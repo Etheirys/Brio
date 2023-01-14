@@ -2,9 +2,10 @@ name: Publish Brio
 
 on:
   workflow_dispatch:
-    version:
-      description: Version tag to create
-      required: true
+    inputs:
+      version:
+        description: Version tag to create
+        required: true
 
 jobs:
 
