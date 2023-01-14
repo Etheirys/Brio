@@ -12,7 +12,7 @@ public class ActorSpawnService : IDisposable
     private ClientObjectManager _clientObjectManager;
     private List<ushort> CreatedIndexes = new List<ushort>();
 
-    public bool CanSpawn => Brio.GPoseService.IsInGPose ;
+    public bool CanSpawn => Brio.GPoseService.IsInGPose && _clientObjectManager.CalculateNextIndex() != 0xffffffff;
 
     public ActorSpawnService()
     {

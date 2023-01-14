@@ -11,6 +11,9 @@ public static class GPoseGlobalControls
     public unsafe static void Draw()
     {
         bool inGPose = Brio.GPoseService.IsInGPose;
+
+        if (!inGPose) ImGui.TextColored(new(1, 0, 0, 1), "Must be in GPose");
+
         if (!inGPose) ImGui.BeginDisabled();
 
         if (ImGui.CollapsingHeader("GPose Actors", ImGuiTreeNodeFlags.DefaultOpen))
