@@ -53,6 +53,7 @@ jobs:
         name: ${{ github.event.inputs.version }}
         tag: v${{ github.event.inputs.version }}
         draft: false
+        token: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Write  Dalamud Version
       run: |
