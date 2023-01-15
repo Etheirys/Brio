@@ -41,7 +41,7 @@ jobs:
     - name: Zip Release
       uses: TheDoctor0/zip-release@0.6.0
       with:
-        filename: './Brio.zip'
+        filename: '../../../../Brio.zip'
         directory: './Brio/bin/x64/Release/'
         exclusions: '*.pdb* *.xml*'
         
