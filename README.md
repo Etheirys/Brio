@@ -10,5 +10,7 @@ In the future, Brio will focus on quality of life for those making animation vid
 ## Installation
 Add the custom Dalamud repo `https://raw.githubusercontent.com/AsgardXIV/Brio/main/repo.json`.
 
+Command is `/brio`.
+
 ## Acknowledgements
 Huge thanks to the [Dalamud](https://github.com/goatcorp/Dalamud/) and [FFXIVClientStructs](https://github.com/aers/FFXIVClientStructs) contributors.
