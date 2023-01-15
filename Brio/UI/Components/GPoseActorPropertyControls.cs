@@ -1,4 +1,5 @@
 ﻿using Brio.Utils;
+using Dalamud.Game.ClientState.Objects.Enums;
 using Dalamud.Game.Text.SeStringHandling;
 using Dalamud.Interface;
 using ImGuiNET;
@@ -28,6 +29,18 @@ public static class GPoseActorPropertyControls
         }
 
         ImGui.PopItemWidth();
-       
+
+        if(ImGui.Button("Force NPC Face Hack"))
+        {
+            GameObject* raw= (GameObject*)gameObject.Address;
+            if(raw->ObjectKind == (byte) ObjectKind.Player)
+            {
+                raw->DisableDraw();
+                raw->ObjectKind = (byte)ObjectKind.BattleNpc;
+                raw->EnableDraw();
+                raw->ObjectKind = (byte)ObjectKind.Player;
+            }
+        }
+
     }
 }
