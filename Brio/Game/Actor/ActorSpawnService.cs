@@ -1,6 +1,5 @@
 ﻿using Brio.Utils;
 using FFXIVClientStructs.FFXIV.Client.Game.Character;
-using FFXIVClientStructs.FFXIV.Client.Game.Control;
 using FFXIVClientStructs.FFXIV.Client.Game.Object;
 using System;
 using System.Collections.Generic;
@@ -12,7 +11,7 @@ public class ActorSpawnService : IDisposable
     private ClientObjectManager _clientObjectManager;
     private List<ushort> CreatedIndexes = new List<ushort>();
 
-    public bool CanSpawn => Brio.GPoseService.IsInGPose && _clientObjectManager.CalculateNextIndex() != 0xffffffff;
+    public bool CanSpawn => Brio.GPoseService.IsInGPose;
 
     public ActorSpawnService()
     {
