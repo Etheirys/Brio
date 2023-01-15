@@ -52,7 +52,6 @@ public class ActorSpawnService : IDisposable
         if (newPlayer == null) return null;
 
         newPlayer->CopyFromCharacter(originalPlayer, 0); 
-        newPlayer->GameObject.ObjectKind = (byte) ObjectKind.BattleNpc;
         *((sbyte*)newPlayer + 0x95) &= ~2; // Disable selection just incase this somehow leaks out of GPose
         newPlayer->GameObject.Position= originalPlayer->GameObject.Position;
         newPlayer->GameObject.SetName($"Brio {newId}");
