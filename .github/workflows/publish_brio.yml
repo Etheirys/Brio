@@ -28,7 +28,7 @@ jobs:
         Expand-Archive -Force /latest.zip "$env:AppData\XIVLauncher\addon\Hooks\dev"
 
     - name: Build Brio
-      run: dotnet build /Brio.sln /p:Configuration=Release /p:DebugType=None /p:DebugSymbols=false /p:Version=${{ github.event.inputs.version }}
+      run: dotnet build Brio.sln /p:Configuration=Release /p:DebugType=None /p:DebugSymbols=false /p:Version=${{ github.event.inputs.version }}
 
     - name: Write Version into Dalamud JSON
       run: |
