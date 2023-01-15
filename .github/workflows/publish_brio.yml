@@ -33,7 +33,7 @@ jobs:
     - name: Write Version into Dalamud JSON
       run: |
         $ver = '${{ steps.version-date.outputs.formattedTime }}'
-        $path = 'Brio/bin/x64/Release/Brio.json'
+        $path = './Brio/bin/x64/Release/Brio.json'
         $content = get-content -path $path
         $content = $content -replace '0.0.0.1',$ver
         set-content -Path $path -Value $content
@@ -42,7 +42,7 @@ jobs:
       uses: TheDoctor0/zip-release@0.6.0
       with:
         filename: '../../../../Brio.zip'
-        directory: './Brio/Brio/bin/x64/Release/'
+        directory: './Brio/bin/x64/Release/'
         exclusions: '*.pdb* *.xml*'
         
     - name: Upload Release
