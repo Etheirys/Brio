@@ -13,8 +13,8 @@ public unsafe class RenderHooks : IDisposable
 
     public RenderHooks()
     {
-        var proj = Dalamud.SigScanner.ScanText("E8 ?? ?? ?? ?? 41 B0 ?? 48 8B D3 48 8B CD");
-        EnforceKindRestrictionsHook = Hook<EnforceKindRestrictionsDelegate>.FromAddress(proj, EnforceKindRestrictionsDetour);
+        var enforceKindRestrictionsAddress = Dalamud.SigScanner.ScanText("E8 ?? ?? ?? ?? 41 B0 ?? 48 8B D3 48 8B CD");
+        EnforceKindRestrictionsHook = Hook<EnforceKindRestrictionsDelegate>.FromAddress(enforceKindRestrictionsAddress, EnforceKindRestrictionsDetour);
 
         EnforceKindRestrictionsHook.Enable();
 
