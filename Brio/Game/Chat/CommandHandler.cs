@@ -18,7 +18,7 @@ public class CommandHandler : IDisposable
 
     private void OnCommand(string command, string arguments)
     {
-        Brio.Toggle();
+        Brio.UI.MainWindow.Toggle();
     }
 
     public void Dispose()

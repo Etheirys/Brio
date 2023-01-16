@@ -1,16 +1,24 @@
 # Brio
-
 Brio is a small utility designed to assist with the management and control of actors in GPose.
-It currently allows the creation and deletion of GPose actors which can then be used by tools like Anamnesis (Penumbra integration required) and Ktisis. 
+It is designed to enhance the experience of users no matter which posing tool they use, whether it be [Anamnesis](https://github.com/imchillin/Anamnesis) or [Ktisis](https://github.com/ktisis-tools/Ktisis).
 
-It is expected that actor creation functionality will become available within Ktisis directly very soon (I'm working on it, I promise)!
-
-In the future, Brio will focus on quality of life for those making animation videos. Combining the XAT camera plugin (to be retired) with easy syncing of actors etc.
+## Features
+* Creation and Deletion of GPose actors
+* Redraw control of GPose Actors
+* NPC Appearance Hack (Allows you to apply NPC appearances to players without breaking tools like Penumbra)
 
 ## Installation
-Add the custom Dalamud repo `https://raw.githubusercontent.com/AsgardXIV/Brio/main/repo.json`.
+1. Add the custom Dalamud repo `https://raw.githubusercontent.com/AsgardXIV/Brio/main/repo.json`
+2. Enable the `Brio` plugin
+3. Run the `/brio` command
 
-Command is `/brio`.
+## Authors
+* [Asgard](https://github.com/AsgardXIV) - Main development.
 
 ## Acknowledgements
-Huge thanks to the [Dalamud](https://github.com/goatcorp/Dalamud/) and [FFXIVClientStructs](https://github.com/aers/FFXIVClientStructs) contributors.
+* [Anamnesis](https://github.com/imchillin/Anamnesis)
+* [Ktisis](https://github.com/ktisis-tools/Ktisis)
+* [Dalamud](https://github.com/goatcorp/Dalamud/) and [FFXIVClientStructs](https://github.com/aers/FFXIVClientStructs)
+
+## License
+Brio is licensed under the [MIT License](https://github.com/AsgardXIV/Brio/blob/main/LICENSE).

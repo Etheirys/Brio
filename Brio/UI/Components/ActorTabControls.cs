@@ -4,7 +4,7 @@ using ImGuiNET;
 
 namespace Brio.UI.Components;
 
-public static class GPoseGlobalControls
+public static class ActorTabControls
 {
     private static GPoseActorSelector _selector = new GPoseActorSelector();
 
@@ -16,7 +16,7 @@ public static class GPoseGlobalControls
 
         if (!inGPose) ImGui.BeginDisabled();
 
-        if (ImGui.CollapsingHeader("GPose Actors", ImGuiTreeNodeFlags.DefaultOpen))
+        if (ImGui.CollapsingHeader("Actors", ImGuiTreeNodeFlags.DefaultOpen))
         { 
             _selector.Draw();
 
@@ -65,7 +65,19 @@ public static class GPoseGlobalControls
         {
             if(_selector.SelectedObject != null)
             {
-                GPoseActorPropertyControls.Draw(_selector.SelectedObject);
+                ActorPropertyControls.Draw(_selector.SelectedObject);
+            }
+            else
+            {
+                ImGui.Text("No actor selected.");
+            }
+        }
+
+        if (ImGui.CollapsingHeader("Actor Redraw"))
+        {
+            if (_selector.SelectedObject != null)
+            {
+                ActorRedrawControls.Draw(_selector.SelectedObject);
             }
             else
             {
@@ -74,5 +86,6 @@ public static class GPoseGlobalControls
         }
 
         if (!inGPose) ImGui.EndDisabled();
+        
     }
 }
