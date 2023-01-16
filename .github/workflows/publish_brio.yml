@@ -30,14 +30,6 @@ jobs:
     - name: Build Brio
       run: dotnet build Brio.sln /p:Configuration=Release /p:DebugType=None /p:DebugSymbols=false /p:Version=${{ github.event.inputs.version }}
 
-    - name: Write Version into Dalamud JSON
-      run: |
-        $ver = '${{ steps.version-date.outputs.formattedTime }}'
-        $path = './Brio/bin/x64/Release/Brio.json'
-        $content = get-content -path $path
-        $content = $content -replace '0.0.0.1',$ver
-        set-content -Path $path -Value $content
-
     - name: Zip Release
       uses: TheDoctor0/zip-release@0.6.0
       with:
@@ -61,7 +53,7 @@ jobs:
         $path = './Resources/Templates/repo_template.json'
         $new_path = './repo.json'
         $content = get-content -path $path
-        $content = $content -replace '0.0.0.1',$ver
+        $content = $content -replace '{version}',$ver
         set-content -Path $new_path -Value $content
 
     - name: Commit repo.json
