@@ -32,6 +32,16 @@ public class InfoWindow : Window
         ImGui.Text("Brio is still very early in development so issues are expected.");
         ImGui.Text("Please report issues you encounter using the button on the right.");
 
+        ImGui.Spacing();
+
+        ImGui.PushStyleColor(ImGuiCol.Button, new Vector4(0, 100, 0, 255) / 255);
+        if (ImGui.Button("Get Started", ButtonSize))
+        {
+            IsOpen = false;
+            Brio.UI.MainWindow.IsOpen = true;
+        }
+        ImGui.PopStyleColor();
+
         ImGui.EndGroup();
 
         ImGui.SameLine(ImGui.GetItemRectSize().X + 50);
@@ -60,7 +70,6 @@ public class InfoWindow : Window
 
         if (ImGui.Button("Asgard's Website", ButtonSize))
             Process.Start(new ProcessStartInfo { FileName = "https://asgard.io", UseShellExecute = true });
-
 
         ImGui.EndGroup();
     }
