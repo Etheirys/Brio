@@ -33,6 +33,14 @@ public class MainWindow : Window
                 ImGui.EndTabItem();
             }
 
+#if DEBUG
+            if (ImGui.BeginTabItem("Debug"))
+            {
+                DebugTabControls.Draw();
+                ImGui.EndTabItem();
+            }
+#endif
+
             ImGui.EndTabBar();
         }
     }

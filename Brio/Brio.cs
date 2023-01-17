@@ -1,8 +1,10 @@
 ﻿using Brio.Config;
 using Brio.Game.Actor;
 using Brio.Game.Chat;
+using Brio.Game.Core;
 using Brio.Game.GPose;
 using Brio.Game.Render;
+using Brio.IPC;
 using Brio.UI;
 
 namespace Brio;
@@ -16,22 +18,27 @@ public static class Brio
     public static GPoseService GPoseService { get; private set; } = null!;
     public static ActorSpawnService ActorSpawnService { get; private set; } = null!;
     public static ActorRedrawService ActorRedrawService { get; private set; } = null!;
-
+    public static PenumbraIPC PenumbraIPC { get; private set; } = null!;
     public static UIContainer UI { get; private set; } = null!;
     public static RenderHooks RenderHooks { get; set; } = null!;
+    public static FrameworkUtils FrameworkUtils { get; set; } = null!;
 
-    private static CommandHandler CommandHandler { get; set; } = null!;
+
+    private static CommandHandler _commandHandler { get; set; } = null!;
 
     public static void Initialize()
     {
         Configuration = Dalamud.PluginInterface.GetPluginConfig() as Configuration ?? new Configuration();
 
-        CommandHandler = new();
+        _commandHandler = new();
 
         GPoseService = new GPoseService();
         ActorSpawnService  = new ActorSpawnService();
         ActorRedrawService = new ActorRedrawService();
-        RenderHooks= new RenderHooks();
+        PenumbraIPC = new PenumbraIPC();
+        RenderHooks = new RenderHooks();
+        FrameworkUtils = new FrameworkUtils();
+
 
         UI = new UIContainer();
 
@@ -59,10 +66,12 @@ public static class Brio
 
         UI.Dispose();
 
+        FrameworkUtils.Dispose();
         RenderHooks.Dispose();
         GPoseService.Dispose();
+        PenumbraIPC.Dispose();
         ActorSpawnService.Dispose();
         ActorRedrawService.Dispose();
-        CommandHandler.Dispose();
+        _commandHandler.Dispose();
     }
 }

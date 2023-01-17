@@ -6,15 +6,17 @@ namespace Brio.Game.GPose;
 
 public class GPoseService : IDisposable
 {
-    public bool IsInGPose => Dalamud.PluginInterface.UiBuilder.GposeActive;
+    public bool IsInGPose => Dalamud.PluginInterface.UiBuilder.GposeActive || FakeGPose;
+    public bool FakeGPose { get; set; } = false;
 
     private bool _lastGPoseState;
 
     public delegate void OnGPoseStateChangeDelegate(bool isInGpose);
     public event OnGPoseStateChangeDelegate? OnGPoseStateChange;
 
+    public const int GPoseActorCount = 39;
     private const int GPoseFirstActor = 201;
-    private const int GPoseActorCount = 39;
+
 
     public GPoseService()
     {

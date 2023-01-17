@@ -55,21 +55,9 @@ public static class ActorTabControls
 
             ImGui.SameLine();
 
-            if (ImGui.Button("Delete All###gpose_actor_delete_all"))
+            if (ImGui.Button("Clear###gpose_actor_delete_all"))
             {
                 Brio.ActorSpawnService.DestroyAll();
-            }
-        }
-
-        if (ImGui.CollapsingHeader("Actor Properties", ImGuiTreeNodeFlags.DefaultOpen))
-        {
-            if(_selector.SelectedObject != null)
-            {
-                ActorPropertyControls.Draw(_selector.SelectedObject);
-            }
-            else
-            {
-                ImGui.Text("No actor selected.");
             }
         }
 
@@ -85,7 +73,18 @@ public static class ActorTabControls
             }
         }
 
+        if (ImGui.CollapsingHeader("Penumbra"))
+        {
+            if (_selector.SelectedObject != null)
+            {
+                PenumbraActorControls.Draw(_selector.SelectedObject);
+            }
+            else
+            {
+                ImGui.Text("No actor selected.");
+            }
+        }
+
         if (!inGPose) ImGui.EndDisabled();
-        
     }
 }

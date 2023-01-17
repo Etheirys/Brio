@@ -19,4 +19,6 @@ public static class GameObjectExtensions
         StructsGameObject* nga = (StructsGameObject*)gameObject.Address;
         nga->SetName(name);
     }
+
+    public unsafe static StructsGameObject* AsNative(this DalamudGameObject gameObject) => (StructsGameObject*)gameObject.Address;
 }

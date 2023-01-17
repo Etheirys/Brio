@@ -1,47 +1,71 @@
-﻿using Dalamud.Game.ClientState.Objects.Enums;
+﻿using Brio.Utils;
+using Dalamud.Game.ClientState.Objects.Types;
+using FFXIVClientStructs.FFXIV.Common.Math;
 using System;
-using DalamudGameObject = Dalamud.Game.ClientState.Objects.Types.GameObject;
-using GameObject = FFXIVClientStructs.FFXIV.Client.Game.Object.GameObject;
 
 namespace Brio.Game.Actor;
 
 public class ActorRedrawService : IDisposable
 {
-    public unsafe void StandardRedraw(DalamudGameObject gameObject)
+    public bool CanRedraw { get; private set; } = true;
+
+    public unsafe void Redraw(GameObject gameObject, RedrawType redrawType, bool preservePosition = true)
     {
-        GameObject* raw = (GameObject*)gameObject.Address;
-        raw->DisableDraw();
-        raw->EnableDraw();
-    }
+        CanRedraw = false;
 
-    public unsafe void ModernNPCHackRedraw(DalamudGameObject gameObject)
-    {
-        var wasEnabled = Brio.RenderHooks.ApplyNPCOverride;
+        var raw = gameObject.AsNative();
 
-        Brio.RenderHooks.ApplyNPCOverride = true;
+        var originalPositon = raw->DrawObject->Object.Position;
+        var originalRotation = raw->DrawObject->Object.Rotation;
 
-        GameObject* raw = (GameObject*)gameObject.Address;
-        raw->DisableDraw();
-        raw->EnableDraw();
+        var npcOverrideEnabled = Brio.RenderHooks.ApplyNPCOverride;
+        if (redrawType == RedrawType.ForceNPCAppearance)
+            Brio.RenderHooks.ApplyNPCOverride = true;
 
-        Brio.RenderHooks.ApplyNPCOverride = wasEnabled;
-
-    }
-
-    public unsafe void LegacyNPCHackRedraw(DalamudGameObject gameObject)
-    {
-        GameObject* raw = (GameObject*)gameObject.Address;
-        if (raw->ObjectKind == (byte)ObjectKind.Player)
+        switch(redrawType)
         {
-            raw->DisableDraw();
-            raw->ObjectKind = (byte)ObjectKind.BattleNpc;
-            raw->EnableDraw();
-            raw->ObjectKind = (byte)ObjectKind.Player;
+            case RedrawType.ForceNPCAppearance:
+            case RedrawType.Standard:
+                raw->DisableDraw();
+                raw->EnableDraw();
+                break;
+
+            case RedrawType.Penumbra:
+                Brio.PenumbraIPC.RawPenumbraRefresh(raw->ObjectIndex);
+                break;
         }
+
+        if (redrawType == RedrawType.ForceNPCAppearance)
+            Brio.RenderHooks.ApplyNPCOverride = npcOverrideEnabled;
+
+        if (preservePosition)
+        {
+            Brio.FrameworkUtils.RunUntilSatisfied(() => raw->RenderFlags == 0,
+            (_) =>
+            {
+                raw->DrawObject->Object.Rotation = originalRotation;
+                raw->DrawObject->Object.Position = originalPositon;
+                CanRedraw = true;
+            },
+            50);
+        }
+        else
+        {
+            CanRedraw = true;
+        }
+
     }
+
 
     public void Dispose()
     {
-
+        CanRedraw = true;
     }
+}
+
+public enum RedrawType
+{
+    Standard,
+    ForceNPCAppearance,
+    Penumbra
 }

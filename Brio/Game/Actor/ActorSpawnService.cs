@@ -9,7 +9,7 @@ namespace Brio.Game.Actor;
 public class ActorSpawnService : IDisposable
 {
     private ClientObjectManager _clientObjectManager;
-    private List<ushort> CreatedIndexes = new List<ushort>();
+    private List<ushort> _createdIndexes = new();
 
     public bool CanSpawn => Brio.GPoseService.IsInGPose;
 
@@ -23,7 +23,7 @@ public class ActorSpawnService : IDisposable
 
     private void ClientState_TerritoryChanged(object? sender, ushort e)
     {
-        CreatedIndexes.Clear();
+        _createdIndexes.Clear();
     }
 
     private void GPoseService_OnGPoseStateChange(bool isInGpose)
@@ -40,7 +40,7 @@ public class ActorSpawnService : IDisposable
         if (localPlayer == null)
             return null;
 
-        Character* originalPlayer = (Character*)localPlayer.Address;
+        Character* originalPlayer = (Character*)localPlayer.AsNative();
         if(originalPlayer == null) return null;
 
         uint idCheck = _clientObjectManager.CreateBattleCharacter();
@@ -50,25 +50,28 @@ public class ActorSpawnService : IDisposable
         Character* newPlayer = (Character*) _clientObjectManager.GetObjectByIndex(newId);
         if (newPlayer == null) return null;
 
-        newPlayer->CopyFromCharacter(originalPlayer, 0); 
+        newPlayer->CopyFromCharacter(originalPlayer, 0); // We copy the Player as the created actor is just blank
+
         *((sbyte*)newPlayer + 0x95) &= ~2; // Disable selection just incase this somehow leaks out of GPose
         newPlayer->GameObject.Position= originalPlayer->GameObject.Position;
-        newPlayer->GameObject.SetName($"Brio {newId}");
+        newPlayer->GameObject.SetName(((int)newId).ToCharacterName());
+
+        newPlayer->CopyFromCharacter(newPlayer, 0); // Some tools get confused (Like Penumbra) unless we copy onto ourselves after name change
 
         newPlayer->GameObject.EnableDraw();
 
-        CreatedIndexes.Add(newId);
+        _createdIndexes.Add(newId);
 
         return newId;
     }
 
     public unsafe void DestroyAllCreated()
     {
-        foreach(var idx in CreatedIndexes)
+        foreach(var idx in _createdIndexes)
         {
             _clientObjectManager.DeleteObjectByIndex(idx, 0);
         }
-        CreatedIndexes.Clear();
+        _createdIndexes.Clear();
     }
 
     public unsafe void DestroyAll()
