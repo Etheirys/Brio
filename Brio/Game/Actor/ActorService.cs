@@ -9,8 +9,8 @@ namespace Brio.Game.Actor;
 
 public class ActorService : IDisposable
 {
-    public const int GPoseActorCount = 40;
-    private const int GPoseFirstActor = 200;
+    public const int GPoseActorCount = 39;
+    private const int GPoseFirstActor = 201;
 
     public delegate void ActorAction(GameObject gameObject);
     public event ActorAction? OnActorDestructing;
