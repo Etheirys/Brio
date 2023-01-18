@@ -56,6 +56,8 @@ public class ActorSpawnService : IDisposable
         newPlayer->GameObject.Position= originalPlayer->GameObject.Position;
         newPlayer->GameObject.SetName(((int)newId).ToCharacterName());
 
+        newPlayer->GameObject.DisableDraw();
+
         newPlayer->CopyFromCharacter(newPlayer, 0); // Some tools get confused (Like Penumbra) unless we copy onto ourselves after name change
 
         newPlayer->GameObject.EnableDraw();

@@ -10,7 +10,7 @@ namespace Brio.UI.Windows;
 
 public class MainWindow : Window
 {
-    public MainWindow() : base(Brio.PluginName, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.AlwaysAutoResize)
+    public MainWindow() : base($"{Brio.PluginName} v{Brio.PluginVersion}", ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.AlwaysAutoResize)
     {
         Size = new Vector2(250, -1);
     }

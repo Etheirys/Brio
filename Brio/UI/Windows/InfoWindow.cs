@@ -10,7 +10,7 @@ public class InfoWindow : Window
 {
     private static Vector2 ButtonSize = new Vector2(150, 25);
 
-    public InfoWindow() : base($"{Brio.PluginName} Information (v{Brio.PluginVersion})", ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.AlwaysAutoResize)
+    public InfoWindow() : base($"{Brio.PluginName} Information", ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.AlwaysAutoResize)
     {
         Size = new Vector2(580, -1);
     }
@@ -19,7 +19,7 @@ public class InfoWindow : Window
     {
         ImGui.BeginGroup();
 
-        ImGui.Text("Welcome to Brio!");
+        ImGui.Text($"Welcome to Brio v{Brio.PluginVersion}!");
 
         ImGui.Spacing();
 
