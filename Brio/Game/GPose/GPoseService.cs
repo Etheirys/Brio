@@ -36,13 +36,10 @@ public class GPoseService : IDisposable
 
     private void HandleGPoseChange(bool newGPoseState)
     {
-        if(newGPoseState)
-        {
-            if (Brio.Configuration.OpenBrioBehavior == Config.OpenBrioBehavior.OnGPoseEnter)
-                Brio.UI.MainWindow.IsOpen = true;
-        }
-
         OnGPoseStateChange?.Invoke(newGPoseState);
+
+        if (Brio.Configuration.OpenBrioBehavior == Config.OpenBrioBehavior.OnGPoseEnter)
+            Brio.UI.MainWindow.IsOpen = newGPoseState;
     }
 
     public List<GameObject> GPoseObjects
