@@ -12,6 +12,10 @@ It is designed to enhance the experience of users no matter which posing tool th
 2. Enable the `Brio` plugin
 3. Run the `/brio` command
 
+## Support
+Brio is still early in Alpha so issues are expected.
+Please either open an [issue](https://github.com/AsgardXIV/Brio/issues) or visit us on [Discord](https://discord.gg/xivtools) if you need help!
+
 ## Authors
 * [Asgard](https://github.com/AsgardXIV) - Main development.
 
