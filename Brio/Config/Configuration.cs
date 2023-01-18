@@ -7,10 +7,12 @@ namespace Brio.Config;
 public class Configuration : IPluginConfiguration
 {
     public const int CurrentVersion = 1;
+    public const int CurrentPopupKey = 1;
     public int Version { get; set; } = CurrentVersion;
 
     // First Time User
     public bool IsFirstTimeUser { get; set; } = true;
+    public int PopupKey { get; set; } = -1;
 
     // Interface
     public OpenBrioBehavior OpenBrioBehavior { get; set; } = OpenBrioBehavior.OnGPoseEnter;

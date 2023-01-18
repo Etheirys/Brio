@@ -2,7 +2,6 @@
 using Dalamud.Game.ClientState.Objects.Enums;
 using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Logging;
-using FFXIVClientStructs.FFXIV.Client.Game.Character;
 using Penumbra.Api;
 using Penumbra.Api.Enums;
 using Penumbra.Api.Helpers;

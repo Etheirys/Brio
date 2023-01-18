@@ -53,7 +53,13 @@ public static class Brio
             Configuration.IsFirstTimeUser = false;
         }
 
-        if(Configuration.OpenBrioBehavior == OpenBrioBehavior.OnPluginStartup)
+        if (Configuration.PopupKey != Configuration.CurrentPopupKey)
+        {
+            UI.InfoWindow.IsOpen = true;
+            Configuration.PopupKey = Configuration.CurrentPopupKey;
+        }
+
+        if (Configuration.OpenBrioBehavior == OpenBrioBehavior.OnPluginStartup)
             UI.MainWindow.IsOpen = true;
 
         if (Configuration.OpenBrioBehavior == OpenBrioBehavior.OnGPoseEnter && GPoseService.IsInGPose)
