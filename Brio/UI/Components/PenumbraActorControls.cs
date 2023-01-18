@@ -51,15 +51,13 @@ public static class PenumbraActorControls
             {
                 Brio.PenumbraIPC.RedrawActorWithCollection(gameObject, _selectedCollection!);
             }
-            if (!validKind) ImGui.TextColored(new(1, 0, 0, 1), "Only available for Player.");
-            if (!validKind) ImGui.TextColored(new(1, 0, 0, 1), "Spawn a Player above.");
+            if (!validKind) ImGui.TextColored(new(1, 0, 0, 1), "Only available for Player actors");
             if (!allowed) ImGui.EndDisabled();
         }
         else
         {
-            ImGui.TextColored(new(1, 0, 0, 1), "Penumbra integration disabled.");
-            ImGui.TextColored(new(1, 0, 0, 1), "Ensure Penumbra is enabled and updated.");
-
+            ImGui.TextColored(new(1, 0, 0, 1), "Penumbra integration not active");
+            ImGui.TextColored(new(1, 0, 0, 1), "See settings");
         }
     }
 }

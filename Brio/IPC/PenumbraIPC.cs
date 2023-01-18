@@ -33,29 +33,33 @@ public class PenumbraIPC : IDisposable
     {
         IsPenumbraEnabled = false;
 
+        if (!Brio.Configuration.AllowPenumbraIntegration)
+            return;
+
         try
         {
             bool penumInstalled = Dalamud.PluginInterface.PluginNames.Contains("Penumbra");
             if (!penumInstalled)
             {
-                PluginLog.Debug("Penumbra not present");
+                PluginLog.Information("Penumbra not present");
                 return;
             }
 
             var (major, minor) = Ipc.ApiVersions.Subscriber(Dalamud.PluginInterface).Invoke();
             if (major != 4 || minor < 18)
             {
-                PluginLog.Debug("Penumbra API mismatch");
+                PluginLog.Information("Penumbra API mismatch");
                 return;
             }
 
             UpdateCollections();
 
             IsPenumbraEnabled = true;
+            PluginLog.Information("Penumbra integration initialized");
         }
         catch (Exception ex)
         {
-            PluginLog.Debug(ex, "Penumbra initialize error");
+            PluginLog.Information(ex, "Penumbra initialize error");
         }
     }
 

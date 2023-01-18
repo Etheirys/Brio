@@ -19,6 +19,9 @@ public class Configuration : IPluginConfiguration
 
     // Hooks
     public ApplyNPCHack ApplyNPCHack { get; set; } = ApplyNPCHack.InGPose;
+
+    // Integrations
+    public bool AllowPenumbraIntegration { get; set; } = true;
 }
 
 public enum OpenBrioBehavior

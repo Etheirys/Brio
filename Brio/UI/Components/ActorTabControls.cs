@@ -73,15 +73,18 @@ public static class ActorTabControls
             }
         }
 
-        if (ImGui.CollapsingHeader("Penumbra"))
+        if (Brio.Configuration.AllowPenumbraIntegration)
         {
-            if (_selector.SelectedObject != null)
+            if (ImGui.CollapsingHeader("Penumbra"))
             {
-                PenumbraActorControls.Draw(_selector.SelectedObject);
-            }
-            else
-            {
-                ImGui.Text("No actor selected.");
+                if (_selector.SelectedObject != null)
+                {
+                    PenumbraActorControls.Draw(_selector.SelectedObject);
+                }
+                else
+                {
+                    ImGui.Text("No actor selected.");
+                }
             }
         }
 
