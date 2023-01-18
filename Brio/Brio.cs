@@ -16,9 +16,11 @@ public static class Brio
 
     public static Configuration Configuration { get; private set; } = null!;
     public static GPoseService GPoseService { get; private set; } = null!;
+    public static ActorService ActorService { get; private set; } = null!;
     public static ActorSpawnService ActorSpawnService { get; private set; } = null!;
     public static ActorRedrawService ActorRedrawService { get; private set; } = null!;
     public static PenumbraIPC PenumbraIPC { get; private set; } = null!;
+    public static PenumbraCollectionService PenumbraCollectionService { get; private set; } = null!;
     public static UIContainer UI { get; private set; } = null!;
     public static RenderHooks RenderHooks { get; set; } = null!;
     public static FrameworkUtils FrameworkUtils { get; set; } = null!;
@@ -33,9 +35,11 @@ public static class Brio
         _commandHandler = new();
 
         GPoseService = new GPoseService();
+        ActorService = new ActorService();
         ActorSpawnService  = new ActorSpawnService();
         ActorRedrawService = new ActorRedrawService();
         PenumbraIPC = new PenumbraIPC();
+        PenumbraCollectionService = new PenumbraCollectionService();
         RenderHooks = new RenderHooks();
         FrameworkUtils = new FrameworkUtils();
 
@@ -75,9 +79,11 @@ public static class Brio
         FrameworkUtils.Dispose();
         RenderHooks.Dispose();
         GPoseService.Dispose();
+        PenumbraCollectionService.Dispose();
         PenumbraIPC.Dispose();
         ActorSpawnService.Dispose();
         ActorRedrawService.Dispose();
+        ActorService.Dispose();
         _commandHandler.Dispose();
     }
 }

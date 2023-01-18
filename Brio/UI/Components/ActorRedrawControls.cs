@@ -10,7 +10,7 @@ public static class ActorRedrawControls
 
     public unsafe static void Draw(GameObject gameObject)
     {
-        bool redrawAllowed = Brio.ActorRedrawService.CanRedraw;
+        bool redrawAllowed = Brio.ActorRedrawService.CanRedraw(gameObject);
 
         if (!redrawAllowed) ImGui.BeginDisabled();
 

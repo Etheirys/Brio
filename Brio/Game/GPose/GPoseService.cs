@@ -1,65 +1,83 @@
-﻿using Dalamud.Game.ClientState.Objects.Types;
+﻿using Brio.Utils;
+using Dalamud.Hooking;
+using Dalamud.Logging;
+using FFXIVClientStructs.FFXIV.Client.Game.Object;
+using FFXIVClientStructs.FFXIV.Client.System.Framework;
 using System;
-using System.Collections.Generic;
 
 namespace Brio.Game.GPose;
 
 public class GPoseService : IDisposable
 {
-    public bool IsInGPose => Dalamud.PluginInterface.UiBuilder.GposeActive || FakeGPose;
+    public GPoseState GPoseState { get; private set; }
+    public bool IsInGPose => GPoseState == GPoseState.Inside || FakeGPose;
     public bool FakeGPose { get; set; } = false;
 
-    private bool _lastGPoseState;
+    public delegate void OnGPoseStateDelegate(GPoseState gposeState);
+    public event OnGPoseStateDelegate? OnGPoseStateChange;
 
-    public delegate void OnGPoseStateChangeDelegate(bool isInGpose);
-    public event OnGPoseStateChangeDelegate? OnGPoseStateChange;
+    private delegate void ExitGPoseDelegate(IntPtr addr);
+    private Hook<ExitGPoseDelegate> ExitGPoseHook = null!;
 
-    public const int GPoseActorCount = 39;
-    private const int GPoseFirstActor = 201;
+    private delegate bool EnterGPoseDelegate(IntPtr addr);
+    private Hook<EnterGPoseDelegate> EnterGPoseHook = null!;
 
-
-    public GPoseService()
+    public unsafe GPoseService()
     {
-        Dalamud.Framework.Update += Framework_Update;
+        GPoseState = Dalamud.PluginInterface.UiBuilder.GposeActive ? GPoseState.Inside: GPoseState.Outside;
 
-        _lastGPoseState = IsInGPose;
+        var framework = Framework.Instance();
+
+        EnterGPoseHook = Hook<EnterGPoseDelegate>.FromAddress((nint)framework->UIModule->vfunc[75], EnteringGPoseDetour);
+        EnterGPoseHook.Enable();
+
+        ExitGPoseHook = Hook<ExitGPoseDelegate>.FromAddress((nint)framework->UIModule->vfunc[76], ExitingGPoseDetour);
+        ExitGPoseHook.Enable();
+
+        
     }
 
-    private void Framework_Update(global::Dalamud.Game.Framework framework)
+    private void ExitingGPoseDetour(IntPtr addr)
     {
-        if(_lastGPoseState != IsInGPose)
+        HandleGPoseChange(GPoseState.Exiting);
+        ExitGPoseHook.Original.Invoke(addr);
+        HandleGPoseChange(GPoseState.Outside);
+    }
+
+    private bool EnteringGPoseDetour(IntPtr addr)
+    {
+        bool didEnter = EnterGPoseHook.Original.Invoke(addr);
+        if(didEnter)
+            HandleGPoseChange(GPoseState.Inside);
+
+        return didEnter;
+    }
+
+    private void HandleGPoseChange(GPoseState state)
+    {
+        GPoseState = state;
+        OnGPoseStateChange?.Invoke(state);
+
+        switch(state)
         {
-            _lastGPoseState = IsInGPose;
-            HandleGPoseChange(_lastGPoseState);
-        }
-    }
-
-    private void HandleGPoseChange(bool newGPoseState)
-    {
-        OnGPoseStateChange?.Invoke(newGPoseState);
-
-        if (Brio.Configuration.OpenBrioBehavior == Config.OpenBrioBehavior.OnGPoseEnter)
-            Brio.UI.MainWindow.IsOpen = newGPoseState;
-    }
-
-    public List<GameObject> GPoseObjects
-    {
-        get
-        {
-            List<GameObject> objects = new();
-            for(int i = GPoseFirstActor; i < GPoseFirstActor + GPoseActorCount; ++i)
-            {
-                var go = Dalamud.ObjectTable[i];
-                if (go != null)
-                    objects.Add(go);
-            }
-
-            return objects;
+            case GPoseState.Inside:
+            case GPoseState.Outside:
+                if (Brio.Configuration.OpenBrioBehavior == Config.OpenBrioBehavior.OnGPoseEnter)
+                    Brio.UI.MainWindow.IsOpen = state == GPoseState.Inside;
+                break;
         }
     }
 
     public void Dispose()
     {
-        Dalamud.Framework.Update -= Framework_Update;
+        ExitGPoseHook.Dispose();
+        EnterGPoseHook.Dispose();
     }
+}
+
+public enum GPoseState
+{
+    Inside,
+    Exiting,
+    Outside
 }

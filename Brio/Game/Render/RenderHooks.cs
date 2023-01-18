@@ -1,5 +1,5 @@
-﻿using Dalamud.Hooking;
-using FFXIVClientStructs.FFXIV.Client.Game.Character;
+﻿using Brio.Game.GPose;
+using Dalamud.Hooking;
 using System;
 
 namespace Brio.Game.Render;
@@ -20,15 +20,15 @@ public unsafe class RenderHooks : IDisposable
 
         Brio.GPoseService.OnGPoseStateChange += GPoseService_OnGPoseStateChange;
 
-        GPoseService_OnGPoseStateChange(Brio.GPoseService.IsInGPose);
+        GPoseService_OnGPoseStateChange(Brio.GPoseService.GPoseState);
     }
 
-    private void GPoseService_OnGPoseStateChange(bool isInGpose)
+    private void GPoseService_OnGPoseStateChange(GPoseState state)
     {
         var npcOverrideBehavior = Brio.Configuration.ApplyNPCHack;
         if (npcOverrideBehavior == Config.ApplyNPCHack.InGPose)
         {
-            ApplyNPCOverride = isInGpose;
+            ApplyNPCOverride = state == GPoseState.Inside;
         }
     }
 

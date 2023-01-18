@@ -1,19 +1,23 @@
 ﻿using Brio.Utils;
 using Dalamud.Game.ClientState.Objects.Types;
-using FFXIVClientStructs.FFXIV.Common.Math;
+using Penumbra.Api;
 using System;
+using System.Collections.Generic;
+using PenumbraRedrawType = Penumbra.Api.Enums.RedrawType;
 
 namespace Brio.Game.Actor;
 
 public class ActorRedrawService : IDisposable
 {
-    public bool CanRedraw { get; private set; } = true;
+    public unsafe bool CanRedraw(GameObject gameObject) => !_redrawsActive.Contains(gameObject.AsNative()->ObjectIndex);
+
+    private List<int> _redrawsActive = new();
 
     public unsafe void Redraw(GameObject gameObject, RedrawType redrawType, bool preservePosition = true)
     {
-        CanRedraw = false;
-
         var raw = gameObject.AsNative();
+        var index = raw->ObjectIndex;
+        _redrawsActive.Add(index);
 
         var originalPositon = raw->DrawObject->Object.Position;
         var originalRotation = raw->DrawObject->Object.Rotation;
@@ -31,7 +35,7 @@ public class ActorRedrawService : IDisposable
                 break;
 
             case RedrawType.Penumbra:
-                Brio.PenumbraIPC.RawPenumbraRefresh(raw->ObjectIndex);
+                Ipc.RedrawObjectByIndex.Subscriber(Dalamud.PluginInterface).Invoke(index, PenumbraRedrawType.Redraw);
                 break;
         }
 
@@ -45,7 +49,7 @@ public class ActorRedrawService : IDisposable
             {
                 raw->DrawObject->Object.Rotation = originalRotation;
                 raw->DrawObject->Object.Position = originalPositon;
-                CanRedraw = true;
+                _redrawsActive.Remove(index);
             },
             50,
             1,
@@ -53,15 +57,14 @@ public class ActorRedrawService : IDisposable
         }
         else
         {
-            CanRedraw = true;
+            _redrawsActive.Remove(index);
         }
 
     }
 
-
     public void Dispose()
     {
-        CanRedraw = true;
+        _redrawsActive.Clear();
     }
 }
 

@@ -1,5 +1,6 @@
-﻿using FFXIVClientStructs.FFXIV.Client.Game.Control;
-using FFXIVClientStructs.FFXIV.Client.Game.Object;
+﻿using Brio.Utils;
+using Dalamud.Game.ClientState.Objects.Types;
+using FFXIVClientStructs.FFXIV.Client.Game.Control;
 using ImGuiNET;
 
 namespace Brio.UI.Components;
@@ -22,7 +23,6 @@ public static class ActorTabControls
 
             ImGui.Separator();
 
-
             bool canSpawn = Brio.ActorSpawnService.CanSpawn;
             if (!canSpawn) ImGui.BeginDisabled();
             if (ImGui.Button("Spawn###gpose_actor_spawn"))
@@ -35,20 +35,19 @@ public static class ActorTabControls
 
             ImGui.SameLine();
 
-            GameObject* selectedObject = _selector.SelectedObject != null ? (GameObject*) _selector.SelectedObject.Address : null;
+            GameObject? selectedObject = _selector.SelectedObject != null ? _selector.SelectedObject : null;
             bool hasSelected = selectedObject != null;
             if (!hasSelected) ImGui.BeginDisabled();
 
             if (ImGui.Button("Target###gpose_actor_target"))
             {
-                TargetSystem.Instance()->GPoseTarget = selectedObject;
+                TargetSystem.Instance()->GPoseTarget = selectedObject!.AsNative();
             }
 
             ImGui.SameLine();
-
             if (ImGui.Button("Delete###gpose_actor_delete"))
             {
-                Brio.ActorSpawnService.DestroyObject(selectedObject);
+                Brio.ActorSpawnService.DestroyObject(selectedObject!);
             }
 
             if (!hasSelected) ImGui.EndDisabled();

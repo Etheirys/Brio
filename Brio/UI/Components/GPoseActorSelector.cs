@@ -1,7 +1,7 @@
 ﻿using ImGuiNET;
 using Brio.Utils;
 using Dalamud.Game.ClientState.Objects.Types;
-using Brio.Game.GPose;
+using Brio.Game.Actor;
 
 namespace Brio.UI.Components;
 
@@ -11,9 +11,9 @@ public class GPoseActorSelector
 
     public unsafe void Draw()
     {
-        var gposeObjects = Brio.GPoseService.GPoseObjects;
+        var gposeObjects = Brio.ActorService.GPoseActors;
 
-        ImGui.Text($"Actors: {gposeObjects.Count}/{GPoseService.GPoseActorCount}");
+        ImGui.Text($"Actors: {gposeObjects.Count}/{ActorService.GPoseActorCount}");
 
         ImGui.PushItemWidth(ImGui.GetContentRegionAvail().X);
         if (ImGui.BeginListBox("###gpose_actor_list"))

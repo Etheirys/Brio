@@ -1,23 +1,26 @@
-﻿using Brio.Utils;
+﻿using Brio.Game.GPose;
+using Brio.Utils;
 using FFXIVClientStructs.FFXIV.Client.Game.Character;
-using FFXIVClientStructs.FFXIV.Client.Game.Object;
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using DalamudGameObject = Dalamud.Game.ClientState.Objects.Types.GameObject;
 
 namespace Brio.Game.Actor;
 
 public class ActorSpawnService : IDisposable
 {
+    public bool CanSpawn => Brio.GPoseService.IsInGPose;
+
     private ClientObjectManager _clientObjectManager;
     private List<ushort> _createdIndexes = new();
-
-    public bool CanSpawn => Brio.GPoseService.IsInGPose;
 
     public ActorSpawnService()
     {
         _clientObjectManager = new ClientObjectManager();
 
         Brio.GPoseService.OnGPoseStateChange += GPoseService_OnGPoseStateChange;
+        Brio.ActorService.OnActorDestructing += ActorService_OnActorDestructing;
         Dalamud.ClientState.TerritoryChanged += ClientState_TerritoryChanged;
     }
 
@@ -26,11 +29,21 @@ public class ActorSpawnService : IDisposable
         _createdIndexes.Clear();
     }
 
-    private void GPoseService_OnGPoseStateChange(bool isInGpose)
+    private void GPoseService_OnGPoseStateChange(GPoseState state)
     {
-        if(!isInGpose)
+        if(state == GPoseState.Outside)
         {
             DestroyAllCreated();
+        }
+    }
+
+    private unsafe void ActorService_OnActorDestructing(DalamudGameObject gameObject)
+    {
+        if(Brio.ActorService.IsGPoseActor(gameObject))
+        {
+            var idx = _clientObjectManager.GetIndexByObject(gameObject.Address);
+            if (idx < ushort.MaxValue)
+                _createdIndexes.Remove((ushort)idx);
         }
     }
 
@@ -55,6 +68,9 @@ public class ActorSpawnService : IDisposable
         *((sbyte*)newPlayer + 0x95) &= ~2; // Disable selection just incase this somehow leaks out of GPose
         newPlayer->GameObject.Position= originalPlayer->GameObject.Position;
         newPlayer->GameObject.SetName(((int)newId).ToCharacterName());
+        newPlayer->GameObject.ObjectKind = 1;
+
+        newPlayer->GameObject.DisableDraw();
 
         newPlayer->CopyFromCharacter(newPlayer, 0); // Some tools get confused (Like Penumbra) unless we copy onto ourselves after name change
 
@@ -67,37 +83,41 @@ public class ActorSpawnService : IDisposable
 
     public unsafe void DestroyAllCreated()
     {
-        foreach(var idx in _createdIndexes)
+        var indexes = _createdIndexes.ToList();
+        foreach (var idx in indexes)
         {
-            _clientObjectManager.DeleteObjectByIndex(idx, 0);
+            var goa = _clientObjectManager.GetObjectByIndex(idx);
+            if (goa == 0) continue;
+            var ago = Dalamud.ObjectTable.CreateObjectReference(goa);
+            if (ago == null) continue;
+            DestroyObject(ago);
         }
         _createdIndexes.Clear();
     }
 
     public unsafe void DestroyAll()
     {
-        DestroyAllCreated();
-
-        var gposeObjects = Brio.GPoseService.GPoseObjects;
+        var gposeObjects = Brio.ActorService.GPoseActors.ToList();
         foreach(var obj in gposeObjects)
         {
-            var idx = _clientObjectManager.GetIndexByObject(new IntPtr(obj.Address));
-            if (idx != 0xFFFFFFFF)
-                _clientObjectManager.DeleteObjectByIndex((ushort)idx, 0);
+            DestroyObject(obj);
         }
     }
 
-    public unsafe void DestroyObject(GameObject* go)
+    public unsafe void DestroyObject(DalamudGameObject go)
     {
-        var idx = _clientObjectManager.GetIndexByObject(new IntPtr(go));
-        if(idx != 0xFFFFFFFF)
+        var native = go.AsNative();
+        var idx = _clientObjectManager.GetIndexByObject((nint)native);
+        if (idx != 0xFFFFFFFF)
+        {
             _clientObjectManager.DeleteObjectByIndex((ushort)idx, 0);
+            Brio.ActorService.UpdateGPoseTable();
+        }
     }
 
     public void Dispose()
     {
         DestroyAllCreated();
-
         Brio.GPoseService.OnGPoseStateChange -= GPoseService_OnGPoseStateChange;
     }
 }

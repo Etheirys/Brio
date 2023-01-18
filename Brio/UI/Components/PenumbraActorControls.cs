@@ -14,7 +14,7 @@ public static class PenumbraActorControls
     {
         if(Brio.PenumbraIPC.IsPenumbraEnabled)
         {
-            var collections = Brio.PenumbraIPC.Collections;
+            var collections = Brio.PenumbraCollectionService.Collections;
 
             if (_selectedCollection == null && collections.Count > 0)
                 _selectedCollection = collections[0];
@@ -40,18 +40,18 @@ public static class PenumbraActorControls
             ImGui.PushFont(UiBuilder.IconFont);
             if(ImGui.Button(FontAwesomeIcon.Redo.ToIconString()))
             {
-                Brio.PenumbraIPC.RefreshPenumbraStatus();
+                Brio.PenumbraCollectionService.RefreshCollections();
             }
             ImGui.PopFont();
 
-            bool validKind = gameObject.ObjectKind == ObjectKind.Player;
-            bool allowed = validKind && Brio.PenumbraIPC.CanApplyCollection;
+            bool isCharacter = gameObject.AsNative()->IsCharacter();
+            bool allowed = isCharacter && Brio.PenumbraCollectionService.CanApplyCollection(gameObject);
             if (!allowed) ImGui.BeginDisabled();
             if(ImGui.Button("Apply Collection"))
             {
-                Brio.PenumbraIPC.RedrawActorWithCollection(gameObject, _selectedCollection!);
+                Brio.PenumbraCollectionService.RedrawActorWithCollection(gameObject, _selectedCollection!);
             }
-            if (!validKind) ImGui.TextColored(new(1, 0, 0, 1), "Only available for Player actors");
+            if (!isCharacter) ImGui.Text("Must be a character type.");
             if (!allowed) ImGui.EndDisabled();
         }
         else
