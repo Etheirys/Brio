@@ -30,9 +30,10 @@ public class FrameworkUtils : IDisposable
     {
         var newTask = new DeferredTask()
         {
-            ConditionAction = (task) => task.TickCount >= task.FrameTarget,
+            ConditionAction = (task) => task.TickCount >= task.StartFrame,
             CompleteAction = action,
-            FrameTarget = delay,
+            MaxFrames = delay,
+            StartFrame = delay,
             DebugPath = $"{callerFile}:{callerLine} - {callerMember}"
         };
 
@@ -42,7 +43,9 @@ public class FrameworkUtils : IDisposable
     public void RunUntilSatisfied(
         Func<bool> condition,
         Action<bool> onSatisfied,
-        int attempts = 0,
+        int attempts,
+        int dontStartFor = 0,
+        bool waitOneMore = false,
         [CallerFilePath] string callerFile = "",
         [CallerLineNumber] int callerLine = 0,
         [CallerMemberName] string callerMember = ""
@@ -52,7 +55,9 @@ public class FrameworkUtils : IDisposable
         {
             ConditionAction = (_) => condition.Invoke(),
             CompleteAction = onSatisfied.Invoke,
-            FrameTarget = attempts,
+            MaxFrames = attempts,
+            StartFrame = dontStartFor,
+            DeferOnceMore = waitOneMore,
             DebugPath = $"{callerFile}:{callerLine} - {callerMember}"
         };
 
@@ -72,20 +77,31 @@ public class FrameworkUtils : IDisposable
             var task = _deferredTasks[i];
             task.TickCount++;
 
-            var conditionSatisfied = CheckTask(task);
-
-            if(conditionSatisfied == true)
+            if (task.TickCount >= task.StartFrame)
             {
-                _deferredTasks.RemoveAt(i--);
-                CompleteTask(task, true);
-            }
-            else if(conditionSatisfied == null || task.FrameTarget <= task.TickCount)
-            {
-                if (task.FrameTarget <= task.TickCount)
-                    PluginLog.Warning($"Task timed out. {task}");
+                var conditionSatisfied = CheckTask(task);
 
-                _deferredTasks.RemoveAt(i--);
-                CompleteTask(task, false);
+                if (conditionSatisfied == true)
+                {
+                    if (task.DeferOnceMore)
+                    {
+                        task.DeferOnceMore = false;
+                        task.ConditionAction = (_) => true;
+                    }
+                    else
+                    {
+                        _deferredTasks.RemoveAt(i--);
+                        CompleteTask(task, true);
+                    }
+                }
+                else if (conditionSatisfied == null || task.MaxFrames <= task.TickCount)
+                {
+                    if (task.MaxFrames <= task.TickCount)
+                        PluginLog.Warning($"Task timed out. {task}");
+
+                    _deferredTasks.RemoveAt(i--);
+                    CompleteTask(task, false);
+                }
             }
         }
     }
@@ -117,11 +133,13 @@ public class FrameworkUtils : IDisposable
 
 class DeferredTask
 {
-    public Func<DeferredTask, bool> ConditionAction { get; init; } = null!;
-    public Action<bool> CompleteAction { get; init; } = null!;
-    public string DebugPath { get; init; } = null!;
-    public int FrameTarget { get; init; }
+    public Func<DeferredTask, bool> ConditionAction { get; set; } = null!;
+    public Action<bool> CompleteAction { get; set; } = null!;
+    public string DebugPath { get; set; } = null!;
+    public int MaxFrames { get; set; }
+    public int StartFrame { get; set; }
     public int TickCount { get; set; } = -1;
+    public bool DeferOnceMore { get; set; } = false;
 
-    public override string ToString() => $"{DebugPath}. T: {FrameTarget} C: {TickCount}";
+    public override string ToString() => $"{DebugPath}. T: {MaxFrames} C: {TickCount}";
 }

@@ -99,7 +99,9 @@ public class PenumbraIPC : IDisposable
                     Ipc.SetCollectionForObject.Subscriber(Dalamud.PluginInterface).Invoke(index, oldName, true, true);
                     CanApplyCollection = true;
                 }, 
-                50
+                50,
+                3,
+                true
            );
         }
         catch(Exception ex)

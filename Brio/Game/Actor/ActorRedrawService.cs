@@ -47,7 +47,9 @@ public class ActorRedrawService : IDisposable
                 raw->DrawObject->Object.Position = originalPositon;
                 CanRedraw = true;
             },
-            50);
+            50,
+            1,
+            true);
         }
         else
         {
