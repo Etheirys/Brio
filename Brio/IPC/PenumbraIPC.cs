@@ -26,7 +26,9 @@ public class PenumbraIPC : IDisposable
         _penumbraInitializedSubscriber = Ipc.Initialized.Subscriber(Dalamud.PluginInterface, RefreshPenumbraStatus);
         _penumbraDisposedSubscriber = Ipc.Disposed.Subscriber(Dalamud.PluginInterface, RefreshPenumbraStatus);
 
-        RefreshPenumbraStatus();        
+        RefreshPenumbraStatus();
+
+        Brio.GPoseService.OnGPoseStateChange += GPoseService_OnGPoseStateChange;
     }
 
     public void RefreshPenumbraStatus() 
@@ -124,8 +126,15 @@ public class PenumbraIPC : IDisposable
         Collections.AddRange(collections);
     }
 
+    private void GPoseService_OnGPoseStateChange(bool isInGpose)
+    {
+        if (isInGpose)
+            RefreshPenumbraStatus();
+    }
+
     public void Dispose()
     {
+        Brio.GPoseService.OnGPoseStateChange -= GPoseService_OnGPoseStateChange;
         _penumbraDisposedSubscriber.Dispose();
         _penumbraInitializedSubscriber.Dispose();
         IsPenumbraEnabled = false;
