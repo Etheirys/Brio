@@ -47,7 +47,7 @@ public class WebService : ServiceBase<WebService>
             var server = new WebServer(o => o
                 .WithUrlPrefix(url)
                 .WithMode(HttpListenerMode.EmbedIO))
-             .WithWebApi("/brio", m => m.WithController<RedrawController>()
+             .WithWebApi("/brio", m => m.WithController<ActorWebController>()
             );
 
             server.Start();

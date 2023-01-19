@@ -89,7 +89,7 @@ public class ActorSpawnService : ServiceBase<ActorSpawnService>
 
         _createdIndexes.Add(newId);
 
-        return newId;
+        return newPlayer->GameObject.ObjectIndex;
     }
 
     public unsafe void DestroyAllCreated()
