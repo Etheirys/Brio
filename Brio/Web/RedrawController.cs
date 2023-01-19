@@ -19,7 +19,7 @@ public class RedrawController : WebApiController
     {
         try
         {
-            return await FrameworkService.Instance.RunUntilSatisfied(
+            return await Dalamud.Framework.RunUntilSatisfied(
                 () =>
                 {
                     var gameObject = Dalamud.ObjectTable[data.ObjectIndex];

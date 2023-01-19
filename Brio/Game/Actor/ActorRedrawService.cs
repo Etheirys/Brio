@@ -49,7 +49,7 @@ public class ActorRedrawService : ServiceBase<ActorRedrawService>
 
         if(preservePosition)
         {
-            FrameworkService.Instance.RunUntilSatisfied(() => raw->RenderFlags == 0,
+            Dalamud.Framework.RunUntilSatisfied(() => raw->RenderFlags == 0,
             (_) =>
             {
                 raw->DrawObject->Object.Rotation = originalRotation;
@@ -57,7 +57,7 @@ public class ActorRedrawService : ServiceBase<ActorRedrawService>
                 _redrawsActive.Remove(index);
             },
             50,
-            1,
+            3,
             true);
         }
         else

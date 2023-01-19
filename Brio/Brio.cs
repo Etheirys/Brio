@@ -34,7 +34,6 @@ public class Brio : IDisposable
         _serviceManager.Add<ActorSpawnService>();
         _serviceManager.Add<PenumbraIPCService>();
         _serviceManager.Add<PenumbraCollectionService>();
-        _serviceManager.Add<FrameworkService>();
 
         // Presentation
         _serviceManager.Add<UIService>();
