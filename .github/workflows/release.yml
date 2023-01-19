@@ -45,7 +45,7 @@ jobs:
       with:
         allowUpdates: true
         artifacts: "./Brio.zip"
-        name: ${{ github.event.inputs.version }}
+        name: Brio v${{ github.event.inputs.version }}
         tag: v${{ github.event.inputs.version }}
         draft: false
         token: ${{ secrets.GITHUB_TOKEN }}
