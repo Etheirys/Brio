@@ -40,7 +40,7 @@ public class GPoseService : ServiceBase<GPoseService>
 
         var exitGPoseAddress = (nint) uiModule->vfunc[76];
         if (exitGPoseAddress == 0)
-            throw new Exception("Could not get EnterGPose address");
+            throw new Exception("Could not get ExitGPose address");
 
         EnterGPoseHook = Hook<EnterGPoseDelegate>.FromAddress(enterGPoseAddress, EnteringGPoseDetour);
         EnterGPoseHook.Enable();
