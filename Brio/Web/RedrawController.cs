@@ -34,7 +34,7 @@ public class RedrawController : WebApiController
                     {
                         var actor = Dalamud.ObjectTable[data.ObjectIndex];
                         if(actor != null)
-                            ActorRedrawService.Instance.Redraw(actor, RedrawType.Standard);
+                            ActorRedrawService.Instance.Redraw(actor, data.RedrawType ?? RedrawType.ForceNPCAppearance);
                     }
 
                 },
@@ -51,4 +51,5 @@ public class RedrawController : WebApiController
 public class RedrawRequest
 {
     public int ObjectIndex { get; set;  }
+    public RedrawType? RedrawType { get; set; }
 }
