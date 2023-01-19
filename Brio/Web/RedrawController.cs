@@ -22,7 +22,7 @@ public class RedrawController : WebApiController
             return await FrameworkService.Instance.RunUntilSatisfied(
                 () =>
                 {
-                    var gameObject = Dalamud.ObjectTable[data.ActorIndex];
+                    var gameObject = Dalamud.ObjectTable[data.ObjectIndex];
                     if(gameObject == null)
                         return false;
 
@@ -32,7 +32,7 @@ public class RedrawController : WebApiController
                 {
                     if(success)
                     {
-                        var actor = Dalamud.ObjectTable[data.ActorIndex];
+                        var actor = Dalamud.ObjectTable[data.ObjectIndex];
                         if(actor != null)
                             ActorRedrawService.Instance.Redraw(actor, RedrawType.Standard);
                     }
@@ -50,5 +50,5 @@ public class RedrawController : WebApiController
 
 public class RedrawRequest
 {
-    public int ActorIndex { get; set;  }
+    public int ObjectIndex { get; set;  }
 }
