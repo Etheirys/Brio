@@ -15,8 +15,11 @@ public class ActorRedrawService : ServiceBase<ActorRedrawService>
 
     private List<int> _redrawsActive = new();
 
-    public unsafe void Redraw(GameObject gameObject, RedrawType redrawType, bool preservePosition = true)
+    public unsafe bool Redraw(GameObject gameObject, RedrawType redrawType, bool preservePosition = true)
     {
+        if(!CanRedraw(gameObject))
+            return false;
+
         var raw = gameObject.AsNative();
         var index = raw->ObjectIndex;
         _redrawsActive.Add(index);
@@ -62,6 +65,7 @@ public class ActorRedrawService : ServiceBase<ActorRedrawService>
             _redrawsActive.Remove(index);
         }
 
+        return true;
     }
 
     public override void Dispose()

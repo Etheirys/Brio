@@ -3,6 +3,7 @@ using Dalamud.Logging;
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
 
 namespace Brio.Game.Core;
 
@@ -10,27 +11,7 @@ public class FrameworkService : ServiceBase<FrameworkService>
 {
     private List<DeferredTask> _deferredTasks = new();
 
-    public void RunDeferred(
-        Action<bool> action,
-        int delay = 0,
-        [CallerFilePath] string callerFile = "",
-        [CallerLineNumber] int callerLine = 0,
-        [CallerMemberName] string callerMember = ""
-    )
-    {
-        var newTask = new DeferredTask()
-        {
-            ConditionAction = (task) => task.TickCount >= task.StartFrame,
-            CompleteAction = action,
-            MaxFrames = delay,
-            StartFrame = delay,
-            DebugPath = $"{callerFile}:{callerLine} - {callerMember}"
-        };
-
-        _deferredTasks.Add(newTask);
-    }
-
-    public void RunUntilSatisfied(
+    public Task<bool> RunUntilSatisfied(
         Func<bool> condition,
         Action<bool> onSatisfied,
         int attempts,
@@ -41,9 +22,12 @@ public class FrameworkService : ServiceBase<FrameworkService>
         [CallerMemberName] string callerMember = ""
     )
     {
+        var callbackTask = new TaskCompletionSource<bool>();
+
         var newTask = new DeferredTask()
         {
-            ConditionAction = (_) => condition.Invoke(),
+            CallbackTask= callbackTask,
+            ConditionAction = () => condition.Invoke(),
             CompleteAction = onSatisfied.Invoke,
             MaxFrames = attempts,
             StartFrame = dontStartFor,
@@ -52,78 +36,104 @@ public class FrameworkService : ServiceBase<FrameworkService>
         };
 
         _deferredTasks.Add(newTask);
+
+        return callbackTask.Task;
     }
 
     public override void Tick()
     {
-        for(int i = 0; i < _deferredTasks.Count; i++)
+        lock(_deferredTasks)
         {
-            var task = _deferredTasks[i];
-            task.TickCount++;
-
-            if(task.TickCount >= task.StartFrame)
+            for(int i = 0; i < _deferredTasks.Count; i++)
             {
-                var conditionSatisfied = CheckTask(task);
+                var task = _deferredTasks[i];
+                task.TickCount++;
 
-                if(conditionSatisfied == true)
+                if(task.TickCount >= task.StartFrame)
                 {
-                    if(task.DeferOnceMore)
+                    var conditionSatisfied = CheckTask(task);
+
+                    if(conditionSatisfied.success)
                     {
-                        task.DeferOnceMore = false;
-                        task.ConditionAction = (_) => true;
+                        if(task.DeferOnceMore)
+                        {
+                            task.DeferOnceMore = false;
+                            task.ConditionAction = () => true;
+                        }
+                        else
+                        {
+                            _deferredTasks.RemoveAt(i--);
+                            CompleteTask(task, true, null);
+                        }
                     }
-                    else
+                    else if(conditionSatisfied.error != null || task.MaxFrames <= task.TickCount)
                     {
                         _deferredTasks.RemoveAt(i--);
-                        CompleteTask(task, true);
-                    }
-                }
-                else if(conditionSatisfied == null || task.MaxFrames <= task.TickCount)
-                {
-                    if(task.MaxFrames <= task.TickCount)
-                        PluginLog.Warning($"Task timed out. {task}");
 
-                    _deferredTasks.RemoveAt(i--);
-                    CompleteTask(task, false);
+                        if(task.MaxFrames <= task.TickCount)
+                        {
+                            PluginLog.Warning($"Task timed out. {task}");
+                            CompleteTask(task, false, null);
+                        }
+                        else
+                        {
+                            CompleteTask(task, false, conditionSatisfied.error);
+                        }
+                    }
+
                 }
             }
         }
     }
 
-    private bool? CheckTask(DeferredTask task)
+    private (bool success, Exception? error) CheckTask(DeferredTask task)
     {
         try
         {
-            return task.ConditionAction(task);
+            return (task.ConditionAction(), null);
         }
         catch(Exception ex)
         {
             PluginLog.Warning(ex, $"Exception running condition action. {task}");
-            return null;
+            return (false, ex);
         }
     }
 
-    private void CompleteTask(DeferredTask task, bool success)
+    private void CompleteTask(DeferredTask task, bool success, Exception? e)
     {
         try
         {
-            task.CompleteAction.Invoke(success);
+            if(e != null)
+            {
+                task.CompleteAction.Invoke(false);
+                task.CallbackTask.SetException(e);
+            }
+            else
+            {
+                task.CompleteAction.Invoke(success);
+                task.CallbackTask.SetResult(success);
+            }
         }
         catch(Exception ex)
         {
             PluginLog.Warning(ex, $"Exception running completion action. {task}");
+            task.CallbackTask.SetResult(true);
         }
     }
 
     public override void Dispose()
     {
-        _deferredTasks.Clear();
+        lock(_deferredTasks)
+        {
+            _deferredTasks.Clear();
+        }
     }
 }
 
 class DeferredTask
 {
-    public Func<DeferredTask, bool> ConditionAction { get; set; } = null!;
+    public TaskCompletionSource<bool> CallbackTask { get; set; } = null!;
+    public Func<bool> ConditionAction { get; set; } = null!;
     public Action<bool> CompleteAction { get; set; } = null!;
     public string DebugPath { get; set; } = null!;
     public int MaxFrames { get; set; }

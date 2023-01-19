@@ -11,8 +11,13 @@ public class ConfigService : ServiceBase<ConfigService>
         Configuration = Dalamud.PluginInterface.GetPluginConfig() as Configuration ?? new Configuration();
     }
 
-    public override void Stop()
+    public static void Save()
     {
         Dalamud.PluginInterface.SavePluginConfig(Configuration);
+    }
+
+    public override void Stop()
+    {
+        Save();
     }
 }

@@ -7,6 +7,8 @@ using Brio.Game.GPose;
 using Brio.Game.Render;
 using Brio.IPC;
 using Brio.UI;
+using Brio.Web;
+using Dalamud.Game;
 using System;
 
 namespace Brio;
@@ -24,7 +26,6 @@ public class Brio : IDisposable
 
         // Services
         _serviceManager.Add<ConfigService>();
-        _serviceManager.Add<FrameworkService>();
         _serviceManager.Add<CommandHandlerService>();
         _serviceManager.Add<GPoseService>();
         _serviceManager.Add<RenderHookService>();
@@ -33,21 +34,24 @@ public class Brio : IDisposable
         _serviceManager.Add<ActorSpawnService>();
         _serviceManager.Add<PenumbraIPCService>();
         _serviceManager.Add<PenumbraCollectionService>();
-        _serviceManager.Add<UIService>();
+        _serviceManager.Add<FrameworkService>();
 
+        // Presentation
+        _serviceManager.Add<UIService>();
+        _serviceManager.Add<WebService>();
         _serviceManager.Add<WelcomeService>();
 
-        // Start Everything
-        _serviceManager.Start();
-
-        Dalamud.Framework.Update += Framework_Update;
+        Dalamud.Framework.RunOnFrameworkThread(() =>
+        {
+            _serviceManager.Start();
+            Dalamud.Framework.Update += Framework_Update;
+        });
     }
 
-    private void Framework_Update(global::Dalamud.Game.Framework framework)
+    private void Framework_Update(Framework framework)
     {
         _serviceManager.Tick();
     }
-
 
     public void Dispose()
     {

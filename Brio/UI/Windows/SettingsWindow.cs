@@ -1,5 +1,6 @@
 ﻿using Brio.Config;
 using Brio.IPC;
+using Brio.Web;
 using Dalamud.Interface;
 using Dalamud.Interface.Windowing;
 using ImGuiNET;
@@ -106,6 +107,21 @@ namespace Brio.UI.Windows
         {
             if(ImGui.BeginTabItem("Integrations"))
             {
+                if(ImGui.CollapsingHeader("Web API", ImGuiTreeNodeFlags.DefaultOpen))
+                {
+                    bool previousEnableWebApi = ConfigService.Configuration.AllowWebAPI;
+                    bool enableWebApi = previousEnableWebApi;
+                    if(ImGui.Checkbox("Enable Web API", ref enableWebApi))
+                    {
+                        if(enableWebApi != previousEnableWebApi)
+                        {
+                            ConfigService.Configuration.AllowWebAPI = enableWebApi;
+                        }
+                    }
+                }
+                ImGui.Text($"Web API Status: {(WebService.Instance.IsRunning ? "Active" : "Inactive")}");
+
+                ImGui.Separator();
 
                 if(ImGui.CollapsingHeader("Penumbra", ImGuiTreeNodeFlags.DefaultOpen))
                 {
