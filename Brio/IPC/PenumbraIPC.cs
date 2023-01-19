@@ -1,4 +1,6 @@
-﻿using Brio.Game.GPose;
+﻿using Brio.Config;
+using Brio.Core;
+using Brio.Game.GPose;
 using Dalamud.Logging;
 using Penumbra.Api;
 using Penumbra.Api.Enums;
@@ -7,7 +9,7 @@ using System;
 
 namespace Brio.IPC;
 
-public class PenumbraIPC : IDisposable
+public class PenumbraIPCService : ServiceBase<PenumbraIPCService>
 {
     public bool IsPenumbraEnabled { get; private set; } = false;
 
@@ -17,21 +19,26 @@ public class PenumbraIPC : IDisposable
     private EventSubscriber _penumbraInitializedSubscriber;
     private EventSubscriber _penumbraDisposedSubscriber;
 
-    public PenumbraIPC()
+    public PenumbraIPCService()
     {
         _penumbraInitializedSubscriber = Ipc.Initialized.Subscriber(Dalamud.PluginInterface, RefreshPenumbraStatus);
         _penumbraDisposedSubscriber = Ipc.Disposed.Subscriber(Dalamud.PluginInterface, RefreshPenumbraStatus);
+    }
 
+    public override void Start()
+    {
         RefreshPenumbraStatus();
 
-        Brio.GPoseService.OnGPoseStateChange += GPoseService_OnGPoseStateChange;
+        GPoseService.Instance.OnGPoseStateChange += GPoseService_OnGPoseStateChange;
+
+        base.Start();
     }
 
     public void RefreshPenumbraStatus() 
     {
         var wasEnabled = IsPenumbraEnabled;
 
-        if (Brio.Configuration.AllowPenumbraIntegration)
+        if (ConfigService.Configuration.AllowPenumbraIntegration)
         {
             IsPenumbraEnabled = CanConnect();
         }
@@ -85,9 +92,9 @@ public class PenumbraIPC : IDisposable
     }
 
 
-    public void Dispose()
+    public override void Dispose()
     {
-        Brio.GPoseService.OnGPoseStateChange -= GPoseService_OnGPoseStateChange;
+        GPoseService.Instance.OnGPoseStateChange -= GPoseService_OnGPoseStateChange;
         _penumbraDisposedSubscriber.Dispose();
         _penumbraInitializedSubscriber.Dispose();
         IsPenumbraEnabled = false;

@@ -10,19 +10,19 @@ public static class ActorRedrawControls
 
     public unsafe static void Draw(GameObject gameObject)
     {
-        bool redrawAllowed = Brio.ActorRedrawService.CanRedraw(gameObject);
+        bool redrawAllowed = ActorRedrawService.Instance.CanRedraw(gameObject);
 
         if (!redrawAllowed) ImGui.BeginDisabled();
 
         ImGui.Checkbox("Preserve Position / Rotation", ref _preservePosition);
 
         if(ImGui.Button("Redraw"))
-            Brio.ActorRedrawService.Redraw(gameObject, RedrawType.Standard, _preservePosition);
+            ActorRedrawService.Instance.Redraw(gameObject, RedrawType.Standard, _preservePosition);
 
         ImGui.SameLine();
 
         if (ImGui.Button("Modern NPC Redraw"))
-            Brio.ActorRedrawService.Redraw(gameObject, RedrawType.ForceNPCAppearance, _preservePosition);
+            ActorRedrawService.Instance.Redraw(gameObject, RedrawType.ForceNPCAppearance, _preservePosition);
 
         if (!redrawAllowed) ImGui.EndDisabled();
     }

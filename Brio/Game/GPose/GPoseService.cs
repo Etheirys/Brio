@@ -1,13 +1,13 @@
-﻿using Brio.Utils;
+﻿using Brio.Config;
+using Brio.Core;
+using Brio.UI;
 using Dalamud.Hooking;
-using Dalamud.Logging;
-using FFXIVClientStructs.FFXIV.Client.Game.Object;
 using FFXIVClientStructs.FFXIV.Client.System.Framework;
 using System;
 
 namespace Brio.Game.GPose;
 
-public class GPoseService : IDisposable
+public class GPoseService : ServiceBase<GPoseService>
 {
     public GPoseState GPoseState { get; private set; }
     public bool IsInGPose => GPoseState == GPoseState.Inside || FakeGPose;
@@ -22,7 +22,7 @@ public class GPoseService : IDisposable
     private delegate bool EnterGPoseDelegate(IntPtr addr);
     private Hook<EnterGPoseDelegate> EnterGPoseHook = null!;
 
-    public unsafe GPoseService()
+    public override unsafe void Start()
     {
         GPoseState = Dalamud.PluginInterface.UiBuilder.GposeActive ? GPoseState.Inside: GPoseState.Outside;
 
@@ -34,7 +34,7 @@ public class GPoseService : IDisposable
         ExitGPoseHook = Hook<ExitGPoseDelegate>.FromAddress((nint)framework->UIModule->vfunc[76], ExitingGPoseDetour);
         ExitGPoseHook.Enable();
 
-        
+        base.Start();
     }
 
     private void ExitingGPoseDetour(IntPtr addr)
@@ -62,13 +62,13 @@ public class GPoseService : IDisposable
         {
             case GPoseState.Inside:
             case GPoseState.Outside:
-                if (Brio.Configuration.OpenBrioBehavior == Config.OpenBrioBehavior.OnGPoseEnter)
-                    Brio.UI.MainWindow.IsOpen = state == GPoseState.Inside;
+                if (ConfigService.Configuration.OpenBrioBehavior == Config.OpenBrioBehavior.OnGPoseEnter)
+                    UIService.Instance.MainWindow.IsOpen = state == GPoseState.Inside;
                 break;
         }
     }
 
-    public void Dispose()
+    public override void Dispose()
     {
         ExitGPoseHook.Dispose();
         EnterGPoseHook.Dispose();

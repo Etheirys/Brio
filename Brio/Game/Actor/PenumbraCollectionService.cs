@@ -1,4 +1,6 @@
-﻿using Brio.Game.GPose;
+﻿using Brio.Core;
+using Brio.Game.GPose;
+using Brio.IPC;
 using Brio.Utils;
 using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Logging;
@@ -9,23 +11,25 @@ using Character = FFXIVClientStructs.FFXIV.Client.Game.Character.Character;
 
 namespace Brio.Game.Actor;
 
-public class PenumbraCollectionService : IDisposable
+public class PenumbraCollectionService : ServiceBase<PenumbraCollectionService>
 {
-    public bool CanApplyCollection(GameObject gameObject) => Brio.ActorRedrawService.CanRedraw(gameObject);
+    public bool CanApplyCollection(GameObject gameObject) => ActorRedrawService.Instance.CanRedraw(gameObject);
     public List<string> Collections { get; } = new();
 
     public Dictionary<int, string> _appliedCollections = new();
 
-    public PenumbraCollectionService()
+    public override void Start()
     {
-        Brio.PenumbraIPC.OnPenumbraStateChange += PenumbraIPC_OnPenumbraStateChange;
-        Brio.ActorService.OnActorDestructing += ActorService_OnActorDestructing;
+        PenumbraIPCService.Instance.OnPenumbraStateChange += PenumbraIPC_OnPenumbraStateChange;
+        ActorService.Instance.OnActorDestructing += ActorService_OnActorDestructing;
         RefreshCollections();
+
+        base.Start();
     }
 
     public unsafe void RedrawActorWithCollection(GameObject gameObject, string collectionName)
     {
-        if (!Brio.PenumbraIPC.IsPenumbraEnabled)
+        if (!PenumbraIPCService.Instance.IsPenumbraEnabled)
         {
             PluginLog.Warning("Tried to Penumbra collection redraw when Penumbra is disabled");
             return;
@@ -41,7 +45,7 @@ public class PenumbraCollectionService : IDisposable
             var (_, oldName) = Ipc.SetCollectionForObject.Subscriber(Dalamud.PluginInterface).Invoke(index, collectionName, true, true);
 
             // Redraw
-            Brio.ActorRedrawService.Redraw(gameObject, RedrawType.Penumbra, true);
+            ActorRedrawService.Instance.Redraw(gameObject, RedrawType.Penumbra, true);
 
             if (!_appliedCollections.ContainsKey(index))
                 _appliedCollections[index] = oldName;
@@ -58,9 +62,9 @@ public class PenumbraCollectionService : IDisposable
     {
         Collections.Clear();
 
-        if (!Brio.PenumbraIPC.IsPenumbraEnabled)
+        if (!PenumbraIPCService.Instance.IsPenumbraEnabled)
         {
-            Brio.PenumbraIPC.RefreshPenumbraStatus();
+            PenumbraIPCService.Instance.RefreshPenumbraStatus();
             return;
         }
 
@@ -113,9 +117,9 @@ public class PenumbraCollectionService : IDisposable
         CleanupOverride(gameObject.AsNative()->ObjectIndex);
     }
 
-    public void Dispose()
+    public override void Dispose()
     {
         CleanupOverrides();
-        Brio.PenumbraIPC.OnPenumbraStateChange -= PenumbraIPC_OnPenumbraStateChange;
+        PenumbraIPCService.Instance.OnPenumbraStateChange -= PenumbraIPC_OnPenumbraStateChange;
     }
 }

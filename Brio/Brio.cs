@@ -1,4 +1,5 @@
 ﻿using Brio.Config;
+using Brio.Core;
 using Brio.Game.Actor;
 using Brio.Game.Chat;
 using Brio.Game.Core;
@@ -6,84 +7,51 @@ using Brio.Game.GPose;
 using Brio.Game.Render;
 using Brio.IPC;
 using Brio.UI;
+using System;
 
 namespace Brio;
 
-public static class Brio
+public class Brio : IDisposable
 {
     public const string PluginName = "Brio";
     public static string PluginVersion = typeof(Brio).Assembly.GetName().Version!.ToString(fieldCount: 3);
 
-    public static Configuration Configuration { get; private set; } = null!;
-    public static GPoseService GPoseService { get; private set; } = null!;
-    public static ActorService ActorService { get; private set; } = null!;
-    public static ActorSpawnService ActorSpawnService { get; private set; } = null!;
-    public static ActorRedrawService ActorRedrawService { get; private set; } = null!;
-    public static PenumbraIPC PenumbraIPC { get; private set; } = null!;
-    public static PenumbraCollectionService PenumbraCollectionService { get; private set; } = null!;
-    public static UIContainer UI { get; private set; } = null!;
-    public static RenderHooks RenderHooks { get; set; } = null!;
-    public static FrameworkUtils FrameworkUtils { get; set; } = null!;
+    private ServiceManager _serviceManager;
 
-
-    private static CommandHandler _commandHandler { get; set; } = null!;
-
-    public static void Initialize()
+    public Brio()
     {
-        Configuration = Dalamud.PluginInterface.GetPluginConfig() as Configuration ?? new Configuration();
+        _serviceManager = new ServiceManager();
 
-        _commandHandler = new();
+        // Services
+        _serviceManager.Add<ConfigService>();
+        _serviceManager.Add<FrameworkService>();
+        _serviceManager.Add<CommandHandlerService>();
+        _serviceManager.Add<GPoseService>();
+        _serviceManager.Add<RenderHookService>();
+        _serviceManager.Add<ActorService>();
+        _serviceManager.Add<ActorRedrawService>();
+        _serviceManager.Add<ActorSpawnService>();
+        _serviceManager.Add<PenumbraIPCService>();
+        _serviceManager.Add<PenumbraCollectionService>();
+        _serviceManager.Add<UIService>();
 
-        GPoseService = new GPoseService();
-        ActorService = new ActorService();
-        ActorSpawnService  = new ActorSpawnService();
-        ActorRedrawService = new ActorRedrawService();
-        PenumbraIPC = new PenumbraIPC();
-        PenumbraCollectionService = new PenumbraCollectionService();
-        RenderHooks = new RenderHooks();
-        FrameworkUtils = new FrameworkUtils();
+        _serviceManager.Add<WelcomeService>();
 
+        // Start Everything
+        _serviceManager.Start();
 
-        UI = new UIContainer();
-
-        StartupLogic();
+        Dalamud.Framework.Update += Framework_Update;
     }
 
-    private static void StartupLogic()
+    private void Framework_Update(global::Dalamud.Game.Framework framework)
     {
-        if(Configuration.IsFirstTimeUser)
-        {
-            UI.InfoWindow.IsOpen = true;
-            Configuration.IsFirstTimeUser = false;
-        }
-
-        if (Configuration.PopupKey != Configuration.CurrentPopupKey)
-        {
-            UI.InfoWindow.IsOpen = true;
-            Configuration.PopupKey = Configuration.CurrentPopupKey;
-        }
-
-        if (Configuration.OpenBrioBehavior == OpenBrioBehavior.OnPluginStartup)
-            UI.MainWindow.IsOpen = true;
-
-        if (Configuration.OpenBrioBehavior == OpenBrioBehavior.OnGPoseEnter && GPoseService.IsInGPose)
-            UI.MainWindow.IsOpen = true;
+        _serviceManager.Tick();
     }
 
-    public static void Destroy()
+
+    public void Dispose()
     {
-        Dalamud.PluginInterface.SavePluginConfig(Configuration);
-
-        UI.Dispose();
-
-        FrameworkUtils.Dispose();
-        RenderHooks.Dispose();
-        GPoseService.Dispose();
-        PenumbraCollectionService.Dispose();
-        PenumbraIPC.Dispose();
-        ActorSpawnService.Dispose();
-        ActorRedrawService.Dispose();
-        ActorService.Dispose();
-        _commandHandler.Dispose();
+        Dalamud.Framework.Update -= Framework_Update;
+        _serviceManager.Dispose();
     }
 }

@@ -1,4 +1,5 @@
-﻿using Dalamud.Game;
+﻿using Brio.Core;
+using Dalamud.Game;
 using Dalamud.Logging;
 using System;
 using System.Collections.Generic;
@@ -6,19 +7,9 @@ using System.Runtime.CompilerServices;
 
 namespace Brio.Game.Core;
 
-public class FrameworkUtils : IDisposable
+public class FrameworkService : ServiceBase<FrameworkService>
 {
     private List<DeferredTask> _deferredTasks = new();
-
-    public FrameworkUtils()
-    {
-        Dalamud.Framework.Update += Framework_Update;
-    }
-
-    private void Framework_Update(Framework framework)
-    {
-        TickTasks();
-    }
 
     public void RunDeferred(
         Action<bool> action,
@@ -64,13 +55,7 @@ public class FrameworkUtils : IDisposable
         _deferredTasks.Add(newTask);
     }
 
-    public void Dispose()
-    {
-        Dalamud.Framework.Update -= Framework_Update;
-        _deferredTasks.Clear();
-    }
-
-    private void TickTasks()
+    public override void Tick()
     {
         for(int i = 0; i < _deferredTasks.Count; i++)
         {
@@ -128,6 +113,11 @@ public class FrameworkUtils : IDisposable
         {
             PluginLog.Warning(ex, $"Exception running completion action. {task}");
         }
+    }
+
+    public override void Dispose()
+    {
+        _deferredTasks.Clear();
     }
 }
 

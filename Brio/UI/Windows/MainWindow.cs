@@ -56,12 +56,12 @@ public class MainWindow : Window
         ImGui.SetCursorPosX(initialPos.X + 170f);
         ImGui.SetCursorPosY(initialPos.Y - ImGui.GetTextLineHeight() * 2f);
         if(ImGui.Button(FontAwesomeIcon.Cog.ToIconString()))
-            Brio.UI.SettingsWindow.Toggle();
+            UIService.Instance.SettingsWindow.Toggle();
 
         ImGui.SetCursorPosX(initialPos.X + 145f);
         ImGui.SetCursorPosY(initialPos.Y - ImGui.GetTextLineHeight() * 2f);
         if (ImGui.Button(FontAwesomeIcon.InfoCircle.ToIconString()))
-            Brio.UI.InfoWindow.Toggle();
+            UIService.Instance.InfoWindow.Toggle();
 
         ImGui.PopFont();
         ImGui.PopStyleColor();

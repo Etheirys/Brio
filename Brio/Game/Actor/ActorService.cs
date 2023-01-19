@@ -1,4 +1,5 @@
-﻿using Brio.Utils;
+﻿using Brio.Core;
+using Brio.Utils;
 using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Hooking;
 using System;
@@ -7,7 +8,7 @@ using System.Collections.ObjectModel;
 
 namespace Brio.Game.Actor;
 
-public class ActorService : IDisposable
+public class ActorService : ServiceBase<ActorService>
 {
     public const int GPoseActorCount = 39;
     private const int GPoseFirstActor = 201;
@@ -24,15 +25,18 @@ public class ActorService : IDisposable
 
     public ActorService()
     {
-        UpdateGPoseTable();
-        Dalamud.Framework.Update += Framework_Update;
-
         var destroyAddress = Dalamud.SigScanner.ScanText("48 89 5C 24 ?? 48 89 74 24 ?? 57 48 83 EC ?? 48 8D 05 ?? ?? ?? ?? 48 8B D9 48 89 01 48 8D 05 ?? ?? ?? ?? 48 89 81 ?? ?? ?? ?? 48 8D 05");
         DestroyGameActorHook = Hook<DestroyGameActorDelegate>.FromAddress(destroyAddress, ActorDestructorDetour);
         DestroyGameActorHook.Enable();
     }
 
-    private void Framework_Update(global::Dalamud.Game.Framework framework)
+    public override void Start()
+    {
+        UpdateGPoseTable();
+        base.Start();
+    }
+
+    public override void Tick()
     {
         UpdateGPoseTable();
     }
@@ -68,10 +72,9 @@ public class ActorService : IDisposable
 
     }
 
-    public void Dispose()
+    public override void Dispose()
     {
         _gposeActors.Clear();
         DestroyGameActorHook.Dispose();
-        Dalamud.Framework.Update -= Framework_Update;
     }
 }

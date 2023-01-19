@@ -1,17 +1,18 @@
-﻿using Brio.UI.Windows;
+﻿using Brio.Config;
+using Brio.Core;
+using Brio.UI.Windows;
 using Dalamud.Interface.Windowing;
-using System;
 
 namespace Brio.UI;
 
-public class UIContainer : IDisposable
+public class UIService : ServiceBase<UIService>
 {
     public WindowSystem WindowSystem { get; private set; } = null!;
     public MainWindow MainWindow { get; private set; } = null!;
     public InfoWindow InfoWindow { get; private set; } = null!;
     public SettingsWindow SettingsWindow { get; private set; } = null!;
 
-    public UIContainer()
+    public override void Start()
     {
         WindowSystem= new WindowSystem(Brio.PluginName);
         MainWindow = new MainWindow();
@@ -28,12 +29,14 @@ public class UIContainer : IDisposable
         Dalamud.PluginInterface.UiBuilder.DisableGposeUiHide = true;
 
         ApplyUISettings();
+
+        base.Start();
     }
 
     public void ApplyUISettings()
     {
-        Dalamud.PluginInterface.UiBuilder.DisableCutsceneUiHide = Brio.Configuration.ShowInCutscene;
-        Dalamud.PluginInterface.UiBuilder.DisableUserUiHide = Brio.Configuration.ShowWhenUIHidden;
+        Dalamud.PluginInterface.UiBuilder.DisableCutsceneUiHide = ConfigService.Configuration.ShowInCutscene;
+        Dalamud.PluginInterface.UiBuilder.DisableUserUiHide = ConfigService.Configuration.ShowWhenUIHidden;
     }
 
     private void UiBuilder_Draw()
@@ -45,7 +48,7 @@ public class UIContainer : IDisposable
         SettingsWindow.Toggle();
     }
 
-    public void Dispose()
+    public override void Dispose()
     {
         Dalamud.PluginInterface.UiBuilder.Draw -= UiBuilder_Draw;
         Dalamud.PluginInterface.UiBuilder.OpenConfigUi -= UiBuilder_OpenConfigUi;

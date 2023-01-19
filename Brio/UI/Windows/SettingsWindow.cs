@@ -1,4 +1,5 @@
 ﻿using Brio.Config;
+using Brio.IPC;
 using Dalamud.Interface;
 using Dalamud.Interface.Windowing;
 using ImGuiNET;
@@ -33,13 +34,13 @@ namespace Brio.UI.Windows
                 if (ImGui.CollapsingHeader("Brio Window", ImGuiTreeNodeFlags.DefaultOpen))
                 {
                     ImGui.PushItemWidth(ImGui.GetContentRegionAvail().X - ImGui.CalcTextSize("Open Brio").X);
-                    var selectedBrioOpenBehavior = Brio.Configuration.OpenBrioBehavior;
+                    var selectedBrioOpenBehavior = ConfigService.Configuration.OpenBrioBehavior;
                     if (ImGui.BeginCombo("Open Brio##OpenBrioBehavior", $"{selectedBrioOpenBehavior}"))
                     {
                         foreach (var openBrioBehavior in Enum.GetValues<OpenBrioBehavior>())
                         {
                             if (ImGui.Selectable($"{openBrioBehavior}", openBrioBehavior == selectedBrioOpenBehavior))
-                                Brio.Configuration.OpenBrioBehavior = openBrioBehavior;
+                                ConfigService.Configuration.OpenBrioBehavior = openBrioBehavior;
                         }
                         ImGui.EndCombo();
                     }
@@ -50,25 +51,25 @@ namespace Brio.UI.Windows
 
                 if (ImGui.CollapsingHeader("Game State", ImGuiTreeNodeFlags.DefaultOpen))
                 {
-                    bool previousShowInCutscenes = Brio.Configuration.ShowInCutscene;
+                    bool previousShowInCutscenes = ConfigService.Configuration.ShowInCutscene;
                     bool showInCutscenes = previousShowInCutscenes;
                     if (ImGui.Checkbox("Show in Cutscenes", ref showInCutscenes))
                     {
                         if (showInCutscenes != previousShowInCutscenes)
                         {
-                            Brio.Configuration.ShowInCutscene = showInCutscenes;
-                            Brio.UI.ApplyUISettings();
+                            ConfigService.Configuration.ShowInCutscene = showInCutscenes;
+                            UIService.Instance.ApplyUISettings();
                         }
                     }
 
-                    bool previousShowWhenUIHidden = Brio.Configuration.ShowWhenUIHidden;
+                    bool previousShowWhenUIHidden = ConfigService.Configuration.ShowWhenUIHidden;
                     bool showWhenUIHidden = previousShowWhenUIHidden;
                     if (ImGui.Checkbox("Show When UI Hidden", ref showWhenUIHidden))
                     {
                         if (showWhenUIHidden != previousShowWhenUIHidden)
                         {
-                            Brio.Configuration.ShowWhenUIHidden = showWhenUIHidden;
-                            Brio.UI.ApplyUISettings();
+                            ConfigService.Configuration.ShowWhenUIHidden = showWhenUIHidden;
+                            UIService.Instance.ApplyUISettings();
                         }
                     }
                 }
@@ -84,13 +85,13 @@ namespace Brio.UI.Windows
                 if (ImGui.CollapsingHeader("Render Hooks", ImGuiTreeNodeFlags.DefaultOpen))
                 {
                     ImGui.PushItemWidth(ImGui.GetContentRegionAvail().X - ImGui.CalcTextSize("Allow NPC Appearance").X);
-                    var selectedNPCHack = Brio.Configuration.ApplyNPCHack;
+                    var selectedNPCHack = ConfigService.Configuration.ApplyNPCHack;
                     if (ImGui.BeginCombo("Allow NPC Appearance##ApplyNPCHack", $"{selectedNPCHack}"))
                     {
                         foreach (var applyNpcHackType in Enum.GetValues<ApplyNPCHack>())
                         {
                             if (ImGui.Selectable($"{applyNpcHackType}", applyNpcHackType == selectedNPCHack))
-                                Brio.Configuration.ApplyNPCHack = applyNpcHackType;
+                                ConfigService.Configuration.ApplyNPCHack = applyNpcHackType;
                         }
                         ImGui.EndCombo();
                     }
@@ -108,25 +109,25 @@ namespace Brio.UI.Windows
 
                 if (ImGui.CollapsingHeader("Penumbra", ImGuiTreeNodeFlags.DefaultOpen))
                 {
-                    bool previousEnablePenumbra = Brio.Configuration.AllowPenumbraIntegration;
+                    bool previousEnablePenumbra = ConfigService.Configuration.AllowPenumbraIntegration;
                     bool enablePenumbra = previousEnablePenumbra;
                     if (ImGui.Checkbox("Allow Penumbra Integration", ref enablePenumbra))
                     {
                         if (enablePenumbra != previousEnablePenumbra)
                         {
-                            Brio.Configuration.AllowPenumbraIntegration = enablePenumbra;
-                            Brio.PenumbraIPC.RefreshPenumbraStatus();
+                            ConfigService.Configuration.AllowPenumbraIntegration = enablePenumbra;
+                            PenumbraIPCService.Instance.RefreshPenumbraStatus();
                         }
                     }
 
                     if (!enablePenumbra) ImGui.BeginDisabled();
-                    ImGui.Text($"Penumbra Status: {(Brio.PenumbraIPC.IsPenumbraEnabled ? "Active" : "Inactive")}");
+                    ImGui.Text($"Penumbra Status: {(PenumbraIPCService.Instance.IsPenumbraEnabled ? "Active" : "Inactive")}");
                     ImGui.SameLine();
                     ImGui.PushFont(UiBuilder.IconFont);
                     if (ImGui.Button(FontAwesomeIcon.Redo.ToIconString()))
                     {
-                        Brio.PenumbraIPC.RefreshPenumbraStatus();
-                        if (!Brio.PenumbraIPC.IsPenumbraEnabled)
+                        PenumbraIPCService.Instance.RefreshPenumbraStatus();
+                        if (!PenumbraIPCService.Instance.IsPenumbraEnabled)
                             Dalamud.ToastGui.ShowError("Brio/Penumbra integration failed.\nEnsure Penumbra is enabled and up to date.");
                     }
                     ImGui.PopFont();

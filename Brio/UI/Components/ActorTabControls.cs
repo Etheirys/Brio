@@ -1,4 +1,7 @@
-﻿using Brio.Utils;
+﻿using Brio.Config;
+using Brio.Game.Actor;
+using Brio.Game.GPose;
+using Brio.Utils;
 using Dalamud.Game.ClientState.Objects.Types;
 using FFXIVClientStructs.FFXIV.Client.Game.Control;
 using ImGuiNET;
@@ -11,7 +14,7 @@ public static class ActorTabControls
 
     public unsafe static void Draw()
     {
-        bool inGPose = Brio.GPoseService.IsInGPose;
+        bool inGPose = GPoseService.Instance.IsInGPose;
 
         if (!inGPose) ImGui.TextColored(new(1, 0, 0, 1), "Must be in GPose");
 
@@ -23,11 +26,11 @@ public static class ActorTabControls
 
             ImGui.Separator();
 
-            bool canSpawn = Brio.ActorSpawnService.CanSpawn;
+            bool canSpawn = ActorSpawnService.Instance.CanSpawn;
             if (!canSpawn) ImGui.BeginDisabled();
             if (ImGui.Button("Spawn###gpose_actor_spawn"))
             {
-                ushort? createdId = Brio.ActorSpawnService.Spawn();
+                ushort? createdId = ActorSpawnService.Instance.Spawn();
                 if (createdId == null)
                     Dalamud.ToastGui.ShowError("Failed to Create Actor.");
             }
@@ -47,7 +50,7 @@ public static class ActorTabControls
             ImGui.SameLine();
             if (ImGui.Button("Delete###gpose_actor_delete"))
             {
-                Brio.ActorSpawnService.DestroyObject(selectedObject!);
+                ActorSpawnService.Instance.DestroyObject(selectedObject!);
             }
 
             if (!hasSelected) ImGui.EndDisabled();
@@ -56,7 +59,7 @@ public static class ActorTabControls
 
             if (ImGui.Button("Clear###gpose_actor_delete_all"))
             {
-                Brio.ActorSpawnService.DestroyAll();
+                ActorSpawnService.Instance.DestroyAll();
             }
         }
 
@@ -72,7 +75,7 @@ public static class ActorTabControls
             }
         }
 
-        if (Brio.Configuration.AllowPenumbraIntegration)
+        if (ConfigService.Configuration.AllowPenumbraIntegration)
         {
             if (ImGui.CollapsingHeader("Penumbra"))
             {

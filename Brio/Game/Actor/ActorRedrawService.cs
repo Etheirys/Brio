@@ -1,13 +1,15 @@
-﻿using Brio.Utils;
+﻿using Brio.Core;
+using Brio.Game.Core;
+using Brio.Game.Render;
+using Brio.Utils;
 using Dalamud.Game.ClientState.Objects.Types;
 using Penumbra.Api;
-using System;
 using System.Collections.Generic;
 using PenumbraRedrawType = Penumbra.Api.Enums.RedrawType;
 
 namespace Brio.Game.Actor;
 
-public class ActorRedrawService : IDisposable
+public class ActorRedrawService : ServiceBase<ActorRedrawService>
 {
     public unsafe bool CanRedraw(GameObject gameObject) => !_redrawsActive.Contains(gameObject.AsNative()->ObjectIndex);
 
@@ -22,9 +24,9 @@ public class ActorRedrawService : IDisposable
         var originalPositon = raw->DrawObject->Object.Position;
         var originalRotation = raw->DrawObject->Object.Rotation;
 
-        var npcOverrideEnabled = Brio.RenderHooks.ApplyNPCOverride;
+        var npcOverrideEnabled = RenderHookService.Instance.ApplyNPCOverride;
         if (redrawType == RedrawType.ForceNPCAppearance)
-            Brio.RenderHooks.ApplyNPCOverride = true;
+            RenderHookService.Instance.ApplyNPCOverride = true;
 
         switch(redrawType)
         {
@@ -40,11 +42,11 @@ public class ActorRedrawService : IDisposable
         }
 
         if (redrawType == RedrawType.ForceNPCAppearance)
-            Brio.RenderHooks.ApplyNPCOverride = npcOverrideEnabled;
+            RenderHookService.Instance.ApplyNPCOverride = npcOverrideEnabled;
 
         if (preservePosition)
         {
-            Brio.FrameworkUtils.RunUntilSatisfied(() => raw->RenderFlags == 0,
+            FrameworkService.Instance.RunUntilSatisfied(() => raw->RenderFlags == 0,
             (_) =>
             {
                 raw->DrawObject->Object.Rotation = originalRotation;
@@ -62,7 +64,7 @@ public class ActorRedrawService : IDisposable
 
     }
 
-    public void Dispose()
+    public override void Dispose()
     {
         _redrawsActive.Clear();
     }

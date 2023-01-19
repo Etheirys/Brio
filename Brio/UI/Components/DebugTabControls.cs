@@ -1,4 +1,5 @@
-﻿using FFXIVClientStructs.FFXIV.Client.System.Framework;
+﻿using Brio.Game.GPose;
+using FFXIVClientStructs.FFXIV.Client.System.Framework;
 using FFXIVClientStructs.FFXIV.Client.UI;
 using ImGuiNET;
 
@@ -15,10 +16,10 @@ public static class DebugTabControls
     {
         if (ImGui.CollapsingHeader("GPose Mode"))
         {
-            var isFakeGPose = Brio.GPoseService.FakeGPose;
+            var isFakeGPose = GPoseService.Instance.FakeGPose;
             var originalIsFake = isFakeGPose;
             ImGui.Checkbox("Fake GPose?", ref isFakeGPose);
-            if (isFakeGPose != originalIsFake) Brio.GPoseService.FakeGPose = isFakeGPose;
+            if (isFakeGPose != originalIsFake) GPoseService.Instance.FakeGPose = isFakeGPose;
 
             ImGui.Spacing();
 

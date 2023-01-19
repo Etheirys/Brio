@@ -1,5 +1,6 @@
-﻿using Brio.Utils;
-using Dalamud.Game.ClientState.Objects.Enums;
+﻿using Brio.Game.Actor;
+using Brio.IPC;
+using Brio.Utils;
 using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Interface;
 using ImGuiNET;
@@ -12,9 +13,9 @@ public static class PenumbraActorControls
 
     public unsafe static void Draw(GameObject gameObject)
     {
-        if(Brio.PenumbraIPC.IsPenumbraEnabled)
+        if(PenumbraIPCService.Instance.IsPenumbraEnabled)
         {
-            var collections = Brio.PenumbraCollectionService.Collections;
+            var collections = PenumbraCollectionService.Instance.Collections;
 
             if (_selectedCollection == null && collections.Count > 0)
                 _selectedCollection = collections[0];
@@ -40,16 +41,16 @@ public static class PenumbraActorControls
             ImGui.PushFont(UiBuilder.IconFont);
             if(ImGui.Button(FontAwesomeIcon.Redo.ToIconString()))
             {
-                Brio.PenumbraCollectionService.RefreshCollections();
+                PenumbraCollectionService.Instance.RefreshCollections();
             }
             ImGui.PopFont();
 
             bool isCharacter = gameObject.AsNative()->IsCharacter();
-            bool allowed = isCharacter && Brio.PenumbraCollectionService.CanApplyCollection(gameObject);
+            bool allowed = isCharacter && PenumbraCollectionService.Instance.CanApplyCollection(gameObject);
             if (!allowed) ImGui.BeginDisabled();
             if(ImGui.Button("Apply Collection"))
             {
-                Brio.PenumbraCollectionService.RedrawActorWithCollection(gameObject, _selectedCollection!);
+                PenumbraCollectionService.Instance.RedrawActorWithCollection(gameObject, _selectedCollection!);
             }
             if (!isCharacter) ImGui.Text("Must be a character type.");
             if (!allowed) ImGui.EndDisabled();

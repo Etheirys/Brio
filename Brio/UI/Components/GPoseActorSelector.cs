@@ -11,7 +11,7 @@ public class GPoseActorSelector
 
     public unsafe void Draw()
     {
-        var gposeObjects = Brio.ActorService.GPoseActors;
+        var gposeObjects = ActorService.Instance.GPoseActors;
 
         ImGui.Text($"Actors: {gposeObjects.Count}/{ActorService.GPoseActorCount}");
 

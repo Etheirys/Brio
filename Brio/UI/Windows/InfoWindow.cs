@@ -38,7 +38,7 @@ public class InfoWindow : Window
         if (ImGui.Button("Get Started", ButtonSize))
         {
             IsOpen = false;
-            Brio.UI.MainWindow.IsOpen = true;
+            UIService.Instance.MainWindow.IsOpen = true;
         }
         ImGui.PopStyleColor();
 

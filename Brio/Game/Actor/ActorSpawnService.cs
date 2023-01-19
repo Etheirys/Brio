@@ -1,16 +1,16 @@
-﻿using Brio.Game.GPose;
+﻿using Brio.Core;
+using Brio.Game.GPose;
 using Brio.Utils;
 using FFXIVClientStructs.FFXIV.Client.Game.Character;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using DalamudGameObject = Dalamud.Game.ClientState.Objects.Types.GameObject;
 
 namespace Brio.Game.Actor;
 
-public class ActorSpawnService : IDisposable
+public class ActorSpawnService : ServiceBase<ActorSpawnService>
 {
-    public bool CanSpawn => Brio.GPoseService.IsInGPose;
+    public bool CanSpawn => GPoseService.Instance.IsInGPose;
 
     private ClientObjectManager _clientObjectManager;
     private List<ushort> _createdIndexes = new();
@@ -18,10 +18,15 @@ public class ActorSpawnService : IDisposable
     public ActorSpawnService()
     {
         _clientObjectManager = new ClientObjectManager();
+    }
 
-        Brio.GPoseService.OnGPoseStateChange += GPoseService_OnGPoseStateChange;
-        Brio.ActorService.OnActorDestructing += ActorService_OnActorDestructing;
+    public override void Start()
+    {
+        GPoseService.Instance.OnGPoseStateChange += GPoseService_OnGPoseStateChange;
+        ActorService.Instance.OnActorDestructing += ActorService_OnActorDestructing;
         Dalamud.ClientState.TerritoryChanged += ClientState_TerritoryChanged;
+
+        base.Start();
     }
 
     private void ClientState_TerritoryChanged(object? sender, ushort e)
@@ -39,7 +44,7 @@ public class ActorSpawnService : IDisposable
 
     private unsafe void ActorService_OnActorDestructing(DalamudGameObject gameObject)
     {
-        if(Brio.ActorService.IsGPoseActor(gameObject))
+        if(ActorService.Instance.IsGPoseActor(gameObject))
         {
             var idx = _clientObjectManager.GetIndexByObject(gameObject.Address);
             if (idx < ushort.MaxValue)
@@ -97,7 +102,7 @@ public class ActorSpawnService : IDisposable
 
     public unsafe void DestroyAll()
     {
-        var gposeObjects = Brio.ActorService.GPoseActors.ToList();
+        var gposeObjects = ActorService.Instance.GPoseActors.ToList();
         foreach(var obj in gposeObjects)
         {
             DestroyObject(obj);
@@ -111,13 +116,13 @@ public class ActorSpawnService : IDisposable
         if (idx != 0xFFFFFFFF)
         {
             _clientObjectManager.DeleteObjectByIndex((ushort)idx, 0);
-            Brio.ActorService.UpdateGPoseTable();
+            ActorService.Instance.UpdateGPoseTable();
         }
     }
 
-    public void Dispose()
+    public override void Dispose()
     {
         DestroyAllCreated();
-        Brio.GPoseService.OnGPoseStateChange -= GPoseService_OnGPoseStateChange;
+        GPoseService.Instance.OnGPoseStateChange -= GPoseService_OnGPoseStateChange;
     }
 }
