@@ -14,7 +14,7 @@ public class UIService : ServiceBase<UIService>
 
     public override void Start()
     {
-        WindowSystem= new WindowSystem(Brio.PluginName);
+        WindowSystem = new WindowSystem(Brio.PluginName);
         MainWindow = new MainWindow();
         InfoWindow = new InfoWindow();
         SettingsWindow = new SettingsWindow();

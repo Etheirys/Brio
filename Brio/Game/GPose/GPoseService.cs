@@ -24,22 +24,22 @@ public class GPoseService : ServiceBase<GPoseService>
 
     public override unsafe void Start()
     {
-        GPoseState = Dalamud.PluginInterface.UiBuilder.GposeActive ? GPoseState.Inside: GPoseState.Outside;
+        GPoseState = Dalamud.PluginInterface.UiBuilder.GposeActive ? GPoseState.Inside : GPoseState.Outside;
 
         var framework = Framework.Instance();
-        if (framework == null)
+        if(framework == null)
             throw new Exception("Framework not found");
 
         var uiModule = framework->GetUiModule();
-        if (uiModule == null)
+        if(uiModule == null)
             throw new Exception("Could not get UI module");
 
-        var enterGPoseAddress = (nint) uiModule->vfunc[75];
-        if(enterGPoseAddress== 0)
+        var enterGPoseAddress = (nint)uiModule->vfunc[75];
+        if(enterGPoseAddress == 0)
             throw new Exception("Could not get EnterGPose address");
 
-        var exitGPoseAddress = (nint) uiModule->vfunc[76];
-        if (exitGPoseAddress == 0)
+        var exitGPoseAddress = (nint)uiModule->vfunc[76];
+        if(exitGPoseAddress == 0)
             throw new Exception("Could not get ExitGPose address");
 
         EnterGPoseHook = Hook<EnterGPoseDelegate>.FromAddress(enterGPoseAddress, EnteringGPoseDetour);
@@ -76,7 +76,7 @@ public class GPoseService : ServiceBase<GPoseService>
         {
             case GPoseState.Inside:
             case GPoseState.Outside:
-                if (ConfigService.Configuration.OpenBrioBehavior == OpenBrioBehavior.OnGPoseEnter)
+                if(ConfigService.Configuration.OpenBrioBehavior == OpenBrioBehavior.OnGPoseEnter)
                     UIService.Instance.MainWindow.IsOpen = state == GPoseState.Inside;
                 break;
         }

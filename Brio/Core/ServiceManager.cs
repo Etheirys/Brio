@@ -12,28 +12,28 @@ public class ServiceManager : IDisposable
 
     private readonly List<IService> _services = new();
 
-    public void Add<T> () where T : IService
+    public void Add<T>() where T : IService
     {
         _toRegister.Add(typeof(T));
     }
 
     public void Start()
     {
-        if (IsStarted)
+        if(IsStarted)
             return;
 
         IsStarted = true;
 
         foreach(var newType in _toRegister)
         {
-            var service = (IService?) Activator.CreateInstance(newType);
+            var service = (IService?)Activator.CreateInstance(newType);
             if(service != null)
                 _services.Add(service);
         }
 
         _toRegister.Clear();
 
-        foreach (var service in _services)
+        foreach(var service in _services)
         {
             service.Start();
         }
@@ -41,7 +41,7 @@ public class ServiceManager : IDisposable
 
     public void Tick()
     {
-        if (!IsStarted)
+        if(!IsStarted)
             return;
 
         foreach(var service in _services)
@@ -50,16 +50,16 @@ public class ServiceManager : IDisposable
 
     public void Dispose()
     {
-        if (!IsStarted)
+        if(!IsStarted)
             return;
 
         var reversed = _services.ToList();
         reversed.Reverse();
 
-        foreach (var service in reversed)
+        foreach(var service in reversed)
             service.Stop();
 
-        foreach (var service in reversed)
+        foreach(var service in reversed)
             service.Dispose();
 
         _services.Clear();

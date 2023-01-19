@@ -44,7 +44,7 @@ public class ActorService : ServiceBase<ActorService>
     private void ActorDestructorDetour(IntPtr addr)
     {
         var ago = Dalamud.ObjectTable.CreateObjectReference(addr);
-        if (ago != null)
+        if(ago != null)
             OnActorDestructing?.Invoke(ago);
 
         DestroyGameActorHook.Original.Invoke(addr);
@@ -53,10 +53,10 @@ public class ActorService : ServiceBase<ActorService>
     public void UpdateGPoseTable()
     {
         _gposeActors.Clear();
-        for (int i = GPoseFirstActor; i < GPoseFirstActor + GPoseActorCount; ++i)
+        for(int i = GPoseFirstActor; i < GPoseFirstActor + GPoseActorCount; ++i)
         {
             var go = Dalamud.ObjectTable[i];
-            if (go != null)
+            if(go != null)
             {
                 _gposeActors.Add(go);
                 HandleGameObject(go);

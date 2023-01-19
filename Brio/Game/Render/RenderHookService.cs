@@ -30,7 +30,7 @@ public unsafe class RenderHookService : ServiceBase<RenderHookService>
     private void GPoseService_OnGPoseStateChange(GPoseState state)
     {
         var npcOverrideBehavior = ConfigService.Configuration.ApplyNPCHack;
-        if (npcOverrideBehavior == Config.ApplyNPCHack.InGPose)
+        if(npcOverrideBehavior == Config.ApplyNPCHack.InGPose)
         {
             ApplyNPCOverride = state == GPoseState.Inside;
         }
@@ -38,7 +38,7 @@ public unsafe class RenderHookService : ServiceBase<RenderHookService>
 
     private long EnforceKindRestrictionsDetour(void* a1, void* a2)
     {
-        if (ApplyNPCOverride || ConfigService.Configuration.ApplyNPCHack == Config.ApplyNPCHack.Always)
+        if(ApplyNPCOverride || ConfigService.Configuration.ApplyNPCHack == Config.ApplyNPCHack.Always)
             return 0;
 
         return EnforceKindRestrictionsHook.Original(a1, a2);

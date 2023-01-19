@@ -35,7 +35,7 @@ public class InfoWindow : Window
         ImGui.Spacing();
 
         ImGui.PushStyleColor(ImGuiCol.Button, new Vector4(0, 100, 0, 255) / 255);
-        if (ImGui.Button("Get Started", ButtonSize))
+        if(ImGui.Button("Get Started", ButtonSize))
         {
             IsOpen = false;
             UIService.Instance.MainWindow.IsOpen = true;
@@ -49,27 +49,27 @@ public class InfoWindow : Window
         ImGui.BeginGroup();
 
         ImGui.PushStyleColor(ImGuiCol.Button, new Vector4(86, 98, 246, 255) / 255);
-        if (ImGui.Button("Discord", ButtonSize))
+        if(ImGui.Button("Discord", ButtonSize))
             Process.Start(new ProcessStartInfo { FileName = "https://discord.gg/xivtools", UseShellExecute = true });
         ImGui.PopStyleColor();
 
         ImGui.PushStyleColor(ImGuiCol.Button, new Vector4(255, 0, 0, 255) / 255);
-        if (ImGui.Button("Report Issue", ButtonSize))
+        if(ImGui.Button("Report Issue", ButtonSize))
             Process.Start(new ProcessStartInfo { FileName = "https://github.com/AsgardXIV/Brio/issues", UseShellExecute = true });
         ImGui.PopStyleColor();
 
         ImGui.PushStyleColor(ImGuiCol.Button, new Vector4(110, 84, 148, 255) / 255);
-        if (ImGui.Button("GitHub Repository", ButtonSize))
+        if(ImGui.Button("GitHub Repository", ButtonSize))
             Process.Start(new ProcessStartInfo { FileName = "https://github.com/AsgardXIV/Brio", UseShellExecute = true });
         ImGui.PopStyleColor();
 
         ImGui.PushStyleColor(ImGuiCol.Button, new Vector4(255, 91, 94, 255) / 255);
-        if (ImGui.Button("Donate on Ko-Fi", ButtonSize))
+        if(ImGui.Button("Donate on Ko-Fi", ButtonSize))
             Process.Start(new ProcessStartInfo { FileName = "https://ko-fi.com/asgard", UseShellExecute = true });
         ImGui.PopStyleColor();
 
         ImGui.PushStyleColor(ImGuiCol.Button, new Vector4(29, 161, 242, 255) / 255);
-        if (ImGui.Button("Asgard's Twitter", ButtonSize))
+        if(ImGui.Button("Asgard's Twitter", ButtonSize))
             Process.Start(new ProcessStartInfo { FileName = "https://twitter.com/AsgardXIV", UseShellExecute = true });
         ImGui.PopStyleColor();
 

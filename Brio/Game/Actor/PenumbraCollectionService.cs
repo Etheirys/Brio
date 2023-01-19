@@ -29,7 +29,7 @@ public class PenumbraCollectionService : ServiceBase<PenumbraCollectionService>
 
     public unsafe void RedrawActorWithCollection(GameObject gameObject, string collectionName)
     {
-        if (!PenumbraIPCService.Instance.IsPenumbraEnabled)
+        if(!PenumbraIPCService.Instance.IsPenumbraEnabled)
         {
             PluginLog.Warning("Tried to Penumbra collection redraw when Penumbra is disabled");
             return;
@@ -47,11 +47,11 @@ public class PenumbraCollectionService : ServiceBase<PenumbraCollectionService>
             // Redraw
             ActorRedrawService.Instance.Redraw(gameObject, RedrawType.Penumbra, true);
 
-            if (!_appliedCollections.ContainsKey(index))
+            if(!_appliedCollections.ContainsKey(index))
                 _appliedCollections[index] = oldName;
 
         }
-        catch (Exception ex)
+        catch(Exception ex)
         {
             PluginLog.Warning(ex, "Error during Penumbra collection redraw");
             Dalamud.ToastGui.ShowError("Unable to apply Penumbra collection.");
@@ -62,7 +62,7 @@ public class PenumbraCollectionService : ServiceBase<PenumbraCollectionService>
     {
         Collections.Clear();
 
-        if (!PenumbraIPCService.Instance.IsPenumbraEnabled)
+        if(!PenumbraIPCService.Instance.IsPenumbraEnabled)
         {
             PenumbraIPCService.Instance.RefreshPenumbraStatus();
             return;
@@ -77,7 +77,7 @@ public class PenumbraCollectionService : ServiceBase<PenumbraCollectionService>
 
     private void CleanupOverrides()
     {
-        foreach (var (index, name) in _appliedCollections)
+        foreach(var (index, name) in _appliedCollections)
         {
             Ipc.SetCollectionForObject.Subscriber(Dalamud.PluginInterface).Invoke(index, name, true, true);
         }
@@ -86,7 +86,7 @@ public class PenumbraCollectionService : ServiceBase<PenumbraCollectionService>
 
     private void CleanupOverride(int index)
     {
-        if (_appliedCollections.ContainsKey(index))
+        if(_appliedCollections.ContainsKey(index))
         {
             Ipc.SetCollectionForObject.Subscriber(Dalamud.PluginInterface).Invoke(index, _appliedCollections[index], true, true);
             _appliedCollections.Remove(index);
@@ -95,7 +95,7 @@ public class PenumbraCollectionService : ServiceBase<PenumbraCollectionService>
 
     private void PenumbraIPC_OnPenumbraStateChange(bool isActive)
     {
-        if (isActive)
+        if(isActive)
         {
             RefreshCollections();
         }

@@ -25,7 +25,7 @@ public class ActorRedrawService : ServiceBase<ActorRedrawService>
         var originalRotation = raw->DrawObject->Object.Rotation;
 
         var npcOverrideEnabled = RenderHookService.Instance.ApplyNPCOverride;
-        if (redrawType == RedrawType.ForceNPCAppearance)
+        if(redrawType == RedrawType.ForceNPCAppearance)
             RenderHookService.Instance.ApplyNPCOverride = true;
 
         switch(redrawType)
@@ -41,10 +41,10 @@ public class ActorRedrawService : ServiceBase<ActorRedrawService>
                 break;
         }
 
-        if (redrawType == RedrawType.ForceNPCAppearance)
+        if(redrawType == RedrawType.ForceNPCAppearance)
             RenderHookService.Instance.ApplyNPCOverride = npcOverrideEnabled;
 
-        if (preservePosition)
+        if(preservePosition)
         {
             FrameworkService.Instance.RunUntilSatisfied(() => raw->RenderFlags == 0,
             (_) =>

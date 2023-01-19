@@ -21,20 +21,20 @@ public class MainWindow : Window
 
         if(ImGui.BeginTabBar("brio_tabs"))
         {
-            if (ImGui.BeginTabItem("Actors"))
+            if(ImGui.BeginTabItem("Actors"))
             {
                 ActorTabControls.Draw();
                 ImGui.EndTabItem();
             }
 
-            if (ImGui.BeginTabItem("Global"))
+            if(ImGui.BeginTabItem("Global"))
             {
                 GlobalTabControls.Draw();
                 ImGui.EndTabItem();
             }
 
 #if DEBUG
-            if (ImGui.BeginTabItem("Debug"))
+            if(ImGui.BeginTabItem("Debug"))
             {
                 DebugTabControls.Draw();
                 ImGui.EndTabItem();
@@ -60,7 +60,7 @@ public class MainWindow : Window
 
         ImGui.SetCursorPosX(initialPos.X + 145f);
         ImGui.SetCursorPosY(initialPos.Y - ImGui.GetTextLineHeight() * 2f);
-        if (ImGui.Button(FontAwesomeIcon.InfoCircle.ToIconString()))
+        if(ImGui.Button(FontAwesomeIcon.InfoCircle.ToIconString()))
             UIService.Instance.InfoWindow.Toggle();
 
         ImGui.PopFont();

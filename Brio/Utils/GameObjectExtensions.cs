@@ -7,7 +7,7 @@ public static class GameObjectExtensions
 {
     public unsafe static void SetName(this ref StructsGameObject gameObject, string name)
     {
-        for (int x = 0; x < name.Length; x++)
+        for(int x = 0; x < name.Length; x++)
         {
             gameObject.Name[x] = (byte)name[x];
         }

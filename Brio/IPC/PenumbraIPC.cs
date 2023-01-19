@@ -34,11 +34,11 @@ public class PenumbraIPCService : ServiceBase<PenumbraIPCService>
         base.Start();
     }
 
-    public void RefreshPenumbraStatus() 
+    public void RefreshPenumbraStatus()
     {
         var wasEnabled = IsPenumbraEnabled;
 
-        if (ConfigService.Configuration.AllowPenumbraIntegration)
+        if(ConfigService.Configuration.AllowPenumbraIntegration)
         {
             IsPenumbraEnabled = CanConnect();
         }
@@ -47,7 +47,7 @@ public class PenumbraIPCService : ServiceBase<PenumbraIPCService>
             IsPenumbraEnabled = false;
         }
 
-        if (wasEnabled != IsPenumbraEnabled)
+        if(wasEnabled != IsPenumbraEnabled)
             OnPenumbraStateChange?.Invoke(IsPenumbraEnabled);
     }
 
@@ -56,14 +56,14 @@ public class PenumbraIPCService : ServiceBase<PenumbraIPCService>
         try
         {
             bool penumInstalled = Dalamud.PluginInterface.PluginNames.Contains("Penumbra");
-            if (!penumInstalled)
+            if(!penumInstalled)
             {
                 PluginLog.Information("Penumbra not present");
                 return false;
             }
 
             var (major, minor) = Ipc.ApiVersions.Subscriber(Dalamud.PluginInterface).Invoke();
-            if (major != 4 || minor < 18)
+            if(major != 4 || minor < 18)
             {
                 PluginLog.Information("Penumbra API mismatch");
                 return false;
@@ -73,7 +73,7 @@ public class PenumbraIPCService : ServiceBase<PenumbraIPCService>
 
             return true;
         }
-        catch (Exception ex)
+        catch(Exception ex)
         {
             PluginLog.Information(ex, "Penumbra initialize error");
             return false;
@@ -83,7 +83,7 @@ public class PenumbraIPCService : ServiceBase<PenumbraIPCService>
     private void GPoseService_OnGPoseStateChange(GPoseState state)
     {
 
-        switch (state)
+        switch(state)
         {
             case GPoseState.Inside:
                 RefreshPenumbraStatus();

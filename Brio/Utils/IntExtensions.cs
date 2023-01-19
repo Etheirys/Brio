@@ -14,7 +14,7 @@ public static class IntExtensions
     public static string ToCharacterName(this int i)
     {
         string words = ToWords(i);
-        if (words.Contains(' '))
+        if(words.Contains(' '))
             return words;
 
         return "Brio " + words;
@@ -23,11 +23,11 @@ public static class IntExtensions
     public static string ToWords(this int i)
     {
         string output = i.ToString();
-        if (i < 20)
+        if(i < 20)
         {
-            output =  _units[i];
+            output = _units[i];
         }
-        else if (i < 100)
+        else if(i < 100)
         {
             output = _tens[i / 10] + ((i % 10 > 0) ? " " + ToWords(i % 10) : "");
         }

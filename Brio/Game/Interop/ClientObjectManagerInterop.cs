@@ -1,15 +1,14 @@
 ﻿using Dalamud.Utility.Signatures;
 using System;
 
-namespace Brio.Game.Actor;
+namespace Brio.Game.Interop;
 
-public class ClientObjectManager
+public class ClientObjectManagerInterop
 {
     // TODO: All this should go back to FFXIV Client Structs
 
     [Signature("48 8D 0D ?? ?? ?? ?? E8 ?? ?? ?? ?? C7 43 60 FF FF FF FF", ScanType = ScanType.StaticAddress)]
     private IntPtr Instance = IntPtr.Zero;
-
 
     private delegate uint CreateBattleCharacterDelegate(IntPtr instance, uint index, byte param);
     [Signature("E8 ?? ?? ?? ?? 83 F8 FF 74 C3", ScanType = ScanType.Text)]
@@ -24,7 +23,7 @@ public class ClientObjectManager
     private delegate uint GetIndexByObjectDelegate(IntPtr instance, IntPtr character);
     [Signature("E8 ?? ?? ?? ?? 48 8B 5E ?? 8B E8", ScanType = ScanType.Text)]
     private GetIndexByObjectDelegate _getIndexByObject = null!;
-    public uint GetIndexByObject(IntPtr character ) => _getIndexByObject(Instance, character);
+    public uint GetIndexByObject(IntPtr character) => _getIndexByObject(Instance, character);
 
     private delegate void DeleteObjectByIndexDelegate(IntPtr instance, ushort id, byte param);
     [Signature("E8 ?? ?? ?? ?? C7 07 ?? ?? ?? ?? 48 8B 05", ScanType = ScanType.Text)]
@@ -36,7 +35,7 @@ public class ClientObjectManager
     private CalculateNextIndexDelegate _calculateNextIndex = null!;
     public uint CalculateNextIndex() => _calculateNextIndex(Instance);
 
-    public ClientObjectManager()
+    public ClientObjectManagerInterop()
     {
         SignatureHelper.Initialise(this);
     }

@@ -17,18 +17,18 @@ public static class PenumbraActorControls
         {
             var collections = PenumbraCollectionService.Instance.Collections;
 
-            if (_selectedCollection == null && collections.Count > 0)
+            if(_selectedCollection == null && collections.Count > 0)
                 _selectedCollection = collections[0];
 
             ImGui.PushItemWidth(ImGui.GetContentRegionAvail().X - ImGui.CalcTextSize("Collection").X - 40);
-            if (ImGui.BeginCombo("Collection", _selectedCollection))
+            if(ImGui.BeginCombo("Collection", _selectedCollection))
             {
                 foreach(var collection in collections)
                 {
                     bool selected = collection == _selectedCollection;
                     if(ImGui.Selectable(collection, selected))
                     {
-                        _selectedCollection= collection;
+                        _selectedCollection = collection;
                     }
                 }
 
@@ -37,7 +37,7 @@ public static class PenumbraActorControls
             ImGui.PopItemWidth();
 
             ImGui.SameLine();
-            
+
             ImGui.PushFont(UiBuilder.IconFont);
             if(ImGui.Button(FontAwesomeIcon.Redo.ToIconString()))
             {
@@ -47,13 +47,13 @@ public static class PenumbraActorControls
 
             bool isCharacter = gameObject.AsNative()->IsCharacter();
             bool allowed = isCharacter && PenumbraCollectionService.Instance.CanApplyCollection(gameObject);
-            if (!allowed) ImGui.BeginDisabled();
+            if(!allowed) ImGui.BeginDisabled();
             if(ImGui.Button("Apply Collection"))
             {
                 PenumbraCollectionService.Instance.RedrawActorWithCollection(gameObject, _selectedCollection!);
             }
-            if (!isCharacter) ImGui.Text("Must be a character type.");
-            if (!allowed) ImGui.EndDisabled();
+            if(!isCharacter) ImGui.Text("Must be a character type.");
+            if(!allowed) ImGui.EndDisabled();
         }
         else
         {

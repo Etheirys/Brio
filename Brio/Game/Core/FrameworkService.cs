@@ -1,5 +1,4 @@
 ﻿using Brio.Core;
-using Dalamud.Game;
 using Dalamud.Logging;
 using System;
 using System.Collections.Generic;
@@ -62,13 +61,13 @@ public class FrameworkService : ServiceBase<FrameworkService>
             var task = _deferredTasks[i];
             task.TickCount++;
 
-            if (task.TickCount >= task.StartFrame)
+            if(task.TickCount >= task.StartFrame)
             {
                 var conditionSatisfied = CheckTask(task);
 
-                if (conditionSatisfied == true)
+                if(conditionSatisfied == true)
                 {
-                    if (task.DeferOnceMore)
+                    if(task.DeferOnceMore)
                     {
                         task.DeferOnceMore = false;
                         task.ConditionAction = (_) => true;
@@ -79,9 +78,9 @@ public class FrameworkService : ServiceBase<FrameworkService>
                         CompleteTask(task, true);
                     }
                 }
-                else if (conditionSatisfied == null || task.MaxFrames <= task.TickCount)
+                else if(conditionSatisfied == null || task.MaxFrames <= task.TickCount)
                 {
-                    if (task.MaxFrames <= task.TickCount)
+                    if(task.MaxFrames <= task.TickCount)
                         PluginLog.Warning($"Task timed out. {task}");
 
                     _deferredTasks.RemoveAt(i--);
@@ -97,7 +96,7 @@ public class FrameworkService : ServiceBase<FrameworkService>
         {
             return task.ConditionAction(task);
         }
-        catch (Exception ex)
+        catch(Exception ex)
         {
             PluginLog.Warning(ex, $"Exception running condition action. {task}");
             return null;
@@ -109,7 +108,8 @@ public class FrameworkService : ServiceBase<FrameworkService>
         try
         {
             task.CompleteAction.Invoke(success);
-        } catch(Exception ex)
+        }
+        catch(Exception ex)
         {
             PluginLog.Warning(ex, $"Exception running completion action. {task}");
         }

@@ -52,4 +52,12 @@
 		</Reference>
 	</ItemGroup>
 
+	<ItemGroup>
+	  <EditorConfigFiles Remove="D:\Development\Brio\Brio\.editorconfig" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <None Include="D:\Development\Brio\Brio\.editorconfig" />
+	</ItemGroup>
+
 </Project>

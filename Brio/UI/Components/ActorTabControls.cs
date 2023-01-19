@@ -16,56 +16,56 @@ public static class ActorTabControls
     {
         bool inGPose = GPoseService.Instance.IsInGPose;
 
-        if (!inGPose) ImGui.TextColored(new(1, 0, 0, 1), "Must be in GPose");
+        if(!inGPose) ImGui.TextColored(new(1, 0, 0, 1), "Must be in GPose");
 
-        if (!inGPose) ImGui.BeginDisabled();
+        if(!inGPose) ImGui.BeginDisabled();
 
-        if (ImGui.CollapsingHeader("Actors", ImGuiTreeNodeFlags.DefaultOpen))
-        { 
+        if(ImGui.CollapsingHeader("Actors", ImGuiTreeNodeFlags.DefaultOpen))
+        {
             _selector.Draw();
 
             ImGui.Separator();
 
             bool canSpawn = ActorSpawnService.Instance.CanSpawn;
-            if (!canSpawn) ImGui.BeginDisabled();
-            if (ImGui.Button("Spawn###gpose_actor_spawn"))
+            if(!canSpawn) ImGui.BeginDisabled();
+            if(ImGui.Button("Spawn###gpose_actor_spawn"))
             {
                 ushort? createdId = ActorSpawnService.Instance.Spawn();
-                if (createdId == null)
+                if(createdId == null)
                     Dalamud.ToastGui.ShowError("Failed to Create Actor.");
             }
-            if (!canSpawn) ImGui.EndDisabled();
+            if(!canSpawn) ImGui.EndDisabled();
 
             ImGui.SameLine();
 
             GameObject? selectedObject = _selector.SelectedObject != null ? _selector.SelectedObject : null;
             bool hasSelected = selectedObject != null;
-            if (!hasSelected) ImGui.BeginDisabled();
+            if(!hasSelected) ImGui.BeginDisabled();
 
-            if (ImGui.Button("Target###gpose_actor_target"))
+            if(ImGui.Button("Target###gpose_actor_target"))
             {
                 TargetSystem.Instance()->GPoseTarget = selectedObject!.AsNative();
             }
 
             ImGui.SameLine();
-            if (ImGui.Button("Delete###gpose_actor_delete"))
+            if(ImGui.Button("Delete###gpose_actor_delete"))
             {
                 ActorSpawnService.Instance.DestroyObject(selectedObject!);
             }
 
-            if (!hasSelected) ImGui.EndDisabled();
+            if(!hasSelected) ImGui.EndDisabled();
 
             ImGui.SameLine();
 
-            if (ImGui.Button("Clear###gpose_actor_delete_all"))
+            if(ImGui.Button("Clear###gpose_actor_delete_all"))
             {
                 ActorSpawnService.Instance.DestroyAll();
             }
         }
 
-        if (ImGui.CollapsingHeader("Actor Redraw"))
+        if(ImGui.CollapsingHeader("Actor Redraw"))
         {
-            if (_selector.SelectedObject != null)
+            if(_selector.SelectedObject != null)
             {
                 ActorRedrawControls.Draw(_selector.SelectedObject);
             }
@@ -75,11 +75,11 @@ public static class ActorTabControls
             }
         }
 
-        if (ConfigService.Configuration.AllowPenumbraIntegration)
+        if(ConfigService.Configuration.AllowPenumbraIntegration)
         {
-            if (ImGui.CollapsingHeader("Penumbra"))
+            if(ImGui.CollapsingHeader("Penumbra"))
             {
-                if (_selector.SelectedObject != null)
+                if(_selector.SelectedObject != null)
                 {
                     PenumbraActorControls.Draw(_selector.SelectedObject);
                 }
@@ -90,6 +90,6 @@ public static class ActorTabControls
             }
         }
 
-        if (!inGPose) ImGui.EndDisabled();
+        if(!inGPose) ImGui.EndDisabled();
     }
 }

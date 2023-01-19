@@ -4,7 +4,8 @@ It is designed to enhance the experience of users no matter which posing tool th
 
 ## Features
 * Creation and Deletion of GPose actors
-* Redraw control of GPose Actors
+* Change the Penumbra collection applied to GPose actors
+* Redraw control of GPose actors
 * NPC Appearance Hack (Allows you to apply NPC appearances to players without breaking tools like Penumbra)
 
 ## Installation

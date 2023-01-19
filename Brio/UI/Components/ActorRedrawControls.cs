@@ -12,7 +12,7 @@ public static class ActorRedrawControls
     {
         bool redrawAllowed = ActorRedrawService.Instance.CanRedraw(gameObject);
 
-        if (!redrawAllowed) ImGui.BeginDisabled();
+        if(!redrawAllowed) ImGui.BeginDisabled();
 
         ImGui.Checkbox("Preserve Position / Rotation", ref _preservePosition);
 
@@ -21,9 +21,9 @@ public static class ActorRedrawControls
 
         ImGui.SameLine();
 
-        if (ImGui.Button("Modern NPC Redraw"))
+        if(ImGui.Button("Modern NPC Redraw"))
             ActorRedrawService.Instance.Redraw(gameObject, RedrawType.ForceNPCAppearance, _preservePosition);
 
-        if (!redrawAllowed) ImGui.EndDisabled();
+        if(!redrawAllowed) ImGui.EndDisabled();
     }
 }

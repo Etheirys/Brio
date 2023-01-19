@@ -14,16 +14,16 @@ public static class DebugTabControls
 
     private unsafe static void DrawGPoseMode()
     {
-        if (ImGui.CollapsingHeader("GPose Mode"))
+        if(ImGui.CollapsingHeader("GPose Mode"))
         {
             var isFakeGPose = GPoseService.Instance.FakeGPose;
             var originalIsFake = isFakeGPose;
             ImGui.Checkbox("Fake GPose?", ref isFakeGPose);
-            if (isFakeGPose != originalIsFake) GPoseService.Instance.FakeGPose = isFakeGPose;
+            if(isFakeGPose != originalIsFake) GPoseService.Instance.FakeGPose = isFakeGPose;
 
             ImGui.Spacing();
 
-            if (ImGui.Button("Enter GPose"))
+            if(ImGui.Button("Enter GPose"))
             {
                 var uiModule = Framework.Instance()->GetUiModule();
                 ((delegate* unmanaged<UIModule*, bool>)uiModule->vfunc[75])(uiModule);
@@ -31,7 +31,7 @@ public static class DebugTabControls
 
             ImGui.SameLine();
 
-            if (ImGui.Button("Exit GPose"))
+            if(ImGui.Button("Exit GPose"))
             {
                 var uiModule = Framework.Instance()->GetUiModule();
                 ((delegate* unmanaged<UIModule*, void>)uiModule->vfunc[76])(uiModule);
