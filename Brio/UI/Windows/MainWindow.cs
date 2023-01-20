@@ -25,9 +25,15 @@ public class MainWindow : Window
                 ImGui.EndTabItem();
             }
 
-            if(ImGui.BeginTabItem("Global"))
+            if(ImGui.BeginTabItem("World"))
             {
-                GlobalTabControls.Draw();
+                WorldTabControls.Draw();
+                ImGui.EndTabItem();
+            }
+
+            if(ImGui.BeginTabItem("Hooks"))
+            {
+                HooksTabControls.Draw();
                 ImGui.EndTabItem();
             }
 

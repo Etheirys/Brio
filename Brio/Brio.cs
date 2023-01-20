@@ -4,6 +4,7 @@ using Brio.Game.Actor;
 using Brio.Game.Chat;
 using Brio.Game.GPose;
 using Brio.Game.Render;
+using Brio.Game.World;
 using Brio.IPC;
 using Brio.UI;
 using Brio.Web;
@@ -31,6 +32,7 @@ public class Brio : IDisposable
         _serviceManager.Add<ActorService>();
         _serviceManager.Add<ActorRedrawService>();
         _serviceManager.Add<ActorSpawnService>();
+        _serviceManager.Add<TimeService>();
         _serviceManager.Add<PenumbraIPCService>();
         _serviceManager.Add<PenumbraCollectionService>();
 
