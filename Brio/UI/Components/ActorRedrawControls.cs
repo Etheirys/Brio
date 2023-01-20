@@ -6,7 +6,7 @@ namespace Brio.UI.Components;
 
 public static class ActorRedrawControls
 {
-    private static RedrawType _redrawType = RedrawType.AllowOptimized | RedrawType.AllowFull | RedrawType.PreservePosition;
+    private static RedrawType _redrawType = RedrawType.AllowOptimized | RedrawType.AllowFull | RedrawType.PreservePosition | RedrawType.ForceAllowNPCAppearance;
 
     public unsafe static void Draw(GameObject gameObject)
     {
@@ -34,6 +34,13 @@ public static class ActorRedrawControls
             _redrawType |= RedrawType.AllowOptimized;
         else
             _redrawType &= ~RedrawType.AllowOptimized;
+
+        bool forceAllowNPC = _redrawType.HasFlag(RedrawType.ForceAllowNPCAppearance);
+        ImGui.Checkbox("Force Allow NPC Appearance", ref forceAllowNPC);
+        if(forceAllowNPC)
+            _redrawType |= RedrawType.ForceAllowNPCAppearance;
+        else
+            _redrawType &= ~RedrawType.ForceAllowNPCAppearance;
 
         bool forceWeapon = _redrawType.HasFlag(RedrawType.ForceRedrawWeaponsOnOptimized);
         ImGui.Checkbox("Force Weapon Redraw", ref forceWeapon);

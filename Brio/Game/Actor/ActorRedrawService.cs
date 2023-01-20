@@ -9,7 +9,7 @@ using FFXIVClientStructs.FFXIV.Client.Graphics.Scene;
 using System.Runtime.InteropServices;
 using System;
 using DrawObjectObject = FFXIVClientStructs.FFXIV.Client.Graphics.Scene.Object;
-
+using Brio.Config;
 
 namespace Brio.Game.Actor;
 
@@ -95,9 +95,16 @@ public class ActorRedrawService : ServiceBase<ActorRedrawService>
             return RedrawResult.Failed;
         }
 
+        var wasNpcHack = RenderHookService.Instance.ApplyNPCOverride;
+        if(redrawType.HasFlag(RedrawType.ForceAllowNPCAppearance))
+            RenderHookService.Instance.ApplyNPCOverride = true;
+
         // Full redraw
         raw->DisableDraw();
         raw->EnableDraw();
+
+        if(redrawType.HasFlag(RedrawType.ForceAllowNPCAppearance))
+            RenderHookService.Instance.ApplyNPCOverride = wasNpcHack;
 
         // Handle position update
         if(redrawType.HasFlag(RedrawType.PreservePosition))
@@ -134,8 +141,9 @@ public enum RedrawType
     AllowFull = 2,
     ForceRedrawWeaponsOnOptimized = 4,
     PreservePosition = 8,
+    ForceAllowNPCAppearance = 16,
 
-    All = AllowOptimized | AllowFull | ForceRedrawWeaponsOnOptimized | PreservePosition
+    All = AllowOptimized | AllowFull | ForceRedrawWeaponsOnOptimized | PreservePosition | ForceAllowNPCAppearance
 }
 
 public enum RedrawResult
