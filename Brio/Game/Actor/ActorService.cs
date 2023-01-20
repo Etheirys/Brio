@@ -64,8 +64,8 @@ public class ActorService : ServiceBase<ActorService>
         }
     }
 
-    public bool IsGPoseActor(int index) => index >= GPoseFirstActor && index < GPoseFirstActor + GPoseActorCount;
-    public unsafe bool IsGPoseActor(GameObject gameObject) => IsGPoseActor(gameObject.AsNative()->ObjectIndex);
+    public static bool IsGPoseActor(int index) => index >= GPoseFirstActor && index < GPoseFirstActor + GPoseActorCount;
+    public unsafe static bool IsGPoseActor(GameObject gameObject) => IsGPoseActor(gameObject.AsNative()->ObjectIndex);
 
     private void HandleGameObject(GameObject go)
     {

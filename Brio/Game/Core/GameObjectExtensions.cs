@@ -1,4 +1,5 @@
-﻿using DalamudGameObject = Dalamud.Game.ClientState.Objects.Types.GameObject;
+﻿using Brio.Game.Actor;
+using DalamudGameObject = Dalamud.Game.ClientState.Objects.Types.GameObject;
 using StructsGameObject = FFXIVClientStructs.FFXIV.Client.Game.Object.GameObject;
 
 namespace Brio.Game.Core;
@@ -17,4 +18,8 @@ public static class GameObjectExtensions
     public unsafe static void SetName(this DalamudGameObject gameObject, string name) => gameObject.AsNative()->SetName(name);
 
     public unsafe static StructsGameObject* AsNative(this DalamudGameObject gameObject) => (StructsGameObject*)gameObject.Address;
+
+    public unsafe static bool IsGPoseActor(this DalamudGameObject gameObject) => ActorService.IsGPoseActor(gameObject);
+    public unsafe static bool IsGPoseActor(this ref StructsGameObject gameObject) => ActorService.IsGPoseActor(gameObject.ObjectIndex);
+
 }

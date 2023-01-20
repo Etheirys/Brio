@@ -69,10 +69,55 @@ public class ActorWebController : WebApiController
             return -1;
         }
     }
+
+    [Route(HttpVerbs.Post, "/despawn")]
+    public async Task<bool> DespawnActor([JsonData] DespawnRequest data)
+    {
+        try
+        {
+            var result = await Dalamud.Framework.RunUntilSatisfied(
+                () =>
+                {
+                    var gameObject = Dalamud.ObjectTable[data.ObjectIndex];
+                    if(gameObject == null)
+                        return false;
+
+                    return ActorRedrawService.Instance.CanRedraw(gameObject);
+                },
+                (success) =>
+                {
+                    if(success)
+                    {
+                        var actor = Dalamud.ObjectTable[data.ObjectIndex];
+                        if(actor != null && actor.IsGPoseActor())
+                        {
+                            ActorSpawnService.Instance.DestroyObject(actor);
+                            return true;
+                        }
+                    }
+                    return false;
+
+                },
+                30);
+
+            return result;
+        }
+        catch
+        {
+            HttpContext.Response.StatusCode = 500;
+            return false;
+        }
+    }
 }
 
 public class RedrawRequest
 {
     public int ObjectIndex { get; set; }
     public RedrawType? RedrawType { get; set; }
+}
+
+
+public class DespawnRequest
+{
+    public int ObjectIndex { get; set; }
 }

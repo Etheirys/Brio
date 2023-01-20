@@ -49,7 +49,7 @@ public class ActorSpawnService : ServiceBase<ActorSpawnService>
 
     private unsafe void ActorService_OnActorDestructing(DalamudGameObject gameObject)
     {
-        if(ActorService.Instance.IsGPoseActor(gameObject))
+        if(ActorService.IsGPoseActor(gameObject))
         {
             var idx = _clientObjectManager.GetIndexByObject(gameObject.Address);
             if(idx < ushort.MaxValue)

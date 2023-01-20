@@ -19,7 +19,7 @@ public static class ActorRedrawControls
         RedrawType redrawType = _preservePosition ? RedrawType.PreservePosition : RedrawType.None;
 
         if(ImGui.Button("Redraw"))
-            ActorRedrawService.Instance.Redraw(gameObject, RedrawType.RedrawWeaponsOnOptimized | RedrawType.AllowOptimized | RedrawType.AllowFull | redrawType);
+            ActorRedrawService.Instance.Redraw(gameObject, RedrawType.ForceRedrawWeaponsOnOptimized | RedrawType.AllowOptimized | RedrawType.AllowFull | redrawType);
 
         if(ImGui.Button("Redraw Full"))
             ActorRedrawService.Instance.Redraw(gameObject, redrawType | RedrawType.AllowFull);

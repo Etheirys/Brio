@@ -72,11 +72,9 @@ public class ActorRedrawService : ServiceBase<ActorRedrawService>
 
                 if(drewInPlace)
                 {
-                    if(redrawType.HasFlag(RedrawType.RedrawWeaponsOnOptimized))
-                    {
-                        chara->DrawData.LoadWeapon(DrawDataContainer.WeaponSlot.MainHand, chara->DrawData.MainHandModel, 1, 0, 0, 0);
-                        chara->DrawData.LoadWeapon(DrawDataContainer.WeaponSlot.OffHand, chara->DrawData.OffHandModel, 1, 0, 0, 0);
-                    }
+                    byte shouldRedrawWeapon = (byte) (redrawType.HasFlag(RedrawType.ForceRedrawWeaponsOnOptimized) ? 1 : 0);
+                    chara->DrawData.LoadWeapon(DrawDataContainer.WeaponSlot.MainHand, chara->DrawData.MainHandModel, shouldRedrawWeapon, 0, 0, 0);
+                    chara->DrawData.LoadWeapon(DrawDataContainer.WeaponSlot.OffHand, chara->DrawData.OffHandModel, shouldRedrawWeapon, 0, 0, 0);
 
                     _redrawsActive.Remove(index);
                     return RedrawResult.Optmized;
@@ -126,10 +124,10 @@ public enum RedrawType
     None = 0,
     AllowOptimized = 1,
     AllowFull = 2,
-    RedrawWeaponsOnOptimized = 4,
+    ForceRedrawWeaponsOnOptimized = 4,
     PreservePosition = 8,
 
-    All = AllowOptimized | AllowFull | RedrawWeaponsOnOptimized | PreservePosition
+    All = AllowOptimized | AllowFull | ForceRedrawWeaponsOnOptimized | PreservePosition
 }
 
 public enum RedrawResult
