@@ -4,6 +4,7 @@ using Brio.Game.GPose;
 using Brio.Game.Interop;
 using Brio.Utils;
 using FFXIVClientStructs.FFXIV.Client.Game.Character;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using DalamudGameObject = Dalamud.Game.ClientState.Objects.Types.GameObject;
@@ -81,6 +82,8 @@ public class ActorSpawnService : ServiceBase<ActorSpawnService>
 
         newPlayer->GameObject.Position = originalPlayer->GameObject.Position;
         newPlayer->GameObject.DefaultPosition = originalPlayer->GameObject.Position;
+        newPlayer->GameObject.Rotation = originalPlayer->GameObject.Rotation;
+        newPlayer->GameObject.DefaultRotation = originalPlayer->GameObject.Rotation;
 
         newPlayer->GameObject.SetName(((int)newId).ToCharacterName());
 
@@ -89,6 +92,13 @@ public class ActorSpawnService : ServiceBase<ActorSpawnService>
         newPlayer->GameObject.EnableDraw();
 
         _createdIndexes.Add(newId);
+
+        Dalamud.Framework.RunUntilSatisfied(() => newPlayer->GameObject.RenderFlags == 0,
+            (_) =>
+            {
+                newPlayer->GameObject.DrawObject->Object.Position = newPlayer->GameObject.Position;
+                return true;
+            }, 50, 3, true);
 
         return newPlayer->GameObject.ObjectIndex;
     }

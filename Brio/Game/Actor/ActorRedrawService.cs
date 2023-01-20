@@ -39,16 +39,21 @@ public class ActorRedrawService : ServiceBase<ActorRedrawService>
         var originalPosition = raw->DrawObject->Object.Position;
         var originalRotation = raw->DrawObject->Object.Rotation;
 
+        // In place
         bool drewInPlace = redrawType.HasFlag(RedrawType.AllowOptimized);
 
         if(drewInPlace)
         {
+            // Can only optimize redraw a character
             if(raw->IsCharacter())
             {
                 Character* chara = (Character*)raw;
                 CharacterBase* charaBase = (CharacterBase*)raw->DrawObject;
+                // Can only optimize redraw a human
                 if(charaBase->GetModelType() == CharacterBase.ModelType.Human)
                 {
+
+                    // We can't change certain values
                     Human* human = ((Human*)raw->DrawObject);
                     if(human->Race != chara->CustomizeData[0]
                         || human->Sex != chara->CustomizeData[1]
@@ -60,6 +65,7 @@ public class ActorRedrawService : ServiceBase<ActorRedrawService>
 
                     if(drewInPlace)
                     {
+                        // Cutomize and gear
                         Buffer.MemoryCopy(chara->CustomizeData, (void*)_customizeBuffer, 28, 28);
                         Buffer.MemoryCopy(chara->EquipSlotData, (void*)(_customizeBuffer + 28), 40, 40);
                         drewInPlace = ((Human*)raw->DrawObject)->UpdateDrawData((byte*)_customizeBuffer, false);
@@ -72,6 +78,7 @@ public class ActorRedrawService : ServiceBase<ActorRedrawService>
 
                 if(drewInPlace)
                 {
+                    // Weapons
                     byte shouldRedrawWeapon = (byte) (redrawType.HasFlag(RedrawType.ForceRedrawWeaponsOnOptimized) ? 1 : 0);
                     chara->DrawData.LoadWeapon(DrawDataContainer.WeaponSlot.MainHand, chara->DrawData.MainHandModel, shouldRedrawWeapon, 0, 0, 0);
                     chara->DrawData.LoadWeapon(DrawDataContainer.WeaponSlot.OffHand, chara->DrawData.OffHandModel, shouldRedrawWeapon, 0, 0, 0);
@@ -88,10 +95,11 @@ public class ActorRedrawService : ServiceBase<ActorRedrawService>
             return RedrawResult.Failed;
         }
 
+        // Full redraw
         raw->DisableDraw();
         raw->EnableDraw();
 
-
+        // Handle position update
         if(redrawType.HasFlag(RedrawType.PreservePosition))
         {
             Dalamud.Framework.RunUntilSatisfied(() => raw->RenderFlags == 0,

@@ -6,7 +6,7 @@ namespace Brio.UI.Components;
 
 public static class ActorRedrawControls
 {
-    private static bool _preservePosition = true;
+    private static RedrawType _redrawType = RedrawType.AllowOptimized | RedrawType.AllowFull | RedrawType.PreservePosition;
 
     public unsafe static void Draw(GameObject gameObject)
     {
@@ -14,15 +14,38 @@ public static class ActorRedrawControls
 
         if(!redrawAllowed) ImGui.BeginDisabled();
 
-        ImGui.Checkbox("Preserve Position / Rotation", ref _preservePosition);
+        bool preservePosition = _redrawType.HasFlag(RedrawType.PreservePosition);
+        ImGui.Checkbox("Preserve Position / Rotation", ref preservePosition);
+        if(preservePosition)
+            _redrawType |= RedrawType.PreservePosition;
+        else
+            _redrawType &= ~RedrawType.PreservePosition;
 
-        RedrawType redrawType = _preservePosition ? RedrawType.PreservePosition : RedrawType.None;
+        bool allowFull = _redrawType.HasFlag(RedrawType.AllowFull);
+        ImGui.Checkbox("Allow Full", ref allowFull);
+        if(allowFull)
+            _redrawType |= RedrawType.AllowFull;
+        else
+            _redrawType &= ~RedrawType.AllowFull;
+
+        bool allowOptimized = _redrawType.HasFlag(RedrawType.AllowOptimized);
+        ImGui.Checkbox("Allow Optimized", ref allowOptimized);
+        if(allowOptimized)
+            _redrawType |= RedrawType.AllowOptimized;
+        else
+            _redrawType &= ~RedrawType.AllowOptimized;
+
+        bool forceWeapon = _redrawType.HasFlag(RedrawType.ForceRedrawWeaponsOnOptimized);
+        ImGui.Checkbox("Force Weapon Redraw", ref forceWeapon);
+        if(forceWeapon)
+            _redrawType |= RedrawType.ForceRedrawWeaponsOnOptimized;
+        else
+            _redrawType &= ~RedrawType.ForceRedrawWeaponsOnOptimized;
+
 
         if(ImGui.Button("Redraw"))
-            ActorRedrawService.Instance.Redraw(gameObject, RedrawType.ForceRedrawWeaponsOnOptimized | RedrawType.AllowOptimized | RedrawType.AllowFull | redrawType);
+            ActorRedrawService.Instance.Redraw(gameObject, _redrawType);
 
-        if(ImGui.Button("Redraw Full"))
-            ActorRedrawService.Instance.Redraw(gameObject, redrawType | RedrawType.AllowFull);
 
         if(!redrawAllowed) ImGui.EndDisabled();
     }
