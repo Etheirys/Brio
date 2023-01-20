@@ -1,7 +1,6 @@
 ﻿using Brio.Core;
 using Brio.Game.Core;
 using Brio.Game.Render;
-using Brio.Utils;
 using Dalamud.Game.ClientState.Objects.Types;
 using Penumbra.Api;
 using System.Collections.Generic;

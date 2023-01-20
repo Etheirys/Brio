@@ -25,6 +25,9 @@ public class Configuration : IPluginConfiguration
     // Integrations
     public bool AllowPenumbraIntegration { get; set; } = true;
     public bool AllowWebAPI { get; set; } = false;
+
+    // Developer
+    public bool ForceDebug { get; set; } = false;
 }
 
 public enum OpenBrioBehavior

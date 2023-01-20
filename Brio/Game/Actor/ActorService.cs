@@ -1,5 +1,5 @@
 ﻿using Brio.Core;
-using Brio.Utils;
+using Brio.Game.Core;
 using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Hooking;
 using System;

@@ -1,6 +1,6 @@
 ﻿using Brio.Game.Actor;
+using Brio.Game.Core;
 using Brio.IPC;
-using Brio.Utils;
 using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Interface;
 using ImGuiNET;

@@ -1,7 +1,7 @@
 ﻿using ImGuiNET;
-using Brio.Utils;
 using Dalamud.Game.ClientState.Objects.Types;
 using Brio.Game.Actor;
+using Brio.Game.Core;
 
 namespace Brio.UI.Components;
 

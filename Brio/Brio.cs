@@ -2,7 +2,6 @@
 using Brio.Core;
 using Brio.Game.Actor;
 using Brio.Game.Chat;
-using Brio.Game.Core;
 using Brio.Game.GPose;
 using Brio.Game.Render;
 using Brio.IPC;
@@ -18,7 +17,7 @@ public class Brio : IDisposable
     public const string PluginName = "Brio";
     public static string PluginVersion = typeof(Brio).Assembly.GetName().Version!.ToString(fieldCount: 3);
 
-    private ServiceManager _serviceManager;
+    private static ServiceManager _serviceManager { get; set; } = null!;
 
     public Brio()
     {
@@ -57,4 +56,10 @@ public class Brio : IDisposable
         Dalamud.Framework.Update -= Framework_Update;
         _serviceManager.Dispose();
     }
+
+#if DEBUG
+    public static bool IsDebug => true;
+#else
+    public static bool IsDebug => _serviceManager.IsStarted && ConfigService.Configuration.ForceDebug;
+#endif
 }

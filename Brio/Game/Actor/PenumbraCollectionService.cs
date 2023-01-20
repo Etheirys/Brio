@@ -1,7 +1,7 @@
 ﻿using Brio.Core;
+using Brio.Game.Core;
 using Brio.Game.GPose;
 using Brio.IPC;
-using Brio.Utils;
 using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Logging;
 using Penumbra.Api;

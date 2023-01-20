@@ -2,15 +2,13 @@
 using Dalamud.Interface;
 using Dalamud.Interface.Windowing;
 using ImGuiNET;
-using System;
-using System.Drawing;
 using System.Numerics;
 
 namespace Brio.UI.Windows;
 
 public class MainWindow : Window
 {
-    public MainWindow() : base($"{Brio.PluginName} v{Brio.PluginVersion}", ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.AlwaysAutoResize)
+    public MainWindow() : base($"{Brio.PluginName} {(Brio.IsDebug ? "(Debug)" : $"v{Brio.PluginVersion}")}", ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.AlwaysAutoResize)
     {
         Size = new Vector2(250, -1);
     }
@@ -33,15 +31,18 @@ public class MainWindow : Window
                 ImGui.EndTabItem();
             }
 
-#if DEBUG
-            if(ImGui.BeginTabItem("Debug"))
+            if(Brio.IsDebug)
             {
-                DebugTabControls.Draw();
-                ImGui.EndTabItem();
-            }
-#endif
+                if(ImGui.BeginTabItem("Debug"))
+                {
+                    DebugTabControls.Draw();
+                    ImGui.EndTabItem();
+                }
 
-            ImGui.EndTabBar();
+                ImGui.EndTabBar();
+            }
+
+           
         }
     }
 

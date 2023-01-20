@@ -1,7 +1,7 @@
 ﻿using DalamudGameObject = Dalamud.Game.ClientState.Objects.Types.GameObject;
 using StructsGameObject = FFXIVClientStructs.FFXIV.Client.Game.Object.GameObject;
 
-namespace Brio.Utils;
+namespace Brio.Game.Core;
 
 public static class GameObjectExtensions
 {
