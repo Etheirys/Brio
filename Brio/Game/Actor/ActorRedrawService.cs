@@ -52,13 +52,13 @@ public class ActorRedrawService : ServiceBase<ActorRedrawService>
                 // Can only optimize redraw a human
                 if(charaBase->GetModelType() == CharacterBase.ModelType.Human)
                 {
-
                     // We can't change certain values
                     Human* human = ((Human*)raw->DrawObject);
                     if(human->Race != chara->CustomizeData[0]
                         || human->Sex != chara->CustomizeData[1]
                         || human->BodyType != chara->CustomizeData[2]
-                        || human->Clan != chara->CustomizeData[4])
+                        || human->Clan != chara->CustomizeData[4]
+                        || chara->ModelCharaId != 0)
                     {
                         drewInPlace = false;
                     }
