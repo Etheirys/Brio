@@ -1,6 +1,4 @@
-﻿using Brio.Config;
-using Brio.Core;
-using Brio.UI;
+﻿using Brio.Core;
 using Dalamud.Hooking;
 using FFXIVClientStructs.FFXIV.Client.System.Framework;
 using System;
@@ -71,15 +69,6 @@ public class GPoseService : ServiceBase<GPoseService>
     {
         GPoseState = state;
         OnGPoseStateChange?.Invoke(state);
-
-        switch(state)
-        {
-            case GPoseState.Inside:
-            case GPoseState.Outside:
-                if(ConfigService.Configuration.OpenBrioBehavior == OpenBrioBehavior.OnGPoseEnter)
-                    UIService.Instance.MainWindow.IsOpen = state == GPoseState.Inside;
-                break;
-        }
     }
 
     public override void Dispose()

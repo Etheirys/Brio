@@ -1,5 +1,7 @@
 ﻿using Brio.Config;
 using Brio.Core;
+using Brio.Game.GPose;
+using Brio.Game.World;
 using Brio.UI.Windows;
 using Dalamud.Interface.Windowing;
 
@@ -25,12 +27,34 @@ public class UIService : ServiceBase<UIService>
 
         Dalamud.PluginInterface.UiBuilder.Draw += UiBuilder_Draw;
         Dalamud.PluginInterface.UiBuilder.OpenConfigUi += UiBuilder_OpenConfigUi;
+        GPoseService.Instance.OnGPoseStateChange += Instance_OnGPoseStateChange;
 
         Dalamud.PluginInterface.UiBuilder.DisableGposeUiHide = true;
 
         ApplyUISettings();
 
         base.Start();
+    }
+
+    private void Instance_OnGPoseStateChange(GPoseState state)
+    {
+        if(ConfigService.Configuration.OpenBrioBehavior == OpenBrioBehavior.OnGPoseEnter)
+        {
+            switch(state)
+            {
+                case GPoseState.Inside:
+                    MainWindow.IsOpen = true;
+                    break;
+                case GPoseState.Outside:
+                    MainWindow.IsOpen = false;
+                    TimeService.Instance.TimeOverrideEnabled = false;
+                    break;
+            }
+
+        }
+        
+        
+        
     }
 
     public void ApplyUISettings()
