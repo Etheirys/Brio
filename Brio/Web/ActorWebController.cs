@@ -11,11 +11,11 @@ namespace Brio.Web;
 public class ActorWebController : WebApiController
 {
     [Route(HttpVerbs.Post, "/redraw")]
-    public async Task<bool> RedrawActor([JsonData] RedrawRequest data)
+    public async Task<string> RedrawActor([JsonData] RedrawRequest data)
     {
         try
         {
-            return await Dalamud.Framework.RunUntilSatisfied(
+            var result = await Dalamud.Framework.RunUntilSatisfied(
                 () =>
                 {
                     var gameObject = Dalamud.ObjectTable[data.ObjectIndex];
@@ -30,16 +30,19 @@ public class ActorWebController : WebApiController
                     {
                         var actor = Dalamud.ObjectTable[data.ObjectIndex];
                         if(actor != null)
-                            ActorRedrawService.Instance.Redraw(actor, data.RedrawType ?? RedrawType.ForceNPCAppearance);
+                            return ActorRedrawService.Instance.Redraw(actor, data.RedrawType ?? RedrawType.All);
                     }
+                    return RedrawResult.Failed;
 
                 },
                 30);
+
+            return result.ToString();
         }
         catch
         {
             HttpContext.Response.StatusCode = 500;
-            return false;
+            return RedrawResult.Failed.ToString();
         }
     }
 

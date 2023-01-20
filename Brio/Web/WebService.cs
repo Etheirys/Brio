@@ -4,6 +4,7 @@ using Dalamud.Logging;
 using EmbedIO;
 using EmbedIO.WebApi;
 using System;
+using System.Threading.Tasks;
 
 namespace Brio.Web;
 
@@ -15,9 +16,7 @@ public class WebService : ServiceBase<WebService>
     private WebServer? _webServer;
 
     public override void Start()
-    {
-        CreateWebServer();
-        
+    {      
         base.Start();
     }
 
@@ -41,6 +40,8 @@ public class WebService : ServiceBase<WebService>
 
     private void CreateWebServer()
     {
+        DestroyWebServer();
+
         try
         {
             var url = "http://localhost:42428/";

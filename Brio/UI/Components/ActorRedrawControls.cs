@@ -16,13 +16,13 @@ public static class ActorRedrawControls
 
         ImGui.Checkbox("Preserve Position / Rotation", ref _preservePosition);
 
+        RedrawType redrawType = _preservePosition ? RedrawType.PreservePosition : RedrawType.None;
+
         if(ImGui.Button("Redraw"))
-            ActorRedrawService.Instance.Redraw(gameObject, RedrawType.Standard, _preservePosition);
+            ActorRedrawService.Instance.Redraw(gameObject, RedrawType.RedrawWeaponsOnOptimized | RedrawType.AllowOptimized | RedrawType.AllowFull | redrawType);
 
-        ImGui.SameLine();
-
-        if(ImGui.Button("Modern NPC Redraw"))
-            ActorRedrawService.Instance.Redraw(gameObject, RedrawType.ForceNPCAppearance, _preservePosition);
+        if(ImGui.Button("Redraw Full"))
+            ActorRedrawService.Instance.Redraw(gameObject, redrawType | RedrawType.AllowFull);
 
         if(!redrawAllowed) ImGui.EndDisabled();
     }
