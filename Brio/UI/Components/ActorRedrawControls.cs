@@ -51,7 +51,11 @@ public static class ActorRedrawControls
 
 
         if(ImGui.Button("Redraw"))
-            ActorRedrawService.Instance.Redraw(gameObject, _redrawType);
+        {
+            var result = ActorRedrawService.Instance.Redraw(gameObject, _redrawType);
+            if(result == RedrawResult.Failed)
+                Dalamud.ToastGui.ShowError("Failed to redraw actor.");
+        }
 
 
         if(!redrawAllowed) ImGui.EndDisabled();
