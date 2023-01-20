@@ -8,9 +8,13 @@ namespace Brio.UI.Windows;
 
 public class MainWindow : Window
 {
-    public MainWindow() : base($"{Brio.PluginName} {(Brio.IsDebug ? "(Debug)" : $"v{Brio.PluginVersion}")}", ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.AlwaysAutoResize)
+    public MainWindow() : base($"{Brio.PluginName} {(Brio.IsDebug ? "(Debug)" : $"v{Brio.PluginVersion}")}", ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.AlwaysAutoResize )
     {
-        Size = new Vector2(250, -1);
+        SizeConstraints = new WindowSizeConstraints
+        {
+            MaximumSize = new Vector2(250, 5000),
+            MinimumSize = new Vector2(250, 200)
+        };
     }
 
     public override void Draw()
