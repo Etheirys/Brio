@@ -4,5 +4,6 @@ public static class WorldTabControls
     public static void Draw()
     {
         TimeControls.Draw();
+        WeatherControls.Draw();
     }
 }

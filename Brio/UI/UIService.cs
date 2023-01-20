@@ -6,7 +6,6 @@ using Brio.UI.Windows;
 using Dalamud.Interface.Windowing;
 
 namespace Brio.UI;
-
 public class UIService : ServiceBase<UIService>
 {
     public WindowSystem WindowSystem { get; private set; } = null!;
@@ -48,13 +47,10 @@ public class UIService : ServiceBase<UIService>
                 case GPoseState.Outside:
                     MainWindow.IsOpen = false;
                     TimeService.Instance.TimeOverrideEnabled = false;
+                    WeatherService.Instance.WeatherOverrideEnabled = false;
                     break;
             }
-
         }
-        
-        
-        
     }
 
     public void ApplyUISettings()
