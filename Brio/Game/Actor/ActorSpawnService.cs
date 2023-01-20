@@ -58,7 +58,7 @@ public class ActorSpawnService : ServiceBase<ActorSpawnService>
         }
     }
 
-    public unsafe ushort? Spawn()
+    public unsafe ushort? Spawn(SpawnOptions options = SpawnOptions.None)
     {
         var localPlayer = Dalamud.ClientState.LocalPlayer;
         if(localPlayer == null)
@@ -93,12 +93,15 @@ public class ActorSpawnService : ServiceBase<ActorSpawnService>
 
         _createdIndexes.Add(newId);
 
-        Dalamud.Framework.RunUntilSatisfied(() => newPlayer->GameObject.RenderFlags == 0,
-            (_) =>
-            {
-                newPlayer->GameObject.DrawObject->Object.Position = newPlayer->GameObject.Position;
-                return true;
-            }, 50, 3, true);
+        if(options.HasFlag(SpawnOptions.ApplyModelPosition))
+        {
+            Dalamud.Framework.RunUntilSatisfied(() => newPlayer->GameObject.RenderFlags == 0,
+                (_) =>
+                {
+                    newPlayer->GameObject.DrawObject->Object.Position = newPlayer->GameObject.Position;
+                    return true;
+                }, 50, 3, true);
+        }
 
         return newPlayer->GameObject.ObjectIndex;
     }
@@ -142,4 +145,11 @@ public class ActorSpawnService : ServiceBase<ActorSpawnService>
         DestroyAllCreated();
         GPoseService.Instance.OnGPoseStateChange -= GPoseService_OnGPoseStateChange;
     }
+}
+
+[Flags]
+public enum SpawnOptions
+{
+    None = 0,
+    ApplyModelPosition = 1
 }

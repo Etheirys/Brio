@@ -47,7 +47,7 @@ public class ActorWebController : WebApiController
     }
 
     [Route(HttpVerbs.Post, "/spawn")]
-    public async Task<int> SpawnActor()
+    public async Task<int> SpawnActor([JsonData] SpawnRequest data)
     {
         try
         {
@@ -56,7 +56,7 @@ public class ActorWebController : WebApiController
                 if(!GPoseService.Instance.IsInGPose)
                     return -1;
 
-                var actorId = ActorSpawnService.Instance.Spawn();
+                var actorId = ActorSpawnService.Instance.Spawn(data.SpawnOptions);
                 if(actorId == null)
                     return -1;
 
@@ -120,4 +120,9 @@ public class RedrawRequest
 public class DespawnRequest
 {
     public int ObjectIndex { get; set; }
+}
+
+public class SpawnRequest
+{
+    public SpawnOptions SpawnOptions { get; set; }
 }
