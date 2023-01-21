@@ -58,6 +58,7 @@ public class ActorRedrawService : ServiceBase<ActorRedrawService>
                         || human->Sex != chara->CustomizeData[1]
                         || human->BodyType != chara->CustomizeData[2]
                         || human->Clan != chara->CustomizeData[4]
+                        || human->FaceId != chara->CustomizeData[5]
                         || chara->ModelCharaId != 0)
                     {
                         drewInPlace = false;
