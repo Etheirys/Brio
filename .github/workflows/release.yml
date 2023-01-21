@@ -49,7 +49,7 @@ jobs:
         tag: v${{ github.event.inputs.version }}
         draft: false
         token: ${{ secrets.GITHUB_TOKEN }}
-        commit: ${{ vars.GITHUB_SHA	}}
+        commit: ${{ vars.GITHUB_SHA }}
 
     - name: Write  Dalamud Version
       run: |
