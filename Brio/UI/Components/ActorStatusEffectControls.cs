@@ -17,7 +17,7 @@ public static class ActorStatusEffectControls
     {
         if(!actor.IsBattleNPC())
         {
-            ImGui.Text("Incompatible actor type");
+            ImGui.Text("Incompatible actor type.");
             return;
         }
 
