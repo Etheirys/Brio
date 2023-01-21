@@ -90,6 +90,18 @@ public static class ActorTabControls
             }
         }
 
+        if(ImGui.CollapsingHeader("Status Effects"))
+        {
+            if(_selector.SelectedObject != null)
+            {
+                ActorStatusEffectControls.Draw(_selector.SelectedObject);
+            }
+            else
+            {
+                ImGui.Text("No actor selected.");
+            }
+        }
+
         if(!inGPose) ImGui.EndDisabled();
     }
 }

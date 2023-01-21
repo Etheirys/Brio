@@ -59,9 +59,16 @@ public static class WeatherControls
                     var list = WeatherService.Instance.WeatherTable.Where(x => x.Name.RawString.Contains(_searchTerm, System.StringComparison.CurrentCultureIgnoreCase)).ToList();
                     foreach(var weather in list)
                     {
-                        if(ImGui.Selectable($"{weather.Name} ({weather.RowId})###global_weather_{weather.RowId}", false))
+                        bool selected = currentWeather == weather.RowId;
+
+                        if(ImGui.Selectable($"{weather.Name} ({weather.RowId})###global_weather_{weather.RowId}", selected))
                         {
                             currentWeather = (byte)weather.RowId;
+                        }
+
+                        if(ImGui.IsItemHovered() && ImGui.IsMouseDoubleClicked(ImGuiMouseButton.Left))
+                        {
+                            ImGui.CloseCurrentPopup();
                         }
                     }
                     ImGui.EndListBox();

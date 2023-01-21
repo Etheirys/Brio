@@ -1,4 +1,5 @@
 ﻿using Brio.Game.Actor;
+using FFXIVClientStructs.FFXIV.Client.Game.Object;
 using DalamudGameObject = Dalamud.Game.ClientState.Objects.Types.GameObject;
 using StructsGameObject = FFXIVClientStructs.FFXIV.Client.Game.Object.GameObject;
 
@@ -21,5 +22,8 @@ public static class GameObjectExtensions
 
     public unsafe static bool IsGPoseActor(this DalamudGameObject gameObject) => ActorService.IsGPoseActor(gameObject);
     public unsafe static bool IsGPoseActor(this ref StructsGameObject gameObject) => ActorService.IsGPoseActor(gameObject.ObjectIndex);
+
+    public static bool IsBattleNPC(this ref StructsGameObject gameObject) => gameObject.ObjectKind == (int)ObjectKind.Pc || gameObject.ObjectKind == (int)ObjectKind.BattleNpc || gameObject.ObjectKind == (int)ObjectKind.Ornament;
+    public unsafe static bool IsBattleNPC(this DalamudGameObject gameObject) => gameObject.AsNative()->IsBattleNPC();
 
 }

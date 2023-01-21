@@ -32,6 +32,7 @@ public class Brio : IDisposable
         _serviceManager.Add<ActorService>();
         _serviceManager.Add<ActorRedrawService>();
         _serviceManager.Add<ActorSpawnService>();
+        _serviceManager.Add<StatusEffectsService>();
         _serviceManager.Add<TimeService>();
         _serviceManager.Add<WeatherService>();
         _serviceManager.Add<PenumbraIPCService>();

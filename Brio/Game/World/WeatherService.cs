@@ -1,6 +1,5 @@
 ﻿using Brio.Core;
 using Dalamud.Hooking;
-using Lumina.Excel;
 using Lumina.Excel.GeneratedSheets;
 using System;
 using System.Collections.Generic;
@@ -32,13 +31,15 @@ public class WeatherService : ServiceBase<WeatherService>
 
     public unsafe byte CurrentWeather
     {
-        get => _weatherSystem->CurrentWeather;
+        get => _weatherSystem->TargetWeather;
         set
         {
-           _weatherSystem->CurrentWeather = value;
-           _weatherSystem->Time = 0;
+           _weatherSystem->TargetWeather = value;
+           _weatherSystem->TransitionTime = DefaultTransitionTime;
         }
     }
+
+    private const float DefaultTransitionTime = 0.5f;
 
     private delegate void UpdateTerritoryWeatherDelegate(IntPtr a1, IntPtr a2);
     private Hook<UpdateTerritoryWeatherDelegate> _updateTerritoryWeatherHook = null!;
@@ -52,8 +53,6 @@ public class WeatherService : ServiceBase<WeatherService>
     public ReadOnlyCollection<Weather> WeatherTable => new(_weatherTable);
     public ReadOnlyCollection<Weather> TerritoryWeatherTable => new(_territoryWeatherTable);
 
-
-
     public unsafe override void Start()
     {
         IntPtr rawWeather = Dalamud.SigScanner.GetStaticAddressFromSig("4C 8B 05 ?? ?? ?? ?? 41 8B 80 ?? ?? ?? ?? C1 E8 02");
@@ -62,11 +61,7 @@ public class WeatherService : ServiceBase<WeatherService>
         var twAddress = Dalamud.SigScanner.ScanText("48 89 5C 24 ?? 55 56 57 48 83 EC ?? 48 8B F9 48 8D 0D ?? ?? ?? ??");
         _updateTerritoryWeatherHook = Hook<UpdateTerritoryWeatherDelegate>.FromAddress(twAddress, UpdateTerritoryWeather);
 
-        var weatherSheet = Dalamud.DataManager.GetExcelSheet<Weather>();
-        if(weatherSheet != null)
-            _weatherTable = weatherSheet.Where(i => !string.IsNullOrEmpty(i.Name)).ToList();
-        _weatherTable.Sort((a, b) => a.RowId.CompareTo(b.RowId));
-
+        UpdateGlobalWeathers();
         UpdateWeathersForCurrentTerritory();
 
         Dalamud.ClientState.TerritoryChanged += ClientState_TerritoryChanged;
@@ -77,6 +72,14 @@ public class WeatherService : ServiceBase<WeatherService>
     private void ClientState_TerritoryChanged(object? sender, ushort e)
     {
         UpdateWeathersForCurrentTerritory();
+    }
+
+    private void UpdateGlobalWeathers()
+    {
+        var weatherSheet = Dalamud.DataManager.GetExcelSheet<Weather>();
+        if(weatherSheet != null)
+            _weatherTable = weatherSheet.Where(i => !string.IsNullOrEmpty(i.Name)).ToList();
+        _weatherTable.Sort((a, b) => a.RowId.CompareTo(b.RowId));
     }
 
     private void UpdateWeathersForCurrentTerritory()
@@ -132,9 +135,9 @@ public class WeatherService : ServiceBase<WeatherService>
     public struct WeatherSystem
     {
         [FieldOffset(0x27)]
-        public byte CurrentWeather;
+        public byte TargetWeather;
 
         [FieldOffset(0x28)]
-        public float Time;
+        public float TransitionTime;
     }
 }
