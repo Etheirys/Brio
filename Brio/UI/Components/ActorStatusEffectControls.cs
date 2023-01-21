@@ -18,6 +18,7 @@ public static class ActorStatusEffectControls
         if(!actor.IsBattleNPC())
         {
             ImGui.Text("Incompatible actor type");
+            return;
         }
 
         BattleChara* chara = (BattleChara*) actor.AsNative();
