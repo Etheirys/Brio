@@ -45,7 +45,7 @@ public class PenumbraCollectionService : ServiceBase<PenumbraCollectionService>
             var (_, oldName) = Ipc.SetCollectionForObject.Subscriber(Dalamud.PluginInterface).Invoke(index, collectionName, true, true);
 
             // Redraw
-            ActorRedrawService.Instance.Redraw(gameObject, RedrawType.All);
+            ActorRedrawService.Instance.Redraw(gameObject, RedrawType.AllowFull);
 
             if(!_appliedCollections.ContainsKey(index))
                 _appliedCollections[index] = oldName;
