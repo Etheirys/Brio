@@ -4,8 +4,8 @@
         "Name": "Brio",
         "Description": "Control actors during GPose sessions.",
         "InternalName": "Brio",
-        "AssemblyVersion": "0.1.5.0",
-        "TestingAssemblyVersion": "0.1.5.0",
+        "AssemblyVersion": "0.1.5.1",
+        "TestingAssemblyVersion": "0.1.5.1",
         "RepoUrl": "https://github.com/AsgardXIV/Brio",
         "ApplicableVersion": "any",
         "DalamudApiLevel": 8,
@@ -16,9 +16,9 @@
         "LoadPriority": 69420,
         "LoadRequiredState": 2,
         "LoadSync": true,
-        "DownloadLinkInstall": "https://github.com/AsgardXIV/Brio/releases/download/v0.1.5.0/Brio.zip",
-        "DownloadLinkTesting": "https://github.com/AsgardXIV/Brio/releases/download/v0.1.5.0/Brio.zip",
-        "DownloadLinkUpdate": "https://github.com/AsgardXIV/Brio/releases/download/v0.1.5.0/Brio.zip",
+        "DownloadLinkInstall": "https://github.com/AsgardXIV/Brio/releases/download/v0.1.5.1/Brio.zip",
+        "DownloadLinkTesting": "https://github.com/AsgardXIV/Brio/releases/download/v0.1.5.1/Brio.zip",
+        "DownloadLinkUpdate": "https://github.com/AsgardXIV/Brio/releases/download/v0.1.5.1/Brio.zip",
         "IconUrl": "https://raw.githubusercontent.com/AsgardXIV/Brio/main/Resources/Images/BrioIcon.png"
     }
 ]
