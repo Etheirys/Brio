@@ -6,6 +6,7 @@ namespace Brio.Game.Interop;
 public class ClientObjectManagerInterop
 {
     // TODO: All this should go back to FFXIV Client Structs
+    // Track: https://github.com/aers/FFXIVClientStructs/pull/287
 
     [Signature("48 8D 0D ?? ?? ?? ?? E8 ?? ?? ?? ?? C7 43 60 FF FF FF FF", ScanType = ScanType.StaticAddress)]
     private IntPtr Instance = IntPtr.Zero;

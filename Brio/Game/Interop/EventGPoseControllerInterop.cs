@@ -7,6 +7,7 @@ namespace Brio.Game.Interop;
 public class EventGPoseControllerInterop
 {
     // TODO: All this should go back to FFXIV Client Structs
+    // Track: https://github.com/aers/FFXIVClientStructs/pull/295
 
     private delegate uint AddToGPoseDelegate(IntPtr instance, IntPtr target, uint u1 = 0);
     [Signature("E8 ?? ?? ?? ?? E8 ?? ?? ?? ?? 80 BE 8C 00 00 00 02", ScanType = ScanType.Text)]

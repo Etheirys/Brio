@@ -24,6 +24,9 @@ public class GPoseService : ServiceBase<GPoseService>
     {
         GPoseState = Dalamud.PluginInterface.UiBuilder.GposeActive ? GPoseState.Inside : GPoseState.Outside;
 
+
+        // TODO: Move to clientstructs
+        // Track: https://github.com/aers/FFXIVClientStructs/pull/291
         var framework = Framework.Instance();
         if(framework == null)
             throw new Exception("Framework not found");
