@@ -25,7 +25,9 @@ Please either open an [issue](https://github.com/AsgardXIV/Brio/issues) or visit
 ## Acknowledgements
 * [Anamnesis](https://github.com/imchillin/Anamnesis)
 * [Ktisis](https://github.com/ktisis-tools/Ktisis)
-* [Dalamud](https://github.com/goatcorp/Dalamud/) and [FFXIVClientStructs](https://github.com/aers/FFXIVClientStructs)
+* [Dalamud](https://github.com/goatcorp/Dalamud/)
+* [Penumbra](https://github.com/xivdev/Penumbra)
+* [FFXIVClientStructs](https://github.com/aers/FFXIVClientStructs)
 
 ## License
 Brio is licensed under the [MIT License](https://github.com/AsgardXIV/Brio/blob/main/LICENSE).
