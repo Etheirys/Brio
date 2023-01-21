@@ -63,7 +63,7 @@ jobs:
       run: |
         git config --global user.name "Actions User"
         git config --global user.email "actions@github.com"
-        git fetch origin main && git fetch origin test && git checkout main
+        git fetch origin main && git checkout main
         git add repo.json
         git commit -m "[CI] Updating versions for v${{ github.event.inputs.version }}" || true
         git push origin main || true
