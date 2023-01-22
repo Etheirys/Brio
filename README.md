@@ -5,7 +5,7 @@ It is designed to enhance the experience of users no matter which posing tool th
 ## Features
 * Creation and Deletion of GPose actors (up to 39)
 * Change the Penumbra collection applied to GPose actors
-* Add/Remove status effects to GPose actors
+* Add/Remove Status Effects on GPose actors
 * Control Time/Weather in both the Overworld and GPose
 * Redraw control of GPose actors
 * NPC Appearance Hack (Allows you to apply NPC appearances to players without breaking tools like Penumbra)
