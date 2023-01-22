@@ -12,12 +12,9 @@ public class WeatherService : ServiceBase<WeatherService>
 {
     public bool WeatherOverrideEnabled
     {
-        get => _updateTerritoryWeatherHook?.IsEnabled ?? false;
+        get => _updateTerritoryWeatherHook.IsEnabled;
         set
         {
-            if(_updateTerritoryWeatherHook == null)
-                throw new Exception("Weather hook is not registered");
-
             if(value != WeatherOverrideEnabled)
             {
                 if(value)
@@ -45,7 +42,7 @@ public class WeatherService : ServiceBase<WeatherService>
     private const float DefaultTransitionTime = 0.5f;
 
     private delegate void UpdateTerritoryWeatherDelegate(IntPtr a1, IntPtr a2);
-    private Hook<UpdateTerritoryWeatherDelegate>? _updateTerritoryWeatherHook;
+    private Hook<UpdateTerritoryWeatherDelegate> _updateTerritoryWeatherHook = null!;
 
     private unsafe WeatherSystem* _weatherSystem;
 
@@ -139,7 +136,7 @@ public class WeatherService : ServiceBase<WeatherService>
 
     public override void Dispose()
     {
-        _updateTerritoryWeatherHook?.Dispose();
+        _updateTerritoryWeatherHook.Dispose();
     }
 
     [StructLayout(LayoutKind.Explicit)]

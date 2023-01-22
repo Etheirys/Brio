@@ -8,10 +8,8 @@ public class TimeService : ServiceBase<TimeService>
 {
     public bool TimeOverrideEnabled
     {
-        get => _updateEorzeaTimeHook?.IsEnabled ?? false;
+        get => _updateEorzeaTimeHook.IsEnabled;
         set {
-            if(_updateEorzeaTimeHook == null)
-                throw new Exception("Time hook is not registered");
 
             if(value != TimeOverrideEnabled)
             {
@@ -46,7 +44,7 @@ public class TimeService : ServiceBase<TimeService>
     }
 
     private delegate void UpdateEorzeaTimeDelegate(IntPtr a1, IntPtr a2);
-    private Hook<UpdateEorzeaTimeDelegate>? _updateEorzeaTimeHook = null!;
+    private Hook<UpdateEorzeaTimeDelegate> _updateEorzeaTimeHook = null!;
 
     public TimeService()
     {

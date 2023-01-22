@@ -11,7 +11,7 @@ public unsafe class RenderHookService : ServiceBase<RenderHookService>
     public bool ApplyNPCOverride { get; set; } = false;
 
     private delegate long EnforceKindRestrictionsDelegate(void* a1, void* a2);
-    private Hook<EnforceKindRestrictionsDelegate>? EnforceKindRestrictionsHook = null!;
+    private Hook<EnforceKindRestrictionsDelegate> EnforceKindRestrictionsHook = null!;
 
     public RenderHookService()
     {
@@ -54,6 +54,6 @@ public unsafe class RenderHookService : ServiceBase<RenderHookService>
 
     public override void Dispose()
     {
-        EnforceKindRestrictionsHook?.Dispose();
+        EnforceKindRestrictionsHook.Dispose();
     }
 }
