@@ -2,9 +2,9 @@
 using Dalamud.Game.ClientState.Objects.Types;
 using ImGuiNET;
 
-namespace Brio.UI.Components;
+namespace Brio.UI.Components.Actor;
 
-public static class ActorRedrawControls
+public static class RedrawControls
 {
     private static RedrawType _redrawType = RedrawType.AllowOptimized | RedrawType.AllowFull | RedrawType.PreservePosition | RedrawType.ForceAllowNPCAppearance;
 

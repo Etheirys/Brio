@@ -5,7 +5,7 @@ using Brio.Game.Actor.Extensions;
 
 namespace Brio.UI.Components;
 
-public class GPoseActorSelector
+public class ActorSelector
 {
     public GameObject? SelectedObject { get; private set; } = null;
 

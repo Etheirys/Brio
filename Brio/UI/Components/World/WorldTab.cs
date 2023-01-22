@@ -1,7 +1,7 @@
 ﻿using ImGuiNET;
 
-namespace Brio.UI.Components;
-public static class WorldTabControls
+namespace Brio.UI.Components.World;
+public static class WorldTab
 {
     public static void Draw()
     {

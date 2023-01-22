@@ -6,8 +6,8 @@ using System.Linq;
 using Dalamud.Game.ClientState.Objects.Types;
 using Brio.Game.Actor.Extensions;
 
-namespace Brio.UI.Components;
-public static class ActorStatusEffectControls
+namespace Brio.UI.Components.Actor;
+public static class StatusEffectControls
 {
     private static int _selectedEntry = 0;
     private static string _searchTerm = string.Empty;
@@ -101,7 +101,7 @@ public static class ActorStatusEffectControls
 
                 ImGui.EndPopup();
             }
-        } 
+        }
         else
         {
             ImGui.Text("Incompatible actor type.");

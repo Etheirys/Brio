@@ -6,11 +6,11 @@ using Dalamud.Game.ClientState.Objects.Types;
 using FFXIVClientStructs.FFXIV.Client.Game.Control;
 using ImGuiNET;
 
-namespace Brio.UI.Components;
+namespace Brio.UI.Components.Actor;
 
-public static class ActorTabControls
+public static class ActorTab
 {
-    private static GPoseActorSelector _selector = new GPoseActorSelector();
+    private static ActorSelector _selector = new ActorSelector();
 
     public unsafe static void Draw()
     {
@@ -67,7 +67,7 @@ public static class ActorTabControls
         {
             if(_selector.SelectedObject != null)
             {
-                ActorRedrawControls.Draw(_selector.SelectedObject);
+                RedrawControls.Draw(_selector.SelectedObject);
             }
             else
             {
@@ -81,7 +81,7 @@ public static class ActorTabControls
             {
                 if(_selector.SelectedObject != null)
                 {
-                    PenumbraActorControls.Draw(_selector.SelectedObject);
+                    PenumbraCollectionControls.Draw(_selector.SelectedObject);
                 }
                 else
                 {
@@ -94,7 +94,7 @@ public static class ActorTabControls
         {
             if(_selector.SelectedObject != null)
             {
-                ActorStatusEffectControls.Draw(_selector.SelectedObject);
+                StatusEffectControls.Draw(_selector.SelectedObject);
             }
             else
             {

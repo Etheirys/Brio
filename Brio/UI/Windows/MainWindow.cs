@@ -1,4 +1,6 @@
 ﻿using Brio.UI.Components;
+using Brio.UI.Components.Actor;
+using Brio.UI.Components.World;
 using Dalamud.Interface;
 using Dalamud.Interface.Windowing;
 using ImGuiNET;
@@ -25,19 +27,19 @@ public class MainWindow : Window
         {
             if(ImGui.BeginTabItem("Actors"))
             {
-                ActorTabControls.Draw();
+                ActorTab.Draw();
                 ImGui.EndTabItem();
             }
 
             if(ImGui.BeginTabItem("World"))
             {
-                WorldTabControls.Draw();
+                WorldTab.Draw();
                 ImGui.EndTabItem();
             }
 
             if(ImGui.BeginTabItem("Hooks"))
             {
-                HooksTabControls.Draw();
+                HooksTab.Draw();
                 ImGui.EndTabItem();
             }
 
@@ -45,7 +47,7 @@ public class MainWindow : Window
             {
                 if(ImGui.BeginTabItem("Debug"))
                 {
-                    DebugTabControls.Draw();
+                    DebugTab.Draw();
                     ImGui.EndTabItem();
                 }
 

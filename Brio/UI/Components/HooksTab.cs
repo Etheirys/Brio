@@ -4,7 +4,7 @@ using ImGuiNET;
 
 namespace Brio.UI.Components;
 
-public static class HooksTabControls
+public static class HooksTab
 {
     public static void Draw()
     {

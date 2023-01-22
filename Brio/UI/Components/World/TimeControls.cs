@@ -2,7 +2,7 @@
 using ImGuiNET;
 using System;
 
-namespace Brio.UI.Components;
+namespace Brio.UI.Components.World;
 public static class TimeControls
 {
     public static void Draw()
@@ -35,7 +35,7 @@ public static class TimeControls
 
         if(originalTime != timeOfDay || originalDay != dayOfMonth)
         {
-            long newTime = ((timeOfDay * 60) + (86400 * ((byte)(dayOfMonth) - 1)));
+            long newTime = timeOfDay * 60 + 86400 * ((byte)dayOfMonth - 1);
 
             TimeService.Instance.EorzeaTime = newTime;
         }

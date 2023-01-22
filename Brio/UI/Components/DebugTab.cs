@@ -5,7 +5,7 @@ using ImGuiNET;
 
 namespace Brio.UI.Components;
 
-public static class DebugTabControls
+public static class DebugTab
 {
     public static void Draw()
     {

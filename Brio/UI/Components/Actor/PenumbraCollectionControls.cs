@@ -7,7 +7,7 @@ using ImGuiNET;
 
 namespace Brio.UI.Components;
 
-public static class PenumbraActorControls
+public static class PenumbraCollectionControls
 {
     private static string? _selectedCollection = null;
 
