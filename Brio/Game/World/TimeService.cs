@@ -11,7 +11,7 @@ public class TimeService : ServiceBase<TimeService>
         get => _updateEorzeaTimeHook?.IsEnabled ?? false;
         set {
             if(_updateEorzeaTimeHook == null)
-                throw new Exception("Weather hook is not registered");
+                throw new Exception("Time hook is not registered");
 
             if(value != TimeOverrideEnabled)
             {
