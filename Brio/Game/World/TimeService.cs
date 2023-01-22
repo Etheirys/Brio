@@ -8,8 +8,11 @@ public class TimeService : ServiceBase<TimeService>
 {
     public bool TimeOverrideEnabled
     {
-        get => _updateEorzeaTimeHook.IsEnabled;
+        get => _updateEorzeaTimeHook?.IsEnabled ?? false;
         set {
+            if(_updateEorzeaTimeHook == null)
+                throw new Exception("Weather hook is not registered");
+
             if(value != TimeOverrideEnabled)
             {
                 if(value)
