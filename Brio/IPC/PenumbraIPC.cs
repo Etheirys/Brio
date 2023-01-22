@@ -91,12 +91,15 @@ public class PenumbraIPCService : ServiceBase<PenumbraIPCService>
         }
     }
 
+    public override void Stop()
+    {
+        GPoseService.Instance.OnGPoseStateChange -= GPoseService_OnGPoseStateChange;
+        IsPenumbraEnabled = false;
+    }
 
     public override void Dispose()
     {
-        GPoseService.Instance.OnGPoseStateChange -= GPoseService_OnGPoseStateChange;
         _penumbraDisposedSubscriber.Dispose();
         _penumbraInitializedSubscriber.Dispose();
-        IsPenumbraEnabled = false;
     }
 }

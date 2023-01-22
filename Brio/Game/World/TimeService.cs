@@ -43,14 +43,20 @@ public class TimeService : ServiceBase<TimeService>
     }
 
     private delegate void UpdateEorzeaTimeDelegate(IntPtr a1, IntPtr a2);
-    private Hook<UpdateEorzeaTimeDelegate> _updateEorzeaTimeHook = null!;
+    private Hook<UpdateEorzeaTimeDelegate>? _updateEorzeaTimeHook = null!;
 
-    public override void Start()
+    public TimeService()
     {
         var etAddress = Dalamud.SigScanner.ScanText("48 89 5C 24 ?? 57 48 83 EC ?? 48 8B F9 48 8B DA 48 81 C1 ?? ?? ?? ?? E8 ?? ?? ?? ?? 4C");
         _updateEorzeaTimeHook = Hook<UpdateEorzeaTimeDelegate>.FromAddress(etAddress, UpdateEorzeaTime);
-        base.Start();
     }
+
+    public override void Dispose()
+    {
+        _updateEorzeaTimeHook?.Dispose();
+        base.Dispose();
+    }
+
 
     internal unsafe static void UpdateEorzeaTime(IntPtr a1, IntPtr a2)
     {

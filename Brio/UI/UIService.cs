@@ -68,7 +68,7 @@ public class UIService : ServiceBase<UIService>
         SettingsWindow.Toggle();
     }
 
-    public override void Dispose()
+    public override void Stop()
     {
         Dalamud.PluginInterface.UiBuilder.Draw -= UiBuilder_Draw;
         Dalamud.PluginInterface.UiBuilder.OpenConfigUi -= UiBuilder_OpenConfigUi;

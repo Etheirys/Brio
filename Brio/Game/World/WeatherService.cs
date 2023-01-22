@@ -12,9 +12,12 @@ public class WeatherService : ServiceBase<WeatherService>
 {
     public bool WeatherOverrideEnabled
     {
-        get => _updateTerritoryWeatherHook.IsEnabled;
+        get => _updateTerritoryWeatherHook?.IsEnabled ?? false;
         set
         {
+            if(_updateTerritoryWeatherHook == null)
+                throw new Exception("Weather hook is not registered");
+
             if(value != WeatherOverrideEnabled)
             {
                 if(value)
@@ -42,7 +45,7 @@ public class WeatherService : ServiceBase<WeatherService>
     private const float DefaultTransitionTime = 0.5f;
 
     private delegate void UpdateTerritoryWeatherDelegate(IntPtr a1, IntPtr a2);
-    private Hook<UpdateTerritoryWeatherDelegate> _updateTerritoryWeatherHook = null!;
+    private Hook<UpdateTerritoryWeatherDelegate>? _updateTerritoryWeatherHook;
 
     private unsafe WeatherSystem* _weatherSystem;
 
@@ -53,14 +56,18 @@ public class WeatherService : ServiceBase<WeatherService>
     public ReadOnlyCollection<Weather> WeatherTable => new(_weatherTable);
     public ReadOnlyCollection<Weather> TerritoryWeatherTable => new(_territoryWeatherTable);
 
-    public unsafe override void Start()
+    public unsafe WeatherService()
     {
+
         IntPtr rawWeather = Dalamud.SigScanner.GetStaticAddressFromSig("4C 8B 05 ?? ?? ?? ?? 41 8B 80 ?? ?? ?? ?? C1 E8 02");
         _weatherSystem = *(WeatherSystem**)rawWeather;
 
         var twAddress = Dalamud.SigScanner.ScanText("48 89 5C 24 ?? 55 56 57 48 83 EC ?? 48 8B F9 48 8D 0D ?? ?? ?? ??");
         _updateTerritoryWeatherHook = Hook<UpdateTerritoryWeatherDelegate>.FromAddress(twAddress, UpdateTerritoryWeather);
+    }
 
+    public unsafe override void Start()
+    {
         UpdateGlobalWeathers();
         UpdateWeathersForCurrentTerritory();
 
@@ -125,10 +132,14 @@ public class WeatherService : ServiceBase<WeatherService>
         //_updateTerritoryWeatherHook.Original(a1, a2);
     }
 
-    public override void Dispose()
+    public override void Stop()
     {
         Dalamud.ClientState.TerritoryChanged -= ClientState_TerritoryChanged;
-        _updateTerritoryWeatherHook.Dispose();
+    }
+
+    public override void Dispose()
+    {
+        _updateTerritoryWeatherHook?.Dispose();
     }
 
     [StructLayout(LayoutKind.Explicit)]

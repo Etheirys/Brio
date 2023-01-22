@@ -8,35 +8,26 @@ public class ServiceManager : IDisposable
 {
     public bool IsStarted { get; private set; } = false;
 
-    private readonly List<Type> _toRegister = new();
-
     private readonly List<IService> _services = new();
 
     public void Add<T>() where T : IService
     {
-        _toRegister.Add(typeof(T));
+        var newType = typeof(T);
+
+        var service = (IService?)Activator.CreateInstance(newType);
+        if(service != null)
+            _services.Add(service);
     }
 
     public void Start()
     {
         if(IsStarted)
-            return;
-
-        IsStarted = true;
-
-        foreach(var newType in _toRegister)
-        {
-            var service = (IService?)Activator.CreateInstance(newType);
-            if(service != null)
-                _services.Add(service);
-        }
-
-        _toRegister.Clear();
+            throw new Exception("Services already running");
 
         foreach(var service in _services)
-        {
             service.Start();
-        }
+
+        IsStarted = true;
     }
 
     public void Tick()
@@ -50,18 +41,19 @@ public class ServiceManager : IDisposable
 
     public void Dispose()
     {
-        if(!IsStarted)
-            return;
-
         var reversed = _services.ToList();
         reversed.Reverse();
 
-        foreach(var service in reversed)
-            service.Stop();
+        if(IsStarted)
+            foreach(var service in reversed)
+                service.Stop();
+
+        IsStarted = false;
 
         foreach(var service in reversed)
             service.Dispose();
 
         _services.Clear();
+
     }
 }

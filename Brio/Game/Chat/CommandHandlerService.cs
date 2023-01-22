@@ -9,7 +9,7 @@ public class CommandHandlerService : ServiceBase<CommandHandlerService>
 {
     private const string CommandName = "/brio";
 
-    public override void Start()
+    public CommandHandlerService()
     {
         Dalamud.CommandManager.AddHandler(CommandName, new CommandInfo(OnCommand)
         {
@@ -17,7 +17,6 @@ public class CommandHandlerService : ServiceBase<CommandHandlerService>
             ShowInHelp = true,
         });
 
-        base.Start();
     }
 
     private void OnCommand(string command, string arguments)

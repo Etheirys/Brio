@@ -15,10 +15,10 @@ public class GPoseService : ServiceBase<GPoseService>
     public event OnGPoseStateDelegate? OnGPoseStateChange;
 
     private delegate void ExitGPoseDelegate(IntPtr addr);
-    private Hook<ExitGPoseDelegate> ExitGPoseHook = null!;
+    private Hook<ExitGPoseDelegate>? _exitGPoseHook = null;
 
     private delegate bool EnterGPoseDelegate(IntPtr addr);
-    private Hook<EnterGPoseDelegate> EnterGPoseHook = null!;
+    private Hook<EnterGPoseDelegate>? _enterGPoseHook = null;
 
     public override unsafe void Start()
     {
@@ -43,11 +43,11 @@ public class GPoseService : ServiceBase<GPoseService>
         if(exitGPoseAddress == 0)
             throw new Exception("Could not get ExitGPose address");
 
-        EnterGPoseHook = Hook<EnterGPoseDelegate>.FromAddress(enterGPoseAddress, EnteringGPoseDetour);
-        EnterGPoseHook.Enable();
+        _enterGPoseHook = Hook<EnterGPoseDelegate>.FromAddress(enterGPoseAddress, EnteringGPoseDetour);
+        _enterGPoseHook.Enable();
 
-        ExitGPoseHook = Hook<ExitGPoseDelegate>.FromAddress(exitGPoseAddress, ExitingGPoseDetour);
-        ExitGPoseHook.Enable();
+        _exitGPoseHook = Hook<ExitGPoseDelegate>.FromAddress(exitGPoseAddress, ExitingGPoseDetour);
+        _exitGPoseHook.Enable();
 
         base.Start();
     }
@@ -55,13 +55,13 @@ public class GPoseService : ServiceBase<GPoseService>
     private void ExitingGPoseDetour(IntPtr addr)
     {
         HandleGPoseChange(GPoseState.Exiting);
-        ExitGPoseHook.Original.Invoke(addr);
+        _exitGPoseHook!.Original.Invoke(addr);
         HandleGPoseChange(GPoseState.Outside);
     }
 
     private bool EnteringGPoseDetour(IntPtr addr)
     {
-        bool didEnter = EnterGPoseHook.Original.Invoke(addr);
+        bool didEnter = _enterGPoseHook!.Original.Invoke(addr);
         if(didEnter)
             HandleGPoseChange(GPoseState.Inside);
 
@@ -76,8 +76,8 @@ public class GPoseService : ServiceBase<GPoseService>
 
     public override void Dispose()
     {
-        ExitGPoseHook.Dispose();
-        EnterGPoseHook.Dispose();
+        _exitGPoseHook?.Dispose();
+        _enterGPoseHook?.Dispose();
     }
 }
 

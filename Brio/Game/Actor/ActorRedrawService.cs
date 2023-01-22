@@ -2,14 +2,11 @@
 using Brio.Game.Core;
 using Brio.Game.Render;
 using FFXIVClientStructs.FFXIV.Client.Game.Character;
-using Penumbra.Api;
 using System.Collections.Generic;
 using GameObject = Dalamud.Game.ClientState.Objects.Types.GameObject;
 using FFXIVClientStructs.FFXIV.Client.Graphics.Scene;
 using System.Runtime.InteropServices;
 using System;
-using DrawObjectObject = FFXIVClientStructs.FFXIV.Client.Graphics.Scene.Object;
-using Brio.Config;
 using Brio.Game.Actor.Extensions;
 
 namespace Brio.Game.Actor;
@@ -22,10 +19,9 @@ public class ActorRedrawService : ServiceBase<ActorRedrawService>
 
     private nint _customizeBuffer;
 
-    public override void Start()
+    public ActorRedrawService()
     {
         _customizeBuffer = Marshal.AllocHGlobal(68);
-        base.Start();
     }
 
     public unsafe RedrawResult Redraw(GameObject gameObject, RedrawType redrawType)
@@ -128,10 +124,14 @@ public class ActorRedrawService : ServiceBase<ActorRedrawService>
         return RedrawResult.Full;
     }
 
+    public override void Stop()
+    {
+        _redrawsActive.Clear();
+    }
+
     public override void Dispose()
     {
         Marshal.FreeHGlobal(_customizeBuffer);
-        _redrawsActive.Clear();
     }
 }
 

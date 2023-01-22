@@ -11,15 +11,18 @@ public unsafe class RenderHookService : ServiceBase<RenderHookService>
     public bool ApplyNPCOverride { get; set; } = false;
 
     private delegate long EnforceKindRestrictionsDelegate(void* a1, void* a2);
-    private Hook<EnforceKindRestrictionsDelegate> EnforceKindRestrictionsHook = null!;
+    private Hook<EnforceKindRestrictionsDelegate>? EnforceKindRestrictionsHook = null!;
 
-    public override void Start()
+    public RenderHookService()
     {
         var enforceKindRestrictionsAddress = Dalamud.SigScanner.ScanText("E8 ?? ?? ?? ?? 41 B0 ?? 48 8B D3 48 8B CD");
         EnforceKindRestrictionsHook = Hook<EnforceKindRestrictionsDelegate>.FromAddress(enforceKindRestrictionsAddress, EnforceKindRestrictionsDetour);
 
         EnforceKindRestrictionsHook.Enable();
+    }
 
+    public override void Start()
+    {
         GPoseService.Instance.OnGPoseStateChange += GPoseService_OnGPoseStateChange;
 
         GPoseService_OnGPoseStateChange(GPoseService.Instance.GPoseState);
@@ -41,11 +44,16 @@ public unsafe class RenderHookService : ServiceBase<RenderHookService>
         if(ApplyNPCOverride || ConfigService.Configuration.ApplyNPCHack == Config.ApplyNPCHack.Always)
             return 0;
 
-        return EnforceKindRestrictionsHook.Original(a1, a2);
+        return EnforceKindRestrictionsHook!.Original(a1, a2);
+    }
+
+    public override void Stop()
+    {
+        GPoseService.Instance.OnGPoseStateChange -= GPoseService_OnGPoseStateChange;
     }
 
     public override void Dispose()
     {
-        EnforceKindRestrictionsHook.Dispose();
+        EnforceKindRestrictionsHook?.Dispose();
     }
 }

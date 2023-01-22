@@ -17,7 +17,7 @@ public class ActorService : ServiceBase<ActorService>
     public event ActorAction? OnActorDestructing;
 
     private delegate void DestroyGameActorDelegate(IntPtr addr);
-    private Hook<DestroyGameActorDelegate> DestroyGameActorHook = null!;
+    private Hook<DestroyGameActorDelegate> _destroyGameActorHook = null!;
 
     public ReadOnlyCollection<GameObject> GPoseActors => new(_gposeActors);
 
@@ -26,8 +26,8 @@ public class ActorService : ServiceBase<ActorService>
     public ActorService()
     {
         var destroyAddress = Dalamud.SigScanner.ScanText("48 89 5C 24 ?? 48 89 74 24 ?? 57 48 83 EC ?? 48 8D 05 ?? ?? ?? ?? 48 8B D9 48 89 01 48 8D 05 ?? ?? ?? ?? 48 89 81 ?? ?? ?? ?? 48 8D 05");
-        DestroyGameActorHook = Hook<DestroyGameActorDelegate>.FromAddress(destroyAddress, ActorDestructorDetour);
-        DestroyGameActorHook.Enable();
+        _destroyGameActorHook = Hook<DestroyGameActorDelegate>.FromAddress(destroyAddress, ActorDestructorDetour);
+        _destroyGameActorHook.Enable();
     }
 
     public override void Start()
@@ -47,7 +47,7 @@ public class ActorService : ServiceBase<ActorService>
         if(ago != null)
             OnActorDestructing?.Invoke(ago);
 
-        DestroyGameActorHook.Original.Invoke(addr);
+        _destroyGameActorHook.Original.Invoke(addr);
     }
 
     public void UpdateGPoseTable()
@@ -75,6 +75,6 @@ public class ActorService : ServiceBase<ActorService>
     public override void Dispose()
     {
         _gposeActors.Clear();
-        DestroyGameActorHook.Dispose();
+        _destroyGameActorHook.Dispose();
     }
 }
