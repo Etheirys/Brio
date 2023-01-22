@@ -3,11 +3,13 @@ Brio is a small utility designed to assist with the management and control of ac
 It is designed to enhance the experience of users no matter which posing tool they use, whether it be [Anamnesis](https://github.com/imchillin/Anamnesis) or [Ktisis](https://github.com/ktisis-tools/Ktisis).
 
 ## Features
-* Creation and Deletion of GPose actors
+* Creation and Deletion of GPose actors (up to 39)
 * Change the Penumbra collection applied to GPose actors
+* Add/Remove status effects to GPose actors
 * Control Time/Weather in both the Overworld and GPose
 * Redraw control of GPose actors
 * NPC Appearance Hack (Allows you to apply NPC appearances to players without breaking tools like Penumbra)
+* Integration with Anamnesis
 
 ## Installation
 1. Add the custom Dalamud repo `https://raw.githubusercontent.com/AsgardXIV/Brio/main/repo.json`
