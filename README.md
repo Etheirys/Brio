@@ -9,7 +9,7 @@ It is designed to enhance the experience of users no matter which posing tool th
 * Control Time/Weather in both the Overworld and GPose
 * Redraw control of GPose actors
 * NPC Appearance Hack (Allows you to apply NPC appearances to players without breaking tools like Penumbra)
-* Integration with Anamnesis
+* Works with Ktisis and Anamnesis (Enable Brio integration within Anamnesis for a better experience)
 
 ## Installation
 1. Add the custom Dalamud repo `https://raw.githubusercontent.com/AsgardXIV/Brio/main/repo.json`
