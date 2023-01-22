@@ -10,6 +10,7 @@ using System.Runtime.InteropServices;
 using System;
 using DrawObjectObject = FFXIVClientStructs.FFXIV.Client.Graphics.Scene.Object;
 using Brio.Config;
+using Brio.Game.Actor.Extensions;
 
 namespace Brio.Game.Actor;
 
@@ -32,12 +33,12 @@ public class ActorRedrawService : ServiceBase<ActorRedrawService>
         if(!CanRedraw(gameObject))
             return RedrawResult.Failed;
 
-        var raw = gameObject.AsNative();
-        var index = raw->ObjectIndex;
+        var rawObject = gameObject.AsNative();
+        var index = rawObject->ObjectIndex;
         _redrawsActive.Add(index);
 
-        var originalPosition = raw->DrawObject->Object.Position;
-        var originalRotation = raw->DrawObject->Object.Rotation;
+        var originalPosition = rawObject->DrawObject->Object.Position;
+        var originalRotation = rawObject->DrawObject->Object.Rotation;
 
         // In place
         bool drewInPlace = redrawType.HasFlag(RedrawType.AllowOptimized);
@@ -45,15 +46,15 @@ public class ActorRedrawService : ServiceBase<ActorRedrawService>
         if(drewInPlace)
         {
             // Can only optimize redraw a character
-            if(raw->IsCharacter())
+            if(rawObject->IsCharacter())
             {
-                Character* chara = (Character*)raw;
-                CharacterBase* charaBase = (CharacterBase*)raw->DrawObject;
+                Character* chara = (Character*)rawObject;
+                CharacterBase* charaBase = (CharacterBase*)rawObject->DrawObject;
                 // Can only optimize redraw a human
                 if(charaBase->GetModelType() == CharacterBase.ModelType.Human)
                 {
                     // We can't change certain values
-                    Human* human = ((Human*)raw->DrawObject);
+                    Human* human = ((Human*)rawObject->DrawObject);
                     if(human->Race != chara->CustomizeData[0]
                         || human->Sex != chara->CustomizeData[1]
                         || human->BodyType != chara->CustomizeData[2]
@@ -69,7 +70,7 @@ public class ActorRedrawService : ServiceBase<ActorRedrawService>
                         // Cutomize and gear
                         Buffer.MemoryCopy(chara->CustomizeData, (void*)_customizeBuffer, 28, 28);
                         Buffer.MemoryCopy(chara->EquipSlotData, (void*)(_customizeBuffer + 28), 40, 40);
-                        drewInPlace = ((Human*)raw->DrawObject)->UpdateDrawData((byte*)_customizeBuffer, false);
+                        drewInPlace = ((Human*)rawObject->DrawObject)->UpdateDrawData((byte*)_customizeBuffer, false);
                     }
                 }
                 else
@@ -101,8 +102,8 @@ public class ActorRedrawService : ServiceBase<ActorRedrawService>
             RenderHookService.Instance.ApplyNPCOverride = true;
 
         // Full redraw
-        raw->DisableDraw();
-        raw->EnableDraw();
+        rawObject->DisableDraw();
+        rawObject->EnableDraw();
 
         if(redrawType.HasFlag(RedrawType.ForceAllowNPCAppearance))
             RenderHookService.Instance.ApplyNPCOverride = wasNpcHack;
@@ -110,11 +111,11 @@ public class ActorRedrawService : ServiceBase<ActorRedrawService>
         // Handle position update
         if(redrawType.HasFlag(RedrawType.PreservePosition))
         {
-            Dalamud.Framework.RunUntilSatisfied(() => raw->RenderFlags == 0,
+            Dalamud.Framework.RunUntilSatisfied(() => rawObject->RenderFlags == 0,
             (_) =>
             {
-                raw->DrawObject->Object.Rotation = originalRotation;
-                raw->DrawObject->Object.Position = originalPosition;
+                rawObject->DrawObject->Object.Rotation = originalRotation;
+                rawObject->DrawObject->Object.Position = originalPosition;
                 _redrawsActive.Remove(index);
                 return true;
             }, 50, 3, true);

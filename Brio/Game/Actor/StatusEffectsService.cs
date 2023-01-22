@@ -1,11 +1,10 @@
 ﻿using Brio.Core;
-using FFXIVClientStructs.FFXIV.Client.Game.Character;
+using Brio.Game.Actor.Extensions;
+using Dalamud.Game.ClientState.Objects.Types;
 using Lumina.Excel.GeneratedSheets;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Net.NetworkInformation;
-
 namespace Brio.Game.Actor;
 public class StatusEffectsService : ServiceBase<StatusEffectsService>
 {
@@ -23,21 +22,22 @@ public class StatusEffectsService : ServiceBase<StatusEffectsService>
     {
         var statusSheet = Dalamud.DataManager.GetExcelSheet<Status>();
         if(statusSheet != null)
-            _statusList = statusSheet.Where((i) => !string.IsNullOrEmpty(i.Name)).ToDictionary((i) => (ushort) i.RowId);
+            _statusList = statusSheet.Where((i) => !string.IsNullOrEmpty(i.Name)).ToDictionary((i) => (ushort)i.RowId);
     }
 
-    public unsafe List<Status> GetAllEffects(BattleChara* battleChara)
+    public unsafe List<Status> GetAllEffects(BattleChara battleChara)
     {
         List<Status> list = new List<Status>();
         const int maxEffects = 30;
 
+        var statusManager = battleChara.GetStatusManager();
+
         for(var i = 0; i < maxEffects; i++)
         {
-            var effect = (ushort)battleChara->StatusManager.GetStatusId(i);
+            var effect = (ushort)statusManager->GetStatusId(i);
             if(effect != 0 && _statusList.ContainsKey(effect))
                 list.Add(_statusList[effect]);
         }
-
         return list;
     }
 

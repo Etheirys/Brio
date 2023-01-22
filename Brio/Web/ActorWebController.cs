@@ -1,4 +1,5 @@
 ﻿using Brio.Game.Actor;
+using Brio.Game.Actor.Extensions;
 using Brio.Game.Core;
 using Brio.Game.GPose;
 using EmbedIO;

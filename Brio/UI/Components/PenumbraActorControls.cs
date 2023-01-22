@@ -1,5 +1,5 @@
 ﻿using Brio.Game.Actor;
-using Brio.Game.Core;
+using Brio.Game.Actor.Extensions;
 using Brio.IPC;
 using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Interface;

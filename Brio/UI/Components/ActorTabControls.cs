@@ -1,6 +1,6 @@
 ﻿using Brio.Config;
 using Brio.Game.Actor;
-using Brio.Game.Core;
+using Brio.Game.Actor.Extensions;
 using Brio.Game.GPose;
 using Dalamud.Game.ClientState.Objects.Types;
 using FFXIVClientStructs.FFXIV.Client.Game.Control;
