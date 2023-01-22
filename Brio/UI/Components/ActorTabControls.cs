@@ -63,7 +63,7 @@ public static class ActorTabControls
             }
         }
 
-        if(ImGui.CollapsingHeader("Actor Redraw"))
+        if(ImGui.CollapsingHeader("Redraw"))
         {
             if(_selector.SelectedObject != null)
             {
