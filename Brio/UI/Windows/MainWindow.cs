@@ -66,13 +66,13 @@ public class MainWindow : Window
         ImGui.PushStyleColor(ImGuiCol.Button, 0x00000000);
         ImGui.PushFont(UiBuilder.IconFont);
 
-        ImGui.SetCursorPosX(ImGui.GetWindowSize().X - 70f);
-        ImGui.SetCursorPosY(initialPos.Y - ImGui.GetTextLineHeight() * 2f);
+        ImGui.SetCursorPosX(ImGui.GetWindowSize().X - (4 * ImGui.GetFontSize()));
+        ImGui.SetCursorPosY(0);
         if(ImGui.Button(FontAwesomeIcon.Cog.ToIconString()))
             UIService.Instance.SettingsWindow.Toggle();
 
-        ImGui.SetCursorPosX(ImGui.GetWindowSize().X - 100f);
-        ImGui.SetCursorPosY(initialPos.Y - ImGui.GetTextLineHeight() * 2f);
+        ImGui.SetCursorPosX(ImGui.GetWindowSize().X - (5.5f * ImGui.GetFontSize()));
+        ImGui.SetCursorPosY(0);
         if(ImGui.Button(FontAwesomeIcon.InfoCircle.ToIconString()))
             UIService.Instance.InfoWindow.Toggle();
 
