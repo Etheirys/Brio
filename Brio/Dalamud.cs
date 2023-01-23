@@ -3,6 +3,7 @@ using Dalamud.Game;
 using Dalamud.Game.ClientState;
 using Dalamud.Game.ClientState.Objects;
 using Dalamud.Game.Command;
+using Dalamud.Game.Gui;
 using Dalamud.Game.Gui.Toast;
 using Dalamud.IoC;
 using Dalamud.Plugin;
@@ -20,6 +21,7 @@ public class Dalamud
     [PluginService] public static ClientState ClientState { get; private set; } = null!;
     [PluginService] public static ObjectTable ObjectTable { get; private set; } = null!;
     [PluginService] public static ToastGui ToastGui { get; private set; } = null!;
+    [PluginService] public static ChatGui ChatGui { get; private set; } = null!;
 
 
     public static void Initialize(DalamudPluginInterface pluginInterface) => pluginInterface.Create<Dalamud>();
