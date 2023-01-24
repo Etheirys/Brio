@@ -8,6 +8,7 @@ using FFXIVClientStructs.FFXIV.Client.Graphics.Scene;
 using System.Runtime.InteropServices;
 using System;
 using Brio.Game.Actor.Extensions;
+using FFXIVClientStructs.FFXIV.Common.Math;
 
 namespace Brio.Game.Actor;
 
@@ -33,8 +34,14 @@ public class ActorRedrawService : ServiceBase<ActorRedrawService>
         var index = rawObject->ObjectIndex;
         _redrawsActive.Add(index);
 
-        var originalPosition = rawObject->DrawObject->Object.Position;
-        var originalRotation = rawObject->DrawObject->Object.Rotation;
+        var originalPosition = rawObject->Position;
+        var originalRotation = Quaternion.Identity;
+
+        if(rawObject->DrawObject != null)
+        {
+            originalPosition = rawObject->DrawObject->Object.Position;
+            originalRotation = rawObject->DrawObject->Object.Rotation;
+        }
 
         // In place
         bool drewInPlace = redrawType.HasFlag(RedrawType.AllowOptimized);
@@ -47,7 +54,7 @@ public class ActorRedrawService : ServiceBase<ActorRedrawService>
                 Character* chara = (Character*)rawObject;
                 CharacterBase* charaBase = (CharacterBase*)rawObject->DrawObject;
                 // Can only optimize redraw a human
-                if(charaBase->GetModelType() == CharacterBase.ModelType.Human)
+                if(charaBase != null && charaBase->GetModelType() == CharacterBase.ModelType.Human)
                 {
                     // We can't change certain values
                     Human* human = ((Human*)rawObject->DrawObject);
@@ -107,13 +114,19 @@ public class ActorRedrawService : ServiceBase<ActorRedrawService>
         // Handle position update
         if(redrawType.HasFlag(RedrawType.PreservePosition))
         {
-            Dalamud.Framework.RunUntilSatisfied(() => rawObject->RenderFlags == 0,
-            (_) =>
+            Dalamud.Framework.RunUntilSatisfied(() => rawObject->RenderFlags == 0 && rawObject->DrawObject != null,
+            (success) =>
             {
-                rawObject->DrawObject->Object.Rotation = originalRotation;
-                rawObject->DrawObject->Object.Position = originalPosition;
                 _redrawsActive.Remove(index);
-                return true;
+
+                if(success)
+                {
+                    rawObject->DrawObject->Object.Rotation = originalRotation;
+                    rawObject->DrawObject->Object.Position = originalPosition;
+                    return true;
+                }
+                
+                return false;
             }, 50, 3, true);
         }
         else
