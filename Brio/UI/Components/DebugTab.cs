@@ -1,6 +1,5 @@
 ﻿using Brio.Game.GPose;
 using FFXIVClientStructs.FFXIV.Client.System.Framework;
-using FFXIVClientStructs.FFXIV.Client.UI;
 using ImGuiNET;
 
 namespace Brio.UI.Components;
@@ -25,16 +24,14 @@ public static class DebugTab
 
             if(ImGui.Button("Enter GPose"))
             {
-                var uiModule = Framework.Instance()->GetUiModule();
-                ((delegate* unmanaged<UIModule*, bool>)uiModule->vfunc[75])(uiModule);
+                Framework.Instance()->GetUiModule()->EnterGPose();
             }
 
             ImGui.SameLine();
 
             if(ImGui.Button("Exit GPose"))
             {
-                var uiModule = Framework.Instance()->GetUiModule();
-                ((delegate* unmanaged<UIModule*, void>)uiModule->vfunc[76])(uiModule);
+                Framework.Instance()->GetUiModule()->ExitGPose();
             }
         }
     }

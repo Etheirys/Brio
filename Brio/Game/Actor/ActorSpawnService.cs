@@ -2,9 +2,10 @@
 using Brio.Game.Actor.Extensions;
 using Brio.Game.Core;
 using Brio.Game.GPose;
-using Brio.Game.Interop;
 using Brio.Utils;
 using FFXIVClientStructs.FFXIV.Client.Game.Character;
+using FFXIVClientStructs.FFXIV.Client.Game.Event;
+using FFXIVClientStructs.FFXIV.Client.Game.Object;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,16 +17,8 @@ public class ActorSpawnService : ServiceBase<ActorSpawnService>
 {
     public bool CanSpawn => GPoseService.Instance.IsInGPose;
 
-    public ClientObjectManagerInterop _clientObjectManager;
-    public EventGPoseControllerInterop _eventGPoseController;
 
     private List<ushort> _createdIndexes = new();
-
-    public ActorSpawnService()
-    {
-        _clientObjectManager = new ClientObjectManagerInterop();
-        _eventGPoseController = new EventGPoseControllerInterop();
-    }
 
     public override void Start()
     {
@@ -53,7 +46,8 @@ public class ActorSpawnService : ServiceBase<ActorSpawnService>
     {
         if(ActorService.IsGPoseActor(gameObject))
         {
-            var idx = _clientObjectManager.GetIndexByObject(gameObject.Address);
+            var com = ClientObjectManager.Instance();
+            var idx = com->GetIndexByObject(gameObject.AsNative());
             if(idx < ushort.MaxValue)
                 _createdIndexes.Remove((ushort)idx);
         }
@@ -65,17 +59,20 @@ public class ActorSpawnService : ServiceBase<ActorSpawnService>
         if(localPlayer == null)
             return null;
 
+        var com = ClientObjectManager.Instance();
+
         Character* originalPlayer = (Character*)localPlayer.AsNative();
         if(originalPlayer == null) return null;
 
-        uint idCheck = _clientObjectManager.CreateBattleCharacter();
+        uint idCheck = com->CreateBattleCharacter();
         if(idCheck == 0xffffffff) return null;
         ushort newId = (ushort)idCheck;
 
-        Character* newPlayer = (Character*)_clientObjectManager.GetObjectByIndex(newId);
+        Character* newPlayer = (Character*)com->GetObjectByIndex(newId);
         if(newPlayer == null) return null;
 
-        _eventGPoseController.AddToGPose((nint)newPlayer); // This is safe even if the list is full. The game will also cleanup for us.
+        var gposeController = &EventFramework.Instance()->EventSceneModule.EventGPoseController;
+        gposeController->AddCharacterToGPose(newPlayer); // This is safe even if the list is full. The game will also cleanup for us.
 
         newPlayer->CopyFromCharacter(originalPlayer, 0); // We copy the Player as the created actor is just blank
 
@@ -110,11 +107,12 @@ public class ActorSpawnService : ServiceBase<ActorSpawnService>
     public unsafe void DestroyAllCreated()
     {
         var indexes = _createdIndexes.ToList();
+        var com = ClientObjectManager.Instance();
         foreach(var idx in indexes)
         {
-            var goa = _clientObjectManager.GetObjectByIndex(idx);
-            if(goa == 0) continue;
-            var ago = Dalamud.ObjectTable.CreateObjectReference(goa);
+            var goa = com->GetObjectByIndex(idx);
+            if(goa == null) continue;
+            var ago = Dalamud.ObjectTable.CreateObjectReference((IntPtr)goa);
             if(ago == null) continue;
             DestroyObject(ago);
         }
@@ -132,11 +130,12 @@ public class ActorSpawnService : ServiceBase<ActorSpawnService>
 
     public unsafe void DestroyObject(DalamudGameObject go)
     {
+        var com = ClientObjectManager.Instance();
         var native = go.AsNative();
-        var idx = _clientObjectManager.GetIndexByObject((nint)native);
+        var idx = com->GetIndexByObject(native);
         if(idx != 0xFFFFFFFF)
         {
-            _clientObjectManager.DeleteObjectByIndex((ushort)idx, 0);
+            com->DeleteObjectByIndex((ushort)idx, 0);
             ActorService.Instance.UpdateGPoseTable();
         }
     }

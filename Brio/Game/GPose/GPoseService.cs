@@ -1,6 +1,7 @@
 ﻿using Brio.Core;
 using Dalamud.Hooking;
 using FFXIVClientStructs.FFXIV.Client.System.Framework;
+using FFXIVClientStructs.FFXIV.Client.UI;
 using System;
 
 namespace Brio.Game.GPose;
@@ -24,24 +25,9 @@ public class GPoseService : ServiceBase<GPoseService>
     {
         GPoseState = Dalamud.PluginInterface.UiBuilder.GposeActive ? GPoseState.Inside : GPoseState.Outside;
 
-
-        // TODO: Move to clientstructs
-        // Track: https://github.com/aers/FFXIVClientStructs/pull/291
-        var framework = Framework.Instance();
-        if(framework == null)
-            throw new Exception("Framework not found");
-
-        var uiModule = framework->GetUiModule();
-        if(uiModule == null)
-            throw new Exception("Could not get UI module");
-
-        var enterGPoseAddress = (nint)uiModule->vfunc[75];
-        if(enterGPoseAddress == 0)
-            throw new Exception("Could not get EnterGPose address");
-
-        var exitGPoseAddress = (nint)uiModule->vfunc[76];
-        if(exitGPoseAddress == 0)
-            throw new Exception("Could not get ExitGPose address");
+        UIModule* uiModule = Framework.Instance()->GetUiModule();
+        var enterGPoseAddress = (nint)uiModule->VTable->EnterGPose;
+        var exitGPoseAddress = (nint)uiModule->VTable->ExitGPose;
 
         _enterGPoseHook = Hook<EnterGPoseDelegate>.FromAddress(enterGPoseAddress, EnteringGPoseDetour);
         _enterGPoseHook.Enable();
