@@ -1,10 +1,10 @@
 ﻿using ImGuiNET;
-using Brio.Game.Actor;
 using System.Numerics;
 using Dalamud.Interface;
 using System.Linq;
 using Dalamud.Game.ClientState.Objects.Types;
 using Brio.Game.Actor.Extensions;
+using Lumina.Excel.GeneratedSheets;
 
 namespace Brio.UI.Components.Actor;
 public static class StatusEffectControls
@@ -15,8 +15,10 @@ public static class StatusEffectControls
     {
         if(actor is BattleChara battleChara)
         {
-            var effects = StatusEffectsService.Instance.GetAllEffects(battleChara);
-            ImGui.PushItemWidth(ImGui.GetContentRegionAvail().X);
+            var statusManager = battleChara.GetStatusManager();
+
+            var effects = statusManager->GetAllStatuses();
+            ImGui.SetNextItemWidth(ImGui.GetContentRegionAvail().X);
             if(ImGui.BeginListBox("###status_effects", new Vector2(0, 100)))
             {
                 int tieBreak = 0;
@@ -32,7 +34,6 @@ public static class StatusEffectControls
 
                 ImGui.EndListBox();
             }
-            ImGui.PopItemWidth();
 
             bool isSelectedPlaying = effects.Count((i) => _selectedEntry == i.RowId) > 0;
 
@@ -41,7 +42,7 @@ public static class StatusEffectControls
             ImGui.SameLine();
             ImGui.PushFont(UiBuilder.IconFont);
 
-            var statusManager = battleChara.GetStatusManager();
+            
 
             bool blockPlay = isSelectedPlaying || _selectedEntry <= 0;
             if(blockPlay) ImGui.BeginDisabled();
@@ -78,21 +79,25 @@ public static class StatusEffectControls
 
                 if(ImGui.BeginListBox("###global_status_listbox"))
                 {
-                    var list = StatusEffectsService.Instance.StatusTable.Where((i) => i.Value.Name.RawString.Contains(_searchTerm, System.StringComparison.CurrentCultureIgnoreCase)).Select(i => i.Value).ToList();
-                    foreach(var status in list)
+                    var statusSheet = Dalamud.DataManager.Excel.GetSheet<Status>();
+                    if(statusSheet != null)
                     {
-                        if(ImGui.Selectable($"{status.Name} ({status.RowId})###global_status_{status.RowId}", _selectedEntry == status.RowId))
+                        var list = statusSheet.Where(i => !string.IsNullOrEmpty(i.Name.RawString)).Where((i) => i.Name.RawString.Contains(_searchTerm, System.StringComparison.CurrentCultureIgnoreCase)).ToList();
+                        foreach(var status in list)
                         {
-                            _selectedEntry = (int)status.RowId;
-                        }
-
-                        if(ImGui.IsItemHovered() && ImGui.IsMouseDoubleClicked(ImGuiMouseButton.Left))
-                        {
-                            ImGui.CloseCurrentPopup();
-
-                            if(effects.Count((i) => _selectedEntry == i.RowId) == 0)
+                            if(ImGui.Selectable($"{status.Name} ({status.RowId})###global_status_{status.RowId}", _selectedEntry == status.RowId))
                             {
-                                statusManager->AddStatus((ushort)_selectedEntry);
+                                _selectedEntry = (int)status.RowId;
+                            }
+
+                            if(ImGui.IsItemHovered() && ImGui.IsMouseDoubleClicked(ImGuiMouseButton.Left))
+                            {
+                                ImGui.CloseCurrentPopup();
+
+                                if(effects.Count((i) => _selectedEntry == i.RowId) == 0)
+                                {
+                                    statusManager->AddStatus((ushort)_selectedEntry);
+                                }
                             }
                         }
                     }

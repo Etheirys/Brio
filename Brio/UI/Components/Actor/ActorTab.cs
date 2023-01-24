@@ -90,6 +90,18 @@ public static class ActorTab
             }
         }
 
+        if(ImGui.CollapsingHeader("Animations"))
+        {
+            if(_selector.SelectedObject != null)
+            {
+                ActionTimelineControls.Draw(_selector.SelectedObject);
+            }
+            else
+            {
+                ImGui.Text("No actor selected.");
+            }
+        }
+
         if(ImGui.CollapsingHeader("Status Effects"))
         {
             if(_selector.SelectedObject != null)

@@ -16,9 +16,9 @@ namespace Brio;
 public class Brio : IDisposable
 {
     public const string PluginName = "Brio";
-    public static string PluginVersion = typeof(Brio).Assembly.GetName().Version!.ToString();
+    public static readonly string PluginVersion = typeof(Brio).Assembly.GetName().Version?.ToString() ?? "(Unknown Version)";
 
-    private static ServiceManager _serviceManager { get; set; } = null!;
+    private ServiceManager _serviceManager { get; set; } = null!;
 
     public Brio()
     {
@@ -32,7 +32,7 @@ public class Brio : IDisposable
         _serviceManager.Add<ActorService>();
         _serviceManager.Add<ActorRedrawService>();
         _serviceManager.Add<ActorSpawnService>();
-        _serviceManager.Add<StatusEffectsService>();
+        _serviceManager.Add<ActionTimelineService>();
         _serviceManager.Add<TimeService>();
         _serviceManager.Add<WeatherService>();
         _serviceManager.Add<PenumbraIPCService>();

@@ -1,6 +1,7 @@
 ﻿using Brio.Game.World;
 using Dalamud.Interface;
 using ImGuiNET;
+using Lumina.Excel.GeneratedSheets;
 using System.Linq;
 
 namespace Brio.UI.Components;
@@ -10,7 +11,6 @@ public static class WeatherControls
 
     public static void Draw()
     {
-
         var isLocked = WeatherService.Instance.WeatherOverrideEnabled;
         var isLockedPrevious = isLocked;
         ImGui.Checkbox("Lock Weather", ref isLocked);
@@ -55,19 +55,23 @@ public static class WeatherControls
 
             if(ImGui.BeginListBox("###global_weather_listbox"))
             {
-                var list = WeatherService.Instance.WeatherTable.Where(x => x.Name.RawString.Contains(_searchTerm, System.StringComparison.CurrentCultureIgnoreCase)).ToList();
-                foreach(var weather in list)
+                var weatherSheet = Dalamud.DataManager.Excel.GetSheet<Weather>();
+                if(weatherSheet != null)
                 {
-                    bool selected = currentWeather == weather.RowId;
-
-                    if(ImGui.Selectable($"{weather.Name} ({weather.RowId})###global_weather_{weather.RowId}", selected))
+                    var matchWeatherList = weatherSheet.Where(x => !string.IsNullOrEmpty(x.Name.RawString)).Where(x => x.Name.RawString.Contains(_searchTerm, System.StringComparison.CurrentCultureIgnoreCase)).ToList();
+                    foreach(var weather in matchWeatherList)
                     {
-                        currentWeather = (byte)weather.RowId;
-                    }
+                        bool selected = currentWeather == weather.RowId;
 
-                    if(ImGui.IsItemHovered() && ImGui.IsMouseDoubleClicked(ImGuiMouseButton.Left))
-                    {
-                        ImGui.CloseCurrentPopup();
+                        if(ImGui.Selectable($"{weather.Name} ({weather.RowId})###global_weather_{weather.RowId}", selected))
+                        {
+                            currentWeather = (byte)weather.RowId;
+                        }
+
+                        if(ImGui.IsItemHovered() && ImGui.IsMouseDoubleClicked(ImGuiMouseButton.Left))
+                        {
+                            ImGui.CloseCurrentPopup();
+                        }
                     }
                 }
                 ImGui.EndListBox();

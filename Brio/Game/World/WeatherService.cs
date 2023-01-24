@@ -46,11 +46,9 @@ public class WeatherService : ServiceBase<WeatherService>
 
     private unsafe WeatherSystem* _weatherSystem;
 
-    private List<Weather> _weatherTable = new();
     private List<Weather> _territoryWeatherTable = new();
 
 
-    public ReadOnlyCollection<Weather> WeatherTable => new(_weatherTable);
     public ReadOnlyCollection<Weather> TerritoryWeatherTable => new(_territoryWeatherTable);
 
     public unsafe WeatherService()
@@ -65,7 +63,6 @@ public class WeatherService : ServiceBase<WeatherService>
 
     public unsafe override void Start()
     {
-        UpdateGlobalWeathers();
         UpdateWeathersForCurrentTerritory();
 
         Dalamud.ClientState.TerritoryChanged += ClientState_TerritoryChanged;
@@ -78,20 +75,12 @@ public class WeatherService : ServiceBase<WeatherService>
         UpdateWeathersForCurrentTerritory();
     }
 
-    private void UpdateGlobalWeathers()
-    {
-        var weatherSheet = Dalamud.DataManager.GetExcelSheet<Weather>();
-        if(weatherSheet != null)
-            _weatherTable = weatherSheet.Where(i => !string.IsNullOrEmpty(i.Name)).ToList();
-        _weatherTable.Sort((a, b) => a.RowId.CompareTo(b.RowId));
-    }
-
     private void UpdateWeathersForCurrentTerritory()
     {
         _territoryWeatherTable.Clear();
 
         ushort territoryId = Dalamud.ClientState.TerritoryType;
-        var territory = Dalamud.DataManager.GameData.GetExcelSheet<TerritoryType>()?.GetRow(territoryId);
+        var territory = Dalamud.DataManager.GetExcelSheet<TerritoryType>()?.GetRow(territoryId);
 
         if(territory == null)
             return;
@@ -132,6 +121,7 @@ public class WeatherService : ServiceBase<WeatherService>
     public override void Stop()
     {
         Dalamud.ClientState.TerritoryChanged -= ClientState_TerritoryChanged;
+        _territoryWeatherTable.Clear();
     }
 
     public override void Dispose()
@@ -142,6 +132,9 @@ public class WeatherService : ServiceBase<WeatherService>
     [StructLayout(LayoutKind.Explicit)]
     public struct WeatherSystem
     {
+        // TODO: Move to client structs
+        // Track: https://github.com/aers/FFXIVClientStructs/pull/306
+
         [FieldOffset(0x27)]
         public byte TargetWeather;
 
