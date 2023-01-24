@@ -9,16 +9,15 @@
         "RepoUrl": "https://github.com/AsgardXIV/Brio",
         "ApplicableVersion": "any",
         "DalamudApiLevel": 8,
-        "IsHide": "False",
-        "IsTestingExclusive": "False",
-        "DownloadCount": 0,
-        "LastUpdate": 0,
-        "LoadPriority": 69420,
-        "LoadRequiredState": 2,
-        "LoadSync": true,
         "DownloadLinkInstall": "https://github.com/AsgardXIV/Brio/releases/download/v{version}/Brio.zip",
         "DownloadLinkTesting": "https://github.com/AsgardXIV/Brio/releases/download/v{version}/Brio.zip",
         "DownloadLinkUpdate": "https://github.com/AsgardXIV/Brio/releases/download/v{version}/Brio.zip",
-        "IconUrl": "https://raw.githubusercontent.com/AsgardXIV/Brio/main/Resources/Images/BrioIcon.png"
+        "IconUrl": "https://raw.githubusercontent.com/AsgardXIV/Brio/main/Resources/Images/BrioIcon.png",
+        "Tags": [ 
+            "gpose",
+            "brio",
+            "posing",
+            "animation"
+        ]
     }
 ]
