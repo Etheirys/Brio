@@ -67,11 +67,14 @@ public class PenumbraCollectionService : ServiceBase<PenumbraCollectionService>
             return;
         }
 
-        var collections = Ipc.GetCollections.Subscriber(Dalamud.PluginInterface).Invoke();
-        var defaultCollection = Ipc.GetDefaultCollectionName.Subscriber(Dalamud.PluginInterface).Invoke();
+        var defaultCollection = Ipc.GetDefaultCollectionName.Subscriber(Dalamud.PluginInterface).Invoke(); 
+        var rawUserCollections = Ipc.GetCollections.Subscriber(Dalamud.PluginInterface).Invoke();
+        var userCollections = new List<string>(rawUserCollections);
+        userCollections.Sort(StringComparer.OrdinalIgnoreCase);
+
         Collections.Add(defaultCollection);
         Collections.Add("None");
-        Collections.AddRange(collections);
+        Collections.AddRange(userCollections);
     }
 
     private void CleanupOverrides()
