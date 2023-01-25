@@ -23,6 +23,7 @@ public class Configuration : IPluginConfiguration
     public ApplyNPCHack ApplyNPCHack { get; set; } = ApplyNPCHack.InGPose;
 
     // Integrations
+    public bool AllowBrioIPC { get; set; } = true;
     public bool AllowPenumbraIntegration { get; set; } = true;
     public bool AllowWebAPI { get; set; } = false;
 

@@ -37,6 +37,7 @@ public class Brio : IDisposable
         _serviceManager.Add<WeatherService>();
         _serviceManager.Add<PenumbraIPCService>();
         _serviceManager.Add<PenumbraCollectionService>();
+        _serviceManager.Add<BrioIPCService>();
 
         // Presentation
         _serviceManager.Add<UIService>();

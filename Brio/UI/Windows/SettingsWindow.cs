@@ -107,6 +107,22 @@ namespace Brio.UI.Windows
         {
             if(ImGui.BeginTabItem("Integrations"))
             {
+                if(ImGui.CollapsingHeader("Brio IPC", ImGuiTreeNodeFlags.DefaultOpen))
+                {
+                    bool previousBrioIpcEnabled = ConfigService.Configuration.AllowBrioIPC;
+                    bool enableBrioIpc = previousBrioIpcEnabled;
+                    if(ImGui.Checkbox("Enable Brio IPC", ref enableBrioIpc))
+                    {
+                        if(enableBrioIpc != previousBrioIpcEnabled)
+                        {
+                            ConfigService.Configuration.AllowBrioIPC = enableBrioIpc;
+                        }
+                    }
+                }
+                ImGui.Text($"Brio IPC Status: {(BrioIPCService.Instance.IsIPCEnabled ? "Active" : "Inactive")}");
+
+                ImGui.Separator();
+
                 if(ImGui.CollapsingHeader("Web API", ImGuiTreeNodeFlags.DefaultOpen))
                 {
                     bool previousEnableWebApi = ConfigService.Configuration.AllowWebAPI;

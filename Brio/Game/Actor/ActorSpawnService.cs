@@ -128,7 +128,7 @@ public class ActorSpawnService : ServiceBase<ActorSpawnService>
         }
     }
 
-    public unsafe void DestroyObject(DalamudGameObject go)
+    public unsafe bool DestroyObject(DalamudGameObject go)
     {
         var com = ClientObjectManager.Instance();
         var native = go.AsNative();
@@ -137,7 +137,10 @@ public class ActorSpawnService : ServiceBase<ActorSpawnService>
         {
             com->DeleteObjectByIndex((ushort)idx, 0);
             ActorService.Instance.UpdateGPoseTable();
+            return true;
         }
+
+        return false;
     }
 
     public override void Dispose()
