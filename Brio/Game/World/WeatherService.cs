@@ -31,11 +31,20 @@ public class WeatherService : ServiceBase<WeatherService>
 
     public unsafe byte CurrentWeather
     {
-        get => _weatherSystem->TargetWeather;
+        get
+        {
+            var system = (*_weatherSystem);
+            if(system == null) return 0;
+            return system->TargetWeather;
+        }
         set
         {
-           _weatherSystem->TargetWeather = value;
-           _weatherSystem->TransitionTime = DefaultTransitionTime;
+            var system = (*_weatherSystem);
+            if(system != null)
+            {
+                (*_weatherSystem)->TargetWeather = value;
+                (*_weatherSystem)->TransitionTime = DefaultTransitionTime;
+            }
         }
     }
 
@@ -44,7 +53,7 @@ public class WeatherService : ServiceBase<WeatherService>
     private delegate void UpdateTerritoryWeatherDelegate(IntPtr a1, IntPtr a2);
     private Hook<UpdateTerritoryWeatherDelegate> _updateTerritoryWeatherHook = null!;
 
-    private unsafe WeatherSystem* _weatherSystem;
+    private unsafe WeatherSystem** _weatherSystem;
 
     private List<Weather> _territoryWeatherTable = new();
 
@@ -60,7 +69,7 @@ public class WeatherService : ServiceBase<WeatherService>
     public unsafe override void Start()
     {
         IntPtr rawWeather = Dalamud.SigScanner.GetStaticAddressFromSig("4C 8B 05 ?? ?? ?? ?? 41 8B 80 ?? ?? ?? ?? C1 E8 02");
-        _weatherSystem = *(WeatherSystem**)rawWeather;
+        _weatherSystem = (WeatherSystem**)rawWeather;
 
         UpdateWeathersForCurrentTerritory();
 
