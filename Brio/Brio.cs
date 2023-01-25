@@ -18,7 +18,7 @@ public class Brio : IDisposable
     public const string PluginName = "Brio";
     public static readonly string PluginVersion = typeof(Brio).Assembly.GetName().Version?.ToString() ?? "(Unknown Version)";
 
-    private ServiceManager _serviceManager { get; set; } = null!;
+    private static ServiceManager _serviceManager { get; set; } = null!;
 
     public Brio()
     {
