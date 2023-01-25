@@ -53,16 +53,15 @@ public class WeatherService : ServiceBase<WeatherService>
 
     public unsafe WeatherService()
     {
-
-        IntPtr rawWeather = Dalamud.SigScanner.GetStaticAddressFromSig("4C 8B 05 ?? ?? ?? ?? 41 8B 80 ?? ?? ?? ?? C1 E8 02");
-        _weatherSystem = *(WeatherSystem**)rawWeather;
-
         var twAddress = Dalamud.SigScanner.ScanText("48 89 5C 24 ?? 55 56 57 48 83 EC ?? 48 8B F9 48 8D 0D ?? ?? ?? ??");
         _updateTerritoryWeatherHook = Hook<UpdateTerritoryWeatherDelegate>.FromAddress(twAddress, UpdateTerritoryWeather);
     }
 
     public unsafe override void Start()
     {
+        IntPtr rawWeather = Dalamud.SigScanner.GetStaticAddressFromSig("4C 8B 05 ?? ?? ?? ?? 41 8B 80 ?? ?? ?? ?? C1 E8 02");
+        _weatherSystem = *(WeatherSystem**)rawWeather;
+
         UpdateWeathersForCurrentTerritory();
 
         Dalamud.ClientState.TerritoryChanged += ClientState_TerritoryChanged;
