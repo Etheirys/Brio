@@ -9,8 +9,31 @@ namespace Brio.Game.GPose;
 public class GPoseService : ServiceBase<GPoseService>
 {
     public GPoseState GPoseState { get; private set; }
-    public bool IsInGPose => GPoseState == GPoseState.Inside || FakeGPose;
-    public bool FakeGPose { get; set; } = false;
+    public bool IsInGPose => GPoseState == GPoseState.Inside;
+    public bool FakeGPose
+    {
+        get => _fakeGPose;
+
+        set
+        {
+            if(value != _fakeGPose)
+            {
+                if(!value)
+                {
+                    _fakeGPose = false;
+                    HandleGPoseChange(GPoseState.Exiting);
+                    HandleGPoseChange(GPoseState.Outside);
+                }
+                else
+                {
+                    HandleGPoseChange(GPoseState.Inside);
+                    _fakeGPose = true;
+                }
+            }
+        }
+    }
+
+    private bool _fakeGPose = false;
 
     public delegate void OnGPoseStateDelegate(GPoseState gposeState);
     public event OnGPoseStateDelegate? OnGPoseStateChange;
@@ -56,6 +79,9 @@ public class GPoseService : ServiceBase<GPoseService>
 
     private void HandleGPoseChange(GPoseState state)
     {
+        if(state == GPoseState || _fakeGPose)
+            return;
+
         GPoseState = state;
         OnGPoseStateChange?.Invoke(state);
     }

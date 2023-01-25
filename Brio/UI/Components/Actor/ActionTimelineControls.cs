@@ -3,8 +3,10 @@ using Brio.Game.Actor.Extensions;
 using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Interface;
 using FFXIVClientStructs.FFXIV.Client.Game;
+using FFXIVClientStructs.FFXIV.Client.Graphics.Scene;
 using ImGuiNET;
 using Lumina.Excel.GeneratedSheets;
+using Math = System.Math;
 using System.Numerics;
 
 namespace Brio.UI.Components.Actor;
@@ -44,6 +46,8 @@ public static class ActionTimelineControls
             DrawOverrideInputs(managedChara);
             DrawSlotSelect(managedChara);
             DrawSlotModifier(managedChara, _selectedSlot);
+            DrawSlotScrub(managedChara, _selectedSlot);
+            ActionTimelineService.Instance.UpdateAllSlots(managedChara);
             DrawSearch(managedChara);
         }
         else
@@ -127,6 +131,18 @@ public static class ActionTimelineControls
         ImGui.PopFont();
         if(ImGui.IsItemHovered())
             ImGui.SetTooltip("Search");
+
+        var speedOverride = ActionTimelineService.Instance.GetSpeedOverride(character);
+        ImGui.SetNextItemWidth(-130);
+        ImGui.SliderFloat("Speed Multiplier", ref speedOverride.SpeedMultiplier, 0, 5f);
+        ImGui.SameLine();
+        ImGui.PushFont(UiBuilder.IconFont);
+        if(ImGui.Button(FontAwesomeIcon.Redo.ToIconString() + "###slot_multiplier_reset"))
+        {
+            speedOverride.SpeedMultiplier = 1.0f;
+        }
+        ImGui.PopFont();
+
     }
 
     private unsafe static void DrawSlotSelect(Character managedChara)
@@ -146,11 +162,10 @@ public static class ActionTimelineControls
                 if(timelineId == 0)
                     continue;
 
-                bool isSelected = oldSelectedSlot == i;
+                bool wasSelected = oldSelectedSlot == i;
 
-                if(isSelected)
+                if(wasSelected && _selectedSlot == -1)
                     _selectedSlot = i;
-
 
                 var timelineEntry = actionTimelineSheet?.GetRow(timelineId);
                 string timelineKey = timelineEntry?.Key ?? "unknown";
@@ -158,8 +173,10 @@ public static class ActionTimelineControls
                 var slot = (ActionTimelineSlots)i;
                 string description = $"{slot} ({i}): {timelineId} ({timelineKey})";
 
-                if(ImGui.Selectable(description, isSelected))
+                if(ImGui.Selectable(description, wasSelected))
+                {
                     _selectedSlot = i;
+                }
 
                 if(ImGui.IsItemHovered())
                 {
@@ -176,7 +193,76 @@ public static class ActionTimelineControls
         if(selectedSlot == -1)
             return;
 
-        // TODO: Speed controls
+        var speedOverride = ActionTimelineService.Instance.GetSpeedOverride(character);
+
+        ImGui.SetNextItemWidth(-100);
+        ImGui.SliderFloat("Slot Speed", ref speedOverride.SlotModifiers[selectedSlot], 0f, 5f);
+        ImGui.SameLine();
+        ImGui.PushFont(UiBuilder.IconFont);
+        if(ImGui.Button(FontAwesomeIcon.Redo.ToIconString() + "###slot_mspeed_reset"))
+        {
+            speedOverride.SlotModifiers[selectedSlot] = 1.0f;
+        }
+        ImGui.PopFont();
+    }
+
+    private unsafe static void DrawSlotScrub(Character character, int selectedSlot)
+    {
+        if(selectedSlot == -1)
+            return;
+
+        var speedOverride = ActionTimelineService.Instance.GetSpeedOverride(character);
+
+        var chara = character.AsNative();
+
+        if(chara->GameObject.DrawObject == null)
+            return;
+
+        var drawObject = chara->GameObject.DrawObject;
+
+        if(drawObject->Object.GetObjectType() != ObjectType.CharacterBase)
+            return;
+
+        var charaBase = (CharacterBase*)&drawObject->Object;
+
+        if(charaBase->Skeleton == null)
+            return;
+
+        if(charaBase->Skeleton->PartialSkeletonCount > 0)
+        {
+            var partialSkele = charaBase->Skeleton->PartialSkeletons[0];
+            var bodyBase = partialSkele.GetHavokAnimatedSkeleton(0);
+
+            if(bodyBase != null)
+            {
+                if(bodyBase->AnimationControls.Length > selectedSlot)
+                {
+                    var animControls = bodyBase->AnimationControls[selectedSlot].Value;
+                    var duration = animControls->hkaAnimationControl.Binding.ptr->Animation.ptr->Duration;
+
+                    bool isPaused = Math.Abs(speedOverride.GetEffectiveSpeed((ActionTimelineSlots)selectedSlot) - animControls->PlaybackSpeed) > 0.1f;
+
+                    ImGui.SetNextItemWidth(-128);
+                    ImGui.SliderFloat("Skeleton Speed", ref animControls->PlaybackSpeed, 0, 5f);
+                    ImGui.SameLine();
+                    ImGui.PushFont(UiBuilder.IconFont);
+                    if(ImGui.Button(FontAwesomeIcon.Redo.ToIconString() + "###skeleton_speed_reset"))
+                    {
+                        animControls->PlaybackSpeed = 1.0f;
+                    }
+                    ImGui.PopFont();
+
+                    var isFrozen = animControls->PlaybackSpeed == 0f;
+                    if(!isFrozen) ImGui.BeginDisabled();
+                    ImGui.SetNextItemWidth(ImGui.GetContentRegionAvail().X - ImGui.CalcTextSize("Skeleton Scrub").X);
+                    ImGui.SliderFloat("Skeleton Scrub", ref animControls->hkaAnimationControl.LocalTime, 0, duration - 0.05f);
+                    if(!isFrozen) ImGui.EndDisabled();
+
+                    if(isPaused && animControls->hkaAnimationControl.LocalTime > duration - 0.05f)
+                        animControls->hkaAnimationControl.LocalTime = 0.0f;
+                }
+            }
+        }
     }
 
     private static void DrawSearch(Character character)
