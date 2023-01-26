@@ -50,7 +50,7 @@ public static class RedrawControls
             _redrawType &= ~RedrawType.ForceRedrawWeaponsOnOptimized;
 
 
-        if(ImGui.Button("Redraw"))
+        if(ImGui.Button("Redraw##button"))
         {
             var result = ActorRedrawService.Instance.Redraw(gameObject, _redrawType);
             if(result == RedrawResult.Failed)
