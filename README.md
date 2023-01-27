@@ -6,7 +6,7 @@ It is designed to enhance the experience of users no matter which posing tool th
 * Creation and Deletion of GPose actors (up to 39)
 * Change the Penumbra collection applied to GPose actors
 * Add/Remove/Blend animations on GPose actors (and adjust their speed / scrub through them)
-* Change the active festivals (Moonfire Faire for fireworks) etc
+* Change the active festivals and apply up to 4 at once (Moonfire Faire for fireworks etc) 
 * Add/Remove Status Effects on GPose actors
 * Control Time/Weather in both the Overworld and GPose
 * Redraw control of GPose actors
