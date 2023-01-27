@@ -2,6 +2,7 @@
 using Dalamud.Game.ClientState.Objects.Types;
 using Brio.Game.Actor;
 using Brio.Game.Actor.Extensions;
+using System.Numerics;
 
 namespace Brio.UI.Components;
 
@@ -15,8 +16,8 @@ public class ActorSelector
 
         ImGui.Text($"Actors: {gposeObjects.Count}/{ActorService.GPoseActorCount}");
 
-        ImGui.PushItemWidth(ImGui.GetContentRegionAvail().X);
-        if(ImGui.BeginListBox("###gpose_actor_list"))
+        ImGui.PushItemWidth(-1);
+        if(ImGui.BeginListBox("###gpose_actor_list", new Vector2(-1, ImGui.GetTextLineHeight() * 9)))
         {
 
             var previousSelected = SelectedObject;

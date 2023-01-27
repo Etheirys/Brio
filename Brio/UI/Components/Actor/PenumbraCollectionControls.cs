@@ -20,7 +20,8 @@ public static class PenumbraCollectionControls
             if(_selectedCollection == null && collections.Count > 0)
                 _selectedCollection = collections[0];
 
-            ImGui.PushItemWidth(ImGui.GetContentRegionAvail().X - ImGui.CalcTextSize("Collection").X - 40);
+            ImGui.SetNextItemWidth(ImGui.GetFontSize() * 8);
+            ImGui.BeginGroup();
             if(ImGui.BeginCombo("Collection", _selectedCollection))
             {
                 foreach(var collection in collections)
@@ -34,7 +35,7 @@ public static class PenumbraCollectionControls
 
                 ImGui.EndCombo();
             }
-            ImGui.PopItemWidth();
+            ImGui.EndGroup();
 
             ImGui.SameLine();
 

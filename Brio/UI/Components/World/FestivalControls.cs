@@ -22,7 +22,7 @@ public static class FestivalControls
         var isGPose = GPoseService.Instance.IsInGPose;
 
         ImGui.SetNextItemWidth(-1);
-        if(ImGui.BeginListBox("###festival_active_list", new Vector2(0, 95)))
+        if(ImGui.BeginListBox("###festival_active_list", new Vector2(0, (ImGui.GetTextLineHeight() * 1.3f) * 4)))
         {
             foreach(var item in active)
             {
@@ -37,7 +37,8 @@ public static class FestivalControls
 
         if(!isGPose) ImGui.BeginDisabled();
 
-        ImGui.SetNextItemWidth(60f);
+        ImGui.SetNextItemWidth(ImGui.GetFontSize() * 2f);
+        ImGui.BeginGroup();
         ImGui.InputInt("Festival##input", ref _festivalInput, 0, 0);
 
         ImGui.SameLine();
@@ -71,6 +72,8 @@ public static class FestivalControls
         }
 
         ImGui.PopFont();
+
+        ImGui.EndGroup();
 
         if(!isGPose) ImGui.EndDisabled();
 

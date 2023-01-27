@@ -18,8 +18,8 @@ public static class StatusEffectControls
             var statusManager = battleChara.GetStatusManager();
 
             var effects = statusManager->GetAllStatuses();
-            ImGui.SetNextItemWidth(ImGui.GetContentRegionAvail().X);
-            if(ImGui.BeginListBox("###status_effects", new Vector2(0, 100)))
+            ImGui.SetNextItemWidth(-1);
+            if(ImGui.BeginListBox("###status_effects", new Vector2(0, ImGui.GetTextLineHeight() * 4)))
             {
                 int tieBreak = 0;
                 foreach(var effect in effects)
@@ -37,7 +37,8 @@ public static class StatusEffectControls
 
             bool isSelectedPlaying = effects.Count((i) => _selectedEntry == i.RowId) > 0;
 
-            ImGui.SetNextItemWidth(-100);
+            ImGui.SetNextItemWidth(ImGui.GetFontSize() * 8);
+            ImGui.BeginGroup();
             ImGui.InputInt("###effect_id", ref _selectedEntry, 0, 0);
             ImGui.SameLine();
             ImGui.PushFont(UiBuilder.IconFont);
@@ -72,6 +73,8 @@ public static class StatusEffectControls
             }
 
             ImGui.PopFont();
+
+            ImGui.EndGroup();
 
             if(ImGui.BeginPopup("###global_status_list"))
             {

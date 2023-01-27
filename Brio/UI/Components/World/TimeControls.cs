@@ -25,7 +25,7 @@ public static class TimeControls
         int originalDay = dayOfMonth;
         if(!isLocked) ImGui.BeginDisabled();
 
-        ImGui.PushItemWidth(ImGui.GetContentRegionAvail().X - ImGui.CalcTextSize("Day of Month").X);
+        ImGui.PushItemWidth(-ImGui.CalcTextSize("XXXXXXXXXXXX").X);
         ImGui.SliderInt("Time of Day", ref timeOfDay, 0, 1439, $"{displayTime.Hours:D2}:{displayTime.Minutes:D2}");
         ImGui.SliderInt("Day of Month", ref dayOfMonth, 1, 31);
         ImGui.PopItemWidth();

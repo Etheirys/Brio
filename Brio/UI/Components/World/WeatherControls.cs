@@ -3,6 +3,7 @@ using Dalamud.Interface;
 using ImGuiNET;
 using Lumina.Excel.GeneratedSheets;
 using System.Linq;
+using System.Numerics;
 
 namespace Brio.UI.Components;
 public static class WeatherControls
@@ -20,7 +21,8 @@ public static class WeatherControls
         if(!isLocked) ImGui.BeginDisabled();
         var currentWeather = (int)WeatherService.Instance.CurrentWeather;
         var previousWeather = currentWeather;
-        ImGui.SetNextItemWidth(150f);
+        ImGui.SetNextItemWidth(ImGui.GetFontSize() * 8.3f);
+        ImGui.BeginGroup();
         if(ImGui.InputInt("Weather", ref currentWeather, 0, 0))
         {
             // Nada
@@ -32,10 +34,11 @@ public static class WeatherControls
             ImGui.OpenPopup("###global_weather_list");
         }
         ImGui.PopFont();
+        ImGui.EndGroup();
 
 
-        ImGui.PushItemWidth(ImGui.GetContentRegionAvail().X);
-        if(ImGui.BeginListBox("###territory_weather_list", new System.Numerics.Vector2(0, 80)))
+        ImGui.PushItemWidth(-1);
+        if(ImGui.BeginListBox("###territory_weather_list", new Vector2(0, ImGui.GetTextLineHeight() * 5)))
         {
             foreach(var weather in WeatherService.Instance.TerritoryWeatherTable)
             {

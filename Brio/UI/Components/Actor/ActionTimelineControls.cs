@@ -64,7 +64,8 @@ public static class ActionTimelineControls
 
         ImGui.SameLine();
 
-        ImGui.SetNextItemWidth(-128);
+        ImGui.SetNextItemWidth(ImGui.GetFontSize() * 4);
+        ImGui.BeginGroup();
         ImGui.InputInt("Base ", ref _baseTimelineInput, 0, 0);
         ImGui.SameLine();
 
@@ -105,7 +106,12 @@ public static class ActionTimelineControls
         if(ImGui.IsItemHovered())
             ImGui.SetTooltip("Search");
 
-        ImGui.SetNextItemWidth(-128);
+        ImGui.EndGroup();
+
+
+        ImGui.SetNextItemWidth(ImGui.GetFontSize() * 7.5f);
+        ImGui.BeginGroup();
+
         ImGui.InputInt("Blend", ref _blendTimelineInput, 0, 0);
 
         ImGui.SameLine();
@@ -132,8 +138,12 @@ public static class ActionTimelineControls
         if(ImGui.IsItemHovered())
             ImGui.SetTooltip("Search");
 
+        ImGui.EndGroup();
+
+        ImGui.SetNextItemWidth(ImGui.GetFontSize() * 6f);
+        ImGui.BeginGroup();
+
         var speedOverride = ActionTimelineService.Instance.GetSpeedOverride(character);
-        ImGui.SetNextItemWidth(-130);
         ImGui.SliderFloat("Speed Multiplier", ref speedOverride.SpeedMultiplier, 0, 5f);
         ImGui.SameLine();
         ImGui.PushFont(UiBuilder.IconFont);
@@ -142,6 +152,8 @@ public static class ActionTimelineControls
             speedOverride.SpeedMultiplier = 1.0f;
         }
         ImGui.PopFont();
+
+        ImGui.EndGroup();
 
     }
 
@@ -152,8 +164,8 @@ public static class ActionTimelineControls
         _selectedSlot = -1;
         var actionTimelineSheet = Dalamud.DataManager.Excel.GetSheet<ActionTimeline>();
 
-        ImGui.SetNextItemWidth(ImGui.GetContentRegionAvail().X);
-        if(ImGui.BeginListBox("###anim_slots", new Vector2(0, 100)))
+        ImGui.SetNextItemWidth(-1);
+        if(ImGui.BeginListBox("###anim_slots", new Vector2(0, ImGui.GetTextLineHeight() * 5)))
         {
             for(int i = 0; i < ActionTimelineDriver.TimelineSlotCount; i++)
             {
@@ -195,7 +207,8 @@ public static class ActionTimelineControls
 
         var speedOverride = ActionTimelineService.Instance.GetSpeedOverride(character);
 
-        ImGui.SetNextItemWidth(-100);
+        ImGui.SetNextItemWidth(ImGui.GetFontSize() * 7.5f);
+        ImGui.BeginGroup();
         ImGui.SliderFloat("Slot Speed", ref speedOverride.SlotModifiers[selectedSlot], 0f, 5f);
         ImGui.SameLine();
         ImGui.PushFont(UiBuilder.IconFont);
@@ -204,6 +217,7 @@ public static class ActionTimelineControls
             speedOverride.SlotModifiers[selectedSlot] = 1.0f;
         }
         ImGui.PopFont();
+        ImGui.EndGroup();
     }
 
     private unsafe static void DrawSlotScrub(Character character, int selectedSlot)
@@ -242,7 +256,8 @@ public static class ActionTimelineControls
 
                     bool isPaused = Math.Abs(speedOverride.GetEffectiveSpeed((ActionTimelineSlots)selectedSlot) - animControls->PlaybackSpeed) > 0.1f;
 
-                    ImGui.SetNextItemWidth(-128);
+                    ImGui.SetNextItemWidth(ImGui.GetFontSize() * 5.5f);
+                    ImGui.BeginGroup();
                     ImGui.SliderFloat("Skeleton Speed", ref animControls->PlaybackSpeed, 0, 5f);
                     ImGui.SameLine();
                     ImGui.PushFont(UiBuilder.IconFont);
@@ -251,12 +266,15 @@ public static class ActionTimelineControls
                         animControls->PlaybackSpeed = 1.0f;
                     }
                     ImGui.PopFont();
+                    ImGui.EndGroup();
 
+                    ImGui.SetNextItemWidth(ImGui.GetFontSize() * 7.5f);
+                    ImGui.BeginGroup();
                     var isFrozen = animControls->PlaybackSpeed == 0f;
                     if(!isFrozen) ImGui.BeginDisabled();
-                    ImGui.SetNextItemWidth(ImGui.GetContentRegionAvail().X - ImGui.CalcTextSize("Skeleton Scrub").X);
                     ImGui.SliderFloat("Skeleton Scrub", ref animControls->hkaAnimationControl.LocalTime, 0, duration - 0.05f);
                     if(!isFrozen) ImGui.EndDisabled();
+                    ImGui.EndGroup();
 
                     if(isPaused && animControls->hkaAnimationControl.LocalTime > duration - 0.05f)
                         animControls->hkaAnimationControl.LocalTime = 0.0f;
