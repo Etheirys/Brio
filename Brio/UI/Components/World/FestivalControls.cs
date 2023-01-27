@@ -37,7 +37,7 @@ public static class FestivalControls
 
         if(!isGPose) ImGui.BeginDisabled();
 
-        ImGui.SetNextItemWidth(ImGui.GetFontSize() * 2f);
+        ImGui.SetNextItemWidth(ImGui.GetFontSize() * 2.8f);
         ImGui.BeginGroup();
         ImGui.InputInt("Festival##input", ref _festivalInput, 0, 0);
 
