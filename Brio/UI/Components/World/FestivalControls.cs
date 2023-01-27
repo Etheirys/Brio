@@ -2,6 +2,7 @@
 using Brio.Game.World;
 using Dalamud.Interface;
 using ImGuiNET;
+using System.Numerics;
 
 namespace Brio.UI.Components.World;
 public static class FestivalControls
@@ -15,34 +16,51 @@ public static class FestivalControls
 
     public unsafe static void Draw()
     {
-        var currentFestival = FestivalService.Instance.CurrentFestival;
-        var isOverridden = FestivalService.Instance.IsOverriden;
+        var active = FestivalService.Instance.ActiveFestivals;
+        var isOverridden = FestivalService.Instance.IsOverridden;
+        var isFull = !FestivalService.Instance.HasMoreSlots;
+        var isGPose = GPoseService.Instance.IsInGPose;
 
-        ImGui.Text($"Current: {currentFestival}");
-
-        ImGui.Spacing();
-
-        if(!GPoseService.Instance.IsInGPose)
+        ImGui.SetNextItemWidth(-1);
+        if(ImGui.BeginListBox("###festival_active_list", new Vector2(0, 95)))
         {
-            ImGui.Text("Must be in GPose to modify festival.");
-            return;
+            foreach(var item in active)
+            {
+                var isSelected = item.Id == _festivalInput;
+                if(ImGui.Selectable(item.ToString(), isSelected))
+                {
+                    _festivalInput = (int) item.Id;
+                }
+            }
+            ImGui.EndListBox();
         }
 
-        ImGui.SetNextItemWidth(85f);
+        if(!isGPose) ImGui.BeginDisabled();
+
+        ImGui.SetNextItemWidth(60f);
         ImGui.InputInt("Festival##input", ref _festivalInput, 0, 0);
 
         ImGui.SameLine();
 
+        if(isFull) ImGui.BeginDisabled();
         ImGui.PushFont(UiBuilder.IconFont);
         if(ImGui.Button(FontAwesomeIcon.Play.ToIconString() + "###festival_play_button"))
         {
-            ApplyOverride((ushort)_festivalInput);
+            ApplyOverride((uint) _festivalInput);
+        }
+        ImGui.PopFont();
+        if(isFull) ImGui.EndDisabled();
+        ImGui.SameLine();
+        ImGui.PushFont(UiBuilder.IconFont);
+        if(ImGui.Button(FontAwesomeIcon.Stop.ToIconString() + "###festival_stop_button"))
+        {
+            RemoveOverride((uint) _festivalInput);
         }
         ImGui.SameLine();
         if(!isOverridden) ImGui.BeginDisabled();
         if(ImGui.Button(FontAwesomeIcon.Redo.ToIconString() + "###festival_reset_button"))
         {
-            FestivalService.Instance.ResetFestivalOverride();
+            FestivalService.Instance.ResetFestivals();
         }
         if(!isOverridden) ImGui.EndDisabled();
 
@@ -53,6 +71,8 @@ public static class FestivalControls
         }
 
         ImGui.PopFont();
+
+        if(!isGPose) ImGui.EndDisabled();
 
         DrawSearch();
     }
@@ -84,7 +104,7 @@ public static class FestivalControls
 
                     if(ImGui.Selectable(entryText, isSelected))
                     {
-                        _festivalInput= entry.Id;
+                        _festivalInput= (int) entry.Id;
                     }
                     if(ImGui.IsItemHovered() && ImGui.IsMouseDoubleClicked(ImGuiMouseButton.Left))
                     {
@@ -104,5 +124,7 @@ public static class FestivalControls
         }
     }
 
-    private static void ApplyOverride(ushort festivalId) => FestivalService.Instance.SetFestivalOverride(festivalId);
+    private static void ApplyOverride(uint festivalId) => FestivalService.Instance.AddFestival(festivalId);
+    private static void RemoveOverride(uint festivalId) => FestivalService.Instance.RemoveFestival(festivalId);
+
 }

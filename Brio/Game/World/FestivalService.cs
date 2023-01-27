@@ -1,7 +1,6 @@
 ﻿using Brio.Core;
 using Brio.Game.GPose;
 using Brio.Utils;
-using FFXIVClientStructs.FFXIV.Client.LayoutEngine;
 using Lumina.Excel.GeneratedSheets;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -9,57 +8,42 @@ using System.IO;
 using System.Linq;
 using System.Numerics;
 using System.Reflection;
-using System.Runtime.InteropServices;
 using System.Text.Json;
 
 namespace Brio.Game.World;
 public class FestivalService : ServiceBase<FestivalService>
 {
-    // TODO: Submit the layout changes back to ClientStructs
+    public const int MaxFestivals = 4;
 
     public ReadOnlyCollection<FestivalEntry> FestivalEntries => new(_festivalEntries);
-    public bool IsOverriden => _originalFestival != null;
+
+    public ReadOnlyCollection<FestivalEntry> ActiveFestivals
+    {
+        get
+        {
+            var result = new List<FestivalEntry>();
+            var active = _festivalInterop.GetActiveFestivals();
+            for(int idx = 0; idx < MaxFestivals; ++idx)
+            {
+                var entry = _festivalEntries.First(i => i.Id == active[idx]);
+                if(entry.Id != 0)
+                    result.Add(entry);
+            }
+            return new(result);
+        }
+    }
+
+    public bool HasMoreSlots => _festivalInterop.GetActiveFestivals().Count(i => i == 0) > 0;
+    public bool IsOverridden => _originalState != null;
 
     private List<FestivalEntry> _festivalEntries = new();
 
-    private Queue<ushort> _queuedTransitions = new();
-    private ushort? _originalFestival;
+    private LayoutManagerInterop _festivalInterop = new();
+    private GameMainInterop _gameMainInterop = new();
 
-    private unsafe delegate* unmanaged<LayoutManager*, FestivalArgs, void> _updateFestival;
 
-    public FestivalEntry CurrentFestival
-    {
-        get
-        {
-            var currentId = CurrentFestivalId;
-            return _festivalEntries.First(i => i.Id == currentId);
-        }
-    }
-
-    public unsafe ushort CurrentFestivalId
-    {
-        get
-        {
-            var layoutWorld = LayoutWorld.Instance();
-            if(layoutWorld != null)
-            {
-                var layoutManager = layoutWorld->ActiveLayout;
-
-                if(layoutManager != null)
-                {
-                    return *(ushort*)(((nint)layoutManager) + 0x40);
-                }
-            }
-
-            return 0;
-        }
-    }
-
-    public unsafe FestivalService()
-    {
-        var updateFestivalAddress = Dalamud.SigScanner.ScanText("E8 ?? ?? ?? ?? 8B C5 EB 6A");
-        _updateFestival = (delegate* unmanaged<LayoutManager*, FestivalArgs, void>)updateFestivalAddress;
-    }
+    private Queue<uint[]?> _pendingChanges = new();
+    private uint[]? _originalState;
 
     public override void Start()
     {
@@ -69,25 +53,89 @@ public class FestivalService : ServiceBase<FestivalService>
         base.Start();
     }
 
+    public bool AddFestival(uint festival)
+    {
+        if(!CheckFestivalRestrictions(festival))
+            return false;
+
+        var active = _festivalInterop.GetActiveFestivals();
+        var copy = active.ToArray();
+
+        for(int i = 0; i < MaxFestivals; ++i)
+        {
+            if(active[i] == 0)
+            {
+                SnapshotFestivals();
+                copy[i] = festival;
+                _pendingChanges.Enqueue(copy);
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public bool RemoveFestival(uint festival)
+    {
+        var active = _festivalInterop.GetActiveFestivals();
+        var copy = active.ToArray();
+
+        for(int i = 0; i < MaxFestivals; ++i)
+        {
+            if(active[i] == festival)
+            {
+                SnapshotFestivals();
+                copy[i] = 0;
+                _pendingChanges.Enqueue(copy);
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public unsafe void ResetFestivals(bool tryThisFrame = false)
+    {
+        if(_originalState != null)
+        {
+            if(tryThisFrame)
+            {
+                InternalApply(_originalState, false);
+            }
+            else
+            {
+                _pendingChanges.Enqueue(_originalState.ToArray());
+            }
+
+            _originalState = null;
+        }
+    }
+
     public unsafe override void Tick()
     {
-        if(_queuedTransitions.Count == 0)
-            return;
-
-        var layoutWorld = LayoutWorld.Instance();
-        if(layoutWorld != null )
+        if(_pendingChanges.Count > 0 && !_festivalInterop.IsBusy)
         {
-            var layoutManager = layoutWorld->ActiveLayout;
+            var pending = _pendingChanges.Dequeue();
+            if(pending != null)
+                InternalApply(pending);
+        }
+    }
 
-            if( layoutManager != null )
-            {
-                byte status = *(byte*)(((nint)layoutManager) + 0x38);
-                if(status != 0 && status != 5)
-                    return;
+    private void SnapshotFestivals()
+    {
+        if(_originalState == null)
+            _originalState = _festivalInterop.GetActiveFestivals().ToArray();
+    }
 
-                var next = _queuedTransitions.Dequeue();
-                SetFestivalImmediately(next);
-            }
+    private unsafe void InternalApply(uint[] festivals, bool applyNow = true)
+    {
+        if(applyNow)
+        {
+            _gameMainInterop.SetActiveFestivals(festivals[0], festivals[1], festivals[2], festivals[3]);
+        }
+        else
+        {
+            _gameMainInterop.QueueActiveFestivals(festivals[0], festivals[1], festivals[2], festivals[3]);
         }
     }
 
@@ -137,47 +185,8 @@ public class FestivalService : ServiceBase<FestivalService>
         }
     }
 
-    public void SetFestivalOverride(ushort festivalId)
-    {
-        if(!CheckFestivalRestrictions(festivalId))
-            return;
 
-        if(_originalFestival == null)
-            _originalFestival = CurrentFestivalId;
-
-        _queuedTransitions.Enqueue(festivalId);
-    }
-
-    public void ResetFestivalOverride()
-    {
-        if(_originalFestival != null)
-        {
-            SetFestivalOverride((ushort) _originalFestival);
-            _originalFestival = null;
-        }
-    }
-
-    private unsafe void SetFestivalImmediately(ushort festivalId)
-    {
-        var layoutWorld = LayoutWorld.Instance();
-        if(layoutWorld != null)
-        {
-            var layoutManager = layoutWorld->ActiveLayout;
-
-            if(layoutManager != null)
-            {
-                var layout = new FestivalArgs
-                {
-                    FestivalId = festivalId
-                };
-
-
-                _updateFestival(layoutManager, layout);
-            }
-        }
-    }
-
-    private bool CheckFestivalRestrictions(ushort festivalId)
+    private bool CheckFestivalRestrictions(uint festivalId)
     {
         var festival = _festivalEntries.SingleOrDefault(i => i.Id == festivalId);
         if(festival == null) return false;
@@ -208,38 +217,26 @@ public class FestivalService : ServiceBase<FestivalService>
     {
         if(gposeState == GPoseState.Exiting)
         {
-            ResetFestivalOverride();
+            ResetFestivals();
         }
     }
 
     private void ClientState_TerritoryChanged(object? sender, ushort e)
     {
-        _queuedTransitions.Clear();
-        _originalFestival = null;
+        _pendingChanges.Clear();
+        _originalState = null;
     }
 
     public override void Stop()
     {
+        ResetFestivals(true);
         GPoseService.Instance.OnGPoseStateChange -= Instance_OnGPoseStateChange;
         Dalamud.ClientState.TerritoryChanged -= ClientState_TerritoryChanged;
-
-        if(_originalFestival != null && CurrentFestivalId != _originalFestival)
-            SetFestivalImmediately((ushort) _originalFestival);
-
-    }
-
-    [StructLayout(LayoutKind.Explicit, Size = 0x10)]
-    private struct FestivalArgs
-    {
-        [FieldOffset(0x0)] public uint FestivalId;
-        [FieldOffset(0x4)] public uint a1;
-        [FieldOffset(0x8)] public uint a2;
-        [FieldOffset(0xC)] public uint a3;
     }
 
     private class FestivalFileEntry
     {
-        public ushort Id { get; set; }
+        public uint Id { get; set; }
         public string Name { get; set; } = null!;
         public bool Unsafe { get; set; }
         public FestivalAreaExclusion? AreaExclusion { get; set; }
@@ -262,7 +259,7 @@ public class FestivalService : ServiceBase<FestivalService>
 
     public class FestivalEntry
     {
-        public ushort Id { get; set; }
+        public uint Id { get; set; }
         public string Name { get; set; } = "Unknown";
         public bool Unknown { get; set; }
         public bool Unsafe { get; set; }

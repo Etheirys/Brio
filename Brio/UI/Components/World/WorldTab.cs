@@ -16,7 +16,7 @@ public static class WorldTab
             WeatherControls.Draw();
         }
 
-        if(ImGui.CollapsingHeader("Festival", ImGuiTreeNodeFlags.DefaultOpen))
+        if(ImGui.CollapsingHeader("Festivals", ImGuiTreeNodeFlags.DefaultOpen))
         {
             FestivalControls.Draw();
         }
