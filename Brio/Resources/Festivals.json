@@ -1,0 +1,526 @@
+﻿[
+  {
+    "Id": 0,
+    "Name": "None",
+    "Unsafe": false
+  },
+  {
+    "Id": 3,
+    "Name": "FFXIII Lightning Strikes",
+    "Unsafe": false
+  },
+  {
+    "Id": 6,
+    "Name": "Burgeoning Dread",
+    "Unsafe": false
+  },
+  {
+    "Id": 7,
+    "Name": "Breaking Brick Mountains",
+    "Unsafe": false
+  },
+  {
+    "Id": 26,
+    "Name": "New Year Machinations (Music) (2015)",
+    "Unsafe": false
+  },
+  {
+    "Id": 30,
+    "Name": "The Maiden's Rhapsody",
+    "Unsafe": false
+  },
+  {
+    "Id": 39,
+    "Name": "Yo-kai Watch",
+    "Unsafe": false
+  },
+  {
+    "Id": 41,
+    "Name": "New Year Machinations (Music) (2016)",
+    "Unsafe": false
+  },
+  {
+    "Id": 42,
+    "Name": "All Saint's Wake (2016)",
+    "Unsafe": false
+  },
+  {
+    "Id": 43,
+    "Name": "Starlight Celebration (2016)",
+    "Unsafe": false
+  },
+  {
+    "Id": 44,
+    "Name": "Heavensturn (2016)",
+    "Unsafe": false
+  },
+  {
+    "Id": 45,
+    "Name": "Valentione's Day (2017)",
+    "Unsafe": false
+  },
+  {
+    "Id": 46,
+    "Name": "Little Ladies' Day (2017)",
+    "Unsafe": false
+  },
+  {
+    "Id": 47,
+    "Name": "Hatching Tide (2017)",
+    "Unsafe": false
+  },
+  {
+    "Id": 48,
+    "Name": "Make It Rain (2017)",
+    "Unsafe": false
+  },
+  {
+    "Id": 49,
+    "Name": "Heavensturn (2017)",
+    "Unsafe": false
+  },
+  {
+    "Id": 50,
+    "Name": "New Year (2017)",
+    "Unsafe": false
+  },
+  {
+    "Id": 51,
+    "Name": "China New Year (2017)",
+    "Unsafe": true
+  },
+  {
+    "Id": 52,
+    "Name": "Korea New Year (2017)",
+    "Unsafe": true
+  },
+  {
+    "Id": 53,
+    "Name": "Moonfire Faire (2017)",
+    "Unsafe": false
+  },
+  {
+    "Id": 54,
+    "Name": "The Rising (2017)",
+    "Unsafe": false
+  },
+  {
+    "Id": 58,
+    "Name": "All Saint's Wake (2017)",
+    "Unsafe": false
+  },
+  {
+    "Id": 59,
+    "Name": "Starlight Celebration (2017)",
+    "Unsafe": false
+  },
+  {
+    "Id": 60,
+    "Name": "Heavensturn (2018)",
+    "Unsafe": false
+  },
+  {
+    "Id": 61,
+    "Name": "New Year (2018)",
+    "Unsafe": false
+  },
+  {
+    "Id": 62,
+    "Name": "China New Year (2018)",
+    "Unsafe": true
+  },
+  {
+    "Id": 63,
+    "Name": "Korea New Year (2018)",
+    "Unsafe": true
+  },
+  {
+    "Id": 64,
+    "Name": "Valentione''s Day (2018)",
+    "Unsafe": false
+  },
+  {
+    "Id": 65,
+    "Name": "Little Ladies' Day (2018)",
+    "Unsafe": false
+  },
+  {
+    "Id": 66,
+    "Name": "Hatching Tide (2018)",
+    "Unsafe": false
+  },
+  {
+    "Id": 70,
+    "Name": "Make It Rain (2018)",
+    "Unsafe": false
+  },
+  {
+    "Id": 71,
+    "Name": "Moonfire Faire (2018)",
+    "Unsafe": false
+  },
+  {
+    "Id": 72,
+    "Name": "The Rising (2018)",
+    "Unsafe": false
+  },
+  {
+    "Id": 73,
+    "Name": "Fifth Anniversary Content (2018)",
+    "Unsafe": false
+  },
+  {
+    "Id": 76,
+    "Name": "All Saint's Wake (2018)",
+    "Unsafe": false
+  },
+  {
+    "Id": 77,
+    "Name": "Starlight Celebration (2018)",
+    "Unsafe": false
+  },
+  {
+    "Id": 78,
+    "Name": "Heavensturn (2019)",
+    "Unsafe": false
+  },
+  {
+    "Id": 79,
+    "Name": "New Year (2019)",
+    "Unsafe": false
+  },
+  {
+    "Id": 80,
+    "Name": "China New Year (2019)",
+    "Unsafe": true
+  },
+  {
+    "Id": 81,
+    "Name": "Korea New Year (2019)",
+    "Unsafe": true
+  },
+  {
+    "Id": 82,
+    "Name": "Valentione's Day (2019)",
+    "Unsafe": false
+  },
+  {
+    "Id": 83,
+    "Name": "Little Ladies' Day (2019)",
+    "Unsafe": false
+  },
+  {
+    "Id": 84,
+    "Name": "FFXV Crossover (2019)",
+    "Unsafe": false
+  },
+  {
+    "Id": 85,
+    "Name": "Hatching Tide (2019)",
+    "Unsafe": false
+  },
+  {
+    "Id": 86,
+    "Name": "Make It Rain (2019)",
+    "Unsafe": false
+  },
+  {
+    "Id": 89,
+    "Name": "Moonfire Faire (2019)",
+    "Unsafe": false
+  },
+  {
+    "Id": 90,
+    "Name": "The Rising (2019)",
+    "Unsafe": false
+  },
+  {
+    "Id": 91,
+    "Name": "All Saint's Wake (2019)",
+    "Unsafe": false
+  },
+  {
+    "Id": 95,
+    "Name": "Starlight Celebration (2019)",
+    "Unsafe": false
+  },
+  {
+    "Id": 96,
+    "Name": "Heavensturn (2020)",
+    "Unsafe": false
+  },
+  {
+    "Id": 97,
+    "Name": "New Year (2020)",
+    "Unsafe": false
+  },
+  {
+    "Id": 98,
+    "Name": "China New Year (2020)",
+    "Unsafe": true
+  },
+  {
+    "Id": 99,
+    "Name": "Korea New Year (2020)",
+    "Unsafe": true
+  },
+  {
+    "Id": 100,
+    "Name": "Valentione's Day (2020)",
+    "Unsafe": false
+  },
+  {
+    "Id": 103,
+    "Name": "Little Ladies' Day (2020)",
+    "Unsafe": false
+  },
+  {
+    "Id": 104,
+    "Name": "Hatching Tide (2020)",
+    "Unsafe": false
+  },
+  {
+    "Id": 105,
+    "Name": "Make It Rain (2020)",
+    "Unsafe": false
+  },
+  {
+    "Id": 106,
+    "Name": "Moonfire Faire (2020)",
+    "Unsafe": false
+  },
+  {
+    "Id": 107,
+    "Name": "The Rising (2020)",
+    "Unsafe": false
+  },
+  {
+    "Id": 108,
+    "Name": "Starlight Celebration (2020)",
+    "Unsafe": false
+  },
+  {
+    "Id": 109,
+    "Name": "Heavensturn (2021)",
+    "Unsafe": false
+  },
+  {
+    "Id": 110,
+    "Name": "New Year (2021)",
+    "Unsafe": false
+  },
+  {
+    "Id": 111,
+    "Name": "China New Year (2021)",
+    "Unsafe": true
+  },
+  {
+    "Id": 112,
+    "Name": "Korea New Year (2021)",
+    "Unsafe": true
+  },
+  {
+    "Id": 113,
+    "Name": "Little Ladies' Day & Valentione's Day (2021)",
+    "Unsafe": false
+  },
+  {
+    "Id": 114,
+    "Name": "Hatching Tide (2021)",
+    "Unsafe": false
+  },
+  {
+    "Id": 115,
+    "Name": "Hatching Tide (2021)",
+    "Unsafe": false
+  },
+  {
+    "Id": 116,
+    "Name": "Moonfire Faire (2021)",
+    "Unsafe": false
+  },
+  {
+    "Id": 117,
+    "Name": "The Rising (2021)",
+    "Unsafe": false
+  },
+  {
+    "Id": 118,
+    "Name": "All Saints' Wake (2021)",
+    "Unsafe": false
+  },
+  {
+    "Id": 121,
+    "Name": "Starlight Celebration (2021)",
+    "Unsafe": false
+  },
+  {
+    "Id": 122,
+    "Name": "Valentione's Day (2022)",
+    "Unsafe": false
+  },
+  {
+    "Id": 123,
+    "Name": "Little Ladies' Day (2022)",
+    "Unsafe": false
+  },
+  {
+    "Id": 124,
+    "Name": "Hatching Tide (2022)",
+    "Unsafe": false
+  },
+  {
+    "Id": 125,
+    "Name": "Make It Rain (2022)",
+    "Unsafe": false
+  },
+  {
+    "Id": 126,
+    "Name": "Moonfire Faire (2022)",
+    "Unsafe": false,
+    "AreaExclusion": {
+      "Reason": "Interactive Area",
+      "TerritoryType": 137,
+      "Polygon": [
+        {
+          "X": 743.5341,
+          "Y": 353.09583
+        },
+        {
+          "X": 789.35895,
+          "Y": 351.90707
+        },
+        {
+          "X": 793.5686,
+          "Y": 444.58456
+        },
+        {
+          "X": 847.4973,
+          "Y": 466.90372
+        },
+        {
+          "X": 844.241,
+          "Y": 515.06146
+        },
+        {
+          "X": 815.3413,
+          "Y": 533.85077
+        },
+        {
+          "X": 779.8968,
+          "Y": 532.01373
+        },
+        {
+          "X": 720.6542,
+          "Y": 499.47015
+        },
+        {
+          "X": 731.2376,
+          "Y": 367.99554
+        }
+      ]
+    }
+  },
+  {
+    "Id": 127,
+    "Name": "The Rising (2022)",
+    "Unsafe": false
+  },
+  {
+    "Id": 128,
+    "Name": "Heavensturn (2023)",
+    "Unsafe": false
+  },
+  {
+    "Id": 129,
+    "Name": "New Year (2023)",
+    "Unsafe": false
+  },
+  {
+    "Id": 130,
+    "Name": "China New Year (2023)",
+    "Unsafe": true
+  },
+  {
+    "Id": 131,
+    "Name": "China New Year (2023)",
+    "Unsafe": true
+  },
+  {
+    "Id": 132,
+    "Name": "All Saint's Wake (2022)",
+    "Unsafe": false
+  },
+  {
+    "Id": 133,
+    "Name": "Starlight Celebration (2022)",
+    "Unsafe": false
+  },
+  {
+    "Id": 135,
+    "Name": "Valentione's Day (2023)",
+    "Unsafe": false
+  },
+  {
+    "Id": 136,
+    "Name": "Hatching Tide (2023)",
+    "Unsafe": false
+  },
+  {
+    "Id": 138,
+    "Name": "Little Ladies Day (2023)",
+    "Unsafe": false
+  },
+  {
+    "Id": 139,
+    "Name": "Make It Rain (2023)",
+    "Unsafe": false
+  },
+  {
+    "Id": 140,
+    "Name": "Moonfire Faire (2023)",
+    "Unsafe": false,
+    "AreaExclusion": {
+      "Reason": "Interactive Area",
+      "TerritoryType":  137,
+      "Polygon": [
+        {
+          "X": 743.5341,
+          "Y": 353.09583
+        },
+        {
+          "X": 789.35895,
+          "Y": 351.90707
+        },
+        {
+          "X": 793.5686,
+          "Y": 444.58456
+        },
+        {
+          "X": 847.4973,
+          "Y": 466.90372
+        },
+        {
+          "X": 844.241,
+          "Y": 515.06146
+        },
+        {
+          "X": 815.3413,
+          "Y": 533.85077
+        },
+        {
+          "X": 779.8968,
+          "Y": 532.01373
+        },
+        {
+          "X": 720.6542,
+          "Y": 499.47015
+        },
+        {
+          "X": 731.2376,
+          "Y": 367.99554
+        }
+      ]
+    }
+  }
+]

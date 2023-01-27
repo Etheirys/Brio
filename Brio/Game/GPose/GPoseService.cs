@@ -63,8 +63,11 @@ public class GPoseService : ServiceBase<GPoseService>
 
     private void ExitingGPoseDetour(IntPtr addr)
     {
-        HandleGPoseChange(GPoseState.Exiting);
-        _exitGPoseHook!.Original.Invoke(addr);
+        if(HandleGPoseChange(GPoseState.Exiting))
+        {
+            _exitGPoseHook!.Original.Invoke(addr);
+        }
+
         HandleGPoseChange(GPoseState.Outside);
     }
 
@@ -72,18 +75,32 @@ public class GPoseService : ServiceBase<GPoseService>
     {
         bool didEnter = _enterGPoseHook!.Original.Invoke(addr);
         if(didEnter)
+        {
+            _fakeGPose = false;
             HandleGPoseChange(GPoseState.Inside);
+        }
 
         return didEnter;
     }
 
-    private void HandleGPoseChange(GPoseState state)
+    private bool HandleGPoseChange(GPoseState state)
     {
         if(state == GPoseState || _fakeGPose)
-            return;
+            return true;
 
         GPoseState = state;
-        OnGPoseStateChange?.Invoke(state);
+
+        try
+        {
+            OnGPoseStateChange?.Invoke(state);
+        }
+        catch(Exception e)
+        {
+            Dalamud.ToastGui.ShowError($"Brio GPose transition error.\n Reason: {e.Message}");
+            return false;
+        }
+
+        return true;
     }
 
     public override void Dispose()

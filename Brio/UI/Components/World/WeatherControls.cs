@@ -27,7 +27,7 @@ public static class WeatherControls
         }
         ImGui.SameLine();
         ImGui.PushFont(UiBuilder.IconFont);
-        if(ImGui.Button(FontAwesomeIcon.Search.ToIconString()))
+        if(ImGui.Button(FontAwesomeIcon.Search.ToIconString() + "###weather_search_button"))
         {
             ImGui.OpenPopup("###global_weather_list");
         }

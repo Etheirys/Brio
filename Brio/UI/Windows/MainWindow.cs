@@ -1,5 +1,6 @@
 ﻿using Brio.UI.Components;
 using Brio.UI.Components.Actor;
+using Brio.UI.Components.Debug;
 using Brio.UI.Components.World;
 using Dalamud.Interface;
 using Dalamud.Interface.Windowing;

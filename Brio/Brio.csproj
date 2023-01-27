@@ -59,6 +59,14 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <None Remove="Resources\Festivals.json" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <EmbeddedResource Include="Resources\Festivals.json" />
+	</ItemGroup>
+
+	<ItemGroup>
 	  <None Include="D:\Development\Brio\Brio\.editorconfig" />
 	</ItemGroup>
 
