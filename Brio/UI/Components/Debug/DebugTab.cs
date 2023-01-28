@@ -16,6 +16,11 @@ public static class DebugTab
             DebugIPCControls.Draw();
         }
 
+        if(ImGui.CollapsingHeader("Addresses"))
+        {
+            DebugAddressControls.Draw();
+        }
+
         if(ImGui.CollapsingHeader("Sandbox"))
         {
             DebugSandboxControls.Draw();

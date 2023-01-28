@@ -4,13 +4,13 @@ using FFXIVClientStructs.FFXIV.Client.LayoutEngine;
 using System;
 using System.Runtime.InteropServices;
 
-namespace Brio.Game.World;
+namespace Brio.Game.World.Interop;
 
 // TODO: Move into ClientStructs
 // Tracking: https://github.com/aers/FFXIVClientStructs/pull/310 & https://github.com/aers/FFXIVClientStructs/pull/311
 
 [StructLayout(LayoutKind.Explicit, Size = 0x98)]
-public unsafe struct LayoutManager
+public unsafe struct LayoutManagerStruct
 {
     [FieldOffset(0x38)] public uint FestivalStatus; // SetActiveFestivals will not allow a change when not 5 or 0
     [FieldOffset(0x40)] public fixed uint ActiveFestivals[4];
@@ -18,12 +18,12 @@ public unsafe struct LayoutManager
 
 public unsafe class LayoutManagerInterop
 {
-    private delegate void SetActiveFestivalsDelegate(LayoutManager* instance, uint* festivalArray);
+    private delegate void SetActiveFestivalsDelegate(LayoutManagerStruct* instance, uint* festivalArray);
 
     [Signature("E8 ?? ?? ?? ?? 8B C5 EB 6A", ScanType = ScanType.Text)]
     private SetActiveFestivalsDelegate _setActiveFestivals = null!;
 
-    public LayoutManagerInterop() 
+    public LayoutManagerInterop()
     {
         SignatureHelper.Initialise(this);
     }
@@ -33,7 +33,7 @@ public unsafe class LayoutManagerInterop
         var world = LayoutWorld.Instance();
         if(world != null)
         {
-            var manager = (LayoutManager*) world->ActiveLayout;
+            var manager = (LayoutManagerStruct*)world->ActiveLayout;
             if(manager != null)
             {
                 _setActiveFestivals(manager, festivalArray);
@@ -48,7 +48,7 @@ public unsafe class LayoutManagerInterop
         var world = LayoutWorld.Instance();
         if(world != null)
         {
-            var manager = (LayoutManager*)world->ActiveLayout;
+            var manager = (LayoutManagerStruct*)world->ActiveLayout;
             if(manager != null)
             {
                 for(int i = 0; i < 4; ++i)
@@ -68,7 +68,7 @@ public unsafe class LayoutManagerInterop
             var world = LayoutWorld.Instance();
             if(world != null)
             {
-                var manager = (LayoutManager*)world->ActiveLayout;
+                var manager = (LayoutManagerStruct*)world->ActiveLayout;
                 if(manager != null)
                 {
                     return manager->FestivalStatus != 0 && manager->FestivalStatus != 5;

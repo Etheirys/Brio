@@ -1,5 +1,6 @@
 ﻿using Brio.Core;
 using Brio.Game.GPose;
+using Brio.Game.World.Interop;
 using Brio.Utils;
 using Lumina.Excel.GeneratedSheets;
 using System.Collections.Generic;
