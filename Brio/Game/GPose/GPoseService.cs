@@ -1,6 +1,5 @@
 ﻿using Brio.Core;
 using Dalamud.Hooking;
-using Dalamud.Logging;
 using FFXIVClientStructs.FFXIV.Client.System.Framework;
 using FFXIVClientStructs.FFXIV.Client.UI;
 using System;
@@ -64,8 +63,11 @@ public class GPoseService : ServiceBase<GPoseService>
 
     private void ExitingGPoseDetour(IntPtr addr)
     {
-        HandleGPoseChange(GPoseState.Exiting);
-        _exitGPoseHook!.Original.Invoke(addr);
+        if(HandleGPoseChange(GPoseState.Exiting))
+        {
+            _exitGPoseHook!.Original.Invoke(addr);
+        }
+
         HandleGPoseChange(GPoseState.Outside);
     }
 
@@ -81,10 +83,10 @@ public class GPoseService : ServiceBase<GPoseService>
         return didEnter;
     }
 
-    private void HandleGPoseChange(GPoseState state)
+    private bool HandleGPoseChange(GPoseState state)
     {
         if(state == GPoseState || _fakeGPose)
-            return;
+            return true;
 
         GPoseState = state;
 
@@ -94,9 +96,11 @@ public class GPoseService : ServiceBase<GPoseService>
         }
         catch(Exception e)
         {
-            PluginLog.Warning(e, "Error during GPose transition");
+            Dalamud.ToastGui.ShowError($"Brio GPose transition error.\n Reason: {e.Message}");
+            return false;
         }
 
+        return true;
     }
 
     public override void Dispose()
