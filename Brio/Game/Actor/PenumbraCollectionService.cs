@@ -123,5 +123,7 @@ public class PenumbraCollectionService : ServiceBase<PenumbraCollectionService>
     {
         CleanupOverrides();
         PenumbraIPCService.Instance.OnPenumbraStateChange -= PenumbraIPC_OnPenumbraStateChange;
+        ActorService.Instance.OnActorDestructing -= ActorService_OnActorDestructing;
+
     }
 }

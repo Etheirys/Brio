@@ -59,18 +59,12 @@ public class ActorService : ServiceBase<ActorService>
             if(go != null)
             {
                 _gposeActors.Add(go);
-                HandleGameObject(go);
             }
         }
     }
 
     public static bool IsGPoseActor(int index) => index >= GPoseFirstActor && index < GPoseFirstActor + GPoseActorCount;
     public unsafe static bool IsGPoseActor(GameObject gameObject) => IsGPoseActor(gameObject.AsNative()->ObjectIndex);
-
-    private void HandleGameObject(GameObject go)
-    {
-
-    }
 
     public override void Dispose()
     {

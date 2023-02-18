@@ -70,8 +70,10 @@ public class UIService : ServiceBase<UIService>
 
     public override void Stop()
     {
+        GPoseService.Instance.OnGPoseStateChange -= Instance_OnGPoseStateChange;
         Dalamud.PluginInterface.UiBuilder.Draw -= UiBuilder_Draw;
         Dalamud.PluginInterface.UiBuilder.OpenConfigUi -= UiBuilder_OpenConfigUi;
+
         WindowSystem.RemoveAllWindows();
     }
 }

@@ -143,6 +143,13 @@ public class ActorSpawnService : ServiceBase<ActorSpawnService>
         return false;
     }
 
+    public override void Stop()
+    {
+        GPoseService.Instance.OnGPoseStateChange -= GPoseService_OnGPoseStateChange;
+        ActorService.Instance.OnActorDestructing -= ActorService_OnActorDestructing;
+        Dalamud.ClientState.TerritoryChanged -= ClientState_TerritoryChanged;
+    }
+
     public override void Dispose()
     {
         DestroyAllCreated();
