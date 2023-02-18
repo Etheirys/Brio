@@ -38,12 +38,6 @@ public class MainWindow : Window
                 ImGui.EndTabItem();
             }
 
-            if(ImGui.BeginTabItem("Hooks"))
-            {
-                HooksTab.Draw();
-                ImGui.EndTabItem();
-            }
-
             if(Brio.IsDebug)
             {
                 if(ImGui.BeginTabItem("Debug"))
@@ -54,8 +48,6 @@ public class MainWindow : Window
 
                 ImGui.EndTabBar();
             }
-
-           
         }
     }
 

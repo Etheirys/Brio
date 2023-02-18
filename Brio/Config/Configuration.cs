@@ -40,7 +40,7 @@ public enum OpenBrioBehavior
 
 public enum ApplyNPCHack
 {
-    Manual,
+    Disabled,
     InGPose,
     Always
 }

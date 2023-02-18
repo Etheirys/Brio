@@ -100,16 +100,15 @@ public class ActorRedrawService : ServiceBase<ActorRedrawService>
             return RedrawResult.Failed;
         }
 
-        var wasNpcHack = RenderHookService.Instance.ApplyNPCOverride;
         if(redrawType.HasFlag(RedrawType.ForceAllowNPCAppearance))
-            RenderHookService.Instance.ApplyNPCOverride = true;
+            RenderHookService.Instance.PushForceNpcHack();
 
         // Full redraw
         rawObject->DisableDraw();
         rawObject->EnableDraw();
 
         if(redrawType.HasFlag(RedrawType.ForceAllowNPCAppearance))
-            RenderHookService.Instance.ApplyNPCOverride = wasNpcHack;
+            RenderHookService.Instance.PopForceNpcHack();
 
         // Handle position update
         if(redrawType.HasFlag(RedrawType.PreservePosition))
