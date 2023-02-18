@@ -89,7 +89,7 @@ public class BrioIPCService : ServiceBase<BrioIPCService>
         IsIPCEnabled = false;
     }
 
-    public override void Tick()
+    public override void Tick(float delta)
     {
         if(IsIPCEnabled != ConfigService.Configuration.AllowBrioIPC)
         {

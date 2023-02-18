@@ -115,7 +115,7 @@ public class FestivalService : ServiceBase<FestivalService>
         }
     }
 
-    public unsafe override void Tick()
+    public unsafe override void Tick(float delta)
     {
         if(_pendingChanges.Count > 0 && !_festivalInterop.IsBusy)
         {

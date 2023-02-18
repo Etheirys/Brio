@@ -18,12 +18,15 @@ public abstract class ServiceBase<T> : IService
         }
     }
 
+    public void AssignInstance() => _instance = (T?)this;
+    public void ClearInstance() => _instance = null;
+
     public virtual void Start()
     {
         _instance = (T)this;
     }
 
-    public virtual void Tick() { }
+    public virtual void Tick(float delta) { }
 
     public virtual void Stop() { }
 

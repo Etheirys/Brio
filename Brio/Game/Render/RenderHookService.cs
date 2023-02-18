@@ -39,7 +39,7 @@ public unsafe class RenderHookService : ServiceBase<RenderHookService>
         if(ConfigService.Configuration.ApplyNPCHack == ApplyNPCHack.InGPose && GPoseService.Instance.IsInGPose)
             return 0;
 
-        return EnforceKindRestrictionsHook!.Original(a1, a2);
+        return EnforceKindRestrictionsHook.Original(a1, a2);
     }
 
     public override void Dispose()

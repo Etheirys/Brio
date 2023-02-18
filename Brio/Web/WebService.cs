@@ -20,7 +20,7 @@ public class WebService : ServiceBase<WebService>
         base.Start();
     }
 
-    public override void Tick()
+    public override void Tick(float delta)
     {
         var allow = ConfigService.Configuration.AllowWebAPI;
         if(allow != _shouldBeRunning)

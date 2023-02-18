@@ -36,7 +36,7 @@ public class ActorService : ServiceBase<ActorService>
         base.Start();
     }
 
-    public override void Tick()
+    public override void Tick(float delta)
     {
         UpdateGPoseTable();
     }
