@@ -63,12 +63,12 @@ public class GPoseService : ServiceBase<GPoseService>
 
     private void ExitingGPoseDetour(IntPtr addr)
     {
-        if(HandleGPoseChange(GPoseState.Exiting))
+        if(HandleGPoseChange(GPoseState.AttemptExit))
         {
+            HandleGPoseChange(GPoseState.Exiting);
             _exitGPoseHook!.Original.Invoke(addr);
+            HandleGPoseChange(GPoseState.Outside);
         }
-
-        HandleGPoseChange(GPoseState.Outside);
     }
 
     private bool EnteringGPoseDetour(IntPtr addr)
@@ -113,6 +113,7 @@ public class GPoseService : ServiceBase<GPoseService>
 public enum GPoseState
 {
     Inside,
+    AttemptExit,
     Exiting,
     Outside
 }

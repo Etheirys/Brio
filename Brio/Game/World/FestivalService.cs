@@ -78,6 +78,9 @@ public class FestivalService : ServiceBase<FestivalService>
 
     public bool RemoveFestival(uint festival)
     {
+        if(!CheckFestivalRestrictions(festival))
+            return false;
+
         var active = _festivalInterop.GetActiveFestivals();
         var copy = active.ToArray();
 
