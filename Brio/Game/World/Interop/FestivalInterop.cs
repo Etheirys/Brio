@@ -88,7 +88,7 @@ public unsafe class GameMainInterop
     private SetActiveFestivalsDelegate _setActiveFestivals = null!;
     public void SetActiveFestivals(uint festival1, uint festival2, uint festival3, uint festival4) => _setActiveFestivals(GameMain.Instance(), festival1, festival2, festival3, festival4);
 
-    [Signature("E8 ?? ?? ?? ?? E9 08 29 00 00", ScanType = ScanType.Text)]
+    [Signature("E8 ?? ?? ?? ?? E9 ?? ?? ?? ?? 8B 44 24 60 48 8D 8D", ScanType = ScanType.Text)]
     private SetActiveFestivalsDelegate _queueActiveFestivals = null!;
     public void QueueActiveFestivals(uint festival1, uint festival2, uint festival3, uint festival4) => _queueActiveFestivals(GameMain.Instance(), festival1, festival2, festival3, festival4);
 

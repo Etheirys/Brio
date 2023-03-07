@@ -8,15 +8,14 @@ namespace Brio.Game.Render;
 public unsafe class RenderHookService : ServiceBase<RenderHookService>
 {
     private delegate long EnforceKindRestrictionsDelegate(void* a1, void* a2);
-    private Hook<EnforceKindRestrictionsDelegate> EnforceKindRestrictionsHook = null!;
+    private Hook<EnforceKindRestrictionsDelegate> _enforceKindRestrictionsHook = null!;
     private uint _forceNpcHackCount = 0;
 
     public RenderHookService()
     {
         var enforceKindRestrictionsAddress = Dalamud.SigScanner.ScanText("E8 ?? ?? ?? ?? 41 B0 ?? 48 8B D3 48 8B CD");
-        EnforceKindRestrictionsHook = Hook<EnforceKindRestrictionsDelegate>.FromAddress(enforceKindRestrictionsAddress, EnforceKindRestrictionsDetour);
-
-        EnforceKindRestrictionsHook.Enable();
+        _enforceKindRestrictionsHook = Hook<EnforceKindRestrictionsDelegate>.FromAddress(enforceKindRestrictionsAddress, EnforceKindRestrictionsDetour);
+        _enforceKindRestrictionsHook.Enable();
     }
 
     public void PushForceNpcHack() => ++_forceNpcHackCount;
@@ -39,11 +38,11 @@ public unsafe class RenderHookService : ServiceBase<RenderHookService>
         if(ConfigService.Configuration.ApplyNPCHack == ApplyNPCHack.InGPose && GPoseService.Instance.IsInGPose)
             return 0;
 
-        return EnforceKindRestrictionsHook.Original(a1, a2);
+        return _enforceKindRestrictionsHook.Original(a1, a2);
     }
 
     public override void Dispose()
     {
-        EnforceKindRestrictionsHook.Dispose();
+        _enforceKindRestrictionsHook.Dispose();
     }
 }
