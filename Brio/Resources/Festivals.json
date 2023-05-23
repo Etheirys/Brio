@@ -482,7 +482,7 @@
     "Unsafe": false,
     "AreaExclusion": {
       "Reason": "Interactive Area",
-      "TerritoryType":  137,
+      "TerritoryType": 137,
       "Polygon": [
         {
           "X": 743.5341,
@@ -522,5 +522,20 @@
         }
       ]
     }
+  },
+  {
+    "Id": 141,
+    "Name": "The Rising (2023)",
+    "Unsafe": false
+  },
+  {
+    "Id": 142,
+    "Name": "All Saints' Wake (2023)",
+    "Unsafe": false
+  },
+  {
+    "Id": 143,
+    "Name": "Starlight Celebration (2023)",
+    "Unsafe": false
   }
 ]
