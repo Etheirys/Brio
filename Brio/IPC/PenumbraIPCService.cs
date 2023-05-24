@@ -6,6 +6,7 @@ using Penumbra.Api;
 using Penumbra.Api.Enums;
 using Penumbra.Api.Helpers;
 using System;
+using System.Linq;
 
 namespace Brio.IPC;
 
@@ -55,7 +56,7 @@ public class PenumbraIPCService : ServiceBase<PenumbraIPCService>
     {
         try
         {
-            bool penumInstalled = Dalamud.PluginInterface.PluginNames.Contains("Penumbra");
+            bool penumInstalled = Dalamud.PluginInterface.InstalledPlugins.Count(x => x.Name == "Penumbra") > 0;
             if(!penumInstalled)
             {
                 PluginLog.Information("Penumbra not present");

@@ -58,9 +58,9 @@ public class ActorRedrawService : ServiceBase<ActorRedrawService>
                 {
                     // We can't change certain values
                     Human* human = ((Human*)rawObject->DrawObject);
-                    if(human->Race != chara->CustomizeData[0]
-                        || human->Sex != chara->CustomizeData[1]
-                        || human->BodyType != chara->CustomizeData[2]
+                    if(human->Race != chara->DrawData.CustomizeData[0]
+                        || human->Sex != chara->DrawData.CustomizeData[1]
+                        || human->BodyType != chara->DrawData.CustomizeData[2]
                         || human->Clan != chara->CustomizeData[4]
                         || human->FaceId != chara->CustomizeData[5]
                         || chara->ModelCharaId != 0)
@@ -72,7 +72,7 @@ public class ActorRedrawService : ServiceBase<ActorRedrawService>
                     {
                         // Cutomize and gear
                         Buffer.MemoryCopy(chara->CustomizeData, (void*)_customizeBuffer, 28, 28);
-                        Buffer.MemoryCopy(chara->EquipSlotData, (void*)(_customizeBuffer + 28), 40, 40);
+                        Buffer.MemoryCopy(&chara->DrawData.Head, (void*)(_customizeBuffer + 28), 40, 40);
                         drewInPlace = ((Human*)rawObject->DrawObject)->UpdateDrawData((byte*)_customizeBuffer, false);
                     }
                 }
