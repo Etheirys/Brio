@@ -61,8 +61,8 @@ public class ActorRedrawService : ServiceBase<ActorRedrawService>
                     if(human->Race != chara->DrawData.CustomizeData[0]
                         || human->Sex != chara->DrawData.CustomizeData[1]
                         || human->BodyType != chara->DrawData.CustomizeData[2]
-                        || human->Clan != chara->CustomizeData[4]
-                        || human->FaceId != chara->CustomizeData[5]
+                        || human->Clan != chara->DrawData.CustomizeData[4]
+                        || human->FaceId != chara->DrawData.CustomizeData[5]
                         || chara->ModelCharaId != 0)
                     {
                         drewInPlace = false;
@@ -71,7 +71,7 @@ public class ActorRedrawService : ServiceBase<ActorRedrawService>
                     if(drewInPlace)
                     {
                         // Cutomize and gear
-                        Buffer.MemoryCopy(chara->CustomizeData, (void*)_customizeBuffer, 28, 28);
+                        Buffer.MemoryCopy(&chara->DrawData.CustomizeData, (void*)_customizeBuffer, 28, 28);
                         Buffer.MemoryCopy(&chara->DrawData.Head, (void*)(_customizeBuffer + 28), 40, 40);
                         drewInPlace = ((Human*)rawObject->DrawObject)->UpdateDrawData((byte*)_customizeBuffer, false);
                     }
