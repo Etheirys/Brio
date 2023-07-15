@@ -103,6 +103,15 @@ public class GPoseService : ServiceBase<GPoseService>
         return true;
     }
 
+    public override void Tick(float delta)
+    {
+        if(!Dalamud.PluginInterface.UiBuilder.GposeActive && IsInGPose)
+        {
+            HandleGPoseChange(GPoseState.Exiting);
+            HandleGPoseChange(GPoseState.Outside);
+        }
+    }
+
     public override void Dispose()
     {
         _exitGPoseHook?.Dispose();

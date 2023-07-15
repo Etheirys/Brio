@@ -74,7 +74,7 @@ public class ActorSpawnService : ServiceBase<ActorSpawnService>
         var gposeController = &EventFramework.Instance()->EventSceneModule.EventGPoseController;
         gposeController->AddCharacterToGPose(newPlayer); // This is safe even if the list is full. The game will also cleanup for us.
 
-        newPlayer->CopyFromCharacter(originalPlayer, 0); // We copy the Player as the created actor is just blank
+        newPlayer->CopyFromCharacter(originalPlayer, Character.CopyFlags.None); // We copy the Player as the created actor is just blank
 
         *((sbyte*)newPlayer + 0x95) &= ~2; // Disable selection just incase this somehow leaks out of GPose
 
@@ -86,7 +86,7 @@ public class ActorSpawnService : ServiceBase<ActorSpawnService>
         newPlayer->GameObject.SetName(((int)newId).ToCharacterName());
 
         newPlayer->GameObject.DisableDraw();
-        newPlayer->CopyFromCharacter(newPlayer, 0); // Some tools get confused (Like Penumbra) unless we copy onto ourselves after name change
+        newPlayer->CopyFromCharacter(newPlayer, Character.CopyFlags.None); // Some tools get confused (Like Penumbra) unless we copy onto ourselves after name change
         newPlayer->GameObject.EnableDraw();
 
         _createdIndexes.Add(newId);
