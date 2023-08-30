@@ -26,8 +26,8 @@ public class FestivalService : ServiceBase<FestivalService>
             var active = _festivalInterop.GetActiveFestivals();
             for(int idx = 0; idx < MaxFestivals; ++idx)
             {
-                var entry = _festivalEntries.First(i => i.Id == active[idx]);
-                if(entry.Id != 0)
+                var entry = _festivalEntries.FirstOrDefault(i => i.Id == active[idx]);
+                if(entry != null && entry.Id != 0)
                     result.Add(entry);
             }
             return new(result);
