@@ -19,7 +19,7 @@
 	<ItemGroup>
 		<PackageReference Include="DalamudPackager" Version="2.1.11" />
 		<PackageReference Include="EmbedIO" Version="3.5.2" />
-		<PackageReference Include="Penumbra.Api" Version="1.0.8" />
+		<PackageReference Include="Penumbra.Api" Version="1.0.9" />
 		<Reference Include="FFXIVClientStructs">
 			<HintPath>$(DalamudLibPath)FFXIVClientStructs.dll</HintPath>
 			<Private>false</Private>
