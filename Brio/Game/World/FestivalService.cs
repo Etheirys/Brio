@@ -26,9 +26,18 @@ public class FestivalService : ServiceBase<FestivalService>
             var active = _festivalInterop.GetActiveFestivals();
             for(int idx = 0; idx < MaxFestivals; ++idx)
             {
-                var entry = _festivalEntries.FirstOrDefault(i => i.Id == active[idx]);
-                if(entry != null && entry.Id != 0)
-                    result.Add(entry);
+                if(active[idx] != 0)
+                {
+                    var entry = _festivalEntries.FirstOrDefault(i => i.Id == active[idx]);
+                    if(entry != null)
+                    {
+                        result.Add(entry);
+                    }
+                    else
+                    {
+                        result.Add(new FestivalEntry { Id = active[idx], Unknown = true, Name = "Unknown" });
+                    }
+                }
             }
             return new(result);
         }
@@ -193,7 +202,7 @@ public class FestivalService : ServiceBase<FestivalService>
     private bool CheckFestivalRestrictions(uint festivalId)
     {
         var festival = _festivalEntries.SingleOrDefault(i => i.Id == festivalId);
-        if(festival == null) return false;
+        if(festival == null) return true;
 
         if(festival.AreaExclusion != null)
         {
