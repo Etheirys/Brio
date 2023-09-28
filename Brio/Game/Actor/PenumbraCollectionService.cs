@@ -30,7 +30,7 @@ public class PenumbraCollectionService : ServiceBase<PenumbraCollectionService>
     {
         if(!PenumbraIPCService.Instance.IsPenumbraEnabled)
         {
-            PluginLog.Warning("Tried to Penumbra collection redraw when Penumbra is disabled");
+            Dalamud.PluginLog.Warning("Tried to Penumbra collection redraw when Penumbra is disabled");
             return;
         }
 
@@ -52,7 +52,7 @@ public class PenumbraCollectionService : ServiceBase<PenumbraCollectionService>
         }
         catch(Exception ex)
         {
-            PluginLog.Warning(ex, "Error during Penumbra collection redraw");
+            Dalamud.PluginLog.Warning(ex, "Error during Penumbra collection redraw");
             Dalamud.ToastGui.ShowError("Unable to apply Penumbra collection.");
         }
     }
@@ -109,7 +109,7 @@ public class PenumbraCollectionService : ServiceBase<PenumbraCollectionService>
             }
             catch
             {
-                PluginLog.Warning("Failed to cleanup collections on Penumbra disable");
+                Dalamud.PluginLog.Warning("Failed to cleanup collections on Penumbra disable");
             }
         }
     }

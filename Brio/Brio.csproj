@@ -70,4 +70,10 @@
 	  <None Include="D:\Development\Brio\Brio\.editorconfig" />
 	</ItemGroup>
 
+	<ItemGroup>
+	  <None Update="Brio.json">
+	    <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+	  </None>
+	</ItemGroup>
+
 </Project>

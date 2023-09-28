@@ -1,27 +1,25 @@
-﻿using Dalamud.Data;
-using Dalamud.Game;
-using Dalamud.Game.ClientState;
+﻿using Dalamud.Game;
 using Dalamud.Game.ClientState.Objects;
-using Dalamud.Game.Command;
-using Dalamud.Game.Gui;
-using Dalamud.Game.Gui.Toast;
 using Dalamud.IoC;
 using Dalamud.Plugin;
+using Dalamud.Plugin.Services;
 
 namespace Brio;
 
 public class Dalamud
 {
     [PluginService] public static DalamudPluginInterface PluginInterface { get; private set; } = null!;
-    [PluginService] public static CommandManager CommandManager { get; private set; } = null!;
-    [PluginService] public static Framework Framework { get; private set; } = null!;
-    [PluginService] public static SigScanner SigScanner { get; private set; } = null!;
-    [PluginService] public static TargetManager TargetManager { get; private set; } = null!;
-    [PluginService] public static DataManager DataManager { get; private set; } = null!;
-    [PluginService] public static ClientState ClientState { get; private set; } = null!;
-    [PluginService] public static ObjectTable ObjectTable { get; private set; } = null!;
-    [PluginService] public static ToastGui ToastGui { get; private set; } = null!;
-    [PluginService] public static ChatGui ChatGui { get; private set; } = null!;
+    [PluginService] public static ICommandManager CommandManager { get; private set; } = null!;
+    [PluginService] public static IFramework Framework { get; private set; } = null!;
+    [PluginService] public static ISigScanner SigScanner { get; private set; } = null!;
+    [PluginService] public static ITargetManager TargetManager { get; private set; } = null!;
+    [PluginService] public static IDataManager DataManager { get; private set; } = null!;
+    [PluginService] public static IClientState ClientState { get; private set; } = null!;
+    [PluginService] public static IObjectTable ObjectTable { get; private set; } = null!;
+    [PluginService] public static IToastGui ToastGui { get; private set; } = null!;
+    [PluginService] public static IChatGui ChatGui { get; private set; } = null!;
+    [PluginService] public static IPluginLog PluginLog { get; private set; } = null!;
+    [PluginService] public static IGameInteropProvider GameInteropProvider { get; private set; } = null!;
 
 
     public static void Initialize(DalamudPluginInterface pluginInterface) => pluginInterface.Create<Dalamud>();

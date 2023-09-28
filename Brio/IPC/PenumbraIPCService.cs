@@ -59,24 +59,24 @@ public class PenumbraIPCService : ServiceBase<PenumbraIPCService>
             bool penumInstalled = Dalamud.PluginInterface.InstalledPlugins.Count(x => x.Name == "Penumbra") > 0;
             if(!penumInstalled)
             {
-                PluginLog.Information("Penumbra not present");
+                Dalamud.PluginLog.Information("Penumbra not present");
                 return false;
             }
 
             var (major, minor) = Ipc.ApiVersions.Subscriber(Dalamud.PluginInterface).Invoke();
             if(major != 4 || minor < 18)
             {
-                PluginLog.Information("Penumbra API mismatch");
+                Dalamud.PluginLog.Information("Penumbra API mismatch");
                 return false;
             }
 
-            PluginLog.Information("Penumbra integration initialized");
+            Dalamud.PluginLog.Information("Penumbra integration initialized");
 
             return true;
         }
         catch(Exception ex)
         {
-            PluginLog.Information(ex, "Penumbra initialize error");
+            Dalamud.PluginLog.Information(ex, "Penumbra initialize error");
             return false;
         }
     }

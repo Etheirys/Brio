@@ -2,6 +2,7 @@
 using FFXIVClientStructs.FFXIV.Client.Game;
 using FFXIVClientStructs.FFXIV.Client.LayoutEngine;
 using System;
+using System.Reflection.Emit;
 using System.Runtime.InteropServices;
 
 namespace Brio.Game.World.Interop;
@@ -25,7 +26,7 @@ public unsafe class LayoutManagerInterop
 
     public LayoutManagerInterop()
     {
-        SignatureHelper.Initialise(this);
+        Dalamud.GameInteropProvider.InitializeFromAttributes(this);
     }
 
     public unsafe void SetActiveFestivals(uint* festivalArray)
@@ -95,6 +96,6 @@ public unsafe class GameMainInterop
 
     public GameMainInterop()
     {
-        SignatureHelper.Initialise(this);
+        Dalamud.GameInteropProvider.InitializeFromAttributes(this);
     }
 }

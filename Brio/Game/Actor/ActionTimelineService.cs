@@ -17,8 +17,8 @@ public class ActionTimelineService : ServiceBase<ActionTimelineService>
     private Hook<SetSlotSpeedDelegate> _setSpeedSlotHook = null!;
 
     public ActionTimelineService()
-    {
-        _setSpeedSlotHook = Hook<SetSlotSpeedDelegate>.FromAddress((nint)ActionTimelineDriver.Addresses.SetSlotSpeed.Value, SetSlotSpeedDetour);
+    { 
+        _setSpeedSlotHook = Dalamud.GameInteropProvider.HookFromAddress<SetSlotSpeedDelegate>((nint)ActionTimelineDriver.Addresses.SetSlotSpeed.Value, SetSlotSpeedDetour);
     }
 
     public override void Start()

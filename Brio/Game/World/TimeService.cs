@@ -49,7 +49,7 @@ public class TimeService : ServiceBase<TimeService>
     public TimeService()
     {
         var etAddress = Dalamud.SigScanner.ScanText("48 89 5C 24 ?? 57 48 83 EC ?? 48 8B F9 48 8B DA 48 81 C1 ?? ?? ?? ?? E8 ?? ?? ?? ?? 4C");
-        _updateEorzeaTimeHook = Hook<UpdateEorzeaTimeDelegate>.FromAddress(etAddress, UpdateEorzeaTime);
+        _updateEorzeaTimeHook = Dalamud.GameInteropProvider.HookFromAddress<UpdateEorzeaTimeDelegate>(etAddress, UpdateEorzeaTime);
     }
 
     public override void Dispose()
