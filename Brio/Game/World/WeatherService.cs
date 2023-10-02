@@ -63,7 +63,7 @@ public class WeatherService : ServiceBase<WeatherService>
     public unsafe WeatherService()
     {
         var twAddress = Dalamud.SigScanner.ScanText("48 89 5C 24 ?? 55 56 57 48 83 EC ?? 48 8B F9 48 8D 0D ?? ?? ?? ??");
-        _updateTerritoryWeatherHook = Hook<UpdateTerritoryWeatherDelegate>.FromAddress(twAddress, UpdateTerritoryWeather);
+        _updateTerritoryWeatherHook = Dalamud.GameInteropProvider.HookFromAddress<UpdateTerritoryWeatherDelegate>(twAddress, UpdateTerritoryWeather);
     }
 
     public unsafe override void Start()
@@ -78,7 +78,7 @@ public class WeatherService : ServiceBase<WeatherService>
         base.Start();
     }
 
-    private void ClientState_TerritoryChanged(object? sender, ushort e)
+    private void ClientState_TerritoryChanged(ushort e)
     {
         UpdateWeathersForCurrentTerritory();
     }

@@ -46,16 +46,16 @@ public class GPoseService : ServiceBase<GPoseService>
 
     public override unsafe void Start()
     {
-        GPoseState = Dalamud.PluginInterface.UiBuilder.GposeActive ? GPoseState.Inside : GPoseState.Outside;
+        GPoseState = Dalamud.ClientState.IsGPosing ? GPoseState.Inside : GPoseState.Outside;
 
         UIModule* uiModule = Framework.Instance()->GetUiModule();
         var enterGPoseAddress = (nint)uiModule->VTable->EnterGPose;
         var exitGPoseAddress = (nint)uiModule->VTable->ExitGPose;
 
-        _enterGPoseHook = Hook<EnterGPoseDelegate>.FromAddress(enterGPoseAddress, EnteringGPoseDetour);
+        _enterGPoseHook = Dalamud.GameInteropProvider.HookFromAddress<EnterGPoseDelegate>(enterGPoseAddress, EnteringGPoseDetour);
         _enterGPoseHook.Enable();
 
-        _exitGPoseHook = Hook<ExitGPoseDelegate>.FromAddress(exitGPoseAddress, ExitingGPoseDetour);
+        _exitGPoseHook = Dalamud.GameInteropProvider.HookFromAddress< ExitGPoseDelegate>(exitGPoseAddress, ExitingGPoseDetour);
         _exitGPoseHook.Enable();
 
         base.Start();
@@ -105,7 +105,7 @@ public class GPoseService : ServiceBase<GPoseService>
 
     public override void Tick(float delta)
     {
-        if(!Dalamud.PluginInterface.UiBuilder.GposeActive && IsInGPose)
+        if(!Dalamud.ClientState.IsGPosing && IsInGPose)
         {
             HandleGPoseChange(GPoseState.Exiting);
             HandleGPoseChange(GPoseState.Outside);

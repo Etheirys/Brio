@@ -1,5 +1,5 @@
-﻿using Dalamud.Game;
-using Dalamud.Logging;
+﻿using Dalamud.Logging;
+using Dalamud.Plugin.Services;
 using System;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
@@ -9,7 +9,7 @@ namespace Brio.Game.Core;
 public static class FrameworkExtensions
 {
     public static Task<T> RunUntilSatisfied<T>(
-        this Framework framework,
+        this IFramework framework,
         Func<bool> condition,
         Func<bool, T> onSatisfied,
         int attempts,
@@ -43,7 +43,7 @@ public static class FrameworkExtensions
     }
 
 
-    private static void ProcessTask<T>(Framework framework, DeferredTask<T> task)
+    private static void ProcessTask<T>(IFramework framework, DeferredTask<T> task)
     {
         var thisTick = task.TickCount++;
         bool result = false;
@@ -54,7 +54,7 @@ public static class FrameworkExtensions
         }
         catch(Exception ex)
         {
-            PluginLog.Warning(ex, $"Exception running condition action. {task}");
+            Dalamud.PluginLog.Warning(ex, $"Exception running condition action. {task}");
             CompleteTask(task, false, ex);
             return;
         }
@@ -75,7 +75,7 @@ public static class FrameworkExtensions
         {
             if(thisTick >= task.MaxFrames)
             {
-                PluginLog.Warning($"Task timed out. {task}");
+                Dalamud.PluginLog.Warning($"Task timed out. {task}");
                 CompleteTask(task, false, null);
             }
             else
@@ -102,7 +102,7 @@ public static class FrameworkExtensions
         }
         catch(Exception ex)
         {
-            PluginLog.Warning(ex, $"Exception running completion action. {task}");
+            Dalamud.PluginLog.Warning(ex, $"Exception running completion action. {task}");
             task.CallbackTask.SetException(ex);
         }
     }

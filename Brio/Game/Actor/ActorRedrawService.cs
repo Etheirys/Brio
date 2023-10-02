@@ -58,12 +58,12 @@ public class ActorRedrawService : ServiceBase<ActorRedrawService>
                 {
                     // We can't change certain values
                     Human* human = ((Human*)rawObject->DrawObject);
-                    if(human->Race != chara->DrawData.CustomizeData[0]
-                        || human->Sex != chara->DrawData.CustomizeData[1]
-                        || human->BodyType != chara->DrawData.CustomizeData[2]
-                        || human->Clan != chara->DrawData.CustomizeData[4]
+                    if(human->Customize.Race != chara->DrawData.CustomizeData[0]
+                        || human->Customize.Sex != chara->DrawData.CustomizeData[1]
+                        || human->Customize.BodyType != chara->DrawData.CustomizeData[2]
+                        || human->Customize.Clan != chara->DrawData.CustomizeData[4]
                         || human->FaceId != chara->DrawData.CustomizeData[5]
-                        || chara->ModelCharaId != 0)
+                        || chara->CharacterData.ModelCharaId != 0)
                     {
                         drewInPlace = false;
                     }

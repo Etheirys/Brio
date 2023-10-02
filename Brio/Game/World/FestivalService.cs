@@ -234,7 +234,7 @@ public class FestivalService : ServiceBase<FestivalService>
         }
     }
 
-    private void ClientState_TerritoryChanged(object? sender, ushort e)
+    private void ClientState_TerritoryChanged(ushort e)
     {
         _pendingChanges.Clear();
         _originalState = null;

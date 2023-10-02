@@ -8,7 +8,7 @@ using Brio.Game.World;
 using Brio.IPC;
 using Brio.UI;
 using Brio.Web;
-using Dalamud.Game;
+using Dalamud.Plugin.Services;
 using System;
 
 namespace Brio;
@@ -52,7 +52,7 @@ public class Brio : IDisposable
         });
     }
 
-    private void Framework_Update(Framework framework)
+    private void Framework_Update(IFramework framework)
     {
         _serviceManager.Tick();
     }

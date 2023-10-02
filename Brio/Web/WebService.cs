@@ -57,7 +57,7 @@ public class WebService : ServiceBase<WebService>
         }
         catch(Exception ex)
         {
-            PluginLog.Error(ex, "Failed to start webserver");
+            Dalamud.PluginLog.Error(ex, "Failed to start webserver");
             _webServer = null;
         }
     }

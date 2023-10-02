@@ -14,7 +14,7 @@ public unsafe class RenderHookService : ServiceBase<RenderHookService>
     public RenderHookService()
     {
         var enforceKindRestrictionsAddress = Dalamud.SigScanner.ScanText("E8 ?? ?? ?? ?? 41 B0 ?? 48 8B D3 48 8B CD");
-        _enforceKindRestrictionsHook = Hook<EnforceKindRestrictionsDelegate>.FromAddress(enforceKindRestrictionsAddress, EnforceKindRestrictionsDetour);
+        _enforceKindRestrictionsHook = Dalamud.GameInteropProvider.HookFromAddress<EnforceKindRestrictionsDelegate>(enforceKindRestrictionsAddress, EnforceKindRestrictionsDetour);
         _enforceKindRestrictionsHook.Enable();
     }
 
