@@ -25,7 +25,7 @@ public class ActorService : ServiceBase<ActorService>
 
     public ActorService()
     {
-        var destroyAddress = Dalamud.SigScanner.ScanText("48 89 5C 24 ?? 48 89 74 24 ?? 57 48 83 EC ?? 48 8D 05 ?? ?? ?? ?? 48 8B D9 48 89 01 48 8D 05 ?? ?? ?? ?? 48 89 81 ?? ?? ?? ?? 48 8D 05");
+        var destroyAddress = Dalamud.SigScanner.ScanText("48 89 5C 24 ?? 48 89 74 24 ?? 57 48 83 EC ?? 48 8D 05 ?? ?? ?? ?? 48 8B D9 48 89 01 48 8D 05 ?? ?? ?? ?? 48 89 81 ?? ?? ?? ?? 48 81 C1");
         _destroyGameActorHook = Dalamud.GameInteropProvider.HookFromAddress<DestroyGameActorDelegate>(destroyAddress, ActorDestructorDetour);
         _destroyGameActorHook.Enable();
     }
