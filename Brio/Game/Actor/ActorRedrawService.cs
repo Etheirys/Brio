@@ -85,8 +85,8 @@ public class ActorRedrawService : ServiceBase<ActorRedrawService>
                 {
                     // Weapons
                     byte shouldRedrawWeapon = (byte) (redrawType.HasFlag(RedrawType.ForceRedrawWeaponsOnOptimized) ? 1 : 0);
-                    chara->DrawData.LoadWeapon(DrawDataContainer.WeaponSlot.MainHand, chara->DrawData.MainHandModel, shouldRedrawWeapon, 0, 0, 0);
-                    chara->DrawData.LoadWeapon(DrawDataContainer.WeaponSlot.OffHand, chara->DrawData.OffHandModel, shouldRedrawWeapon, 0, 0, 0);
+                    chara->DrawData.LoadWeapon(DrawDataContainer.WeaponSlot.MainHand, chara->DrawData.Weapon(DrawDataContainer.WeaponSlot.MainHand).ModelId, shouldRedrawWeapon, 0, 0, 0);
+                    chara->DrawData.LoadWeapon(DrawDataContainer.WeaponSlot.OffHand, chara->DrawData.Weapon(DrawDataContainer.WeaponSlot.OffHand).ModelId, shouldRedrawWeapon, 0, 0, 0);
 
                     _redrawsActive.Remove(index);
                     return RedrawResult.Optmized;
