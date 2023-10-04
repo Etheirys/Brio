@@ -537,5 +537,20 @@
     "Id": 143,
     "Name": "Starlight Celebration (2023)",
     "Unsafe": false
+  },
+  {
+    "Id": 144,
+    "Name": "Valentione's Day (2024)",
+    "Unsafe": false
+  },
+  {
+    "Id": 145,
+    "Name": "Hatching Tide (2024)",
+    "Unsafe": false
+  },
+  {
+    "Id": 146,
+    "Name": "Make It Rain (2024)",
+    "Unsafe": false
   }
 ]
