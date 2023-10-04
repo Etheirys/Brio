@@ -81,7 +81,7 @@ public class ActorSpawnService : ServiceBase<ActorSpawnService>
         newPlayer->GameObject.Rotation = originalPlayer->GameObject.Rotation;
         newPlayer->GameObject.DefaultRotation = originalPlayer->GameObject.Rotation;
 
-       newPlayer->GameObject.SetName(((int)newId).ToCharacterName());
+        newPlayer->GameObject.SetName(((int)newId).ToCharacterName());
 
         newPlayer->GameObject.DisableDraw();
         newPlayer->CharacterSetup.CopyFromCharacter(newPlayer, CharacterSetup.CopyFlags.None); // Some tools get confused (Like Penumbra) unless we copy onto ourselves after name change
