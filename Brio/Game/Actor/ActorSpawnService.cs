@@ -71,8 +71,8 @@ public class ActorSpawnService : ServiceBase<ActorSpawnService>
         Character* newPlayer = (Character*)com->GetObjectByIndex(newId);
         if(newPlayer == null) return null;
 
-        //var gposeController = &EventFramework.Instance()->EventSceneModule.EventGPoseController;
-        //gposeController->AddCharacterToGPose(newPlayer); // This is safe even if the list is full. The game will also cleanup for us.
+        var gposeController = &EventFramework.Instance()->EventSceneModule.EventGPoseController;
+        gposeController->AddCharacterToGPose(newPlayer); // This is safe even if the list is full. The game will also cleanup for us.
 
         newPlayer->CharacterSetup.CopyFromCharacter(originalPlayer, CharacterSetup.CopyFlags.None); // We copy the Player as the created actor is just blank
 
