@@ -21,7 +21,7 @@ It is designed to enhance the experience of users no matter which posing tool th
 ## Support
 Brio is still early in Alpha so issues are expected.
 
-Please either open an [issue](https://github.com/AsgardXIV/Brio/issues) or visit us on [Discord](https://discord.gg/xivtools) if you need help!
+Please either open an [issue](https://github.com/AsgardXIV/Brio/issues) or visit us on [Discord](https://discord.gg/KvGJCCnG8t) if you need help!
 
 ## Authors
 * [Asgard](https://github.com/AsgardXIV) - Main development.
