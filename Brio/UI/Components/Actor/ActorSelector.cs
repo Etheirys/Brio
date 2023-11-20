@@ -14,7 +14,7 @@ public class ActorSelector
     {
         var gposeObjects = ActorService.Instance.GPoseActors;
 
-        ImGui.Text($"Actors: {gposeObjects.Count}/{ActorService.GPoseActorCount}");
+        ImGui.Text($"Actors: {gposeObjects.Count}");
 
         ImGui.PushItemWidth(-1);
         if(ImGui.BeginListBox("###gpose_actor_list", new Vector2(-1, ImGui.GetTextLineHeight() * 9)))

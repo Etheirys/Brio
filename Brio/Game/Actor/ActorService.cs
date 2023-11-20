@@ -1,5 +1,6 @@
 ﻿using Brio.Core;
 using Brio.Game.Actor.Extensions;
+using Brio.Game.Actor.Interop;
 using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Hooking;
 using System;
@@ -22,6 +23,8 @@ public class ActorService : ServiceBase<ActorService>
     public ReadOnlyCollection<GameObject> GPoseActors => new(_gposeActors);
 
     private List<GameObject> _gposeActors = new();
+
+    public AttachmentInterop AttachmentInterop { get; } = new();
 
     public ActorService()
     {

@@ -11,6 +11,7 @@ namespace Brio.UI.Components.Actor;
 public static class ActorTab
 {
     private static ActorSelector _selector = new ActorSelector();
+    private static bool _allowCompanions = true;
 
     public unsafe static void Draw()
     {
@@ -30,7 +31,8 @@ public static class ActorTab
             if(!canSpawn) ImGui.BeginDisabled();
             if(ImGui.Button("Spawn###gpose_actor_spawn"))
             {
-                ushort? createdId = ActorSpawnService.Instance.Spawn();
+                SpawnOptions options = _allowCompanions ? SpawnOptions.ReserveCompanionSlot : SpawnOptions.None;
+                ushort? createdId = ActorSpawnService.Instance.Spawn(options);
                 if(createdId == null)
                     Dalamud.ToastGui.ShowError("Failed to Create Actor.");
             }
@@ -61,6 +63,10 @@ public static class ActorTab
             {
                 ActorSpawnService.Instance.DestroyAll();
             }
+
+            ImGui.Checkbox("Allow Attachments", ref _allowCompanions);
+            if(ImGui.IsItemHovered())
+                ImGui.SetTooltip("Allow attachments to be attached to spawned actors.\nThis will take two slots instead of one so reduces the total actors you can spawn.");
         }
 
         if(ImGui.CollapsingHeader("Redraw"))
@@ -95,6 +101,18 @@ public static class ActorTab
             if(_selector.SelectedObject != null)
             {
                 ActionTimelineControls.Draw(_selector.SelectedObject);
+            }
+            else
+            {
+                ImGui.Text("No actor selected.");
+            }
+        }
+
+        if(ImGui.CollapsingHeader("Attachments"))
+        {
+            if(_selector.SelectedObject != null)
+            {
+                AttachmentControls.Draw(_selector.SelectedObject);
             }
             else
             {

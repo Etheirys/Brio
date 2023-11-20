@@ -64,7 +64,9 @@ public class ActorSpawnService : ServiceBase<ActorSpawnService>
         Character* originalPlayer = (Character*)localPlayer.AsNative();
         if(originalPlayer == null) return null;
 
-        uint idCheck = com->CreateBattleCharacter();
+        bool reserveCompanionSlot = options.HasFlag(SpawnOptions.ReserveCompanionSlot);
+
+        uint idCheck = com->CreateBattleCharacter(param: (byte)(reserveCompanionSlot ? 1 : 0));
         if(idCheck == 0xffffffff) return null;
         ushort newId = (ushort)idCheck;
 
@@ -159,5 +161,6 @@ public class ActorSpawnService : ServiceBase<ActorSpawnService>
 public enum SpawnOptions
 {
     None = 0,
-    ApplyModelPosition = 1
+    ApplyModelPosition = 1,
+    ReserveCompanionSlot = 2,
 }
