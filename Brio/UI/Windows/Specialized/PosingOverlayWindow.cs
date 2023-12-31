@@ -124,6 +124,9 @@ internal class PosingOverlayWindow : Window, IDisposable
         // Bone Transforms
         foreach (var (skeleton, poseSlot) in posing.SkeletonPosing.Skeletons)
         {
+            if(!skeleton.IsValid)
+                continue;
+
             var charaBase = skeleton.CharacterBase;
             if (charaBase == null)
                 continue;

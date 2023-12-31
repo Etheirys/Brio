@@ -285,6 +285,9 @@ internal class PosingGraphicalWindow : Window, IDisposable
                 if (bone == null)
                     return null;
 
+                if(!bone.Skeleton.IsValid)
+                    return null;
+
                 if (bone.IsHidden)
                     return null;
 

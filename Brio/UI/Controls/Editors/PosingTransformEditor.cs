@@ -16,10 +16,21 @@ internal class PosingTransformEditor
     {
         var selected = posingCapability.Selected;
 
-        using (ImRaii.PushId(id))
+        using(ImRaii.PushId(id))
         {
             selected.Switch(
-                bone => DrawBoneTransformEditor(posingCapability, bone, width),
+                bone =>
+                {
+                    var realBone = posingCapability.SkeletonPosing.GetBone(bone);
+                    if(realBone != null && realBone.Skeleton.IsValid)
+                    {
+                        DrawBoneTransformEditor(posingCapability, bone, width);
+                    }
+                    else
+                    {
+                        DrawModelTransformEditor(posingCapability, width);
+                    }
+                },
                 _ => DrawModelTransformEditor(posingCapability, width),
                 _ => DrawModelTransformEditor(posingCapability, width)
             );
@@ -28,7 +39,7 @@ internal class PosingTransformEditor
 
     private void DrawBoneTransformEditor(PosingCapability posingCapability, BonePoseInfoId boneId, float? width)
     {
-        if (width.HasValue)
+        if(width.HasValue)
             width -= ImGui.CalcTextSize("XXXX").X;
 
         var bone = posingCapability.SkeletonPosing.GetBone(boneId);
@@ -45,77 +56,77 @@ internal class PosingTransformEditor
         bool anyActive = false;
 
 
-        if (width.HasValue)
+        if(width.HasValue)
             ImGui.PushItemWidth(width.Value);
 
         var text = "No Bone Selected";
-        if (bone != null)
+        if(bone != null)
             text = bone.FriendlyDescriptor;
         ImGui.Text(text);
 
         didChange |= ImGui.DragFloat3("###position", ref realTransform.Position, 0.001f);
         anyActive |= ImGui.IsItemActive();
-        if (ImGui.IsItemHovered())
+        if(ImGui.IsItemHovered())
             ImGui.SetTooltip("Position");
         ImGui.SameLine();
         bool propBool = propagate.HasFlag(TransformComponents.Position);
-        if (ImGui.Checkbox("###propagate_position", ref propBool))
+        if(ImGui.Checkbox("###propagate_position", ref propBool))
         {
             didChange |= true;
             propagate = propBool ? propagate | TransformComponents.Position : propagate & ~TransformComponents.Position;
         }
-        if (ImGui.IsItemHovered())
+        if(ImGui.IsItemHovered())
             ImGui.SetTooltip("Propagate");
 
         didChange |= ImGui.DragFloat3("###rotation", ref realEuler, 0.1f);
         anyActive |= ImGui.IsItemActive();
-        if (ImGui.IsItemHovered())
+        if(ImGui.IsItemHovered())
             ImGui.SetTooltip("Rotation");
         ImGui.SameLine();
         propBool = propagate.HasFlag(TransformComponents.Rotation);
-        if (ImGui.Checkbox("###propagate_rotation", ref propBool))
+        if(ImGui.Checkbox("###propagate_rotation", ref propBool))
         {
             didChange |= true;
             propagate = propBool ? propagate | TransformComponents.Rotation : propagate & ~TransformComponents.Rotation;
         }
-        if (ImGui.IsItemHovered())
+        if(ImGui.IsItemHovered())
             ImGui.SetTooltip("Propagate");
 
         didChange |= ImGui.DragFloat3("###scale", ref realTransform.Scale, 0.001f);
         anyActive |= ImGui.IsItemActive();
-        if (ImGui.IsItemHovered())
+        if(ImGui.IsItemHovered())
             ImGui.SetTooltip("Scale");
         ImGui.SameLine();
         propBool = propagate.HasFlag(TransformComponents.Scale);
-        if (ImGui.Checkbox("###propagate_scale", ref propBool))
+        if(ImGui.Checkbox("###propagate_scale", ref propBool))
         {
             didChange |= true;
             propagate = propBool ? propagate | TransformComponents.Scale : propagate & ~TransformComponents.Scale;
         }
-        if (ImGui.IsItemHovered())
+        if(ImGui.IsItemHovered())
             ImGui.SetTooltip("Propagate");
 
-        if (width.HasValue)
+        if(width.HasValue)
             ImGui.PopItemWidth();
 
 
         realTransform.Rotation = realEuler.ToQuaternion();
         var toApply = before + realTransform.CalculateDiff(beforeMods);
 
-        if (didChange && bone != null && bonePose != null)
+        if(didChange && bone != null && bonePose != null)
         {
             posingCapability.SkeletonPosing.GetBonePose(bone).Apply(toApply, before);
             bonePose.DefaultPropagation = propagate;
         }
 
-        if (anyActive)
+        if(anyActive)
         {
             _trackingTransform = realTransform;
             _trackingEuler = realEuler;
         }
         else
         {
-            if (_trackingEuler.HasValue || _trackingTransform.HasValue)
+            if(_trackingEuler.HasValue || _trackingTransform.HasValue)
                 posingCapability.Snapshot();
 
             _trackingTransform = null;
@@ -134,48 +145,48 @@ internal class PosingTransformEditor
         bool anyActive = false;
 
 
-        if (width.HasValue)
+        if(width.HasValue)
             ImGui.PushItemWidth(width.Value);
 
         ImGui.Text("Model Transform");
 
         didChange |= ImGui.DragFloat3("###position", ref realTransform.Position, 0.001f);
         anyActive |= ImGui.IsItemActive();
-        if (ImGui.IsItemHovered())
+        if(ImGui.IsItemHovered())
             ImGui.SetTooltip("Position");
 
 
         didChange |= ImGui.DragFloat3("###rotation", ref realEuler, 0.1f);
         anyActive |= ImGui.IsItemActive();
-        if (ImGui.IsItemHovered())
+        if(ImGui.IsItemHovered())
             ImGui.SetTooltip("Rotation");
 
 
         didChange |= ImGui.DragFloat3("###scale", ref realTransform.Scale, 0.001f);
         anyActive |= ImGui.IsItemActive();
-        if (ImGui.IsItemHovered())
+        if(ImGui.IsItemHovered())
             ImGui.SetTooltip("Scale");
 
 
-        if (width.HasValue)
+        if(width.HasValue)
             ImGui.PopItemWidth();
 
 
         realTransform.Rotation = realEuler.ToQuaternion();
 
-        if (didChange)
+        if(didChange)
         {
             posingCapability.ModelPosing.Transform = realTransform;
         }
 
-        if (anyActive)
+        if(anyActive)
         {
             _trackingTransform = realTransform;
             _trackingEuler = realEuler;
         }
         else
         {
-            if (_trackingEuler.HasValue || _trackingTransform.HasValue)
+            if(_trackingEuler.HasValue || _trackingTransform.HasValue)
                 posingCapability.Snapshot();
 
             _trackingTransform = null;
