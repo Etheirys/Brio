@@ -34,7 +34,7 @@ internal class WeatherSelector(string id) : Selector<WeatherUnion>(id)
         UpdateList();
     }
 
-    protected override void DrawItem(WeatherUnion union, bool isHovered)
+    protected override void DrawItem(WeatherUnion union, bool isHovered, bool isMouseOver)
     {
         ImBrio.BorderedGameIcon("icon", union, flags: ImGuiButtonFlags.None, size: IconSize);
     }

@@ -183,9 +183,9 @@ internal class GearEditor()
                         if (dyePopup.Success)
                         {
                             _dyeSelector.Draw();
-                            if (_dyeSelector.HoverChanged && _dyeSelector.Hovered != null)
+                            if (_dyeSelector.SoftSelectionChanged && _dyeSelector.SoftSelected != null)
                             {
-                                equip.Stain = (DyeId)_dyeSelector.Hovered;
+                                equip.Stain = (DyeId)_dyeSelector.SoftSelected;
                                 didChange |= true;
                             }
                             if (_dyeSelector.SelectionChanged)
@@ -198,9 +198,9 @@ internal class GearEditor()
                         if (gearPopup.Success)
                         {
                             _gearSelector.Draw();
-                            if (_gearSelector.HoverChanged && _gearSelector.Hovered != null)
+                            if (_gearSelector.SoftSelectionChanged && _gearSelector.SoftSelected != null)
                             {
-                                equip.Value = (uint)_gearSelector.Hovered.ModelId;
+                                equip.Value = (uint)_gearSelector.SoftSelected.ModelId;
                                 equip.Stain = dyeId;
                                 didChange |= true;
                             }
@@ -314,9 +314,9 @@ internal class GearEditor()
                         if (dyePopup.Success)
                         {
                             _dyeSelector.Draw();
-                            if (_dyeSelector.HoverChanged && _dyeSelector.Hovered != null)
+                            if (_dyeSelector.SoftSelectionChanged && _dyeSelector.SoftSelected != null)
                             {
-                                equip.Stain = (DyeId)_dyeSelector.Hovered;
+                                equip.Stain = (DyeId)_dyeSelector.SoftSelected;
                                 didChange |= true;
                             }
                             if (_dyeSelector.SelectionChanged)
@@ -329,9 +329,9 @@ internal class GearEditor()
                         if (gearPopup.Success)
                         {
                             _gearSelector.Draw();
-                            if (_gearSelector.HoverChanged && _gearSelector.Hovered != null)
+                            if (_gearSelector.SoftSelectionChanged && _gearSelector.SoftSelected != null)
                             {
-                                equip.Value = _gearSelector.Hovered.ModelId;
+                                equip.Value = _gearSelector.SoftSelected.ModelId;
                                 equip.Stain = dyeId;
                                 didChange |= true;
                             }

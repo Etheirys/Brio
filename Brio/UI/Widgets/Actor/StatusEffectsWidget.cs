@@ -95,9 +95,9 @@ internal class StatusEffectsWidget(StatusEffectCapability capability) : Widget<S
             {
                 _globalStatusEffectSelector.Draw();
 
-                if (_globalStatusEffectSelector.HoverChanged && _globalStatusEffectSelector.Hovered != null)
+                if (_globalStatusEffectSelector.SoftSelectionChanged && _globalStatusEffectSelector.SoftSelected != null)
                 {
-                    _selectedStatus = (int)_globalStatusEffectSelector.Hovered.RowId;
+                    _selectedStatus = (int)_globalStatusEffectSelector.SoftSelected.RowId;
                 }
 
                 if (_globalStatusEffectSelector.SelectionChanged && _globalStatusEffectSelector.Selected != null)

@@ -12,15 +12,15 @@ namespace Brio.UI.Controls.Selectors;
 internal abstract class Selector<T> where T : class
 {
     public T? Selected => _selected;
-    public T? Hovered => _hovered;
+    public T? SoftSelected => _softSelected;
 
-    public bool HoverChanged { get; private set; }
+    public bool SoftSelectionChanged { get; private set; }
     public bool SelectionChanged { get; private set; }
 
     protected string _id;
 
     protected volatile T? _selected;
-    protected volatile T? _hovered;
+    protected volatile T? _softSelected;
 
 
     private readonly List<T> _items = [];
@@ -48,7 +48,7 @@ internal abstract class Selector<T> where T : class
     public void Select(T? selected, bool shouldScroll = true, bool shouldUpdate = true, bool shouldClear = false)
     {
         _selected = selected;
-        _hovered = selected;
+        _softSelected = selected;
 
         if (selected != null)
             _shouldFocusSearch = true;
@@ -69,7 +69,7 @@ internal abstract class Selector<T> where T : class
     {
         var items = _filteredAndSortedItems;
 
-        HoverChanged = false;
+        SoftSelectionChanged = false;
         SelectionChanged = false;
 
         using (ImRaii.PushId($"selector_{_id}"))
@@ -126,7 +126,8 @@ internal abstract class Selector<T> where T : class
                         using (ImRaii.PushId(i))
                         {
                             var startPos = ImGui.GetCursorPos();
-                            bool isHovered = IsItemHovered(item);
+                            bool isHovered = IsItemSoftSelected(item);
+                            bool isMouseOver = ImGui.IsItemHovered();
                             bool wasHovered = ImGui.Selectable($"###entry", isHovered, ImGuiSelectableFlags.AllowDoubleClick, new Vector2(0, EntrySize));
                             bool wasSelected = wasHovered && ImGui.IsMouseDoubleClicked(ImGuiMouseButton.Left);
                             var endPos = ImGui.GetCursorPos();
@@ -139,7 +140,7 @@ internal abstract class Selector<T> where T : class
                                     using (var itemGroup = ImRaii.Group())
                                     {
                                         if (itemGroup.Success)
-                                            DrawItem(item, isHovered);
+                                            DrawItem(item, isHovered, isMouseOver);
                                     }
                                 }
                                 ImGui.SetCursorPos(endPos);
@@ -159,8 +160,8 @@ internal abstract class Selector<T> where T : class
 
                             if (wasHovered)
                             {
-                                _hovered = item;
-                                HoverChanged = true;
+                                _softSelected = item;
+                                SoftSelectionChanged = true;
 
                                 if (wasSelected)
                                 {
@@ -187,7 +188,7 @@ internal abstract class Selector<T> where T : class
         _items.AddRange(items);
     }
 
-    protected abstract void DrawItem(T item, bool isHovered);
+    protected abstract void DrawItem(T item, bool isSoftSelected, bool isMouseOver);
 
     protected virtual void DrawOptions()
     {
@@ -245,9 +246,9 @@ internal abstract class Selector<T> where T : class
         return 0;
     }
 
-    protected virtual bool IsItemHovered(T item)
+    protected virtual bool IsItemSoftSelected(T item)
     {
-        return _hovered?.Equals(item) ?? false;
+        return _softSelected?.Equals(item) ?? false;
     }
 
     protected virtual bool IsItemSelected(T item)

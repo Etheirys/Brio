@@ -86,16 +86,18 @@ internal class ActionTimelineSelector(string id) : Selector<ActionTimelineSelect
 
         }
     }
-    protected override void DrawItem(ActionTimelineSelectorEntry item, bool isHovered)
+    protected override void DrawItem(ActionTimelineSelectorEntry item, bool isSoftSelected, bool isMouseOver)
     {
         var description = $"{item.Name}\n{item.SecondaryId} {item.TimelineType} {item.Slot} {item.Purpose}\n{item.TimelineId} {item.Key}";
 
         ImBrio.BorderedGameIcon("icon", item.Icon, "Images.ActionTimeline.png", description, flags: ImGuiButtonFlags.None, size: IconSize);
+
+        if(isMouseOver)
+            ImGui.SetTooltip(description);
     }
 
     protected override void DrawOptions()
     {
-
         if (ImGui.Checkbox("Emotes", ref _showEmotes))
             UpdateList();
 

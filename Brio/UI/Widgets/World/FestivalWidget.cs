@@ -108,8 +108,8 @@ internal class FestivalWidget : Widget<FestivalCapability>
             {
                 _globalFestivalSelector.Draw();
 
-                if (_globalFestivalSelector.HoverChanged && _globalFestivalSelector.Hovered != null)
-                    _selectedFestival = (int)_globalFestivalSelector.Hovered.Id;
+                if (_globalFestivalSelector.SoftSelectionChanged && _globalFestivalSelector.SoftSelected != null)
+                    _selectedFestival = (int)_globalFestivalSelector.SoftSelected.Id;
 
                 if (_globalFestivalSelector.SelectionChanged && _globalFestivalSelector.Selected != null)
                 {

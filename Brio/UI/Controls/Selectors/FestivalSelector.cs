@@ -25,7 +25,7 @@ internal class FestivalSelector(string id, IEnumerable<FestivalEntry> entries) :
         AddItems(_entries);
     }
 
-    protected override void DrawItem(FestivalEntry item, bool isHovered)
+    protected override void DrawItem(FestivalEntry item, bool isHovered, bool isMouseOver)
     {
         ImGui.Text(item.ToString());
     }

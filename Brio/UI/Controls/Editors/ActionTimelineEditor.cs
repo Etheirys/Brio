@@ -96,9 +96,9 @@ internal class ActionTimelineEditor()
             {
                 _globalTimelineSelector.Draw();
 
-                if (_globalTimelineSelector.HoverChanged && _globalTimelineSelector.Hovered != null)
+                if (_globalTimelineSelector.SoftSelectionChanged && _globalTimelineSelector.SoftSelected != null)
                 {
-                    _baseAnimation = _globalTimelineSelector.Hovered.TimelineId;
+                    _baseAnimation = _globalTimelineSelector.SoftSelected.TimelineId;
                 }
 
                 if (_globalTimelineSelector.SelectionChanged && _globalTimelineSelector.Selected != null)
@@ -147,9 +147,9 @@ internal class ActionTimelineEditor()
             {
                 _globalTimelineSelector.Draw();
 
-                if (_globalTimelineSelector.HoverChanged && _globalTimelineSelector.Hovered != null)
+                if (_globalTimelineSelector.SoftSelectionChanged && _globalTimelineSelector.SoftSelected != null)
                 {
-                    _blendAnimation = _globalTimelineSelector.Hovered.TimelineId;
+                    _blendAnimation = _globalTimelineSelector.SoftSelected.TimelineId;
                 }
 
                 if (_globalTimelineSelector.SelectionChanged && _globalTimelineSelector.Selected != null)

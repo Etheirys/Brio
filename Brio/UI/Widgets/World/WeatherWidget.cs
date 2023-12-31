@@ -56,9 +56,9 @@ internal class WeatherWidget(WeatherCapability weatherCapability) : Widget<Weath
             {
                 _weatherSelector.Draw();
 
-                if (_weatherSelector.HoverChanged && _weatherSelector.Hovered != null)
+                if (_weatherSelector.SoftSelectionChanged && _weatherSelector.SoftSelected != null)
                 {
-                    currentWeather = _weatherSelector.Hovered.Match(
+                    currentWeather = _weatherSelector.SoftSelected.Match(
                         naturalWeather => (int)naturalWeather.RowId,
                         weatherOverride => 0
                     );
