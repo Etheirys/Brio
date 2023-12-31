@@ -56,9 +56,7 @@ internal unsafe class SkeletonService : IDisposable
         _updateBonePhysicsHook = hooking.HookFromAddress<UpdateBonePhysicsDelegate>(scanner.ScanText(updateBonePhysicsAddress), UpdateBonePhysicsDetour);
         _updateBonePhysicsHook.Enable();
 
-        // This happens early in the render, and it's the step which locks the skeletons (once tail size etc is known).
-        // We could also do it after Framework.TaskRenderGraphicsRender but that's tricky to hook.
-        var finalizeSkeletonsHook = "48 85 C9 74 ?? 53 48 83 EC ?? 48 8D 05 ?? ?? ?? ?? 48 89 74 24";
+        var finalizeSkeletonsHook = "48 8B 0D 31 03 11 02 E9 54 7E 32 00"; // Framework.TaskRenderGraphicsRender
         _finalizeSkeletonsHook = hooking.HookFromAddress<FinalizeSkeletonsDelegate>(scanner.ScanText(finalizeSkeletonsHook), FinalizeSkeletonsHook);
         _finalizeSkeletonsHook.Enable();
 
