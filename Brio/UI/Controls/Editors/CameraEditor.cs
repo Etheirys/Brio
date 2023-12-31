@@ -1,5 +1,4 @@
 ﻿using Brio.Capabilities.Camera;
-using Brio.Capabilities.Core;
 using Brio.UI.Controls.Stateless;
 using Dalamud.Interface.Utility.Raii;
 using ImGuiNET;

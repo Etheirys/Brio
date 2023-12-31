@@ -1,10 +1,6 @@
 ﻿using Brio.Capabilities.Camera;
 using Brio.UI.Controls.Editors;
-using Brio.UI.Controls.Stateless;
 using Brio.UI.Widgets.Core;
-using Dalamud.Interface.Utility.Raii;
-using ImGuiNET;
-using System.Numerics;
 
 namespace Brio.UI.Widgets.Camera;
 

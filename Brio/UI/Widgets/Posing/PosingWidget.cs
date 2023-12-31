@@ -6,7 +6,6 @@ using Dalamud.Interface;
 using Dalamud.Interface.Utility.Raii;
 using ImGuiNET;
 using OneOf.Types;
-using System.Numerics;
 
 namespace Brio.UI.Widgets.Posing;
 

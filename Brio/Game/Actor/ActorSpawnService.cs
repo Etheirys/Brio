@@ -10,7 +10,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Brio.Game.GPose;
-using FFXIVClientStructs.FFXIV.Client.Game.Event;
 using Brio.Game.Types;
 using Brio.IPC;
 using Brio.Core;

@@ -12,7 +12,6 @@ using System.Collections.Generic;
 using System.Numerics;
 using Brio.Core;
 using Dalamud.Interface.Utility;
-using Brio.Game.Posing.Skeletons;
 using System.Linq;
 using Brio.Config;
 using Brio.UI.Controls.Core;

@@ -11,8 +11,6 @@ using Brio.Game.Posing;
 using Brio.UI.Controls.Core;
 using Brio.UI.Controls.Editors;
 using Brio.UI.Controls.Stateless;
-using Brio.Game.GPose;
-using System;
 
 namespace Brio.UI.Windows.Specialized;
 
