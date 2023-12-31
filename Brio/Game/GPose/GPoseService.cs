@@ -75,7 +75,9 @@ internal unsafe class GPoseService : IDisposable
 
     public void TriggerGPoseChange()
     {
-        OnGPoseStateChange?.Invoke(IsGPosing);
+        var gposing = IsGPosing;
+        Brio.Log.Verbose($"GPose state changed to {gposing}");
+        OnGPoseStateChange?.Invoke(gposing);
     }
 
     public void AddCharacterToGPose(Character chara) => AddCharacterToGPose((NativeCharacter*)chara.Address);
@@ -132,7 +134,7 @@ internal unsafe class GPoseService : IDisposable
 
         UpdateDynamicHooks();
 
-        OnGPoseStateChange?.Invoke(IsGPosing);
+        TriggerGPoseChange();
     }
 
     private void UpdateDynamicHooks()

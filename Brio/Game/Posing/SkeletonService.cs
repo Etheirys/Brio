@@ -25,7 +25,7 @@ internal unsafe class SkeletonService : IDisposable
     public event SkeletonUpdateEvent? SkeletonUpdateStart;
     public event SkeletonUpdateEvent? SkeletonUpdateEnd;
 
-    private delegate void UpdateBonePhysicsDelegate(nint a1, uint a2);
+    private delegate nint UpdateBonePhysicsDelegate(nint a1);
     private readonly Hook<UpdateBonePhysicsDelegate> _updateBonePhysicsHook = null!;
 
     private delegate void FinalizeSkeletonsDelegate(nint a1);
@@ -292,6 +292,7 @@ internal unsafe class SkeletonService : IDisposable
 
     private void RefreshSkeletonCache()
     {
+        Brio.Log.Verbose("Refreshing skeleton cache...");
         _skeletonToPosingCapability.Clear();
         _skeletons.Clear();
         foreach (var actor in _monitorService.ObjectTable)
@@ -305,6 +306,7 @@ internal unsafe class SkeletonService : IDisposable
                 }
             }
         }
+        Brio.Log.Verbose("Skeleton cache refreshed.");
     }
 
     private void ClearSkeleton(Skeleton skeleton)
@@ -381,9 +383,9 @@ internal unsafe class SkeletonService : IDisposable
         }
     }
 
-    private void UpdateBonePhysicsDetour(nint a1, uint a2)
+    private nint UpdateBonePhysicsDetour(nint a1)
     {
-        _updateBonePhysicsHook.Original(a1, a2);
+        var result = _updateBonePhysicsHook.Original(a1);
         try
         {
             BeginSkeletonUpdate();
@@ -392,6 +394,7 @@ internal unsafe class SkeletonService : IDisposable
         {
             Brio.Log.Error(e, "Error during skeleton update");
         }
+        return result;
     }
 
     private void FinalizeSkeletonsHook(nint a1)
