@@ -19,7 +19,7 @@ internal unsafe class CameraService : IDisposable
     private delegate nint CameraCollisionDelegate(nint a1, nint a2, nint a3, nint a4, uint a5, float a6, nint a7);
     private readonly Hook<CameraCollisionDelegate> _cameraCollisionHook = null!;
 
-    private delegate void CameraUpdateDelegate(BrioCamera* camera);
+    private delegate nint CameraUpdateDelegate(BrioCamera* camera);
     private readonly Hook<CameraUpdateDelegate> _cameraUpdateHook = null!;
 
     public CameraService(EntityManager entityManager, GPoseService gPoseService, ISigScanner scanner, IGameInteropProvider hooking)
@@ -41,9 +41,9 @@ internal unsafe class CameraService : IDisposable
         return (BrioCamera*)CameraManager.Instance()->GetActiveCamera();
     }
 
-    private void CameraUpdateDetour(BrioCamera* camera)
+    private nint CameraUpdateDetour(BrioCamera* camera)
     {
-        _cameraUpdateHook.Original(camera);
+        var result = _cameraUpdateHook.Original(camera);
 
         if (_gPoseService.IsGPosing)
         {
@@ -60,6 +60,7 @@ internal unsafe class CameraService : IDisposable
                 }
             }
         }
+        return result;
     }
 
     private nint CameraCollisionDetour(nint a1, nint a2, nint a3, nint a4, uint a5, float a6, nint a7)

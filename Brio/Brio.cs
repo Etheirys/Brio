@@ -53,18 +53,18 @@ public class Brio : IDalamudPlugin
                 {
                     if(service.Lifetime == ServiceLifetime.Singleton)
                     {
-                        Brio.Log.Verbose($"Initializing {service.ServiceType}...");
+                        Brio.Log.Debug($"Initializing {service.ServiceType}...");
                         _services.GetRequiredService(service.ServiceType);
                     }
                 }
 
                 // Setup default entities
-                Brio.Log.Verbose($"Setting up default entitites...");
+                Brio.Log.Debug($"Setting up default entitites...");
                 _services.GetRequiredService<EntityManager>().SetupDefaultEntities();
                 _services.GetRequiredService<EntityActorManager>().AttachContainer();
 
                 // Trigger GPose events to ensure the plugin is in the correct state
-                Brio.Log.Verbose($"Triggering initial GPose state...");
+                Brio.Log.Debug($"Triggering initial GPose state...");
                 _services.GetRequiredService<GPoseService>().TriggerGPoseChange();
 
                 Log.Info($"Started {Name} in {stopwatch.ElapsedMilliseconds}ms");

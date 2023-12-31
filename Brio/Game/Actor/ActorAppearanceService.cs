@@ -25,13 +25,13 @@ internal class ActorAppearanceService : IDisposable
     private readonly GlamourerService _glamourerService;
     private readonly EntityManager _entityManager;
 
-    private delegate long EnforceKindRestrictionsDelegate(nint a1, nint a2);
+    private delegate byte EnforceKindRestrictionsDelegate(nint a1, nint a2);
     private readonly Hook<EnforceKindRestrictionsDelegate> _enforceKindRestrictionsHook = null!;
 
-    private delegate void UpdateWetnessDelegate(nint a1);
+    private delegate nint UpdateWetnessDelegate(nint a1);
     private readonly Hook<UpdateWetnessDelegate> _updateWetnessHook = null!;
 
-    private unsafe delegate void UpdateTintDelegate(nint charaBase, nint tint);
+    private unsafe delegate nint UpdateTintDelegate(nint charaBase, nint tint);
     private readonly Hook<UpdateTintDelegate> _updateTintHook = null!;
 
     private uint _forceNpcHackCount = 0;
@@ -288,7 +288,7 @@ internal class ActorAppearanceService : IDisposable
 
     public ActorAppearance GetActorAppearance(Character character) => ActorAppearance.FromCharacter(character);
 
-    private long EnforceKindRestrictionsDetour(nint a1, nint a2)
+    private byte EnforceKindRestrictionsDetour(nint a1, nint a2)
     {
         if (_configurationService.Configuration.Appearance.ApplyNPCHack == ApplyNPCHack.Always)
             return 0;
@@ -299,20 +299,20 @@ internal class ActorAppearanceService : IDisposable
         return _enforceKindRestrictionsHook.Original(a1, a2);
     }
 
-    private void UpdateWetnessDetour(nint a1)
+    private nint UpdateWetnessDetour(nint a1)
     {
         if (_gPoseService.IsGPosing)
-            return;
+            return 0;
 
-        _updateWetnessHook.Original(a1);
+        return _updateWetnessHook.Original(a1);
     }
 
-    private void UpdateTintDetour(nint charaBase, nint tint)
+    private nint UpdateTintDetour(nint charaBase, nint tint)
     {
         if (_gPoseService.IsGPosing && CanTint)
-            return;
+            return 0;
 
-        _updateTintHook.Original(charaBase, tint);
+        return _updateTintHook.Original(charaBase, tint);
     }
 
     public void Dispose()

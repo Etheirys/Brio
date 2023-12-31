@@ -292,7 +292,7 @@ internal unsafe class SkeletonService : IDisposable
 
     private void RefreshSkeletonCache()
     {
-        Brio.Log.Verbose("Refreshing skeleton cache...");
+        Brio.Log.Debug("Refreshing skeleton cache...");
         _skeletonToPosingCapability.Clear();
         _skeletons.Clear();
         foreach (var actor in _monitorService.ObjectTable)
@@ -306,7 +306,7 @@ internal unsafe class SkeletonService : IDisposable
                 }
             }
         }
-        Brio.Log.Verbose("Skeleton cache refreshed.");
+        Brio.Log.Debug("Skeleton cache refreshed.");
     }
 
     private void ClearSkeleton(Skeleton skeleton)

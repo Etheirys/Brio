@@ -76,7 +76,7 @@ internal unsafe class GPoseService : IDisposable
     public void TriggerGPoseChange()
     {
         var gposing = IsGPosing;
-        Brio.Log.Verbose($"GPose state changed to {gposing}");
+        Brio.Log.Debug($"GPose state changed to {gposing}");
         OnGPoseStateChange?.Invoke(gposing);
     }
 
