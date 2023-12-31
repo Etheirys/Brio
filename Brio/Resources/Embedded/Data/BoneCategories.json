@@ -9,7 +9,6 @@
         "n_hhiji_",
         "j_kosi",
         "j_kubi",
-        "j_asi_",
         "j_sebo_",
         "j_mune_",
         "j_sako_",
@@ -31,6 +30,12 @@
         "j_ex_h",
         "j_kami_",
         "j_ex_met_va"
+      ]
+    },
+    "legs": {
+      "Type": "Filter",
+      "Bones": [
+        "j_asi_"
       ]
     },
     "tail": {
