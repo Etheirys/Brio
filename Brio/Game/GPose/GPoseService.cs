@@ -1,128 +1,162 @@
-﻿using Brio.Core;
+﻿using Brio.Config;
+using Dalamud.Game;
+using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Hooking;
+using Dalamud.Plugin.Services;
+using FFXIVClientStructs.FFXIV.Client.Game.Event;
 using FFXIVClientStructs.FFXIV.Client.System.Framework;
 using FFXIVClientStructs.FFXIV.Client.UI;
 using System;
+using NativeCharacter = FFXIVClientStructs.FFXIV.Client.Game.Character.Character;
 
 namespace Brio.Game.GPose;
 
-public class GPoseService : ServiceBase<GPoseService>
+internal unsafe class GPoseService : IDisposable
 {
-    public GPoseState GPoseState { get; private set; }
-    public bool IsInGPose => GPoseState == GPoseState.Inside;
+    public bool IsGPosing => _isInFakeGPose || _isInGPose;
+
+    public delegate void OnGPoseStateDelegate(bool newState);
+    public event OnGPoseStateDelegate? OnGPoseStateChange;
+
     public bool FakeGPose
     {
-        get => _fakeGPose;
-
+        get => _isInFakeGPose;
         set
         {
-            if(value != _fakeGPose)
-            {
-                if(!value)
-                {
-                    _fakeGPose = false;
-                    HandleGPoseChange(GPoseState.Exiting);
-                    HandleGPoseChange(GPoseState.Outside);
-                }
-                else
-                {
-                    HandleGPoseChange(GPoseState.Inside);
-                    _fakeGPose = true;
-                }
-            }
+            if (_isInFakeGPose == value)
+                return;
+
+            _isInFakeGPose = value;
+
+            TriggerGPoseChange();
         }
     }
 
-    private bool _fakeGPose = false;
+    private bool _isInGPose = false;
+    private bool _isInFakeGPose = false;
 
-    public delegate void OnGPoseStateDelegate(GPoseState gposeState);
-    public event OnGPoseStateDelegate? OnGPoseStateChange;
+    private delegate bool GPoseEnterExitDelegate(UIModule* uiModule);
+    private delegate void ExitGPoseDelegate(UIModule* uiModule);
+    private readonly Hook<GPoseEnterExitDelegate> _enterGPoseHook;
+    private readonly Hook<ExitGPoseDelegate> _exitGPoseHook;
 
-    private delegate void ExitGPoseDelegate(IntPtr addr);
-    private Hook<ExitGPoseDelegate>? _exitGPoseHook = null;
+    private delegate nint MouseHoverDelegate(nint a1, nint a2, nint a3);
+    private readonly Hook<MouseHoverDelegate> _mouseHoverHook = null!;
 
-    private delegate bool EnterGPoseDelegate(IntPtr addr);
-    private Hook<EnterGPoseDelegate>? _enterGPoseHook = null;
+    private readonly IFramework _framework;
+    private readonly IClientState _clientState;
+    private readonly ConfigurationService _configService;
 
-    public override unsafe void Start()
+    public GPoseService(IFramework framework, IClientState clientState, ConfigurationService configService, IGameInteropProvider interopProvider, ISigScanner scanner)
     {
-        GPoseState = Dalamud.ClientState.IsGPosing ? GPoseState.Inside : GPoseState.Outside;
+        _framework = framework;
+        _clientState = clientState;
+        _configService = configService;
+
+        _isInGPose = _clientState.IsGPosing;
 
         UIModule* uiModule = Framework.Instance()->GetUiModule();
         var enterGPoseAddress = (nint)uiModule->VTable->EnterGPose;
         var exitGPoseAddress = (nint)uiModule->VTable->ExitGPose;
 
-        _enterGPoseHook = Dalamud.GameInteropProvider.HookFromAddress<EnterGPoseDelegate>(enterGPoseAddress, EnteringGPoseDetour);
+        _enterGPoseHook = interopProvider.HookFromAddress<GPoseEnterExitDelegate>(enterGPoseAddress, EnteringGPoseDetour);
         _enterGPoseHook.Enable();
 
-        _exitGPoseHook = Dalamud.GameInteropProvider.HookFromAddress< ExitGPoseDelegate>(exitGPoseAddress, ExitingGPoseDetour);
+        _exitGPoseHook = interopProvider.HookFromAddress<ExitGPoseDelegate>(exitGPoseAddress, ExitingGPoseDetour);
         _exitGPoseHook.Enable();
 
-        base.Start();
+        var mouseHoverAddr = "40 57 48 83 EC ?? 48 89 6C 24 ?? 48 8B F9 48 89 74 24 ?? 49 8B E8 4C 89 74 24";
+        _mouseHoverHook = interopProvider.HookFromAddress<MouseHoverDelegate>(scanner.ScanText(mouseHoverAddr), GPoseMouseEventDetour);
+
+        _framework.Update += OnFrameworkUpdate;
+
+        UpdateDynamicHooks();
     }
 
-    private void ExitingGPoseDetour(IntPtr addr)
+    public void TriggerGPoseChange()
     {
-        if(HandleGPoseChange(GPoseState.AttemptExit))
-        {
-            HandleGPoseChange(GPoseState.Exiting);
-            _exitGPoseHook!.Original.Invoke(addr);
-            HandleGPoseChange(GPoseState.Outside);
-        }
+        OnGPoseStateChange?.Invoke(IsGPosing);
     }
 
-    private bool EnteringGPoseDetour(IntPtr addr)
+    public void AddCharacterToGPose(Character chara) => AddCharacterToGPose((NativeCharacter*)chara.Address);
+
+    public void AddCharacterToGPose(NativeCharacter* chara)
     {
-        bool didEnter = _enterGPoseHook!.Original.Invoke(addr);
-        if(didEnter)
-        {
-            _fakeGPose = false;
-            HandleGPoseChange(GPoseState.Inside);
-        }
+        if (!IsGPosing)
+            return;
+
+        var ef = EventFramework.Instance();
+        if (ef == null)
+            return;
+
+        ef->EventSceneModule.EventGPoseController.AddCharacterToGPose(chara);
+
+    }
+
+    private void ExitingGPoseDetour(UIModule* uiModule)
+    {
+        _exitGPoseHook.Original.Invoke(uiModule);
+        HandleGPoseStateChange(false);
+    }
+
+    private bool EnteringGPoseDetour(UIModule* uiModule)
+    {
+        bool didEnter = _enterGPoseHook.Original.Invoke(uiModule);
+
+        HandleGPoseStateChange(didEnter);
 
         return didEnter;
     }
 
-    private bool HandleGPoseChange(GPoseState state)
+    private nint GPoseMouseEventDetour(nint a1, nint a2, nint a3)
     {
-        if(state == GPoseState || _fakeGPose)
-            return true;
+        if (_configService.Configuration.Posing.DisableGPoseMouseSelect)
+            return 0;
 
-        GPoseState = state;
-
-        try
-        {
-            OnGPoseStateChange?.Invoke(state);
-        }
-        catch(Exception e)
-        {
-            Dalamud.ToastGui.ShowError($"Brio GPose transition error.\n Reason: {e.Message}");
-            return false;
-        }
-
-        return true;
+        return _mouseHoverHook.Original(a1, a2, a3);
     }
 
-    public override void Tick(float delta)
+    private void OnFrameworkUpdate(IFramework framework)
     {
-        if(!Dalamud.ClientState.IsGPosing && IsInGPose)
+        // Only detect if we got snapped out
+        if (!_clientState.IsGPosing && _isInGPose)
+            HandleGPoseStateChange(_clientState.IsGPosing);
+    }
+
+    private void HandleGPoseStateChange(bool newState)
+    {
+        if (IsGPosing == newState || _isInFakeGPose)
+            return;
+
+        _isInGPose = newState;
+
+        UpdateDynamicHooks();
+
+        OnGPoseStateChange?.Invoke(IsGPosing);
+    }
+
+    private void UpdateDynamicHooks()
+    {
+        if (IsGPosing)
         {
-            HandleGPoseChange(GPoseState.Exiting);
-            HandleGPoseChange(GPoseState.Outside);
+            if (!_mouseHoverHook.IsEnabled)
+                _mouseHoverHook.Enable();
+
+        }
+        else
+        {
+            if (_mouseHoverHook.IsEnabled)
+                _mouseHoverHook.Disable();
         }
     }
 
-    public override void Dispose()
+    public void Dispose()
     {
-        _exitGPoseHook?.Dispose();
-        _enterGPoseHook?.Dispose();
+        _framework.Update -= OnFrameworkUpdate;
+
+        _enterGPoseHook.Dispose();
+        _exitGPoseHook.Dispose();
+        _mouseHoverHook.Dispose();
     }
 }
 
-public enum GPoseState
-{
-    Inside,
-    AttemptExit,
-    Exiting,
-    Outside
-}

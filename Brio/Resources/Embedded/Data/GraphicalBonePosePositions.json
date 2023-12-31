@@ -1,0 +1,540 @@
+﻿{
+  "PoseImages": {
+    "body": {
+      "Image": "PoseBody",
+      "Bones": [
+        {
+          "Name": "!model",
+          "Position": "635, 2110"
+        },
+        {
+          "Name": "j_kao",
+          "Position": "635, 200"
+        },
+        {
+          "Name": "j_kubi",
+          "Position": "635, 325"
+        },
+        {
+          "Name": "j_sebo_c",
+          "Position": "635, 440"
+        },
+        {
+          "Name": "j_sebo_b",
+          "Position": "635, 620"
+        },
+        {
+          "Name": "j_sebo_a",
+          "Position": "635, 760"
+        },
+        {
+          "Name": "j_kosi",
+          "Position": "635, 870"
+        },
+        {
+          "Name": "j_asi_a_l",
+          "Position": "530, 1120"
+        },
+        {
+          "Name": "j_asi_b_l",
+          "Position": "530, 1410"
+        },
+        {
+          "Name": "j_asi_c_l",
+          "Position": "530, 1530"
+        },
+        {
+          "Name": "j_asi_d_l",
+          "Position": "530, 1900"
+        },
+        {
+          "Name": "j_asi_e_l",
+          "Position": "530, 2000"
+        },
+        {
+          "Name": "j_mune_l",
+          "Position": "520, 545"
+        },
+        {
+          "Name": "j_sako_l",
+          "Position": "510, 425"
+        },
+        {
+          "Name": "n_hkata_l",
+          "Position": "425, 420"
+        },
+        {
+          "Name": "j_ude_a_l",
+          "Position": "423, 485"
+        },
+        {
+          "Name": "j_ude_b_l",
+          "Position": "280, 730"
+        },
+        {
+          "Name": "n_hhiji_l",
+          "Position": "355, 740"
+        },
+        {
+          "Name": "n_hte_l",
+          "Position": "170, 970"
+        }
+      ]
+    },
+    "hands": {
+      "Image": "PoseHand",
+      "Bones": [
+        {
+          "Name": "j_oya_a_l",
+          "Position": "830, 1000"
+        },
+        {
+          "Name": "j_oya_b_l",
+          "Position": "920, 830"
+        },
+        {
+          "Name": "j_hito_a_l",
+          "Position": "645, 850"
+        },
+        {
+          "Name": "j_hito_b_l",
+          "Position": "630, 540"
+        },
+        {
+          "Name": "j_naka_a_l",
+          "Position": "440, 850"
+        },
+        {
+          "Name": "j_naka_b_l",
+          "Position": "430, 540"
+        },
+        {
+          "Name": "j_kusu_a_l",
+          "Position": "280, 850"
+        },
+        {
+          "Name": "j_kusu_b_l",
+          "Position": "250, 540"
+        },
+        {
+          "Name": "j_ko_a_l",
+          "Position": "140, 920"
+        },
+        {
+          "Name": "j_ko_b_l",
+          "Position": "120, 660"
+        },
+        {
+          "Name": "n_hte_l",
+          "Position": "455, 1485"
+        },
+        {
+          "Name": "j_te_l",
+          "Position": "450, 1320"
+        },
+        {
+          "Name": "n_buki_l",
+          "Position": "450, 1100"
+        }
+      ]
+    },
+    "tail": {
+      "Image": "PoseTail",
+      "Bones": [
+        {
+          "Name": "n_sippo_a",
+          "Position": "216, 300"
+        },
+        {
+          "Name": "n_sippo_b",
+          "Position": "570, 462"
+        },
+        {
+          "Name": "n_sippo_c",
+          "Position": "1046, 885"
+        },
+        {
+          "Name": "n_sippo_d",
+          "Position": "1177, 1380"
+        },
+        {
+          "Name": "n_sippo_e",
+          "Position": "1727, 1807"
+        }
+      ]
+    },
+    "armor": {
+      "Image": "PoseArmor",
+      "Bones": [
+        {
+          "Name": "j_kami_a",
+          "Position": "655.5, 165"
+        },
+        {
+          "Name": "j_kami_b",
+          "Position": "655.5, 280"
+        },
+        {
+          "Name": "j_kami_f_l",
+          "Position": "560, 165"
+        },
+        {
+          "Name": "n_kataarmor_l",
+          "Position": "470, 450"
+        },
+        {
+          "Name": "j_buki_sebo_l",
+          "Position": "550, 450"
+        },
+        {
+          "Name": "j_buki2_kosi_l",
+          "Position": "477, 772"
+        },
+        {
+          "Name": "j_buki_kosi_l",
+          "Position": "445, 850"
+        },
+        {
+          "Name": "j_sk_s_a_l",
+          "Position": "433, 980"
+        },
+        {
+          "Name": "j_sk_s_b_l",
+          "Position": "381, 1276"
+        },
+        {
+          "Name": "j_sk_s_c_l",
+          "Position": "304, 1689"
+        },
+        {
+          "Name": "j_sk_f_a_l",
+          "Position": "540, 980"
+        },
+        {
+          "Name": "j_sk_f_b_l",
+          "Position": "520, 1300"
+        },
+        {
+          "Name": "j_sk_f_c_l",
+          "Position": "470, 1750"
+        },
+        {
+          "Name": "j_sk_b_a_l",
+          "Position": "604, 980"
+        },
+        {
+          "Name": "j_sk_b_b_l",
+          "Position": "604, 1300"
+        },
+        {
+          "Name": "j_sk_b_c_l",
+          "Position": "604, 1750"
+        },
+        {
+          "Name": "n_hizasoubi_l",
+          "Position": "547, 1521"
+        }
+      ]
+    },
+    "human_head": {
+      "Image": "PoseHeadWithEars",
+      "Bones": [
+        {
+          "Name": "j_mimi_l",
+          "Position": "102, 730"
+        },
+        {
+          "Name": "n_ear_a_l",
+          "Position": "102, 790"
+        },
+        {
+          "Name": "n_ear_b_l",
+          "Position": "102, 850"
+        },
+        {
+          "Name": "j_f_mayu_l",
+          "Position": "257, 550"
+        },
+        {
+          "Name": "j_f_miken_l",
+          "Position": "375, 580"
+        },
+        {
+          "Name": "j_f_umab_l",
+          "Position": "310, 600"
+        },
+        {
+          "Name": "j_f_eye_l",
+          "Position": "310, 650"
+        },
+        {
+          "Name": "j_f_dmab_l",
+          "Position": "310, 700"
+        },
+        {
+          "Name": "j_f_memoto",
+          "Position": "458.5, 694"
+        },
+        {
+          "Name": "j_f_hana",
+          "Position": "458.5, 820"
+        },
+        {
+          "Name": "j_f_ulip_a",
+          "Position": "458.5, 920"
+        },
+        {
+          "Name": "j_f_dlip_a",
+          "Position": "458.5, 1000"
+        },
+        {
+          "Name": "j_f_lip_l",
+          "Position": "350, 950"
+        },
+        {
+          "Name": "j_ago",
+          "Position": "458.5, 1100"
+        }
+      ]
+    },
+    "miqote_head": {
+      "Image": "PoseHeadMiqote",
+      "Bones": [
+        {
+          "Name": "j_mimi_l",
+          "Position": "142, 213"
+        },
+        {
+          "Name": "n_ear_a_l",
+          "Position": "77, 283"
+        },
+        {
+          "Name": "n_ear_b_l",
+          "Position": "77, 363"
+        },
+        {
+          "Name": "j_f_mayu_l",
+          "Position": "337, 638"
+        },
+        {
+          "Name": "j_f_miken_l",
+          "Position": "468, 683"
+        },
+        {
+          "Name": "j_f_umab_l",
+          "Position": "395, 696"
+        },
+        {
+          "Name": "j_f_eye_l",
+          "Position": "395, 748"
+        },
+        {
+          "Name": "j_f_dmab_l",
+          "Position": "395, 813"
+        },
+        {
+          "Name": "j_f_memoto",
+          "Position": "571, 817"
+        },
+        {
+          "Name": "j_f_hana",
+          "Position": "571, 888"
+        },
+        {
+          "Name": "j_f_ulip_a",
+          "Position": "571, 1043"
+        },
+        {
+          "Name": "j_f_dlip_a",
+          "Position": "571, 1143"
+        },
+        {
+          "Name": "j_f_lip_l",
+          "Position": "447, 1073"
+        },
+        {
+          "Name": "j_ago",
+          "Position": "571, 1243"
+        }
+      ]
+    },
+    "viera_head_base": {
+      "Image": "PoseHeadVieraFloppy",
+      "Bones": [
+        {
+          "Name": "n_ear_a_l",
+          "Position": "234, 93"
+        },
+        {
+          "Name": "n_ear_b_l",
+          "Position": "234, 160"
+        },
+        {
+          "Name": "j_f_mayu_l",
+          "Position": "346, 585"
+        },
+        {
+          "Name": "j_f_miken_l",
+          "Position": "460, 620"
+        },
+        {
+          "Name": "j_f_umab_l",
+          "Position": "400, 645"
+        },
+        {
+          "Name": "j_f_eye_l",
+          "Position": "400, 683"
+        },
+        {
+          "Name": "j_f_dmab_l",
+          "Position": "400, 727"
+        },
+        {
+          "Name": "j_f_memoto",
+          "Position": "527, 714"
+        },
+        {
+          "Name": "j_f_hana",
+          "Position": "527, 827"
+        },
+        {
+          "Name": "j_f_ulip_a",
+          "Position": "527, 894"
+        },
+        {
+          "Name": "j_f_dlip_a",
+          "Position": "527, 945"
+        },
+        {
+          "Name": "j_f_lip_l",
+          "Position": "450, 911"
+        },
+        {
+          "Name": "j_ago",
+          "Position": "527, 1010"
+        }
+      ]
+    },
+    "viera_head_a": {
+      "Image": "PoseHeadVieraFloppy",
+      "Parent": "viera_head_base",
+      "Bones": [
+        {
+          "Name": "j_zera_a_l",
+          "Position": "400, 155"
+        },
+        {
+          "Name": "j_zera_b_l",
+          "Position": "90, 190"
+        }
+      ]
+    },
+    "viera_head_b": {
+      "Image": "PoseHeadVieraFloppy",
+      "Parent": "viera_head_base",
+      "Bones": [
+        {
+          "Name": "j_zerb_a_l",
+          "Position": "400, 155"
+        },
+        {
+          "Name": "j_zerb_b_l",
+          "Position": "90, 190"
+        }
+      ]
+    },
+    "viera_head_c": {
+      "Image": "PoseHeadVieraFloppy",
+      "Parent": "viera_head_base",
+      "Bones": [
+        {
+          "Name": "j_zerc_a_l",
+          "Position": "400, 155"
+        },
+        {
+          "Name": "j_zerc_b_l",
+          "Position": "90, 190"
+        }
+      ]
+    },
+    "viera_head_d": {
+      "Image": "PoseHeadVieraFloppy",
+      "Parent": "viera_head_base",
+      "Bones": [
+        {
+          "Name": "j_zerd_a_l",
+          "Position": "400, 155"
+        },
+        {
+          "Name": "j_zerd_b_l",
+          "Position": "90, 190"
+        }
+      ]
+    },
+    "hrothgar_head": {
+      "Image": "PoseHeadHroth",
+      "Bones": [
+        {
+          "Name": "n_ear_a_l",
+          "Position": "145, 380"
+        },
+        {
+          "Name": "n_ear_b_l",
+          "Position": "145, 480"
+        },
+        {
+          "Name": "j_f_mayu_l",
+          "Position": "400, 680"
+        },
+        {
+          "Name": "j_f_miken_l",
+          "Position": "550, 760"
+        },
+        {
+          "Name": "j_f_umab_l",
+          "Position": "469, 743"
+        },
+        {
+          "Name": "j_f_eye_l",
+          "Position": "469, 820"
+        },
+        {
+          "Name": "j_f_dmab_l",
+          "Position": "469, 890"
+        },
+        {
+          "Name": "j_f_hige_l",
+          "Position": "450, 1130"
+        },
+        {
+          "Name": "n_f_ulip_l",
+          "Position": "480, 1275"
+        },
+        {
+          "Name": "n_f_lip_l",
+          "Position": "480, 1360"
+        },
+        {
+          "Name": "j_f_hana",
+          "Position": "696.5, 1106"
+        },
+        {
+          "Name": "j_f_uago",
+          "Position": "696.5, 1240"
+        },
+        {
+          "Name": "j_f_ulip",
+          "Position": "696.5, 1316"
+        },
+        {
+          "Name": "j_f_dlip",
+          "Position": "696.5, 1401"
+        },
+        {
+          "Name": "j_ago",
+          "Position": "696.5, 1517"
+        }
+      ]
+    }
+  }
+}

@@ -1,171 +1,322 @@
-﻿using Brio.Config;
-using Brio.IPC;
-using Brio.Web;
-using Dalamud.Interface;
+﻿using Dalamud.Interface;
+using Dalamud.Interface.Utility.Raii;
 using Dalamud.Interface.Windowing;
 using ImGuiNET;
+using Brio.Config;
+using Brio.IPC;
+using Brio.UI.Controls.Stateless;
+using Brio.Web;
 using System;
 using System.Numerics;
 
-namespace Brio.UI.Windows
+namespace Brio.UI.Windows;
+
+internal class SettingsWindow : Window
 {
-    public class SettingsWindow : Window
+    private readonly ConfigurationService _configurationService;
+    private readonly PenumbraService _penumbraService;
+    private readonly GlamourerService _glamourerService;
+    private readonly WebService _webService;
+
+    public SettingsWindow(ConfigurationService configurationService, PenumbraService penumbraService, GlamourerService glamourerService, WebService webService) : base($"{Brio.Name} Settings###brio_settings_window", ImGuiWindowFlags.NoResize)
     {
-        public SettingsWindow() : base($"{Brio.PluginName} Settings", ImGuiWindowFlags.NoResize)
-        {
-            Size = new Vector2(300, 400);
-        }
+        Namespace = "brio_settings_namespace";
 
-        public override void Draw()
+        _configurationService = configurationService;
+        _penumbraService = penumbraService;
+        _glamourerService = glamourerService;
+        _webService = webService;
+
+        Size = new Vector2(300, 400);
+    }
+
+    public override void Draw()
+    {
+        using (ImRaii.PushId("brio_settings"))
         {
-            if(ImGui.BeginTabBar("brio_settings"))
+            using (var tab = ImRaii.TabBar("###brio_settings_tabs"))
             {
-                DrawInterfaceSettings();
-                DrawIntegrationSettings();
-                DrawHookSettings();
+                if (tab.Success)
+                {
+                    DrawInterfaceTab();
+                    DrawIPCTab();
+                    DrawAppearanceTab();
+                    DrawPosingTab();
 
-                ImGui.EndTabBar();
+                }
             }
         }
+    }
 
-        private void DrawInterfaceSettings()
+    private void DrawInterfaceTab()
+    {
+        using (var tab = ImRaii.TabItem("Interface"))
         {
-            if(ImGui.BeginTabItem("Interface"))
+            if (tab.Success)
             {
-                if(ImGui.CollapsingHeader("Brio Window", ImGuiTreeNodeFlags.DefaultOpen))
+                if (ImGui.CollapsingHeader("Window", ImGuiTreeNodeFlags.DefaultOpen))
                 {
-                    ImGui.PushItemWidth(ImGui.GetContentRegionAvail().X - ImGui.CalcTextSize("Open Brio").X);
-                    var selectedBrioOpenBehavior = ConfigService.Configuration.OpenBrioBehavior;
-                    if(ImGui.BeginCombo("Open Brio##OpenBrioBehavior", $"{selectedBrioOpenBehavior}"))
-                    {
-                        foreach(var openBrioBehavior in Enum.GetValues<OpenBrioBehavior>())
-                        {
-                            if(ImGui.Selectable($"{openBrioBehavior}", openBrioBehavior == selectedBrioOpenBehavior))
-                                ConfigService.Configuration.OpenBrioBehavior = openBrioBehavior;
-                        }
-                        ImGui.EndCombo();
-                    }
-                    ImGui.PopItemWidth();
+                    DrawOpenBrioSetting();
+                    DrawHideSettings();
                 }
 
-                ImGui.Separator();
-
-                if(ImGui.CollapsingHeader("Game State", ImGuiTreeNodeFlags.DefaultOpen))
+                if (ImGui.CollapsingHeader("Display", ImGuiTreeNodeFlags.DefaultOpen))
                 {
-                    bool previousShowInCutscenes = ConfigService.Configuration.ShowInCutscene;
-                    bool showInCutscenes = previousShowInCutscenes;
-                    if(ImGui.Checkbox("Show in Cutscenes", ref showInCutscenes))
-                    {
-                        if(showInCutscenes != previousShowInCutscenes)
-                        {
-                            ConfigService.Configuration.ShowInCutscene = showInCutscenes;
-                            UIService.Instance.ApplyUISettings();
-                        }
-                    }
-
-                    bool previousShowWhenUIHidden = ConfigService.Configuration.ShowWhenUIHidden;
-                    bool showWhenUIHidden = previousShowWhenUIHidden;
-                    if(ImGui.Checkbox("Show When UI Hidden", ref showWhenUIHidden))
-                    {
-                        if(showWhenUIHidden != previousShowWhenUIHidden)
-                        {
-                            ConfigService.Configuration.ShowWhenUIHidden = showWhenUIHidden;
-                            UIService.Instance.ApplyUISettings();
-                        }
-                    }
+                    DrawDisplaySettings();
                 }
-
-                ImGui.EndTabItem();
             }
         }
+    }
 
-        private void DrawHookSettings()
+    private void DrawOpenBrioSetting()
+    {
+        var selectedBrioOpenBehavior = _configurationService.Configuration.Interface.OpenBrioBehavior;
+        const string label = "Open Brio";
+        ImGui.SetNextItemWidth(-ImGui.CalcTextSize(label).X);
+        using (var combo = ImRaii.Combo(label, selectedBrioOpenBehavior.ToString()))
         {
-            if(ImGui.BeginTabItem("Hooks"))
+            if (combo.Success)
             {
-                if(ImGui.CollapsingHeader("Render Hooks", ImGuiTreeNodeFlags.DefaultOpen))
+                foreach (var openBrioBehavior in Enum.GetValues<OpenBrioBehavior>())
                 {
-                    ImGui.PushItemWidth(ImGui.GetContentRegionAvail().X - ImGui.CalcTextSize("Allow NPC Appearance").X);
-                    var selectedNPCHack = ConfigService.Configuration.ApplyNPCHack;
-                    if(ImGui.BeginCombo("Allow NPC Appearance##ApplyNPCHack", $"{selectedNPCHack}"))
+                    if (ImGui.Selectable($"{openBrioBehavior}", openBrioBehavior == selectedBrioOpenBehavior))
                     {
-                        foreach(var applyNpcHackType in Enum.GetValues<ApplyNPCHack>())
-                        {
-                            if(ImGui.Selectable($"{applyNpcHackType}", applyNpcHackType == selectedNPCHack))
-                                ConfigService.Configuration.ApplyNPCHack = applyNpcHackType;
-                        }
-                        ImGui.EndCombo();
+                        _configurationService.Configuration.Interface.OpenBrioBehavior = openBrioBehavior;
+                        _configurationService.ApplyChange();
                     }
-                    ImGui.PopItemWidth();
                 }
-
-                ImGui.EndTabItem();
             }
         }
+    }
 
-        private void DrawIntegrationSettings()
+    private void DrawHideSettings()
+    {
+        bool showInGPose = _configurationService.Configuration.Interface.ShowInGPose;
+        if (ImGui.Checkbox("Show in GPose", ref showInGPose))
         {
-            if(ImGui.BeginTabItem("Integrations"))
+            _configurationService.Configuration.Interface.ShowInGPose = showInGPose;
+            _configurationService.ApplyChange();
+        }
+
+        bool showInCutscene = _configurationService.Configuration.Interface.ShowInCutscene;
+        if (ImGui.Checkbox("Show in Cutscenes", ref showInCutscene))
+        {
+            _configurationService.Configuration.Interface.ShowInCutscene = showInCutscene;
+            _configurationService.ApplyChange();
+        }
+
+        bool showWhenUIHidden = _configurationService.Configuration.Interface.ShowWhenUIHidden;
+        if (ImGui.Checkbox("Show when UI Hidden", ref showWhenUIHidden))
+        {
+            _configurationService.Configuration.Interface.ShowWhenUIHidden = showWhenUIHidden;
+            _configurationService.ApplyChange();
+        }
+    }
+
+    private void DrawDisplaySettings()
+    {
+        bool censorActorNames = _configurationService.Configuration.Interface.CensorActorNames;
+        if (ImGui.Checkbox("Censor Actor Names", ref censorActorNames))
+        {
+            _configurationService.Configuration.Interface.CensorActorNames = censorActorNames;
+            _configurationService.ApplyChange();
+        }
+    }
+
+    private void DrawIPCTab()
+    {
+        using (var tab = ImRaii.TabItem("IPC"))
+        {
+            if (tab.Success)
             {
-                if(ImGui.CollapsingHeader("Brio IPC", ImGuiTreeNodeFlags.DefaultOpen))
+                DrawWebAPI();
+                DrawThirdPartyIPC();
+            }
+        }
+    }
+
+    private void DrawThirdPartyIPC()
+    {
+        if (ImGui.CollapsingHeader("Third-Party", ImGuiTreeNodeFlags.DefaultOpen))
+        {
+
+            bool enablePenumbra = _configurationService.Configuration.IPC.AllowPenumbraIntegration;
+            if (ImGui.Checkbox("Allow Penumbra Integration", ref enablePenumbra))
+            {
+                _configurationService.Configuration.IPC.AllowPenumbraIntegration = enablePenumbra;
+                _configurationService.ApplyChange();
+            }
+
+            using (ImRaii.Disabled(!enablePenumbra))
+            {
+                ImGui.Text($"Penumbra Status: {(_penumbraService.IsPenumbraAvailable ? "Active" : "Inactive")}");
+                ImGui.SameLine();
+                ImBrio.FontIconButton("refresh_penumbra", FontAwesomeIcon.Sync, "Refresh Penumbra Status");
+            }
+
+            bool enableGlamourer = _configurationService.Configuration.IPC.AllowGlamourerIntegration;
+            if (ImGui.Checkbox("Allow Glamourer Integration", ref enableGlamourer))
+            {
+                _configurationService.Configuration.IPC.AllowGlamourerIntegration = enableGlamourer;
+                _configurationService.ApplyChange();
+            }
+
+            using (ImRaii.Disabled(!enableGlamourer))
+            {
+                ImGui.Text($"Glamourer Status: {(_glamourerService.IsGlamourerAvailable ? "Active" : "Inactive")}");
+                ImGui.SameLine();
+                ImBrio.FontIconButton("refresh_glamourer", FontAwesomeIcon.Sync, "Refresh Glamourer Status");
+            }
+        }
+    }
+
+    private void DrawWebAPI()
+    {
+
+        if (ImGui.CollapsingHeader("Web API", ImGuiTreeNodeFlags.DefaultOpen))
+        {
+            bool enableWebApi = _configurationService.Configuration.IPC.AllowWebAPI;
+            if (ImGui.Checkbox("Enable Web API", ref enableWebApi))
+            {
+                _configurationService.Configuration.IPC.AllowWebAPI = enableWebApi;
+                _configurationService.ApplyChange();
+            }
+        }
+        ImGui.Text($"Web API Status: {(_webService.IsRunning ? "Active" : "Inactive")}");
+    }
+
+    private void DrawAppearanceTab()
+    {
+        using (var tab = ImRaii.TabItem("Appearance"))
+        {
+            if (tab.Success)
+            {
+                DrawNPCAppearanceHack();
+            }
+        }
+    }
+
+    private void DrawNPCAppearanceHack()
+    {
+        if (ImGui.CollapsingHeader("Appearance", ImGuiTreeNodeFlags.DefaultOpen))
+        {
+            var allowNPCHackBehavior = _configurationService.Configuration.Appearance.ApplyNPCHack;
+            const string label = "Allow NPC Appearance on Players";
+            ImGui.SetNextItemWidth(-ImGui.CalcTextSize(label).X);
+            using (var combo = ImRaii.Combo(label, allowNPCHackBehavior.ToString()))
+            {
+                if (combo.Success)
                 {
-                    bool previousBrioIpcEnabled = ConfigService.Configuration.AllowBrioIPC;
-                    bool enableBrioIpc = previousBrioIpcEnabled;
-                    if(ImGui.Checkbox("Enable Brio IPC", ref enableBrioIpc))
+                    foreach (var npcHack in Enum.GetValues<ApplyNPCHack>())
                     {
-                        if(enableBrioIpc != previousBrioIpcEnabled)
+                        if (ImGui.Selectable($"{npcHack}", npcHack == allowNPCHackBehavior))
                         {
-                            ConfigService.Configuration.AllowBrioIPC = enableBrioIpc;
+                            _configurationService.Configuration.Appearance.ApplyNPCHack = npcHack;
+                            _configurationService.ApplyChange();
                         }
                     }
                 }
-                ImGui.Text($"Brio IPC Status: {(BrioIPCService.Instance.IsIPCEnabled ? "Active" : "Inactive")}");
+            }
 
-                ImGui.Separator();
+            bool enableTinting = _configurationService.Configuration.Appearance.EnableTinting;
+            if (ImGui.Checkbox("Enable Tinting", ref enableTinting))
+            {
+                _configurationService.Configuration.Appearance.EnableTinting = enableTinting;
+                _configurationService.ApplyChange();
+            }
+        }
+    }
 
-                if(ImGui.CollapsingHeader("Web API", ImGuiTreeNodeFlags.DefaultOpen))
-                {
-                    bool previousEnableWebApi = ConfigService.Configuration.AllowWebAPI;
-                    bool enableWebApi = previousEnableWebApi;
-                    if(ImGui.Checkbox("Enable Web API", ref enableWebApi))
-                    {
-                        if(enableWebApi != previousEnableWebApi)
-                        {
-                            ConfigService.Configuration.AllowWebAPI = enableWebApi;
-                        }
-                    }
-                }
-                ImGui.Text($"Web API Status: {(WebService.Instance.IsRunning ? "Active" : "Inactive")}");
+    private void DrawPosingTab()
+    {
+        using (var tab = ImRaii.TabItem("Posing"))
+        {
+            if (tab.Success)
+            {
+                DrawPosingGeneralSection();
+                DrawGPoseSection();
+                DrawOverlaySection();
+            }
+        }
+    }
 
-                ImGui.Separator();
+    private void DrawGPoseSection()
+    {
+        if (ImGui.CollapsingHeader("GPose", ImGuiTreeNodeFlags.DefaultOpen))
+        {
+            bool enableMouseHook = _configurationService.Configuration.Posing.DisableGPoseMouseSelect;
+            if (ImGui.Checkbox("Disable GPose Mouse Select", ref enableMouseHook))
+            {
+                _configurationService.Configuration.Posing.DisableGPoseMouseSelect = enableMouseHook;
+                _configurationService.ApplyChange();
+            }
 
-                if(ImGui.CollapsingHeader("Penumbra", ImGuiTreeNodeFlags.DefaultOpen))
-                {
-                    bool previousEnablePenumbra = ConfigService.Configuration.AllowPenumbraIntegration;
-                    bool enablePenumbra = previousEnablePenumbra;
-                    if(ImGui.Checkbox("Allow Penumbra Integration", ref enablePenumbra))
-                    {
-                        if(enablePenumbra != previousEnablePenumbra)
-                        {
-                            ConfigService.Configuration.AllowPenumbraIntegration = enablePenumbra;
-                            PenumbraIPCService.Instance.RefreshPenumbraStatus();
-                        }
-                    }
+            bool enableBrioTargetChange = _configurationService.Configuration.Posing.BrioTargetChangesWithGPose;
+            if (ImGui.Checkbox("Brio Target Changes with GPose Target", ref enableBrioTargetChange))
+            {
+                _configurationService.Configuration.Posing.BrioTargetChangesWithGPose = enableBrioTargetChange;
+                _configurationService.ApplyChange();
+            }
 
-                    if(!enablePenumbra) ImGui.BeginDisabled();
-                    ImGui.Text($"Penumbra Status: {(PenumbraIPCService.Instance.IsPenumbraEnabled ? "Active" : "Inactive")}");
-                    ImGui.SameLine();
-                    ImGui.PushFont(UiBuilder.IconFont);
-                    if(ImGui.Button(FontAwesomeIcon.Redo.ToIconString()))
-                    {
-                        PenumbraIPCService.Instance.RefreshPenumbraStatus();
-                        if(!PenumbraIPCService.Instance.IsPenumbraEnabled)
-                            Dalamud.ToastGui.ShowError("Brio/Penumbra integration failed.\nEnsure Penumbra is enabled and up to date.");
-                    }
-                    ImGui.PopFont();
-                    if(!enablePenumbra) ImGui.EndDisabled();
-                }
-                ImGui.EndTabItem();
+            bool enableGPoseTargetChange = _configurationService.Configuration.Posing.GPoseTargetChangesWithBrio;
+            if (ImGui.Checkbox("GPose Target Changes with Brio Target", ref enableGPoseTargetChange))
+            {
+                _configurationService.Configuration.Posing.GPoseTargetChangesWithBrio = enableGPoseTargetChange;
+                _configurationService.ApplyChange();
+            }
+        }
+    }
+
+    private void DrawOverlaySection()
+    {
+        if (ImGui.CollapsingHeader("Overlay", ImGuiTreeNodeFlags.DefaultOpen))
+        {
+            bool defaultsOn = _configurationService.Configuration.Posing.OverlayDefaultsOn;
+            if (ImGui.Checkbox("Overlay Defaults On", ref defaultsOn))
+            {
+                _configurationService.Configuration.Posing.OverlayDefaultsOn = defaultsOn;
+                _configurationService.ApplyChange();
+            }
+
+            bool allowGizmoAxisFlip = _configurationService.Configuration.Posing.AllowGizmoAxisFlip;
+            if (ImGui.Checkbox("Allow Gizmo Axis Flip", ref allowGizmoAxisFlip))
+            {
+                _configurationService.Configuration.Posing.AllowGizmoAxisFlip = allowGizmoAxisFlip;
+                _configurationService.ApplyChange();
+            }
+
+            bool showSkeletonLines = _configurationService.Configuration.Posing.ShowSkeletonLines;
+            if (ImGui.Checkbox("Show Skeleton Lines", ref showSkeletonLines))
+            {
+                _configurationService.Configuration.Posing.ShowSkeletonLines = showSkeletonLines;
+                _configurationService.ApplyChange();
+            }
+
+            float lineThickness = _configurationService.Configuration.Posing.SkeletonLineThickness;
+            if (ImGui.DragFloat("Line Thickness", ref lineThickness, 0.01f, 0.01f, 20f))
+            {
+                _configurationService.Configuration.Posing.SkeletonLineThickness = lineThickness;
+                _configurationService.ApplyChange();
+            }
+
+            float circleSize = _configurationService.Configuration.Posing.BoneCircleSize;
+            if (ImGui.DragFloat("Circle Size", ref circleSize, 0.01f, 0.01f, 20f))
+            {
+                _configurationService.Configuration.Posing.BoneCircleSize = circleSize;
+                _configurationService.ApplyChange();
+            }
+        }
+    }
+
+    private void DrawPosingGeneralSection()
+    {
+        if (ImGui.CollapsingHeader("General", ImGuiTreeNodeFlags.DefaultOpen))
+        {
+            var undoStackSize = _configurationService.Configuration.Posing.UndoStackSize;
+            if (ImGui.DragInt("Undo History", ref undoStackSize, 1, 0, 100))
+            {
+                _configurationService.Configuration.Posing.UndoStackSize = undoStackSize;
+                _configurationService.ApplyChange();
             }
         }
     }

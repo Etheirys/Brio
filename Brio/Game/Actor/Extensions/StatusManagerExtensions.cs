@@ -1,27 +1,28 @@
-﻿using StatusManager = FFXIVClientStructs.FFXIV.Client.Game.StatusManager;
-using System.Collections.Generic;
+﻿using Dalamud.Game.ClientState.Objects.Types;
+using Brio.Resources;
 using Lumina.Excel.GeneratedSheets;
+using System.Collections.Generic;
+using StatusManager = FFXIVClientStructs.FFXIV.Client.Game.StatusManager;
 
 namespace Brio.Game.Actor.Extensions;
-public static class StatusManagerExtensions
+
+internal static class StatusManagerExtensions
 {
     public static List<Status> GetAllStatuses(this ref StatusManager sm)
     {
-        List<Status> list = new List<Status>();
-        const int maxEffects = 30;
+        List<Status> list = [];
 
-        var statusSheet = Dalamud.DataManager.GetExcelSheet<Status>();
-
-        for(var i = 0; i < maxEffects; i++)
+        for (var i = 0; i < sm.StatusSpan.Length; i++)
         {
             var effect = (ushort)sm.GetStatusId(i);
-            if(effect != 0)
-            {
-                var statusEntry = statusSheet?.GetRow(effect);
-                if(statusEntry != null)
-                    list.Add(statusEntry);
-            }
+            if (effect != 0)
+                if (GameDataProvider.Instance.Statuses.TryGetValue(effect, out var status))
+                    list.Add(status);
+
+
         }
         return list;
     }
+
+    public unsafe static StatusManager* GetStatusManager(this BattleChara battleChara) => battleChara.Native()->Character.GetStatusManager();
 }

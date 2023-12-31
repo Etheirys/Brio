@@ -1,168 +1,101 @@
-﻿using Brio.Core;
-using Brio.Game.Core;
-using Brio.Game.Render;
-using FFXIVClientStructs.FFXIV.Client.Game.Character;
-using System.Collections.Generic;
-using GameObject = Dalamud.Game.ClientState.Objects.Types.GameObject;
-using FFXIVClientStructs.FFXIV.Client.Graphics.Scene;
-using System.Runtime.InteropServices;
-using System;
+﻿using Dalamud.Game.ClientState.Objects.Types;
+using Dalamud.Plugin.Services;
 using Brio.Game.Actor.Extensions;
-using FFXIVClientStructs.FFXIV.Common.Math;
+using Brio.Game.Core;
+using System.Threading.Tasks;
+using System;
 
 namespace Brio.Game.Actor;
 
-public class ActorRedrawService : ServiceBase<ActorRedrawService>
+internal class ActorRedrawService(IFramework framework, IObjectTable objectTable)
 {
-    public unsafe bool CanRedraw(GameObject gameObject) => !_redrawsActive.Contains(gameObject.AsNative()->ObjectIndex);
+    public delegate void ActorRedrawEventDelegate(GameObject go, RedrawStage stage);
 
-    private List<int> _redrawsActive = new();
+    public event ActorRedrawEventDelegate? ActorRedrawEvent;
 
-    private nint _customizeBuffer;
+    private readonly IFramework _framework = framework;
 
-    public ActorRedrawService()
+    private readonly IObjectTable _objectTable = objectTable;
+
+    public Task<RedrawResult> RedrawActor(int objectIndex)
     {
-        _customizeBuffer = Marshal.AllocHGlobal(68);
+        var actor = _objectTable[objectIndex];
+        if (actor == null)
+            return Task.FromResult(RedrawResult.Failed);
+
+        return RedrawActor(actor);
     }
 
-    public unsafe RedrawResult Redraw(GameObject gameObject, RedrawType redrawType)
+    public async Task<RedrawResult> RedrawActor(GameObject go)
     {
-        if(!CanRedraw(gameObject))
-            return RedrawResult.Failed;
-
-        var rawObject = gameObject.AsNative();
-        var index = rawObject->ObjectIndex;
-        _redrawsActive.Add(index);
-
-        var originalPosition = rawObject->Position;
-        var originalRotation = Quaternion.Identity;
-
-        if(rawObject->DrawObject != null)
+        Brio.Log.Debug($"Beginning Brio redraw on gameobject {go.ObjectIndex}...");
+        DisableDraw(go);
+        try
         {
-            originalPosition = rawObject->DrawObject->Object.Position;
-            originalRotation = rawObject->DrawObject->Object.Rotation;
+            ActorRedrawEvent?.Invoke(go, RedrawStage.After);
+            await DrawWhenReady(go);
+            await WaitForDrawing(go);
+            ActorRedrawEvent?.Invoke(go, RedrawStage.After);
+            Brio.Log.Debug($"Brio redraw complete on gameobject {go.ObjectIndex}.");
+            return RedrawResult.Full;
         }
-
-        // In place
-        bool drewInPlace = redrawType.HasFlag(RedrawType.AllowOptimized);
-
-        if(drewInPlace)
+        catch (Exception e)
         {
-            // Can only optimize redraw a character
-            if(rawObject->IsCharacter())
-            {
-                Character* chara = (Character*)rawObject;
-                CharacterBase* charaBase = (CharacterBase*)rawObject->DrawObject;
-                // Can only optimize redraw a human
-                if(charaBase != null && charaBase->GetModelType() == CharacterBase.ModelType.Human)
-                {
-                    // We can't change certain values
-                    Human* human = ((Human*)rawObject->DrawObject);
-                    if(human->Customize.Race != chara->DrawData.CustomizeData[0]
-                        || human->Customize.Sex != chara->DrawData.CustomizeData[1]
-                        || human->Customize.BodyType != chara->DrawData.CustomizeData[2]
-                        || human->Customize.Clan != chara->DrawData.CustomizeData[4]
-                        || human->FaceId != chara->DrawData.CustomizeData[5]
-                        || chara->CharacterData.ModelCharaId != 0)
-                    {
-                        drewInPlace = false;
-                    }
-
-                    if(drewInPlace)
-                    {
-                        // Cutomize and gear
-                        Buffer.MemoryCopy(&chara->DrawData.CustomizeData, (void*)_customizeBuffer, 28, 28);
-                        Buffer.MemoryCopy(&chara->DrawData.Head, (void*)(_customizeBuffer + 28), 40, 40);
-                        drewInPlace = ((Human*)rawObject->DrawObject)->UpdateDrawData((byte*)_customizeBuffer, false);
-                    }
-                }
-                else
-                {
-                    drewInPlace = false;
-                }
-
-                if(drewInPlace)
-                {
-                    // Weapons
-                    byte shouldRedrawWeapon = (byte) (redrawType.HasFlag(RedrawType.ForceRedrawWeaponsOnOptimized) ? 1 : 0);
-                    chara->DrawData.LoadWeapon(DrawDataContainer.WeaponSlot.MainHand, chara->DrawData.Weapon(DrawDataContainer.WeaponSlot.MainHand).ModelId, shouldRedrawWeapon, 0, 0, 0);
-                    chara->DrawData.LoadWeapon(DrawDataContainer.WeaponSlot.OffHand, chara->DrawData.Weapon(DrawDataContainer.WeaponSlot.OffHand).ModelId, shouldRedrawWeapon, 0, 0, 0);
-
-                    _redrawsActive.Remove(index);
-                    return RedrawResult.Optmized;
-                }
-            }
-        }
-
-        if(!redrawType.HasFlag(RedrawType.AllowFull))
-        {
-            _redrawsActive.Remove(index);
+            Brio.Log.Error(e, $"Brio redraw failed on gameobject {go.ObjectIndex}.");
             return RedrawResult.Failed;
         }
-
-        if(redrawType.HasFlag(RedrawType.ForceAllowNPCAppearance))
-            RenderHookService.Instance.PushForceNpcHack();
-
-        // Full redraw
-        rawObject->DisableDraw();
-        rawObject->EnableDraw();
-
-        if(redrawType.HasFlag(RedrawType.ForceAllowNPCAppearance))
-            RenderHookService.Instance.PopForceNpcHack();
-
-        // Handle position update
-        if(redrawType.HasFlag(RedrawType.PreservePosition))
-        {
-            Dalamud.Framework.RunUntilSatisfied(() => rawObject->RenderFlags == 0 && rawObject->DrawObject != null,
-            (success) =>
-            {
-                _redrawsActive.Remove(index);
-
-                if(success)
-                {
-                    rawObject->DrawObject->Object.Rotation = originalRotation;
-                    rawObject->DrawObject->Object.Position = originalPosition;
-                    return true;
-                }
-                
-                return false;
-            }, 50, 3, true);
-        }
-        else
-        {
-            _redrawsActive.Remove(index);
-        }
-
-        return RedrawResult.Full;
     }
 
-    public override void Stop()
+    public unsafe void DisableDraw(GameObject go)
     {
-        _redrawsActive.Clear();
+        var native = go.Native();
+        native->DisableDraw();
     }
 
-    public override void Dispose()
+    public unsafe void EnableDraw(GameObject go)
     {
-        Marshal.FreeHGlobal(_customizeBuffer);
+        var native = go.Native();
+        native->EnableDraw();
     }
-}
 
-[Flags]
-public enum RedrawType
-{
-    None = 0,
-    AllowOptimized = 1,
-    AllowFull = 2,
-    ForceRedrawWeaponsOnOptimized = 4,
-    PreservePosition = 8,
-    ForceAllowNPCAppearance = 16,
+    public unsafe Task DrawWhenReady(GameObject go)
+    {
+        return _framework.RunUntilSatisfied(
+           () => go.Native()->IsReadyToDraw(),
+           (_) => EnableDraw(go),
+           100,
+           dontStartFor: 2
+       );
+    }
 
-    All = AllowOptimized | AllowFull | ForceRedrawWeaponsOnOptimized | PreservePosition | ForceAllowNPCAppearance
-}
+    public unsafe Task WaitForDrawing(GameObject go)
+    {
+        return _framework.RunUntilSatisfied(
+           () =>
+           {
+               var drawObject = go.Native()->DrawObject;
+               if (drawObject == null)
+                   return false;
 
-public enum RedrawResult
-{
-    Optmized,
-    Full,
-    Failed
+               return drawObject->IsVisible;
+           },
+           (_) => { },
+           100,
+           dontStartFor: 2
+           );
+    }
+
+    public enum RedrawResult
+    {
+        NoChange,
+        Optmized,
+        Full,
+        Failed
+    }
+
+    public enum RedrawStage
+    {
+        Before,
+        After
+    }
 }

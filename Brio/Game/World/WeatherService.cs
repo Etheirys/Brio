@@ -1,23 +1,44 @@
-﻿using Brio.Core;
+﻿
+using Dalamud.Game;
 using Dalamud.Hooking;
+using Dalamud.Plugin.Services;
+using FFXIVClientStructs.FFXIV.Client.Graphics.Environment;
+using Brio.Game.Types;
+using Brio.Resources;
 using Lumina.Excel.GeneratedSheets;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Runtime.InteropServices;
 
 namespace Brio.Game.World;
-public class WeatherService : ServiceBase<WeatherService>
+
+internal class WeatherService : IDisposable
 {
+    public ReadOnlyCollection<Weather> TerritoryWeatherTable
+    {
+        get
+        {
+            if (_currentCachedTerritory != _clientState.TerritoryType)
+            {
+                _currentCachedTerritory = 0;
+                UpdateWeathersForCurrentTerritory();
+                if (_territoryWeatherTable.Any())
+                    _currentCachedTerritory = _clientState.TerritoryType;
+            }
+
+            return _territoryWeatherTable.AsReadOnly();
+        }
+    }
+
     public bool WeatherOverrideEnabled
     {
         get => _updateTerritoryWeatherHook.IsEnabled;
         set
         {
-            if(value != WeatherOverrideEnabled)
+            if (value != WeatherOverrideEnabled)
             {
-                if(value)
+                if (value)
                 {
                     _updateTerritoryWeatherHook.Enable();
                 }
@@ -29,21 +50,21 @@ public class WeatherService : ServiceBase<WeatherService>
         }
     }
 
-    public unsafe byte CurrentWeather
+    public unsafe WeatherId CurrentWeather
     {
         get
         {
-            var system = (*_weatherSystem);
-            if(system == null) return 0;
-            return system->TargetWeather;
+            var system = EnvManager.Instance();
+            if (system == null) return WeatherId.None;
+            return new(system->ActiveWeather);
         }
         set
         {
-            var system = (*_weatherSystem);
-            if(system != null)
+            var system = EnvManager.Instance();
+            if (system != null)
             {
-                (*_weatherSystem)->TargetWeather = value;
-                (*_weatherSystem)->TransitionTime = DefaultTransitionTime;
+                system->ActiveWeather = value.Id;
+                system->TransitionTime = DefaultTransitionTime;
             }
         }
     }
@@ -51,67 +72,62 @@ public class WeatherService : ServiceBase<WeatherService>
     private const float DefaultTransitionTime = 0.5f;
 
     private delegate void UpdateTerritoryWeatherDelegate(IntPtr a1, IntPtr a2);
-    private Hook<UpdateTerritoryWeatherDelegate> _updateTerritoryWeatherHook = null!;
+    private readonly Hook<UpdateTerritoryWeatherDelegate> _updateTerritoryWeatherHook = null!;
 
-    private unsafe WeatherSystem** _weatherSystem;
+    private readonly List<Weather> _territoryWeatherTable = [];
 
-    private List<Weather> _territoryWeatherTable = new();
+    private ushort? _currentCachedTerritory;
+
+    public IEnumerable<Weather> AllWeatherCollection => _gameDataProvider.Weathers.Values;
+
+    private readonly IClientState _clientState;
+    private readonly GameDataProvider _gameDataProvider;
 
 
-    public ReadOnlyCollection<Weather> TerritoryWeatherTable => new(_territoryWeatherTable);
-
-    public unsafe WeatherService()
+    public WeatherService(IClientState clientState, GameDataProvider gameDataProvider, ISigScanner scanner, IGameInteropProvider hooking)
     {
-        var twAddress = Dalamud.SigScanner.ScanText("48 89 5C 24 ?? 55 56 57 48 83 EC ?? 48 8B F9 48 8D 0D ?? ?? ?? ??");
-        _updateTerritoryWeatherHook = Dalamud.GameInteropProvider.HookFromAddress<UpdateTerritoryWeatherDelegate>(twAddress, UpdateTerritoryWeather);
-    }
+        _clientState = clientState;
+        _gameDataProvider = gameDataProvider;
 
-    public unsafe override void Start()
-    {
-        IntPtr rawWeather = Dalamud.SigScanner.GetStaticAddressFromSig("4C 8B 05 ?? ?? ?? ?? 41 8B 80 ?? ?? ?? ?? C1 E8 02");
-        _weatherSystem = (WeatherSystem**)rawWeather;
+        var twAddress = scanner.ScanText("48 89 5C 24 ?? 55 56 57 48 83 EC ?? 48 8B F9 48 8D 0D");
+        _updateTerritoryWeatherHook = hooking.HookFromAddress<UpdateTerritoryWeatherDelegate>(twAddress, UpdateTerritoryWeatherDetour);
 
-        UpdateWeathersForCurrentTerritory();
+        _clientState.TerritoryChanged += OnTerritoryChanged;
 
-        Dalamud.ClientState.TerritoryChanged += ClientState_TerritoryChanged;
-
-        base.Start();
-    }
-
-    private void ClientState_TerritoryChanged(ushort e)
-    {
         UpdateWeathersForCurrentTerritory();
     }
 
-    private void UpdateWeathersForCurrentTerritory()
+    private void OnTerritoryChanged(ushort e)
+    {
+        UpdateWeathersForCurrentTerritory();
+        WeatherOverrideEnabled = false;
+    }
+
+    private unsafe void UpdateWeathersForCurrentTerritory()
     {
         _territoryWeatherTable.Clear();
 
-        ushort territoryId = Dalamud.ClientState.TerritoryType;
-        var territory = Dalamud.DataManager.GetExcelSheet<TerritoryType>()?.GetRow(territoryId);
+        var envManager = EnvManager.Instance();
 
-        if(territory == null)
+        if (envManager == null)
             return;
 
-        var rate = Dalamud.DataManager.GameData.GetExcelSheet<WeatherRate>()?.GetRow(territory.WeatherRate);
-
-        if(rate == null)
+        var scenePtr = (nint)envManager->EnvScene;
+        if (scenePtr == 0)
             return;
 
-        foreach(var wr in rate!.UnkData0)
+        byte* weatherIds = (byte*)(scenePtr + 0x2C);
+
+        for (int i = 0; i < 32; ++i)
         {
-            if(wr.Weather == 0)
+            var weatherId = weatherIds[i];
+            if (weatherId == 0)
                 continue;
 
-            var weatherSheet = Dalamud.DataManager.GetExcelSheet<Weather>();
-            if(weatherSheet == null)
+            if (!_gameDataProvider.Weathers.TryGetValue((uint)weatherId, out var weather))
                 continue;
 
-            var weather = weatherSheet.SingleOrDefault(i => i.RowId == wr.Weather);
-            if(weather == null)
-                continue;
-
-            if(_territoryWeatherTable.Count(x => x.RowId == weather.RowId) == 0)
+            if (!_territoryWeatherTable.Any(x => x.RowId == weather.RowId))
             {
                 _territoryWeatherTable.Add(weather);
             }
@@ -120,33 +136,17 @@ public class WeatherService : ServiceBase<WeatherService>
         _territoryWeatherTable.Sort((a, b) => a.RowId.CompareTo(b.RowId));
     }
 
-    private void UpdateTerritoryWeather(IntPtr a1, IntPtr a2)
+    private void UpdateTerritoryWeatherDetour(IntPtr a1, IntPtr a2)
     {
         // DO NOTHING
         //_updateTerritoryWeatherHook.Original(a1, a2);
     }
 
-    public override void Stop()
+    public void Dispose()
     {
-        Dalamud.ClientState.TerritoryChanged -= ClientState_TerritoryChanged;
+        _clientState.TerritoryChanged -= OnTerritoryChanged;
         _territoryWeatherTable.Clear();
-    }
-
-    public override void Dispose()
-    {
         _updateTerritoryWeatherHook.Dispose();
     }
-
-    [StructLayout(LayoutKind.Explicit)]
-    public struct WeatherSystem
-    {
-        // TODO: Move to client structs
-        // Track: https://github.com/aers/FFXIVClientStructs/pull/306
-
-        [FieldOffset(0x27)]
-        public byte TargetWeather;
-
-        [FieldOffset(0x28)]
-        public float TransitionTime;
-    }
 }
+

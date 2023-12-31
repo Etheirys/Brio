@@ -1,0 +1,95 @@
+﻿{
+  "Categories": {
+    "body": {
+      "Type": "Filter",
+      "Bones": [
+        "n_root",
+        "n_hara",
+        "n_hkata_",
+        "n_hhiji_",
+        "j_kosi",
+        "j_kubi",
+        "j_asi_",
+        "j_sebo_",
+        "j_mune_",
+        "j_sako_",
+        "j_ude_"
+      ]
+    },
+    "head": {
+      "Type": "Filter",
+      "Bones": [
+        "n_f_",
+        "j_kao",
+        "j_ago",
+        "j_f_"
+      ]
+    },
+    "hair": {
+      "Type": "Filter",
+      "Bones": [
+        "j_ex_h",
+        "j_kami_",
+        "j_ex_met_va"
+      ]
+    },
+    "tail": {
+      "Type": "Filter",
+      "Bones": [
+        "n_sippo_"
+      ]
+    },
+    "ears": {
+      "Type": "Filter",
+      "Bones": [
+        "j_mimi",
+        "j_zer"
+      ]
+    },
+    "hands": {
+      "Type": "Filter",
+      "Bones": [
+        "n_hte_",
+        "j_te_",
+        "j_hito_",
+        "j_ko_",
+        "j_kusu_",
+        "j_oya_",
+        "j_naka_"
+      ]
+    },
+    "clothing": {
+      "Type": "Filter",
+      "Bones": [
+        "n_ear_",
+        "n_hijisoubi_",
+        "n_hizasoubi_",
+        "n_kataarmor_",
+        "j_sk_",
+        "j_ex_top_",
+        "j_ex_met_a",
+        "j_ex_met_b",
+        "j_ex_met_c",
+        "j_ex_met_d",
+        "j_zacc"
+      ]
+    },
+    "weapon": {
+      "Type": "Filter",
+      "Bones": [
+        "n_buki_",
+        "j_buki"
+      ]
+    },
+    "ivcs": {
+      "Type": "Filter",
+      "Bones": [
+        "iv_"
+      ]
+    },
+    "other": {
+      "Type": "Filter",
+      "Bones": []
+    }
+  }
+}

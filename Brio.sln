@@ -1,25 +1,25 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.4.33213.308
+VisualStudioVersion = 17.8.34316.72
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Brio", "Brio\Brio.csproj", "{E88698DB-603B-4D99-8A46-72BD91094BED}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Brio", "Brio\Brio.csproj", "{6E14631E-8223-427D-8A03-550EEE66B842}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		Debug|Any CPU = Debug|Any CPU
-		Release|Any CPU = Release|Any CPU
+		Debug|x64 = Debug|x64
+		Release|x64 = Release|x64
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{E88698DB-603B-4D99-8A46-72BD91094BED}.Debug|Any CPU.ActiveCfg = Debug|x64
-		{E88698DB-603B-4D99-8A46-72BD91094BED}.Debug|Any CPU.Build.0 = Debug|x64
-		{E88698DB-603B-4D99-8A46-72BD91094BED}.Release|Any CPU.ActiveCfg = Release|x64
-		{E88698DB-603B-4D99-8A46-72BD91094BED}.Release|Any CPU.Build.0 = Release|x64
+		{6E14631E-8223-427D-8A03-550EEE66B842}.Debug|x64.ActiveCfg = Debug|x64
+		{6E14631E-8223-427D-8A03-550EEE66B842}.Debug|x64.Build.0 = Debug|x64
+		{6E14631E-8223-427D-8A03-550EEE66B842}.Release|x64.ActiveCfg = Release|x64
+		{6E14631E-8223-427D-8A03-550EEE66B842}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {54ABBAF7-84C3-49B8-A395-FA332263885E}
+		SolutionGuid = {5E2A0464-B31C-449B-B345-80D9E0F949A6}
 	EndGlobalSection
 EndGlobal

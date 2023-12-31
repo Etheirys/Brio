@@ -1,44 +1,52 @@
-﻿using Brio.Core;
-using Brio.UI;
-using Dalamud.Game.Command;
+﻿using Dalamud.Game.Command;
+using Dalamud.Plugin.Services;
+using Brio.UI.Windows;
 using System;
+using Brio.UI;
 
 namespace Brio.Game.Chat;
 
-public class CommandHandlerService : ServiceBase<CommandHandlerService>
+internal class CommandHandlerService : IDisposable
 {
     private const string CommandName = "/brio";
 
-    public CommandHandlerService()
+    private readonly ICommandManager _commandManager;
+    private readonly IChatGui _chatGui;
+    private readonly UIManager _uiManager;
+
+    public CommandHandlerService(ICommandManager commandManager, IChatGui chatGui, UIManager uiManager)
     {
-        Dalamud.CommandManager.AddHandler(CommandName, new CommandInfo(OnCommand)
+        _commandManager = commandManager;
+        _chatGui = chatGui;
+        _uiManager = uiManager;
+
+        _commandManager.AddHandler(CommandName, new CommandInfo(OnCommand)
         {
             HelpMessage = "Toggles the Brio window.",
             ShowInHelp = true,
         });
-
     }
 
     private void OnCommand(string command, string arguments)
     {
-        if(arguments.Length == 0)
+        if (arguments.Length == 0)
             arguments = "window";
 
         var argumentList = arguments.Split(' ', 2);
         arguments = argumentList.Length == 2 ? argumentList[1] : string.Empty;
 
-        switch(argumentList[0].ToLowerInvariant())
+        switch (argumentList[0].ToLowerInvariant())
         {
             case "window":
-                UIService.Instance.MainWindow.Toggle();
+                _uiManager.ToggleMainWindow();
                 break;
 
             case "settings":
-                UIService.Instance.SettingsWindow.Toggle();
+                _uiManager.ToggleSettingsWindow();
                 break;
 
             case "about":
-                UIService.Instance.InfoWindow.Toggle();
+                _uiManager.ToggleInfoWindow();
                 break;
 
             case "help":
@@ -46,21 +54,21 @@ public class CommandHandlerService : ServiceBase<CommandHandlerService>
                 PrintHelp();
                 break;
         }
-            
+
     }
 
     private void PrintHelp()
     {
-        Dalamud.ChatGui.Print("Valid Brio Commands Are:");
-        Dalamud.ChatGui.Print("<none> - Toggle main Brio window");
-        Dalamud.ChatGui.Print("window - Toggle main Brio window");
-        Dalamud.ChatGui.Print("settings - Toggle Brio settings window");
-        Dalamud.ChatGui.Print("about - Toggle Brio info window");
-        Dalamud.ChatGui.Print("help - Print this help prompt");
+        _chatGui.Print("Valid Brio Commands Are:");
+        _chatGui.Print("<none> - Toggle main Brio window");
+        _chatGui.Print("window - Toggle main Brio window");
+        _chatGui.Print("settings - Toggle Brio settings window");
+        _chatGui.Print("about - Toggle Brio info window");
+        _chatGui.Print("help - Print this help prompt");
     }
 
-    public override void Dispose()
+    public void Dispose()
     {
-        Dalamud.CommandManager.RemoveHandler(CommandName);
+        _commandManager.RemoveHandler(CommandName);
     }
 }

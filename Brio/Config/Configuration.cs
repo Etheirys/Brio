@@ -1,31 +1,31 @@
 ﻿using Dalamud.Configuration;
-using System;
 
 namespace Brio.Config;
 
-[Serializable]
-public class Configuration : IPluginConfiguration
+internal class Configuration : IPluginConfiguration
 {
     public const int CurrentVersion = 1;
-    public const int CurrentPopupKey = 1;
+    public const int CurrentPopupKey = 2;
+
     public int Version { get; set; } = CurrentVersion;
 
     // First Time User
-    public bool IsFirstTimeUser { get; set; } = true;
     public int PopupKey { get; set; } = -1;
 
     // Interface
-    public OpenBrioBehavior OpenBrioBehavior { get; set; } = OpenBrioBehavior.OnGPoseEnter;
-    public bool ShowInCutscene { get; set; } = false;
-    public bool ShowWhenUIHidden { get; set; } = false;
+    public InterfaceConfiguration Interface { get; set; } = new InterfaceConfiguration();
 
-    // Hooks
-    public ApplyNPCHack ApplyNPCHack { get; set; } = ApplyNPCHack.InGPose;
+    // Posing
+    public PosingConfiguration Posing { get; set; } = new PosingConfiguration();
 
-    // Integrations
-    public bool AllowBrioIPC { get; set; } = true;
-    public bool AllowPenumbraIntegration { get; set; } = true;
-    public bool AllowWebAPI { get; set; } = false;
+    // IPC
+    public IPCConfiguration IPC { get; set; } = new IPCConfiguration();
+
+    // Appearance
+    public AppearanceConfiguration Appearance { get; set; } = new AppearanceConfiguration();
+
+    // Paths
+    public PathsConfiguration Paths { get; set; } = new PathsConfiguration();
 
     // Developer
     public bool ForceDebug { get; set; } = false;

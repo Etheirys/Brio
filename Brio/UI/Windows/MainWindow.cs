@@ -1,76 +1,71 @@
-﻿using Brio.UI.Components;
-using Brio.UI.Components.Actor;
-using Brio.UI.Components.Debug;
-using Brio.UI.Components.World;
-using Dalamud.Interface;
+﻿using Dalamud.Interface;
+using Dalamud.Interface.Utility.Raii;
 using Dalamud.Interface.Windowing;
 using ImGuiNET;
+using Brio.Config;
+using Brio.Entities;
+using Brio.UI.Entitites;
 using System.Numerics;
+using Brio.UI.Controls.Stateless;
 
 namespace Brio.UI.Windows;
 
-public class MainWindow : Window
+internal class MainWindow : Window
 {
-    public MainWindow() : base($"{Brio.PluginName} {(Brio.IsDebug ? "(Debug)" : $"v{Brio.PluginVersion}")}", ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.AlwaysAutoResize )
+    private readonly SettingsWindow _settingsWindow;
+    private readonly InfoWindow _infoWindow;
+    private readonly EntityManager _entityManager;
+
+    private readonly EntityHierarchyView _entitySelector;
+
+    public MainWindow(ConfigurationService configService, SettingsWindow settingsWindow, InfoWindow infoWindow, EntityManager entityManager) : base($"{Brio.Name} {configService.Version}###brio_main_window", ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.AlwaysAutoResize)
     {
+        Namespace = "brio_main_namespace";
+
+        _settingsWindow = settingsWindow;
+        _infoWindow = infoWindow;
+        _entityManager = entityManager;
+        _entitySelector = new(_entityManager);
+
         SizeConstraints = new WindowSizeConstraints
         {
-            MaximumSize = new Vector2(2000, 5000),
-            MinimumSize = new Vector2(250, 200)
+            MaximumSize = new Vector2(270, 5000),
+            MinimumSize = new Vector2(270, 200)
         };
     }
 
     public override void Draw()
     {
-        DrawWidgets();
+        DrawHeaderButtons();
 
-        if(ImGui.BeginTabBar("brio_tabs"))
+        var rootEntity = _entityManager.RootEntity;
+
+        if (rootEntity == null)
+            return;
+
+        using (var container = ImRaii.Child("###entity_hierarchy_container", new Vector2(-1, ImGui.GetTextLineHeight() * 15f), true))
         {
-            if(ImGui.BeginTabItem("Actors"))
+            if (container.Success)
             {
-                ActorTab.Draw();
-                ImGui.EndTabItem();
-            }
-
-            if(ImGui.BeginTabItem("World"))
-            {
-                WorldTab.Draw();
-                ImGui.EndTabItem();
-            }
-
-            if(Brio.IsDebug)
-            {
-                if(ImGui.BeginTabItem("Debug"))
-                {
-                    DebugTab.Draw();
-                    ImGui.EndTabItem();
-                }
-
-                ImGui.EndTabBar();
+                _entitySelector.Draw(rootEntity);
             }
         }
+
+        EntityHelpers.DrawEntitySection(_entityManager.SelectedEntity);
     }
 
-    private void DrawWidgets()
+    private void DrawHeaderButtons()
     {
         var initialPos = ImGui.GetCursorPos();
         ImGui.PushClipRect(ImGui.GetWindowPos(), ImGui.GetWindowPos() + ImGui.GetWindowSize(), false);
 
-        ImGui.PushStyleColor(ImGuiCol.Button, 0x00000000);
-        ImGui.PushFont(UiBuilder.IconFont);
-
-        ImGui.SetCursorPosX(ImGui.GetWindowSize().X - (4 * ImGui.GetFontSize()));
         ImGui.SetCursorPosY(0);
-        if(ImGui.Button(FontAwesomeIcon.Cog.ToIconString()))
-            UIService.Instance.SettingsWindow.Toggle();
+        if (ImBrio.FontIconButtonRight("settings_toggle", FontAwesomeIcon.Cog, 2.3f, "Settings", bordered: false))
+            _settingsWindow.Toggle();
 
-        ImGui.SetCursorPosX(ImGui.GetWindowSize().X - (5.5f * ImGui.GetFontSize()));
         ImGui.SetCursorPosY(0);
-        if(ImGui.Button(FontAwesomeIcon.InfoCircle.ToIconString()))
-            UIService.Instance.InfoWindow.Toggle();
-
-        ImGui.PopFont();
-        ImGui.PopStyleColor();
+        if (ImBrio.FontIconButtonRight("info_toggle", FontAwesomeIcon.InfoCircle, 3.3f, "Info", bordered: false))
+            _infoWindow.Toggle();
 
         ImGui.PopClipRect();
         ImGui.SetCursorPos(initialPos);

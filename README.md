@@ -1,11 +1,16 @@
 # Brio
-Brio is a small utility designed to assist with the management and control of actors in GPose.
-It is designed to enhance the experience of users no matter which posing tool they use, whether it be [Anamnesis](https://github.com/imchillin/Anamnesis) or [Ktisis](https://github.com/ktisis-tools/Ktisis).
+Brio is a suite of tools to enhance your GPosing experience, primarily developed by Asgard.
+Brio is currently in alpha, and as such, there may be bugs. If you find any, please report them.
 
 ## Features
+* Actor Posing
+  * While animating
+  * Adjust actor positions without them resetting
+  * Overlay and graphical posing modes
 * Creation and Deletion of GPose actors (up to 39)
+* Edit Actor Appearances
 * Change the Penumbra collection applied to GPose actors
-* Add/Remove/Blend animations on GPose actors (and adjust their speed / scrub through them)
+* Add/Remove/Blend animations on GPose actors (and adjust their speed)
 * Change the active festivals and apply up to 4 at once (Moonfire Faire for fireworks etc) 
 * Add/Remove Status Effects on GPose actors
 * Control Time/Weather in both the Overworld and GPose
@@ -27,11 +32,19 @@ Please either open an [issue](https://github.com/AsgardXIV/Brio/issues) or visit
 * [Asgard](https://github.com/AsgardXIV) - Main development.
 
 ## Acknowledgements
+Brio wouldn't be possible without the tireless work of many devs across many projects.
+
+A special thanks goes to:
 * [Anamnesis](https://github.com/imchillin/Anamnesis)
 * [Ktisis](https://github.com/ktisis-tools/Ktisis)
 * [Dalamud](https://github.com/goatcorp/Dalamud/)
 * [Penumbra](https://github.com/xivdev/Penumbra)
+* [Glamourer](https://github.com/Ottermandias/Glamourer)
 * [FFXIVClientStructs](https://github.com/aers/FFXIVClientStructs)
+* [VFXEditor](https://github.com/0ceal0t/Dalamud-VFXEditor)
+* [Cammy](https://github.com/UnknownX7/Cammy)
+
+Find out more about this [here](https://github.com/AsgardXIV/Brio/blob/main/Acknowledgements.md).
 
 ## License
-Brio is licensed under the [MIT License](https://github.com/AsgardXIV/Brio/blob/main/LICENSE).
+Brio is licensed under the [GPL 3.0 license](https://github.com/AsgardXIV/Brio/blob/main/LICENSE).

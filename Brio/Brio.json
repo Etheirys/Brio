@@ -1,7 +1,7 @@
 ﻿{
   "Author": "Asgard",
   "Name": "Brio",
-  "Punchline": "Actor control for GPose.",
+  "Punchline": "Enhanced GPosing.",
   "Description": "Control actors during GPose sessions.",
   "AssemblyVersion": "0.0.0.1",
   "InternalName": "Brio",

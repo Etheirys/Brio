@@ -1,31 +1,20 @@
 ﻿using Brio.Config;
-using Brio.Game.GPose;
-using Brio.UI;
+using Brio.UI.Windows;
 
 namespace Brio.Core;
 
-public class WelcomeService : ServiceBase<WelcomeService>
+internal class WelcomeService
 {
-    public override void Start()
+    public WelcomeService(ConfigurationService configService, MainWindow mainWindow, InfoWindow infoWindow)
     {
-        if(ConfigService.Configuration.IsFirstTimeUser)
+        if (configService.Configuration.PopupKey != Configuration.CurrentPopupKey)
         {
-            UIService.Instance.InfoWindow.IsOpen = true;
-            ConfigService.Configuration.IsFirstTimeUser = false;
+            infoWindow.IsOpen = true;
+            configService.Configuration.PopupKey = Configuration.CurrentPopupKey;
+            configService.Save();
         }
 
-        if(ConfigService.Configuration.PopupKey != Configuration.CurrentPopupKey)
-        {
-            UIService.Instance.InfoWindow.IsOpen = true;
-            ConfigService.Configuration.PopupKey = Configuration.CurrentPopupKey;
-        }
-
-        if(ConfigService.Configuration.OpenBrioBehavior == OpenBrioBehavior.OnPluginStartup)
-            UIService.Instance.MainWindow.IsOpen = true;
-
-        if(ConfigService.Configuration.OpenBrioBehavior == OpenBrioBehavior.OnGPoseEnter && GPoseService.Instance.IsInGPose)
-            UIService.Instance.MainWindow.IsOpen = true;
-
-        base.Start();
+        if (configService.Configuration.Interface.OpenBrioBehavior == OpenBrioBehavior.OnPluginStartup)
+            mainWindow.IsOpen = true;
     }
 }

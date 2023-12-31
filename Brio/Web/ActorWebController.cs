@@ -1,67 +1,45 @@
-﻿using Brio.Game.Actor;
-using Brio.Game.Actor.Extensions;
-using Brio.Game.Core;
-using Brio.Game.GPose;
+﻿using Dalamud.Plugin.Services;
 using EmbedIO;
 using EmbedIO.Routing;
 using EmbedIO.WebApi;
+using Brio.Game.Actor;
 using System.Threading.Tasks;
 
 namespace Brio.Web;
 
-public class ActorWebController : WebApiController
+internal class ActorWebController(IFramework framework, ActorSpawnService actorSpawnService, ActorRedrawService redrawService) : WebApiController
 {
+    private readonly IFramework _framework = framework;
+    private readonly ActorSpawnService _actorSpawnService = actorSpawnService;
+    private readonly ActorRedrawService _redrawService = redrawService;
+
     [Route(HttpVerbs.Post, "/redraw")]
     public async Task<string> RedrawActor([JsonData] RedrawRequest data)
     {
+        Brio.Log.Debug("Received redraw request on WebAPI");
         try
         {
-            var result = await Dalamud.Framework.RunUntilSatisfied(
-                () =>
-                {
-                    var gameObject = Dalamud.ObjectTable[data.ObjectIndex];
-                    if(gameObject == null)
-                        return false;
-
-                    return ActorRedrawService.Instance.CanRedraw(gameObject);
-                },
-                (success) =>
-                {
-                    if(success)
-                    {
-                        var actor = Dalamud.ObjectTable[data.ObjectIndex];
-                        if(actor != null)
-                            return ActorRedrawService.Instance.Redraw(actor, data.RedrawType ?? RedrawType.All);
-                    }
-                    return RedrawResult.Failed;
-
-                },
-                30);
-
+            var result = await _framework.RunOnFrameworkThread(async () => await _redrawService.RedrawActor(data.ObjectIndex));
             return result.ToString();
         }
         catch
         {
             HttpContext.Response.StatusCode = 500;
-            return RedrawResult.Failed.ToString();
+            return ActorRedrawService.RedrawResult.Failed.ToString();
         }
     }
 
     [Route(HttpVerbs.Post, "/spawn")]
-    public async Task<int> SpawnActor([JsonData] SpawnRequest data)
+    public async Task<int> Spawn()
     {
+        Brio.Log.Debug("Received spawn request on WebAPI");
         try
         {
-            return await Dalamud.Framework.RunOnFrameworkThread(() =>
+            return await _framework.RunOnFrameworkThread(() =>
             {
-                if(!GPoseService.Instance.IsInGPose)
-                    return -1;
-
-                var actorId = ActorSpawnService.Instance.Spawn(data.SpawnOptions);
-                if(actorId == null)
-                    return -1;
-
-                return (int)actorId;
+                if (_actorSpawnService.CreateCharacter(out var chara, SpawnFlags.Default))
+                    return chara.ObjectIndex;
+                return -1;
             });
         }
         catch
@@ -72,58 +50,29 @@ public class ActorWebController : WebApiController
     }
 
     [Route(HttpVerbs.Post, "/despawn")]
-    public async Task<bool> DespawnActor([JsonData] DespawnRequest data)
+    public async Task<bool> Despawn([JsonData] DespawnRequest data)
     {
+        Brio.Log.Debug("Received despawn request on WebAPI");
         try
         {
-            var result = await Dalamud.Framework.RunUntilSatisfied(
-                () =>
-                {
-                    var gameObject = Dalamud.ObjectTable[data.ObjectIndex];
-                    if(gameObject == null)
-                        return false;
-
-                    return ActorRedrawService.Instance.CanRedraw(gameObject);
-                },
-                (success) =>
-                {
-                    if(success)
-                    {
-                        var actor = Dalamud.ObjectTable[data.ObjectIndex];
-                        if(actor != null && actor.IsGPoseActor())
-                        {
-                            ActorSpawnService.Instance.DestroyObject(actor);
-                            return true;
-                        }
-                    }
-                    return false;
-
-                },
-                30);
-
-            return result;
+            var didDestroy = await _framework.RunOnFrameworkThread(() => _actorSpawnService.DestroyObject(data.ObjectIndex));
+            return didDestroy;
         }
         catch
         {
             HttpContext.Response.StatusCode = 500;
             return false;
         }
+
     }
 }
-
-public class RedrawRequest
-{
-    public int ObjectIndex { get; set; }
-    public RedrawType? RedrawType { get; set; }
-}
-
 
 public class DespawnRequest
 {
     public int ObjectIndex { get; set; }
 }
 
-public class SpawnRequest
+public class RedrawRequest
 {
-    public SpawnOptions SpawnOptions { get; set; }
+    public int ObjectIndex { get; set; }
 }

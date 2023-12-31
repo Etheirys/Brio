@@ -1,81 +1,91 @@
-﻿using Brio.Core;
+﻿using Dalamud.Plugin.Services;
+using FFXIVClientStructs.FFXIV.Client.Game;
+using FFXIVClientStructs.FFXIV.Client.LayoutEngine;
+using Brio.Core;
 using Brio.Game.GPose;
-using Brio.Game.World.Interop;
-using Brio.Utils;
-using Lumina.Excel.GeneratedSheets;
+using Brio.Resources;
+using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.IO;
 using System.Linq;
 using System.Numerics;
-using System.Reflection;
-using System.Text.Json;
 
 namespace Brio.Game.World;
-public class FestivalService : ServiceBase<FestivalService>
+
+internal unsafe class FestivalService : IDisposable
 {
     public const int MaxFestivals = 4;
 
-    public ReadOnlyCollection<FestivalEntry> FestivalEntries => new(_festivalEntries);
+    public readonly IReadOnlyDictionary<uint, FestivalEntry> FestivalList;
 
-    public ReadOnlyCollection<FestivalEntry> ActiveFestivals
+    public bool HasMoreSlots => EngineActiveFestivals.Any();
+    public bool HasOverride => _originalState != null;
+    public bool CanModify => _gPoseService.IsGPosing;
+
+
+    private readonly IClientState _clientState;
+    private readonly IToastGui _toastGui;
+    private readonly IFramework _framework;
+    private readonly GPoseService _gPoseService;
+    private readonly ResourceProvider _resourceProvider;
+
+    private readonly Queue<uint[]> _pendingChanges = new();
+    private uint[]? _originalState;
+
+    public uint[] EngineActiveFestivals
     {
         get
         {
-            var result = new List<FestivalEntry>();
-            var active = _festivalInterop.GetActiveFestivals();
-            for(int idx = 0; idx < MaxFestivals; ++idx)
+            uint[] activeFestivals = new uint[4];
+            var engineFestivals = GameMain.Instance()->ActiveFestivals;
+            for (int i = 0; i < MaxFestivals; i++)
             {
-                if(active[idx] != 0)
-                {
-                    var entry = _festivalEntries.FirstOrDefault(i => i.Id == active[idx]);
-                    if(entry != null)
-                    {
-                        result.Add(entry);
-                    }
-                    else
-                    {
-                        result.Add(new FestivalEntry { Id = active[idx], Unknown = true, Name = "Unknown" });
-                    }
-                }
+                activeFestivals[i] = engineFestivals[i];
+
             }
-            return new(result);
+
+            return activeFestivals;
         }
     }
 
-    public bool HasMoreSlots => _festivalInterop.GetActiveFestivals().Count(i => i == 0) > 0;
-    public bool IsOverridden => _originalState != null;
-
-    private List<FestivalEntry> _festivalEntries = new();
-
-    private LayoutManagerInterop _festivalInterop = new();
-    private GameMainInterop _gameMainInterop = new();
-
-
-    private Queue<uint[]?> _pendingChanges = new();
-    private uint[]? _originalState;
-
-    public override void Start()
+    public FestivalService(IClientState clientState, IToastGui toastGui, GameDataProvider gameDataProvider, IFramework framework, GPoseService gPoseService, ResourceProvider resourceProvider)
     {
-        UpdateFestivalList();
-        GPoseService.Instance.OnGPoseStateChange += Instance_OnGPoseStateChange;
-        Dalamud.ClientState.TerritoryChanged += ClientState_TerritoryChanged;
-        base.Start();
+        _clientState = clientState;
+        _toastGui = toastGui;
+        _framework = framework;
+        _gPoseService = gPoseService;
+        _resourceProvider = resourceProvider;
+        FestivalList = BuildFestivalList(gameDataProvider);
+
+        _framework.Update += OnFrameworkUpdate;
+        _gPoseService.OnGPoseStateChange += OnGPoseStateChanged;
+        _clientState.TerritoryChanged += OnTerritoryChanged;
     }
+
+    private void OnFrameworkUpdate(IFramework framework)
+    {
+        var layoutManager = LayoutWorld.Instance()->ActiveLayout;
+        if (_pendingChanges.Count > 0 && layoutManager != null && (layoutManager->FestivalStatus == 5 || layoutManager->FestivalStatus == 0))
+        {
+            var pending = _pendingChanges.Dequeue();
+            if (pending != null)
+                InternalApply(pending);
+        }
+    }
+
 
     public bool AddFestival(uint festival)
     {
-        if(!CheckFestivalRestrictions(festival))
+        if (!CheckFestivalRestrictions(festival))
             return false;
 
-        var active = _festivalInterop.GetActiveFestivals();
+        var active = EngineActiveFestivals.ToArray();
         var copy = active.ToArray();
 
-        for(int i = 0; i < MaxFestivals; ++i)
+        for (int i = 0; i < MaxFestivals; ++i)
         {
-            if(active[i] == 0)
+            if (active[i] == 0)
             {
-                SnapshotFestivals();
+                SnapshotFestivalsIfNeeded();
                 copy[i] = festival;
                 _pendingChanges.Enqueue(copy);
                 return true;
@@ -87,17 +97,17 @@ public class FestivalService : ServiceBase<FestivalService>
 
     public bool RemoveFestival(uint festival)
     {
-        if(!CheckFestivalRestrictions(festival))
+        if (!CheckFestivalRestrictions(festival))
             return false;
 
-        var active = _festivalInterop.GetActiveFestivals();
+        var active = EngineActiveFestivals.ToArray();
         var copy = active.ToArray();
 
-        for(int i = 0; i < MaxFestivals; ++i)
+        for (int i = 0; i < MaxFestivals; ++i)
         {
-            if(active[i] == festival)
+            if (active[i] == festival)
             {
-                SnapshotFestivals();
+                SnapshotFestivalsIfNeeded();
                 copy[i] = 0;
                 _pendingChanges.Enqueue(copy);
                 return true;
@@ -109,9 +119,9 @@ public class FestivalService : ServiceBase<FestivalService>
 
     public unsafe void ResetFestivals(bool tryThisFrame = false)
     {
-        if(_originalState != null)
+        if (_originalState != null)
         {
-            if(tryThisFrame)
+            if (tryThisFrame)
             {
                 InternalApply(_originalState, false);
             }
@@ -124,127 +134,112 @@ public class FestivalService : ServiceBase<FestivalService>
         }
     }
 
-    public unsafe override void Tick(float delta)
+    private void InternalApply(uint[] festivals, bool applyNow = true)
     {
-        if(_pendingChanges.Count > 0 && !_festivalInterop.IsBusy)
+        if (applyNow)
         {
-            var pending = _pendingChanges.Dequeue();
-            if(pending != null)
-                InternalApply(pending);
-        }
-    }
-
-    private void SnapshotFestivals()
-    {
-        if(_originalState == null)
-            _originalState = _festivalInterop.GetActiveFestivals().ToArray();
-    }
-
-    private unsafe void InternalApply(uint[] festivals, bool applyNow = true)
-    {
-        if(applyNow)
-        {
-            _gameMainInterop.SetActiveFestivals(festivals[0], festivals[1], festivals[2], festivals[3]);
+            GameMain.Instance()->SetActiveFestivals(festivals[0], festivals[1], festivals[2], festivals[3]);
         }
         else
         {
-            _gameMainInterop.QueueActiveFestivals(festivals[0], festivals[1], festivals[2], festivals[3]);
+            GameMain.Instance()->QueueActiveFestivals(festivals[0], festivals[1], festivals[2], festivals[3]);
         }
     }
 
-    private void UpdateFestivalList()
+    private void SnapshotFestivalsIfNeeded()
     {
-        _festivalEntries.Clear();
-
-        List<FestivalFileEntry> knownEntries = new();
-
-        using var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream("Brio.Resources.Festivals.json");
-        if(stream != null)
-        {
-            using var reader = new StreamReader(stream);
-            var txt = reader.ReadToEnd();
-            knownEntries = JsonSerializer.Deserialize<List<FestivalFileEntry>>(txt) ?? knownEntries;
-        }
-
-
-        var festivalSheet = Dalamud.DataManager.GetExcelSheet<Festival>();
-        if(festivalSheet == null)
-            return;
-
-        foreach(var festival in festivalSheet)
-        {
-            var knownEntry = knownEntries.SingleOrDefault((i) => i.Id == festival.RowId);
-            if(knownEntry != null)
-            {
-                _festivalEntries.Add(new FestivalEntry
-                {
-                    Id = knownEntry.Id,
-                    Name = knownEntry.Name,
-                    Unsafe = knownEntry.Unsafe,
-                    AreaExclusion = knownEntry.AreaExclusion,
-                    Unknown = false
-                });
-            }
-            else
-            {
-                _festivalEntries.Add(new FestivalEntry
-                {
-                    Id = (ushort)festival.RowId,
-                    Name = "Unknown",
-                    Unsafe = false,
-                    Unknown = true
-                });
-            }
-        }
+        if (_originalState == null)
+            _originalState = EngineActiveFestivals.ToArray();
     }
 
-
-    private bool CheckFestivalRestrictions(uint festivalId)
+    private bool CheckFestivalRestrictions(uint festivalId, bool showError = true)
     {
-        var festival = _festivalEntries.SingleOrDefault(i => i.Id == festivalId);
-        if(festival == null) return true;
-
-        if(festival.AreaExclusion != null)
+        if (FestivalList.TryGetValue(festivalId, out var festival))
         {
-            if(Dalamud.ClientState.TerritoryType == festival.AreaExclusion.TerritoryType)
+            if (festival.AreaExclusion != null)
             {
-                var localPlayer = Dalamud.ClientState.LocalPlayer;
-                if(localPlayer == null)
-                    return false;
-
-                var playerPosition = new Vector2(localPlayer.Position.X, localPlayer.Position.Z);
-                var polygon = festival.AreaExclusion.Polygon.Select(i => i.AsVector2()).ToArray();
-                if(playerPosition.IsPointInPolygon(polygon))
+                if (_clientState.TerritoryType == festival.AreaExclusion.TerritoryType)
                 {
-                    Dalamud.ToastGui.ShowError($"Unable to apply festival here.\nReason: {festival.AreaExclusion.Reason}");
-                    return false;
+                    var localPlayer = _clientState.LocalPlayer;
+                    if (localPlayer == null)
+                        return false;
+
+                    var playerPosition = new Vector2(localPlayer.Position.X, localPlayer.Position.Z);
+                    var polygon = festival.AreaExclusion.Polygon.Select(i => i.AsVector2()).ToArray();
+                    if (playerPosition.IsPointInPolygon(polygon))
+                    {
+                        if (showError)
+                            _toastGui.ShowError($"Unable to apply festival here.\nReason: {festival.AreaExclusion.Reason}");
+
+                        return false;
+                    }
+
                 }
-
             }
         }
 
         return true;
     }
 
-    private void Instance_OnGPoseStateChange(GPoseState gposeState)
+    private IReadOnlyDictionary<uint, FestivalEntry> BuildFestivalList(GameDataProvider gameDataProvider)
     {
-        if(gposeState == GPoseState.Exiting)
+        var festivals = new Dictionary<uint, FestivalEntry>();
+
+        var knownEntries = _resourceProvider.GetResourceDocument<List<FestivalFileEntry>>("Data.Festivals.json");
+
+        foreach (var (_, row) in gameDataProvider.Festivals)
         {
-            ResetFestivals();
+            if (row.RowId == 0)
+                continue;
+
+            var fileEntry = knownEntries.FirstOrDefault(x => x.Id == row.RowId);
+            if (fileEntry != null)
+            {
+                festivals.Add(row.RowId, new FestivalEntry
+                {
+                    Id = fileEntry.Id,
+                    Name = fileEntry.Name,
+                    Unsafe = fileEntry.Unsafe,
+                    Unknown = false,
+                    AreaExclusion = fileEntry.AreaExclusion
+                });
+            }
+            else
+            {
+                festivals.Add(row.RowId, new FestivalEntry
+                {
+                    Id = row.RowId,
+                    Unsafe = false,
+                    Unknown = true,
+                    AreaExclusion = null
+                });
+            }
+        }
+
+        return festivals.AsReadOnly();
+    }
+
+    private void OnGPoseStateChanged(bool newState)
+    {
+        if (!newState)
+        {
+            ResetFestivals(false);
         }
     }
 
-    private void ClientState_TerritoryChanged(ushort e)
+    private void OnTerritoryChanged(ushort obj)
     {
         _pendingChanges.Clear();
         _originalState = null;
     }
 
-    public override void Stop()
+
+    public void Dispose()
     {
         ResetFestivals(true);
-        GPoseService.Instance.OnGPoseStateChange -= Instance_OnGPoseStateChange;
-        Dalamud.ClientState.TerritoryChanged -= ClientState_TerritoryChanged;
+        _framework.Update -= OnFrameworkUpdate;
+        _gPoseService.OnGPoseStateChange -= OnGPoseStateChanged;
+        _clientState.TerritoryChanged -= OnTerritoryChanged;
     }
 
     private class FestivalFileEntry
@@ -259,7 +254,7 @@ public class FestivalService : ServiceBase<FestivalService>
     {
         public string Reason { get; set; } = string.Empty;
         public ushort TerritoryType { get; set; }
-        public FestivalAreaExclusionBoundary[] Polygon { get; set; } = new FestivalAreaExclusionBoundary[0];
+        public FestivalAreaExclusionBoundary[] Polygon { get; set; } = Array.Empty<FestivalAreaExclusionBoundary>();
     }
 
     public class FestivalAreaExclusionBoundary
@@ -267,7 +262,7 @@ public class FestivalService : ServiceBase<FestivalService>
         public float X { get; set; }
         public float Y { get; set; }
 
-        public Vector2 AsVector2() => new Vector2(X, Y);
+        public Vector2 AsVector2() => new(X, Y);
     }
 
     public class FestivalEntry

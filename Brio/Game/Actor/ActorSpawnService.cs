@@ -1,166 +1,306 @@
-﻿using Brio.Core;
+﻿using Dalamud.Game.ClientState.Objects.Types;
+using Dalamud.Plugin.Services;
 using Brio.Game.Actor.Extensions;
+using System.Diagnostics.CodeAnalysis;
+using ClientObjectManager = FFXIVClientStructs.FFXIV.Client.Game.Object.ClientObjectManager;
+using CharacterCopyFlags = FFXIVClientStructs.FFXIV.Client.Game.Character.CharacterSetup.CopyFlags;
+using NativeCharacter = FFXIVClientStructs.FFXIV.Client.Game.Character.Character;
 using Brio.Game.Core;
-using Brio.Game.GPose;
-using Brio.Utils;
-using FFXIVClientStructs.FFXIV.Client.Game.Character;
-using FFXIVClientStructs.FFXIV.Client.Game.Event;
-using FFXIVClientStructs.FFXIV.Client.Game.Object;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using DalamudGameObject = Dalamud.Game.ClientState.Objects.Types.GameObject;
+using Brio.Game.GPose;
+using FFXIVClientStructs.FFXIV.Client.Game.Event;
+using Brio.Game.Types;
+using Brio.IPC;
+using Brio.Core;
 
 namespace Brio.Game.Actor;
 
-public class ActorSpawnService : ServiceBase<ActorSpawnService>
+internal class ActorSpawnService : IDisposable
 {
-    public bool CanSpawn => GPoseService.Instance.IsInGPose;
+    private readonly ObjectMonitorService _monitorService;
+    private readonly IObjectTable _objectTable;
+    private readonly IClientState _clientState;
+    private readonly IFramework _framework;
+    private readonly GPoseService _gPoseService;
+    private readonly ActorRedrawService _actorRedrawService;
+    private readonly GlamourerService _glamourerService;
+    private readonly TargetService _targetService;
 
+    private readonly List<ushort> _createdIndexes = [];
 
-    private List<ushort> _createdIndexes = new();
-
-    public override void Start()
+    public unsafe ActorSpawnService(ObjectMonitorService monitorService, GlamourerService glamourerService, IObjectTable objectTable, IClientState clientState, IFramework framework, GPoseService gPoseService, ActorRedrawService actorRedrawService, TargetService targetService)
     {
-        GPoseService.Instance.OnGPoseStateChange += GPoseService_OnGPoseStateChange;
-        ActorService.Instance.OnActorDestructing += ActorService_OnActorDestructing;
-        Dalamud.ClientState.TerritoryChanged += ClientState_TerritoryChanged;
+        _monitorService = monitorService;
+        _objectTable = objectTable;
+        _clientState = clientState;
+        _framework = framework;
+        _gPoseService = gPoseService;
+        _actorRedrawService = actorRedrawService;
+        _glamourerService = glamourerService;
+        _targetService = targetService;
 
-        base.Start();
+        _monitorService.CharacterDestroyed += OnCharacterDestroyed;
+        _gPoseService.OnGPoseStateChange += OnGPoseStateChanged;
+        _clientState.TerritoryChanged += OnTerritoryChanged;
     }
 
-    private void ClientState_TerritoryChanged(ushort e)
+    public bool CreateCharacter([MaybeNullWhen(false)] out Character outCharacter, SpawnFlags flags = SpawnFlags.Default)
     {
-        _createdIndexes.Clear();
-    }
+        outCharacter = null;
 
-    private void GPoseService_OnGPoseStateChange(GPoseState state)
-    {
-        if(state == GPoseState.Outside)
+        var localPlayer = _clientState.LocalPlayer;
+        if (localPlayer != null)
         {
-            DestroyAllCreated();
+            if (CloneCharacter(localPlayer, out outCharacter, flags))
+            {
+                return true;
+            }
         }
+
+        return false;
     }
 
-    private unsafe void ActorService_OnActorDestructing(DalamudGameObject gameObject)
+    public unsafe bool CloneCharacter(Character sourceCharacter, [MaybeNullWhen(false)] out Character outCharacter, SpawnFlags flags = SpawnFlags.Default)
     {
-        if(ActorService.IsGPoseActor(gameObject))
+        outCharacter = null;
+
+        CharacterCopyFlags copyFlags = CharacterCopyFlags.WeaponHiding;
+
+        bool hasCompanion = sourceCharacter.HasSpawnedCompanion();
+        if (hasCompanion)
         {
-            var com = ClientObjectManager.Instance();
-            var idx = com->GetIndexByObject(gameObject.AsNative());
-            if(idx < ushort.MaxValue)
-                _createdIndexes.Remove((ushort)idx);
+            flags |= SpawnFlags.ReserveCompanionSlot;
+            copyFlags |= CharacterCopyFlags.Companion | CharacterCopyFlags.Ornament | CharacterCopyFlags.Mount;
         }
-    }
 
-    public unsafe ushort? Spawn(SpawnOptions options = SpawnOptions.None)
-    {
-        var localPlayer = Dalamud.ClientState.LocalPlayer;
-        if(localPlayer == null)
-            return null;
+        if (flags.HasFlag(SpawnFlags.CopyPosition))
+            copyFlags |= CharacterCopyFlags.Position;
 
-        var com = ClientObjectManager.Instance();
 
-        Character* originalPlayer = (Character*)localPlayer.AsNative();
-        if(originalPlayer == null) return null;
-
-        bool reserveCompanionSlot = options.HasFlag(SpawnOptions.ReserveCompanionSlot);
-
-        uint idCheck = com->CreateBattleCharacter(param: (byte)(reserveCompanionSlot ? 1 : 0));
-        if(idCheck == 0xffffffff) return null;
-        ushort newId = (ushort)idCheck;
-
-        Character* newPlayer = (Character*)com->GetObjectByIndex(newId);
-        if(newPlayer == null) return null;
-
-        var gposeController = &EventFramework.Instance()->EventSceneModule.EventGPoseController;
-        gposeController->AddCharacterToGPose(newPlayer); // This is safe even if the list is full. The game will also cleanup for us.
-
-        newPlayer->CharacterSetup.CopyFromCharacter(originalPlayer, CharacterSetup.CopyFlags.None); // We copy the Player as the created actor is just blank
-
-        newPlayer->GameObject.Position = originalPlayer->GameObject.Position;
-        newPlayer->GameObject.DefaultPosition = originalPlayer->GameObject.Position;
-        newPlayer->GameObject.Rotation = originalPlayer->GameObject.Rotation;
-        newPlayer->GameObject.DefaultRotation = originalPlayer->GameObject.Rotation;
-
-        newPlayer->GameObject.SetName(((int)newId).ToCharacterName());
-
-        newPlayer->GameObject.DisableDraw();
-        newPlayer->CharacterSetup.CopyFromCharacter(newPlayer, CharacterSetup.CopyFlags.None); // Some tools get confused (Like Penumbra) unless we copy onto ourselves after name change
-        newPlayer->GameObject.EnableDraw();
-
-        _createdIndexes.Add(newId);
-
-        if(options.HasFlag(SpawnOptions.ApplyModelPosition))
+        if (CreateEmptyCharacter(out outCharacter, flags))
         {
-            Dalamud.Framework.RunUntilSatisfied(() => newPlayer->GameObject.RenderFlags == 0,
-                (_) =>
+
+            var sourceNative = sourceCharacter.Native();
+            var targetNative = outCharacter.Native();
+
+            // This double copy from self is needed for some tools like Penumbra/Glamourer.
+            // We first copy the real source, then we copy ourselves onto ourselves.
+            targetNative->CharacterSetup.CopyFromCharacter(sourceCharacter.Native(), copyFlags);
+            targetNative->CharacterSetup.CopyFromCharacter(outCharacter.Native(), CharacterCopyFlags.None);
+
+            // Copy position if requested
+            if (flags.HasFlag(SpawnFlags.CopyPosition))
+            {
+                var position = sourceNative->GameObject.Position;
+                var rotation = sourceNative->GameObject.Rotation;
+
+                // TODO: This is only needed for Anamnesis and Ktisis. 
+                if (sourceNative->GameObject.DrawObject != null && sourceNative->GameObject.DrawObject->IsVisible)
                 {
-                    newPlayer->GameObject.DrawObject->Object.Position = newPlayer->GameObject.Position;
-                    return true;
-                }, 50, 3, true);
-        }
+                    // TODO: This is weird if you are mounted
+                    position = sourceNative->GameObject.DrawObject->Object.Position;
+                }
 
-        return newPlayer->GameObject.ObjectIndex;
-    }
+                targetNative->GameObject.DefaultPosition = position;
+                targetNative->GameObject.Position = position;
+                targetNative->GameObject.Rotation = rotation;
+                targetNative->GameObject.DefaultRotation = rotation;
+            }
 
-    public unsafe void DestroyAllCreated()
-    {
-        var indexes = _createdIndexes.ToList();
-        var com = ClientObjectManager.Instance();
-        foreach(var idx in indexes)
-        {
-            var goa = com->GetObjectByIndex(idx);
-            if(goa == null) continue;
-            var ago = Dalamud.ObjectTable.CreateObjectReference((IntPtr)goa);
-            if(ago == null) continue;
-            DestroyObject(ago);
-        }
-        _createdIndexes.Clear();
-    }
+            // Start drawing
+            _actorRedrawService.DrawWhenReady(outCharacter);
 
-    public unsafe void DestroyAll()
-    {
-        var gposeObjects = ActorService.Instance.GPoseActors.ToList();
-        foreach(var obj in gposeObjects)
-        {
-            DestroyObject(obj);
-        }
-    }
+            if (hasCompanion)
+            {
+                // We need to wait for the companion to be ready before we can draw it.
+                var companion = _objectTable.CreateObjectReference((nint)(&targetNative->CompanionObject));
+                if (companion != null)
+                    _actorRedrawService.DrawWhenReady(companion);
+            }
 
-    public unsafe bool DestroyObject(DalamudGameObject go)
-    {
-        var com = ClientObjectManager.Instance();
-        var native = go.AsNative();
-        var idx = com->GetIndexByObject(native);
-        if(idx != 0xFFFFFFFF)
-        {
-            com->DeleteObjectByIndex((ushort)idx, 0);
-            ActorService.Instance.UpdateGPoseTable();
+
             return true;
         }
 
         return false;
     }
 
-    public override void Stop()
+    public void ClearAll()
     {
-        GPoseService.Instance.OnGPoseStateChange -= GPoseService_OnGPoseStateChange;
-        ActorService.Instance.OnActorDestructing -= ActorService_OnActorDestructing;
-        Dalamud.ClientState.TerritoryChanged -= ClientState_TerritoryChanged;
+        for (int i = ActorTableHelpers.GPoseStart; i <= ActorTableHelpers.GPoseEnd; i++)
+        {
+            var obj = _objectTable[i];
+            if (obj == null)
+                continue;
+
+            DestroyObject(obj);
+        }
     }
 
-    public override void Dispose()
+    public bool DestroyObject(int objectIndex)
     {
+        var go = _objectTable[objectIndex];
+
+        if (go != null)
+            return DestroyObject(go);
+
+        return false;
+    }
+
+    public unsafe bool DestroyObject(GameObject go)
+    {
+        Brio.Log.Debug($"Destroying gameobjectobject {go.ObjectIndex}...");
+
+        var com = ClientObjectManager.Instance();
+        var native = go.Native();
+        var idx = com->GetIndexByObject(native);
+        if (idx != 0xFFFFFFFF)
+        {
+            com->DeleteObjectByIndex((ushort)idx, 0);
+            return true;
+        }
+
+        return false;
+    }
+
+    public unsafe void DestroyAllCreated()
+    {
+        Brio.Log.Debug("Destroying all created gameobjects.");
+
+        var indexes = _createdIndexes.ToList();
+        var com = ClientObjectManager.Instance();
+        foreach (var idx in indexes)
+        {
+            com->DeleteObjectByIndex(idx, 0);
+        }
+        _createdIndexes.Clear();
+    }
+
+    public void DestroyCompanion(Character character)
+    {
+        if (character.CalculateCompanionInfo(out var info))
+        {
+            InternalSetCompanion(character, info.Kind, 0);
+        }
+    }
+
+    public unsafe void CreateCompanion(Character character, CompanionContainer container)
+    {
+        DestroyCompanion(character);
+        InternalSetCompanion(character, container.Kind, (short)container.Id);
+
+        // We need to wait for the companion to be ready before we can draw it.
+        var companionNative = &character.Native()->CompanionObject->Character.GameObject;
+        _framework.RunUntilSatisfied(
+            () => character.CalculateCompanionInfo(out var info) && info.Kind == container.Kind && info.Id == container.Id && companionNative->IsReadyToDraw(),
+            (_) => companionNative->EnableDraw(),
+            1000,
+            dontStartFor: 1
+        );
+    }
+
+    private unsafe void InternalSetCompanion(Character character, CompanionKind kind, short id)
+    {
+        var native = character.Native();
+        switch (kind)
+        {
+            case CompanionKind.Companion:
+                native->Companion.SetupCompanion(id, 0);
+                break;
+
+            case CompanionKind.Mount:
+                native->Mount.CreateAndSetupMount(id, 0, 0, 0, 0, 0, 0);
+                break;
+
+            case CompanionKind.Ornament:
+                native->Ornament.SetupOrnament(id, 0);
+                break;
+        }
+    }
+
+    private bool CreateEmptyCharacter([MaybeNullWhen(false)] out Character outCharacter, SpawnFlags flags)
+    {
+        outCharacter = null;
+
+        Brio.Log.Debug("Creating Brio character...");
+
+        unsafe
+        {
+            var com = ClientObjectManager.Instance();
+            uint idCheck = com->CreateBattleCharacter(param: (byte)(flags.HasFlag(SpawnFlags.ReserveCompanionSlot) ? 1 : 0));
+            if (idCheck == 0xffffffff)
+            {
+                Brio.Log.Warning("Failed to create character, invalid ID was returned.");
+                EventBus.Instance.NotifyError("Failed to create character.");
+                return false;
+            }
+            ushort newId = (ushort)idCheck;
+
+            _createdIndexes.Add(newId);
+
+            var newObject = com->GetObjectByIndex(newId);
+            if (newObject == null) return false;
+
+            var newPlayer = (NativeCharacter*)newObject;
+
+            newObject->CalculateAndSetName(newId); // Brio One etc
+
+            _gPoseService.AddCharacterToGPose(newPlayer);
+
+            var character = _objectTable.CreateObjectReference((nint)newObject);
+            if (character == null || character is not Character)
+                return false;
+
+            outCharacter = (Character)character;
+        }
+
+        if (_gPoseService.IsGPosing && _targetService.GPoseTarget == null)
+            _targetService.GPoseTarget = outCharacter;
+
+        return true;
+    }
+
+    private void OnGPoseStateChanged(bool newState)
+    {
+        if (!newState)
+            DestroyAllCreated();
+    }
+
+    private unsafe void OnCharacterDestroyed(NativeCharacter* chara)
+    {
+        var go = _objectTable.CreateObjectReference((nint)chara);
+        if (go != null && go.IsGPose())
+        {
+            var com = ClientObjectManager.Instance();
+            var idx = com->GetIndexByObject(go.Native());
+            if (idx < ushort.MaxValue)
+                _createdIndexes.Remove((ushort)idx);
+        }
+    }
+
+    private void OnTerritoryChanged(ushort obj)
+    {
+        _createdIndexes.Clear();
+    }
+
+    public unsafe void Dispose()
+    {
+        _monitorService.CharacterDestroyed -= OnCharacterDestroyed;
+        _gPoseService.OnGPoseStateChange -= OnGPoseStateChanged;
+        _clientState.TerritoryChanged -= OnTerritoryChanged;
+
         DestroyAllCreated();
-        GPoseService.Instance.OnGPoseStateChange -= GPoseService_OnGPoseStateChange;
     }
 }
 
 [Flags]
-public enum SpawnOptions
+enum SpawnFlags
 {
     None = 0,
-    ApplyModelPosition = 1,
-    ReserveCompanionSlot = 2,
+    ReserveCompanionSlot = 1 << 0,
+    CopyPosition = 1 << 1,
+
+    Default = CopyPosition,
 }

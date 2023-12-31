@@ -1,20 +1,38 @@
-﻿using Dalamud.Logging;
-using Dalamud.Plugin.Services;
-using System;
+﻿using Dalamud.Plugin.Services;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
+using System;
 
 namespace Brio.Game.Core;
 
-public static class FrameworkExtensions
+internal static class FrameworkExtensions
 {
+    public static Task RunUntilSatisfied(
+        this IFramework framework,
+        Func<bool> condition,
+        Action<bool> onSatisfied,
+        int attempts,
+        int dontStartFor = 0,
+        bool deferOnceOnSuccess = false,
+        [CallerFilePath] string callerFile = "",
+        [CallerLineNumber] int callerLine = 0,
+        [CallerMemberName] string callerMember = ""
+    )
+    {
+        return RunUntilSatisfied(framework, condition, (v) =>
+        {
+            onSatisfied.Invoke(v);
+            return true;
+        }, attempts, dontStartFor, deferOnceOnSuccess, callerFile, callerLine, callerMember);
+    }
+
     public static Task<T> RunUntilSatisfied<T>(
         this IFramework framework,
         Func<bool> condition,
         Func<bool, T> onSatisfied,
         int attempts,
         int dontStartFor = 0,
-        bool waitOneMore = false,
+        bool deferOnceOnSuccess = false,
         [CallerFilePath] string callerFile = "",
         [CallerLineNumber] int callerLine = 0,
         [CallerMemberName] string callerMember = ""
@@ -28,20 +46,18 @@ public static class FrameworkExtensions
             ConditionAction = () => condition.Invoke(),
             CompleteAction = onSatisfied.Invoke,
             MaxFrames = attempts,
-            DeferOnceMore = waitOneMore,
+            DeferOnceMore = deferOnceOnSuccess,
             DebugPath = $"{callerFile}:{callerLine} - {callerMember}"
         };
 
-        Dalamud.Framework.RunOnTick(() =>
+        framework.RunOnTick(() =>
         {
             ProcessTask(framework, newTask);
         },
         delayTicks: dontStartFor);
 
         return callbackTask.Task;
-
     }
-
 
     private static void ProcessTask<T>(IFramework framework, DeferredTask<T> task)
     {
@@ -52,16 +68,16 @@ public static class FrameworkExtensions
         {
             result = task.ConditionAction();
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
-            Dalamud.PluginLog.Warning(ex, $"Exception running condition action. {task}");
+            Brio.Log.Warning(ex, $"Exception running condition action. {task}");
             CompleteTask(task, false, ex);
             return;
         }
 
-        if(result)
+        if (result)
         {
-            if(task.DeferOnceMore)
+            if (task.DeferOnceMore)
             {
                 framework.RunOnTick(() => CompleteTask(task, true, null));
             }
@@ -73,23 +89,23 @@ public static class FrameworkExtensions
         }
         else
         {
-            if(thisTick >= task.MaxFrames)
+            if (thisTick >= task.MaxFrames)
             {
-                Dalamud.PluginLog.Warning($"Task timed out. {task}");
+                Brio.Log.Warning($"Task timed out. {task}");
                 CompleteTask(task, false, null);
             }
             else
             {
-                Dalamud.Framework.RunOnTick(() => ProcessTask(framework, task));
+                framework.RunOnTick(() => ProcessTask(framework, task));
             }
         }
     }
-        
+
     private static void CompleteTask<T>(DeferredTask<T> task, bool success, Exception? e)
     {
         try
         {
-            if(e != null)
+            if (e != null)
             {
                 task.CompleteAction.Invoke(false);
                 task.CallbackTask.SetException(e);
@@ -100,9 +116,9 @@ public static class FrameworkExtensions
                 task.CallbackTask.SetResult(result);
             }
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
-            Dalamud.PluginLog.Warning(ex, $"Exception running completion action. {task}");
+            Brio.Log.Warning(ex, $"Exception running completion action. {task}");
             task.CallbackTask.SetException(ex);
         }
     }

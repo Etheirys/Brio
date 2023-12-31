@@ -1,161 +1,79 @@
-﻿using Brio.Core;
-using Brio.Game.Actor.Extensions;
-using Brio.Game.GPose;
-using Dalamud.Game.ClientState.Objects.Types;
+﻿using Dalamud.Game;
 using Dalamud.Hooking;
+using Dalamud.Plugin.Services;
 using FFXIVClientStructs.FFXIV.Client.Game;
+using Brio.Capabilities.Actor;
+using Brio.Entities;
 using System;
-using System.Collections.Generic;
 
 namespace Brio.Game.Actor;
-public class ActionTimelineService : ServiceBase<ActionTimelineService>
+
+internal unsafe class ActionTimelineService : IDisposable
 {
-    private Dictionary<int, BaseOverrideEntry> _actorBaseOverrides = new();
-    private Dictionary<nint, SpeedOverrideEntry> _actorSpeedOverrides = new();
+    private delegate bool CalculateAndApplyOverallSpeedDelegate(ActionTimelineManager* a1);
+    private readonly Hook<CalculateAndApplyOverallSpeedDelegate> _calculateAndApplyOverallSpeedHook = null!;
 
-    private delegate void SetSlotSpeedDelegate(IntPtr a1, uint slot, float speed);
-    private Hook<SetSlotSpeedDelegate> _setSpeedSlotHook = null!;
+    private delegate void SetSlotSpeedDelegate(ActionTimelineDriver* a1, ActionTimelineSlots slot, float speed);
+    private readonly Hook<SetSlotSpeedDelegate> _setSpeedSlotHook = null!;
 
-    public ActionTimelineService()
-    { 
-        _setSpeedSlotHook = Dalamud.GameInteropProvider.HookFromAddress<SetSlotSpeedDelegate>((nint)ActionTimelineDriver.Addresses.SetSlotSpeed.Value, SetSlotSpeedDetour);
+    private readonly EntityManager _entityManager;
+
+    public ActionTimelineService(EntityManager entityManager, ISigScanner scanner, IGameInteropProvider hooking)
+    {
+        _entityManager = entityManager;
+
+        _calculateAndApplyOverallSpeedHook = hooking.HookFromAddress<CalculateAndApplyOverallSpeedDelegate>((nint)ActionTimelineManager.Addresses.CalculateAndApplyOverallSpeed.Value, CalculateAndApplyOverallSpeedDetour);
+        _calculateAndApplyOverallSpeedHook.Enable();
+
+        _setSpeedSlotHook = hooking.HookFromAddress<SetSlotSpeedDelegate>((nint)ActionTimelineDriver.Addresses.SetSlotSpeed.Value, SetSlotSpeedDetour);
+        _setSpeedSlotHook.Enable();
     }
 
-    public override void Start()
+    private bool CalculateAndApplyOverallSpeedDetour(ActionTimelineManager* a1)
     {
-        ActorService.Instance.OnActorDestructing += Instance_OnActorDestructing;
-        GPoseService.Instance.OnGPoseStateChange += Instance_OnGPoseStateChange;
-
-        Instance_OnGPoseStateChange(GPoseService.Instance.GPoseState);
-        base.Start();
-    }
-
-    private void Instance_OnGPoseStateChange(GPoseState gposeState)
-    {
-        if(gposeState == GPoseState.Inside)
-            _setSpeedSlotHook.Enable();
-
-        if(gposeState == GPoseState.Exiting)
-            _setSpeedSlotHook.Disable();
-    }
-
-    public unsafe void ApplyBaseOverride(Character managedChara, ushort actionTimeline, bool interrupt)
-    {
-        var chara = managedChara.AsNative();
-        var index = chara->GameObject.ObjectIndex;
-        
-        if(!_actorBaseOverrides.ContainsKey(index))
+        bool result = _calculateAndApplyOverallSpeedHook.Original(a1);
+        if (_entityManager.TryGetEntity(a1->Parent, out var entity))
         {
-            _actorBaseOverrides[index] = new BaseOverrideEntry
+            if (entity.TryGetCapability<ActionTimelineCapability>(out var atc))
             {
-                OriginalMode = (byte)chara->Mode,
-                OriginalModeParam = (byte)chara->ModeParam
-            };
-        }
+                if (atc.SpeedMultiplierOverride.HasValue)
+                {
+                    a1->OverallSpeed = atc.SpeedMultiplierOverride.Value;
+                    result |= true;
+                }
 
-        chara->SetMode(FFXIVClientStructs.FFXIV.Client.Game.Character.Character.CharacterModes.AnimLock, 0);
-        chara->ActionTimelineManager.BaseOverride = actionTimeline;
-
-        if(interrupt)
-            chara->ActionTimelineManager.Driver.PlayTimeline(actionTimeline);
-    }
-
-    public bool HasOverride(Character managedChara) => _actorBaseOverrides.ContainsKey(managedChara.GetObjectIndex());
-
-    public unsafe void RemoveOverride(Character managedChara)
-    {
-        var index = managedChara.GetObjectIndex();
-        if(_actorBaseOverrides.TryGetValue(index, out BaseOverrideEntry? entry))
-        {
-            var chara = managedChara.AsNative();
-            chara->ActionTimelineManager.BaseOverride = 0;
-            chara->ActionTimelineManager.Driver.TimelineIds[0] = 0;
-            chara->SetMode((FFXIVClientStructs.FFXIV.Client.Game.Character.Character.CharacterModes)entry.OriginalMode, entry.OriginalModeParam);
-        }
-    }
-
-    public unsafe SpeedOverrideEntry GetSpeedOverride(Character managedChara)
-    {
-        var addr = new IntPtr(&managedChara.AsNative()->ActionTimelineManager.Driver);
-        if(!_actorSpeedOverrides.ContainsKey(addr))
-        {
-            var entry = new SpeedOverrideEntry();
-
-            for(int i = 0; i < ActionTimelineDriver.TimelineSlotCount; ++i)
-                entry.SlotModifiers[i] = 1f;
-
-            _actorSpeedOverrides[addr] = entry;
-
-            return entry;
-
-        }
-
-        return _actorSpeedOverrides[addr];
-    }
-
-    public unsafe void Blend(Character managedChara, ushort actionTimeline) => managedChara.AsNative()->ActionTimelineManager.Driver.PlayTimeline(actionTimeline);
-
-    public unsafe void UpdateAllSlots(Character chara)
-    {
-        var addr = new IntPtr(&chara.AsNative()->ActionTimelineManager.Driver);
-        if(_actorSpeedOverrides.ContainsKey(addr))
-        {
-            var entry = _actorSpeedOverrides[addr];
-            for(uint i = 0; i < ActionTimelineDriver.TimelineSlotCount; ++i)
-            {
-                _setSpeedSlotHook.Original(addr, i, entry.SlotModifiers[i] * entry.SpeedMultiplier);
+                if (atc.CheckAndResetDirtySlots())
+                    result |= true;
             }
 
-            return;
         }
+
+        return result;
     }
 
-    private unsafe void Instance_OnActorDestructing(GameObject gameObject)
+    private unsafe void SetSlotSpeedDetour(ActionTimelineDriver* a1, ActionTimelineSlots slot, float speed)
     {
-        _actorBaseOverrides.Remove(gameObject.GetObjectIndex());
+        float finalSpeed = speed;
 
-        if(gameObject is Character chara)
+        var owner = a1->Parent;
+
+        if (_entityManager.TryGetEntity(owner, out var entity))
         {
-            var addr = new IntPtr(&chara.AsNative()->ActionTimelineManager.Driver);
-            _actorSpeedOverrides.Remove(addr);
+            if (entity.TryGetCapability<ActionTimelineCapability>(out var atc))
+            {
+                if (atc.HasSlotSpeedOverride(slot))
+                {
+                    finalSpeed = atc.GetSlotSpeed(slot);
+                }
+            }
+
         }
+        _setSpeedSlotHook.Original(a1, slot, finalSpeed);
     }
 
-    private unsafe void SetSlotSpeedDetour(IntPtr a1, uint slot, float speed)
+    public void Dispose()
     {
-        if(_actorSpeedOverrides.ContainsKey(a1))
-        {
-            var entry = _actorSpeedOverrides[a1];
-            _setSpeedSlotHook.Original(a1, slot, entry.SlotModifiers[slot] * entry.SpeedMultiplier);
-
-            return;
-        }
-
-        _setSpeedSlotHook.Original(a1, slot, speed);
-    }
-
-    public override void Stop()
-    {
-        ActorService.Instance.OnActorDestructing -= Instance_OnActorDestructing;
-        GPoseService.Instance.OnGPoseStateChange -= Instance_OnGPoseStateChange;
-    }
-
-    public override void Dispose()
-    {
+        _calculateAndApplyOverallSpeedHook.Dispose();
         _setSpeedSlotHook.Dispose();
-    }
-
-    public class BaseOverrideEntry
-    {
-        public byte OriginalMode { get; set; }
-        public byte OriginalModeParam { get; set;  }
-    }
-
-    public class SpeedOverrideEntry
-    {
-        public float SpeedMultiplier = 1.0f;
-        public float[] SlotModifiers = new float[ActionTimelineDriver.TimelineSlotCount];
-
-        public float GetEffectiveSpeed(ActionTimelineSlots slot) => SpeedMultiplier * SlotModifiers[(int)slot];
     }
 }

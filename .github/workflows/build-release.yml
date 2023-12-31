@@ -1,0 +1,45 @@
+name: Build Brio - Dalamud Release
+
+on:
+  push:
+    branches: '*'
+    tags-ignore: '*'
+  pull_request:
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+        
+    - name: Install .NET
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 7.0.x
+
+    - name: Download Dalamud
+      run: |
+        Invoke-WebRequest -Uri https://goatcorp.github.io/dalamud-distrib/latest.zip -OutFile latest.zip
+        Expand-Archive -Force latest.zip "$env:AppData\XIVLauncher\addon\Hooks\dev"
+
+    - name: Restore Dependencies
+      run: dotnet restore Brio.sln
+      
+    - name: Build Brio
+      run: dotnet build --no-restore Brio.sln /p:Configuration=Release /p:DebugType=None /p:DebugSymbols=false /p:Version=0.0.0.1
+
+    - name: Zip Release
+      uses: TheDoctor0/zip-release@0.6.0
+      with:
+        filename: '../../../../Brio.zip'
+        directory: './Brio/bin/x64/Release/'
+
+    - name: Upload a Build Artifact
+      uses: actions/upload-artifact@v2.2.1
+      with:
+        path: |
+          ./Brio.zip
