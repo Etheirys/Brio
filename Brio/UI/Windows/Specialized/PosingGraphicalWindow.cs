@@ -75,7 +75,6 @@ internal class PosingGraphicalWindow : Window, IDisposable
         {
             x->DesiredSize.X = MathF.Max(x->DesiredSize.X, x->DesiredSize.Y);
             x->DesiredSize.Y = x->DesiredSize.X * 0.5f;
-            Size = x->DesiredSize;
         });
 
         base.PreDraw();
