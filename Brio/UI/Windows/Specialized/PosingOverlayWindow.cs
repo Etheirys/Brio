@@ -214,13 +214,12 @@ internal class PosingOverlayWindow : Window, IDisposable
 
         if (hovered.Any() && !clicked.Any())
         {
+            ImGui.SetNextWindowPos(ImGui.GetMousePos() + new Vector2(2, 2), ImGuiCond.Always);
             if (ImGui.Begin("gizmo_bone_select_preview", ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoDecoration))
             {
-                ImGui.SetWindowPos(ImGui.GetMousePos() + new Vector2(1, 0));
                 foreach (var hover in hovered)
                 {
                     ImGui.BeginDisabled();
-
                     ImGui.Selectable($"{hover.Item.DisplayName}###selectable_{hover.GetHashCode()}", hover.CurrentlySelected);
                     ImGui.EndDisabled();
                 }
@@ -251,7 +250,6 @@ internal class PosingOverlayWindow : Window, IDisposable
         {
             if (popup.Success)
             {
-                ImGui.SetWindowFocus();
                 int selectedIndex = -1;
                 foreach (var click in _selectingFrom)
                 {
