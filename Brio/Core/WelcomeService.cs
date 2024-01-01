@@ -11,7 +11,6 @@ internal class WelcomeService
         {
             infoWindow.IsOpen = true;
             configService.Configuration.PopupKey = Configuration.CurrentPopupKey;
-            configService.Save();
         }
 
         if (configService.Configuration.Interface.OpenBrioBehavior == OpenBrioBehavior.OnPluginStartup)

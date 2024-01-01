@@ -27,14 +27,14 @@ internal unsafe class ObjectMonitorService : IDisposable
 
     private readonly IObjectTable _objectTable;
 
-    private delegate void NativeCharacterEventDelegate(NativeCharacter* chara);
+    private delegate nint NativeCharacterEventDelegate(NativeCharacter* chara);
     private readonly Hook<NativeCharacterEventDelegate> _characterIntitializeHook = null!;
     private readonly Hook<NativeCharacterEventDelegate> _characterFinalizeHook = null!;
 
-    private delegate nint CharacterBaseUpdateMaterialsDelegate(BrioCharacterBase* charaBase, uint a2, byte a3);
+    private delegate nint CharacterBaseUpdateMaterialsDelegate(BrioCharacterBase* charaBase);
     private readonly Hook<CharacterBaseUpdateMaterialsDelegate> _characterBaseUpdateMaterialsHook = null!;
 
-    private delegate void CharacterBaseCleanupDelegate(BrioCharacterBase* charaBase);
+    private delegate nint CharacterBaseCleanupDelegate(BrioCharacterBase* charaBase);
     private readonly Hook<CharacterBaseCleanupDelegate> _characterBaseCleanupHook = null!;
 
     private readonly Dictionary<nint, Character> _charaBaseToCharacterCache = [];
@@ -55,7 +55,7 @@ internal unsafe class ObjectMonitorService : IDisposable
         _characterBaseCleanupHook = hooking.HookFromAddress<CharacterBaseCleanupDelegate>((nint)charaBaseCleanupAddr, CharacterBaseCleanupDetour);
         _characterBaseCleanupHook.Enable();
 
-        var charaBaseUpdateMaterialsDetour = "E8 ?? ?? ?? ?? 48 8B 8B ?? ?? ?? ?? 48 85 C9 74 ?? 4C 8B 83";
+        var charaBaseUpdateMaterialsDetour = "40 53 48 83 EC ?? 48 8B D9 E8 ?? ?? ?? ?? 48 8B 8B ?? ?? ?? ?? 48 85 C9 74 ?? 4C 8B 83";
         _characterBaseUpdateMaterialsHook = hooking.HookFromAddress<CharacterBaseUpdateMaterialsDelegate>(scanner.ScanText(charaBaseUpdateMaterialsDetour), CharacterBaseUpdateMaterialsDetour);
         _characterBaseUpdateMaterialsHook.Enable();
     }
@@ -87,26 +87,27 @@ internal unsafe class ObjectMonitorService : IDisposable
         return false;
     }
 
-    private void CharacterIntitializeDetour(NativeCharacter* chara)
+    private nint CharacterIntitializeDetour(NativeCharacter* chara)
     {
-        _characterIntitializeHook.Original.Invoke(chara);
+        var result = _characterIntitializeHook.Original.Invoke(chara);
         CharacterInitialized?.Invoke(chara);
+        return result;
     }
 
-    private void CharacterFinalizeDetour(NativeCharacter* chara)
+    private nint CharacterFinalizeDetour(NativeCharacter* chara)
     {
         CharacterDestroyed?.Invoke(chara);
-        _characterFinalizeHook.Original.Invoke(chara);
+        return _characterFinalizeHook.Original.Invoke(chara);
     }
 
-    private nint CharacterBaseUpdateMaterialsDetour(BrioCharacterBase* charaBase, uint a2, byte a3)
+    private nint CharacterBaseUpdateMaterialsDetour(BrioCharacterBase* charaBase)
     {
-        var result = _characterBaseUpdateMaterialsHook.Original(charaBase, a2, a3);
+        var result = _characterBaseUpdateMaterialsHook.Original(charaBase);
         CharacterBaseMaterialsUpdated?.Invoke(charaBase);
         return result;
     }
 
-    private void CharacterBaseCleanupDetour(BrioCharacterBase* charaBase)
+    private nint CharacterBaseCleanupDetour(BrioCharacterBase* charaBase)
     {
         if (charaBase != null)
         {
@@ -114,7 +115,7 @@ internal unsafe class ObjectMonitorService : IDisposable
             _charaBaseToCharacterCache.Remove((nint)charaBase);
         }
 
-        _characterBaseCleanupHook.Original(charaBase);
+        return _characterBaseCleanupHook.Original(charaBase);
     }
 
     public void Dispose()
