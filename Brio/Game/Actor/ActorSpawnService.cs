@@ -50,9 +50,9 @@ internal class ActorSpawnService : IDisposable
         outCharacter = null;
 
         var localPlayer = _clientState.LocalPlayer;
-        if (localPlayer != null)
+        if(localPlayer != null)
         {
-            if (CloneCharacter(localPlayer, out outCharacter, flags))
+            if(CloneCharacter(localPlayer, out outCharacter, flags))
             {
                 return true;
             }
@@ -68,17 +68,17 @@ internal class ActorSpawnService : IDisposable
         CharacterCopyFlags copyFlags = CharacterCopyFlags.WeaponHiding;
 
         bool hasCompanion = sourceCharacter.HasSpawnedCompanion();
-        if (hasCompanion)
+        if(hasCompanion)
         {
             flags |= SpawnFlags.ReserveCompanionSlot;
             copyFlags |= CharacterCopyFlags.Companion | CharacterCopyFlags.Ornament | CharacterCopyFlags.Mount;
         }
 
-        if (flags.HasFlag(SpawnFlags.CopyPosition))
+        if(flags.HasFlag(SpawnFlags.CopyPosition))
             copyFlags |= CharacterCopyFlags.Position;
 
 
-        if (CreateEmptyCharacter(out outCharacter, flags))
+        if(CreateEmptyCharacter(out outCharacter, flags))
         {
 
             var sourceNative = sourceCharacter.Native();
@@ -90,13 +90,13 @@ internal class ActorSpawnService : IDisposable
             targetNative->CharacterSetup.CopyFromCharacter(outCharacter.Native(), CharacterCopyFlags.None);
 
             // Copy position if requested
-            if (flags.HasFlag(SpawnFlags.CopyPosition))
+            if(flags.HasFlag(SpawnFlags.CopyPosition))
             {
                 var position = sourceNative->GameObject.Position;
                 var rotation = sourceNative->GameObject.Rotation;
 
                 // TODO: This is only needed for Anamnesis and Ktisis. 
-                if (sourceNative->GameObject.DrawObject != null && sourceNative->GameObject.DrawObject->IsVisible)
+                if(sourceNative->GameObject.DrawObject != null && sourceNative->GameObject.DrawObject->IsVisible)
                 {
                     // TODO: This is weird if you are mounted
                     position = sourceNative->GameObject.DrawObject->Object.Position;
@@ -111,12 +111,13 @@ internal class ActorSpawnService : IDisposable
             // Start drawing
             _actorRedrawService.DrawWhenReady(outCharacter);
 
-            if (hasCompanion)
+            if(hasCompanion)
             {
                 // We need to wait for the companion to be ready before we can draw it.
-                var companion = _objectTable.CreateObjectReference((nint)(&targetNative->CompanionObject));
-                if (companion != null)
+                var companion = _objectTable.CreateObjectReference((nint)(targetNative->CompanionObject));
+                if(companion != null)
                     _actorRedrawService.DrawWhenReady(companion);
+
             }
 
 
@@ -128,10 +129,10 @@ internal class ActorSpawnService : IDisposable
 
     public void ClearAll()
     {
-        for (int i = ActorTableHelpers.GPoseStart; i <= ActorTableHelpers.GPoseEnd; i++)
+        for(int i = ActorTableHelpers.GPoseStart; i <= ActorTableHelpers.GPoseEnd; i++)
         {
             var obj = _objectTable[i];
-            if (obj == null)
+            if(obj == null)
                 continue;
 
             DestroyObject(obj);
@@ -142,7 +143,7 @@ internal class ActorSpawnService : IDisposable
     {
         var go = _objectTable[objectIndex];
 
-        if (go != null)
+        if(go != null)
             return DestroyObject(go);
 
         return false;
@@ -155,7 +156,7 @@ internal class ActorSpawnService : IDisposable
         var com = ClientObjectManager.Instance();
         var native = go.Native();
         var idx = com->GetIndexByObject(native);
-        if (idx != 0xFFFFFFFF)
+        if(idx != 0xFFFFFFFF)
         {
             com->DeleteObjectByIndex((ushort)idx, 0);
             return true;
@@ -170,7 +171,7 @@ internal class ActorSpawnService : IDisposable
 
         var indexes = _createdIndexes.ToList();
         var com = ClientObjectManager.Instance();
-        foreach (var idx in indexes)
+        foreach(var idx in indexes)
         {
             com->DeleteObjectByIndex(idx, 0);
         }
@@ -179,7 +180,7 @@ internal class ActorSpawnService : IDisposable
 
     public void DestroyCompanion(Character character)
     {
-        if (character.CalculateCompanionInfo(out var info))
+        if(character.CalculateCompanionInfo(out var info))
         {
             InternalSetCompanion(character, info.Kind, 0);
         }
@@ -203,7 +204,7 @@ internal class ActorSpawnService : IDisposable
     private unsafe void InternalSetCompanion(Character character, CompanionKind kind, short id)
     {
         var native = character.Native();
-        switch (kind)
+        switch(kind)
         {
             case CompanionKind.Companion:
                 native->Companion.SetupCompanion(id, 0);
@@ -229,7 +230,7 @@ internal class ActorSpawnService : IDisposable
         {
             var com = ClientObjectManager.Instance();
             uint idCheck = com->CreateBattleCharacter(param: (byte)(flags.HasFlag(SpawnFlags.ReserveCompanionSlot) ? 1 : 0));
-            if (idCheck == 0xffffffff)
+            if(idCheck == 0xffffffff)
             {
                 Brio.Log.Warning("Failed to create character, invalid ID was returned.");
                 EventBus.Instance.NotifyError("Failed to create character.");
@@ -240,7 +241,7 @@ internal class ActorSpawnService : IDisposable
             _createdIndexes.Add(newId);
 
             var newObject = com->GetObjectByIndex(newId);
-            if (newObject == null) return false;
+            if(newObject == null) return false;
 
             var newPlayer = (NativeCharacter*)newObject;
 
@@ -249,13 +250,13 @@ internal class ActorSpawnService : IDisposable
             _gPoseService.AddCharacterToGPose(newPlayer);
 
             var character = _objectTable.CreateObjectReference((nint)newObject);
-            if (character == null || character is not Character)
+            if(character == null || character is not Character)
                 return false;
 
             outCharacter = (Character)character;
         }
 
-        if (_gPoseService.IsGPosing && _targetService.GPoseTarget == null)
+        if(_gPoseService.IsGPosing && _targetService.GPoseTarget == null)
             _targetService.GPoseTarget = outCharacter;
 
         return true;
@@ -263,18 +264,18 @@ internal class ActorSpawnService : IDisposable
 
     private void OnGPoseStateChanged(bool newState)
     {
-        if (!newState)
+        if(!newState)
             DestroyAllCreated();
     }
 
     private unsafe void OnCharacterDestroyed(NativeCharacter* chara)
     {
         var go = _objectTable.CreateObjectReference((nint)chara);
-        if (go != null && go.IsGPose())
+        if(go != null && go.IsGPose())
         {
             var com = ClientObjectManager.Instance();
             var idx = com->GetIndexByObject(go.Native());
-            if (idx < ushort.MaxValue)
+            if(idx < ushort.MaxValue)
                 _createdIndexes.Remove((ushort)idx);
         }
     }
