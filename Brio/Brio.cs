@@ -128,6 +128,7 @@ public class Brio : IDalamudPlugin
         serviceCollection.AddSingleton<TimeService>();
         serviceCollection.AddSingleton<WeatherService>();
         serviceCollection.AddSingleton<FestivalService>();
+        serviceCollection.AddSingleton<WorldRenderingService>();
         serviceCollection.AddSingleton<SkeletonService>();
         serviceCollection.AddSingleton<PosingService>();
         serviceCollection.AddSingleton<CameraService>();
