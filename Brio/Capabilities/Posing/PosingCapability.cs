@@ -23,7 +23,21 @@ internal class PosingCapability : ActorCharacterCapability
     public SkeletonPosingCapability SkeletonPosing => Entity.GetCapability<SkeletonPosingCapability>();
     public ModelPosingCapability ModelPosing => Entity.GetCapability<ModelPosingCapability>();
 
-    public bool HasOverride => SkeletonPosing.PoseInfo.IsOveridden || ModelPosing.HasOverride;
+    public bool HasOverride
+    {
+        get
+        {
+            if(Entity.TryGetCapability<SkeletonPosingCapability>(out var skeletonPosing))
+                if(skeletonPosing.PoseInfo.IsOveridden)
+                    return true;
+
+            if(Entity.TryGetCapability<ModelPosingCapability>(out var modelPosing))
+                if(modelPosing.HasOverride)
+                    return true;
+
+            return false;
+        }
+    }
 
     public bool HasUndoStack => _undoStack.Any();
     public bool HasRedoStack => _redoStack.Any();

@@ -26,9 +26,9 @@ namespace Brio.Entities.Actor
             AddCapability(ActivatorUtilities.CreateInstance<ActorLifetimeCapability>(_serviceProvider, this));
             AddCapability(ActivatorUtilities.CreateInstance<ActorAppearanceCapability>(_serviceProvider, this));
 
-            AddCapability(ActivatorUtilities.CreateInstance<PosingCapability>(_serviceProvider, this));
             AddCapability(ActivatorUtilities.CreateInstance<SkeletonPosingCapability>(_serviceProvider, this));
             AddCapability(ActivatorUtilities.CreateInstance<ModelPosingCapability>(_serviceProvider, this));
+            AddCapability(ActivatorUtilities.CreateInstance<PosingCapability>(_serviceProvider, this));
 
             AddCapability(ActionTimelineCapability.CreateIfEligible(_serviceProvider, this));
             AddCapability(CompanionCapability.CreateIfEligible(_serviceProvider, this));
