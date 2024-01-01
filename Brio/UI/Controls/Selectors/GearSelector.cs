@@ -64,7 +64,7 @@ internal class GearSelector(string id) : Selector<ModelDatabase.ModelInfo>(id)
         return string.Compare(itemA.Name, itemB.Name, StringComparison.InvariantCultureIgnoreCase);
     }
 
-    protected override void DrawItem(ModelDatabase.ModelInfo item, bool isHovered, bool isMouseOver)
+    protected override void DrawItem(ModelDatabase.ModelInfo item, bool isHovered)
     {
         ImBrio.BorderedGameIcon("icon", item.Icon, _allowedSlots.GetEquipSlotFallback(), flags: ImGuiButtonFlags.None, size: IconSize);
 

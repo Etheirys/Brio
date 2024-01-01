@@ -24,7 +24,7 @@ internal class DyeSelector(string id) : Selector<DyeUnion>(id)
         AddItem(new None());
     }
 
-    protected override void DrawItem(DyeUnion item, bool isHovered, bool isMouseOver)
+    protected override void DrawItem(DyeUnion item, bool isHovered)
     {
         var (id, name, color) = item.Match(
             stain => ((byte)stain.RowId, stain.Name, (uint)ImBrio.ARGBToABGR(stain.Color)),

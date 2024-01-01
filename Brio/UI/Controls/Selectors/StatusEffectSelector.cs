@@ -20,7 +20,7 @@ internal class StatusEffectSelector(string id) : Selector<Status>(id)
         AddItems(GameDataProvider.Instance.Statuses.Values);
     }
 
-    protected override void DrawItem(Status item, bool isHovered, bool isMouseOver)
+    protected override void DrawItem(Status item, bool isHovered)
     {
         IDalamudTextureWrap? tex = null;
         if (item.Icon != 0)

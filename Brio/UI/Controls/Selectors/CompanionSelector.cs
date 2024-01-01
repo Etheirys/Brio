@@ -36,7 +36,7 @@ internal class CompanionSelector(string id) : Selector<CompanionRowUnion>(id)
 
     }
 
-    protected override void DrawItem(CompanionRowUnion companionType, bool isHovered, bool isMouseOver)
+    protected override void DrawItem(CompanionRowUnion companionType, bool isHovered)
     {
         ImBrio.BorderedGameIcon("icon", companionType, flags: ImGuiButtonFlags.None, size: IconSize);
     }

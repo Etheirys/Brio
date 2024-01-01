@@ -126,11 +126,12 @@ internal abstract class Selector<T> where T : class
                         using (ImRaii.PushId(i))
                         {
                             var startPos = ImGui.GetCursorPos();
-                            bool isHovered = IsItemSoftSelected(item);
-                            bool isMouseOver = ImGui.IsItemHovered();
-                            bool wasHovered = ImGui.Selectable($"###entry", isHovered, ImGuiSelectableFlags.AllowDoubleClick, new Vector2(0, EntrySize));
-                            bool wasSelected = wasHovered && ImGui.IsMouseDoubleClicked(ImGuiMouseButton.Left);
+                            bool isSoftSelected = IsItemSoftSelected(item);
+                            bool wasSoftSelected = ImGui.Selectable($"###entry", isSoftSelected, ImGuiSelectableFlags.AllowDoubleClick, new Vector2(0, EntrySize));
+                            bool wasSelected = wasSoftSelected && ImGui.IsMouseDoubleClicked(ImGuiMouseButton.Left);
                             var endPos = ImGui.GetCursorPos();
+
+
 
                             if (ImGui.IsItemVisible())
                             {
@@ -139,14 +140,16 @@ internal abstract class Selector<T> where T : class
                                 {
                                     using (var itemGroup = ImRaii.Group())
                                     {
-                                        if (itemGroup.Success)
-                                            DrawItem(item, isHovered, isMouseOver);
+                                        if (itemGroup.Success) 
+                                            DrawItem(item, isSoftSelected);
                                     }
+                                    if(ImGui.IsItemHovered())
+                                        DrawTooltip(item);
                                 }
                                 ImGui.SetCursorPos(endPos);
                             }
 
-                            if (isHovered && _scrollToSelected)
+                            if (isSoftSelected && _scrollToSelected)
                             {
                                 if (ImGui.IsItemVisible())
                                 {
@@ -158,7 +161,7 @@ internal abstract class Selector<T> where T : class
                                 }
                             }
 
-                            if (wasHovered)
+                            if (wasSoftSelected)
                             {
                                 _softSelected = item;
                                 SoftSelectionChanged = true;
@@ -188,9 +191,14 @@ internal abstract class Selector<T> where T : class
         _items.AddRange(items);
     }
 
-    protected abstract void DrawItem(T item, bool isSoftSelected, bool isMouseOver);
+    protected abstract void DrawItem(T item, bool isSoftSelected);
 
     protected virtual void DrawOptions()
+    {
+
+    }
+
+    protected virtual void DrawTooltip(T item)
     {
 
     }

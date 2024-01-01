@@ -107,7 +107,7 @@ internal class NpcSelector(string id) : Selector<NpcSelectorEntry>(id)
             UpdateList();
     }
 
-    protected override void DrawItem(NpcSelectorEntry item, bool isHovered, bool isMouseOver)
+    protected override void DrawItem(NpcSelectorEntry item, bool isHovered)
     {
         var details = item.Appearance.Match(
             bnpc => $"Battle NPC: {bnpc.RowId}\nModel: {bnpc.ModelChara.Row}",
