@@ -16,7 +16,7 @@ internal unsafe class CameraService : IDisposable
     private readonly EntityManager _entityManager;
     private readonly GPoseService _gPoseService;
 
-    private delegate nint CameraCollisionDelegate(nint a1, nint a2, nint a3, nint a4, uint a5, float a6, nint a7);
+    private delegate nint CameraCollisionDelegate(BrioCamera* a1, Vector3* a2, Vector3* a3, float a4, nint a5, float a6);
     private readonly Hook<CameraCollisionDelegate> _cameraCollisionHook = null!;
 
     private delegate nint CameraUpdateDelegate(BrioCamera* camera);
@@ -27,7 +27,7 @@ internal unsafe class CameraService : IDisposable
         _entityManager = entityManager;
         _gPoseService = gPoseService;
 
-        var cameraCollisionAddr = "E8 ?? ?? ?? ?? 45 0F 57 FF";
+        var cameraCollisionAddr = "E8 ?? ?? ?? ?? 4C 8D 45 C7 89 83";
         _cameraCollisionHook = hooking.HookFromAddress<CameraCollisionDelegate>(scanner.ScanText(cameraCollisionAddr), CameraCollisionDetour);
         _cameraCollisionHook.Enable();
 
@@ -51,35 +51,42 @@ internal unsafe class CameraService : IDisposable
             {
                 if (cameraEntity.TryGetCapability<CameraCapability>(out var cameraCapability))
                 {
-                    Vector3 currentPos = camera->Camera.CameraBase.SceneCamera.Object.Position;
-                    var newPos = cameraCapability.PositionOffset + currentPos;
-                    camera->Camera.CameraBase.SceneCamera.Object.Position = newPos;
+                    if(camera == cameraCapability.Camera)
+                    {
+                        Vector3 currentPos = camera->Camera.CameraBase.SceneCamera.Object.Position;
+                        var newPos = cameraCapability.PositionOffset + currentPos;
+                        camera->Camera.CameraBase.SceneCamera.Object.Position = newPos;
 
-                    Vector3 currentLookAt = camera->Camera.CameraBase.SceneCamera.LookAtVector;
-                    camera->Camera.CameraBase.SceneCamera.LookAtVector = currentLookAt + (newPos - currentPos);
+                        Vector3 currentLookAt = camera->Camera.CameraBase.SceneCamera.LookAtVector;
+                        camera->Camera.CameraBase.SceneCamera.LookAtVector = currentLookAt + (newPos - currentPos);
+                    }
                 }
             }
         }
         return result;
     }
 
-    private nint CameraCollisionDetour(nint a1, nint a2, nint a3, nint a4, uint a5, float a6, nint a7)
+    private nint CameraCollisionDetour(BrioCamera* camera, Vector3* a2, Vector3* a3, float a4, nint a5, float a6)
     {
-        var result = _cameraCollisionHook.Original(a1, a2, a3, a4, a5, a6, a7);
-
         if (_gPoseService.IsGPosing)
         {
             if (_entityManager.TryGetEntity<CameraEntity>("camera", out var cameraEntity))
             {
                 if (cameraEntity.TryGetCapability<CameraCapability>(out var cameraCapability))
                 {
-                    if (cameraCapability.DisableCollision)
-                        return 0;
+                    if(cameraCapability.DisableCollision)
+                    {
+                        if(camera == cameraCapability.Camera)
+                        {
+                            camera->Collide = new Vector2(camera->Camera.MaxDistance);
+                            return 0;
+                        }
+                    }
                 }
             }
         }
 
-        return result;
+        return _cameraCollisionHook.Original(camera, a2, a3, a4, a5, a6);
     }
 
     public void Dispose()

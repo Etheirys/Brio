@@ -17,4 +17,6 @@ internal struct BrioCamera
     [FieldOffset(0x150)] public Vector2 Pan;
 
     [FieldOffset(0x160)] public float Rotation;
+
+    [FieldOffset(0x208)] public Vector2 Collide;
 }
