@@ -1,4 +1,6 @@
-﻿using Dalamud.Game;
+﻿using Brio.Config;
+using Brio.Game.GPose;
+using Dalamud.Game;
 using Dalamud.Hooking;
 using Dalamud.Plugin.Services;
 using FFXIVClientStructs.FFXIV.Client.System.Framework;
@@ -83,20 +85,58 @@ internal class TimeService : IDisposable
     private delegate void UpdateEorzeaTimeDelegate(IntPtr a1, IntPtr a2);
     private readonly Hook<UpdateEorzeaTimeDelegate> _updateEorzeaTimeHook = null!;
 
-    public TimeService(ISigScanner scanner, IGameInteropProvider hooking)
+    private readonly IClientState _clientState;
+    private readonly GPoseService _gPoseService;
+    private readonly ConfigurationService _configurationService;
+
+    public TimeService(IClientState clientState, GPoseService gPoseService, ConfigurationService configurationService, ISigScanner scanner, IGameInteropProvider hooking)
     {
+        _clientState = clientState;
+        _gPoseService = gPoseService;
+        _configurationService = configurationService;
+
         var etAddress = scanner.ScanText("48 89 5C 24 ?? 57 48 83 EC ?? 48 8B F9 48 8B DA 48 81 C1 ?? ?? ?? ?? E8 ?? ?? ?? ?? 4C");
         _updateEorzeaTimeHook = hooking.HookFromAddress<UpdateEorzeaTimeDelegate>(etAddress, UpdateEorzeaTime);
+
+        _clientState.TerritoryChanged += OnTerritoryChanged;
+        _gPoseService.OnGPoseStateChange += OnGPoseStateChanged;
+        _clientState.Logout += OnLogout;
+    }
+
+    private void OnLogout()
+    {
+        IsTimeFrozen = false;
+    }
+
+    private void OnTerritoryChanged(ushort obj)
+    {
+        IsTimeFrozen = false;
+    }
+
+    private void OnGPoseStateChanged(bool newState)
+    {
+        if(!newState)
+        {
+            if(_configurationService.Configuration.Environment.ResetTimeOnGPoseExit)
+            {
+                IsTimeFrozen = false;
+            }
+        }
+    }
+
+    private void UpdateEorzeaTime(IntPtr a1, IntPtr a2)
+    {
+        // DO NOTHING
+        // UpdateEorzeaTimeHook.Original(a1, a2);
     }
 
     public void Dispose()
     {
-        _updateEorzeaTimeHook?.Dispose();
-    }
+        _clientState.TerritoryChanged -= OnTerritoryChanged;
+        _clientState.Logout -= OnLogout;
+        _gPoseService.OnGPoseStateChange -= OnGPoseStateChanged;
 
-    internal void UpdateEorzeaTime(IntPtr a1, IntPtr a2)
-    {
-        // DO NOTHING
-        // UpdateEorzeaTimeHook.Original(a1, a2);
+        _updateEorzeaTimeHook?.Dispose();
+
     }
 }

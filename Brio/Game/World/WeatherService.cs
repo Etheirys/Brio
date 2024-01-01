@@ -10,6 +10,8 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using Brio.Game.GPose;
+using Brio.Config;
 
 namespace Brio.Game.World;
 
@@ -82,25 +84,42 @@ internal class WeatherService : IDisposable
 
     private readonly IClientState _clientState;
     private readonly GameDataProvider _gameDataProvider;
+    private readonly GPoseService _gPoseService;
+    private readonly ConfigurationService _configurationService;
 
 
-    public WeatherService(IClientState clientState, GameDataProvider gameDataProvider, ISigScanner scanner, IGameInteropProvider hooking)
+    public WeatherService(IClientState clientState, GameDataProvider gameDataProvider, GPoseService gPoseService, ConfigurationService configurationService, ISigScanner scanner, IGameInteropProvider hooking)
     {
         _clientState = clientState;
         _gameDataProvider = gameDataProvider;
+        _gPoseService = gPoseService;
+        _configurationService = configurationService;
 
         var twAddress = scanner.ScanText("48 89 5C 24 ?? 55 56 57 48 83 EC ?? 48 8B F9 48 8D 0D");
         _updateTerritoryWeatherHook = hooking.HookFromAddress<UpdateTerritoryWeatherDelegate>(twAddress, UpdateTerritoryWeatherDetour);
 
-        _clientState.TerritoryChanged += OnTerritoryChanged;
 
         UpdateWeathersForCurrentTerritory();
+
+        _clientState.TerritoryChanged += OnTerritoryChanged;
+        _gPoseService.OnGPoseStateChange += OnGposeStateChanged;
     }
 
     private void OnTerritoryChanged(ushort e)
     {
         UpdateWeathersForCurrentTerritory();
         WeatherOverrideEnabled = false;
+    }
+
+    private void OnGposeStateChanged(bool newState)
+    {
+        if(!newState )
+        {
+            if (_configurationService.Configuration.Environment.ResetWeatherOnGPoseExit)
+            {
+                WeatherOverrideEnabled = false;
+            }
+        }
     }
 
     private unsafe void UpdateWeathersForCurrentTerritory()
@@ -145,6 +164,7 @@ internal class WeatherService : IDisposable
     public void Dispose()
     {
         _clientState.TerritoryChanged -= OnTerritoryChanged;
+        _gPoseService.OnGPoseStateChange -= OnGposeStateChanged;
         _territoryWeatherTable.Clear();
         _updateTerritoryWeatherHook.Dispose();
     }

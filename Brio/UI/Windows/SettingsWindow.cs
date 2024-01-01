@@ -42,7 +42,7 @@ internal class SettingsWindow : Window
                     DrawIPCTab();
                     DrawAppearanceTab();
                     DrawPosingTab();
-
+                    DrawWorldTab();
                 }
             }
         }
@@ -316,6 +316,44 @@ internal class SettingsWindow : Window
             if (ImGui.DragInt("Undo History", ref undoStackSize, 1, 0, 100))
             {
                 _configurationService.Configuration.Posing.UndoStackSize = undoStackSize;
+                _configurationService.ApplyChange();
+            }
+        }
+    }
+
+    private void DrawWorldTab()
+    {
+        using(var tab = ImRaii.TabItem("World"))
+        {
+            if(tab.Success)
+            {
+                DrawEnvironmentSection();
+            }
+        }
+    }
+
+    private void DrawEnvironmentSection()
+    {
+        if(ImGui.CollapsingHeader("Environment", ImGuiTreeNodeFlags.DefaultOpen))
+        {
+            var resetTimeOnGPoseExit = _configurationService.Configuration.Environment.ResetTimeOnGPoseExit;
+            if(ImGui.Checkbox("Reset Time on GPose Exit", ref resetTimeOnGPoseExit))
+            {
+                _configurationService.Configuration.Environment.ResetTimeOnGPoseExit = resetTimeOnGPoseExit;
+                _configurationService.ApplyChange();
+            }
+
+            var resetWeatherOnGPoseExit = _configurationService.Configuration.Environment.ResetWeatherOnGPoseExit;
+            if(ImGui.Checkbox("Reset Weather on GPose Exit", ref resetWeatherOnGPoseExit))
+            {
+                _configurationService.Configuration.Environment.ResetWeatherOnGPoseExit = resetWeatherOnGPoseExit;
+                _configurationService.ApplyChange();
+            }
+
+            var resetWaterOnGPoseExit = _configurationService.Configuration.Environment.ResetWaterOnGPoseExit;
+            if(ImGui.Checkbox("Reset Water on GPose Exit", ref resetWaterOnGPoseExit))
+            {
+                _configurationService.Configuration.Environment.ResetWaterOnGPoseExit = resetWaterOnGPoseExit;
                 _configurationService.ApplyChange();
             }
         }
