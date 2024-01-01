@@ -337,6 +337,7 @@ internal class PosingGraphicalWindow : Window, IDisposable
 
         if (ImGui.Begin("##graphic_pose_gizmo", flags))
         {
+            ImGuizmo.BeginFrame();
             ImGuizmo.SetDrawlist();
             ImGuizmo.SetRect(childStart.X, childStart.Y, gizmoSize.X, gizmoSize.Y);
             ImGuizmo.SetGizmoSizeClipSpace(0.5f);

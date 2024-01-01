@@ -74,11 +74,6 @@ internal class PosingOverlayWindow : Window, IDisposable
 
         var io = ImGui.GetIO();
         ImGui.SetWindowSize(io.DisplaySize);
-        var windowPos = ImGui.GetWindowPos();
-        ImGuizmo.SetRect(windowPos.X, windowPos.Y, io.DisplaySize.X, io.DisplaySize.Y);
-        ImGuizmo.SetOrthographic(false);
-        ImGuizmo.AllowAxisFlip(_configurationService.Configuration.Posing.AllowGizmoAxisFlip);
-        ImGuizmo.SetDrawlist();
 
         DrawContent(posing);
     }
@@ -341,7 +336,7 @@ internal class PosingOverlayWindow : Window, IDisposable
 
     private unsafe void DrawGizmo(PosingCapability posing, OverlayUIState uiState)
     {
-        if (!uiState.DrawGizmo)
+        if(!uiState.DrawGizmo)
             return;
 
         if (posing.Selected.Value is None)
@@ -404,6 +399,12 @@ internal class PosingOverlayWindow : Window, IDisposable
         var lastObserved = _trackingTransform ?? currentTransform;
         var matrix = lastObserved.ToMatrix();
 
+        ImGuizmo.BeginFrame();
+        var io = ImGui.GetIO();
+        ImGuizmo.SetRect(0, 0, io.DisplaySize.X, io.DisplaySize.Y);
+        ImGuizmo.SetOrthographic(false);
+        ImGuizmo.AllowAxisFlip(_configurationService.Configuration.Posing.AllowGizmoAxisFlip);
+        ImGuizmo.SetDrawlist();
         ImGuizmo.Enable(uiState.GizmoEnabled);
 
         Transform? newTransform = null;
