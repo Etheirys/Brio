@@ -251,6 +251,7 @@ internal class PosingOverlayWindow : Window, IDisposable
         {
             if (popup.Success)
             {
+                ImGui.SetWindowFocus();
                 int selectedIndex = -1;
                 foreach (var click in _selectingFrom)
                 {
