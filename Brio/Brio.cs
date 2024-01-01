@@ -75,7 +75,7 @@ public class Brio : IDalamudPlugin
                 _services.Dispose();
                 throw;
             }
-        }, delayTicks: 2); // TODO: Why do we need to wait 2 frames for some users?
+        }, delayTicks: 30); // TODO: Why do we need to wait several frames for some users?
     }
 
     private IServiceCollection SetupServices(DalamudServices dalamudServices)
