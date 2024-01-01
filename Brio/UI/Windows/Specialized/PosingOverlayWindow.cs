@@ -36,7 +36,7 @@ internal class PosingOverlayWindow : Window, IDisposable
     private const int _gizmoId = 142857;
     private const string _boneSelectPopupName = "brio_bone_select_popup";
 
-    public PosingOverlayWindow(EntityManager entityManager, CameraService cameraService, ConfigurationService configService, PosingService posingService, GPoseService gPoseService) : base("##brio_posing_overlay_window", ImGuiWindowFlags.NoInputs | ImGuiWindowFlags.NoBackground | ImGuiWindowFlags.NoDecoration)
+    public PosingOverlayWindow(EntityManager entityManager, CameraService cameraService, ConfigurationService configService, PosingService posingService, GPoseService gPoseService) : base("##brio_posing_overlay_window", ImGuiWindowFlags.NoInputs | ImGuiWindowFlags.NoBackground | ImGuiWindowFlags.NoDecoration, true)
     {
         Namespace = "brio_posing_overlay_namespace";
 
@@ -53,8 +53,10 @@ internal class PosingOverlayWindow : Window, IDisposable
     public override void PreDraw()
     {
         base.PreDraw();
-        ImGuiHelpers.ForceNextWindowMainViewport();
-        ImGuiHelpers.SetNextWindowPosRelativeMainViewport(new Vector2(0, 0));
+        ImGuiHelpers.SetNextWindowPosRelativeMainViewport(new Vector2(0, 0), ImGuiCond.Always);
+        SizeCondition = ImGuiCond.Always;
+        var io = ImGui.GetIO();
+        Size = io.DisplaySize;
 
         Flags = ImGuiWindowFlags.NoInputs | ImGuiWindowFlags.NoBackground | ImGuiWindowFlags.NoDecoration;
 
@@ -66,14 +68,10 @@ internal class PosingOverlayWindow : Window, IDisposable
 
     public override void Draw()
     {
-
         if (!_entityManager.TryGetCapabilityFromSelectedEntity<PosingCapability>(out var posing))
         {
             return;
         }
-
-        var io = ImGui.GetIO();
-        ImGui.SetWindowSize(io.DisplaySize);
 
         DrawContent(posing);
     }
