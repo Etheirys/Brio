@@ -26,7 +26,7 @@ public class Brio : IDalamudPlugin
 {
     public const string Name = "Brio";
 
-    private readonly ServiceProvider _services;
+    private ServiceProvider? _services = null;
 
     public static IPluginLog Log { get; private set; } = null!;
 
@@ -36,18 +36,19 @@ public class Brio : IDalamudPlugin
         var dalamudServices = new DalamudServices(pluginInterface);
         Log = dalamudServices.Log;
 
-        var stopwatch = new Stopwatch();
-        stopwatch.Start();
-        Log.Info($"Starting {Name}...");
-
-        // Setup plugin services
-        var serviceCollection = SetupServices(dalamudServices);
-        _services = serviceCollection.BuildServiceProvider(new ServiceProviderOptions { ValidateOnBuild = true });
-
         dalamudServices.Framework.RunOnTick(() =>
         {
+            var stopwatch = new Stopwatch();
+            stopwatch.Start();
+            Log.Info($"Starting {Name}...");
+
             try
             {
+                // Setup plugin services
+                var serviceCollection = SetupServices(dalamudServices);
+
+                _services = serviceCollection.BuildServiceProvider(new ServiceProviderOptions { ValidateOnBuild = true });
+
                 // Initialize the singletons
                 foreach (var service in serviceCollection)
                 {
@@ -72,7 +73,7 @@ public class Brio : IDalamudPlugin
             catch (Exception e)
             {
                 Log.Error(e, $"Failed to start {Name} in {stopwatch.ElapsedMilliseconds}ms");
-                _services.Dispose();
+                _services?.Dispose();
                 throw;
             }
         }, delayTicks: 30); // TODO: Why do we need to wait several frames for some users?
@@ -150,6 +151,6 @@ public class Brio : IDalamudPlugin
 
     public void Dispose()
     {
-        _services.Dispose();
+        _services?.Dispose();
     }
 }
