@@ -104,7 +104,7 @@ internal class PosingOverlayToolbarWindow : Window
                 _posingService.CoordinateMode = _posingService.CoordinateMode == PosingCoordinateMode.Local ? PosingCoordinateMode.World : PosingCoordinateMode.Local;
         }
         if (ImGui.IsItemHovered())
-            ImGui.SetTooltip(_posingService.CoordinateMode == PosingCoordinateMode.Local ? "Switch to Local" : "Switch to World");
+            ImGui.SetTooltip(_posingService.CoordinateMode == PosingCoordinateMode.Local ? "Switch to World" : "Switch to Local");
 
         ImGui.SameLine();
 
