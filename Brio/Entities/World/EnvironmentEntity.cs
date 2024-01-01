@@ -16,5 +16,6 @@ internal class EnvironmentEntity(IServiceProvider provider) : Entity("environmen
         AddCapability(ActivatorUtilities.CreateInstance<TimeCapability>(_serviceProvider, this));
         AddCapability(ActivatorUtilities.CreateInstance<WeatherCapability>(_serviceProvider, this));
         AddCapability(ActivatorUtilities.CreateInstance<FestivalCapability>(_serviceProvider, this));
+        AddCapability(ActivatorUtilities.CreateInstance<WorldRenderingCapability>(_serviceProvider, this));
     }
 }
