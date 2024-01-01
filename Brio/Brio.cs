@@ -106,6 +106,7 @@ public class Brio : IDalamudPlugin
         serviceCollection.AddSingleton<WelcomeService>();
 
         // IPC
+        serviceCollection.AddSingleton<BrioIPCService>();
         serviceCollection.AddSingleton<PenumbraService>();
         serviceCollection.AddSingleton<GlamourerService>();
 
