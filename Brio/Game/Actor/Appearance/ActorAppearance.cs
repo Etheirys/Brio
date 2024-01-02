@@ -81,6 +81,7 @@ internal struct ActorAppearance()
             actorAppearance.Customize.Gender = (Genders)customize.Gender;
             actorAppearance.Customize.BodyType = (BodyTypes)customize.BodyType;
             actorAppearance.Customize.Tribe = (Tribes)customize.Tribe.Row;
+            actorAppearance.Customize.Height = customize.Height;
             actorAppearance.Customize.FaceType = customize.Face;
             actorAppearance.Customize.HairStyle = customize.HairStyle;
             actorAppearance.Customize.HasHighlights = customize.HairHighlight;
@@ -126,6 +127,7 @@ internal struct ActorAppearance()
         actorAppearance.Customize.Gender = (Genders)npc.Gender;
         actorAppearance.Customize.BodyType = (BodyTypes)npc.BodyType;
         actorAppearance.Customize.Tribe = (Tribes)npc.Tribe.Row;
+        actorAppearance.Customize.Height = npc.Height;
         actorAppearance.Customize.FaceType = npc.Face;
         actorAppearance.Customize.HairStyle = npc.HairStyle;
         actorAppearance.Customize.HasHighlights = npc.HairHighlight;
