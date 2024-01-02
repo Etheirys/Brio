@@ -214,8 +214,8 @@ internal class PosingOverlayWindow : Window, IDisposable
 
         if (hovered.Any() && !clicked.Any())
         {
-            ImGui.SetNextWindowPos(ImGui.GetMousePos() + new Vector2(2, 2), ImGuiCond.Always);
-            if (ImGui.Begin("gizmo_bone_select_preview", ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoDecoration))
+            ImGui.SetNextWindowPos(ImGui.GetMousePos() + new Vector2(1, 0), ImGuiCond.Always);
+            if (ImGui.Begin("gizmo_bone_select_preview", ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoDecoration | ImGuiWindowFlags.NoInputs | ImGuiWindowFlags.NoMove))
             {
                 foreach (var hover in hovered)
                 {
