@@ -50,6 +50,10 @@ internal static class IntExtensions
 
     public static string ToBrioName(this int i)
     {
-        return $"Brio {i.ToWords("'")}";
+        string words = ToWords(i);
+        if(words.Contains(' '))
+            return words;
+
+        return "Brio " + words;
     }
 }
