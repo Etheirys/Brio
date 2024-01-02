@@ -39,7 +39,7 @@ internal class PosingCapability : ActorCharacterCapability
         }
     }
 
-    public bool HasUndoStack => _undoStack.Any();
+    public bool HasUndoStack => _undoStack.Count > 1;
     public bool HasRedoStack => _redoStack.Any();
 
     private Stack<PoseStack> _undoStack = [];
@@ -125,9 +125,12 @@ internal class PosingCapability : ActorCharacterCapability
             return;
         }
 
+        if(!_undoStack.Any())
+            _undoStack.Push(new PoseStack(new PoseInfo(), ModelPosing.OriginalTransform));
+
         _redoStack.Clear();
         _undoStack.Push(new PoseStack(SkeletonPosing.PoseInfo.Clone(), ModelPosing.Transform));
-        _undoStack = _undoStack.Trim(undoStackSize);
+        _undoStack = _undoStack.Trim(undoStackSize + 1);
     }
 
     public void Redo()
@@ -149,10 +152,6 @@ internal class PosingCapability : ActorCharacterCapability
         {
             SkeletonPosing.PoseInfo = applicable.Info.Clone();
             ModelPosing.Transform = applicable.ModelTransform;
-        }
-        else
-        {
-            Reset(false);
         }
     }
 

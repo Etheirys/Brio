@@ -10,6 +10,6 @@ internal static class CollectionExtensions
         if (stack.Count <= trimCount)
             return stack;
 
-        return new(stack.ToArray().Take(trimCount));
+        return new(stack.ToArray().Take(trimCount).Reverse());
     }
 }

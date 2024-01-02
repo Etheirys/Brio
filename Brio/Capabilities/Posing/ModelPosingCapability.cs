@@ -27,6 +27,17 @@ internal class ModelPosingCapability : ActorCharacterCapability
         }
     }
 
+    public unsafe Transform OriginalTransform
+    {
+        get
+        {
+            if(_originalTransform.HasValue)
+                return _originalTransform.Value;
+
+            return Transform;
+        }
+    }
+
     public Transform? OverrideTransform => _transformOverride;
 
 
