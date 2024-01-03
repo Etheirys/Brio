@@ -173,7 +173,7 @@ internal class PosingCapability : ActorCharacterCapability
         {
             var all = new PoseImporterOptions(new BoneFilter(_posingService), TransformComponents.All, true);
             var poseFile = await _framework.RunOnTick(() => GeneratePoseFile(), delayTicks: 2);
-            SkeletonPosing.PoseInfo.Clear();
+            Reset(false);
             ImportPose(poseFile, options: all, generateSnapshot: true);
         }
     }
