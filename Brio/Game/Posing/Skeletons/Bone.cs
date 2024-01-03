@@ -59,6 +59,8 @@ internal class Bone(int index, Skeleton skeleton, PartialSkeleton partial)
         }
     }
 
+    public unsafe bool EligibleForIK => Parent != null && !Parent.IsHidden;
+
     public Bone? GetFirstVisibleParent()
     {
         if (Parent == null)
@@ -73,5 +75,24 @@ internal class Bone(int index, Skeleton skeleton, PartialSkeleton partial)
     public override int GetHashCode()
     {
         return HashCode.Combine(Name, PartialId, Index);
+    }
+
+    public List<Bone> GetBonesToDepth(int depth, bool stopAtHidden, int? lastPartial = null, List<Bone>? bones = null)
+    {
+        bones ??= [];
+        lastPartial ??= PartialId;
+
+        bones.Add(this);
+
+        if (depth == 0 || Parent == null)
+            return bones;
+
+        if(stopAtHidden && Parent.IsHidden)
+            return bones;
+
+        if(Parent.PartialId != lastPartial)
+            return bones;
+
+        return Parent.GetBonesToDepth(depth - 1, stopAtHidden, lastPartial, bones);
     }
 }

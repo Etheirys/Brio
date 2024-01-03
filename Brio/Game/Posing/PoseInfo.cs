@@ -1,5 +1,6 @@
 ﻿using Brio.Core;
 using Brio.Game.Posing.Skeletons;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -11,7 +12,7 @@ internal class PoseInfo
 
     public BonePoseInfo GetPoseInfo(BonePoseInfoId id)
     {
-        if (_poses.TryGetValue(id, out var pose))
+        if(_poses.TryGetValue(id, out var pose))
             return pose;
 
         return _poses[id] = new BonePoseInfo(id, this);
@@ -19,17 +20,36 @@ internal class PoseInfo
 
     public bool IsOveridden => _poses.Any(x => x.Value.HasStacks);
 
+    public bool HasIKStacks => _poses.Any(x => x.Value.Stacks.Any(s => s.IKInfo.Enabled));
+
+    public Dictionary<string, int> StackCounts
+    {
+        get
+        {
+            Dictionary<string, int> counts = [];
+            foreach(var pose in _poses)
+            {
+                if(pose.Value.Stacks.Count > 0)
+                    counts[pose.Key.BoneName] = pose.Value.Stacks.Count;
+            }
+            return counts;
+        }
+    }
+
     public unsafe BonePoseInfo GetPoseInfo(Bone bone, PoseInfoSlot slot = PoseInfoSlot.Character) => GetPoseInfo(new BonePoseInfoId(bone.Name, bone.PartialId, slot));
 
     public void Clear()
     {
-        _poses.Clear();
+        foreach(var pose in _poses)
+        {
+            pose.Value.ClearStacks();
+        }
     }
 
     public PoseInfo Clone()
     {
         var clone = new PoseInfo();
-        foreach (var pose in _poses)
+        foreach(var pose in _poses)
         {
             clone._poses.Add(pose.Key, pose.Value.Clone(clone));
         }
@@ -48,6 +68,8 @@ internal class BonePoseInfo(BonePoseInfoId id, PoseInfo parent)
 
     public TransformComponents DefaultPropagation { get; set; } = TransformComponents.Position | TransformComponents.Rotation;
 
+    public BoneIKInfo DefaultIK { get; set; } = BoneIKInfo.Default;
+
     public IReadOnlyList<BonePoseTransformInfo> Stacks => _stacks;
 
     public PoseMirrorMode MirrorMode { get; set; } = PoseMirrorMode.None;
@@ -56,30 +78,36 @@ internal class BonePoseInfo(BonePoseInfoId id, PoseInfo parent)
 
     public bool HasStacks => _stacks.Any();
 
-    public void Apply(Transform transform, Transform? original = null, TransformComponents? propagation = null, TransformComponents applyTo = TransformComponents.All, PoseMirrorMode? mirrorMode = null, bool forceNewStack = false)
+    public void Apply(Transform transform, Transform? original = null, TransformComponents? propagation = null, TransformComponents applyTo = TransformComponents.All, BoneIKInfo? ikInfo = null, PoseMirrorMode? mirrorMode = null, bool forceNewStack = false)
     {
         var prop = propagation ?? DefaultPropagation;
+        ikInfo ??= DefaultIK;
         var calc = original.HasValue ? transform.CalculateDiff(original.Value) : transform;
-        var transformIndex = GetTransformIndex(prop, forceNewStack);
+        var transformIndex = GetTransformIndex(prop, ikInfo.Value, forceNewStack);
         mirrorMode ??= MirrorMode;
 
         var existing = _stacks[transformIndex].Transform;
 
         calc.Filter(applyTo);
-        if (Transform.Identity.IsApproximatelySame(calc + existing))
+        if(Transform.Identity.IsApproximatelySame(calc + existing))
             return;
 
-        if (mirrorMode == PoseMirrorMode.Copy)
+        if(mirrorMode == PoseMirrorMode.Copy)
         {
-            GetMirrorBone()?.Apply(calc, null, prop, applyTo, PoseMirrorMode.None, forceNewStack);
+            GetMirrorBone()?.Apply(calc, null, prop, applyTo, ikInfo.Value, PoseMirrorMode.None, forceNewStack);
         }
-        else if (mirrorMode == PoseMirrorMode.Mirror)
+        else if(mirrorMode == PoseMirrorMode.Mirror)
         {
             var inverted = calc.Inverted();
-            GetMirrorBone()?.Apply(inverted, null, prop, applyTo, PoseMirrorMode.None, forceNewStack);
+            GetMirrorBone()?.Apply(inverted, null, prop, applyTo, ikInfo.Value, PoseMirrorMode.None, forceNewStack);
         }
 
-        _stacks[transformIndex] = new(prop, _stacks[transformIndex].Transform + calc);
+        _stacks[transformIndex] = new(prop, ikInfo.Value, _stacks[transformIndex].Transform + calc);
+    }
+
+    public void ClearStacks()
+    {
+        _stacks.Clear();
     }
 
     public BonePoseInfo Clone(PoseInfo parent)
@@ -98,28 +126,28 @@ internal class BonePoseInfo(BonePoseInfoId id, PoseInfo parent)
     public BonePoseInfo? GetMirrorBone()
     {
         var mirror = Id.GetMirrorBone();
-        if (mirror.HasValue)
+        if(mirror.HasValue)
             return Parent.GetPoseInfo(mirror.Value);
 
         return null;
     }
 
-    private int GetTransformIndex(TransformComponents components, bool forceNewStack)
+    private int GetTransformIndex(TransformComponents components, BoneIKInfo ikInfo, bool forceNewStack)
     {
-        if (_stacks.Count == 0)
+        if(_stacks.Count == 0)
         {
-            _stacks.Add(new(components, Transform.Identity));
+            _stacks.Add(new(components, ikInfo, Transform.Identity));
             return 0;
         }
 
-        if (!forceNewStack)
+        if(!forceNewStack)
         {
             var entry = _stacks[^1];
-            if (entry.PropagateComponents == components)
+            if(entry.PropagateComponents == components && entry.IKInfo.Equals(ikInfo))
                 return _stacks.Count - 1;
         }
 
-        _stacks.Add(new(components, Transform.Identity));
+        _stacks.Add(new(components, ikInfo, Transform.Identity));
         return _stacks.Count - 1;
     }
 }
@@ -146,13 +174,13 @@ internal record struct BonePoseInfoId(string BoneName, int Partial, PoseInfoSlot
 
     public readonly BonePoseInfoId? GetMirrorBone()
     {
-        if (BoneName.EndsWith("_r"))
+        if(BoneName.EndsWith("_r"))
         {
             var mirrorName = BoneName.Substring(0, BoneName.Length - 2) + "_l";
             return new BonePoseInfoId(mirrorName, Partial, Slot);
         }
 
-        if (BoneName.EndsWith("_l"))
+        if(BoneName.EndsWith("_l"))
         {
             var mirrorName = BoneName.Substring(0, BoneName.Length - 2) + "_r";
             return new BonePoseInfoId(mirrorName, Partial, Slot);
@@ -161,4 +189,25 @@ internal record struct BonePoseInfoId(string BoneName, int Partial, PoseInfoSlot
         return null;
     }
 }
-internal record struct BonePoseTransformInfo(TransformComponents PropagateComponents, Transform Transform);
+internal record struct BonePoseTransformInfo(TransformComponents PropagateComponents, BoneIKInfo IKInfo, Transform Transform);
+
+internal struct BoneIKInfo
+{
+    public bool Enabled = false;
+    public int Depth = 3;
+    public int Iterations = 8;
+    public bool EnforceConstraints = true;
+
+    public static readonly BoneIKInfo Default = new();
+
+
+    public BoneIKInfo()
+    {
+
+    }
+
+    public override int GetHashCode()
+    {
+        return HashCode.Combine(Enabled, Depth, Iterations);
+    }
+}
