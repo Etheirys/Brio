@@ -337,7 +337,7 @@ internal class PosingOverlayToolbarWindow : Window
                 if(posing.Selected.Value is BonePoseInfoId id)
                 {
                     var info = posing.SkeletonPosing.GetBonePose(id);
-                    BoneIKEditor.Draw(info);
+                    BoneIKEditor.Draw(info, posing);
                 }
             }
         }

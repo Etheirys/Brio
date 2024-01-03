@@ -29,7 +29,7 @@ internal class Skeleton : IDisposable
         get
         {
             var result = new List<Skeleton>();
-            foreach (var bone in Bones)
+            foreach(var bone in Bones)
                 result.AddRange(bone.Attachments);
 
             return result;
@@ -46,20 +46,20 @@ internal class Skeleton : IDisposable
         GameSkeleton = gameSkeleton;
 
         var partialCount = gameSkeleton->PartialSkeletonCount;
-        for (int partialIdx = 0; partialIdx < partialCount; partialIdx++)
+        for(int partialIdx = 0; partialIdx < partialCount; partialIdx++)
         {
             var partial = &gameSkeleton->PartialSkeletons[partialIdx];
             var newPartial = new PartialSkeleton(this, partialIdx);
             Partials.Add(newPartial);
 
-            for (int poseIdx = 0; poseIdx < MaxPoses; poseIdx++)
+            for(int poseIdx = 0; poseIdx < MaxPoses; poseIdx++)
             {
                 var pose = partial->GetHavokPose(poseIdx);
-                if (pose != null)
+                if(pose != null)
                 {
                     newPartial.Poses.Add((nint)pose);
                     var boneCount = pose->Skeleton->Bones.Length;
-                    for (int boneIdx = 0; boneIdx < boneCount; boneIdx++)
+                    for(int boneIdx = 0; boneIdx < boneCount; boneIdx++)
                     {
 
                         var rawBone = pose->Skeleton->Bones[boneIdx];
@@ -69,12 +69,12 @@ internal class Skeleton : IDisposable
                         var bone = newPartial.GetOrCreateBone(boneIdx);
                         bone.Name = boneName;
 
-                        if (!Bones.Contains(bone))
+                        if(!Bones.Contains(bone))
                             Bones.Add(bone);
 
-                        if (parentIndex < 0)
+                        if(parentIndex < 0)
                         {
-                            if (partialIdx == 0)
+                            if(partialIdx == 0)
                             {
                                 RootPartial = newPartial;
                                 RootBone = bone;
@@ -88,7 +88,7 @@ internal class Skeleton : IDisposable
                         {
                             var parentBone = newPartial.GetOrCreateBone(parentIndex);
                             bone.Parent = parentBone;
-                            if (parentBone.Children.Contains(bone) == false)
+                            if(parentBone.Children.Contains(bone) == false)
                                 parentBone.Children.Add(bone);
                         }
                     }
@@ -96,9 +96,9 @@ internal class Skeleton : IDisposable
 
             }
 
-            if (partialIdx != 0)
+            if(partialIdx != 0)
             {
-                if (partial->ConnectedBoneIndex >= 0 && partial->ConnectedParentBoneIndex >= 0)
+                if(partial->ConnectedBoneIndex >= 0 && partial->ConnectedParentBoneIndex >= 0)
                 {
                     var parent = Partials[0].GetOrCreateBone(partial->ConnectedParentBoneIndex);
                     var child = newPartial.GetOrCreateBone(partial->ConnectedBoneIndex);
@@ -117,7 +117,7 @@ internal class Skeleton : IDisposable
 
     public unsafe static Skeleton? Create(GameSkeleton* gameSkeleton)
     {
-        if (gameSkeleton == null)
+        if(gameSkeleton == null)
             return null;
 
         return new Skeleton(gameSkeleton);
@@ -125,29 +125,34 @@ internal class Skeleton : IDisposable
 
     public unsafe static Skeleton? Create(BrioCharacterBase* charaBase)
     {
-        if (charaBase == null)
+        if(charaBase == null)
             return null;
 
-        if (charaBase->CharacterBase.Skeleton == null)
+        if(charaBase->CharacterBase.Skeleton == null)
             return null;
 
         return new Skeleton(charaBase->CharacterBase.Skeleton);
     }
 
-    public unsafe void UpdateCachedTransforms()
+    public unsafe void UpdateCachedTransforms(CacheTypes cacheTypes = CacheTypes.All)
     {
-        foreach (var partial in Partials)
+        foreach(var partial in Partials)
         {
-            if (partial.Poses.Count == 0)
+            if(partial.Poses.Count == 0)
                 continue;
 
             hkaPose* pose = (hkaPose*)partial.Poses[0];
             var boneCount = pose->Skeleton->Bones.Length;
-            for (int boneIdx = 0; boneIdx < boneCount; boneIdx++)
+            for(int boneIdx = 0; boneIdx < boneCount; boneIdx++)
             {
                 var bone = partial.Bones[boneIdx];
                 Transform pos = pose->AccessBoneModelSpace(boneIdx, PropagateOrNot.DontPropagate);
-                bone.LastTransform = pos;
+
+                if(cacheTypes.HasFlag(CacheTypes.LastRawTransform))
+                    bone.LastRawTransform = pos;
+
+                if(cacheTypes.HasFlag(CacheTypes.LastTransform))
+                    bone.LastTransform = pos;
             }
         }
     }
@@ -155,7 +160,7 @@ internal class Skeleton : IDisposable
     public void ClearAttachments()
     {
         AttachedTo = null;
-        foreach (var bone in Bones)
+        foreach(var bone in Bones)
         {
             bone.Attachments.Clear();
         }
@@ -163,10 +168,10 @@ internal class Skeleton : IDisposable
 
     public Bone? GetFirstVisibleBone(string name)
     {
-        foreach (var partial in Partials)
+        foreach(var partial in Partials)
         {
             var bone = partial.GetBone(name);
-            if (bone != null && !bone.IsHidden)
+            if(bone != null && !bone.IsHidden)
                 return bone;
         }
         return null;
@@ -176,6 +181,15 @@ internal class Skeleton : IDisposable
     {
         IsValid = false;
     }
+}
+
+[Flags]
+internal enum CacheTypes
+{
+    None = 0,
+    LastTransform = 1 << 0,
+    LastRawTransform = 1 << 1,
+    All = LastTransform | LastRawTransform,
 }
 
 internal enum SkeletonType

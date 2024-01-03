@@ -72,7 +72,7 @@ namespace Brio.Capabilities.Posing
                     if (bone.IsPartialRoot && !bone.IsSkeletonRoot)
                         continue;
 
-                    poseFile.Bones[bone.Name] = bone.LastTransform;
+                    poseFile.Bones[bone.Name] = bone.LastRawTransform;
                 }
             }
 
@@ -84,7 +84,7 @@ namespace Brio.Capabilities.Posing
                     if (bone.IsPartialRoot && !bone.IsSkeletonRoot)
                         continue;
 
-                    poseFile.MainHand[bone.Name] = bone.LastTransform;
+                    poseFile.MainHand[bone.Name] = bone.LastRawTransform;
                 }
             }
 
@@ -96,7 +96,7 @@ namespace Brio.Capabilities.Posing
                     if (bone.IsPartialRoot && !bone.IsSkeletonRoot)
                         continue;
 
-                    poseFile.OffHand[bone.Name] = bone.LastTransform;
+                    poseFile.OffHand[bone.Name] = bone.LastRawTransform;
                 }
             }
         }

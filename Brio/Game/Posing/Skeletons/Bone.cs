@@ -39,6 +39,7 @@ internal class Bone(int index, Skeleton skeleton, PartialSkeleton partial)
     public List<Skeleton> Attachments = [];
 
     public Transform LastTransform = Transform.Identity;
+    public Transform LastRawTransform = Transform.Identity;
 
     public unsafe bool IsHidden
     {

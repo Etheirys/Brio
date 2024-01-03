@@ -112,6 +112,7 @@ internal unsafe class SkeletonService : IDisposable
 
                     var modelSpace = pose->AccessBoneModelSpace(boneIdx, PropagateOrNot.DontPropagate);
                     bone.LastTransform = modelSpace;
+                    bone.LastRawTransform = modelSpace;
 
                     // Transitive actions
                     posingCapability.ExecuteTransitiveActions(bone, bonePoseInfo);
@@ -123,8 +124,6 @@ internal unsafe class SkeletonService : IDisposable
                         var info = bonePoseInfo.Stacks[i];
                         ApplySnapshot(pose, bone, info);
                     }
-
-
                 }
             }
         }
@@ -254,9 +253,9 @@ internal unsafe class SkeletonService : IDisposable
         foreach(var skeleton in _skeletonsToUpdate)
         {
             // We take one final view now the engine is done touching skeletons.
-            // Notably, the tail size is updated during the render rather than the physics update (or before).
+            // Notably, the tail size and breast size are updated during the render rather than the physics update (or before).
             // It's too late to manipulate what ends up in the game scene at this point.
-            skeleton.UpdateCachedTransforms();
+            skeleton.UpdateCachedTransforms(CacheTypes.LastTransform);
         }
 
         EndPosingInverval();

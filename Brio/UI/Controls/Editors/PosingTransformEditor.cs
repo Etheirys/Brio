@@ -119,7 +119,7 @@ internal class PosingTransformEditor
         {
             if(popup.Success && bonePose != null)
             {
-                BoneIKEditor.Draw(bonePose);
+                BoneIKEditor.Draw(bonePose, posingCapability);
             }
         }
 

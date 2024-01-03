@@ -41,6 +41,7 @@ internal class PosingCapability : ActorCharacterCapability
 
     public bool HasUndoStack => _undoStack.Count > 1;
     public bool HasRedoStack => _redoStack.Any();
+    public bool HasIKApplied => SkeletonPosing.PoseInfo.HasIKStacks;
 
     private Stack<PoseStack> _undoStack = [];
     private Stack<PoseStack> _redoStack = [];
@@ -115,7 +116,7 @@ internal class PosingCapability : ActorCharacterCapability
         ResourceProvider.Instance.SaveFileDocument(path, poseFile);
     }
 
-    public async void Snapshot()
+    public void Snapshot()
     {
         var undoStackSize = _configurationService.Configuration.Posing.UndoStackSize;
         if (undoStackSize <= 0)
@@ -125,14 +126,7 @@ internal class PosingCapability : ActorCharacterCapability
             return;
         }
 
-        //if(SkeletonPosing.PoseInfo.HasIKStacks)
-        //{
-        //    var all = new PoseImporterOptions(new BoneFilter(_posingService), TransformComponents.All, true);
-        //    var poseFile = await _framework.RunOnTick(() => GeneratePoseFile(), delayTicks: 2);
-        //    SkeletonPosing.PoseInfo.Clear();
-        //    ImportPose(poseFile, options: all, generateSnapshot: true);
-        //    return;
-        //}
+        
 
         if(!_undoStack.Any())
             _undoStack.Push(new PoseStack(new PoseInfo(), ModelPosing.OriginalTransform));
@@ -171,6 +165,17 @@ internal class PosingCapability : ActorCharacterCapability
 
         if (generateSnapshot)
             Snapshot();
+    }
+
+    public async void SnapshotIK()
+    {
+        if(SkeletonPosing.PoseInfo.HasIKStacks)
+        {
+            var all = new PoseImporterOptions(new BoneFilter(_posingService), TransformComponents.All, true);
+            var poseFile = await _framework.RunOnTick(() => GeneratePoseFile(), delayTicks: 2);
+            SkeletonPosing.PoseInfo.Clear();
+            ImportPose(poseFile, options: all, generateSnapshot: true);
+        }
     }
 
     private PoseFile GeneratePoseFile()
