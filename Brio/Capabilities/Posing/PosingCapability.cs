@@ -125,17 +125,14 @@ internal class PosingCapability : ActorCharacterCapability
             return;
         }
 
-        if(SkeletonPosing.PoseInfo.HasIKStacks)
-        {
-            var filter = new BoneFilter(_posingService);
-            filter.DisableCategory("breasts");
-            filter.DisableCategory("tail");
-            var all = new PoseImporterOptions(filter, TransformComponents.All, true);
-            var poseFile = await _framework.RunOnTick(() => GeneratePoseFile(), delayTicks: 2);
-            SkeletonPosing.PoseInfo.Clear();
-            ImportPose(poseFile, options: all, generateSnapshot: true);
-            return;
-        }
+        //if(SkeletonPosing.PoseInfo.HasIKStacks)
+        //{
+        //    var all = new PoseImporterOptions(new BoneFilter(_posingService), TransformComponents.All, true);
+        //    var poseFile = await _framework.RunOnTick(() => GeneratePoseFile(), delayTicks: 2);
+        //    SkeletonPosing.PoseInfo.Clear();
+        //    ImportPose(poseFile, options: all, generateSnapshot: true);
+        //    return;
+        //}
 
         if(!_undoStack.Any())
             _undoStack.Push(new PoseStack(new PoseInfo(), ModelPosing.OriginalTransform));

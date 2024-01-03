@@ -10,6 +10,7 @@
         "j_kosi",
         "j_kubi",
         "j_sebo_",
+        "j_mune_",
         "j_sako_",
         "j_ude_"
       ]
@@ -29,12 +30,6 @@
         "j_ex_h",
         "j_kami_",
         "j_ex_met_va"
-      ]
-    },
-    "breasts": {
-      "Type": "Filter",
-      "Bones": [
-        "j_mune_"
       ]
     },
     "legs": {
