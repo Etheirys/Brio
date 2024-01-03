@@ -1,6 +1,8 @@
 ﻿using Brio.Capabilities.Posing;
 using Brio.Core;
 using Brio.Game.Posing;
+using Brio.UI.Controls.Stateless;
+using Dalamud.Interface;
 using Dalamud.Interface.Utility.Raii;
 using ImGuiNET;
 using System.Numerics;
@@ -64,6 +66,10 @@ internal class PosingTransformEditor
             text = bone.FriendlyDescriptor;
         ImGui.Text(text);
 
+        ImGui.SameLine();
+        if(ImBrio.FontIconButtonRight("ik", FontAwesomeIcon.Adjust, 1, "Inverse Kinematics", bone?.EligibleForIK == true))
+            ImGui.OpenPopup("transform_ik_popup");
+
         didChange |= ImGui.DragFloat3("###position", ref realTransform.Position, 0.001f);
         anyActive |= ImGui.IsItemActive();
         if(ImGui.IsItemHovered())
@@ -109,6 +115,13 @@ internal class PosingTransformEditor
         if(width.HasValue)
             ImGui.PopItemWidth();
 
+        using(var popup = ImRaii.Popup("transform_ik_popup"))
+        {
+            if(popup.Success && bonePose != null)
+            {
+                BoneIKEditor.Draw(bonePose);
+            }
+        }
 
         realTransform.Rotation = realEuler.ToQuaternion();
         var toApply = before + realTransform.CalculateDiff(beforeMods);

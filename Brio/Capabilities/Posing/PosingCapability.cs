@@ -115,13 +115,22 @@ internal class PosingCapability : ActorCharacterCapability
         ResourceProvider.Instance.SaveFileDocument(path, poseFile);
     }
 
-    public void Snapshot()
+    public async void Snapshot()
     {
         var undoStackSize = _configurationService.Configuration.Posing.UndoStackSize;
         if (undoStackSize <= 0)
         {
             _undoStack.Clear();
             _redoStack.Clear();
+            return;
+        }
+
+        if(SkeletonPosing.PoseInfo.HasIKStacks)
+        {
+            var all = new PoseImporterOptions(new BoneFilter(_posingService), TransformComponents.All, true);
+            var poseFile = await _framework.RunOnTick(() => GeneratePoseFile());
+            SkeletonPosing.PoseInfo.Clear();
+            ImportPose(poseFile, options: all, generateSnapshot: true);
             return;
         }
 

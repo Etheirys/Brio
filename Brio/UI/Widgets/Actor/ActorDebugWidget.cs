@@ -47,7 +47,22 @@ internal class ActorDebugWidget(ActorDebugCapability capability) : Widget<ActorD
                         }
                     }
                 }
+
+                using(var infoTab = ImRaii.TabItem("Skeleton"))
+                {
+                    if(infoTab.Success)
+                    {
+                        if(ImGui.CollapsingHeader("Stacks", ImGuiTreeNodeFlags.DefaultOpen))
+                        {
+                            var stacks = Capability.SkeletonStacks;
+                            foreach(var stack in stacks)
+                            {
+                                ImGui.Text($"{stack.Key}: {stack.Value}");
+                            }
+                        }
+                    }
+                }
+                    }
+                }
             }
-        }
-    }
 }

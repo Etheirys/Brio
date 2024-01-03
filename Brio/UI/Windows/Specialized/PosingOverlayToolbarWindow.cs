@@ -188,11 +188,13 @@ internal class PosingOverlayToolbarWindow : Window
 
         ImGui.SameLine();
 
-        var parentBone = posing.Selected.Match(
-          boneSelect => posing.SkeletonPosing.GetBone(boneSelect)?.GetFirstVisibleParent(),
+        var bone = posing.Selected.Match(
+          boneSelect => posing.SkeletonPosing.GetBone(boneSelect),
           _ => null,
           _ => null
        );
+
+        var parentBone = bone?.Parent;
 
         using (ImRaii.PushFont(UiBuilder.IconFont))
         {
@@ -204,6 +206,20 @@ internal class PosingOverlayToolbarWindow : Window
         }
         if (ImGui.IsItemHovered())
             ImGui.SetTooltip("Select Parent");
+
+        
+        using(ImRaii.PushFont(UiBuilder.IconFont))
+        {
+            using(ImRaii.Disabled(!(bone?.EligibleForIK == true)))
+            {
+                if(ImGui.Button($"{FontAwesomeIcon.Adjust.ToIconString()}###bone_ik", new Vector2(buttonSize)))
+                    ImGui.OpenPopup("overlay_bone_ik");
+            }
+        }
+        if(ImGui.IsItemHovered())
+            ImGui.SetTooltip("Inverse Kinematics");
+
+        ImGui.SameLine();
 
 
         using (ImRaii.PushFont(UiBuilder.IconFont))
@@ -311,6 +327,18 @@ internal class PosingOverlayToolbarWindow : Window
             if (popup.Success)
             {
                 _boneSearchControl.Draw("overlay_bone_search", posing);
+            }
+        }
+
+        using(var popup = ImRaii.Popup("overlay_bone_ik"))
+        {
+            if(popup.Success)
+            {
+                if(posing.Selected.Value is BonePoseInfoId id)
+                {
+                    var info = posing.SkeletonPosing.GetBonePose(id);
+                    BoneIKEditor.Draw(info);
+                }
             }
         }
     }
