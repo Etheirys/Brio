@@ -29,7 +29,6 @@
 	  <None Remove="Resources\Embedded\Images\PoseHeadWithEars.png" />
 	  <None Remove="Resources\Embedded\Images\PoseTail.png" />
 	  <None Remove="Resources\Embedded\Language\en.json" />
-	  <None Remove="Resources\Festivals.json" />
 	  <None Remove="Resources\Embedded\Images\ActionTimeline.png" />
 	  <None Remove="Resources\Embedded\Images\Body.png" />
 	  <None Remove="Resources\Embedded\Images\Companion.png" />

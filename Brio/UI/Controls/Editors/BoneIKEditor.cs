@@ -21,7 +21,7 @@ internal class BoneIKEditor
 
         ImGui.SameLine();
 
-        if(ImBrio.FontIconButtonRight("snapshot", FontAwesomeIcon.CameraRetro, 1.1f, "Apply IK Snapshot", poseInfo.Parent.HasIKStacks))
+        if(ImBrio.FontIconButtonRight("snapshot", FontAwesomeIcon.CameraRetro, 1.2f, "Apply IK Snapshot", poseInfo.Parent.HasIKStacks))
             posing.SnapshotIK();
 
         using(ImRaii.Disabled(!ik.Enabled))

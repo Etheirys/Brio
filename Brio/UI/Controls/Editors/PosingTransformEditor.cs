@@ -67,7 +67,7 @@ internal class PosingTransformEditor
         ImGui.Text(text);
 
         ImGui.SameLine();
-        if(ImBrio.FontIconButtonRight("ik", FontAwesomeIcon.Adjust, 1.1f, "Inverse Kinematics", bone?.EligibleForIK == true))
+        if(ImBrio.FontIconButtonRight("ik", FontAwesomeIcon.Adjust, 1.2f, "Inverse Kinematics", bone?.EligibleForIK == true))
             ImGui.OpenPopup("transform_ik_popup");
 
         didChange |= ImGui.DragFloat3("###position", ref realTransform.Position, 0.001f);
