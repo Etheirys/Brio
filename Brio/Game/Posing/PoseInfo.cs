@@ -1,8 +1,10 @@
 ﻿using Brio.Core;
 using Brio.Game.Posing.Skeletons;
+using OneOf;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 
 namespace Brio.Game.Posing;
 
@@ -68,7 +70,7 @@ internal class BonePoseInfo(BonePoseInfoId id, PoseInfo parent)
 
     public TransformComponents DefaultPropagation { get; set; } = TransformComponents.Position | TransformComponents.Rotation;
 
-    public BoneIKInfo DefaultIK { get; set; } = BoneIKInfo.Default;
+    public BoneIKInfo DefaultIK { get; set; } = BoneIKInfo.CalculateDefault(id.BoneName);
 
     public IReadOnlyList<BonePoseTransformInfo> Stacks => _stacks;
 
@@ -194,11 +196,48 @@ internal record struct BonePoseTransformInfo(TransformComponents PropagateCompon
 internal struct BoneIKInfo
 {
     public bool Enabled = false;
-    public int Depth = 3;
-    public int Iterations = 8;
+    
     public bool EnforceConstraints = true;
 
-    public static readonly BoneIKInfo Default = new();
+    public OneOf<CCDOptions, TwoJointOptions> SolverOptions = new CCDOptions();
+
+    public readonly static BoneIKInfo Disabled = new();
+
+    public static bool CanUseJoint(string boneName) => boneName.StartsWith("j_te") || boneName.StartsWith("j_asi_d");
+
+    public static BoneIKInfo CalculateDefault(string boneName, bool allowJoint = true)
+    {
+        var result = new BoneIKInfo();
+
+        if(allowJoint && CanUseJoint(boneName))
+        {
+            if(boneName.StartsWith("j_te"))
+            {
+                var options = new TwoJointOptions()
+                {
+                    FirstBone = 2,
+                    SecondBone = 1,
+                    EndBone = 0,
+                    RotationAxis = Vector3.UnitZ
+                };
+                result.SolverOptions = options;
+            }
+
+            if(boneName.StartsWith("j_asi_d"))
+            {
+                var options = new TwoJointOptions()
+                {
+                    FirstBone = 3,
+                    SecondBone = 1,
+                    EndBone = 0,
+                    RotationAxis = -Vector3.UnitZ
+                };
+                result.SolverOptions = options;
+            }
+        }
+
+        return result;
+    }
 
 
     public BoneIKInfo()
@@ -206,8 +245,17 @@ internal struct BoneIKInfo
 
     }
 
-    public override int GetHashCode()
+    public struct CCDOptions()
     {
-        return HashCode.Combine(Enabled, Depth, Iterations);
+        public int Depth = 3;
+        public int Iterations = 8;
+    }
+
+    public struct TwoJointOptions()
+    {
+        public int FirstBone = -1;
+        public int SecondBone = -1;
+        public int EndBone = -1;
+        public Vector3 RotationAxis = Vector3.Zero;
     }
 }

@@ -32,15 +32,46 @@ internal class BoneIKEditor
                 didChange |= true;
             }
 
-            if(ImGui.SliderInt("Depth", ref ik.Depth, 1, 20))
+
+            string solverType = ik.SolverOptions.Match(_ => "CCD", _ => "Two Joint");
+            using(var combo = ImRaii.Combo("Solver", solverType))
             {
-                didChange |= true;
+                if(combo.Success)
+                {
+                    if(ImGui.Selectable("CCD"))
+                    {
+                        ik.SolverOptions = BoneIKInfo.CalculateDefault(poseInfo.Name, false).SolverOptions;
+                        didChange |= true;
+                    }
+
+                    if(BoneIKInfo.CanUseJoint(poseInfo.Name))
+                    {
+                        if(ImGui.Selectable("Two Joint"))
+                        {
+                            ik.SolverOptions = BoneIKInfo.CalculateDefault(poseInfo.Name, true).SolverOptions;
+                            didChange |= true;
+                        }
+                    }
+                }
             }
 
-            if(ImGui.SliderInt("Iterations", ref ik.Iterations, 1, 20))
-            {
-                didChange |= true;
-            }
+            ik.SolverOptions.Switch(
+                ccd =>
+                {
+                    if(ImGui.SliderInt("Depth", ref ccd.Depth, 1, 20))
+                    {
+                        didChange |= true;
+                    }
+
+                    if(ImGui.SliderInt("Iterations", ref ccd.Iterations, 1, 20))
+                    {
+                        didChange |= true;
+                    }
+                },
+                twoJoint =>
+                {
+                }
+             );
         }
 
         if(didChange)

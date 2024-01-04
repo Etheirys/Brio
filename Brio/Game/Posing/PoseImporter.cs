@@ -16,7 +16,7 @@ internal class PoseImporter(PoseFile poseFile, PoseImporterOptions options)
             {
                 if (poseFile.Bones.TryGetValue(bone.Name, out var fileBone))
                 {
-                    poseInfo.Apply(fileBone, bone.LastTransform, TransformComponents.All, options.TransformComponents, BoneIKInfo.Default, PoseMirrorMode.None, true);
+                    poseInfo.Apply(fileBone, bone.LastTransform, TransformComponents.All, options.TransformComponents, BoneIKInfo.Disabled, PoseMirrorMode.None, true);
                 }
             }
         }
@@ -28,7 +28,7 @@ internal class PoseImporter(PoseFile poseFile, PoseImporterOptions options)
             {
                 if (poseFile.MainHand.TryGetValue(bone.Name, out var fileBone))
                 {
-                    poseInfo.Apply(fileBone, bone.LastTransform, TransformComponents.All, options.TransformComponents, BoneIKInfo.Default, PoseMirrorMode.None, true);
+                    poseInfo.Apply(fileBone, bone.LastTransform, TransformComponents.All, options.TransformComponents, BoneIKInfo.Disabled, PoseMirrorMode.None, true);
                 }
             }
         }
@@ -40,7 +40,7 @@ internal class PoseImporter(PoseFile poseFile, PoseImporterOptions options)
             {
                 if (poseFile.OffHand.TryGetValue(bone.Name, out var fileBone))
                 {
-                    poseInfo.Apply(fileBone, bone.LastTransform, TransformComponents.All, options.TransformComponents, BoneIKInfo.Default, PoseMirrorMode.None, true);
+                    poseInfo.Apply(fileBone, bone.LastTransform, TransformComponents.All, options.TransformComponents, BoneIKInfo.Disabled, PoseMirrorMode.None, true);
                 }
             }
         }

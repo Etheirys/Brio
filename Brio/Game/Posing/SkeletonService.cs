@@ -270,7 +270,6 @@ internal unsafe class SkeletonService : IDisposable
         var trans = info.Transform;
         trans.Filter(info.PropagateComponents);
 
-
         // Position
         bool prop = info.PropagateComponents.HasFlag(TransformComponents.Position);
         var modelSpace = pose->AccessBoneModelSpace(boneId, prop ? PropagateOrNot.Propagate : PropagateOrNot.DontPropagate);
@@ -278,8 +277,7 @@ internal unsafe class SkeletonService : IDisposable
         temp.Position += info.Transform.Position;
         if(info.IKInfo.Enabled)
         {
-            var impactedBones = bone.GetBonesToDepth(info.IKInfo.Depth, true);
-            _ikService.SolveIK(pose, (ushort)impactedBones.Last().Index, (ushort)impactedBones.First().Index, temp.Position, info.IKInfo.Iterations); 
+            _ikService.SolveIK(pose, info.IKInfo, bone, temp.Position); 
 
             if(!info.IKInfo.EnforceConstraints)
             {
