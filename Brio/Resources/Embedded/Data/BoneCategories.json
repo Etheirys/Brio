@@ -18,12 +18,7 @@
     "head": {
       "Type": "Filter",
       "Bones": [
-        "j_kao"
-      ]
-    },
-    "face": {
-      "Type": "Filter",
-      "Bones": [
+        "j_kao",
         "n_f_",
         "j_ago",
         "j_f_"
