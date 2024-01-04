@@ -11,13 +11,15 @@ internal class BoneFilter
 
     private readonly HashSet<string> _allowedCategories = [];
 
+    private readonly HashSet<string> _excludedPrefixes = [];
+
     public IReadOnlyList<BoneCategory> AllCategories => _posingService.BoneCategories.Categories;
 
     public BoneFilter(PosingService posingService)
     {
         _posingService = posingService;
 
-        foreach (var category in _posingService.BoneCategories.Categories)
+        foreach(var category in _posingService.BoneCategories.Categories)
             _allowedCategories.Add(category.Id);
     }
 
@@ -25,36 +27,43 @@ internal class BoneFilter
     {
         bool foundBone = false;
 
-        if (bone.IsHidden && !considerHidden)
+        if(bone.IsHidden && !considerHidden)
             return false;
 
+        // Look for excludes
+        foreach(var excluded in _excludedPrefixes)
+        {
+            if(bone.Name.StartsWith(excluded))
+                return false;
+        }
+
         // Weapon bone names don't matter
-        if (slot == PoseInfoSlot.MainHand || slot == PoseInfoSlot.OffHand)
-            if (WeaponsAllowed)
+        if(slot == PoseInfoSlot.MainHand || slot == PoseInfoSlot.OffHand)
+            if(WeaponsAllowed)
                 return true;
             else
                 return false;
 
         // Check if the bone is in any of the categories and that category is visible
-        foreach (var category in AllCategories)
+        foreach(var category in AllCategories)
         {
-            if (category.Type != BoneCategoryTypes.Filter)
+            if(category.Type != BoneCategoryTypes.Filter)
                 continue;
 
-            foreach (var boneName in category.Bones)
+            foreach(var boneName in category.Bones)
             {
-                if (bone.Name.StartsWith(boneName))
+                if(bone.Name.StartsWith(boneName))
                 {
                     foundBone = true;
 
-                    if (_allowedCategories.Any(x => category.Id == x))
+                    if(_allowedCategories.Any(x => category.Id == x))
                         return true;
                 }
             }
         }
 
         // If we didn't find a bone, and the "other" category is visible, we should display it
-        if (!foundBone && OtherAllowed)
+        if(!foundBone && OtherAllowed)
             return true;
 
         return false;
@@ -87,10 +96,15 @@ internal class BoneFilter
         _allowedCategories.Add(category.Id);
     }
 
+    public void AddExcludedPrefix(string bonePrefix)
+    {
+        _excludedPrefixes.Add(bonePrefix);
+    }
+
     public void EnableAll()
     {
         _allowedCategories.Clear();
-        foreach (var category in AllCategories)
+        foreach(var category in AllCategories)
             _allowedCategories.Add(category.Id);
     }
 

@@ -171,7 +171,11 @@ internal class PosingCapability : ActorCharacterCapability
     {
         if(SkeletonPosing.PoseInfo.HasIKStacks)
         {
-            var all = new PoseImporterOptions(new BoneFilter(_posingService), TransformComponents.All, true);
+            var boneFilter = new BoneFilter(_posingService);
+            // TODO: This is annoying
+            boneFilter.AddExcludedPrefix("j_mune");
+            boneFilter.AddExcludedPrefix("n_sippo");
+            var all = new PoseImporterOptions(boneFilter, TransformComponents.All, true);
             var poseFile = await _framework.RunOnTick(() => GeneratePoseFile(), delayTicks: 2);
             Reset(false);
             ImportPose(poseFile, options: all, generateSnapshot: true);
