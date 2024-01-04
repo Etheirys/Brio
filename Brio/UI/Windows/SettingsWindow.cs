@@ -29,7 +29,7 @@ internal class SettingsWindow : Window
         _webService = webService;
         _brioIPCService = brioIPCService;
 
-        Size = new Vector2(300, 400);
+        Size = new Vector2(300, 450);
     }
 
     public override void Draw()
@@ -300,6 +300,13 @@ internal class SettingsWindow : Window
             if (ImGui.Checkbox("Show Skeleton Lines", ref showSkeletonLines))
             {
                 _configurationService.Configuration.Posing.ShowSkeletonLines = showSkeletonLines;
+                _configurationService.ApplyChange();
+            }
+
+            bool hideSkeletonWhenGizmoActive = _configurationService.Configuration.Posing.HideSkeletonWhenGizmoActive;
+            if (ImGui.Checkbox("Hide Skeleton when Gizmo Active", ref hideSkeletonWhenGizmoActive))
+            {
+                _configurationService.Configuration.Posing.HideSkeletonWhenGizmoActive = hideSkeletonWhenGizmoActive;
                 _configurationService.ApplyChange();
             }
 

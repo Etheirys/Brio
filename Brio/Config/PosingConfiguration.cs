@@ -16,6 +16,7 @@ internal class PosingConfiguration
     public uint SkeletonLineActiveColor { get; set; } = 0xFFFFFFFF;
     public uint SkeletonLineInactiveColor { get; set; } = 0x55555555;
     public bool ShowSkeletonLines { get; set; } = true;
+    public bool HideSkeletonWhenGizmoActive { get; set; } = false;
     public ImGuiKey DisableGizmoHotkey { get; set; } = ImGuiKey.LeftShift;
     public ImGuiKey DisableSkeletonHotkey { get; set; } = ImGuiKey.LeftCtrl;
     public ImGuiKey HideOverlayHotkey { get; set; } = ImGuiKey.LeftAlt;
