@@ -18,10 +18,22 @@
     "head": {
       "Type": "Filter",
       "Bones": [
+        "j_kao"
+      ]
+    },
+    "face": {
+      "Type": "Filter",
+      "Bones": [
         "n_f_",
-        "j_kao",
         "j_ago",
         "j_f_"
+      ]
+    },
+    "ears": {
+      "Type": "Filter",
+      "Bones": [
+        "j_mimi",
+        "j_zer"
       ]
     },
     "hair": {
@@ -42,13 +54,6 @@
       "Type": "Filter",
       "Bones": [
         "n_sippo_"
-      ]
-    },
-    "ears": {
-      "Type": "Filter",
-      "Bones": [
-        "j_mimi",
-        "j_zer"
       ]
     },
     "hands": {

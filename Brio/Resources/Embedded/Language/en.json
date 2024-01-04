@@ -207,6 +207,7 @@
   "bone_categories": {
     "body": "Body",
     "head": "Head",
+    "face": "Face",
     "hair": "Hair",
     "clothing": "Clothes",
     "legs": "Legs",
