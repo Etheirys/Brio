@@ -236,6 +236,7 @@ internal unsafe class SkeletonService : IDisposable
             ApplyBrioTransforms(skeleton, _skeletonToPosingCapability[skeleton]);
             skeleton.UpdateCachedTransforms();
             ReparentPartials(skeleton);
+            skeleton.UpdateCachedTransforms();
         }
 
         foreach(var skeleton in _skeletonsToUpdate)
