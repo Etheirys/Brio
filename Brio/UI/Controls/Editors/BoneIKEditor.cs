@@ -1,7 +1,5 @@
 ﻿using Brio.Capabilities.Posing;
 using Brio.Game.Posing;
-using Brio.UI.Controls.Stateless;
-using Dalamud.Interface;
 using Dalamud.Interface.Utility.Raii;
 using ImGuiNET;
 
@@ -18,11 +16,6 @@ internal class BoneIKEditor
         {
             didChange |= true;
         }
-
-        ImGui.SameLine();
-
-        if(ImBrio.FontIconButtonRight("snapshot", FontAwesomeIcon.CameraRetro, 1.2f, "Apply IK Snapshot", poseInfo.Parent.HasIKStacks))
-            posing.SnapshotIK();
 
         using(ImRaii.Disabled(!ik.Enabled))
         {

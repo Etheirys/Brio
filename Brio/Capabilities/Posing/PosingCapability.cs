@@ -72,7 +72,7 @@ internal class PosingCapability : ActorCharacterCapability
     {
         try
         {
-            if (path.EndsWith(".cmp"))
+            if(path.EndsWith(".cmp"))
             {
                 ImportPose(ResourceProvider.Instance.GetFileDocument<CMToolPoseFile>(path), options);
                 return;
@@ -93,7 +93,7 @@ internal class PosingCapability : ActorCharacterCapability
                 cmToolPoseFile => cmToolPoseFile.Upgrade()
             );
 
-        if (!poseFile.Bones.Any() && !poseFile.MainHand.Any() && !poseFile.OffHand.Any())
+        if(!poseFile.Bones.Any() && !poseFile.MainHand.Any() && !poseFile.OffHand.Any())
         {
             EventBus.Instance.NotifyError("Invalid pose file.");
             return;
@@ -106,7 +106,7 @@ internal class PosingCapability : ActorCharacterCapability
         SkeletonPosing.ImportSkeletonPose(poseFile, options);
         ModelPosing.ImportModelPose(poseFile, options);
 
-        if (generateSnapshot)
+        if(generateSnapshot)
             _framework.RunOnTick(() => Snapshot(), delayTicks: 2);
     }
 
@@ -119,14 +119,12 @@ internal class PosingCapability : ActorCharacterCapability
     public void Snapshot()
     {
         var undoStackSize = _configurationService.Configuration.Posing.UndoStackSize;
-        if (undoStackSize <= 0)
+        if(undoStackSize <= 0)
         {
             _undoStack.Clear();
             _redoStack.Clear();
             return;
         }
-
-        
 
         if(!_undoStack.Any())
             _undoStack.Push(new PoseStack(new PoseInfo(), ModelPosing.OriginalTransform));
@@ -134,11 +132,13 @@ internal class PosingCapability : ActorCharacterCapability
         _redoStack.Clear();
         _undoStack.Push(new PoseStack(SkeletonPosing.PoseInfo.Clone(), ModelPosing.Transform));
         _undoStack = _undoStack.Trim(undoStackSize + 1);
+
+        Reconcile();
     }
 
     public void Redo()
     {
-        if (_redoStack.TryPop(out var redoStack))
+        if(_redoStack.TryPop(out var redoStack))
         {
             _undoStack.Push(redoStack);
             SkeletonPosing.PoseInfo = redoStack.Info.Clone();
@@ -148,10 +148,10 @@ internal class PosingCapability : ActorCharacterCapability
 
     public void Undo()
     {
-        if (_undoStack.TryPop(out var undoStack))
+        if(_undoStack.TryPop(out var undoStack))
             _redoStack.Push(undoStack);
 
-        if (_undoStack.TryPeek(out var applicable))
+        if(_undoStack.TryPeek(out var applicable))
         {
             SkeletonPosing.PoseInfo = applicable.Info.Clone();
             ModelPosing.Transform = applicable.ModelTransform;
@@ -163,23 +163,19 @@ internal class PosingCapability : ActorCharacterCapability
         SkeletonPosing.ResetPose();
         ModelPosing.ResetTransform();
 
-        if (generateSnapshot)
+        if(generateSnapshot)
             Snapshot();
     }
 
-    public async void SnapshotIK()
+    private void Reconcile()
     {
-        if(SkeletonPosing.PoseInfo.HasIKStacks)
+        _framework.RunOnTick(() =>
         {
-            var boneFilter = new BoneFilter(_posingService);
-            // TODO: This is annoying
-            boneFilter.AddExcludedPrefix("j_mune");
-            boneFilter.AddExcludedPrefix("n_sippo");
-            var all = new PoseImporterOptions(boneFilter, TransformComponents.All, true);
-            var poseFile = await _framework.RunOnTick(() => GeneratePoseFile(), delayTicks: 2);
+            var all = new PoseImporterOptions(new BoneFilter(_posingService), TransformComponents.All, true);
+            var poseFile = GeneratePoseFile();
             Reset(false);
-            ImportPose(poseFile, options: all, generateSnapshot: true);
-        }
+            ImportPose(poseFile, options: all, generateSnapshot: false);
+        }, delayTicks: 2);
     }
 
     private PoseFile GeneratePoseFile()
