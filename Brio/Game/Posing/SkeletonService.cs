@@ -16,7 +16,6 @@ using Brio.Game.Core;
 using System.Linq;
 using GameSkeleton = FFXIVClientStructs.FFXIV.Client.Graphics.Render.Skeleton;
 using Brio.Game.GPose;
-using System.Numerics;
 
 namespace Brio.Game.Posing;
 

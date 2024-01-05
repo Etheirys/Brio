@@ -1,7 +1,6 @@
 ﻿using Brio.Core;
 using Brio.Files;
 using Brio.Game.Posing.Skeletons;
-using System;
 
 namespace Brio.Game.Posing;
 
