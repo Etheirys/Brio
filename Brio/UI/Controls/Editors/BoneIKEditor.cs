@@ -53,11 +53,13 @@ internal class BoneIKEditor
                 {
                     if(ImGui.SliderInt("Depth", ref ccd.Depth, 1, 20))
                     {
+                        ik.SolverOptions = ccd;
                         didChange |= true;
                     }
 
                     if(ImGui.SliderInt("Iterations", ref ccd.Iterations, 1, 20))
                     {
+                        ik.SolverOptions = ccd;
                         didChange |= true;
                     }
                 },
