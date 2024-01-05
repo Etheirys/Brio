@@ -16,7 +16,7 @@ internal class PoseImporter(PoseFile poseFile, PoseImporterOptions options)
             {
                 if (poseFile.Bones.TryGetValue(bone.Name, out var fileBone))
                 {
-                    poseInfo.Apply(fileBone, bone.LastTransform, TransformComponents.All, options.TransformComponents, BoneIKInfo.Disabled, PoseMirrorMode.None, true);
+                    poseInfo.Apply(fileBone, bone.LastRawTransform, TransformComponents.All, options.TransformComponents, BoneIKInfo.Disabled, PoseMirrorMode.None, true);
                 }
             }
         }
@@ -28,7 +28,7 @@ internal class PoseImporter(PoseFile poseFile, PoseImporterOptions options)
             {
                 if (poseFile.MainHand.TryGetValue(bone.Name, out var fileBone))
                 {
-                    poseInfo.Apply(fileBone, bone.LastTransform, TransformComponents.All, options.TransformComponents, BoneIKInfo.Disabled, PoseMirrorMode.None, true);
+                    poseInfo.Apply(fileBone, bone.LastRawTransform, TransformComponents.All, options.TransformComponents, BoneIKInfo.Disabled, PoseMirrorMode.None, true);
                 }
             }
         }
@@ -40,7 +40,7 @@ internal class PoseImporter(PoseFile poseFile, PoseImporterOptions options)
             {
                 if (poseFile.OffHand.TryGetValue(bone.Name, out var fileBone))
                 {
-                    poseInfo.Apply(fileBone, bone.LastTransform, TransformComponents.All, options.TransformComponents, BoneIKInfo.Disabled, PoseMirrorMode.None, true);
+                    poseInfo.Apply(fileBone, bone.LastRawTransform, TransformComponents.All, options.TransformComponents, BoneIKInfo.Disabled, PoseMirrorMode.None, true);
                 }
             }
         }
@@ -54,13 +54,3 @@ internal class PoseImporterOptions(BoneFilter filter, TransformComponents transf
     public bool ApplyModelTransform { get; set; } = applyModelTransform;
 }
 
-[Flags]
-internal enum PoseImportCategories
-{
-    None = 0,
-    Body = 1 << 0,
-    Head = 1 << 1,
-    Weapons = 1 << 2,
-
-    All = Body | Head | Weapons,
-}

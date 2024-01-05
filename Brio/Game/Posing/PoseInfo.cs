@@ -85,12 +85,17 @@ internal class BonePoseInfo(BonePoseInfoId id, PoseInfo parent)
         var prop = propagation ?? DefaultPropagation;
         ikInfo ??= DefaultIK;
         var calc = original.HasValue ? transform.CalculateDiff(original.Value) : transform;
+
+        if(calc.IsApproximatelySame(Transform.Identity))
+            return;
+
         var transformIndex = GetTransformIndex(prop, ikInfo.Value, forceNewStack);
         mirrorMode ??= MirrorMode;
 
         var existing = _stacks[transformIndex].Transform;
 
         calc.Filter(applyTo);
+
         if(Transform.Identity.IsApproximatelySame(calc + existing))
             return;
 
