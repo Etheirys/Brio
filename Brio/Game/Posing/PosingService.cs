@@ -11,14 +11,14 @@ internal class PosingService
 
     public BoneFilter OverlayFilter { get; }
 
-    public PoseImporterOptions ImporterOptions { get; }
+    public PoseImporterOptions DefaultImporterOptions { get; }
 
     public PosingService()
     {
         OverlayFilter = new BoneFilter(this);
 
-        ImporterOptions = new PoseImporterOptions(new BoneFilter(this), TransformComponents.Rotation, false);
-        ImporterOptions.BoneFilter.DisableCategory("weapon");
+        DefaultImporterOptions = new PoseImporterOptions(new BoneFilter(this), TransformComponents.Rotation, false);
+        DefaultImporterOptions.BoneFilter.DisableCategory("weapon");
     }
 }
 

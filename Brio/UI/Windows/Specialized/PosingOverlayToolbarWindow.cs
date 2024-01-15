@@ -276,7 +276,7 @@ internal class PosingOverlayToolbarWindow : Window
             using (ImRaii.Disabled(!posing.HasOverride))
             {
                 if (ImGui.Button($"{FontAwesomeIcon.Undo.ToIconString()}###reset_pose", new Vector2(buttonSize)))
-                    posing.Reset();
+                    posing.Reset(false, false);
             }
         }
         if (ImGui.IsItemHovered())
@@ -318,7 +318,7 @@ internal class PosingOverlayToolbarWindow : Window
         {
             if (popup.Success)
             {
-                PosingEditorCommon.DrawImportOptionEditor(_posingService.ImporterOptions);
+                PosingEditorCommon.DrawImportOptionEditor(_posingService.DefaultImporterOptions);
             }
         }
 

@@ -62,13 +62,13 @@ internal class PosingOverlayWindow : Window, IDisposable
 
         ImGuizmo.SetID(_gizmoId);
 
-        if (ImGuizmo.IsUsing() && _trackingTransform.HasValue)
+        if(ImGuizmo.IsUsing() && _trackingTransform.HasValue)
             Flags &= ~ImGuiWindowFlags.NoInputs;
     }
 
     public override void Draw()
     {
-        if (!_entityManager.TryGetCapabilityFromSelectedEntity<PosingCapability>(out var posing))
+        if(!_entityManager.TryGetCapabilityFromSelectedEntity<PosingCapability>(out var posing))
         {
             return;
         }
@@ -100,11 +100,11 @@ internal class PosingOverlayWindow : Window, IDisposable
     private unsafe void CalculateClickables(PosingCapability posing, OverlayUIState uiState, PosingConfiguration config, ref List<ClickableItem> clickables)
     {
         var camera = _cameraService.GetCurrentCamera();
-        if (camera == null)
+        if(camera == null)
             return;
 
         // Model Transform
-        if (camera->WorldToScreen(posing.ModelPosing.Transform.Position, out var modelScreen))
+        if(camera->WorldToScreen(posing.ModelPosing.Transform.Position, out var modelScreen))
         {
             clickables.Add(new ClickableItem
             {
@@ -115,13 +115,13 @@ internal class PosingOverlayWindow : Window, IDisposable
         }
 
         // Bone Transforms
-        foreach (var (skeleton, poseSlot) in posing.SkeletonPosing.Skeletons)
+        foreach(var (skeleton, poseSlot) in posing.SkeletonPosing.Skeletons)
         {
             if(!skeleton.IsValid)
                 continue;
 
             var charaBase = skeleton.CharacterBase;
-            if (charaBase == null)
+            if(charaBase == null)
                 continue;
 
             var modelMatrix = new Transform()
@@ -132,14 +132,14 @@ internal class PosingOverlayWindow : Window, IDisposable
             }.ToMatrix();
 
 
-            foreach (var bone in skeleton.Bones)
+            foreach(var bone in skeleton.Bones)
             {
-                if (!_posingService.OverlayFilter.IsBoneValid(bone, poseSlot))
+                if(!_posingService.OverlayFilter.IsBoneValid(bone, poseSlot))
                     continue;
 
                 var boneWorldPosition = Vector3.Transform(bone.LastTransform.Position, modelMatrix);
 
-                if (camera->WorldToScreen(boneWorldPosition, out var boneScreen))
+                if(camera->WorldToScreen(boneWorldPosition, out var boneScreen))
                 {
                     clickables.Add(new ClickableItem
                     {
@@ -148,13 +148,13 @@ internal class PosingOverlayWindow : Window, IDisposable
                         Size = config.BoneCircleSize,
                     });
 
-                    if (bone.Parent != null)
+                    if(bone.Parent != null)
                     {
-                        if (!_posingService.OverlayFilter.IsBoneValid(bone.Parent, poseSlot))
+                        if(!_posingService.OverlayFilter.IsBoneValid(bone.Parent, poseSlot))
                             continue;
 
                         var parentWorldPosition = Vector3.Transform(bone.Parent.LastTransform.Position, modelMatrix);
-                        if (camera->WorldToScreen(parentWorldPosition, out var parentScreen))
+                        if(camera->WorldToScreen(parentWorldPosition, out var parentScreen))
                         {
                             clickables.Last().ParentScreenPosition = parentScreen;
                         }
@@ -165,26 +165,26 @@ internal class PosingOverlayWindow : Window, IDisposable
         }
 
         // Selection
-        foreach (var clickable in clickables)
+        foreach(var clickable in clickables)
         {
-            if (posing.Selected.Equals(clickable.Item))
+            if(posing.Selected.Equals(clickable.Item))
                 clickable.CurrentlySelected = true;
         }
     }
 
     private void HandleSkeletonInput(PosingCapability posing, OverlayUIState uiState, List<ClickableItem> clickables)
     {
-        if (!uiState.SkeletonInputEnabled)
+        if(!uiState.SkeletonInputEnabled)
             return;
 
         var clicked = new List<ClickableItem>();
         var hovered = new List<ClickableItem>();
 
-        foreach (var clickable in clickables)
+        foreach(var clickable in clickables)
         {
             var start = new Vector2(clickable.ScreenPosition.X - clickable.Size, clickable.ScreenPosition.Y - clickable.Size);
             var end = new Vector2(clickable.ScreenPosition.X + clickable.Size, clickable.ScreenPosition.Y + clickable.Size);
-            if (ImGui.IsMouseHoveringRect(start, end))
+            if(ImGui.IsMouseHoveringRect(start, end))
             {
                 hovered.Add(clickable);
                 clickable.CurrentlyHovered = true;
@@ -192,7 +192,7 @@ internal class PosingOverlayWindow : Window, IDisposable
 
                 ImGui.SetNextFrameWantCaptureMouse(true);
 
-                if (ImGui.IsMouseClicked(ImGuiMouseButton.Left))
+                if(ImGui.IsMouseClicked(ImGuiMouseButton.Left))
                 {
                     clicked.Add(clickable);
                     clickable.WasClicked = true;
@@ -201,23 +201,23 @@ internal class PosingOverlayWindow : Window, IDisposable
             }
         }
 
-        if (clicked.Any())
+        if(clicked.Any())
         {
             posing.Selected = clicked[0].Item;
 
-            if (clicked.Count > 1)
+            if(clicked.Count > 1)
             {
                 _selectingFrom = clicked;
                 ImGui.OpenPopup(_boneSelectPopupName);
             }
         }
 
-        if (hovered.Any() && !clicked.Any())
+        if(hovered.Any() && !clicked.Any())
         {
             ImGui.SetNextWindowPos(ImGui.GetMousePos() + new Vector2(15, 10), ImGuiCond.Always);
-            if (ImGui.Begin("gizmo_bone_select_preview", ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoDecoration | ImGuiWindowFlags.NoInputs | ImGuiWindowFlags.NoMove))
+            if(ImGui.Begin("gizmo_bone_select_preview", ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoDecoration | ImGuiWindowFlags.NoInputs | ImGuiWindowFlags.NoMove))
             {
-                foreach (var hover in hovered)
+                foreach(var hover in hovered)
                 {
                     ImGui.BeginDisabled();
                     ImGui.Selectable($"{hover.Item.DisplayName}###selectable_{hover.GetHashCode()}", hover.CurrentlySelected);
@@ -228,9 +228,9 @@ internal class PosingOverlayWindow : Window, IDisposable
             ImGui.End();
 
             var wheel = ImGui.GetIO().MouseWheel;
-            if (wheel != 0)
+            if(wheel != 0)
             {
-                if (hovered.Count == 1)
+                if(hovered.Count == 1)
                 {
                     posing.Selected = hovered[0].Item;
                 }
@@ -246,18 +246,18 @@ internal class PosingOverlayWindow : Window, IDisposable
 
     private void DrawPopup(PosingCapability posing)
     {
-        using (var popup = ImRaii.Popup(_boneSelectPopupName))
+        using(var popup = ImRaii.Popup(_boneSelectPopupName))
         {
-            if (popup.Success)
+            if(popup.Success)
             {
                 int selectedIndex = -1;
-                foreach (var click in _selectingFrom)
+                foreach(var click in _selectingFrom)
                 {
                     bool isSelected = posing.Selected == click.Item;
-                    if (isSelected)
+                    if(isSelected)
                         selectedIndex = _selectingFrom.IndexOf(click);
 
-                    if (ImGui.Selectable($"{click.Item.DisplayName}###clickable_{click.GetHashCode()}", isSelected))
+                    if(ImGui.Selectable($"{click.Item.DisplayName}###clickable_{click.GetHashCode()}", isSelected))
                     {
                         posing.Selected = click.Item;
                         _selectingFrom = [];
@@ -266,18 +266,18 @@ internal class PosingOverlayWindow : Window, IDisposable
                 }
 
                 var wheel = ImGui.GetIO().MouseWheel;
-                if (wheel != 0)
+                if(wheel != 0)
                 {
-                    if (wheel < 0)
+                    if(wheel < 0)
                     {
                         selectedIndex++;
-                        if (selectedIndex >= _selectingFrom.Count)
+                        if(selectedIndex >= _selectingFrom.Count)
                             selectedIndex = 0;
                     }
                     else
                     {
                         selectedIndex--;
-                        if (selectedIndex < 0)
+                        if(selectedIndex < 0)
                             selectedIndex = _selectingFrom.Count - 1;
                     }
 
@@ -290,12 +290,12 @@ internal class PosingOverlayWindow : Window, IDisposable
 
     private void DrawSkeletonLines(OverlayUIState uiState, PosingConfiguration config, List<ClickableItem> clickables)
     {
-        if (!uiState.DrawSkeletonLines)
+        if(!uiState.DrawSkeletonLines)
             return;
 
-        foreach (var clickable in clickables)
+        foreach(var clickable in clickables)
         {
-            if (clickable.ParentScreenPosition.HasValue)
+            if(clickable.ParentScreenPosition.HasValue)
             {
                 float thickness = config.SkeletonLineThickness;
                 uint color = uiState.SkeletonLinesEnabled ? config.SkeletonLineActiveColor : config.SkeletonLineInactiveColor;
@@ -306,25 +306,25 @@ internal class PosingOverlayWindow : Window, IDisposable
 
     private void DrawSkeletonDots(OverlayUIState uiState, PosingConfiguration config, List<ClickableItem> clickables)
     {
-        if (!uiState.DrawSkeletonDots)
+        if(!uiState.DrawSkeletonDots)
             return;
 
-        foreach (var clickable in clickables)
+        foreach(var clickable in clickables)
         {
             bool isFilled = clickable.CurrentlySelected || clickable.CurrentlyHovered;
 
             var color = config.BoneCircleNormalColor;
 
-            if (clickable.CurrentlyHovered)
+            if(clickable.CurrentlyHovered)
                 color = config.BoneCircleHoveredColor;
 
-            if (clickable.CurrentlySelected)
+            if(clickable.CurrentlySelected)
                 color = config.BoneCircleSelectedColor;
 
-            if (!uiState.SkeletonDotsEnabled)
+            if(!uiState.SkeletonDotsEnabled)
                 color = config.BoneCircleInactiveColor;
 
-            if (isFilled)
+            if(isFilled)
                 ImGui.GetWindowDrawList().AddCircleFilled(clickable.ScreenPosition, clickable.Size, color);
             else
                 ImGui.GetWindowDrawList().AddCircle(clickable.ScreenPosition, clickable.Size, color);
@@ -336,11 +336,11 @@ internal class PosingOverlayWindow : Window, IDisposable
         if(!uiState.DrawGizmo)
             return;
 
-        if (posing.Selected.Value is None)
+        if(posing.Selected.Value is None)
             return;
 
         var camera = _cameraService.GetCurrentCamera();
-        if (camera == null)
+        if(camera == null)
             return;
 
         var selected = posing.Selected;
@@ -356,10 +356,10 @@ internal class PosingOverlayWindow : Window, IDisposable
             boneSelect =>
             {
                 var bone = posing.SkeletonPosing.GetBone(boneSelect);
-                if (bone == null)
+                if(bone == null)
                     return false;
 
-                if (!_posingService.OverlayFilter.IsBoneValid(bone, boneSelect.Slot))
+                if(!_posingService.OverlayFilter.IsBoneValid(bone, boneSelect.Slot))
                 {
                     return false;
                 }
@@ -367,7 +367,7 @@ internal class PosingOverlayWindow : Window, IDisposable
                 currentTransform = bone.LastTransform;
 
                 var charaBase = bone.Skeleton.CharacterBase;
-                if (charaBase == null)
+                if(charaBase == null)
                     return false;
 
                 var modelMatrix = new Transform()
@@ -389,7 +389,7 @@ internal class PosingOverlayWindow : Window, IDisposable
             _ => false
         );
 
-        if (!shouldDraw)
+        if(!shouldDraw)
             return;
 
 
@@ -406,7 +406,7 @@ internal class PosingOverlayWindow : Window, IDisposable
 
         Transform? newTransform = null;
 
-        if (ImGuizmo.Manipulate(
+        if(ImGuizmo.Manipulate(
             ref worldViewMatrix.M11,
             ref projectionMatrix.M11,
             Operation,
@@ -418,15 +418,15 @@ internal class PosingOverlayWindow : Window, IDisposable
             _trackingTransform = newTransform;
         }
 
-        if (_trackingTransform.HasValue && !ImGuizmo.IsUsing())
+        if(_trackingTransform.HasValue && !ImGuizmo.IsUsing())
         {
-            posing.Snapshot();
+            posing.Snapshot(false, false);
             _trackingTransform = null;
         }
 
         ImGuizmo.Enable(true);
 
-        if (newTransform != null)
+        if(newTransform != null)
         {
             selected.Switch(
                 bone =>
@@ -446,7 +446,7 @@ internal class PosingOverlayWindow : Window, IDisposable
 
     private void OnGPoseStateChanged(bool newState)
     {
-        if (newState)
+        if(newState)
             IsOpen = _configurationService.Configuration.Posing.OverlayDefaultsOn;
         else
             IsOpen = false;

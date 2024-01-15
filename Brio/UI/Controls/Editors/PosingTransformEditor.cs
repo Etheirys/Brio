@@ -140,7 +140,9 @@ internal class PosingTransformEditor
         else
         {
             if(_trackingEuler.HasValue || _trackingTransform.HasValue)
-                posingCapability.Snapshot();
+            {
+                posingCapability.Snapshot(false, false);
+            }
 
             _trackingTransform = null;
             _trackingEuler = null;
@@ -200,7 +202,9 @@ internal class PosingTransformEditor
         else
         {
             if(_trackingEuler.HasValue || _trackingTransform.HasValue)
-                posingCapability.Snapshot();
+            {
+                posingCapability.Snapshot(false, false);
+            }
 
             _trackingTransform = null;
             _trackingEuler = null;

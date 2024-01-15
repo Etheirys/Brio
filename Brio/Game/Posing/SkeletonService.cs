@@ -1,6 +1,11 @@
 ﻿using Brio.Capabilities.Posing;
+using Brio.Core;
 using Brio.Entities;
 using Brio.Game.Actor.Extensions;
+using Brio.Game.Actor.Interop;
+using Brio.Game.Core;
+using Brio.Game.GPose;
+using Brio.Game.Posing.Skeletons;
 using Dalamud.Game;
 using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Hooking;
@@ -8,14 +13,9 @@ using Dalamud.Plugin.Services;
 using FFXIVClientStructs.Havok;
 using System;
 using System.Collections.Generic;
-using static FFXIVClientStructs.Havok.hkaPose;
-using Brio.Core;
-using Brio.Game.Posing.Skeletons;
-using Brio.Game.Actor.Interop;
-using Brio.Game.Core;
 using System.Linq;
+using static FFXIVClientStructs.Havok.hkaPose;
 using GameSkeleton = FFXIVClientStructs.FFXIV.Client.Graphics.Render.Skeleton;
-using Brio.Game.GPose;
 
 namespace Brio.Game.Posing;
 
@@ -213,13 +213,13 @@ internal unsafe class SkeletonService : IDisposable
 
         foreach(var skeleton in _skeletons)
         {
-            if(!skeleton.IsValid)
+            if(skeleton.IsValid is false)
                 continue;
 
-            if(skeleton.CharacterBase == null)
+            if(skeleton.CharacterBase is null)
                 continue;
 
-            if(!_skeletonToPosingCapability.ContainsKey(skeleton))
+            if(_skeletonToPosingCapability.ContainsKey(skeleton) is false)
                 continue;
 
             _skeletonsToUpdate.Add(skeleton);
@@ -277,7 +277,7 @@ internal unsafe class SkeletonService : IDisposable
         temp.Position += info.Transform.Position;
         if(info.IKInfo.Enabled)
         {
-            _ikService.SolveIK(pose, info.IKInfo, bone, temp.Position); 
+            _ikService.SolveIK(pose, info.IKInfo, bone, temp.Position);
 
             if(!info.IKInfo.EnforceConstraints)
             {

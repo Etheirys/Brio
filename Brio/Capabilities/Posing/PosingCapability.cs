@@ -1,18 +1,18 @@
 ﻿using Brio.Capabilities.Actor;
-using Brio.Game.Posing;
-using OneOf.Types;
+using Brio.Config;
+using Brio.Core;
 using Brio.Entities.Actor;
+using Brio.Entities.Core;
+using Brio.Files;
+using Brio.Game.Posing;
+using Brio.Resources;
 using Brio.UI.Widgets.Posing;
 using Brio.UI.Windows.Specialized;
-using Brio.Entities.Core;
-using Brio.Core;
-using Brio.Files;
-using Brio.Resources;
-using OneOf;
-using System.Linq;
-using System.Collections.Generic;
 using Dalamud.Plugin.Services;
-using Brio.Config;
+using OneOf;
+using OneOf.Types;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Brio.Capabilities.Posing;
 
@@ -74,11 +74,11 @@ internal class PosingCapability : ActorCharacterCapability
         {
             if(path.EndsWith(".cmp"))
             {
-                ImportPose(ResourceProvider.Instance.GetFileDocument<CMToolPoseFile>(path), options);
+                ImportPose(ResourceProvider.Instance.GetFileDocument<CMToolPoseFile>(path), options, reset: false, reconcile: false);
                 return;
             }
 
-            ImportPose(ResourceProvider.Instance.GetFileDocument<PoseFile>(path), options);
+            ImportPose(ResourceProvider.Instance.GetFileDocument<PoseFile>(path), options, reset: false, reconcile: false);
         }
         catch
         {
@@ -86,7 +86,7 @@ internal class PosingCapability : ActorCharacterCapability
         }
     }
 
-    public void ImportPose(OneOf<PoseFile, CMToolPoseFile> rawPoseFile, PoseImporterOptions? options = null, bool generateSnapshot = true)
+    public void ImportPose(OneOf<PoseFile, CMToolPoseFile> rawPoseFile, PoseImporterOptions? options = null, bool generateSnapshot = true, bool reset = true, bool reconcile = true)
     {
         var poseFile = rawPoseFile.Match(
                 poseFile => poseFile,
@@ -101,13 +101,13 @@ internal class PosingCapability : ActorCharacterCapability
 
         poseFile.SanitizeBoneNames();
 
-        options ??= _posingService.ImporterOptions;
+        options ??= _posingService.DefaultImporterOptions;
 
         SkeletonPosing.ImportSkeletonPose(poseFile, options);
         ModelPosing.ImportModelPose(poseFile, options);
 
         if(generateSnapshot)
-            _framework.RunOnTick(() => Snapshot(), delayTicks: 2);
+            _framework.RunOnTick(() => Snapshot(reset, reconcile), delayTicks: 2);
     }
 
     public void ExportPose(string path)
@@ -116,7 +116,7 @@ internal class PosingCapability : ActorCharacterCapability
         ResourceProvider.Instance.SaveFileDocument(path, poseFile);
     }
 
-    public void Snapshot()
+    public void Snapshot(bool reset = true, bool reconcile = true)
     {
         var undoStackSize = _configurationService.Configuration.Posing.UndoStackSize;
         if(undoStackSize <= 0)
@@ -133,7 +133,8 @@ internal class PosingCapability : ActorCharacterCapability
         _undoStack.Push(new PoseStack(SkeletonPosing.PoseInfo.Clone(), ModelPosing.Transform));
         _undoStack = _undoStack.Trim(undoStackSize + 1);
 
-        Reconcile();
+        if(reconcile)
+            Reconcile(reset);
     }
 
     public void Redo()
@@ -158,22 +159,25 @@ internal class PosingCapability : ActorCharacterCapability
         }
     }
 
-    public void Reset(bool generateSnapshot = true)
+    public void Reset(bool generateSnapshot = true, bool reset = true)
     {
         SkeletonPosing.ResetPose();
         ModelPosing.ResetTransform();
 
         if(generateSnapshot)
-            Snapshot();
+            Snapshot(reset);
     }
 
-    private void Reconcile()
+    public void Reconcile(bool reset = true, bool generateSnapshot = true)
     {
         _framework.RunOnTick(() =>
         {
             var all = new PoseImporterOptions(new BoneFilter(_posingService), TransformComponents.All, true);
             var poseFile = GeneratePoseFile();
-            Reset(false);
+            if(reset)
+            {
+                Reset(generateSnapshot, false);
+            }
             ImportPose(poseFile, options: all, generateSnapshot: false);
         }, delayTicks: 2);
     }
