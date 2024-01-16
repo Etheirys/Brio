@@ -1,5 +1,5 @@
 # Brio
-Brio is a suite of tools to enhance your GPosing experience, primarily developed by Asgard.
+Brio is a suite of tools to enhance your GPosing experience.
 Brio is currently in alpha, and as such, there may be bugs. If you find any, please report them.
 
 ## Features
@@ -29,7 +29,8 @@ Brio is still early in Alpha so issues are expected.
 Please either open an [issue](https://github.com/AsgardXIV/Brio/issues) or visit us on [Discord](https://discord.gg/KvGJCCnG8t) if you need help!
 
 ## Authors
-* [Asgard](https://github.com/AsgardXIV) - Main development.
+* [Minmoose](https://github.com/Minmoose) - Maintainer.
+* [Asgard](https://github.com/AsgardXIV) - Original developer.
 
 ## Acknowledgements
 Brio wouldn't be possible without the tireless work of many devs across many projects.
