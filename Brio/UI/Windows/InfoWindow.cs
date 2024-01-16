@@ -66,16 +66,6 @@ internal class InfoWindow : Window
                     Process.Start(new ProcessStartInfo { FileName = "https://github.com/AsgardXIV/Brio", UseShellExecute = true });
                 ImGui.PopStyleColor();
 
-                ImGui.PushStyleColor(ImGuiCol.Button, new Vector4(255, 91, 94, 255) / 255);
-                if (ImGui.Button("Donate on Ko-Fi", buttonSize))
-                    Process.Start(new ProcessStartInfo { FileName = "https://ko-fi.com/asgard", UseShellExecute = true });
-                ImGui.PopStyleColor();
-
-                ImGui.PushStyleColor(ImGuiCol.Button, new Vector4(29, 161, 242, 255) / 255);
-                if (ImGui.Button("Asgard's Twitter", buttonSize))
-                    Process.Start(new ProcessStartInfo { FileName = "https://twitter.com/AsgardXIV", UseShellExecute = true });
-                ImGui.PopStyleColor();
-
                 ImGui.PushStyleColor(ImGuiCol.Button, new Vector4(0, 70, 0, 255) / 255);
                 if (ImGui.Button("Licenses", buttonSize))
                     Process.Start(new ProcessStartInfo { FileName = "https://github.com/AsgardXIV/Brio/blob/main/Acknowledgements.md", UseShellExecute = true });
