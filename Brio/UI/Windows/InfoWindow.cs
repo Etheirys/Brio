@@ -31,13 +31,14 @@ internal class InfoWindow : Window
             {
                 string text = $"Welcome to Brio v{_configurationService.Version}!";
                 text += "\n\n";
-                text += "Brio is a suite of tools to enhance your GPosing experience, primarily developed by Asgard.";
+                text += "Brio is a suite of tools to enhance your GPosing experience,";
+                text += "\n";
+                text += "originally made by Asgard, now maintained by Minmoose.";
                 text += "\n\n";
                 text += "Brio is currently in alpha, and as such, there may be bugs. If you find any, please report them.";
                 text += "\n\n";
                 text += "Happy Posing!";
                 text += "\n";
-                text += " - Asgard";
 
                 ImGui.PushTextWrapPos(segmentSize * 2);
                 ImGui.TextWrapped(text);
@@ -52,12 +53,12 @@ internal class InfoWindow : Window
             if (buttonGroup.Success)
             {
                 ImGui.PushStyleColor(ImGuiCol.Button, new Vector4(86, 98, 246, 255) / 255);
-                if (ImGui.Button("Discord", buttonSize))
+                if (ImGui.Button("Join the Discord", buttonSize))
                     Process.Start(new ProcessStartInfo { FileName = "https://discord.gg/KvGJCCnG8t", UseShellExecute = true });
                 ImGui.PopStyleColor();
 
                 ImGui.PushStyleColor(ImGuiCol.Button, new Vector4(255, 0, 0, 255) / 255);
-                if (ImGui.Button("Report Issue", buttonSize))
+                if (ImGui.Button("Report an Issue", buttonSize))
                     Process.Start(new ProcessStartInfo { FileName = "https://github.com/AsgardXIV/Brio/issues", UseShellExecute = true });
                 ImGui.PopStyleColor();
 
@@ -67,7 +68,7 @@ internal class InfoWindow : Window
                 ImGui.PopStyleColor();
 
                 ImGui.PushStyleColor(ImGuiCol.Button, new Vector4(0, 70, 0, 255) / 255);
-                if (ImGui.Button("Licenses", buttonSize))
+                if (ImGui.Button("License & Attributions", buttonSize))
                     Process.Start(new ProcessStartInfo { FileName = "https://github.com/AsgardXIV/Brio/blob/main/Acknowledgements.md", UseShellExecute = true });
                 ImGui.PopStyleColor();
 

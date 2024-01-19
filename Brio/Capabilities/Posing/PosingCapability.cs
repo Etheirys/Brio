@@ -168,7 +168,7 @@ internal class PosingCapability : ActorCharacterCapability
             Snapshot(reset);
     }
 
-    public void Reconcile(bool reset = true, bool generateSnapshot = true)
+    private void Reconcile(bool reset = true, bool generateSnapshot = true)
     {
         _framework.RunOnTick(() =>
         {
