@@ -1,4 +1,5 @@
-﻿using ImGuiNET;
+﻿using Brio.Config;
+using ImGuiNET;
 using ImGuizmoNET;
 using System.Numerics;
 
@@ -10,10 +11,12 @@ internal static class ImGuizmoExtensions
     {
         float mouseWheel = ImGui.GetIO().MouseWheel / 100;
 
-        if(ImGui.GetIO().KeyCtrl)
+        bool smallIncrement = ImGui.IsKeyDown(ConfigurationService.Instance.Configuration.Interface.IncrementSmall);
+        if(smallIncrement)
             mouseWheel /= 10;
 
-        if(ImGui.GetIO().KeyShift)
+        bool largeIncrement = ImGui.IsKeyDown(ConfigurationService.Instance.Configuration.Interface.IncrementLarge);
+        if(largeIncrement)
             mouseWheel *= 10;
 
         if(mouseWheel != 0)

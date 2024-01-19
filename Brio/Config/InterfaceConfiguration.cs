@@ -1,4 +1,6 @@
-﻿namespace Brio.Config;
+﻿using ImGuiNET;
+
+namespace Brio.Config;
 
 internal class InterfaceConfiguration
 {
@@ -7,4 +9,7 @@ internal class InterfaceConfiguration
     public bool ShowInCutscene { get; set; } = false;
     public bool ShowWhenUIHidden { get; set; } = false;
     public bool CensorActorNames { get; set; } = false;
+
+    public ImGuiKey IncrementSmall { get; set; } = ImGuiKey.RightCtrl;
+    public ImGuiKey IncrementLarge { get; set; } = ImGuiKey.RightShift;
 }
