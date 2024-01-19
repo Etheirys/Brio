@@ -36,16 +36,16 @@ internal class TimeService : IDisposable
         {
             var framework = Framework.Instance();
             if (framework == null) return 0;
-            return framework->IsEorzeaTimeOverridden ? framework->EorzeaTimeOverride : framework->EorzeaTime;
+            return framework->ClientTime.IsEorzeaTimeOverridden ? framework->ClientTime.EorzeaTimeOverride : framework->ClientTime.EorzeaTime;
         }
 
         set
         {
             var framework = Framework.Instance();
             if (framework == null) return;
-            framework->EorzeaTime = value;
-            if (framework->IsEorzeaTimeOverridden)
-                framework->EorzeaTimeOverride = value;
+            framework->ClientTime.EorzeaTime = value;
+            if (framework->ClientTime.IsEorzeaTimeOverridden)
+                framework->ClientTime.EorzeaTimeOverride = value;
         }
     }
 
