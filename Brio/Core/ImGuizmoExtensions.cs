@@ -9,18 +9,21 @@ internal static class ImGuizmoExtensions
 {
     public static bool MouseWheelManipulate(ref Matrix4x4 matrix)
     {
+        if(ImGui.IsAnyMouseDown())
+            return false;
+
         float mouseWheel = ImGui.GetIO().MouseWheel / 100;
-
-        bool smallIncrement = ImGui.IsKeyDown(ConfigurationService.Instance.Configuration.Interface.IncrementSmall);
-        if(smallIncrement)
-            mouseWheel /= 10;
-
-        bool largeIncrement = ImGui.IsKeyDown(ConfigurationService.Instance.Configuration.Interface.IncrementLarge);
-        if(largeIncrement)
-            mouseWheel *= 10;
-
+   
         if(mouseWheel != 0)
         {
+            bool smallIncrement = ImGui.IsKeyDown(ConfigurationService.Instance.Configuration.Interface.IncrementSmall);
+            if(smallIncrement)
+                mouseWheel /= 10;
+
+            bool largeIncrement = ImGui.IsKeyDown(ConfigurationService.Instance.Configuration.Interface.IncrementLarge);
+            if(largeIncrement)
+                mouseWheel *= 10;
+
             if(ImGuizmo.IsOver(OPERATION.ROTATE_X))
             {
                 matrix = Matrix4x4.CreateRotationX(mouseWheel) * matrix;
