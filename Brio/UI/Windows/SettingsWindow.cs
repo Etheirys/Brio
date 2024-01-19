@@ -296,6 +296,13 @@ internal class SettingsWindow : Window
                 _configurationService.ApplyChange();
             }
 
+            bool hideGizmoWhenAdvancedPosingOpen = _configurationService.Configuration.Posing.HideGizmoWhenAdvancedPosingOpen;
+            if(ImGui.Checkbox("Hide Gizmo while Advanced Posing", ref hideGizmoWhenAdvancedPosingOpen))
+            {
+                _configurationService.Configuration.Posing.HideGizmoWhenAdvancedPosingOpen = hideGizmoWhenAdvancedPosingOpen;
+                _configurationService.ApplyChange();
+            }
+
             bool showSkeletonLines = _configurationService.Configuration.Posing.ShowSkeletonLines;
             if (ImGui.Checkbox("Show Skeleton Lines", ref showSkeletonLines))
             {
