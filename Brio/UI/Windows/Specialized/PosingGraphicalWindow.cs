@@ -380,14 +380,16 @@ internal class PosingGraphicalWindow : Window, IDisposable
 
         if(!appearance.IsHuman)
         {
-            ImGui.Text("Graphical posing is only available for humanaoid characters.");
+            ImGui.Text("Graphical posing is only available for humanoid characters.");
             if(ImGui.Button("Make Human"))
                 appearance.MakeHuman();
 
             return;
         }
 
-        var contentWidth = ImGui.GetContentRegionAvail().X / 3f;
+
+        var contentArea = ImGui.GetContentRegionAvail();
+        var contentWidth = contentArea.X / 3f;
         using(var child = ImRaii.Child("###body_pane", new Vector2(contentWidth, -1), false, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse))
         {
             if(child.Success)
@@ -480,6 +482,14 @@ internal class PosingGraphicalWindow : Window, IDisposable
                     DrawBoneSection("hands", true, posing);
                 }
             }
+        }
+
+        // Check if the user has clicked on the background to clear selection.
+        Vector2 mousePos = ImGui.GetMousePos() - ImGui.GetWindowPos();
+        bool isMouseOverArea = (mousePos.X > 0 && mousePos.Y > 0 && mousePos.X < contentArea.X && mousePos.Y < contentArea.Y);
+        if (ImGui.IsAnyMouseDown() && !ImGui.IsAnyItemHovered() && isMouseOverArea)
+        {
+            posing.ClearSelection();
         }
     }
 
