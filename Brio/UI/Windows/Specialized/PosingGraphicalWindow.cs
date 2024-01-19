@@ -345,6 +345,11 @@ internal class PosingGraphicalWindow : Window, IDisposable
 
             ImGuizmo.Enable(true);
 
+            if(ImGuizmoExtensions.MouseWheelManipulate(ref matrix))
+            {
+                _trackingMatrix = matrix;
+            }
+
             if(ImGuizmo.Manipulate(ref viewMatrix.M11, ref projectionMatrix.M11, OPERATION.ROTATE, _posingService.CoordinateMode.AsGizmoMode(), ref matrix.M11))
             {
                 _trackingMatrix = matrix;

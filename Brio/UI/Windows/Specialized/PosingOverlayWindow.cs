@@ -406,6 +406,12 @@ internal class PosingOverlayWindow : Window, IDisposable
 
         Transform? newTransform = null;
 
+        if(ImGuizmoExtensions.MouseWheelManipulate(ref matrix))
+        {
+            newTransform = matrix.ToTransform();
+            _trackingTransform = newTransform;
+        }
+
         if(ImGuizmo.Manipulate(
             ref worldViewMatrix.M11,
             ref projectionMatrix.M11,
