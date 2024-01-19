@@ -32,26 +32,26 @@ internal class FestivalSelector(string id, IEnumerable<FestivalEntry> entries) :
 
     protected override void DrawOptions()
     {
-        if (ImGui.Checkbox("Show Unknown", ref _showUnknown))
+        if(ImGui.Checkbox("Show Unknown", ref _showUnknown))
             UpdateList();
 
         ImGui.SameLine();
 
-        if (ImGui.Checkbox("Show Unsafe", ref _showUnsafe))
+        if(ImGui.Checkbox("Show Unsafe", ref _showUnsafe))
             UpdateList();
     }
 
     protected override bool Filter(FestivalEntry item, string search)
     {
-        if (item.Unknown && !_showUnknown)
+        if(item.Unknown && !_showUnknown)
             return false;
 
-        if (item.Unsafe && !_showUnsafe)
+        if(item.Unsafe && !_showUnsafe)
             return false;
 
         string searchTerm = $"{item.Name} {item.Id}";
 
-        if (searchTerm.Contains(search, StringComparison.InvariantCultureIgnoreCase))
+        if(searchTerm.Contains(search, StringComparison.InvariantCultureIgnoreCase))
             return true;
 
         return false;

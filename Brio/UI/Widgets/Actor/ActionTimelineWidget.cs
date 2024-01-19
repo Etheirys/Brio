@@ -1,6 +1,6 @@
 ﻿using Brio.Capabilities.Actor;
-using Brio.UI.Widgets.Core;
 using Brio.UI.Controls.Editors;
+using Brio.UI.Widgets.Core;
 
 namespace Brio.UI.Widgets.Actor;
 

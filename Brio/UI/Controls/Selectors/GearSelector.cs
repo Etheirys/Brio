@@ -1,9 +1,9 @@
-﻿using FFXIVClientStructs.FFXIV.Client.Game.Character;
-using ImGuiNET;
-using Brio.Game.Actor.Appearance;
+﻿using Brio.Game.Actor.Appearance;
 using Brio.Resources;
 using Brio.Resources.Extra;
 using Brio.UI.Controls.Stateless;
+using FFXIVClientStructs.FFXIV.Client.Game.Character;
+using ImGuiNET;
 using System;
 using System.Numerics;
 
@@ -34,14 +34,14 @@ internal class GearSelector(string id) : Selector<ModelDatabase.ModelInfo>(id)
 
     protected override bool Filter(ModelDatabase.ModelInfo item, string search)
     {
-        if ((_allowedSlots & item.Slots) == 0)
+        if((_allowedSlots & item.Slots) == 0)
             return false;
 
         WeaponModelId weaponModelId = default;
         weaponModelId.Value = item.ModelId;
         string searchTerm = $"{item.Name} {item.ModelId}";
 
-        if (searchTerm.Contains(search, StringComparison.InvariantCultureIgnoreCase))
+        if(searchTerm.Contains(search, StringComparison.InvariantCultureIgnoreCase))
             return true;
 
         return false;
@@ -49,16 +49,16 @@ internal class GearSelector(string id) : Selector<ModelDatabase.ModelInfo>(id)
 
     protected override int Compare(ModelDatabase.ModelInfo itemA, ModelDatabase.ModelInfo itemB)
     {
-        if (itemA.ModelId == 0 && itemB.ModelId != 0)
+        if(itemA.ModelId == 0 && itemB.ModelId != 0)
             return -1;
 
-        if (itemA.ModelId != 0 && itemB.ModelId == 0)
+        if(itemA.ModelId != 0 && itemB.ModelId == 0)
             return 1;
 
-        if (!string.IsNullOrEmpty(itemA.Name) && string.IsNullOrEmpty(itemB.Name))
+        if(!string.IsNullOrEmpty(itemA.Name) && string.IsNullOrEmpty(itemB.Name))
             return -1;
 
-        if (string.IsNullOrEmpty(itemA.Name) && !string.IsNullOrEmpty(itemB.Name))
+        if(string.IsNullOrEmpty(itemA.Name) && !string.IsNullOrEmpty(itemB.Name))
             return 1;
 
         return string.Compare(itemA.Name, itemB.Name, StringComparison.InvariantCultureIgnoreCase);
@@ -72,7 +72,7 @@ internal class GearSelector(string id) : Selector<ModelDatabase.ModelInfo>(id)
 
         string modelId;
 
-        if (_allowedSlots.HasFlag(ActorEquipSlot.MainHand) || _allowedSlots.HasFlag(ActorEquipSlot.OffHand))
+        if(_allowedSlots.HasFlag(ActorEquipSlot.MainHand) || _allowedSlots.HasFlag(ActorEquipSlot.OffHand))
         {
             WeaponModelId weaponModelId = new()
             {

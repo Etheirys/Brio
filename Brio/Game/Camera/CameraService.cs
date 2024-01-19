@@ -45,11 +45,11 @@ internal unsafe class CameraService : IDisposable
     {
         var result = _cameraUpdateHook.Original(camera);
 
-        if (_gPoseService.IsGPosing)
+        if(_gPoseService.IsGPosing)
         {
-            if (_entityManager.TryGetEntity<CameraEntity>("camera", out var cameraEntity))
+            if(_entityManager.TryGetEntity<CameraEntity>("camera", out var cameraEntity))
             {
-                if (cameraEntity.TryGetCapability<CameraCapability>(out var cameraCapability))
+                if(cameraEntity.TryGetCapability<CameraCapability>(out var cameraCapability))
                 {
                     if(camera == cameraCapability.Camera)
                     {
@@ -68,11 +68,11 @@ internal unsafe class CameraService : IDisposable
 
     private nint CameraCollisionDetour(BrioCamera* camera, Vector3* a2, Vector3* a3, float a4, nint a5, float a6)
     {
-        if (_gPoseService.IsGPosing)
+        if(_gPoseService.IsGPosing)
         {
-            if (_entityManager.TryGetEntity<CameraEntity>("camera", out var cameraEntity))
+            if(_entityManager.TryGetEntity<CameraEntity>("camera", out var cameraEntity))
             {
-                if (cameraEntity.TryGetCapability<CameraCapability>(out var cameraCapability))
+                if(cameraEntity.TryGetCapability<CameraCapability>(out var cameraCapability))
                 {
                     if(cameraCapability.DisableCollision)
                     {

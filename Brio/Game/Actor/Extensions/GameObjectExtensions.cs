@@ -1,9 +1,8 @@
-﻿using Dalamud.Game.ClientState.Objects.Enums;
+﻿using Brio.Core;
+using Dalamud.Game.ClientState.Objects.Enums;
 using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Interface;
-
 using StructsObject = FFXIVClientStructs.FFXIV.Client.Game.Object.GameObject;
-using Brio.Core;
 
 namespace Brio.Game.Actor.Extensions;
 
@@ -26,7 +25,7 @@ internal static class GameObjectExtensions
 
     public static string GetFriendlyName(this GameObject go)
     {
-        switch (go.ObjectKind)
+        switch(go.ObjectKind)
         {
             case ObjectKind.Ornament:
                 return $"Ornament ({go.ObjectIndex})";
@@ -39,7 +38,7 @@ internal static class GameObjectExtensions
 
     public static string GetCensoredName(this GameObject go)
     {
-        if (go.ObjectIndex >= ActorTableHelpers.GPoseStart)
+        if(go.ObjectIndex >= ActorTableHelpers.GPoseStart)
             return $"{(go.ObjectIndex - ActorTableHelpers.GPoseStart + 1).ToBrioName()} ({go.ObjectIndex})";
 
         return $"{((int)go.ObjectIndex).ToBrioName()} ({go.ObjectIndex})";
@@ -62,7 +61,7 @@ internal static class GameObjectExtensions
 
     public unsafe static void SetName(this ref StructsObject gameObject, string name)
     {
-        for (int x = 0; x < name.Length; x++)
+        for(int x = 0; x < name.Length; x++)
         {
             gameObject.Name[x] = (byte)name[x];
         }

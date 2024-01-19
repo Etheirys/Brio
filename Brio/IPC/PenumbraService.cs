@@ -1,6 +1,6 @@
-﻿using Dalamud.Game.ClientState.Objects.Types;
+﻿using Brio.Config;
+using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Plugin;
-using Brio.Config;
 using Penumbra.Api;
 using Penumbra.Api.Helpers;
 using System;
@@ -45,7 +45,7 @@ internal class PenumbraService : IDisposable
 
     public void RefreshPenumbraStatus()
     {
-        if (_configurationService.Configuration.IPC.AllowPenumbraIntegration)
+        if(_configurationService.Configuration.IPC.AllowPenumbraIntegration)
         {
             IsPenumbraAvailable = ConnectToPenumbra();
         }
@@ -78,14 +78,14 @@ internal class PenumbraService : IDisposable
         try
         {
             bool penumInstalled = _pluginInterface.InstalledPlugins.Count(x => x.Name == "Penumbra") > 0;
-            if (!penumInstalled)
+            if(!penumInstalled)
             {
                 Brio.Log.Debug("Penumbra not present");
                 return false;
             }
 
             var (major, minor) = Ipc.ApiVersions.Subscriber(_pluginInterface).Invoke();
-            if (major != PenumbraApiMajor || minor < PenumbraApiMinor)
+            if(major != PenumbraApiMajor || minor < PenumbraApiMinor)
             {
                 Brio.Log.Debug("Penumbra API mismatch");
                 return false;
@@ -95,7 +95,7 @@ internal class PenumbraService : IDisposable
 
             return true;
         }
-        catch (Exception ex)
+        catch(Exception ex)
         {
             Brio.Log.Debug(ex, "Penumbra initialize error");
             return false;

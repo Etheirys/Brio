@@ -1,9 +1,9 @@
-﻿using Dalamud.Interface;
-using Dalamud.Interface.Utility.Raii;
-using ImGuiNET;
-using Brio.Entities;
+﻿using Brio.Entities;
 using Brio.Entities.Core;
 using Brio.UI.Widgets.Core;
+using Dalamud.Interface;
+using Dalamud.Interface.Utility.Raii;
+using ImGuiNET;
 using System.Linq;
 
 namespace Brio.UI.Entitites;
@@ -17,14 +17,14 @@ internal class EntityHierarchyView(EntityManager entityManager)
     {
         var selectedEntityId = entityManager.SelectedEntityId;
 
-        if (_lastSelectedId != null && selectedEntityId != null && !_lastSelectedId.Equals(selectedEntityId))
+        if(_lastSelectedId != null && selectedEntityId != null && !_lastSelectedId.Equals(selectedEntityId))
         {
             // The change must have come from outside of this control, so we need to scroll to the new selection
             _scrollToSelected = true;
             _lastSelectedId = selectedEntityId;
         }
 
-        using (ImRaii.PushId($"entity_hierarchy_{root.Id}"))
+        using(ImRaii.PushId($"entity_hierarchy_{root.Id}"))
         {
             DrawEntity(root, selectedEntityId);
         }
@@ -32,22 +32,22 @@ internal class EntityHierarchyView(EntityManager entityManager)
 
     private void DrawEntity(Entity entity, EntityId? selectedEntityId)
     {
-        if (!entity.IsVisible)
+        if(!entity.IsVisible)
             return;
 
         bool didRightClick = false;
 
         ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags.SpanAvailWidth | ImGuiTreeNodeFlags.OpenOnDoubleClick;
 
-        if (entity.Flags.HasFlag(EntityFlags.DefaultOpen))
+        if(entity.Flags.HasFlag(EntityFlags.DefaultOpen))
             flags |= ImGuiTreeNodeFlags.DefaultOpen;
 
-        if (entity.Children.Count == 0)
+        if(entity.Children.Count == 0)
             flags |= ImGuiTreeNodeFlags.Leaf;
 
-        if (selectedEntityId != null && entity.Id.Equals(selectedEntityId))
+        if(selectedEntityId != null && entity.Id.Equals(selectedEntityId))
         {
-            if (_scrollToSelected)
+            if(_scrollToSelected)
             {
                 ImGui.SetScrollHereY();
                 _scrollToSelected = false;
@@ -55,16 +55,16 @@ internal class EntityHierarchyView(EntityManager entityManager)
             flags |= ImGuiTreeNodeFlags.Selected;
         }
 
-        using (var treeNode = ImRaii.TreeNode($"###treenode_{entity.Id}", flags))
+        using(var treeNode = ImRaii.TreeNode($"###treenode_{entity.Id}", flags))
         {
             bool isNodeOpen = treeNode.Success;
 
-            if (ImGui.IsItemClicked(ImGuiMouseButton.Left))
+            if(ImGui.IsItemClicked(ImGuiMouseButton.Left))
             {
                 Select(entity);
             }
 
-            if (ImGui.IsItemClicked(ImGuiMouseButton.Right))
+            if(ImGui.IsItemClicked(ImGuiMouseButton.Right))
             {
                 Select(entity);
                 didRightClick = true;
@@ -72,37 +72,37 @@ internal class EntityHierarchyView(EntityManager entityManager)
 
             DrawNode(entity);
 
-            if (didRightClick)
+            if(didRightClick)
             {
                 ImGui.OpenPopup($"context_popup");
             }
 
-            using (var popup = ImRaii.Popup("context_popup"))
+            using(var popup = ImRaii.Popup("context_popup"))
             {
-                if (popup.Success)
+                if(popup.Success)
                 {
                     bool didDrawAnything = false;
 
-                    foreach (var v in entity.Capabilities.ToList())
+                    foreach(var v in entity.Capabilities.ToList())
                     {
-                        if (v.Widget != null)
+                        if(v.Widget != null)
                         {
                             bool hasPopup = v.Widget.Flags.HasFlag(WidgetFlags.DrawPopup);
                             didDrawAnything |= hasPopup;
-                            if (hasPopup)
+                            if(hasPopup)
                                 v.Widget.DrawPopup();
                         }
                     }
 
-                    if (!didDrawAnything)
+                    if(!didDrawAnything)
                         ImGui.CloseCurrentPopup();
                 }
             }
 
-            if (isNodeOpen)
+            if(isNodeOpen)
             {
-                if (entity.Children.Count > 0)
-                    foreach (var child in entity.Children.ToList())
+                if(entity.Children.Count > 0)
+                    foreach(var child in entity.Children.ToList())
                         DrawEntity(child, selectedEntityId);
             }
 
@@ -112,7 +112,7 @@ internal class EntityHierarchyView(EntityManager entityManager)
     private void DrawNode(Entity entity)
     {
         ImGui.SameLine();
-        using (ImRaii.PushFont(UiBuilder.IconFont))
+        using(ImRaii.PushFont(UiBuilder.IconFont))
         {
             ImGui.Text(entity.Icon.ToIconString());
         }

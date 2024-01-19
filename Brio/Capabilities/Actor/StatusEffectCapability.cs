@@ -1,8 +1,8 @@
-﻿using Dalamud.Game.ClientState.Objects.Types;
-using Brio.Entities.Actor;
+﻿using Brio.Entities.Actor;
 using Brio.Game.Actor.Extensions;
 using Brio.Resources;
 using Brio.UI.Widgets.Actor;
+using Dalamud.Game.ClientState.Objects.Types;
 using Lumina.Excel.GeneratedSheets;
 using Microsoft.Extensions.DependencyInjection;
 using System;
@@ -23,7 +23,7 @@ internal class StatusEffectCapability : ActorCapability
 
     public static StatusEffectCapability? CreateIfEligible(IServiceProvider provider, ActorEntity entity)
     {
-        if (entity.GameObject is BattleChara character)
+        if(entity.GameObject is BattleChara character)
             return ActivatorUtilities.CreateInstance<StatusEffectCapability>(provider, entity, character);
 
         return null;
@@ -37,7 +37,7 @@ internal class StatusEffectCapability : ActorCapability
     {
         var statusManager = Character.GetStatusManager();
         var idx = statusManager->GetStatusIndex(status);
-        if (idx != -1)
+        if(idx != -1)
             statusManager->RemoveStatus(idx);
     }
 

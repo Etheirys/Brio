@@ -1,9 +1,9 @@
-﻿using Dalamud.Game.ClientState.Objects.Types;
-using Dalamud.Plugin.Services;
-using Brio.Game.Actor.Extensions;
+﻿using Brio.Game.Actor.Extensions;
 using Brio.Game.Core;
-using System.Threading.Tasks;
+using Dalamud.Game.ClientState.Objects.Types;
+using Dalamud.Plugin.Services;
 using System;
+using System.Threading.Tasks;
 
 namespace Brio.Game.Actor;
 
@@ -20,7 +20,7 @@ internal class ActorRedrawService(IFramework framework, IObjectTable objectTable
     public Task<RedrawResult> RedrawActor(int objectIndex)
     {
         var actor = _objectTable[objectIndex];
-        if (actor == null)
+        if(actor == null)
             return Task.FromResult(RedrawResult.Failed);
 
         return RedrawActor(actor);
@@ -39,7 +39,7 @@ internal class ActorRedrawService(IFramework framework, IObjectTable objectTable
             Brio.Log.Debug($"Brio redraw complete on gameobject {go.ObjectIndex}.");
             return RedrawResult.Full;
         }
-        catch (Exception e)
+        catch(Exception e)
         {
             Brio.Log.Error(e, $"Brio redraw failed on gameobject {go.ObjectIndex}.");
             return RedrawResult.Failed;
@@ -74,7 +74,7 @@ internal class ActorRedrawService(IFramework framework, IObjectTable objectTable
            () =>
            {
                var drawObject = go.Native()->DrawObject;
-               if (drawObject == null)
+               if(drawObject == null)
                    return false;
 
                return drawObject->IsVisible;

@@ -15,56 +15,56 @@ internal class BoneSearchControl
     private string _searchTerm = string.Empty;
     public void Draw(string id, PosingCapability posing)
     {
-        using (ImRaii.PushId(id))
+        using(ImRaii.PushId(id))
         {
             ImGui.SetNextItemWidth(-1);
             ImGui.InputText("###search_term", ref _searchTerm, 256);
 
-            using (var child = ImRaii.Child("###bone_search_editor_child", new Vector2(400, ImGui.GetTextLineHeight() * 25f), true))
+            using(var child = ImRaii.Child("###bone_search_editor_child", new Vector2(400, ImGui.GetTextLineHeight() * 25f), true))
             {
-                if (child.Success)
+                if(child.Success)
                 {
 
                     bool rootSelected = posing.Selected.Value is None || posing.Selected.Value is ModelTransformSelection;
                     ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags.DefaultOpen | ImGuiTreeNodeFlags.OpenOnDoubleClick;
 
-                    if (rootSelected)
+                    if(rootSelected)
                         flags |= ImGuiTreeNodeFlags.Selected;
 
-                    using (var node = ImRaii.TreeNode("Model", flags))
+                    using(var node = ImRaii.TreeNode("Model", flags))
                     {
-                        if (node.Success)
+                        if(node.Success)
                         {
-                            if (ImGui.IsItemClicked())
+                            if(ImGui.IsItemClicked())
                                 posing.Selected = PosingSelectionType.ModelTransform;
 
-                            if (posing.SkeletonPosing.CharacterSkeleton != null)
+                            if(posing.SkeletonPosing.CharacterSkeleton != null)
                             {
-                                using (var skeleton = ImRaii.TreeNode("Character", ImGuiTreeNodeFlags.DefaultOpen | ImGuiTreeNodeFlags.OpenOnDoubleClick))
+                                using(var skeleton = ImRaii.TreeNode("Character", ImGuiTreeNodeFlags.DefaultOpen | ImGuiTreeNodeFlags.OpenOnDoubleClick))
                                 {
-                                    if (skeleton.Success)
+                                    if(skeleton.Success)
                                     {
                                         DrawBone(posing.SkeletonPosing.CharacterSkeleton.RootBone, posing, PoseInfoSlot.Character);
                                     }
                                 }
                             }
 
-                            if (posing.SkeletonPosing.MainHandSkeleton != null)
+                            if(posing.SkeletonPosing.MainHandSkeleton != null)
                             {
-                                using (var skeleton = ImRaii.TreeNode("Main Hand", ImGuiTreeNodeFlags.DefaultOpen | ImGuiTreeNodeFlags.OpenOnDoubleClick))
+                                using(var skeleton = ImRaii.TreeNode("Main Hand", ImGuiTreeNodeFlags.DefaultOpen | ImGuiTreeNodeFlags.OpenOnDoubleClick))
                                 {
-                                    if (skeleton.Success)
+                                    if(skeleton.Success)
                                     {
                                         DrawBone(posing.SkeletonPosing.MainHandSkeleton.RootBone, posing, PoseInfoSlot.MainHand);
                                     }
                                 }
                             }
 
-                            if (posing.SkeletonPosing.OffHandSkeleton != null)
+                            if(posing.SkeletonPosing.OffHandSkeleton != null)
                             {
-                                using (var skeleton = ImRaii.TreeNode("Off Hand", ImGuiTreeNodeFlags.DefaultOpen | ImGuiTreeNodeFlags.OpenOnDoubleClick))
+                                using(var skeleton = ImRaii.TreeNode("Off Hand", ImGuiTreeNodeFlags.DefaultOpen | ImGuiTreeNodeFlags.OpenOnDoubleClick))
                                 {
-                                    if (skeleton.Success)
+                                    if(skeleton.Success)
                                     {
                                         DrawBone(posing.SkeletonPosing.OffHandSkeleton.RootBone, posing, PoseInfoSlot.OffHand);
                                     }
@@ -89,28 +89,28 @@ internal class BoneSearchControl
 
         bool treeIncludesTerm = TreeIncludesTerm(bone, _searchTerm, false);
 
-        if (leaf || !treeIncludesTerm)
+        if(leaf || !treeIncludesTerm)
             flags |= ImGuiTreeNodeFlags.Leaf;
 
-        if (selected)
+        if(selected)
             flags |= ImGuiTreeNodeFlags.Selected;
 
         treeIncludesTerm = TreeIncludesTerm(bone, _searchTerm, true);
-        if (!treeIncludesTerm)
+        if(!treeIncludesTerm)
             return;
 
-        if (!bone.IsHidden)
+        if(!bone.IsHidden)
         {
-            using (var node = ImRaii.TreeNode($"{bone.FriendlyName}###{bonePoseInfoId}", flags))
+            using(var node = ImRaii.TreeNode($"{bone.FriendlyName}###{bonePoseInfoId}", flags))
             {
-                if (node.Success)
+                if(node.Success)
                 {
-                    if (ImGui.IsItemClicked())
+                    if(ImGui.IsItemClicked())
                     {
                         posing.Selected = bonePoseInfoId;
                     }
 
-                    foreach (var child in bone.Children)
+                    foreach(var child in bone.Children)
                     {
                         DrawBone(child, posing, slot);
                     }
@@ -119,7 +119,7 @@ internal class BoneSearchControl
         }
         else
         {
-            foreach (var child in bone.Children)
+            foreach(var child in bone.Children)
             {
                 DrawBone(child, posing, slot);
             }
@@ -128,16 +128,16 @@ internal class BoneSearchControl
 
     private bool TreeIncludesTerm(Bone bone, string term, bool includeCurrent)
     {
-        if (string.IsNullOrWhiteSpace(term))
+        if(string.IsNullOrWhiteSpace(term))
             return true;
 
-        if (includeCurrent)
-            if (bone.FriendlyDescriptor.Contains(term, StringComparison.OrdinalIgnoreCase))
+        if(includeCurrent)
+            if(bone.FriendlyDescriptor.Contains(term, StringComparison.OrdinalIgnoreCase))
                 return true;
 
-        foreach (var child in bone.Children)
+        foreach(var child in bone.Children)
         {
-            if (TreeIncludesTerm(child, term, true))
+            if(TreeIncludesTerm(child, term, true))
                 return true;
         }
 

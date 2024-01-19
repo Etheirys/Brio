@@ -36,11 +36,11 @@ internal static class IntExtensions
     public static string ToWords(this int i, string separator = " ")
     {
         string output = i.ToString();
-        if (i < 20)
+        if(i < 20)
         {
             output = _units[i];
         }
-        else if (i < 100)
+        else if(i < 100)
         {
             output = _tens[i / 10] + ((i % 10 > 0) ? separator + ToWords(i % 10, separator) : "");
         }

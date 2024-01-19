@@ -1,7 +1,7 @@
-﻿using FFXIVClientStructs.FFXIV.Client.Game.Character;
-using Brio.Game.Actor.Appearance;
-using System.Numerics;
+﻿using Brio.Game.Actor.Appearance;
+using FFXIVClientStructs.FFXIV.Client.Game.Character;
 using System;
+using System.Numerics;
 
 namespace Brio.Files;
 

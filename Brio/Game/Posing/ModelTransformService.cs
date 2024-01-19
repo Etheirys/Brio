@@ -1,15 +1,15 @@
-﻿using Dalamud.Game.ClientState.Objects.Types;
-using Dalamud.Hooking;
-using Dalamud.Plugin.Services;
-using FFXIVClientStructs.FFXIV.Client.Graphics;
+﻿using Brio.Capabilities.Posing;
 using Brio.Entities;
 using Brio.Game.Actor;
 using Brio.Game.Actor.Extensions;
 using Brio.Game.GPose;
+using Dalamud.Game.ClientState.Objects.Types;
+using Dalamud.Hooking;
+using Dalamud.Plugin.Services;
+using FFXIVClientStructs.FFXIV.Client.Graphics;
 using System;
 using static Brio.Game.Actor.ActorRedrawService;
 using StructsGameObject = FFXIVClientStructs.FFXIV.Client.Game.Object.GameObject;
-using Brio.Capabilities.Posing;
 
 namespace Brio.Game.Posing;
 
@@ -38,7 +38,7 @@ internal unsafe class ModelTransformService : IDisposable
     {
         var native = go.Native();
         var drawObject = native->DrawObject;
-        if (drawObject != null)
+        if(drawObject != null)
         {
             return *(Transform*)(&drawObject->Object.Position);
         }
@@ -56,7 +56,7 @@ internal unsafe class ModelTransformService : IDisposable
     public unsafe void SetTransform(StructsGameObject* native, Transform transform)
     {
         var drawObject = native->DrawObject;
-        if (drawObject != null)
+        if(drawObject != null)
         {
             *(Transform*)(&drawObject->Object.Position) = transform;
         }
@@ -64,13 +64,13 @@ internal unsafe class ModelTransformService : IDisposable
 
     private void UpdatePositionDetour(StructsGameObject* gameObject, float x, float y, float z)
     {
-        if (_gPoseService.IsGPosing)
+        if(_gPoseService.IsGPosing)
         {
-            if (_entityManager.TryGetEntity(gameObject, out var entity))
+            if(_entityManager.TryGetEntity(gameObject, out var entity))
             {
-                if (entity.TryGetCapability<ModelPosingCapability>(out var transformCapability))
+                if(entity.TryGetCapability<ModelPosingCapability>(out var transformCapability))
                 {
-                    if (transformCapability.OverrideTransform.HasValue)
+                    if(transformCapability.OverrideTransform.HasValue)
                     {
                         var transform = transformCapability.OverrideTransform.Value;
                         SetTransform(gameObject, transform);
@@ -85,7 +85,7 @@ internal unsafe class ModelTransformService : IDisposable
 
     private void OnActorRedraw(GameObject go, RedrawStage stage)
     {
-        if (stage == RedrawStage.After)
+        if(stage == RedrawStage.After)
             UpdatePositionDetour((StructsGameObject*)go.Address, go.Position.X, go.Position.Y, go.Position.Z);
     }
 

@@ -1,7 +1,7 @@
 ﻿using Brio.Resources;
-using OneOf.Types;
-using OneOf;
 using Lumina.Excel.GeneratedSheets;
+using OneOf;
+using OneOf.Types;
 
 namespace Brio.Game.Types;
 
@@ -10,7 +10,7 @@ internal partial class ActionTimelineUnion : OneOfBase<ActionTimeline, None>
 {
     public static implicit operator ActionTimelineUnion(ActionTimelineId actionTimelineId)
     {
-        if (actionTimelineId.Id != 0 && GameDataProvider.Instance.ActionTimelines.TryGetValue(actionTimelineId.Id, out var timeline))
+        if(actionTimelineId.Id != 0 && GameDataProvider.Instance.ActionTimelines.TryGetValue(actionTimelineId.Id, out var timeline))
             return timeline;
 
         return new None();

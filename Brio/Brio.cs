@@ -1,10 +1,10 @@
-﻿using Dalamud.Plugin;
-using Dalamud.Plugin.Services;
-using Brio.Config;
+﻿using Brio.Config;
 using Brio.Core;
 using Brio.Entities;
 using Brio.Game.Actor;
+using Brio.Game.Camera;
 using Brio.Game.Chat;
+using Brio.Game.Core;
 using Brio.Game.GPose;
 using Brio.Game.Posing;
 using Brio.Game.World;
@@ -12,13 +12,13 @@ using Brio.IPC;
 using Brio.Resources;
 using Brio.UI;
 using Brio.UI.Windows;
-using Brio.Web;
-using Microsoft.Extensions.DependencyInjection;
-using System.Diagnostics;
-using Brio.Game.Camera;
 using Brio.UI.Windows.Specialized;
-using Brio.Game.Core;
+using Brio.Web;
+using Dalamud.Plugin;
+using Dalamud.Plugin.Services;
+using Microsoft.Extensions.DependencyInjection;
 using System;
+using System.Diagnostics;
 
 namespace Brio;
 
@@ -50,7 +50,7 @@ public class Brio : IDalamudPlugin
                 _services = serviceCollection.BuildServiceProvider(new ServiceProviderOptions { ValidateOnBuild = true });
 
                 // Initialize the singletons
-                foreach (var service in serviceCollection)
+                foreach(var service in serviceCollection)
                 {
                     if(service.Lifetime == ServiceLifetime.Singleton)
                     {
@@ -70,7 +70,7 @@ public class Brio : IDalamudPlugin
 
                 Log.Info($"Started {Name} in {stopwatch.ElapsedMilliseconds}ms");
             }
-            catch (Exception e)
+            catch(Exception e)
             {
                 Log.Error(e, $"Failed to start {Name} in {stopwatch.ElapsedMilliseconds}ms");
                 _services?.Dispose();

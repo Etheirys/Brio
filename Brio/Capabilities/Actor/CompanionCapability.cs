@@ -1,9 +1,9 @@
-﻿using Dalamud.Game.ClientState.Objects.Types;
-using Brio.Entities.Actor;
+﻿using Brio.Entities.Actor;
 using Brio.Game.Actor;
 using Brio.Game.Actor.Extensions;
 using Brio.Game.Types;
 using Brio.UI.Widgets.Actor;
+using Dalamud.Game.ClientState.Objects.Types;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 
@@ -36,10 +36,10 @@ internal unsafe class CompanionCapability : ActorCharacterCapability
 
     public static CompanionCapability? CreateIfEligible(IServiceProvider provider, ActorEntity entity)
     {
-        if (entity.GameObject is Character character && character.HasCompanionSlot())
+        if(entity.GameObject is Character character && character.HasCompanionSlot())
             return ActivatorUtilities.CreateInstance<CompanionCapability>(provider, entity, ModeType.Owner);
 
-        if (entity.Parent is ActorEntity parentEntity && parentEntity.GameObject is Character parentCharacter && parentCharacter.HasCompanionSlot())
+        if(entity.Parent is ActorEntity parentEntity && parentEntity.GameObject is Character parentCharacter && parentCharacter.HasCompanionSlot())
             return ActivatorUtilities.CreateInstance<CompanionCapability>(provider, parentEntity, ModeType.Companion);
 
         return null;

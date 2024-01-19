@@ -45,7 +45,7 @@ internal class PoseFile
     public void SanitizeBoneNames()
     {
         var newBones = new Dictionary<string, Bone>();
-        foreach (var bone in Bones)
+        foreach(var bone in Bones)
         {
             newBones[AnamnesisBoneNameConverter.AnamnesisToGame(bone.Key)] = bone.Value;
         }

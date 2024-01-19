@@ -1,7 +1,7 @@
-﻿using Dalamud.Interface.Utility.Raii;
-using ImGuiNET;
-using Brio.Capabilities.Debug;
+﻿using Brio.Capabilities.Debug;
 using Brio.UI.Widgets.Core;
+using Dalamud.Interface.Utility.Raii;
+using ImGuiNET;
 
 namespace Brio.UI.Widgets.Debug;
 
@@ -13,25 +13,25 @@ internal class DebugWidget(DebugCapability capability) : Widget<DebugCapability>
 
     public override void DrawBody()
     {
-        using (var bar = ImRaii.TabBar("DebugTabBar"))
+        using(var bar = ImRaii.TabBar("DebugTabBar"))
         {
-            if (bar.Success)
+            if(bar.Success)
             {
-                using (var item = ImRaii.TabItem("GPose"))
+                using(var item = ImRaii.TabItem("GPose"))
                 {
-                    if (item.Success)
+                    if(item.Success)
                         DrawGPose();
                 }
 
-                using (var item = ImRaii.TabItem("Addresses"))
+                using(var item = ImRaii.TabItem("Addresses"))
                 {
-                    if (item.Success)
+                    if(item.Success)
                         DrawAddresses();
                 }
 
-                using (var item = ImRaii.TabItem("Misc"))
+                using(var item = ImRaii.TabItem("Misc"))
                 {
-                    if (item.Success)
+                    if(item.Success)
                         DrawMisc();
                 }
             }
@@ -41,19 +41,19 @@ internal class DebugWidget(DebugCapability capability) : Widget<DebugCapability>
     private void DrawGPose()
     {
         bool fakeGPose = Capability.FakeGPose;
-        if (ImGui.Checkbox("Fake GPose", ref fakeGPose))
+        if(ImGui.Checkbox("Fake GPose", ref fakeGPose))
         {
             Capability.FakeGPose = fakeGPose;
         }
 
-        if (ImGui.Button("Enter GPose"))
+        if(ImGui.Button("Enter GPose"))
         {
             Capability.EnterGPose();
         }
 
         ImGui.SameLine();
 
-        if (ImGui.Button("Exit GPose"))
+        if(ImGui.Button("Exit GPose"))
         {
             Capability.ExitGPose();
         }
@@ -61,7 +61,7 @@ internal class DebugWidget(DebugCapability capability) : Widget<DebugCapability>
 
     private void DrawAddresses()
     {
-        foreach (var (desc, addr) in Capability.GetInterestingAddresses())
+        foreach(var (desc, addr) in Capability.GetInterestingAddresses())
         {
             string addrStr = addr.ToString("X");
             ImGui.SetNextItemWidth(-ImGui.CalcTextSize(addrStr).X);

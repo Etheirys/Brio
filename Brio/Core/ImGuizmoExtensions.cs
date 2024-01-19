@@ -13,7 +13,7 @@ internal static class ImGuizmoExtensions
             return false;
 
         float mouseWheel = ImGui.GetIO().MouseWheel / 100;
-   
+
         if(mouseWheel != 0)
         {
             bool smallIncrement = ImGui.IsKeyDown(ConfigurationService.Instance.Configuration.Interface.IncrementSmall);

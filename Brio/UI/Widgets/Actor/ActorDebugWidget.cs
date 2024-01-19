@@ -1,8 +1,8 @@
-﻿using Dalamud.Interface.Utility.Raii;
-using ImGuiNET;
-using Brio.Capabilities.Actor;
+﻿using Brio.Capabilities.Actor;
 using Brio.Game.Actor.Extensions;
 using Brio.UI.Widgets.Core;
+using Dalamud.Interface.Utility.Raii;
+using ImGuiNET;
 
 namespace Brio.UI.Widgets.Actor;
 
@@ -14,13 +14,13 @@ internal class ActorDebugWidget(ActorDebugCapability capability) : Widget<ActorD
 
     public unsafe override void DrawBody()
     {
-        using (var tabBar = ImRaii.TabBar("###debug_tabs"))
+        using(var tabBar = ImRaii.TabBar("###debug_tabs"))
         {
-            if (tabBar.Success)
+            if(tabBar.Success)
             {
-                using (var infoTab = ImRaii.TabItem("Info"))
+                using(var infoTab = ImRaii.TabItem("Info"))
                 {
-                    if (infoTab.Success)
+                    if(infoTab.Success)
                     {
                         string addr = Capability.GameObject.Address.ToString("X");
                         ImGui.SetNextItemWidth(-ImGui.CalcTextSize("Address").X);
@@ -28,7 +28,7 @@ internal class ActorDebugWidget(ActorDebugCapability capability) : Widget<ActorD
 
 
                         var charaBase = Capability.Character.GetCharacterBase();
-                        if (charaBase != null)
+                        if(charaBase != null)
                         {
                             addr = ((nint)charaBase).ToString("X");
                             ImGui.SetNextItemWidth(-ImGui.CalcTextSize("DrawObject").X);
@@ -62,7 +62,7 @@ internal class ActorDebugWidget(ActorDebugCapability capability) : Widget<ActorD
                         }
                     }
                 }
-                    }
-                }
             }
+        }
+    }
 }

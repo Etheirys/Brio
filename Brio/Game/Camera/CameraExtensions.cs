@@ -18,7 +18,7 @@ internal static class CameraExtensions
 
     public unsafe static bool WorldToScreen(this BrioCamera camera, Vector3 world, out Vector2 screen)
     {
-        if (camera.Camera.CameraBase.SceneCamera.WorldToScreen(world, out var ffScreen))
+        if(camera.Camera.CameraBase.SceneCamera.WorldToScreen(world, out var ffScreen))
         {
             screen = ffScreen;
             return true;
@@ -29,7 +29,7 @@ internal static class CameraExtensions
 
     public unsafe static bool ScreenToWorld(this BrioCamera camera, Vector2 screen, out Vector3 world)
     {
-        if (camera.Camera.CameraBase.SceneCamera.ScreenToWorld(screen, out var ffScreen))
+        if(camera.Camera.CameraBase.SceneCamera.ScreenToWorld(screen, out var ffScreen))
         {
             world = ffScreen;
             return true;
@@ -42,7 +42,7 @@ internal static class CameraExtensions
     {
         var viewMatrix = camera.GetViewMatrix();
 
-        if (Matrix4x4.Invert(viewMatrix, out var invertedViewMatrix))
+        if(Matrix4x4.Invert(viewMatrix, out var invertedViewMatrix))
             return invertedViewMatrix.Translation;
 
         return Vector3.Zero;

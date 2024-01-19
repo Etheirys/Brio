@@ -1,14 +1,14 @@
-﻿using FFXIVClientStructs.FFXIV.Client.Game;
-using FFXIVClientStructs.FFXIV.Client.Graphics.Environment;
-using FFXIVClientStructs.FFXIV.Client.LayoutEngine;
-using FFXIVClientStructs.FFXIV.Client.System.Framework;
-using Brio.Capabilities.Core;
+﻿using Brio.Capabilities.Core;
 using Brio.Entities.Core;
 using Brio.Game.GPose;
 using Brio.UI.Widgets.Debug;
-using System.Collections.Generic;
+using FFXIVClientStructs.FFXIV.Client.Game;
 using FFXIVClientStructs.FFXIV.Client.Game.Control;
 using FFXIVClientStructs.FFXIV.Client.Game.Event;
+using FFXIVClientStructs.FFXIV.Client.Graphics.Environment;
+using FFXIVClientStructs.FFXIV.Client.LayoutEngine;
+using FFXIVClientStructs.FFXIV.Client.System.Framework;
+using System.Collections.Generic;
 
 namespace Brio.Capabilities.Debug;
 

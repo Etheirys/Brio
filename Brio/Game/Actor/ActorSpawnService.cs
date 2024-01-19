@@ -1,18 +1,18 @@
-﻿using Dalamud.Game.ClientState.Objects.Types;
-using Dalamud.Plugin.Services;
+﻿using Brio.Core;
 using Brio.Game.Actor.Extensions;
-using System.Diagnostics.CodeAnalysis;
-using ClientObjectManager = FFXIVClientStructs.FFXIV.Client.Game.Object.ClientObjectManager;
-using CharacterCopyFlags = FFXIVClientStructs.FFXIV.Client.Game.Character.CharacterSetup.CopyFlags;
-using NativeCharacter = FFXIVClientStructs.FFXIV.Client.Game.Character.Character;
 using Brio.Game.Core;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using Brio.Game.GPose;
 using Brio.Game.Types;
 using Brio.IPC;
-using Brio.Core;
+using Dalamud.Game.ClientState.Objects.Types;
+using Dalamud.Plugin.Services;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
+using System.Linq;
+using CharacterCopyFlags = FFXIVClientStructs.FFXIV.Client.Game.Character.CharacterSetup.CopyFlags;
+using ClientObjectManager = FFXIVClientStructs.FFXIV.Client.Game.Object.ClientObjectManager;
+using NativeCharacter = FFXIVClientStructs.FFXIV.Client.Game.Character.Character;
 
 namespace Brio.Game.Actor;
 

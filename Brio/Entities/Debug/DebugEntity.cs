@@ -1,8 +1,8 @@
-﻿using System;
-using Dalamud.Interface;
-using Brio.Capabilities.Debug;
+﻿using Brio.Capabilities.Debug;
 using Brio.Entities.Core;
+using Dalamud.Interface;
 using Microsoft.Extensions.DependencyInjection;
+using System;
 
 namespace Brio.Entities.Debug;
 

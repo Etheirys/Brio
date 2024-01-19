@@ -65,11 +65,11 @@ namespace Brio.Capabilities.Posing
         public void ExportSkeletonPose(PoseFile poseFile)
         {
             var skeleton = CharacterSkeleton;
-            if (skeleton != null)
+            if(skeleton != null)
             {
-                foreach (var bone in CharacterSkeleton!.Bones)
+                foreach(var bone in CharacterSkeleton!.Bones)
                 {
-                    if (bone.IsPartialRoot && !bone.IsSkeletonRoot)
+                    if(bone.IsPartialRoot && !bone.IsSkeletonRoot)
                         continue;
 
                     poseFile.Bones[bone.Name] = bone.LastRawTransform;
@@ -77,11 +77,11 @@ namespace Brio.Capabilities.Posing
             }
 
             var mainHandSkeleton = MainHandSkeleton;
-            if (mainHandSkeleton != null)
+            if(mainHandSkeleton != null)
             {
-                foreach (var bone in mainHandSkeleton!.Bones)
+                foreach(var bone in mainHandSkeleton!.Bones)
                 {
-                    if (bone.IsPartialRoot && !bone.IsSkeletonRoot)
+                    if(bone.IsPartialRoot && !bone.IsSkeletonRoot)
                         continue;
 
                     poseFile.MainHand[bone.Name] = bone.LastRawTransform;
@@ -89,11 +89,11 @@ namespace Brio.Capabilities.Posing
             }
 
             var offHandSkeleton = OffHandSkeleton;
-            if (offHandSkeleton != null)
+            if(offHandSkeleton != null)
             {
-                foreach (var bone in offHandSkeleton!.Bones)
+                foreach(var bone in offHandSkeleton!.Bones)
                 {
-                    if (bone.IsPartialRoot && !bone.IsSkeletonRoot)
+                    if(bone.IsPartialRoot && !bone.IsSkeletonRoot)
                         continue;
 
                     poseFile.OffHand[bone.Name] = bone.LastRawTransform;
@@ -108,17 +108,17 @@ namespace Brio.Capabilities.Posing
 
         public unsafe BonePoseInfo GetBonePose(Bone bone)
         {
-            if (CharacterSkeleton != null && CharacterSkeleton == bone.Skeleton)
+            if(CharacterSkeleton != null && CharacterSkeleton == bone.Skeleton)
             {
                 return PoseInfo.GetPoseInfo(bone, PoseInfoSlot.Character);
             }
 
-            if (MainHandSkeleton != null && MainHandSkeleton == bone.Skeleton)
+            if(MainHandSkeleton != null && MainHandSkeleton == bone.Skeleton)
             {
                 return PoseInfo.GetPoseInfo(bone, PoseInfoSlot.MainHand);
             }
 
-            if (OffHandSkeleton != null && OffHandSkeleton == bone.Skeleton)
+            if(OffHandSkeleton != null && OffHandSkeleton == bone.Skeleton)
             {
                 return PoseInfo.GetPoseInfo(bone, PoseInfoSlot.OffHand);
             }
@@ -128,7 +128,7 @@ namespace Brio.Capabilities.Posing
 
         public Bone? GetBone(BonePoseInfoId? id)
         {
-            if (id == null)
+            if(id == null)
                 return null;
 
             return id.Value.Slot switch

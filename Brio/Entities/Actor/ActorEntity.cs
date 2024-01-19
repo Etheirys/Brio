@@ -1,12 +1,12 @@
-﻿using Dalamud.Game.ClientState.Objects.Types;
-using Brio.Capabilities.Actor;
+﻿using Brio.Capabilities.Actor;
+using Brio.Capabilities.Posing;
+using Brio.Config;
 using Brio.Entities.Core;
 using Brio.Game.Actor.Extensions;
+using Dalamud.Game.ClientState.Objects.Types;
+using Dalamud.Interface;
 using Microsoft.Extensions.DependencyInjection;
 using System;
-using Brio.Capabilities.Posing;
-using Dalamud.Interface;
-using Brio.Config;
 
 namespace Brio.Entities.Actor
 {

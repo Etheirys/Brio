@@ -100,13 +100,13 @@ internal struct Transform
 
     public void Filter(TransformComponents keep)
     {
-        if (!keep.HasFlag(TransformComponents.Position))
+        if(!keep.HasFlag(TransformComponents.Position))
             Position = Vector3.Zero;
 
-        if (!keep.HasFlag(TransformComponents.Rotation))
+        if(!keep.HasFlag(TransformComponents.Rotation))
             Rotation = Quaternion.Identity;
 
-        if (!keep.HasFlag(TransformComponents.Scale))
+        if(!keep.HasFlag(TransformComponents.Scale))
             Scale = Vector3.Zero;
     }
 

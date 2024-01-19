@@ -1,10 +1,10 @@
-﻿using Dalamud.Interface;
-using Dalamud.Interface.Utility.Raii;
-using ImGuiNET;
-using Brio.Capabilities.World;
+﻿using Brio.Capabilities.World;
 using Brio.UI.Controls.Selectors;
 using Brio.UI.Controls.Stateless;
 using Brio.UI.Widgets.Core;
+using Dalamud.Interface;
+using Dalamud.Interface.Utility.Raii;
+using ImGuiNET;
 using System.Collections.Generic;
 using System.Numerics;
 
@@ -35,16 +35,16 @@ internal class FestivalWidget : Widget<FestivalCapability>
     {
         List<uint> festivals = new(Capability.ActiveFestivals);
 
-        using (ImRaii.Disabled(!Capability.CanModify))
+        using(ImRaii.Disabled(!Capability.CanModify))
         {
             ImGui.SetNextItemWidth(-1);
-            using (var listbox = ImRaii.ListBox("###festival_active_list", new Vector2(0, (ImGui.GetTextLineHeight() * 1.3f) * 4)))
+            using(var listbox = ImRaii.ListBox("###festival_active_list", new Vector2(0, (ImGui.GetTextLineHeight() * 1.3f) * 4)))
             {
-                if (listbox.Success)
+                if(listbox.Success)
                 {
-                    foreach (var festivalId in festivals)
+                    foreach(var festivalId in festivals)
                     {
-                        if (festivalId == 0)
+                        if(festivalId == 0)
                             continue;
 
                         var isSelected = festivalId == _selectedFestival;
@@ -53,7 +53,7 @@ internal class FestivalWidget : Widget<FestivalCapability>
 
                         string name = festival?.ToString() ?? $"Unknown ({festivalId})";
 
-                        if (ImGui.Selectable(name, isSelected))
+                        if(ImGui.Selectable(name, isSelected))
                         {
                             _selectedFestival = (int)festivalId;
                         }
@@ -63,21 +63,21 @@ internal class FestivalWidget : Widget<FestivalCapability>
 
             ImGui.SetNextItemWidth(ImGui.CalcTextSize("XXXXXXX").X);
             ImGui.InputInt("###festival_selected_input", ref _selectedFestival, 0, 0);
-            if (ImBrio.IsItemConfirmed())
+            if(ImBrio.IsItemConfirmed())
             {
                 AddFestival();
             }
 
             ImGui.SameLine();
 
-            if (ImBrio.FontIconButton("festival_add_button", FontAwesomeIcon.Plus, "Add Festival", Capability.CanAdd && _selectedFestival != 0))
+            if(ImBrio.FontIconButton("festival_add_button", FontAwesomeIcon.Plus, "Add Festival", Capability.CanAdd && _selectedFestival != 0))
             {
                 AddFestival();
             }
 
             ImGui.SameLine();
 
-            if (ImBrio.FontIconButton("festival_remove_button", FontAwesomeIcon.Minus, "Remove Festival", _selectedFestival != 0 && festivals.Contains((uint)_selectedFestival)))
+            if(ImBrio.FontIconButton("festival_remove_button", FontAwesomeIcon.Minus, "Remove Festival", _selectedFestival != 0 && festivals.Contains((uint)_selectedFestival)))
             {
                 Capability.Remove((uint)_selectedFestival);
             }
@@ -85,14 +85,14 @@ internal class FestivalWidget : Widget<FestivalCapability>
             ImGui.SameLine();
 
 
-            if (ImBrio.FontIconButton("festival_reset_button", FontAwesomeIcon.Redo, "Reset", Capability.HasOverride))
+            if(ImBrio.FontIconButton("festival_reset_button", FontAwesomeIcon.Redo, "Reset", Capability.HasOverride))
             {
                 Capability.Reset();
             }
 
             ImGui.SameLine();
 
-            if (ImBrio.FontIconButton("festival_search_button", FontAwesomeIcon.Search, "Search", Capability.CanAdd))
+            if(ImBrio.FontIconButton("festival_search_button", FontAwesomeIcon.Search, "Search", Capability.CanAdd))
             {
                 _globalFestivalSelector.Select(null, false);
                 ImGui.OpenPopup("festival_search_popup");
@@ -102,16 +102,16 @@ internal class FestivalWidget : Widget<FestivalCapability>
 
     private void DrawSearch()
     {
-        using (var popup = ImRaii.Popup("festival_search_popup"))
+        using(var popup = ImRaii.Popup("festival_search_popup"))
         {
-            if (popup.Success)
+            if(popup.Success)
             {
                 _globalFestivalSelector.Draw();
 
-                if (_globalFestivalSelector.SoftSelectionChanged && _globalFestivalSelector.SoftSelected != null)
+                if(_globalFestivalSelector.SoftSelectionChanged && _globalFestivalSelector.SoftSelected != null)
                     _selectedFestival = (int)_globalFestivalSelector.SoftSelected.Id;
 
-                if (_globalFestivalSelector.SelectionChanged && _globalFestivalSelector.Selected != null)
+                if(_globalFestivalSelector.SelectionChanged && _globalFestivalSelector.Selected != null)
                 {
                     _selectedFestival = (int)_globalFestivalSelector.Selected.Id;
                     AddFestival();
@@ -123,10 +123,10 @@ internal class FestivalWidget : Widget<FestivalCapability>
 
     private void AddFestival()
     {
-        if (_selectedFestival == 0)
+        if(_selectedFestival == 0)
             return;
 
-        if (!Capability.CanAdd)
+        if(!Capability.CanAdd)
             return;
 
         Capability.Add((uint)_selectedFestival);

@@ -1,5 +1,5 @@
-﻿using Dalamud.Game.ClientState.Objects.Enums;
-using Brio.Game.Actor.Appearance;
+﻿using Brio.Game.Actor.Appearance;
+using Dalamud.Game.ClientState.Objects.Enums;
 using Lumina.Data;
 using Lumina.Excel;
 using Lumina.Excel.GeneratedSheets;
@@ -52,40 +52,40 @@ internal class BrioCharaMakeType : ExcelRow
         Tribe = new LazyRow<Tribe>(gameData, parser.ReadColumn<int>(1), language);
         Gender = (Genders)parser.ReadColumn<sbyte>(2);
 
-        for (int i = 0; i < MenuCount; i++)
+        for(int i = 0; i < MenuCount; i++)
             Lobbys[i] = new LazyRow<Lobby>(gameData, parser.ReadColumn<uint>(3 + i), language);
 
-        for (int i = 0; i < MenuCount; i++)
+        for(int i = 0; i < MenuCount; i++)
             InitVals[i] = parser.ReadColumn<byte>(31 + i);
 
-        for (int i = 0; i < MenuCount; i++)
+        for(int i = 0; i < MenuCount; i++)
             SubMenuType[i] = (MenuType)parser.ReadColumn<byte>(59 + i);
 
-        for (int i = 0; i < MenuCount; i++)
+        for(int i = 0; i < MenuCount; i++)
             SubMenuNum[i] = parser.ReadColumn<byte>(87 + i);
 
-        for (int i = 0; i < MenuCount; i++)
+        for(int i = 0; i < MenuCount; i++)
             LookAt[i] = parser.ReadColumn<byte>(115 + i);
 
-        for (int i = 0; i < MenuCount; i++)
+        for(int i = 0; i < MenuCount; i++)
             SubMenuMask[i] = parser.ReadColumn<uint>(143 + i);
 
-        for (int i = 0; i < MenuCount; i++)
+        for(int i = 0; i < MenuCount; i++)
             Customize[i] = (CustomizeIndex)parser.ReadColumn<uint>(171 + i);
 
-        for (int i = 0; i < MenuCount; i++)
-            for (int x = 0; x < SubMenuParamCount; x++)
+        for(int i = 0; i < MenuCount; i++)
+            for(int x = 0; x < SubMenuParamCount; x++)
                 SubMenuParam[i, x] = parser.ReadColumn<uint>(199 + (x * MenuCount) + i);
 
-        for (int i = 0; i < MenuCount; i++)
-            for (int x = 0; x < SubMenuGraphicCount; x++)
+        for(int i = 0; i < MenuCount; i++)
+            for(int x = 0; x < SubMenuGraphicCount; x++)
                 SubMenuGraphic[i, x] = parser.ReadColumn<byte>(2999 + (x * MenuCount) + i);
 
-        for (int i = 0; i < VoiceCount; i++)
+        for(int i = 0; i < VoiceCount; i++)
             Voice[i] = parser.ReadColumn<byte>(3279 + i);
 
-        for (int i = 0; i < FaceCount; i++)
-            for (int x = 0; x < FaceFeatureCount; x++)
+        for(int i = 0; i < FaceCount; i++)
+            for(int x = 0; x < FaceFeatureCount; x++)
                 FacialFeature[i, x] = parser.ReadColumn<int>(3291 + (x * FaceCount) + i);
     }
 
@@ -93,11 +93,11 @@ internal class BrioCharaMakeType : ExcelRow
     {
         var menus = new Menu[MenuCount];
 
-        for (int i = 0; i < MenuCount; ++i)
+        for(int i = 0; i < MenuCount; ++i)
         {
             var lobby = Lobbys[i].Value;
 
-            if (lobby == null)
+            if(lobby == null)
                 continue;
 
 
@@ -110,9 +110,9 @@ internal class BrioCharaMakeType : ExcelRow
             var subParams = new int[subMenuNum];
             var subGraphics = new byte[SubMenuGraphicCount];
 
-            for (int x = 0; x < subMenuNum; ++x)
+            for(int x = 0; x < subMenuNum; ++x)
             {
-                if (x >= SubMenuParamCount)
+                if(x >= SubMenuParamCount)
                 {
                     subParams[x] = 0;
                     continue;

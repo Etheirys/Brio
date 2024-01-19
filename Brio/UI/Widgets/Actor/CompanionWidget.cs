@@ -1,11 +1,11 @@
-﻿using Dalamud.Interface.Utility.Raii;
-using ImGuiNET;
-using Brio.Capabilities.Actor;
+﻿using Brio.Capabilities.Actor;
 using Brio.Game.Actor.Extensions;
 using Brio.Game.Types;
 using Brio.UI.Controls.Selectors;
 using Brio.UI.Controls.Stateless;
 using Brio.UI.Widgets.Core;
+using Dalamud.Interface.Utility.Raii;
+using ImGuiNET;
 namespace Brio.UI.Widgets.Actor;
 
 internal unsafe class CompanionWidget(CompanionCapability capability) : Widget<CompanionCapability>(capability)
@@ -25,7 +25,7 @@ internal unsafe class CompanionWidget(CompanionCapability capability) : Widget<C
         {
             WidgetFlags flags = WidgetFlags.DrawBody | WidgetFlags.DefaultOpen;
 
-            if (Capability.Character.HasSpawnedCompanion())
+            if(Capability.Character.HasSpawnedCompanion())
                 flags |= WidgetFlags.DrawPopup;
 
             return flags;
@@ -34,8 +34,8 @@ internal unsafe class CompanionWidget(CompanionCapability capability) : Widget<C
 
     public override void DrawPopup()
     {
-        if (Capability.Character.HasSpawnedCompanion())
-            if (ImGui.MenuItem("Destroy Companion###companionowner_popup_destroy"))
+        if(Capability.Character.HasSpawnedCompanion())
+            if(ImGui.MenuItem("Destroy Companion###companionowner_popup_destroy"))
                 Capability.DestroyCompanion();
     }
 
@@ -49,7 +49,7 @@ internal unsafe class CompanionWidget(CompanionCapability capability) : Widget<C
     {
         CompanionRowUnion row = Capability.Character.GetCompanionInfo();
 
-        if (ImBrio.BorderedGameIcon("###companionpreview", row))
+        if(ImBrio.BorderedGameIcon("###companionpreview", row))
         {
             _selector.Select(row);
             ImGui.OpenPopup("companionowner_select");
@@ -58,16 +58,16 @@ internal unsafe class CompanionWidget(CompanionCapability capability) : Widget<C
 
     private void DrawSearch()
     {
-        using (var popup = ImRaii.Popup("companionowner_select"))
+        using(var popup = ImRaii.Popup("companionowner_select"))
         {
-            if (popup.Success)
+            if(popup.Success)
             {
                 _selector.Draw();
-                if (_selector.SelectionChanged)
+                if(_selector.SelectionChanged)
                 {
                     var selected = _selector.Selected;
 
-                    if (selected != null)
+                    if(selected != null)
                         Capability.SetCompanion(selected);
 
                     ImGui.CloseCurrentPopup();

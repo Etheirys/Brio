@@ -24,9 +24,9 @@ internal class CameraCapability : Capability
         set
         {
             var camera = Camera;
-            if (camera != null)
+            if(camera != null)
             {
-                if (value)
+                if(value)
                 {
 
                     _originalZoomLimits = new Vector2(camera->Camera.MinDistance, camera->Camera.MaxDistance);
@@ -35,13 +35,13 @@ internal class CameraCapability : Capability
                 }
                 else
                 {
-                    if (_originalZoomLimits.HasValue)
+                    if(_originalZoomLimits.HasValue)
                     {
 
                         camera->Camera.MinDistance = _originalZoomLimits.Value.X;
                         camera->Camera.MaxDistance = _originalZoomLimits.Value.Y;
 
-                        if (camera->Camera.Distance < camera->Camera.MinDistance)
+                        if(camera->Camera.Distance < camera->Camera.MinDistance)
                             camera->Camera.Distance = camera->Camera.MinDistance;
 
                         _originalZoomLimits = null;
@@ -80,7 +80,7 @@ internal class CameraCapability : Capability
 
     private void OnGPoseStateChange(bool newState)
     {
-        if (!newState)
+        if(!newState)
             Reset();
     }
 

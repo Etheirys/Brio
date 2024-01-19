@@ -54,9 +54,9 @@ internal unsafe struct ActorEquipment
     {
         var slots = Count / sizeof(EquipmentModelId);
 
-        fixed (byte* dataPtr = equip.Data)
+        fixed(byte* dataPtr = equip.Data)
         {
-            for (int i = 0; i < slots; i++)
+            for(int i = 0; i < slots; i++)
             {
                 var addr = (EquipmentModelId*)(dataPtr + i * sizeof(EquipmentModelId));
                 *addr = model;

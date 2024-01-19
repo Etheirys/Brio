@@ -1,6 +1,6 @@
-﻿using ImGuiNET;
-using Brio.Capabilities.World;
+﻿using Brio.Capabilities.World;
 using Brio.UI.Widgets.Core;
+using ImGuiNET;
 
 namespace Brio.UI.Widgets.World;
 

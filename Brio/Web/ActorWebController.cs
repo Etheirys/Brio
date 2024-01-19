@@ -1,8 +1,8 @@
-﻿using Dalamud.Plugin.Services;
+﻿using Brio.Game.Actor;
+using Dalamud.Plugin.Services;
 using EmbedIO;
 using EmbedIO.Routing;
 using EmbedIO.WebApi;
-using Brio.Game.Actor;
 using System.Threading.Tasks;
 
 namespace Brio.Web;
@@ -37,7 +37,7 @@ internal class ActorWebController(IFramework framework, ActorSpawnService actorS
         {
             return await _framework.RunOnFrameworkThread(() =>
             {
-                if (_actorSpawnService.CreateCharacter(out var chara, SpawnFlags.Default))
+                if(_actorSpawnService.CreateCharacter(out var chara, SpawnFlags.Default))
                     return chara.ObjectIndex;
                 return -1;
             });

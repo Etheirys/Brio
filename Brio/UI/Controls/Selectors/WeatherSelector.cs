@@ -1,7 +1,7 @@
-﻿using ImGuiNET;
-using Brio.Game.Types;
+﻿using Brio.Game.Types;
 using Brio.Resources;
 using Brio.UI.Controls.Stateless;
+using ImGuiNET;
 using Lumina.Excel.GeneratedSheets;
 using System.Collections.Generic;
 using System.Numerics;
@@ -23,7 +23,7 @@ internal class WeatherSelector(string id) : Selector<WeatherUnion>(id)
 
     protected override void PopulateList()
     {
-        foreach (var weather in GameDataProvider.Instance.Weathers.Values)
+        foreach(var weather in GameDataProvider.Instance.Weathers.Values)
             AddItem(weather);
     }
 
@@ -41,7 +41,7 @@ internal class WeatherSelector(string id) : Selector<WeatherUnion>(id)
 
     protected override void DrawOptions()
     {
-        if (ImGui.Checkbox("Show Invalid Weathers", ref _showInvalidWeathers))
+        if(ImGui.Checkbox("Show Invalid Weathers", ref _showInvalidWeathers))
             UpdateList();
     }
 
@@ -51,15 +51,15 @@ internal class WeatherSelector(string id) : Selector<WeatherUnion>(id)
         return item.Match(
             (weatherRow) =>
             {
-                if (string.IsNullOrEmpty(weatherRow.Name))
+                if(string.IsNullOrEmpty(weatherRow.Name))
                     return false;
 
-                if (!_showInvalidWeathers && !_validWeathers.Contains(weatherRow))
+                if(!_showInvalidWeathers && !_validWeathers.Contains(weatherRow))
                     return false;
 
                 var searchText = $"{weatherRow.Name} {weatherRow.RowId}";
 
-                if (searchText.Contains(search, System.StringComparison.InvariantCultureIgnoreCase))
+                if(searchText.Contains(search, System.StringComparison.InvariantCultureIgnoreCase))
                     return true;
 
                 return false;

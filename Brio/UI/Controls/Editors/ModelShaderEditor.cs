@@ -1,9 +1,9 @@
-﻿using Dalamud.Interface;
-using ImGuiNET;
-using Brio.Capabilities.Actor;
+﻿using Brio.Capabilities.Actor;
 using Brio.Game.Actor.Appearance;
 using Brio.Game.Actor.Interop;
 using Brio.UI.Controls.Stateless;
+using Dalamud.Interface;
+using ImGuiNET;
 
 namespace Brio.UI.Controls.Editors;
 
@@ -33,7 +33,7 @@ internal class ModelShaderEditor()
     {
         var resetTo = ImGui.GetCursorPos();
         bool shaderChange = apply.HasOverride;
-        if (ImBrio.FontIconButtonRight("reset_shaders", FontAwesomeIcon.Undo, 1, "Reset Shaders", shaderChange))
+        if(ImBrio.FontIconButtonRight("reset_shaders", FontAwesomeIcon.Undo, 1, "Reset Shaders", shaderChange))
         {
             apply.Reset();
             _ = _capability.Redraw();
@@ -48,7 +48,7 @@ internal class ModelShaderEditor()
         bool didChange = false;
 
         ImGui.SetNextItemWidth(MaxItemWidth);
-        if (ImGui.SliderFloat("###muscle", ref original.MuscleTone, 0.0f, 2.0f, "%.2f"))
+        if(ImGui.SliderFloat("###muscle", ref original.MuscleTone, 0.0f, 2.0f, "%.2f"))
         {
             apply.MuscleTone = original.MuscleTone;
             didChange |= true;
@@ -64,20 +64,20 @@ internal class ModelShaderEditor()
     {
         bool didChange = false;
 
-        if (AppearanceEditorCommon.DrawExtendedColor(ref original.SkinColor, "skinColor", "Skin Color"))
+        if(AppearanceEditorCommon.DrawExtendedColor(ref original.SkinColor, "skinColor", "Skin Color"))
         {
             apply.SkinColor = original.SkinColor;
             didChange |= true;
         }
         ImGui.SameLine();
-        if (AppearanceEditorCommon.DrawExtendedColor(ref original.SkinGloss, "skinGloss", "Skin Gloss"))
+        if(AppearanceEditorCommon.DrawExtendedColor(ref original.SkinGloss, "skinGloss", "Skin Gloss"))
         {
             apply.SkinGloss = original.SkinGloss;
             didChange |= true;
         }
         ImGui.SameLine();
 
-        if (AppearanceEditorCommon.DrawExtendedColor(ref original.MouthColor, "mouthColor", "Mouth Color"))
+        if(AppearanceEditorCommon.DrawExtendedColor(ref original.MouthColor, "mouthColor", "Mouth Color"))
         {
             apply.MouthColor = original.MouthColor;
             didChange |= true;
@@ -95,14 +95,14 @@ internal class ModelShaderEditor()
     {
         bool didChange = false;
 
-        if (AppearanceEditorCommon.DrawExtendedColor(ref original.LeftEyeColor, "leftEyeColor", "Left Eye Color"))
+        if(AppearanceEditorCommon.DrawExtendedColor(ref original.LeftEyeColor, "leftEyeColor", "Left Eye Color"))
         {
             apply.LeftEyeColor = original.LeftEyeColor;
             didChange |= true;
         }
         ImGui.SameLine();
 
-        if (AppearanceEditorCommon.DrawExtendedColor(ref original.RightEyeColor, "rightEyeColor", "Right Eye Color"))
+        if(AppearanceEditorCommon.DrawExtendedColor(ref original.RightEyeColor, "rightEyeColor", "Right Eye Color"))
         {
             apply.RightEyeColor = original.RightEyeColor;
             didChange |= true;
@@ -110,7 +110,7 @@ internal class ModelShaderEditor()
 
         ImGui.SameLine();
 
-        if (AppearanceEditorCommon.DrawExtendedColor(ref original.FeatureColor, "featureColor", "Feature Color"))
+        if(AppearanceEditorCommon.DrawExtendedColor(ref original.FeatureColor, "featureColor", "Feature Color"))
         {
             apply.FeatureColor = original.FeatureColor;
             didChange |= true;
@@ -128,21 +128,21 @@ internal class ModelShaderEditor()
 
         bool didChange = false;
 
-        if (AppearanceEditorCommon.DrawExtendedColor(ref original.HairColor, "hairColor", "Hair Color"))
+        if(AppearanceEditorCommon.DrawExtendedColor(ref original.HairColor, "hairColor", "Hair Color"))
         {
             apply.HairColor = original.HairColor;
             didChange |= true;
         }
         ImGui.SameLine();
 
-        if (AppearanceEditorCommon.DrawExtendedColor(ref original.HairHighlight, "hairHighlight", "Hair Highlight"))
+        if(AppearanceEditorCommon.DrawExtendedColor(ref original.HairHighlight, "hairHighlight", "Hair Highlight"))
         {
             apply.HairHighlight = original.HairHighlight;
             didChange |= true;
         }
         ImGui.SameLine();
 
-        if (AppearanceEditorCommon.DrawExtendedColor(ref original.HairGloss, "hairGloss", "Hair Gloss"))
+        if(AppearanceEditorCommon.DrawExtendedColor(ref original.HairGloss, "hairGloss", "Hair Gloss"))
         {
             apply.HairGloss = original.HairGloss;
             didChange |= true;

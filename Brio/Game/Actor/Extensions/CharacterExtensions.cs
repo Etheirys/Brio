@@ -1,22 +1,20 @@
 ﻿namespace Brio.Game.Actor.Extensions;
 
-using StructsCharacter = FFXIVClientStructs.FFXIV.Client.Game.Character.Character;
-using StructsBattleCharacter = FFXIVClientStructs.FFXIV.Client.Game.Character.BattleChara;
-using StructsDrawDataContainer = FFXIVClientStructs.FFXIV.Client.Game.Character.DrawDataContainer;
-using StructsCharacterBase = FFXIVClientStructs.FFXIV.Client.Graphics.Scene.CharacterBase;
-using StrictsDrawObjectData = FFXIVClientStructs.FFXIV.Client.Game.Character.DrawObjectData;
-
-
 using Dalamud.Game.ClientState.Objects.Types;
-using System;
-using System.Linq;
-using global::Brio.Game.Types;
 using global::Brio.Game.Actor.Appearance;
 using global::Brio.Game.Actor.Interop;
-using global::Brio.Resources.Sheets;
-using global::Brio.Resources;
-using System.Collections.Generic;
 using global::Brio.Game.Posing;
+using global::Brio.Game.Types;
+using global::Brio.Resources;
+using global::Brio.Resources.Sheets;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using StrictsDrawObjectData = FFXIVClientStructs.FFXIV.Client.Game.Character.DrawObjectData;
+using StructsBattleCharacter = FFXIVClientStructs.FFXIV.Client.Game.Character.BattleChara;
+using StructsCharacter = FFXIVClientStructs.FFXIV.Client.Game.Character.Character;
+using StructsCharacterBase = FFXIVClientStructs.FFXIV.Client.Graphics.Scene.CharacterBase;
+using StructsDrawDataContainer = FFXIVClientStructs.FFXIV.Client.Game.Character.DrawDataContainer;
 
 internal static class CharacterExtensions
 {
@@ -51,17 +49,17 @@ internal static class CharacterExtensions
     public unsafe static CompanionContainer GetCompanionInfo(this Character go)
     {
         var native = go.Native();
-        if (native->CompanionObject != null)
+        if(native->CompanionObject != null)
         {
-            if (native->Ornament.OrnamentObject != null)
+            if(native->Ornament.OrnamentObject != null)
             {
                 return new(CompanionKind.Ornament, native->Ornament.OrnamentId);
             }
-            else if (native->Mount.MountObject != null)
+            else if(native->Mount.MountObject != null)
             {
                 return new(CompanionKind.Mount, native->Mount.MountId);
             }
-            else if (native->Companion.CompanionObject != null)
+            else if(native->Companion.CompanionObject != null)
             {
                 return new(CompanionKind.Companion, (ushort)native->Companion.CompanionObject->Character.GameObject.DataID);
             }
@@ -85,12 +83,12 @@ internal static class CharacterExtensions
             _ => throw new Exception("Invalid weapon slot")
         };
 
-        if (!weaponSlot.HasValue)
+        if(!weaponSlot.HasValue)
             return null;
 
         var drawData = &go.Native()->DrawData;
 
-        fixed (StrictsDrawObjectData* drawObjData = &drawData->Weapon(weaponSlot.Value))
+        fixed(StrictsDrawObjectData* drawObjData = &drawData->Weapon(weaponSlot.Value))
         {
             StrictsDrawObjectData* drawObjectData = drawObjData;
             return drawObjectData;
@@ -110,19 +108,19 @@ internal static class CharacterExtensions
         var list = new List<CharacterBaseInfo>();
         var charaBase = go.GetCharacterBase();
 
-        if (charaBase != null)
+        if(charaBase != null)
             list.Add(new CharacterBaseInfo { CharacterBase = charaBase, Slot = PoseInfoSlot.Character });
 
         charaBase = go.GetWeaponCharacterBase(ActorEquipSlot.MainHand);
-        if (charaBase != null)
+        if(charaBase != null)
             list.Add(new CharacterBaseInfo { CharacterBase = charaBase, Slot = PoseInfoSlot.MainHand });
 
         charaBase = go.GetWeaponCharacterBase(ActorEquipSlot.OffHand);
-        if (charaBase != null)
+        if(charaBase != null)
             list.Add(new CharacterBaseInfo { CharacterBase = charaBase, Slot = PoseInfoSlot.OffHand });
 
         charaBase = go.GetWeaponCharacterBase(ActorEquipSlot.Prop);
-        if (charaBase != null)
+        if(charaBase != null)
             list.Add(new CharacterBaseInfo { CharacterBase = charaBase, Slot = PoseInfoSlot.Prop });
 
         return list;
@@ -131,7 +129,7 @@ internal static class CharacterExtensions
     public static unsafe BrioCharacterBase* GetWeaponCharacterBase(this Character go, ActorEquipSlot slot)
     {
         var weaponDrawData = go.GetWeaponDrawObjectData(slot);
-        if (weaponDrawData != null)
+        if(weaponDrawData != null)
         {
             return (BrioCharacterBase*)weaponDrawData->DrawObject;
         }
@@ -142,10 +140,10 @@ internal static class CharacterExtensions
     public static unsafe BrioHuman* GetHuman(this Character go)
     {
         var charaBase = go.GetCharacterBase();
-        if (charaBase == null)
+        if(charaBase == null)
             return null;
 
-        if (charaBase->CharacterBase.GetModelType() != StructsCharacterBase.ModelType.Human)
+        if(charaBase->CharacterBase.GetModelType() != StructsCharacterBase.ModelType.Human)
             return null;
 
         return (BrioHuman*)charaBase;
@@ -154,7 +152,7 @@ internal static class CharacterExtensions
     public static unsafe BrioHuman.ShaderParams* GetShaderParams(this Character go)
     {
         var human = go.GetHuman();
-        if (human != null && human->Shaders != null && human->Shaders->Params != null)
+        if(human != null && human->Shaders != null && human->Shaders->Params != null)
         {
             return human->Shaders->Params;
         }

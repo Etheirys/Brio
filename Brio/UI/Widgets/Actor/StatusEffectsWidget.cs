@@ -1,12 +1,12 @@
-﻿using Dalamud.Interface;
-using Dalamud.Interface.Internal;
-using Dalamud.Interface.Utility.Raii;
-using ImGuiNET;
-using Brio.Capabilities.Actor;
+﻿using Brio.Capabilities.Actor;
 using Brio.Resources;
 using Brio.UI.Controls.Selectors;
 using Brio.UI.Controls.Stateless;
 using Brio.UI.Widgets.Core;
+using Dalamud.Interface;
+using Dalamud.Interface.Internal;
+using Dalamud.Interface.Utility.Raii;
+using ImGuiNET;
 using System.Linq;
 using System.Numerics;
 
@@ -27,18 +27,18 @@ internal class StatusEffectsWidget(StatusEffectCapability capability) : Widget<S
         var statuses = Capability.ActiveStatuses;
 
         ImGui.SetNextItemWidth(-1);
-        using (var listbox = ImRaii.ListBox("###status_effects", new Vector2(0, ImGui.GetTextLineHeight() * 6)))
+        using(var listbox = ImRaii.ListBox("###status_effects", new Vector2(0, ImGui.GetTextLineHeight() * 6)))
         {
-            if (listbox.Success)
+            if(listbox.Success)
             {
-                foreach (var status in statuses)
+                foreach(var status in statuses)
                 {
                     bool selected = status.RowId == _selectedStatus;
 
                     IDalamudTextureWrap? tex = null;
-                    if (status.Icon != 0)
+                    if(status.Icon != 0)
                         tex = UIManager.Instance.TextureProvider.GetIcon(status.Icon);
-                    if (tex == null)
+                    if(tex == null)
                         tex = ResourceProvider.Instance.GetResourceImage("Images.StatusEffect.png");
 
                     float ratio = tex.Size.X / tex.Size.Y;
@@ -52,7 +52,7 @@ internal class StatusEffectsWidget(StatusEffectCapability capability) : Widget<S
                     ImGui.SameLine();
                     ImGui.Text($"{status.Name}\n{status.RowId}");
 
-                    if (wasSelected)
+                    if(wasSelected)
                         _selectedStatus = (int)status.RowId;
                 }
             }
@@ -63,25 +63,25 @@ internal class StatusEffectsWidget(StatusEffectCapability capability) : Widget<S
 
         ImGui.SetNextItemWidth(ImGui.CalcTextSize("XXXXXXX").X);
         ImGui.InputInt("###status_selected_input", ref _selectedStatus, 0, 0);
-        if (ImBrio.IsItemConfirmed())
+        if(ImBrio.IsItemConfirmed())
         {
             ApplyStatusEffect();
         }
 
         ImGui.SameLine();
 
-        if (ImBrio.FontIconButton("status_effects_add", FontAwesomeIcon.Plus, "Add Effect", canAdd))
+        if(ImBrio.FontIconButton("status_effects_add", FontAwesomeIcon.Plus, "Add Effect", canAdd))
             ApplyStatusEffect();
 
         ImGui.SameLine();
 
-        if (ImBrio.FontIconButton("status_effects_remove", FontAwesomeIcon.Minus, "Remove Effect", isSelectedPlaying))
+        if(ImBrio.FontIconButton("status_effects_remove", FontAwesomeIcon.Minus, "Remove Effect", isSelectedPlaying))
             Capability.RemoveStatus((ushort)_selectedStatus);
 
         ImGui.SameLine();
 
 
-        if (ImBrio.FontIconButton("status_effects_search", FontAwesomeIcon.Search, "Search"))
+        if(ImBrio.FontIconButton("status_effects_search", FontAwesomeIcon.Search, "Search"))
         {
             _globalStatusEffectSelector.Select(null, false);
             ImGui.OpenPopup("status_effect_search");
@@ -89,18 +89,18 @@ internal class StatusEffectsWidget(StatusEffectCapability capability) : Widget<S
 
 
 
-        using (var popup = ImRaii.Popup("status_effect_search"))
+        using(var popup = ImRaii.Popup("status_effect_search"))
         {
-            if (popup.Success)
+            if(popup.Success)
             {
                 _globalStatusEffectSelector.Draw();
 
-                if (_globalStatusEffectSelector.SoftSelectionChanged && _globalStatusEffectSelector.SoftSelected != null)
+                if(_globalStatusEffectSelector.SoftSelectionChanged && _globalStatusEffectSelector.SoftSelected != null)
                 {
                     _selectedStatus = (int)_globalStatusEffectSelector.SoftSelected.RowId;
                 }
 
-                if (_globalStatusEffectSelector.SelectionChanged && _globalStatusEffectSelector.Selected != null)
+                if(_globalStatusEffectSelector.SelectionChanged && _globalStatusEffectSelector.Selected != null)
                 {
                     _selectedStatus = (int)_globalStatusEffectSelector.Selected.RowId;
                     ApplyStatusEffect();
@@ -112,7 +112,7 @@ internal class StatusEffectsWidget(StatusEffectCapability capability) : Widget<S
 
     private void ApplyStatusEffect()
     {
-        if (_selectedStatus == 0)
+        if(_selectedStatus == 0)
             return;
 
         Capability.AddStatus((ushort)_selectedStatus);

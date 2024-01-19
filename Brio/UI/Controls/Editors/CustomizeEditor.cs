@@ -1,13 +1,13 @@
-﻿using Dalamud.Game.ClientState.Objects.Enums;
-using Dalamud.Interface;
-using Dalamud.Interface.Utility.Raii;
-using ImGuiNET;
-using Brio.Capabilities.Actor;
+﻿using Brio.Capabilities.Actor;
 using Brio.Game.Actor.Appearance;
 using Brio.Game.Actor.Extensions;
 using Brio.Resources;
 using Brio.Resources.Sheets;
 using Brio.UI.Controls.Stateless;
+using Dalamud.Game.ClientState.Objects.Enums;
+using Dalamud.Interface;
+using Dalamud.Interface.Utility.Raii;
+using ImGuiNET;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -32,14 +32,14 @@ internal class CustomizeEditor()
         didChange |= DrawReset(ref currentAppearance, originalAppearance);
         didChange |= DrawModelIdSelector(ref currentAppearance.ModelCharaId);
 
-        if (_capability.IsHuman)
+        if(_capability.IsHuman)
         {
             ImGui.Separator();
             didChange |= DrawRaceSelector(ref currentAppearance.Customize);
             ImGui.Separator();
 
             var charaMake = _capability.Character.GetCharaMakeType();
-            if (charaMake != null)
+            if(charaMake != null)
             {
                 var menus = charaMake.BuildMenus();
                 didChange |= DrawMenus(ref currentAppearance, menus);
@@ -47,7 +47,7 @@ internal class CustomizeEditor()
         }
         else
         {
-            if (ImGui.Button("Make Human"))
+            if(ImGui.Button("Make Human"))
                 _ = _capability.MakeHuman();
         }
 
@@ -60,7 +60,7 @@ internal class CustomizeEditor()
 
         var resetTo = ImGui.GetCursorPos();
         bool customizeChanged = !currentAppearance.Customize.Equals(originalAppearance.Customize) || currentAppearance.ModelCharaId != originalAppearance.ModelCharaId;
-        if (ImBrio.FontIconButtonRight("reset_customize", FontAwesomeIcon.Undo, 1, "Reset Customize", customizeChanged))
+        if(ImBrio.FontIconButtonRight("reset_customize", FontAwesomeIcon.Undo, 1, "Reset Customize", customizeChanged))
         {
             currentAppearance.ModelCharaId = originalAppearance.ModelCharaId;
             currentAppearance.Customize = originalAppearance.Customize;
@@ -78,11 +78,11 @@ internal class CustomizeEditor()
         bool hasLipColor = menus.GetMenuTypeForCustomize(CustomizeIndex.LipColor) == BrioCharaMakeType.MenuType.Color;
         bool featuresDone = false;
 
-        for (int i = 0; i < menus.Menus.Length; ++i)
+        for(int i = 0; i < menus.Menus.Length; ++i)
         {
             var menu = menus.Menus[i];
 
-            switch (menu.CustomizeIndex)
+            switch(menu.CustomizeIndex)
             {
                 case CustomizeIndex.Race:
                 case CustomizeIndex.Tribe:
@@ -114,7 +114,7 @@ internal class CustomizeEditor()
                     break;
 
                 case CustomizeIndex.LipColor:
-                    if (!hasLipColor)
+                    if(!hasLipColor)
                         didChange |= DrawListSelector(ref appearance.Customize, CustomizeIndex.LipColor, menu.Title);
 
                     break;
@@ -129,9 +129,9 @@ internal class CustomizeEditor()
 
                 case CustomizeIndex.FaceFeatures:
                     var colorMenu = menus.Menus.Length >= i && menus.Menus[i + 1].Type == BrioCharaMakeType.MenuType.Color ? menus.Menus[i + 1] : null;
-                    if (!featuresDone)
+                    if(!featuresDone)
                     {
-                        if (colorMenu != null)
+                        if(colorMenu != null)
                         {
                             didChange |= DrawFeatureSelect(ref appearance.Customize, menu, colorMenu);
                             featuresDone = true;
@@ -159,7 +159,7 @@ internal class CustomizeEditor()
 
         const string modelIdLabel = "Model";
         ImGui.SetNextItemWidth(MaxItemWidth);
-        if (ImGui.InputInt("###model_id", ref modelId, 1, 1, ImGuiInputTextFlags.EnterReturnsTrue))
+        if(ImGui.InputInt("###model_id", ref modelId, 1, 1, ImGuiInputTextFlags.EnterReturnsTrue))
             madeChange |= true;
         ImGui.SameLine();
         ImGui.Text(modelIdLabel);
@@ -176,14 +176,14 @@ internal class CustomizeEditor()
 
         var racePreview = Enum.GetName(customize.Race) ?? "Unknown";
         ImGui.SetNextItemWidth(width);
-        using (var raceDrop = ImRaii.Combo("###race_combo", racePreview))
+        using(var raceDrop = ImRaii.Combo("###race_combo", racePreview))
         {
-            if (raceDrop.Success)
+            if(raceDrop.Success)
             {
                 var races = Enum.GetNames<Races>();
-                foreach (var raceName in races)
+                foreach(var raceName in races)
                 {
-                    if (ImGui.Selectable(raceName, raceName == racePreview))
+                    if(ImGui.Selectable(raceName, raceName == racePreview))
                     {
                         var newRace = Enum.Parse<Races>(raceName);
                         customize.Race = newRace;
@@ -198,14 +198,14 @@ internal class CustomizeEditor()
         var existingTribe = customize.Tribe;
         var tribePreview = Enum.GetName(existingTribe) ?? "Unknown";
         ImGui.SetNextItemWidth(width);
-        using (var tribeDrop = ImRaii.Combo("###tribe_combo", tribePreview))
+        using(var tribeDrop = ImRaii.Combo("###tribe_combo", tribePreview))
         {
-            if (tribeDrop.Success)
+            if(tribeDrop.Success)
             {
                 var tribes = customize.Race.GetValidTribes();
-                foreach (var tribe in tribes)
+                foreach(var tribe in tribes)
                 {
-                    if (ImGui.Selectable(tribe.ToString(), tribe == existingTribe))
+                    if(ImGui.Selectable(tribe.ToString(), tribe == existingTribe))
                     {
                         customize.Tribe = tribe;
                         madeChange |= true;
@@ -217,14 +217,14 @@ internal class CustomizeEditor()
         var existingGender = customize.Gender;
         var genderPreview = Enum.GetName(existingGender) ?? "Unknown";
         ImGui.SetNextItemWidth(width);
-        using (var genderDrop = ImRaii.Combo("###gender_combo", genderPreview))
+        using(var genderDrop = ImRaii.Combo("###gender_combo", genderPreview))
         {
-            if (genderDrop.Success)
+            if(genderDrop.Success)
             {
                 var genders = customize.Race.GetAllowedGenders();
-                foreach (var gender in genders)
+                foreach(var gender in genders)
                 {
-                    if (ImGui.Selectable(gender.ToString(), gender == existingGender))
+                    if(ImGui.Selectable(gender.ToString(), gender == existingGender))
                     {
                         customize.Gender = gender;
                         madeChange |= true;
@@ -238,14 +238,14 @@ internal class CustomizeEditor()
         var existingType = customize.BodyType;
         var typePreview = Enum.GetName(existingType) ?? "Unknown";
         ImGui.SetNextItemWidth(width);
-        using (var typeDrop = ImRaii.Combo("###type_combo", typePreview))
+        using(var typeDrop = ImRaii.Combo("###type_combo", typePreview))
         {
-            if (typeDrop.Success)
+            if(typeDrop.Success)
             {
                 var types = customize.Tribe.GetAllowedBodyTypes(existingGender);
-                foreach (var bodyType in types)
+                foreach(var bodyType in types)
                 {
-                    if (ImGui.Selectable(bodyType.ToString(), bodyType == existingType))
+                    if(ImGui.Selectable(bodyType.ToString(), bodyType == existingType))
                     {
                         customize.BodyType = bodyType;
                         madeChange |= true;
@@ -281,20 +281,20 @@ internal class CustomizeEditor()
 
         bool highlightEnabled = customize.HighlightsEnabled;
 
-        if (ImBrio.BorderedGameIcon(currentHairIdx.ToString(), currentIcon, "Images.UnknownIcon.png", size: IconSize))
+        if(ImBrio.BorderedGameIcon(currentHairIdx.ToString(), currentIcon, "Images.UnknownIcon.png", size: IconSize))
             ImGui.OpenPopup("hair_style_popup");
 
         Vector2 whenDone = ImGui.GetCursorPos();
 
         ImGui.SameLine();
 
-        using (var group = ImRaii.Group())
+        using(var group = ImRaii.Group())
         {
-            if (group.Success)
+            if(group.Success)
             {
 
                 ImGui.SetNextItemWidth(MaxItemWidth);
-                if (ImGui.InputInt("###hair_style", ref currentHairIdx, 1, 1, ImGuiInputTextFlags.EnterReturnsTrue))
+                if(ImGui.InputInt("###hair_style", ref currentHairIdx, 1, 1, ImGuiInputTextFlags.EnterReturnsTrue))
                 {
                     madeChange |= true;
                     customize.HairStyle = (byte)currentHairIdx;
@@ -304,19 +304,19 @@ internal class CustomizeEditor()
 
                 ImGui.SameLine();
 
-                using (ImRaii.Disabled(!highlightEnabled))
+                using(ImRaii.Disabled(!highlightEnabled))
                 {
                     madeChange |= DrawColorSelector(ref customize, CustomizeIndex.HairColor2, "Highlight Color");
                 }
 
                 ImGui.SameLine();
 
-                if (ImGui.Checkbox("###hair_highlight_enabled", ref highlightEnabled))
+                if(ImGui.Checkbox("###hair_highlight_enabled", ref highlightEnabled))
                 {
                     customize.HighlightsEnabled = highlightEnabled;
                     madeChange |= true;
                 }
-                if (ImGui.IsItemHovered())
+                if(ImGui.IsItemHovered())
                     ImGui.SetTooltip("Enable Hair Highlights");
 
             }
@@ -328,7 +328,7 @@ internal class CustomizeEditor()
         ImGui.Text(title);
         ImGui.SetCursorPos(whenDone);
 
-        if (ImBrio.DrawIconSelectorPopup("hair_style_popup", hairStyles.Select(x => new ImBrio.IconSelectorEntry(x.FeatureID, x.Icon)).ToArray(), ref currentHairIdx, columns: 6, iconSize: IconSize))
+        if(ImBrio.DrawIconSelectorPopup("hair_style_popup", hairStyles.Select(x => new ImBrio.IconSelectorEntry(x.FeatureID, x.Icon)).ToArray(), ref currentHairIdx, columns: 6, iconSize: IconSize))
         {
             customize.HairStyle = (byte)currentHairIdx;
             madeChange |= true;
@@ -343,12 +343,12 @@ internal class CustomizeEditor()
 
         int eyeShape = customize.RealEyeShape;
         ImGui.SetNextItemWidth(MaxItemWidth / 1.97f);
-        if (ImGui.InputInt("###eye_shape", ref eyeShape, 1, 1, ImGuiInputTextFlags.EnterReturnsTrue))
+        if(ImGui.InputInt("###eye_shape", ref eyeShape, 1, 1, ImGuiInputTextFlags.EnterReturnsTrue))
         {
             customize.RealEyeShape = (byte)eyeShape;
             madeChange |= true;
         }
-        if (ImGui.IsItemHovered())
+        if(ImGui.IsItemHovered())
             ImGui.SetTooltip("Eye Shape");
 
         ImGui.SameLine();
@@ -362,12 +362,12 @@ internal class CustomizeEditor()
         ImGui.SameLine();
 
         var smallIris = customize.EyeShape >= 128;
-        if (ImGui.Checkbox("###small_iris", ref smallIris))
+        if(ImGui.Checkbox("###small_iris", ref smallIris))
         {
             customize.HasSmallIris = smallIris;
             madeChange |= true;
         }
-        if (ImGui.IsItemHovered())
+        if(ImGui.IsItemHovered())
             ImGui.SetTooltip("Small Iris");
 
         ImGui.SameLine();
@@ -384,7 +384,7 @@ internal class CustomizeEditor()
 
         int currentMouthIdx = customize.RealLipStyle;
 
-        if (hasColor)
+        if(hasColor)
         {
             ImGui.SetNextItemWidth(MaxItemWidth / 1.45f);
         }
@@ -393,29 +393,29 @@ internal class CustomizeEditor()
             ImGui.SetNextItemWidth(MaxItemWidth);
         }
 
-        if (ImGui.InputInt("###mouth_id", ref currentMouthIdx, 1, 1, ImGuiInputTextFlags.EnterReturnsTrue))
+        if(ImGui.InputInt("###mouth_id", ref currentMouthIdx, 1, 1, ImGuiInputTextFlags.EnterReturnsTrue))
         {
             madeChange |= true;
             customize.RealLipStyle = (byte)currentMouthIdx;
         }
 
-        if (hasColor)
+        if(hasColor)
         {
             ImGui.SameLine();
 
             bool lipColorEnabled = customize.LipColorEnabled;
-            if (ImGui.Checkbox("###lip_color_enabled", ref lipColorEnabled))
+            if(ImGui.Checkbox("###lip_color_enabled", ref lipColorEnabled))
             {
                 customize.LipColorEnabled = lipColorEnabled;
                 madeChange |= true;
             }
 
-            if (ImGui.IsItemHovered())
+            if(ImGui.IsItemHovered())
                 ImGui.SetTooltip("Enable Lip Color");
 
             ImGui.SameLine();
 
-            using (ImRaii.Disabled(!lipColorEnabled))
+            using(ImRaii.Disabled(!lipColorEnabled))
             {
                 madeChange |= DrawColorSelector(ref customize, CustomizeIndex.LipColor, "Lip Color");
             }
@@ -445,20 +445,20 @@ internal class CustomizeEditor()
         int currentColorIdx = customize.FacePaintColor;
         var currentHairColor = facePaintColors.Length > currentColorIdx ? facePaintColors[currentColorIdx] : 0;
 
-        if (ImBrio.BorderedGameIcon(currentFacepaintIdx.ToString(), currentIcon, "Images.Head.png", size: IconSize))
+        if(ImBrio.BorderedGameIcon(currentFacepaintIdx.ToString(), currentIcon, "Images.Head.png", size: IconSize))
             ImGui.OpenPopup("face_paint_popup");
 
         Vector2 whenDone = ImGui.GetCursorPos();
 
         ImGui.SameLine();
 
-        using (var group = ImRaii.Group())
+        using(var group = ImRaii.Group())
         {
-            if (group.Success)
+            if(group.Success)
             {
 
                 ImGui.SetNextItemWidth(MaxItemWidth);
-                if (ImGui.InputInt("###facepaint_id", ref currentFacepaintIdx, 1, 1, ImGuiInputTextFlags.EnterReturnsTrue))
+                if(ImGui.InputInt("###facepaint_id", ref currentFacepaintIdx, 1, 1, ImGuiInputTextFlags.EnterReturnsTrue))
                 {
                     madeChange |= true;
                     customize.RealFacepaint = (byte)currentFacepaintIdx;
@@ -468,12 +468,12 @@ internal class CustomizeEditor()
 
                 ImGui.SameLine();
 
-                if (ImGui.Checkbox("###face_paint_flipped", ref facepaintFlipped))
+                if(ImGui.Checkbox("###face_paint_flipped", ref facepaintFlipped))
                 {
                     customize.FacepaintFlipped = facepaintFlipped;
                     madeChange |= true;
                 }
-                if (ImGui.IsItemHovered())
+                if(ImGui.IsItemHovered())
                     ImGui.SetTooltip("Flipped");
             }
         }
@@ -484,7 +484,7 @@ internal class CustomizeEditor()
         ImGui.Text(title);
         ImGui.SetCursorPos(whenDone);
 
-        if (ImBrio.DrawIconSelectorPopup("face_paint_popup", facePaints.Select(x => new ImBrio.IconSelectorEntry(x.FeatureID, x.Icon)).ToArray(), ref currentFacepaintIdx, columns: 6, iconSize: IconSize, fallbackImage: "Images.Head.png"))
+        if(ImBrio.DrawIconSelectorPopup("face_paint_popup", facePaints.Select(x => new ImBrio.IconSelectorEntry(x.FeatureID, x.Icon)).ToArray(), ref currentFacepaintIdx, columns: 6, iconSize: IconSize, fallbackImage: "Images.Head.png"))
         {
             customize.RealFacepaint = (byte)currentFacepaintIdx;
             madeChange |= true;
@@ -504,7 +504,7 @@ internal class CustomizeEditor()
         var face = customize.FaceType - 1;
         bool validFace = face >= 0 && face < BrioCharaMakeType.FaceCount;
 
-        for (int i = 0; i < BrioCharaMakeType.FaceFeatureCount; ++i)
+        for(int i = 0; i < BrioCharaMakeType.FaceFeatureCount; ++i)
         {
             uint featureIcon = validFace ? (uint)menu.FacialFeatures[face, i] : 0;
             entries.Add(new ImBrio.IconSelectorEntry(1 << i, featureIcon));
@@ -513,20 +513,20 @@ internal class CustomizeEditor()
         // Legacy tattoo
         entries.Add(new ImBrio.IconSelectorEntry(128, 0, "Images.LegacyTattoo.png"));
 
-        using (ImRaii.PushId($"face_feature_{menu.MenuId}"))
+        using(ImRaii.PushId($"face_feature_{menu.MenuId}"))
         {
-            if (ImBrio.BorderedGameIcon($"{menu.Title}", entries[0].Icon, "Images.UnknownIcon.png", size: IconSize))
+            if(ImBrio.BorderedGameIcon($"{menu.Title}", entries[0].Icon, "Images.UnknownIcon.png", size: IconSize))
                 ImGui.OpenPopup("face_feature_popup");
 
             Vector2 whenDone = ImGui.GetCursorPos();
             ImGui.SameLine();
 
-            using (var group = ImRaii.Group())
+            using(var group = ImRaii.Group())
             {
-                if (group.Success)
+                if(group.Success)
                 {
                     ImGui.SetNextItemWidth(MaxItemWidth);
-                    if (ImGui.InputInt("###feature_ids", ref currentFeatures, 1, 1, ImGuiInputTextFlags.EnterReturnsTrue))
+                    if(ImGui.InputInt("###feature_ids", ref currentFeatures, 1, 1, ImGuiInputTextFlags.EnterReturnsTrue))
                     {
                         madeChange |= true;
                         customize.FaceFeatures = (FacialFeature)currentFeatures;
@@ -540,7 +540,7 @@ internal class CustomizeEditor()
             ImGui.Text("Features");
             ImGui.SetCursorPos(whenDone);
 
-            if (ImBrio.DrawIconSelectorPopup("face_feature_popup", [.. entries], ref currentFeatures, columns: 4, iconSize: IconSize, fallbackImage: "Images.Head.png", bitField: true))
+            if(ImBrio.DrawIconSelectorPopup("face_feature_popup", [.. entries], ref currentFeatures, columns: 4, iconSize: IconSize, fallbackImage: "Images.Head.png", bitField: true))
             {
                 customize.FaceFeatures = (FacialFeature)currentFeatures;
                 madeChange |= true;
@@ -557,7 +557,7 @@ internal class CustomizeEditor()
 
         int value = customize.Data[(int)customizeIndex];
         ImGui.SetNextItemWidth(MaxItemWidth);
-        if (ImGui.InputInt($"###{title}", ref value, 1, 1, ImGuiInputTextFlags.EnterReturnsTrue))
+        if(ImGui.InputInt($"###{title}", ref value, 1, 1, ImGuiInputTextFlags.EnterReturnsTrue))
         {
             customize.Data[(int)customizeIndex] = (byte)value;
             didChange |= true;
@@ -579,19 +579,19 @@ internal class CustomizeEditor()
 
         uint graphic = entries.FirstOrDefault(x => !multiItem && x.Id == value || multiItem && (x.Id & value) != 0).Icon;
 
-        if (ImBrio.BorderedGameIcon($"{customizeIndex}_icon", graphic, "Images.UnknownIcon.png", size: IconSize))
+        if(ImBrio.BorderedGameIcon($"{customizeIndex}_icon", graphic, "Images.UnknownIcon.png", size: IconSize))
             ImGui.OpenPopup($"{customizeIndex}_popup");
 
         Vector2 whenDone = ImGui.GetCursorPos();
 
         ImGui.SameLine();
 
-        using (var group = ImRaii.Group())
+        using(var group = ImRaii.Group())
         {
-            if (group.Success)
+            if(group.Success)
             {
                 ImGui.SetNextItemWidth(MaxItemWidth);
-                if (ImGui.InputInt($"###{customizeIndex}", ref value, 1, 1, ImGuiInputTextFlags.EnterReturnsTrue))
+                if(ImGui.InputInt($"###{customizeIndex}", ref value, 1, 1, ImGuiInputTextFlags.EnterReturnsTrue))
                 {
                     customize.Data[(int)customizeIndex] = (byte)value;
                     didChange |= true;
@@ -605,7 +605,7 @@ internal class CustomizeEditor()
             }
         }
 
-        if (ImBrio.DrawIconSelectorPopup($"{customizeIndex}_popup", entries, ref value, columns: 6, iconSize: IconSize, fallbackImage: "Images.Head.png", bitField: multiItem))
+        if(ImBrio.DrawIconSelectorPopup($"{customizeIndex}_popup", entries, ref value, columns: 6, iconSize: IconSize, fallbackImage: "Images.Head.png", bitField: multiItem))
         {
             customize.Data[(int)customizeIndex] = (byte)value;
             didChange |= true;
@@ -620,7 +620,7 @@ internal class CustomizeEditor()
 
         int value = customize.Data[(int)customizeIndex];
         ImGui.SetNextItemWidth(MaxItemWidth);
-        if (ImGui.SliderInt($"###{title}", ref value, 0, 100))
+        if(ImGui.SliderInt($"###{title}", ref value, 0, 100))
         {
             customize.Data[(int)customizeIndex] = (byte)value;
             didChange |= true;
@@ -665,17 +665,17 @@ internal class CustomizeEditor()
         };
         int valueIdx = customize.Data[(int)customizeIndex];
         uint value = colors.Length > valueIdx ? colors[valueIdx] : 0;
-        if (ImBrio.DrawLabeledColor($"{customizeIndex}_color", value, valueIdx.ToString(), title))
+        if(ImBrio.DrawLabeledColor($"{customizeIndex}_color", value, valueIdx.ToString(), title))
             ImGui.OpenPopup($"{customizeIndex}_popup");
 
-        if (ownOption)
+        if(ownOption)
         {
             ImGui.SameLine();
             ImGui.SetCursorPosX(LabelStart);
             ImGui.Text(title);
         }
 
-        if (ImBrio.DrawPopupColorSelector($"{customizeIndex}_popup", colors, ref valueIdx))
+        if(ImBrio.DrawPopupColorSelector($"{customizeIndex}_popup", colors, ref valueIdx))
         {
             customize.Data[(int)customizeIndex] = (byte)valueIdx;
             madeChange |= true;

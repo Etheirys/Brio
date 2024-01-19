@@ -1,10 +1,10 @@
-﻿using Dalamud.Game.ClientState.Objects.Types;
+﻿using Brio.Config;
+using Brio.Game.Actor;
+using Brio.Game.GPose;
+using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Ipc;
 using Dalamud.Plugin.Services;
-using Brio.Config;
-using Brio.Game.Actor;
-using Brio.Game.GPose;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -46,7 +46,7 @@ internal class GlamourerService : IDisposable
 
     public void RefreshGlamourerStatus()
     {
-        if (_configurationService.Configuration.IPC.AllowGlamourerIntegration)
+        if(_configurationService.Configuration.IPC.AllowGlamourerIntegration)
         {
             IsGlamourerAvailable = ConnectToGlamourer();
         }
@@ -58,7 +58,7 @@ internal class GlamourerService : IDisposable
 
     public Task RevertCharacter(Character? character)
     {
-        if (!IsGlamourerAvailable && character != null)
+        if(!IsGlamourerAvailable && character != null)
             return Task.CompletedTask;
 
         Brio.Log.Debug("Starting glamourer revert...");
@@ -78,14 +78,14 @@ internal class GlamourerService : IDisposable
         try
         {
             bool glamourerInstalled = _pluginInterface.InstalledPlugins.Any(x => x.Name == "Glamourer");
-            if (!glamourerInstalled)
+            if(!glamourerInstalled)
             {
                 Brio.Log.Debug("Glamourer not present");
                 return false;
             }
 
             var (major, minor) = _glamourerApiVersions.InvokeFunc();
-            if (major != GlamourerApiMajor || minor < GlamourerApiMinor)
+            if(major != GlamourerApiMajor || minor < GlamourerApiMinor)
             {
                 Brio.Log.Debug("Glamourer API mismatch");
                 return false;
@@ -95,7 +95,7 @@ internal class GlamourerService : IDisposable
 
             return true;
         }
-        catch (Exception ex)
+        catch(Exception ex)
         {
             Brio.Log.Debug(ex, "Glamourer initialize error");
             return false;

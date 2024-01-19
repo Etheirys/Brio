@@ -1,5 +1,5 @@
-﻿using ImGuiNET;
-using Brio.Game.Types;
+﻿using Brio.Game.Types;
+using ImGuiNET;
 using System.Numerics;
 
 namespace Brio.UI.Controls.Stateless;
@@ -12,7 +12,7 @@ internal static partial class ImBrio
            none => ("None", (byte)0)
         );
 
-        if (!showText)
+        if(!showText)
         {
             description = string.Empty;
         }

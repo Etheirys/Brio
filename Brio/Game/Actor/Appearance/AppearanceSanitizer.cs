@@ -1,6 +1,6 @@
-﻿using Dalamud.Game.ClientState.Objects.Enums;
-using Brio.Resources;
+﻿using Brio.Resources;
 using Brio.Resources.Sheets;
+using Dalamud.Game.ClientState.Objects.Enums;
 using System.Linq;
 
 namespace Brio.Game.Actor.Appearance;
@@ -12,33 +12,33 @@ internal static class AppearanceSanitizer
         var allowedTribes = appearance.Customize.Race.GetValidTribes();
         var allowedGenders = appearance.Customize.Race.GetAllowedGenders();
 
-        if (!allowedTribes.Contains(appearance.Customize.Tribe))
+        if(!allowedTribes.Contains(appearance.Customize.Tribe))
             appearance.Customize.Tribe = allowedTribes.First();
 
-        if (!allowedGenders.Contains(appearance.Customize.Gender))
+        if(!allowedGenders.Contains(appearance.Customize.Gender))
             appearance.Customize.Gender = allowedGenders.First();
 
         var allowedBodyTypes = appearance.Customize.Tribe.GetAllowedBodyTypes(appearance.Customize.Gender);
-        if (!allowedBodyTypes.Contains(appearance.Customize.BodyType))
+        if(!allowedBodyTypes.Contains(appearance.Customize.BodyType))
             appearance.Customize.BodyType = allowedBodyTypes.First();
 
-        if (appearance.Customize.Race == Races.Viera)
+        if(appearance.Customize.Race == Races.Viera)
         {
-            if (oldAppearance.HasValue)
+            if(oldAppearance.HasValue)
             {
-                if (oldAppearance.Value.Customize.Race == appearance.Customize.Race && appearance.Customize.Tribe == oldAppearance.Value.Customize.Tribe && appearance.Customize.Gender == oldAppearance.Value.Customize.Gender && appearance.Customize.RaceFeatureType == oldAppearance.Value.Customize.RaceFeatureType)
+                if(oldAppearance.Value.Customize.Race == appearance.Customize.Race && appearance.Customize.Tribe == oldAppearance.Value.Customize.Tribe && appearance.Customize.Gender == oldAppearance.Value.Customize.Gender && appearance.Customize.RaceFeatureType == oldAppearance.Value.Customize.RaceFeatureType)
                     return;
             }
 
             var charaMake = GetCharaMakeType(appearance);
-            if (charaMake == null)
+            if(charaMake == null)
             {
                 appearance.Customize.RaceFeatureType = 1;
             }
             else
             {
                 var menu = charaMake.BuildMenus().GetMenuForCustomize(CustomizeIndex.RaceFeatureType)!;
-                if (appearance.Customize.RaceFeatureType < 1 || appearance.Customize.RaceFeatureType > menu.SubParams.Length)
+                if(appearance.Customize.RaceFeatureType < 1 || appearance.Customize.RaceFeatureType > menu.SubParams.Length)
                     appearance.Customize.RaceFeatureType = 1;
             }
 

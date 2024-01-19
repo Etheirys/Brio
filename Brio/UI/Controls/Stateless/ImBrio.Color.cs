@@ -31,15 +31,15 @@ internal static partial class ImBrio
     {
         bool wasChanged = false;
 
-        using (var popup = ImRaii.Popup(id))
+        using(var popup = ImRaii.Popup(id))
         {
-            if (popup.Success)
+            if(popup.Success)
             {
                 ImGui.SetNextItemWidth(-1);
                 wasChanged |= ImGui.InputInt($"##{id}_index", ref index, 1, 1, ImGuiInputTextFlags.EnterReturnsTrue);
                 wasChanged |= DrawColorSelector(id, colors, ref index, columns);
 
-                if (ImGui.IsMouseDoubleClicked(ImGuiMouseButton.Left))
+                if(ImGui.IsMouseDoubleClicked(ImGuiMouseButton.Left))
                     ImGui.CloseCurrentPopup();
             }
         }
@@ -51,35 +51,35 @@ internal static partial class ImBrio
     {
         bool wasClicked = false;
 
-        for (int i = 0; i < colors.Length; ++i)
+        for(int i = 0; i < colors.Length; ++i)
         {
             var color = colors[i];
-            if (color == 0)
+            if(color == 0)
                 continue;
 
             var thisColorText = i.ToString();
 
             bool isSelected = i == index;
 
-            if (isSelected)
+            if(isSelected)
             {
                 ImGui.PushStyleVar(ImGuiStyleVar.FrameBorderSize, 4.0f);
                 ImGui.PushStyleColor(ImGuiCol.Border, 0xFFFFFFFF);
             }
 
-            if (DrawLabeledColor($"{id}_{i}", color, thisColorText, thisColorText))
+            if(DrawLabeledColor($"{id}_{i}", color, thisColorText, thisColorText))
             {
                 wasClicked = true;
                 index = i;
             }
 
-            if (isSelected)
+            if(isSelected)
             {
                 ImGui.PopStyleColor();
                 ImGui.PopStyleVar();
             }
 
-            if ((i + 1) % columns != 0)
+            if((i + 1) % columns != 0)
                 ImGui.SameLine();
         }
 

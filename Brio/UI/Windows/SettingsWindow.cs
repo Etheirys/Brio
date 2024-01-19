@@ -1,11 +1,11 @@
-﻿using Dalamud.Interface;
-using Dalamud.Interface.Utility.Raii;
-using Dalamud.Interface.Windowing;
-using ImGuiNET;
-using Brio.Config;
+﻿using Brio.Config;
 using Brio.IPC;
 using Brio.UI.Controls.Stateless;
 using Brio.Web;
+using Dalamud.Interface;
+using Dalamud.Interface.Utility.Raii;
+using Dalamud.Interface.Windowing;
+using ImGuiNET;
 using System;
 using System.Numerics;
 
@@ -34,11 +34,11 @@ internal class SettingsWindow : Window
 
     public override void Draw()
     {
-        using (ImRaii.PushId("brio_settings"))
+        using(ImRaii.PushId("brio_settings"))
         {
-            using (var tab = ImRaii.TabBar("###brio_settings_tabs"))
+            using(var tab = ImRaii.TabBar("###brio_settings_tabs"))
             {
-                if (tab.Success)
+                if(tab.Success)
                 {
                     DrawInterfaceTab();
                     DrawIPCTab();
@@ -52,17 +52,17 @@ internal class SettingsWindow : Window
 
     private void DrawInterfaceTab()
     {
-        using (var tab = ImRaii.TabItem("Interface"))
+        using(var tab = ImRaii.TabItem("Interface"))
         {
-            if (tab.Success)
+            if(tab.Success)
             {
-                if (ImGui.CollapsingHeader("Window", ImGuiTreeNodeFlags.DefaultOpen))
+                if(ImGui.CollapsingHeader("Window", ImGuiTreeNodeFlags.DefaultOpen))
                 {
                     DrawOpenBrioSetting();
                     DrawHideSettings();
                 }
 
-                if (ImGui.CollapsingHeader("Display", ImGuiTreeNodeFlags.DefaultOpen))
+                if(ImGui.CollapsingHeader("Display", ImGuiTreeNodeFlags.DefaultOpen))
                 {
                     DrawDisplaySettings();
                 }
@@ -75,13 +75,13 @@ internal class SettingsWindow : Window
         var selectedBrioOpenBehavior = _configurationService.Configuration.Interface.OpenBrioBehavior;
         const string label = "Open Brio";
         ImGui.SetNextItemWidth(-ImGui.CalcTextSize(label).X);
-        using (var combo = ImRaii.Combo(label, selectedBrioOpenBehavior.ToString()))
+        using(var combo = ImRaii.Combo(label, selectedBrioOpenBehavior.ToString()))
         {
-            if (combo.Success)
+            if(combo.Success)
             {
-                foreach (var openBrioBehavior in Enum.GetValues<OpenBrioBehavior>())
+                foreach(var openBrioBehavior in Enum.GetValues<OpenBrioBehavior>())
                 {
-                    if (ImGui.Selectable($"{openBrioBehavior}", openBrioBehavior == selectedBrioOpenBehavior))
+                    if(ImGui.Selectable($"{openBrioBehavior}", openBrioBehavior == selectedBrioOpenBehavior))
                     {
                         _configurationService.Configuration.Interface.OpenBrioBehavior = openBrioBehavior;
                         _configurationService.ApplyChange();
@@ -94,21 +94,21 @@ internal class SettingsWindow : Window
     private void DrawHideSettings()
     {
         bool showInGPose = _configurationService.Configuration.Interface.ShowInGPose;
-        if (ImGui.Checkbox("Show in GPose", ref showInGPose))
+        if(ImGui.Checkbox("Show in GPose", ref showInGPose))
         {
             _configurationService.Configuration.Interface.ShowInGPose = showInGPose;
             _configurationService.ApplyChange();
         }
 
         bool showInCutscene = _configurationService.Configuration.Interface.ShowInCutscene;
-        if (ImGui.Checkbox("Show in Cutscenes", ref showInCutscene))
+        if(ImGui.Checkbox("Show in Cutscenes", ref showInCutscene))
         {
             _configurationService.Configuration.Interface.ShowInCutscene = showInCutscene;
             _configurationService.ApplyChange();
         }
 
         bool showWhenUIHidden = _configurationService.Configuration.Interface.ShowWhenUIHidden;
-        if (ImGui.Checkbox("Show when UI Hidden", ref showWhenUIHidden))
+        if(ImGui.Checkbox("Show when UI Hidden", ref showWhenUIHidden))
         {
             _configurationService.Configuration.Interface.ShowWhenUIHidden = showWhenUIHidden;
             _configurationService.ApplyChange();
@@ -118,7 +118,7 @@ internal class SettingsWindow : Window
     private void DrawDisplaySettings()
     {
         bool censorActorNames = _configurationService.Configuration.Interface.CensorActorNames;
-        if (ImGui.Checkbox("Censor Actor Names", ref censorActorNames))
+        if(ImGui.Checkbox("Censor Actor Names", ref censorActorNames))
         {
             _configurationService.Configuration.Interface.CensorActorNames = censorActorNames;
             _configurationService.ApplyChange();
@@ -127,9 +127,9 @@ internal class SettingsWindow : Window
 
     private void DrawIPCTab()
     {
-        using (var tab = ImRaii.TabItem("IPC"))
+        using(var tab = ImRaii.TabItem("IPC"))
         {
-            if (tab.Success)
+            if(tab.Success)
             {
                 DrawBrioIPC();
                 DrawThirdPartyIPC();
@@ -139,16 +139,16 @@ internal class SettingsWindow : Window
 
     private void DrawThirdPartyIPC()
     {
-        if (ImGui.CollapsingHeader("Third-Party", ImGuiTreeNodeFlags.DefaultOpen))
+        if(ImGui.CollapsingHeader("Third-Party", ImGuiTreeNodeFlags.DefaultOpen))
         {
             bool enablePenumbra = _configurationService.Configuration.IPC.AllowPenumbraIntegration;
-            if (ImGui.Checkbox("Allow Penumbra Integration", ref enablePenumbra))
+            if(ImGui.Checkbox("Allow Penumbra Integration", ref enablePenumbra))
             {
                 _configurationService.Configuration.IPC.AllowPenumbraIntegration = enablePenumbra;
                 _configurationService.ApplyChange();
             }
 
-            using (ImRaii.Disabled(!enablePenumbra))
+            using(ImRaii.Disabled(!enablePenumbra))
             {
                 ImGui.Text($"Penumbra Status: {(_penumbraService.IsPenumbraAvailable ? "Active" : "Inactive")}");
                 ImGui.SameLine();
@@ -156,13 +156,13 @@ internal class SettingsWindow : Window
             }
 
             bool enableGlamourer = _configurationService.Configuration.IPC.AllowGlamourerIntegration;
-            if (ImGui.Checkbox("Allow Glamourer Integration", ref enableGlamourer))
+            if(ImGui.Checkbox("Allow Glamourer Integration", ref enableGlamourer))
             {
                 _configurationService.Configuration.IPC.AllowGlamourerIntegration = enableGlamourer;
                 _configurationService.ApplyChange();
             }
 
-            using (ImRaii.Disabled(!enableGlamourer))
+            using(ImRaii.Disabled(!enableGlamourer))
             {
                 ImGui.Text($"Glamourer Status: {(_glamourerService.IsGlamourerAvailable ? "Active" : "Inactive")}");
                 ImGui.SameLine();
@@ -174,7 +174,7 @@ internal class SettingsWindow : Window
     private void DrawBrioIPC()
     {
 
-        if (ImGui.CollapsingHeader("Brio", ImGuiTreeNodeFlags.DefaultOpen))
+        if(ImGui.CollapsingHeader("Brio", ImGuiTreeNodeFlags.DefaultOpen))
         {
             bool enableBrioIpc = _configurationService.Configuration.IPC.EnableBrioIPC;
             if(ImGui.Checkbox("Enable Brio IPC", ref enableBrioIpc))
@@ -185,7 +185,7 @@ internal class SettingsWindow : Window
             ImGui.Text($"Brio IPC Status: {(_brioIPCService.IsIPCEnabled ? "Active" : "Inactive")}");
 
             bool enableWebApi = _configurationService.Configuration.IPC.AllowWebAPI;
-            if (ImGui.Checkbox("Enable Web API", ref enableWebApi))
+            if(ImGui.Checkbox("Enable Web API", ref enableWebApi))
             {
                 _configurationService.Configuration.IPC.AllowWebAPI = enableWebApi;
                 _configurationService.ApplyChange();
@@ -193,14 +193,14 @@ internal class SettingsWindow : Window
 
             ImGui.Text($"Web API Status: {(_webService.IsRunning ? "Active" : "Inactive")}");
         }
-        
+
     }
 
     private void DrawAppearanceTab()
     {
-        using (var tab = ImRaii.TabItem("Appearance"))
+        using(var tab = ImRaii.TabItem("Appearance"))
         {
-            if (tab.Success)
+            if(tab.Success)
             {
                 DrawNPCAppearanceHack();
             }
@@ -209,18 +209,18 @@ internal class SettingsWindow : Window
 
     private void DrawNPCAppearanceHack()
     {
-        if (ImGui.CollapsingHeader("Appearance", ImGuiTreeNodeFlags.DefaultOpen))
+        if(ImGui.CollapsingHeader("Appearance", ImGuiTreeNodeFlags.DefaultOpen))
         {
             var allowNPCHackBehavior = _configurationService.Configuration.Appearance.ApplyNPCHack;
             const string label = "Allow NPC Appearance on Players";
             ImGui.SetNextItemWidth(-ImGui.CalcTextSize(label).X);
-            using (var combo = ImRaii.Combo(label, allowNPCHackBehavior.ToString()))
+            using(var combo = ImRaii.Combo(label, allowNPCHackBehavior.ToString()))
             {
-                if (combo.Success)
+                if(combo.Success)
                 {
-                    foreach (var npcHack in Enum.GetValues<ApplyNPCHack>())
+                    foreach(var npcHack in Enum.GetValues<ApplyNPCHack>())
                     {
-                        if (ImGui.Selectable($"{npcHack}", npcHack == allowNPCHackBehavior))
+                        if(ImGui.Selectable($"{npcHack}", npcHack == allowNPCHackBehavior))
                         {
                             _configurationService.Configuration.Appearance.ApplyNPCHack = npcHack;
                             _configurationService.ApplyChange();
@@ -230,7 +230,7 @@ internal class SettingsWindow : Window
             }
 
             bool enableTinting = _configurationService.Configuration.Appearance.EnableTinting;
-            if (ImGui.Checkbox("Enable Tinting", ref enableTinting))
+            if(ImGui.Checkbox("Enable Tinting", ref enableTinting))
             {
                 _configurationService.Configuration.Appearance.EnableTinting = enableTinting;
                 _configurationService.ApplyChange();
@@ -240,9 +240,9 @@ internal class SettingsWindow : Window
 
     private void DrawPosingTab()
     {
-        using (var tab = ImRaii.TabItem("Posing"))
+        using(var tab = ImRaii.TabItem("Posing"))
         {
-            if (tab.Success)
+            if(tab.Success)
             {
                 DrawPosingGeneralSection();
                 DrawGPoseSection();
@@ -253,24 +253,24 @@ internal class SettingsWindow : Window
 
     private void DrawGPoseSection()
     {
-        if (ImGui.CollapsingHeader("GPose", ImGuiTreeNodeFlags.DefaultOpen))
+        if(ImGui.CollapsingHeader("GPose", ImGuiTreeNodeFlags.DefaultOpen))
         {
             bool enableMouseHook = _configurationService.Configuration.Posing.DisableGPoseMouseSelect;
-            if (ImGui.Checkbox("Disable GPose Mouse Select", ref enableMouseHook))
+            if(ImGui.Checkbox("Disable GPose Mouse Select", ref enableMouseHook))
             {
                 _configurationService.Configuration.Posing.DisableGPoseMouseSelect = enableMouseHook;
                 _configurationService.ApplyChange();
             }
 
             bool enableBrioTargetChange = _configurationService.Configuration.Posing.BrioTargetChangesWithGPose;
-            if (ImGui.Checkbox("Brio Target Changes with GPose Target", ref enableBrioTargetChange))
+            if(ImGui.Checkbox("Brio Target Changes with GPose Target", ref enableBrioTargetChange))
             {
                 _configurationService.Configuration.Posing.BrioTargetChangesWithGPose = enableBrioTargetChange;
                 _configurationService.ApplyChange();
             }
 
             bool enableGPoseTargetChange = _configurationService.Configuration.Posing.GPoseTargetChangesWithBrio;
-            if (ImGui.Checkbox("GPose Target Changes with Brio Target", ref enableGPoseTargetChange))
+            if(ImGui.Checkbox("GPose Target Changes with Brio Target", ref enableGPoseTargetChange))
             {
                 _configurationService.Configuration.Posing.GPoseTargetChangesWithBrio = enableGPoseTargetChange;
                 _configurationService.ApplyChange();
@@ -280,17 +280,17 @@ internal class SettingsWindow : Window
 
     private void DrawOverlaySection()
     {
-        if (ImGui.CollapsingHeader("Overlay", ImGuiTreeNodeFlags.DefaultOpen))
+        if(ImGui.CollapsingHeader("Overlay", ImGuiTreeNodeFlags.DefaultOpen))
         {
             bool defaultsOn = _configurationService.Configuration.Posing.OverlayDefaultsOn;
-            if (ImGui.Checkbox("Overlay Defaults On", ref defaultsOn))
+            if(ImGui.Checkbox("Overlay Defaults On", ref defaultsOn))
             {
                 _configurationService.Configuration.Posing.OverlayDefaultsOn = defaultsOn;
                 _configurationService.ApplyChange();
             }
 
             bool allowGizmoAxisFlip = _configurationService.Configuration.Posing.AllowGizmoAxisFlip;
-            if (ImGui.Checkbox("Allow Gizmo Axis Flip", ref allowGizmoAxisFlip))
+            if(ImGui.Checkbox("Allow Gizmo Axis Flip", ref allowGizmoAxisFlip))
             {
                 _configurationService.Configuration.Posing.AllowGizmoAxisFlip = allowGizmoAxisFlip;
                 _configurationService.ApplyChange();
@@ -304,28 +304,28 @@ internal class SettingsWindow : Window
             }
 
             bool showSkeletonLines = _configurationService.Configuration.Posing.ShowSkeletonLines;
-            if (ImGui.Checkbox("Show Skeleton Lines", ref showSkeletonLines))
+            if(ImGui.Checkbox("Show Skeleton Lines", ref showSkeletonLines))
             {
                 _configurationService.Configuration.Posing.ShowSkeletonLines = showSkeletonLines;
                 _configurationService.ApplyChange();
             }
 
             bool hideSkeletonWhenGizmoActive = _configurationService.Configuration.Posing.HideSkeletonWhenGizmoActive;
-            if (ImGui.Checkbox("Hide Skeleton when Gizmo Active", ref hideSkeletonWhenGizmoActive))
+            if(ImGui.Checkbox("Hide Skeleton when Gizmo Active", ref hideSkeletonWhenGizmoActive))
             {
                 _configurationService.Configuration.Posing.HideSkeletonWhenGizmoActive = hideSkeletonWhenGizmoActive;
                 _configurationService.ApplyChange();
             }
 
             float lineThickness = _configurationService.Configuration.Posing.SkeletonLineThickness;
-            if (ImGui.DragFloat("Line Thickness", ref lineThickness, 0.01f, 0.01f, 20f))
+            if(ImGui.DragFloat("Line Thickness", ref lineThickness, 0.01f, 0.01f, 20f))
             {
                 _configurationService.Configuration.Posing.SkeletonLineThickness = lineThickness;
                 _configurationService.ApplyChange();
             }
 
             float circleSize = _configurationService.Configuration.Posing.BoneCircleSize;
-            if (ImGui.DragFloat("Circle Size", ref circleSize, 0.01f, 0.01f, 20f))
+            if(ImGui.DragFloat("Circle Size", ref circleSize, 0.01f, 0.01f, 20f))
             {
                 _configurationService.Configuration.Posing.BoneCircleSize = circleSize;
                 _configurationService.ApplyChange();
@@ -335,10 +335,10 @@ internal class SettingsWindow : Window
 
     private void DrawPosingGeneralSection()
     {
-        if (ImGui.CollapsingHeader("General", ImGuiTreeNodeFlags.DefaultOpen))
+        if(ImGui.CollapsingHeader("General", ImGuiTreeNodeFlags.DefaultOpen))
         {
             var undoStackSize = _configurationService.Configuration.Posing.UndoStackSize;
-            if (ImGui.DragInt("Undo History", ref undoStackSize, 1, 0, 100))
+            if(ImGui.DragInt("Undo History", ref undoStackSize, 1, 0, 100))
             {
                 _configurationService.Configuration.Posing.UndoStackSize = undoStackSize;
                 _configurationService.ApplyChange();

@@ -26,10 +26,10 @@ internal class CameraWindow : Window, IDisposable
 
     public override bool DrawConditions()
     {
-        if (!_entityManager.TryGetEntity<CameraEntity>("camera", out var camEntity))
+        if(!_entityManager.TryGetEntity<CameraEntity>("camera", out var camEntity))
             return false;
 
-        if (!camEntity.HasCapability<CameraCapability>())
+        if(!camEntity.HasCapability<CameraCapability>())
             return false;
 
         return base.DrawConditions();
@@ -37,9 +37,9 @@ internal class CameraWindow : Window, IDisposable
 
     public override void Draw()
     {
-        if (_entityManager.TryGetEntity<CameraEntity>("camera", out var camEntity))
+        if(_entityManager.TryGetEntity<CameraEntity>("camera", out var camEntity))
         {
-            if (camEntity.TryGetCapability<CameraCapability>(out var camCap))
+            if(camEntity.TryGetCapability<CameraCapability>(out var camCap))
             {
                 CameraEditor.Draw("posing_camera_editor", camCap);
             }
@@ -49,7 +49,7 @@ internal class CameraWindow : Window, IDisposable
 
     private void OnGPoseStateChange(bool newState)
     {
-        if (!newState)
+        if(!newState)
             IsOpen = false;
     }
 

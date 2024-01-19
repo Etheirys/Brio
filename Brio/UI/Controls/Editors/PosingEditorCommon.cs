@@ -1,12 +1,12 @@
 ﻿using Brio.Capabilities.Posing;
+using Brio.Core;
 using Brio.Game.Posing;
-using Dalamud.Interface.Utility.Raii;
+using Brio.UI.Controls.Stateless;
 using Dalamud.Interface;
+using Dalamud.Interface.Utility.Raii;
 using ImGuiNET;
 using OneOf.Types;
 using System.Numerics;
-using Brio.UI.Controls.Stateless;
-using Brio.Core;
 
 namespace Brio.UI.Controls.Editors;
 
@@ -19,27 +19,27 @@ internal static class PosingEditorCommon
         ImGui.Separator();
 
         var selected = options.TransformComponents.HasFlag(TransformComponents.Position);
-        if (ImGui.Checkbox("Position", ref selected))
+        if(ImGui.Checkbox("Position", ref selected))
         {
-            if (selected)
+            if(selected)
                 options.TransformComponents |= TransformComponents.Position;
             else
                 options.TransformComponents &= ~TransformComponents.Position;
         }
 
         selected = options.TransformComponents.HasFlag(TransformComponents.Rotation);
-        if (ImGui.Checkbox("Rotation", ref selected))
+        if(ImGui.Checkbox("Rotation", ref selected))
         {
-            if (selected)
+            if(selected)
                 options.TransformComponents |= TransformComponents.Rotation;
             else
                 options.TransformComponents &= ~TransformComponents.Rotation;
         }
 
         selected = options.TransformComponents.HasFlag(TransformComponents.Scale);
-        if (ImGui.Checkbox("Scale", ref selected))
+        if(ImGui.Checkbox("Scale", ref selected))
         {
-            if (selected)
+            if(selected)
                 options.TransformComponents |= TransformComponents.Scale;
             else
                 options.TransformComponents &= ~TransformComponents.Scale;
@@ -48,7 +48,7 @@ internal static class PosingEditorCommon
         ImGui.Separator();
 
         selected = options.ApplyModelTransform;
-        if (ImGui.Checkbox("Model Transform", ref selected))
+        if(ImGui.Checkbox("Model Transform", ref selected))
         {
             options.ApplyModelTransform = selected;
         }
@@ -56,31 +56,31 @@ internal static class PosingEditorCommon
 
     public static void DrawBoneFilterEditor(BoneFilter filter)
     {
-        if (ImBrio.FontIconButton("select_all", Dalamud.Interface.FontAwesomeIcon.Check, "Select All"))
+        if(ImBrio.FontIconButton("select_all", Dalamud.Interface.FontAwesomeIcon.Check, "Select All"))
         {
             filter.EnableAll();
         }
 
         ImGui.SameLine();
 
-        if (ImBrio.FontIconButton("select_none", Dalamud.Interface.FontAwesomeIcon.Minus, "Select None"))
+        if(ImBrio.FontIconButton("select_none", Dalamud.Interface.FontAwesomeIcon.Minus, "Select None"))
         {
             filter.DisableAll();
         }
 
         ImGui.Separator();
 
-        foreach (var category in filter.AllCategories)
+        foreach(var category in filter.AllCategories)
         {
             var isEnabled = filter.IsCategoryEnabled(category);
-            if (ImGui.Checkbox(category.Name, ref isEnabled))
+            if(ImGui.Checkbox(category.Name, ref isEnabled))
             {
-                if (isEnabled)
+                if(isEnabled)
                     filter.EnableCategory(category);
                 else
                     filter.DisableCategory(category);
             }
-            if (ImGui.IsItemHovered() && ImGui.IsMouseClicked(ImGuiMouseButton.Right))
+            if(ImGui.IsItemHovered() && ImGui.IsMouseClicked(ImGuiMouseButton.Right))
             {
                 filter.EnableOnly(category);
             }
@@ -88,7 +88,7 @@ internal static class PosingEditorCommon
     }
     public static void DrawMirrorModeSelect(PosingCapability posing, Vector2 buttonSize)
     {
-        using (ImRaii.PushFont(UiBuilder.IconFont))
+        using(ImRaii.PushFont(UiBuilder.IconFont))
         {
             var hasMirror = posing.Selected.Match(
                 boneSelect => posing.SkeletonPosing.GetBonePose(boneSelect).GetMirrorBone() != null,
@@ -96,24 +96,24 @@ internal static class PosingEditorCommon
                 _ => false
             );
 
-            using (ImRaii.Disabled(posing.Selected.Value is None || !hasMirror))
+            using(ImRaii.Disabled(posing.Selected.Value is None || !hasMirror))
             {
                 posing.Selected.Switch(
                     boneSelect =>
                     {
                         var poseInfo = posing.SkeletonPosing.GetBonePose(boneSelect);
-                        switch (poseInfo.MirrorMode)
+                        switch(poseInfo.MirrorMode)
                         {
                             case PoseMirrorMode.None:
-                                if (ImGui.Button($"{FontAwesomeIcon.Unlink.ToIconString()}###mirror_mode", buttonSize))
+                                if(ImGui.Button($"{FontAwesomeIcon.Unlink.ToIconString()}###mirror_mode", buttonSize))
                                     poseInfo.MirrorMode = PoseMirrorMode.Copy;
                                 break;
                             case PoseMirrorMode.Copy:
-                                if (ImGui.Button($"{FontAwesomeIcon.Link.ToIconString()}###mirror_mode", buttonSize))
+                                if(ImGui.Button($"{FontAwesomeIcon.Link.ToIconString()}###mirror_mode", buttonSize))
                                     poseInfo.MirrorMode = PoseMirrorMode.Mirror;
                                 break;
                             case PoseMirrorMode.Mirror:
-                                if (ImGui.Button($"{FontAwesomeIcon.YinYang.ToIconString()}###mirror_mode", buttonSize))
+                                if(ImGui.Button($"{FontAwesomeIcon.YinYang.ToIconString()}###mirror_mode", buttonSize))
                                     poseInfo.MirrorMode = PoseMirrorMode.None;
                                 break;
                         }
@@ -124,11 +124,11 @@ internal static class PosingEditorCommon
             }
         }
 
-        if (ImGui.IsItemHovered())
+        if(ImGui.IsItemHovered())
         {
-            if (posing.Selected.Value is BonePoseInfoId poseInfo)
+            if(posing.Selected.Value is BonePoseInfoId poseInfo)
             {
-                switch (posing.SkeletonPosing.GetBonePose(poseInfo).MirrorMode)
+                switch(posing.SkeletonPosing.GetBonePose(poseInfo).MirrorMode)
                 {
                     case PoseMirrorMode.None:
                         ImGui.SetTooltip("Link: None");

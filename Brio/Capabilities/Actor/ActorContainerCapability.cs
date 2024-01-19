@@ -1,11 +1,11 @@
-﻿using Dalamud.Game.ClientState.Objects.Types;
-using Brio.Capabilities.Core;
+﻿using Brio.Capabilities.Core;
 using Brio.Entities;
 using Brio.Entities.Actor;
 using Brio.Game.Actor;
+using Brio.Game.Core;
 using Brio.Game.GPose;
 using Brio.UI.Widgets.Actor;
-using Brio.Game.Core;
+using Dalamud.Game.ClientState.Objects.Types;
 
 namespace Brio.Capabilities.Actor;
 
@@ -35,12 +35,12 @@ internal class ActorContainerCapability : Capability
     public void CreateCharacter(bool enableAttachments, bool targetNewInHierarchy)
     {
         SpawnFlags flags = SpawnFlags.Default;
-        if (enableAttachments)
+        if(enableAttachments)
             flags |= SpawnFlags.ReserveCompanionSlot;
 
-        if (_actorSpawnService.CreateCharacter(out var chara, flags))
+        if(_actorSpawnService.CreateCharacter(out var chara, flags))
         {
-            if (targetNewInHierarchy)
+            if(targetNewInHierarchy)
             {
                 _entityManager.SetSelectedEntity(chara);
             }
@@ -54,11 +54,11 @@ internal class ActorContainerCapability : Capability
 
     public void CloneActor(ActorEntity entity, bool targetNewInHierarchy)
     {
-        if (entity.GameObject is Character character)
+        if(entity.GameObject is Character character)
         {
-            if (_actorSpawnService.CloneCharacter(character, out var chara))
+            if(_actorSpawnService.CloneCharacter(character, out var chara))
             {
-                if (targetNewInHierarchy)
+                if(targetNewInHierarchy)
                 {
                     _entityManager.SetSelectedEntity(chara);
                 }

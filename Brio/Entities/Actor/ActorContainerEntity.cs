@@ -1,6 +1,6 @@
-﻿using Dalamud.Interface;
-using Brio.Capabilities.Actor;
+﻿using Brio.Capabilities.Actor;
 using Brio.Entities.Core;
+using Dalamud.Interface;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 
@@ -24,7 +24,7 @@ internal class ActorContainerEntity(IServiceProvider provider) : Entity("actorCo
     {
         _children.Sort((a, b) =>
         {
-            if (a is ActorEntity actorA && b is ActorEntity actorB)
+            if(a is ActorEntity actorA && b is ActorEntity actorB)
                 return actorA.GameObject.ObjectIndex.CompareTo(actorB.GameObject.ObjectIndex);
 
             return string.Compare(a.Id.Unique, b.Id.Unique, System.StringComparison.Ordinal);

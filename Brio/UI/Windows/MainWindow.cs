@@ -1,12 +1,12 @@
-﻿using Dalamud.Interface;
+﻿using Brio.Config;
+using Brio.Entities;
+using Brio.UI.Controls.Stateless;
+using Brio.UI.Entitites;
+using Dalamud.Interface;
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Interface.Windowing;
 using ImGuiNET;
-using Brio.Config;
-using Brio.Entities;
-using Brio.UI.Entitites;
 using System.Numerics;
-using Brio.UI.Controls.Stateless;
 
 namespace Brio.UI.Windows;
 
@@ -40,12 +40,12 @@ internal class MainWindow : Window
 
         var rootEntity = _entityManager.RootEntity;
 
-        if (rootEntity == null)
+        if(rootEntity == null)
             return;
 
-        using (var container = ImRaii.Child("###entity_hierarchy_container", new Vector2(-1, ImGui.GetTextLineHeight() * 15f), true))
+        using(var container = ImRaii.Child("###entity_hierarchy_container", new Vector2(-1, ImGui.GetTextLineHeight() * 15f), true))
         {
-            if (container.Success)
+            if(container.Success)
             {
                 _entitySelector.Draw(rootEntity);
             }
@@ -60,11 +60,11 @@ internal class MainWindow : Window
         ImGui.PushClipRect(ImGui.GetWindowPos(), ImGui.GetWindowPos() + ImGui.GetWindowSize(), false);
 
         ImGui.SetCursorPosY(0);
-        if (ImBrio.FontIconButtonRight("settings_toggle", FontAwesomeIcon.Cog, 2.3f, "Settings", bordered: false))
+        if(ImBrio.FontIconButtonRight("settings_toggle", FontAwesomeIcon.Cog, 2.3f, "Settings", bordered: false))
             _settingsWindow.Toggle();
 
         ImGui.SetCursorPosY(0);
-        if (ImBrio.FontIconButtonRight("info_toggle", FontAwesomeIcon.InfoCircle, 3.3f, "Info", bordered: false))
+        if(ImBrio.FontIconButtonRight("info_toggle", FontAwesomeIcon.InfoCircle, 3.3f, "Info", bordered: false))
             _infoWindow.Toggle();
 
         ImGui.PopClipRect();

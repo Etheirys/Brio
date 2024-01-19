@@ -1,8 +1,8 @@
-﻿using Dalamud.Interface;
+﻿using Brio.Game.Actor.Appearance;
+using Brio.UI.Controls.Stateless;
+using Dalamud.Interface;
 using Dalamud.Interface.Utility.Raii;
 using ImGuiNET;
-using Brio.Game.Actor.Appearance;
-using Brio.UI.Controls.Stateless;
 using System.Numerics;
 
 namespace Brio.UI.Controls.Editors;
@@ -30,7 +30,7 @@ internal class ExtendedAppearanceEditor
 
         var resetTo = ImGui.GetCursorPos();
         bool extendedChanged = !currentAppearance.ExtendedAppearance.Equals(originalAppearance.ExtendedAppearance);
-        if (ImBrio.FontIconButtonRight("reset_extended", FontAwesomeIcon.Undo, 1, "Reset Extended", extendedChanged))
+        if(ImBrio.FontIconButtonRight("reset_extended", FontAwesomeIcon.Undo, 1, "Reset Extended", extendedChanged))
         {
             currentAppearance.ExtendedAppearance = originalAppearance.ExtendedAppearance;
             didChange |= true;
@@ -47,7 +47,7 @@ internal class ExtendedAppearanceEditor
         float transparency = appearance.ExtendedAppearance.Transparency;
 
         ImGui.SetNextItemWidth(MaxItemWidth);
-        if (ImGui.SliderFloat("###transparency", ref transparency, 0.0f, 1.0f, "%.2f"))
+        if(ImGui.SliderFloat("###transparency", ref transparency, 0.0f, 1.0f, "%.2f"))
         {
             appearance.ExtendedAppearance.Transparency = transparency;
             didChange = true;
@@ -66,7 +66,7 @@ internal class ExtendedAppearanceEditor
         float wetness = appearance.ExtendedAppearance.Wetness;
 
         ImGui.SetNextItemWidth(MaxItemWidth);
-        if (ImGui.SliderFloat("###wetness", ref wetness, 0.0f, 1.0f, "%.2f"))
+        if(ImGui.SliderFloat("###wetness", ref wetness, 0.0f, 1.0f, "%.2f"))
         {
             appearance.ExtendedAppearance.Wetness = wetness;
             didChange = true;
@@ -77,7 +77,7 @@ internal class ExtendedAppearanceEditor
 
         wetness = appearance.ExtendedAppearance.WetnessDepth;
         ImGui.SetNextItemWidth(MaxItemWidth);
-        if (ImGui.SliderFloat("###wetnessdepth", ref wetness, 0.0f, 3.0f, "%.2f"))
+        if(ImGui.SliderFloat("###wetnessdepth", ref wetness, 0.0f, 3.0f, "%.2f"))
         {
             appearance.ExtendedAppearance.WetnessDepth = wetness;
             didChange = true;
@@ -96,7 +96,7 @@ internal class ExtendedAppearanceEditor
     {
         bool didChange = false;
 
-        using (ImRaii.Disabled(!canTint))
+        using(ImRaii.Disabled(!canTint))
         {
             didChange |= DrawTint(ref appearance.ExtendedAppearance.CharacterTint, "character", "Character");
             ImGui.SameLine();
@@ -113,21 +113,21 @@ internal class ExtendedAppearanceEditor
 
     private bool DrawTint(ref Vector4 tint, string id, string label)
     {
-        using (ImRaii.PushId($"tint_{id}"))
+        using(ImRaii.PushId($"tint_{id}"))
         {
             bool didChange = false;
 
             var tempTint = tint;
-            if (ImGui.ColorButton($"{label}###{id}", tempTint, ImGuiColorEditFlags.NoInputs | ImGuiColorEditFlags.NoLabel | ImGuiColorEditFlags.NoAlpha))
+            if(ImGui.ColorButton($"{label}###{id}", tempTint, ImGuiColorEditFlags.NoInputs | ImGuiColorEditFlags.NoLabel | ImGuiColorEditFlags.NoAlpha))
             {
                 ImGui.OpenPopup($"{id}_tint_popup");
             }
 
-            using (var popup = ImRaii.Popup($"{id}_tint_popup"))
+            using(var popup = ImRaii.Popup($"{id}_tint_popup"))
             {
-                if (popup.Success)
+                if(popup.Success)
                 {
-                    if (ImGui.ColorPicker4("###tint", ref tempTint))
+                    if(ImGui.ColorPicker4("###tint", ref tempTint))
                     {
                         tint = tempTint;
                         didChange = true;

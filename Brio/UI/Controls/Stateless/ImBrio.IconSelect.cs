@@ -13,20 +13,20 @@ internal static partial class ImBrio
 
         bool wasClicked = false;
 
-        for (int i = 0; i < entries.Length; ++i)
+        for(int i = 0; i < entries.Length; ++i)
         {
             var entry = entries[i];
 
             var beginPos = ImGui.GetCursorScreenPos();
 
-            if (entry.Icon == 0 && entry.FallbackOverride != null)
+            if(entry.Icon == 0 && entry.FallbackOverride != null)
                 fallbackImage = entry.FallbackOverride;
 
-            if (BorderedGameIcon($"{id}_{i}", entry.Icon, fallbackImage, size: iconSize.Value))
+            if(BorderedGameIcon($"{id}_{i}", entry.Icon, fallbackImage, size: iconSize.Value))
             {
                 wasClicked |= true;
 
-                if (!bitField)
+                if(!bitField)
                     selectedId = entry.Id;
                 else
                     selectedId ^= entry.Id;
@@ -38,9 +38,9 @@ internal static partial class ImBrio
 
             ImGui.GetWindowDrawList().AddText(textPos, 0xFF000000, text);
 
-            if ((!bitField && selectedId == entry.Id) || (bitField && ((entry.Id & selectedId) != 0)))
+            if((!bitField && selectedId == entry.Id) || (bitField && ((entry.Id & selectedId) != 0)))
             {
-                using (ImRaii.PushFont(UiBuilder.IconFont))
+                using(ImRaii.PushFont(UiBuilder.IconFont))
                 {
                     var starText = FontAwesomeIcon.Star.ToIconString();
                     var starSize = ImGui.CalcTextSize(starText);
@@ -49,7 +49,7 @@ internal static partial class ImBrio
                 }
             }
 
-            if ((i + 1) % columns != 0)
+            if((i + 1) % columns != 0)
                 ImGui.SameLine();
 
         }
@@ -61,15 +61,15 @@ internal static partial class ImBrio
     {
         bool wasChanged = false;
 
-        using (var popup = ImRaii.Popup(id))
+        using(var popup = ImRaii.Popup(id))
         {
-            if (popup.Success)
+            if(popup.Success)
             {
                 ImGui.SetNextItemWidth(-1);
                 wasChanged |= ImGui.InputInt($"##{id}_index", ref selectedId, 1, 1, ImGuiInputTextFlags.EnterReturnsTrue);
                 wasChanged |= DrawIconSelector(id, entries, ref selectedId, columns, iconSize, fallbackImage, bitField);
 
-                if (ImGui.IsMouseDoubleClicked(ImGuiMouseButton.Left))
+                if(ImGui.IsMouseDoubleClicked(ImGuiMouseButton.Left))
                     ImGui.CloseCurrentPopup();
             }
         }

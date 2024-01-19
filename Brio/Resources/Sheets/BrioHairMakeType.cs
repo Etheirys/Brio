@@ -27,10 +27,10 @@ internal class BrioHairMakeType : ExcelRow
         Tribe = new LazyRow<Tribe>(gameData, parser.ReadColumn<int>(1), language);
         Gender = (Genders)parser.ReadColumn<sbyte>(2);
 
-        for (int i = 0; i < EntryCount; i++)
+        for(int i = 0; i < EntryCount; i++)
             HairStyles[i] = new LazyRow<CharaMakeCustomize>(gameData, parser.ReadColumn<uint>(66 + (i * 9)), language);
 
-        for (int i = 0; i < EntryCount; i++)
+        for(int i = 0; i < EntryCount; i++)
             FacePaints[i] = new LazyRow<CharaMakeCustomize>(gameData, parser.ReadColumn<uint>(73 + (i * 9)), language);
     }
 }

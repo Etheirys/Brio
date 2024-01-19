@@ -64,17 +64,17 @@ internal unsafe class ObjectMonitorService : IDisposable
 
     public bool TryGetCharacterFromCharacterBase(CharacterBase* characterBase, [MaybeNullWhen(false)] out Character chara)
     {
-        if (_charaBaseToCharacterCache.TryGetValue((nint)characterBase, out chara))
+        if(_charaBaseToCharacterCache.TryGetValue((nint)characterBase, out chara))
             return true;
 
-        foreach (var obj in _objectTable)
+        foreach(var obj in _objectTable)
         {
-            if (obj is Character foundChara)
+            if(obj is Character foundChara)
             {
                 var bases = foundChara.GetCharacterBases();
-                foreach (var searchBase in bases)
+                foreach(var searchBase in bases)
                 {
-                    if (searchBase.CharacterBase == characterBase)
+                    if(searchBase.CharacterBase == characterBase)
                     {
                         chara = foundChara;
                         _charaBaseToCharacterCache[(nint)characterBase] = foundChara;
@@ -109,7 +109,7 @@ internal unsafe class ObjectMonitorService : IDisposable
 
     private nint CharacterBaseCleanupDetour(BrioCharacterBase* charaBase)
     {
-        if (charaBase != null)
+        if(charaBase != null)
         {
             CharacterBaseDestroyed?.Invoke(charaBase);
             _charaBaseToCharacterCache.Remove((nint)charaBase);

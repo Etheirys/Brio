@@ -1,7 +1,7 @@
 ﻿using Dalamud.Plugin.Services;
+using System;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
-using System;
 
 namespace Brio.Game.Core;
 
@@ -68,16 +68,16 @@ internal static class FrameworkExtensions
         {
             result = task.ConditionAction();
         }
-        catch (Exception ex)
+        catch(Exception ex)
         {
             Brio.Log.Warning(ex, $"Exception running condition action. {task}");
             CompleteTask(task, false, ex);
             return;
         }
 
-        if (result)
+        if(result)
         {
-            if (task.DeferOnceMore)
+            if(task.DeferOnceMore)
             {
                 framework.RunOnTick(() => CompleteTask(task, true, null));
             }
@@ -89,7 +89,7 @@ internal static class FrameworkExtensions
         }
         else
         {
-            if (thisTick >= task.MaxFrames)
+            if(thisTick >= task.MaxFrames)
             {
                 Brio.Log.Warning($"Task timed out. {task}");
                 CompleteTask(task, false, null);
@@ -105,7 +105,7 @@ internal static class FrameworkExtensions
     {
         try
         {
-            if (e != null)
+            if(e != null)
             {
                 task.CompleteAction.Invoke(false);
                 task.CallbackTask.SetException(e);
@@ -116,7 +116,7 @@ internal static class FrameworkExtensions
                 task.CallbackTask.SetResult(result);
             }
         }
-        catch (Exception ex)
+        catch(Exception ex)
         {
             Brio.Log.Warning(ex, $"Exception running completion action. {task}");
             task.CallbackTask.SetException(ex);

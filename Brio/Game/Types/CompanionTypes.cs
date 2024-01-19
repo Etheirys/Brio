@@ -1,7 +1,7 @@
-﻿using OneOf.Types;
-using OneOf;
+﻿using Brio.Resources;
 using Lumina.Excel.GeneratedSheets;
-using Brio.Resources;
+using OneOf;
+using OneOf.Types;
 
 namespace Brio.Game.Types;
 
@@ -10,7 +10,7 @@ internal partial class CompanionRowUnion : OneOfBase<Companion, Mount, Ornament,
 {
     public static implicit operator CompanionRowUnion(CompanionContainer container)
     {
-        if (container.Id == 0)
+        if(container.Id == 0)
             return new None();
 
         return container.Kind switch

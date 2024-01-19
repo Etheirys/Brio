@@ -1,6 +1,6 @@
-﻿using EmbedIO;
+﻿using Brio.Config;
+using EmbedIO;
 using EmbedIO.WebApi;
-using Brio.Config;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 
@@ -28,11 +28,11 @@ internal class WebService : IDisposable
     private void RefreshState()
     {
         var allow = _configurationService.Configuration.IPC.AllowWebAPI;
-        if (allow != _shouldBeRunning)
+        if(allow != _shouldBeRunning)
         {
             _shouldBeRunning = allow;
 
-            if (_shouldBeRunning)
+            if(_shouldBeRunning)
             {
                 CreateWebServer();
             }
@@ -60,7 +60,7 @@ internal class WebService : IDisposable
 
             _webServer = server;
         }
-        catch (Exception ex)
+        catch(Exception ex)
         {
             Brio.Log.Error(ex, "Failed to start webserver");
             _webServer = null;

@@ -23,7 +23,7 @@ internal unsafe class GPoseService : IDisposable
         get => _isInFakeGPose;
         set
         {
-            if (_isInFakeGPose == value)
+            if(_isInFakeGPose == value)
                 return;
 
             _isInFakeGPose = value;
@@ -84,11 +84,11 @@ internal unsafe class GPoseService : IDisposable
 
     public void AddCharacterToGPose(NativeCharacter* chara)
     {
-        if (!IsGPosing)
+        if(!IsGPosing)
             return;
 
         var ef = EventFramework.Instance();
-        if (ef == null)
+        if(ef == null)
             return;
 
         ef->EventSceneModule.EventGPoseController.AddCharacterToGPose(chara);
@@ -106,13 +106,13 @@ internal unsafe class GPoseService : IDisposable
         bool didEnter = _enterGPoseHook.Original.Invoke(uiModule);
 
         HandleGPoseStateChange(didEnter);
-
+        
         return didEnter;
     }
 
     private nint GPoseMouseEventDetour(nint a1, nint a2, nint a3)
     {
-        if (_configService.Configuration.Posing.DisableGPoseMouseSelect)
+        if(_configService.Configuration.Posing.DisableGPoseMouseSelect)
             return 0;
 
         return _mouseHoverHook.Original(a1, a2, a3);
@@ -121,13 +121,13 @@ internal unsafe class GPoseService : IDisposable
     private void OnFrameworkUpdate(IFramework framework)
     {
         // Only detect if we got snapped out
-        if (!_clientState.IsGPosing && _isInGPose)
+        if(!_clientState.IsGPosing && _isInGPose)
             HandleGPoseStateChange(_clientState.IsGPosing);
     }
 
     private void HandleGPoseStateChange(bool newState)
     {
-        if (IsGPosing == newState || _isInFakeGPose)
+        if(IsGPosing == newState || _isInFakeGPose)
             return;
 
         _isInGPose = newState;
@@ -139,15 +139,15 @@ internal unsafe class GPoseService : IDisposable
 
     private void UpdateDynamicHooks()
     {
-        if (IsGPosing)
+        if(IsGPosing)
         {
-            if (!_mouseHoverHook.IsEnabled)
+            if(!_mouseHoverHook.IsEnabled)
                 _mouseHoverHook.Enable();
 
         }
         else
         {
-            if (_mouseHoverHook.IsEnabled)
+            if(_mouseHoverHook.IsEnabled)
                 _mouseHoverHook.Disable();
         }
     }

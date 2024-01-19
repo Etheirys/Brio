@@ -1,14 +1,14 @@
 ﻿using Brio.Capabilities.Actor;
+using Brio.Game.Actor.Extensions;
+using Brio.Resources;
 using Brio.UI.Controls.Selectors;
 using Brio.UI.Controls.Stateless;
-using Dalamud.Interface.Utility.Raii;
 using Dalamud.Interface;
+using Dalamud.Interface.Utility.Raii;
 using FFXIVClientStructs.FFXIV.Client.Game;
+using FFXIVClientStructs.FFXIV.Client.Graphics.Scene;
 using ImGuiNET;
 using System;
-using Brio.Resources;
-using Brio.Game.Actor.Extensions;
-using FFXIVClientStructs.FFXIV.Client.Graphics.Scene;
 
 namespace Brio.UI.Controls.Editors;
 
@@ -35,16 +35,16 @@ internal class ActionTimelineEditor()
         DrawBlend();
         DrawOverallSpeed();
 
-        if (drawAdvanced)
+        if(drawAdvanced)
         {
             DrawLips();
 
-            if (ImGui.CollapsingHeader("Scrub"))
+            if(ImGui.CollapsingHeader("Scrub"))
             {
                 DrawScrub();
             }
 
-            if (ImGui.CollapsingHeader("Slots"))
+            if(ImGui.CollapsingHeader("Slots"))
             {
                 DrawSlots();
             }
@@ -56,14 +56,14 @@ internal class ActionTimelineEditor()
         const string baseLabel = "Base";
         ImGui.SetNextItemWidth(MaxItemWidth - ImGui.CalcTextSize("XXXX").X);
         ImGui.InputInt($"###base_animation", ref _baseAnimation, 0, 0);
-        if (ImBrio.IsItemConfirmed())
+        if(ImBrio.IsItemConfirmed())
         {
             ApplyBaseOverride();
         }
 
         ImGui.SameLine();
         ImGui.Checkbox("###base_interrupt", ref _baseInterrupt);
-        if (ImGui.IsItemHovered())
+        if(ImGui.IsItemHovered())
             ImGui.SetTooltip("Interrupt");
 
         ImGui.SameLine();
@@ -72,17 +72,17 @@ internal class ActionTimelineEditor()
 
         ImGui.SameLine();
 
-        if (ImBrio.FontIconButtonRight("base_play", FontAwesomeIcon.PlayCircle, 3, "Play", _baseAnimation != 0))
+        if(ImBrio.FontIconButtonRight("base_play", FontAwesomeIcon.PlayCircle, 3, "Play", _baseAnimation != 0))
             ApplyBaseOverride();
 
         ImGui.SameLine();
 
-        if (ImBrio.FontIconButtonRight("base_reset", FontAwesomeIcon.Undo, 2, "Reset", _capability.HasBaseOverride))
+        if(ImBrio.FontIconButtonRight("base_reset", FontAwesomeIcon.Undo, 2, "Reset", _capability.HasBaseOverride))
             _capability.ResetBaseOverride();
 
         ImGui.SameLine();
 
-        if (ImBrio.FontIconButtonRight("base_search", FontAwesomeIcon.Search, 1, "Search"))
+        if(ImBrio.FontIconButtonRight("base_search", FontAwesomeIcon.Search, 1, "Search"))
         {
             _globalTimelineSelector.Select(null, false);
             _globalTimelineSelector.AllowBlending = false;
@@ -90,18 +90,18 @@ internal class ActionTimelineEditor()
 
         }
 
-        using (var popup = ImRaii.Popup("base_search_popup"))
+        using(var popup = ImRaii.Popup("base_search_popup"))
         {
-            if (popup.Success)
+            if(popup.Success)
             {
                 _globalTimelineSelector.Draw();
 
-                if (_globalTimelineSelector.SoftSelectionChanged && _globalTimelineSelector.SoftSelected != null)
+                if(_globalTimelineSelector.SoftSelectionChanged && _globalTimelineSelector.SoftSelected != null)
                 {
                     _baseAnimation = _globalTimelineSelector.SoftSelected.TimelineId;
                 }
 
-                if (_globalTimelineSelector.SelectionChanged && _globalTimelineSelector.Selected != null)
+                if(_globalTimelineSelector.SelectionChanged && _globalTimelineSelector.Selected != null)
                 {
                     _baseAnimation = _globalTimelineSelector.Selected.TimelineId;
                     ApplyBaseOverride();
@@ -117,7 +117,7 @@ internal class ActionTimelineEditor()
 
         ImGui.SetNextItemWidth(MaxItemWidth);
         ImGui.InputInt($"###blend_animation", ref _blendAnimation, 0, 0);
-        if (ImBrio.IsItemConfirmed())
+        if(ImBrio.IsItemConfirmed())
         {
             ApplyBlend();
         }
@@ -129,11 +129,11 @@ internal class ActionTimelineEditor()
 
         ImGui.SameLine();
 
-        if (ImBrio.FontIconButtonRight("blend_play", FontAwesomeIcon.PlayCircle, 2, "Play", _blendAnimation != 0))
+        if(ImBrio.FontIconButtonRight("blend_play", FontAwesomeIcon.PlayCircle, 2, "Play", _blendAnimation != 0))
             ApplyBlend();
 
         ImGui.SameLine();
-        if (ImBrio.FontIconButtonRight("blend_search", FontAwesomeIcon.Search, 1, "Search"))
+        if(ImBrio.FontIconButtonRight("blend_search", FontAwesomeIcon.Search, 1, "Search"))
         {
             _globalTimelineSelector.Select(null, false);
             _globalTimelineSelector.AllowBlending = true;
@@ -141,18 +141,18 @@ internal class ActionTimelineEditor()
 
         }
 
-        using (var popup = ImRaii.Popup("blend_search_popup"))
+        using(var popup = ImRaii.Popup("blend_search_popup"))
         {
-            if (popup.Success)
+            if(popup.Success)
             {
                 _globalTimelineSelector.Draw();
 
-                if (_globalTimelineSelector.SoftSelectionChanged && _globalTimelineSelector.SoftSelected != null)
+                if(_globalTimelineSelector.SoftSelectionChanged && _globalTimelineSelector.SoftSelected != null)
                 {
                     _blendAnimation = _globalTimelineSelector.SoftSelected.TimelineId;
                 }
 
-                if (_globalTimelineSelector.SelectionChanged && _globalTimelineSelector.Selected != null)
+                if(_globalTimelineSelector.SelectionChanged && _globalTimelineSelector.Selected != null)
                 {
                     _blendAnimation = _globalTimelineSelector.Selected.TimelineId;
                     ApplyBlend();
@@ -167,24 +167,24 @@ internal class ActionTimelineEditor()
         var lipsOverride = _capability.LipsOverride;
 
         string preview = "None";
-        if (lipsOverride != 0)
+        if(lipsOverride != 0)
             preview = GameDataProvider.Instance.ActionTimelines[lipsOverride].Key;
 
         ImGui.SetNextItemWidth(MaxItemWidth);
-        using (var combo = ImRaii.Combo("###lips", preview))
+        using(var combo = ImRaii.Combo("###lips", preview))
         {
-            if (combo.Success)
+            if(combo.Success)
             {
-                if (ImGui.Selectable($"None", lipsOverride == 0))
+                if(ImGui.Selectable($"None", lipsOverride == 0))
                 {
                     _capability.LipsOverride = 0;
                 }
 
-                for (uint i = 0x272; i <= 0x272 + 8; ++i)
+                for(uint i = 0x272; i <= 0x272 + 8; ++i)
                 {
                     var entry = GameDataProvider.Instance.ActionTimelines[i];
                     bool selected = lipsOverride == i;
-                    if (ImGui.Selectable($"{entry.Key} ({i})", selected))
+                    if(ImGui.Selectable($"{entry.Key} ({i})", selected))
                     {
                         _capability.LipsOverride = (ushort)i;
                     }
@@ -203,47 +203,47 @@ internal class ActionTimelineEditor()
         float width = -ImGui.CalcTextSize("XXXX").X;
 
         var drawObj = _capability.Character.Native()->GameObject.DrawObject;
-        if (drawObj == null)
+        if(drawObj == null)
             return;
 
-        if (drawObj->Object.GetObjectType() != ObjectType.CharacterBase)
+        if(drawObj->Object.GetObjectType() != ObjectType.CharacterBase)
             return;
 
         var charaBase = (CharacterBase*)drawObj;
 
-        if (charaBase->Skeleton == null)
+        if(charaBase->Skeleton == null)
             return;
 
         var skeleton = charaBase->Skeleton;
 
-        for (int p = 0; p < skeleton->PartialSkeletonCount; ++p)
+        for(int p = 0; p < skeleton->PartialSkeletonCount; ++p)
         {
             var partial = &skeleton->PartialSkeletons[p];
             var animatedSkele = partial->GetHavokAnimatedSkeleton(0);
-            if (animatedSkele == null)
+            if(animatedSkele == null)
                 continue;
 
-            for (int c = 0; c < animatedSkele->AnimationControls.Length; ++c)
+            for(int c = 0; c < animatedSkele->AnimationControls.Length; ++c)
             {
                 var control = animatedSkele->AnimationControls[c].Value;
-                if (control == null)
+                if(control == null)
                     continue;
 
                 var binding = control->hkaAnimationControl.Binding;
-                if (binding.ptr == null)
+                if(binding.ptr == null)
                     continue;
 
                 var anim = binding.ptr->Animation.ptr;
-                if (anim == null)
+                if(anim == null)
                     continue;
 
-                if (control->PlaybackSpeed == 0)
+                if(control->PlaybackSpeed == 0)
                 {
                     drewAny |= true;
                     var duration = anim->Duration;
                     var time = control->hkaAnimationControl.LocalTime;
                     ImGui.SetNextItemWidth(width);
-                    if (ImGui.SliderFloat($"###scrub_{p}_{c}", ref time, 0f, duration, "%.2f", ImGuiSliderFlags.AlwaysClamp))
+                    if(ImGui.SliderFloat($"###scrub_{p}_{c}", ref time, 0f, duration, "%.2f", ImGuiSliderFlags.AlwaysClamp))
                     {
                         control->hkaAnimationControl.LocalTime = time;
                     }
@@ -253,7 +253,7 @@ internal class ActionTimelineEditor()
             }
         }
 
-        if (!drewAny)
+        if(!drewAny)
             ImGui.Text("Pause motion to enable.");
     }
 
@@ -261,9 +261,9 @@ internal class ActionTimelineEditor()
     {
 
         var slots = Enum.GetValues<ActionTimelineSlots>();
-        foreach (var slot in slots)
+        foreach(var slot in slots)
         {
-            using (ImRaii.PushId((int)slot))
+            using(ImRaii.PushId((int)slot))
             {
                 DrawSlot(slot);
                 ImGui.Separator();
@@ -280,7 +280,7 @@ internal class ActionTimelineEditor()
 
         var slotDescription = $"{slot} ({(int)slot}): {actionInfo}";
 
-        using (ImRaii.PushId($"slot_{slot}"))
+        using(ImRaii.PushId($"slot_{slot}"))
         {
             ImGui.Text(slotDescription);
 
@@ -288,19 +288,19 @@ internal class ActionTimelineEditor()
             float newSpeed = existingSpeed;
             const string speedLabel = "Slot Speed";
             ImGui.SetNextItemWidth(ImGui.CalcTextSize($"XXXXXXXXXXXXXXXXXi").X);
-            if (ImGui.SliderFloat($"{speedLabel}", ref newSpeed, 0f, 5f))
+            if(ImGui.SliderFloat($"{speedLabel}", ref newSpeed, 0f, 5f))
                 _capability.SetSlotSpeedOverride(slot, newSpeed);
 
 
             ImGui.SameLine();
 
-            if (ImBrio.FontIconButtonRight("reset", FontAwesomeIcon.Undo, 1, "Reset Speed", _capability.HasSlotSpeedOverride(slot)))
+            if(ImBrio.FontIconButtonRight("reset", FontAwesomeIcon.Undo, 1, "Reset Speed", _capability.HasSlotSpeedOverride(slot)))
                 _capability.ResetSlotSpeedOverride(slot);
 
             ImGui.SameLine();
 
             var speed = _capability.GetSlotSpeed(slot);
-            if (ImBrio.FontIconButtonRight("speed_pause", FontAwesomeIcon.PauseCircle, 2, "Pause", speed > 0f))
+            if(ImBrio.FontIconButtonRight("speed_pause", FontAwesomeIcon.PauseCircle, 2, "Pause", speed > 0f))
                 _capability.SetSlotSpeedOverride(slot, 0.0f);
         }
     }
@@ -312,7 +312,7 @@ internal class ActionTimelineEditor()
 
         const string speedLabel = "Speed";
         ImGui.SetNextItemWidth(MaxItemWidth);
-        if (ImGui.SliderFloat($"###speed_slider", ref newSpeed, 0f, 5f))
+        if(ImGui.SliderFloat($"###speed_slider", ref newSpeed, 0f, 5f))
             _capability.SetOverallSpeedOverride(newSpeed);
 
         ImGui.SameLine();
@@ -322,18 +322,18 @@ internal class ActionTimelineEditor()
 
         ImGui.SameLine();
 
-        if (ImBrio.FontIconButtonRight("speed_reset", FontAwesomeIcon.Undo, 1, "Reset Speed", _capability.HasSpeedMultiplierOverride))
+        if(ImBrio.FontIconButtonRight("speed_reset", FontAwesomeIcon.Undo, 1, "Reset Speed", _capability.HasSpeedMultiplierOverride))
             _capability.ResetOverallSpeedOverride();
 
         ImGui.SameLine();
 
-        if (ImBrio.FontIconButtonRight("speed_pause", FontAwesomeIcon.PauseCircle, 2, "Pause", _capability.SpeedMultiplier > 0f))
+        if(ImBrio.FontIconButtonRight("speed_pause", FontAwesomeIcon.PauseCircle, 2, "Pause", _capability.SpeedMultiplier > 0f))
             _capability.SetOverallSpeedOverride(0.0f);
     }
 
     private void ApplyBaseOverride()
     {
-        if (_baseAnimation == 0)
+        if(_baseAnimation == 0)
             return;
 
         _capability.ApplyBaseOverride((ushort)_baseAnimation, _baseInterrupt);
@@ -341,7 +341,7 @@ internal class ActionTimelineEditor()
 
     private void ApplyBlend()
     {
-        if (_blendAnimation == 0)
+        if(_blendAnimation == 0)
             return;
 
         _capability.BlendTimeline((ushort)_blendAnimation);

@@ -1,5 +1,5 @@
-﻿using Dalamud.Interface;
-using Brio.Entities.Core;
+﻿using Brio.Entities.Core;
+using Dalamud.Interface;
 using System;
 
 namespace Brio.Entities.World;

@@ -200,7 +200,7 @@ internal record struct BonePoseTransformInfo(TransformComponents PropagateCompon
 internal struct BoneIKInfo
 {
     public bool Enabled = false;
-    
+
     public bool EnforceConstraints = true;
 
     public OneOf<CCDOptions, TwoJointOptions> SolverOptions = new CCDOptions();

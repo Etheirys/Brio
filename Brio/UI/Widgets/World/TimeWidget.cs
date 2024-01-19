@@ -1,8 +1,8 @@
-﻿using Dalamud.Interface;
-using ImGuiNET;
-using Brio.Capabilities.World;
+﻿using Brio.Capabilities.World;
 using Brio.UI.Controls.Stateless;
 using Brio.UI.Widgets.Core;
+using Dalamud.Interface;
+using ImGuiNET;
 using System;
 using System.Numerics;
 
@@ -37,31 +37,31 @@ internal class TimeWidget(TimeCapability timeCapability) : Widget<TimeCapability
 
         var preservePos = ImGui.GetCursorPos();
         ImGui.SetCursorPos(unlockPos);
-        if (isLocked)
+        if(isLocked)
         {
-            if (ImBrio.FontIconButtonRight("timelock", FontAwesomeIcon.Unlock, 1, "Unlock Time", bordered: false))
+            if(ImBrio.FontIconButtonRight("timelock", FontAwesomeIcon.Unlock, 1, "Unlock Time", bordered: false))
                 isLocked = false;
         }
         else
         {
-            if (ImBrio.FontIconButtonRight("timelock", FontAwesomeIcon.Lock, 1, "Lock Time", bordered: false))
+            if(ImBrio.FontIconButtonRight("timelock", FontAwesomeIcon.Lock, 1, "Lock Time", bordered: false))
                 isLocked = true;
         }
         ImGui.SetCursorPos(preservePos);
 
-        if (originalMinute != minuteOfDay)
+        if(originalMinute != minuteOfDay)
         {
             isLocked = true;
             Capability.TimeService.MinuteOfDay = minuteOfDay;
         }
 
-        if (originalDay != dayOfMonth)
+        if(originalDay != dayOfMonth)
         {
             isLocked = true;
             Capability.TimeService.DayOfMonth = dayOfMonth;
         }
 
-        if (isLocked != isLockedPrevious)
+        if(isLocked != isLockedPrevious)
             Capability.TimeService.IsTimeFrozen = isLocked;
     }
 }

@@ -50,13 +50,13 @@ internal abstract class Selector<T> where T : class
         _selected = selected;
         _softSelected = selected;
 
-        if (selected != null)
+        if(selected != null)
             _shouldFocusSearch = true;
 
-        if (shouldScroll)
+        if(shouldScroll)
             _scrollToSelected = true;
 
-        if (shouldUpdate)
+        if(shouldUpdate)
             UpdateList(shouldClear);
     }
 
@@ -72,26 +72,26 @@ internal abstract class Selector<T> where T : class
         SoftSelectionChanged = false;
         SelectionChanged = false;
 
-        using (ImRaii.PushId($"selector_{_id}"))
+        using(ImRaii.PushId($"selector_{_id}"))
         {
 
-            if (Flags.HasFlag(SelectorFlags.AllowSearch))
+            if(Flags.HasFlag(SelectorFlags.AllowSearch))
             {
                 ImGui.SetNextItemWidth(-1);
 
-                if (_shouldFocusSearch)
+                if(_shouldFocusSearch)
                     ImGui.SetKeyboardFocusHere();
 
-                if (ImGui.InputTextWithHint($"###search", "Search", ref _search, 256))
+                if(ImGui.InputTextWithHint($"###search", "Search", ref _search, 256))
                 {
                     UpdateList();
                 }
             }
             _shouldFocusSearch = false;
 
-            if (Flags.HasFlag(SelectorFlags.ShowOptions))
+            if(Flags.HasFlag(SelectorFlags.ShowOptions))
             {
-                using (ImRaii.PushId("options_container"))
+                using(ImRaii.PushId("options_container"))
                 {
                     DrawOptions();
                 }
@@ -99,31 +99,31 @@ internal abstract class Selector<T> where T : class
 
             var listSize = MinimumListSize;
 
-            if (Flags.HasFlag(SelectorFlags.AdaptiveSizing))
+            if(Flags.HasFlag(SelectorFlags.AdaptiveSizing))
             {
                 var maxSize = ImGui.GetContentRegionAvail();
 
-                if (listSize.X < maxSize.X)
+                if(listSize.X < maxSize.X)
                 {
                     listSize.X = maxSize.X;
                     listSize.Y = MinimumListSize.Y * (1.0f + (listSize.X / MinimumListSize.X));
                 }
             }
 
-            using (var listbox = ImRaii.ListBox($"###listbox", listSize))
+            using(var listbox = ImRaii.ListBox($"###listbox", listSize))
             {
-                if (items == null)
+                if(items == null)
                     return;
 
-                if (listbox.Success)
+                if(listbox.Success)
                 {
                     int i = 0;
 
-                    foreach (var item in items)
+                    foreach(var item in items)
                     {
                         ++i;
 
-                        using (ImRaii.PushId(i))
+                        using(ImRaii.PushId(i))
                         {
                             var startPos = ImGui.GetCursorPos();
                             bool isSoftSelected = IsItemSoftSelected(item);
@@ -133,14 +133,14 @@ internal abstract class Selector<T> where T : class
 
 
 
-                            if (ImGui.IsItemVisible())
+                            if(ImGui.IsItemVisible())
                             {
                                 ImGui.SetCursorPos(startPos);
-                                using (ImRaii.PushId("item_container"))
+                                using(ImRaii.PushId("item_container"))
                                 {
-                                    using (var itemGroup = ImRaii.Group())
+                                    using(var itemGroup = ImRaii.Group())
                                     {
-                                        if (itemGroup.Success) 
+                                        if(itemGroup.Success)
                                             DrawItem(item, isSoftSelected);
                                     }
                                     if(ImGui.IsItemHovered())
@@ -149,9 +149,9 @@ internal abstract class Selector<T> where T : class
                                 ImGui.SetCursorPos(endPos);
                             }
 
-                            if (isSoftSelected && _scrollToSelected)
+                            if(isSoftSelected && _scrollToSelected)
                             {
-                                if (ImGui.IsItemVisible())
+                                if(ImGui.IsItemVisible())
                                 {
                                     _scrollToSelected = false;
                                 }
@@ -161,12 +161,12 @@ internal abstract class Selector<T> where T : class
                                 }
                             }
 
-                            if (wasSoftSelected)
+                            if(wasSoftSelected)
                             {
                                 _softSelected = item;
                                 SoftSelectionChanged = true;
 
-                                if (wasSelected)
+                                if(wasSelected)
                                 {
                                     _selected = item;
                                     SelectionChanged = true;
@@ -221,7 +221,7 @@ internal abstract class Selector<T> where T : class
 
     protected void UpdateList(bool shouldClear = false)
     {
-        if (shouldClear)
+        if(shouldClear)
         {
             Interlocked.Exchange(ref _filteredAndSortedItems, null);
         }
@@ -231,7 +231,7 @@ internal abstract class Selector<T> where T : class
             var newList = _items.Where(x =>
             {
                 // Selected is always shown
-                if (IsItemSelected(x))
+                if(IsItemSelected(x))
                     return true;
 
                 return Filter(x, _search);

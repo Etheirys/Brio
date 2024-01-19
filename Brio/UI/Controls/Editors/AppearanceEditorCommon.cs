@@ -1,11 +1,11 @@
-﻿using Dalamud.Interface.Utility.Raii;
-using Dalamud.Interface;
-using ImGuiNET;
-using Brio.UI.Controls.Stateless;
-using Brio.Capabilities.Actor;
-using Brio.UI.Controls.Selectors;
-using System.Numerics;
+﻿using Brio.Capabilities.Actor;
 using Brio.Game.Actor.Appearance;
+using Brio.UI.Controls.Selectors;
+using Brio.UI.Controls.Stateless;
+using Dalamud.Interface;
+using Dalamud.Interface.Utility.Raii;
+using ImGuiNET;
+using System.Numerics;
 
 namespace Brio.UI.Controls.Editors;
 
@@ -15,7 +15,7 @@ internal static class AppearanceEditorCommon
 
     public static void DrawPenumbraCollectionSwitcher(ActorAppearanceCapability capability)
     {
-        if (!capability.HasPenumbraIntegration)
+        if(!capability.HasPenumbraIntegration)
             return;
 
         var collections = capability.Collections;
@@ -23,14 +23,14 @@ internal static class AppearanceEditorCommon
 
         const string collectionLabel = "Collection";
         ImGui.SetNextItemWidth(-ImGui.CalcTextSize($"{collectionLabel} XXXX").X);
-        using (var combo = ImRaii.Combo(collectionLabel, currentCollection))
+        using(var combo = ImRaii.Combo(collectionLabel, currentCollection))
         {
-            if (combo.Success)
+            if(combo.Success)
             {
-                foreach (var collection in collections)
+                foreach(var collection in collections)
                 {
                     bool isSelected = collection.Equals(currentCollection);
-                    if (ImGui.Selectable(collection, isSelected))
+                    if(ImGui.Selectable(collection, isSelected))
                         capability.SetCollection(collection);
                 }
             }
@@ -38,7 +38,7 @@ internal static class AppearanceEditorCommon
 
         ImGui.SameLine();
 
-        if (ImBrio.FontIconButtonRight("actorappearancewidget_reset", FontAwesomeIcon.Undo, 1, "Reset", capability.IsCollectionOverridden))
+        if(ImBrio.FontIconButtonRight("actorappearancewidget_reset", FontAwesomeIcon.Undo, 1, "Reset", capability.IsCollectionOverridden))
             capability.ResetCollection();
     }
 
@@ -51,7 +51,7 @@ internal static class AppearanceEditorCommon
     {
         _globalNpcSelector.Draw();
 
-        if (_globalNpcSelector.SelectionChanged && _globalNpcSelector.Selected != null)
+        if(_globalNpcSelector.SelectionChanged && _globalNpcSelector.Selected != null)
         {
             _ = capability.SetAppearance(_globalNpcSelector.Selected.Appearance, options);
             return true;
@@ -62,21 +62,21 @@ internal static class AppearanceEditorCommon
 
     public static bool DrawExtendedColor(ref Vector4 color, string id, string label)
     {
-        using (ImRaii.PushId($"color_{id}"))
+        using(ImRaii.PushId($"color_{id}"))
         {
             bool didChange = false;
 
             var tempColor = color;
-            if (ImGui.ColorButton($"{label}###{id}", tempColor, ImGuiColorEditFlags.NoInputs | ImGuiColorEditFlags.NoLabel))
+            if(ImGui.ColorButton($"{label}###{id}", tempColor, ImGuiColorEditFlags.NoInputs | ImGuiColorEditFlags.NoLabel))
             {
                 ImGui.OpenPopup($"{id}_color_popup");
             }
 
-            using (var popup = ImRaii.Popup($"{id}_color_popup"))
+            using(var popup = ImRaii.Popup($"{id}_color_popup"))
             {
-                if (popup.Success)
+                if(popup.Success)
                 {
-                    if (ImGui.ColorPicker4("###color", ref tempColor))
+                    if(ImGui.ColorPicker4("###color", ref tempColor))
                     {
                         color = tempColor;
                         didChange = true;
@@ -90,23 +90,23 @@ internal static class AppearanceEditorCommon
 
     public static bool DrawExtendedColor(ref Vector3 color, string id, string label)
     {
-        using (ImRaii.PushId($"color_{id}"))
+        using(ImRaii.PushId($"color_{id}"))
         {
             bool didChange = false;
 
             var tempColor = color;
             var tempColor4 = new Vector4(tempColor, 0.0f);
             var flags = ImGuiColorEditFlags.NoInputs | ImGuiColorEditFlags.NoLabel | ImGuiColorEditFlags.NoAlpha;
-            if (ImGui.ColorButton($"{label}###{id}", tempColor4, flags))
+            if(ImGui.ColorButton($"{label}###{id}", tempColor4, flags))
             {
                 ImGui.OpenPopup($"{id}_color_popup");
             }
 
-            using (var popup = ImRaii.Popup($"{id}_color_popup"))
+            using(var popup = ImRaii.Popup($"{id}_color_popup"))
             {
-                if (popup.Success)
+                if(popup.Success)
                 {
-                    if (ImGui.ColorPicker3("###color", ref tempColor))
+                    if(ImGui.ColorPicker3("###color", ref tempColor))
                     {
                         color = tempColor;
                         didChange = true;

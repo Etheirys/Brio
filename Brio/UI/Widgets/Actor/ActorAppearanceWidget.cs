@@ -1,11 +1,11 @@
-﻿using Dalamud.Interface;
-using Dalamud.Interface.Utility.Raii;
-using ImGuiNET;
-using Brio.Capabilities.Actor;
+﻿using Brio.Capabilities.Actor;
+using Brio.Game.Actor.Appearance;
 using Brio.UI.Controls.Editors;
 using Brio.UI.Controls.Stateless;
 using Brio.UI.Widgets.Core;
-using Brio.Game.Actor.Appearance;
+using Dalamud.Interface;
+using Dalamud.Interface.Utility.Raii;
+using ImGuiNET;
 
 namespace Brio.UI.Widgets.Actor;
 
@@ -23,7 +23,7 @@ internal class ActorAppearanceWidget(ActorAppearanceCapability capability) : Wid
 
     private void DrawLoadAppearance()
     {
-        if (ImBrio.FontIconButton("load_npc", FontAwesomeIcon.PersonArrowDownToLine, "Load NPC Appearance"))
+        if(ImBrio.FontIconButton("load_npc", FontAwesomeIcon.PersonArrowDownToLine, "Load NPC Appearance"))
         {
             AppearanceEditorCommon.ResetNPCSelector();
             ImGui.OpenPopup("widget_npc_selector");
@@ -31,30 +31,30 @@ internal class ActorAppearanceWidget(ActorAppearanceCapability capability) : Wid
 
         ImGui.SameLine();
 
-        if (ImBrio.FontIconButton("import_charafile", FontAwesomeIcon.FileImport, "Import Character File"))
+        if(ImBrio.FontIconButton("import_charafile", FontAwesomeIcon.FileImport, "Import Character File"))
             FileUIHelpers.ShowImportCharacterModal(Capability, AppearanceImportOptions.Default);
 
         ImGui.SameLine();
 
-        if (ImBrio.FontIconButton("export_charafile", FontAwesomeIcon.FileExport, "Export Character File"))
+        if(ImBrio.FontIconButton("export_charafile", FontAwesomeIcon.FileExport, "Export Character File"))
             FileUIHelpers.ShowExportCharacterModal(Capability);
 
         ImGui.SameLine();
 
-        if (ImBrio.FontIconButton("advanced_appearance", FontAwesomeIcon.UserEdit, "Advanced"))
+        if(ImBrio.FontIconButton("advanced_appearance", FontAwesomeIcon.UserEdit, "Advanced"))
             ActivateAdvanced();
 
         ImGui.SameLine();
 
 
-        if (ImBrio.FontIconButtonRight("reset_appearance", FontAwesomeIcon.Undo, 1, "Reset", Capability.IsAppearanceOverridden))
+        if(ImBrio.FontIconButtonRight("reset_appearance", FontAwesomeIcon.Undo, 1, "Reset", Capability.IsAppearanceOverridden))
             _ = Capability.ResetAppearance();
 
-        using (var popup = ImRaii.Popup("widget_npc_selector"))
+        using(var popup = ImRaii.Popup("widget_npc_selector"))
         {
-            if (popup.Success)
+            if(popup.Success)
             {
-                if (AppearanceEditorCommon.DrawNPCSelector(Capability, AppearanceImportOptions.Default))
+                if(AppearanceEditorCommon.DrawNPCSelector(Capability, AppearanceImportOptions.Default))
                     ImGui.CloseCurrentPopup();
             }
         }
@@ -62,7 +62,7 @@ internal class ActorAppearanceWidget(ActorAppearanceCapability capability) : Wid
 
     public override void DrawQuickIcons()
     {
-        if (ImBrio.FontIconButton("redrawwidget_redraw", FontAwesomeIcon.PaintBrush, "Redraw"))
+        if(ImBrio.FontIconButton("redrawwidget_redraw", FontAwesomeIcon.PaintBrush, "Redraw"))
         {
             _ = Capability.Redraw();
         }

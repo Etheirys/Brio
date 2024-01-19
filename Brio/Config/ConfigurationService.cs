@@ -28,7 +28,7 @@ internal class ConfigurationService : IDisposable
 
     public void ApplyChange(bool save = true)
     {
-        if (save)
+        if(save)
             Save();
 
         OnConfigurationChanged?.Invoke();

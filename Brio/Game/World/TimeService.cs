@@ -16,9 +16,9 @@ internal class TimeService : IDisposable
         set
         {
 
-            if (value != IsTimeFrozen)
+            if(value != IsTimeFrozen)
             {
-                if (value)
+                if(value)
                 {
                     _updateEorzeaTimeHook.Enable();
                 }
@@ -35,16 +35,16 @@ internal class TimeService : IDisposable
         get
         {
             var framework = Framework.Instance();
-            if (framework == null) return 0;
+            if(framework == null) return 0;
             return framework->ClientTime.IsEorzeaTimeOverridden ? framework->ClientTime.EorzeaTimeOverride : framework->ClientTime.EorzeaTime;
         }
 
         set
         {
             var framework = Framework.Instance();
-            if (framework == null) return;
+            if(framework == null) return;
             framework->ClientTime.EorzeaTime = value;
-            if (framework->ClientTime.IsEorzeaTimeOverridden)
+            if(framework->ClientTime.IsEorzeaTimeOverridden)
                 framework->ClientTime.EorzeaTimeOverride = value;
         }
     }

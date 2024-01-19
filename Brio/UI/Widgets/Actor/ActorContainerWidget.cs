@@ -1,10 +1,10 @@
-﻿using Dalamud.Interface;
-using Dalamud.Interface.Utility.Raii;
-using ImGuiNET;
-using Brio.Capabilities.Actor;
+﻿using Brio.Capabilities.Actor;
 using Brio.Entities.Actor;
 using Brio.UI.Controls.Stateless;
 using Brio.UI.Widgets.Core;
+using Dalamud.Interface;
+using Dalamud.Interface.Utility.Raii;
+using ImGuiNET;
 using System.Numerics;
 
 namespace Brio.UI.Widgets.Actor;
@@ -18,7 +18,7 @@ internal class ActorContainerWidget(ActorContainerCapability capability) : Widge
         {
             WidgetFlags flags = WidgetFlags.DefaultOpen | WidgetFlags.DrawBody;
 
-            if (Capability.CanControlCharacters)
+            if(Capability.CanControlCharacters)
                 flags |= WidgetFlags.DrawPopup;
 
             return flags;
@@ -29,14 +29,14 @@ internal class ActorContainerWidget(ActorContainerCapability capability) : Widge
 
     public override void DrawBody()
     {
-        if (ImGui.BeginListBox($"###actorcontainerwidget_{Capability.Entity.Id}_list", new Vector2(-1, 150)))
+        if(ImGui.BeginListBox($"###actorcontainerwidget_{Capability.Entity.Id}_list", new Vector2(-1, 150)))
         {
-            foreach (var child in Capability.Entity.Children)
+            foreach(var child in Capability.Entity.Children)
             {
-                if (child is ActorEntity actorEntity)
+                if(child is ActorEntity actorEntity)
                 {
                     bool isSelected = actorEntity.Equals(_selectedActor);
-                    if (ImGui.Selectable($"{child.FriendlyName}###actorcontainerwidget_{Capability.Entity.Id}_item_{actorEntity.Id}", isSelected, ImGuiSelectableFlags.AllowDoubleClick))
+                    if(ImGui.Selectable($"{child.FriendlyName}###actorcontainerwidget_{Capability.Entity.Id}_item_{actorEntity.Id}", isSelected, ImGuiSelectableFlags.AllowDoubleClick))
                     {
                         _selectedActor = actorEntity;
                     }
@@ -48,53 +48,53 @@ internal class ActorContainerWidget(ActorContainerCapability capability) : Widge
 
 
 
-        using (ImRaii.Disabled(!Capability.CanControlCharacters))
+        using(ImRaii.Disabled(!Capability.CanControlCharacters))
         {
             bool hasSelection = _selectedActor != null;
 
-            if (ImBrio.FontIconButton("containerwidget_spawnbasic", FontAwesomeIcon.Plus, "Spawn"))
+            if(ImBrio.FontIconButton("containerwidget_spawnbasic", FontAwesomeIcon.Plus, "Spawn"))
             {
                 Capability.CreateCharacter(false, false);
             }
 
             ImGui.SameLine();
 
-            if (ImBrio.FontIconButton("containerwidget_spawnattachments", FontAwesomeIcon.PlusSquare, "Spawn with Companion slot"))
+            if(ImBrio.FontIconButton("containerwidget_spawnattachments", FontAwesomeIcon.PlusSquare, "Spawn with Companion slot"))
             {
                 Capability.CreateCharacter(true, false);
             }
 
             ImGui.SameLine();
 
-            if (ImBrio.FontIconButton("containerwidget_clone", FontAwesomeIcon.Clone, "Clone", hasSelection))
+            if(ImBrio.FontIconButton("containerwidget_clone", FontAwesomeIcon.Clone, "Clone", hasSelection))
             {
                 Capability.CloneActor(_selectedActor!, false);
             }
 
             ImGui.SameLine();
 
-            if (ImBrio.FontIconButton("containerwidget_destroy", FontAwesomeIcon.Trash, "Destroy", hasSelection))
+            if(ImBrio.FontIconButton("containerwidget_destroy", FontAwesomeIcon.Trash, "Destroy", hasSelection))
             {
                 Capability.DestroyCharacter(_selectedActor!);
             }
 
             ImGui.SameLine();
 
-            if (ImBrio.FontIconButton("containerwidget_target", FontAwesomeIcon.Bullseye, "Target", hasSelection))
+            if(ImBrio.FontIconButton("containerwidget_target", FontAwesomeIcon.Bullseye, "Target", hasSelection))
             {
                 Capability.Target(_selectedActor!);
             }
 
             ImGui.SameLine();
 
-            if (ImBrio.FontIconButton("containerwidget_selectinhierarchy", FontAwesomeIcon.FolderTree, "Select in Hierarchy", hasSelection))
+            if(ImBrio.FontIconButton("containerwidget_selectinhierarchy", FontAwesomeIcon.FolderTree, "Select in Hierarchy", hasSelection))
             {
                 Capability.SelectInHierarchy(_selectedActor!);
             }
 
             ImGui.SameLine();
 
-            if (ImBrio.FontIconButton("containerwidget_destroyall", FontAwesomeIcon.Bomb, "Destroy All"))
+            if(ImBrio.FontIconButton("containerwidget_destroyall", FontAwesomeIcon.Bomb, "Destroy All"))
             {
                 Capability.DestroyAll();
             }
@@ -103,17 +103,17 @@ internal class ActorContainerWidget(ActorContainerCapability capability) : Widge
 
     public override void DrawPopup()
     {
-        if (ImGui.MenuItem("Spawn###containerwidgetpopup_spawnbasic"))
+        if(ImGui.MenuItem("Spawn###containerwidgetpopup_spawnbasic"))
         {
             Capability.CreateCharacter(false, true);
         }
 
-        if (ImGui.MenuItem("Spawn with Companion###containerwidgetpopup_spawncompanion"))
+        if(ImGui.MenuItem("Spawn with Companion###containerwidgetpopup_spawncompanion"))
         {
             Capability.CreateCharacter(true, true);
         }
 
-        if (ImGui.MenuItem("Destroy All###containerwidgetpopup_destroyall"))
+        if(ImGui.MenuItem("Destroy All###containerwidgetpopup_destroyall"))
         {
             Capability.DestroyAll();
         }

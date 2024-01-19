@@ -1,9 +1,9 @@
-﻿using Dalamud.Game.ClientState.Objects.Types;
-using FFXIVClientStructs.FFXIV.Client.Game;
-using Brio.Entities.Actor;
+﻿using Brio.Entities.Actor;
 using Brio.Game.Actor.Extensions;
 using Brio.Game.Types;
 using Brio.UI.Widgets.Actor;
+using Dalamud.Game.ClientState.Objects.Types;
+using FFXIVClientStructs.FFXIV.Client.Game;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
@@ -52,7 +52,7 @@ internal class ActionTimelineCapability : ActorCharacterCapability
 
     public unsafe float GetSlotSpeed(ActionTimelineSlots slot)
     {
-        if (_actionTimelineSlotSpeedOverrides.TryGetValue(slot, out float speed))
+        if(_actionTimelineSlotSpeedOverrides.TryGetValue(slot, out float speed))
             return speed;
 
         return Character.Native()->ActionTimelineManager.Driver.TimelineSpeeds[(int)slot];
@@ -79,7 +79,7 @@ internal class ActionTimelineCapability : ActorCharacterCapability
 
     public unsafe void ApplyBaseOverride(ushort actionTimeline, bool interrupt)
     {
-        if (_originalBaseAnimation == null)
+        if(_originalBaseAnimation == null)
             _originalBaseAnimation = new(Character.Native()->EventState, Character.Native()->ModeParam, Character.Native()->ActionTimelineManager.BaseOverride);
 
         var chara = Character.Native();
@@ -87,13 +87,13 @@ internal class ActionTimelineCapability : ActorCharacterCapability
         chara->SetMode(CharacterModes.AnimLock, 0);
         chara->ActionTimelineManager.BaseOverride = actionTimeline;
 
-        if (interrupt)
+        if(interrupt)
             BlendTimeline(actionTimeline);
     }
 
     public unsafe void ResetBaseOverride()
     {
-        if (_originalBaseAnimation == null)
+        if(_originalBaseAnimation == null)
             return;
 
         var chara = Character.Native();
@@ -125,7 +125,7 @@ internal class ActionTimelineCapability : ActorCharacterCapability
 
     public static ActionTimelineCapability? CreateIfEligible(IServiceProvider provider, ActorEntity entity)
     {
-        if (entity.GameObject is Character)
+        if(entity.GameObject is Character)
             return ActivatorUtilities.CreateInstance<ActionTimelineCapability>(provider, entity);
 
         return null;

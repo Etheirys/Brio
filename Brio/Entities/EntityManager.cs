@@ -25,9 +25,9 @@ internal unsafe partial class EntityManager : IDisposable
     {
         get
         {
-            if (SelectedEntityId.HasValue)
+            if(SelectedEntityId.HasValue)
             {
-                if (TryGetEntity(SelectedEntityId.Value, out var entity))
+                if(TryGetEntity(SelectedEntityId.Value, out var entity))
                 {
                     return entity;
                 }
@@ -63,9 +63,9 @@ internal unsafe partial class EntityManager : IDisposable
 
     public void AttachEntity(Entity entity, Entity? parent, bool autoDetach = false)
     {
-        if (entity.Parent != null)
+        if(entity.Parent != null)
         {
-            if (autoDetach)
+            if(autoDetach)
             {
                 DetachEntity(entity, false);
             }
@@ -87,9 +87,9 @@ internal unsafe partial class EntityManager : IDisposable
         entity.OnDetached();
         _entityMap.Remove(entity.Id);
         entity.Parent?.RemoveChild(entity);
-        if (dispose)
+        if(dispose)
         {
-            foreach (var child in entity.Children)
+            foreach(var child in entity.Children)
                 DetachEntity(child, true);
 
             entity.Dispose();
@@ -103,9 +103,9 @@ internal unsafe partial class EntityManager : IDisposable
 
     public bool TryGetEntity<T>(EntityId id, [MaybeNullWhen(false)] out T entity) where T : Entity
     {
-        if (TryGetEntity(id, out var e))
+        if(TryGetEntity(id, out var e))
         {
-            if (e is T t)
+            if(e is T t)
             {
                 entity = t;
                 return true;
@@ -138,7 +138,7 @@ internal unsafe partial class EntityManager : IDisposable
 
     public bool TryGetCapabilityFromSelectedEntity<T>([MaybeNullWhen(false)] out T capability, bool considerChildren = false, bool considerParents = true) where T : Capability
     {
-        if (TryGetCapabilitiesFromSelectedEntity<T>(out var capabilities, considerChildren, considerParents))
+        if(TryGetCapabilitiesFromSelectedEntity<T>(out var capabilities, considerChildren, considerParents))
         {
             capability = capabilities.First();
             return true;
@@ -152,12 +152,12 @@ internal unsafe partial class EntityManager : IDisposable
         capabilities = null;
 
         var selected = SelectedEntity;
-        if (selected != null)
+        if(selected != null)
         {
-            if (!selected.IsAttached)
+            if(!selected.IsAttached)
                 return false;
 
-            if (selected.TryGetCapabilities<T>(out capabilities, considerChildren, considerParents))
+            if(selected.TryGetCapabilities<T>(out capabilities, considerChildren, considerParents))
             {
                 return true;
             }
@@ -168,14 +168,14 @@ internal unsafe partial class EntityManager : IDisposable
 
     private void RefreshDebugEntity()
     {
-        if (_configurationService.IsDebug)
+        if(_configurationService.IsDebug)
         {
             var debugEntity = ActivatorUtilities.CreateInstance<DebugEntity>(_serviceProvider);
             AttachEntity(debugEntity, _worldEntity);
         }
         else
         {
-            if (TryGetEntity(DebugEntity.FixedId, out var entity))
+            if(TryGetEntity(DebugEntity.FixedId, out var entity))
             {
                 DetachEntity(entity, true);
             }
@@ -184,7 +184,7 @@ internal unsafe partial class EntityManager : IDisposable
 
     public void Dispose()
     {
-        foreach (var entity in _entityMap.Values)
+        foreach(var entity in _entityMap.Values)
             entity.Dispose();
     }
 }

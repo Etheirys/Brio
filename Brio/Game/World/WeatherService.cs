@@ -1,17 +1,17 @@
 ﻿
+using Brio.Config;
+using Brio.Game.GPose;
+using Brio.Game.Types;
+using Brio.Resources;
 using Dalamud.Game;
 using Dalamud.Hooking;
 using Dalamud.Plugin.Services;
 using FFXIVClientStructs.FFXIV.Client.Graphics.Environment;
-using Brio.Game.Types;
-using Brio.Resources;
 using Lumina.Excel.GeneratedSheets;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using Brio.Game.GPose;
-using Brio.Config;
 
 namespace Brio.Game.World;
 
@@ -21,11 +21,11 @@ internal class WeatherService : IDisposable
     {
         get
         {
-            if (_currentCachedTerritory != _clientState.TerritoryType)
+            if(_currentCachedTerritory != _clientState.TerritoryType)
             {
                 _currentCachedTerritory = 0;
                 UpdateWeathersForCurrentTerritory();
-                if (_territoryWeatherTable.Any())
+                if(_territoryWeatherTable.Any())
                     _currentCachedTerritory = _clientState.TerritoryType;
             }
 
@@ -38,9 +38,9 @@ internal class WeatherService : IDisposable
         get => _updateTerritoryWeatherHook.IsEnabled;
         set
         {
-            if (value != WeatherOverrideEnabled)
+            if(value != WeatherOverrideEnabled)
             {
-                if (value)
+                if(value)
                 {
                     _updateTerritoryWeatherHook.Enable();
                 }
@@ -57,13 +57,13 @@ internal class WeatherService : IDisposable
         get
         {
             var system = EnvManager.Instance();
-            if (system == null) return WeatherId.None;
+            if(system == null) return WeatherId.None;
             return new(system->ActiveWeather);
         }
         set
         {
             var system = EnvManager.Instance();
-            if (system != null)
+            if(system != null)
             {
                 system->ActiveWeather = value.Id;
                 system->TransitionTime = DefaultTransitionTime;
@@ -113,9 +113,9 @@ internal class WeatherService : IDisposable
 
     private void OnGposeStateChanged(bool newState)
     {
-        if(!newState )
+        if(!newState)
         {
-            if (_configurationService.Configuration.Environment.ResetWeatherOnGPoseExit)
+            if(_configurationService.Configuration.Environment.ResetWeatherOnGPoseExit)
             {
                 WeatherOverrideEnabled = false;
             }
@@ -128,25 +128,25 @@ internal class WeatherService : IDisposable
 
         var envManager = EnvManager.Instance();
 
-        if (envManager == null)
+        if(envManager == null)
             return;
 
         var scenePtr = (nint)envManager->EnvScene;
-        if (scenePtr == 0)
+        if(scenePtr == 0)
             return;
 
         byte* weatherIds = (byte*)(scenePtr + 0x2C);
 
-        for (int i = 0; i < 32; ++i)
+        for(int i = 0; i < 32; ++i)
         {
             var weatherId = weatherIds[i];
-            if (weatherId == 0)
+            if(weatherId == 0)
                 continue;
 
-            if (!_gameDataProvider.Weathers.TryGetValue((uint)weatherId, out var weather))
+            if(!_gameDataProvider.Weathers.TryGetValue((uint)weatherId, out var weather))
                 continue;
 
-            if (!_territoryWeatherTable.Any(x => x.RowId == weather.RowId))
+            if(!_territoryWeatherTable.Any(x => x.RowId == weather.RowId))
             {
                 _territoryWeatherTable.Add(weather);
             }

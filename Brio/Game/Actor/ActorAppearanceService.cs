@@ -1,19 +1,19 @@
-﻿using Dalamud.Game;
-using Dalamud.Game.ClientState.Objects.Types;
-using Dalamud.Hooking;
-using Dalamud.Plugin.Services;
-using Brio.Config;
+﻿using Brio.Config;
+using Brio.Entities;
 using Brio.Game.Actor.Appearance;
 using Brio.Game.Actor.Extensions;
 using Brio.Game.GPose;
 using Brio.IPC;
+using Dalamud.Game;
+using Dalamud.Game.ClientState.Objects.Types;
+using Dalamud.Hooking;
+using Dalamud.Plugin.Services;
+using FFXIVClientStructs.FFXIV.Client.Graphics.Scene;
 using System;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using static Brio.Game.Actor.ActorRedrawService;
 using DrawDataContainer = FFXIVClientStructs.FFXIV.Client.Game.Character.DrawDataContainer;
-using FFXIVClientStructs.FFXIV.Client.Graphics.Scene;
-using System.Runtime.InteropServices;
-using Brio.Entities;
 
 namespace Brio.Game.Actor;
 
@@ -62,7 +62,7 @@ internal class ActorAppearanceService : IDisposable
     public void PushForceNpcHack() => ++_forceNpcHackCount;
     public void PopForceNpcHack()
     {
-        if (_forceNpcHackCount == 0)
+        if(_forceNpcHackCount == 0)
             throw new Exception("Invalid _forceNpcHack count (is already 0)");
 
         --_forceNpcHackCount;
@@ -95,28 +95,28 @@ internal class ActorAppearanceService : IDisposable
             var native = character.Native();
 
             // Model
-            if (native->CharacterData.ModelCharaId != appearance.ModelCharaId)
+            if(native->CharacterData.ModelCharaId != appearance.ModelCharaId)
             {
                 native->CharacterData.ModelCharaId = appearance.ModelCharaId;
                 needsRedraw |= true;
                 glamourerReset |= true;
             }
 
-            if (options.HasFlag(AppearanceImportOptions.Equipment) || options.HasFlag(AppearanceImportOptions.Customize))
+            if(options.HasFlag(AppearanceImportOptions.Equipment) || options.HasFlag(AppearanceImportOptions.Customize))
             {
                 // Hat toggle hack
-                if (!existingAppearance.Equipment.Head.Equals(appearance.Equipment.Head))
+                if(!existingAppearance.Equipment.Head.Equals(appearance.Equipment.Head))
                 {
                     appearance.Runtime.IsHatHidden = false;
                     forceHeadToggles = true;
                 }
 
                 // Customize & Equipment
-                if (!existingAppearance.Customize.Equals(appearance.Customize) || !existingAppearance.Equipment.Equals(appearance.Equipment))
+                if(!existingAppearance.Customize.Equals(appearance.Customize) || !existingAppearance.Equipment.Equals(appearance.Equipment))
                 {
                     forceHeadToggles = true;
 
-                    if (!existingAppearance.Customize.Equals(appearance.Customize))
+                    if(!existingAppearance.Customize.Equals(appearance.Customize))
                         glamourerReset |= true;
 
                     if
@@ -129,17 +129,17 @@ internal class ActorAppearanceService : IDisposable
                     )
                         needsRedraw |= true;
 
-                    if (!needsRedraw)
+                    if(!needsRedraw)
                     {
                         // Model redraw optimized if we can
                         var human = character.GetHuman();
-                        if (human != null)
+                        if(human != null)
                         {
 
                             byte[] data = new byte[68];
-                            fixed (byte* ptr = data)
+                            fixed(byte* ptr = data)
                             {
-                                if (options.HasFlag(AppearanceImportOptions.Customize))
+                                if(options.HasFlag(AppearanceImportOptions.Customize))
                                 {
                                     Buffer.MemoryCopy(appearance.Customize.Data, ptr, 28, 28);
                                 }
@@ -148,7 +148,7 @@ internal class ActorAppearanceService : IDisposable
                                     Buffer.MemoryCopy(existingAppearance.Customize.Data, ptr, 28, 28);
                                 }
 
-                                if (options.HasFlag(AppearanceImportOptions.Equipment))
+                                if(options.HasFlag(AppearanceImportOptions.Equipment))
                                 {
                                     Buffer.MemoryCopy(appearance.Equipment.Data, ptr + 28, 40, 40);
                                 }
@@ -167,29 +167,29 @@ internal class ActorAppearanceService : IDisposable
                         }
                     }
 
-                    if (options.HasFlag(AppearanceImportOptions.Customize))
+                    if(options.HasFlag(AppearanceImportOptions.Customize))
                     {
                         // We can just set the data again incase we didn't earlier
                         *(ActorCustomize*)&native->DrawData.CustomizeData = appearance.Customize;
                     }
 
-                    if (options.HasFlag(AppearanceImportOptions.Equipment))
+                    if(options.HasFlag(AppearanceImportOptions.Equipment))
                     {
                         *(ActorEquipment*)&native->DrawData.Head = appearance.Equipment;
                     }
                 }
             }
 
-            if (options.HasFlag(AppearanceImportOptions.Weapon))
+            if(options.HasFlag(AppearanceImportOptions.Weapon))
             {
                 // Weapons
-                if (!needsRedraw)
+                if(!needsRedraw)
                 {
 
-                    if (!existingAppearance.Weapons.MainHand.Equals(appearance.Weapons.MainHand))
+                    if(!existingAppearance.Weapons.MainHand.Equals(appearance.Weapons.MainHand))
                         native->DrawData.LoadWeapon(DrawDataContainer.WeaponSlot.MainHand, appearance.Weapons.MainHand, 0, 0, 0, 0);
 
-                    if (!existingAppearance.Weapons.OffHand.Equals(appearance.Weapons.OffHand))
+                    if(!existingAppearance.Weapons.OffHand.Equals(appearance.Weapons.OffHand))
                         native->DrawData.LoadWeapon(DrawDataContainer.WeaponSlot.OffHand, appearance.Weapons.OffHand, 0, 0, 0, 0);
                 }
 
@@ -198,14 +198,14 @@ internal class ActorAppearanceService : IDisposable
             }
 
 
-            if (options.HasFlag(AppearanceImportOptions.Weapon))
+            if(options.HasFlag(AppearanceImportOptions.Weapon))
             {
                 // Weapon Visibility
-                if (existingAppearance.Runtime.IsMainHandHidden != appearance.Runtime.IsMainHandHidden)
+                if(existingAppearance.Runtime.IsMainHandHidden != appearance.Runtime.IsMainHandHidden)
                     character.GetWeaponDrawObjectData(ActorEquipSlot.MainHand)->IsHidden = appearance.Runtime.IsMainHandHidden;
 
 
-                if (existingAppearance.Runtime.IsOffHandHidden != appearance.Runtime.IsOffHandHidden)
+                if(existingAppearance.Runtime.IsOffHandHidden != appearance.Runtime.IsOffHandHidden)
                     character.GetWeaponDrawObjectData(ActorEquipSlot.OffHand)->IsHidden = appearance.Runtime.IsOffHandHidden;
 
             }
@@ -213,10 +213,10 @@ internal class ActorAppearanceService : IDisposable
 
         RedrawResult redrawResult = RedrawResult.Optmized;
 
-        if (needsRedraw)
+        if(needsRedraw)
             redrawResult = await _redrawService.RedrawActor(character);
 
-        if (glamourerReset)
+        if(glamourerReset)
             await _glamourerService.RevertCharacter(character);
 
         unsafe
@@ -227,57 +227,57 @@ internal class ActorAppearanceService : IDisposable
             existingAppearance = GetActorAppearance(character);
 
 
-            if (options.HasFlag(AppearanceImportOptions.ExtendedAppearance))
+            if(options.HasFlag(AppearanceImportOptions.ExtendedAppearance))
             {
                 // Hat
-                if (existingAppearance.Runtime.IsHatHidden != appearance.Runtime.IsHatHidden || forceHeadToggles)
+                if(existingAppearance.Runtime.IsHatHidden != appearance.Runtime.IsHatHidden || forceHeadToggles)
                 {
                     native->DrawData.IsHatHidden = !appearance.Runtime.IsHatHidden;
                     native->DrawData.HideHeadgear(0, appearance.Runtime.IsHatHidden);
                 }
 
                 // Visor
-                if (existingAppearance.Runtime.IsVisorToggled != appearance.Runtime.IsVisorToggled || forceHeadToggles)
+                if(existingAppearance.Runtime.IsVisorToggled != appearance.Runtime.IsVisorToggled || forceHeadToggles)
                 {
                     native->DrawData.SetVisor(appearance.Runtime.IsVisorToggled);
                     native->DrawData.IsVisorToggled = appearance.Runtime.IsVisorToggled;
                 }
 
                 // Wetness
-                if (existingAppearance.ExtendedAppearance.Wetness != appearance.ExtendedAppearance.Wetness)
+                if(existingAppearance.ExtendedAppearance.Wetness != appearance.ExtendedAppearance.Wetness)
                 {
                     var charaBase = character.GetCharacterBase();
                     charaBase->CharacterBase.SwimmingWetness = appearance.ExtendedAppearance.Wetness;
                 }
-                if (existingAppearance.ExtendedAppearance.WetnessDepth != appearance.ExtendedAppearance.WetnessDepth)
+                if(existingAppearance.ExtendedAppearance.WetnessDepth != appearance.ExtendedAppearance.WetnessDepth)
                 {
                     var charaBase = character.GetCharacterBase();
                     charaBase->CharacterBase.WetnessDepth = appearance.ExtendedAppearance.WetnessDepth;
                 }
 
                 // Tints
-                if (existingAppearance.ExtendedAppearance.CharacterTint != appearance.ExtendedAppearance.CharacterTint)
+                if(existingAppearance.ExtendedAppearance.CharacterTint != appearance.ExtendedAppearance.CharacterTint)
                 {
                     var charaBase = character.GetCharacterBase();
                     charaBase->Tint = appearance.ExtendedAppearance.CharacterTint;
                 }
 
-                if (existingAppearance.ExtendedAppearance.MainHandTint != appearance.ExtendedAppearance.MainHandTint)
+                if(existingAppearance.ExtendedAppearance.MainHandTint != appearance.ExtendedAppearance.MainHandTint)
                 {
                     var weaponCharaBase = character.GetWeaponCharacterBase(ActorEquipSlot.MainHand);
-                    if (weaponCharaBase != null)
+                    if(weaponCharaBase != null)
                         weaponCharaBase->Tint = appearance.ExtendedAppearance.MainHandTint;
                 }
 
-                if (existingAppearance.ExtendedAppearance.OffHandTint != appearance.ExtendedAppearance.OffHandTint)
+                if(existingAppearance.ExtendedAppearance.OffHandTint != appearance.ExtendedAppearance.OffHandTint)
                 {
                     var weaponCharaBase = character.GetWeaponCharacterBase(ActorEquipSlot.OffHand);
-                    if (weaponCharaBase != null)
+                    if(weaponCharaBase != null)
                         weaponCharaBase->Tint = appearance.ExtendedAppearance.OffHandTint;
                 }
 
                 // Transparency
-                if (existingAppearance.ExtendedAppearance.Transparency != appearance.ExtendedAppearance.Transparency)
+                if(existingAppearance.ExtendedAppearance.Transparency != appearance.ExtendedAppearance.Transparency)
                     native->Alpha = appearance.ExtendedAppearance.Transparency;
 
             }
@@ -290,10 +290,10 @@ internal class ActorAppearanceService : IDisposable
 
     private byte EnforceKindRestrictionsDetour(nint a1, nint a2)
     {
-        if (_configurationService.Configuration.Appearance.ApplyNPCHack == ApplyNPCHack.Always)
+        if(_configurationService.Configuration.Appearance.ApplyNPCHack == ApplyNPCHack.Always)
             return 0;
 
-        if (_configurationService.Configuration.Appearance.ApplyNPCHack == ApplyNPCHack.InGPose && _gPoseService.IsGPosing)
+        if(_configurationService.Configuration.Appearance.ApplyNPCHack == ApplyNPCHack.InGPose && _gPoseService.IsGPosing)
             return 0;
 
         return _enforceKindRestrictionsHook.Original(a1, a2);
@@ -301,7 +301,7 @@ internal class ActorAppearanceService : IDisposable
 
     private nint UpdateWetnessDetour(nint a1)
     {
-        if (_gPoseService.IsGPosing)
+        if(_gPoseService.IsGPosing)
             return 0;
 
         return _updateWetnessHook.Original(a1);
@@ -309,7 +309,7 @@ internal class ActorAppearanceService : IDisposable
 
     private nint UpdateTintDetour(nint charaBase, nint tint)
     {
-        if (_gPoseService.IsGPosing && CanTint)
+        if(_gPoseService.IsGPosing && CanTint)
             return 0;
 
         return _updateTintHook.Original(charaBase, tint);

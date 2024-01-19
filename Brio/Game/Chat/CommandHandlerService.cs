@@ -1,7 +1,7 @@
-﻿using Dalamud.Game.Command;
+﻿using Brio.UI;
+using Dalamud.Game.Command;
 using Dalamud.Plugin.Services;
 using System;
-using Brio.UI;
 
 namespace Brio.Game.Chat;
 
@@ -28,13 +28,13 @@ internal class CommandHandlerService : IDisposable
 
     private void OnCommand(string command, string arguments)
     {
-        if (arguments.Length == 0)
+        if(arguments.Length == 0)
             arguments = "window";
 
         var argumentList = arguments.Split(' ', 2);
         arguments = argumentList.Length == 2 ? argumentList[1] : string.Empty;
 
-        switch (argumentList[0].ToLowerInvariant())
+        switch(argumentList[0].ToLowerInvariant())
         {
             case "window":
                 _uiManager.ToggleMainWindow();

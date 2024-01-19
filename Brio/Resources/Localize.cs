@@ -9,14 +9,14 @@ internal static class Localize
 
     public static string Get(string key, string? defaultValue = null)
     {
-        if (_stringDb.TryGetValue(key, out var value))
+        if(_stringDb.TryGetValue(key, out var value))
             return value;
         return defaultValue ?? key;
     }
 
     public static string? GetNullable(string key)
     {
-        if (_stringDb.TryGetValue(key, out var value))
+        if(_stringDb.TryGetValue(key, out var value))
             return value;
         return null;
     }
@@ -31,17 +31,17 @@ internal static class Localize
 
     private static void FlattenRecursive(JsonElement element, string currentKey)
     {
-        switch (element.ValueKind)
+        switch(element.ValueKind)
         {
             case JsonValueKind.Object:
-                foreach (var property in element.EnumerateObject())
+                foreach(var property in element.EnumerateObject())
                 {
                     FlattenRecursive(property.Value, $"{currentKey}{property.Name}.");
                 }
                 break;
             case JsonValueKind.Array:
                 int index = 0;
-                foreach (var item in element.EnumerateArray())
+                foreach(var item in element.EnumerateArray())
                 {
                     FlattenRecursive(item, $"{currentKey}{index}.");
                     index++;

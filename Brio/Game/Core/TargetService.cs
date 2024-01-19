@@ -19,13 +19,13 @@ internal class TargetService : IDisposable
     {
         get
         {
-            if (_entityManager.SelectedEntity is ActorEntity actorEntity)
+            if(_entityManager.SelectedEntity is ActorEntity actorEntity)
                 return actorEntity.GameObject;
             return null;
         }
         set
         {
-            if (value != null)
+            if(value != null)
                 _entityManager.SetSelectedEntity(value);
         }
     }
@@ -53,16 +53,16 @@ internal class TargetService : IDisposable
     private void OnFrameworkUpdate(IFramework framework)
     {
         var currentBrioAddr = BrioTarget?.Address ?? 0;
-        if (currentBrioAddr != 0 && _lastBrioTarget != currentBrioAddr)
+        if(currentBrioAddr != 0 && _lastBrioTarget != currentBrioAddr)
         {
-            if (_configService.Configuration.Posing.GPoseTargetChangesWithBrio)
+            if(_configService.Configuration.Posing.GPoseTargetChangesWithBrio)
                 GPoseTarget = BrioTarget;
         }
 
         var currentGPoseAddr = GPoseTarget?.Address ?? 0;
-        if (currentGPoseAddr != 0 && _lastGPoseTarget != currentGPoseAddr)
+        if(currentGPoseAddr != 0 && _lastGPoseTarget != currentGPoseAddr)
         {
-            if (_configService.Configuration.Posing.BrioTargetChangesWithGPose)
+            if(_configService.Configuration.Posing.BrioTargetChangesWithGPose)
                 BrioTarget = GPoseTarget;
         }
 

@@ -1,6 +1,6 @@
-﻿using OneOf.Types;
+﻿using Lumina.Excel.GeneratedSheets;
 using OneOf;
-using Lumina.Excel.GeneratedSheets;
+using OneOf.Types;
 
 namespace Brio.Game.Types;
 

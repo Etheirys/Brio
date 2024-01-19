@@ -1,8 +1,8 @@
-﻿using Brio.Entities.Actor;
-using Brio.Game.Posing;
+﻿using Brio.Capabilities.Actor;
 using Brio.Core;
-using Brio.Capabilities.Actor;
+using Brio.Entities.Actor;
 using Brio.Files;
+using Brio.Game.Posing;
 
 namespace Brio.Capabilities.Posing;
 
@@ -14,7 +14,7 @@ internal class ModelPosingCapability : ActorCharacterCapability
     {
         get
         {
-            if (_transformOverride.HasValue)
+            if(_transformOverride.HasValue)
                 return _transformOverride.Value;
 
             return _transformService.GetTransform(GameObject);
@@ -54,7 +54,7 @@ internal class ModelPosingCapability : ActorCharacterCapability
     public void ResetTransform()
     {
         _transformOverride = null;
-        if (_originalTransform.HasValue)
+        if(_originalTransform.HasValue)
         {
             _transformService.SetTransform(GameObject, _originalTransform.Value);
             _originalTransform = null;
@@ -68,13 +68,13 @@ internal class ModelPosingCapability : ActorCharacterCapability
 
     public void ImportModelPose(PoseFile poseFile, PoseImporterOptions options)
     {
-        if (options.ApplyModelTransform)
+        if(options.ApplyModelTransform)
             Transform += poseFile.ModelDifference;
     }
 
     public void ExportModelPose(PoseFile poseFile)
     {
-        if (_originalTransform.HasValue)
+        if(_originalTransform.HasValue)
             poseFile.ModelDifference = Transform.CalculateDiff(_originalTransform.Value);
     }
 }

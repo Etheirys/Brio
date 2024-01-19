@@ -20,7 +20,7 @@ internal class PosingTransformWindow : Window
 
     public override bool DrawConditions()
     {
-        if (!_entityManager.SelectedHasCapability<PosingCapability>())
+        if(!_entityManager.SelectedHasCapability<PosingCapability>())
             return false;
 
         return base.DrawConditions();
@@ -28,7 +28,7 @@ internal class PosingTransformWindow : Window
 
     public unsafe override void Draw()
     {
-        if (!_entityManager.TryGetCapabilityFromSelectedEntity<PosingCapability>(out var posing))
+        if(!_entityManager.TryGetCapabilityFromSelectedEntity<PosingCapability>(out var posing))
         {
             return;
         }

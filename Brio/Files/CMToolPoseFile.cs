@@ -456,44 +456,44 @@ internal class CMToolPoseFile
 
         PoseFile poseFile = new();
 
-        if (Race == null)
+        if(Race == null)
             throw new Exception("Legacy pose file has no race specified");
 
         Races fileRace = (Races)byte.Parse(Race);
 
         PropertyInfo[] props = legacyType.GetProperties(BindingFlags.Public | BindingFlags.DeclaredOnly | BindingFlags.Instance);
-        foreach (PropertyInfo propertyInfo in props)
+        foreach(PropertyInfo propertyInfo in props)
         {
             string boneName = propertyInfo.Name;
 
-            if (boneName == "Race")
+            if(boneName == "Race")
                 continue;
 
-            if (boneName.EndsWith("Size"))
+            if(boneName.EndsWith("Size"))
                 continue;
 
-            if (boneName == "Type")
+            if(boneName == "Type")
                 continue;
 
             PropertyInfo? rotProp = legacyType.GetProperty(boneName);
             PropertyInfo? scaleProp = legacyType.GetProperty(boneName + "Size");
 
-            if (boneName.StartsWith(@"Hroth") && fileRace != Races.Hrothgar)
+            if(boneName.StartsWith(@"Hroth") && fileRace != Races.Hrothgar)
                 continue;
 
-            if (boneName.StartsWith("Viera") && fileRace != Races.Viera)
+            if(boneName.StartsWith("Viera") && fileRace != Races.Viera)
                 continue;
 
             string? rotString = null;
             string? scaleString = null;
 
-            if (rotProp != null)
+            if(rotProp != null)
                 rotString = (string?)rotProp.GetValue(this);
 
-            if (scaleProp != null)
+            if(scaleProp != null)
                 scaleString = (string?)scaleProp.GetValue(this);
 
-            if (rotString == null && scaleString == null)
+            if(rotString == null && scaleString == null)
                 continue;
 
             PoseFile.Bone bone = StringToBone(rotString, scaleString);
@@ -508,7 +508,7 @@ internal class CMToolPoseFile
     {
         PoseFile.Bone bone = new PoseFile.Bone();
 
-        if (!string.IsNullOrEmpty(rot) && rot != "null")
+        if(!string.IsNullOrEmpty(rot) && rot != "null")
         {
             byte[] data = StringToByteArray(rot);
 
@@ -520,7 +520,7 @@ internal class CMToolPoseFile
             bone.Rotation = value;
         }
 
-        if (!string.IsNullOrEmpty(scale) && scale != "null")
+        if(!string.IsNullOrEmpty(scale) && scale != "null")
         {
             byte[] data = StringToByteArray(scale);
 
@@ -542,14 +542,14 @@ internal class CMToolPoseFile
             string[] parts = hex.Split(' ');
             byte[] data = new byte[parts.Length];
 
-            for (int i = 0; i < parts.Length; i++)
+            for(int i = 0; i < parts.Length; i++)
             {
                 data[i] = byte.Parse(parts[i], NumberStyles.HexNumber);
             }
 
             return data;
         }
-        catch (Exception ex)
+        catch(Exception ex)
         {
             throw new Exception($"Failed to parse string: {hex} to byte array", ex);
         }

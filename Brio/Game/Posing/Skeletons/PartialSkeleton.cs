@@ -24,7 +24,7 @@ internal unsafe class PartialSkeleton(Skeleton skeleton, int id)
 
     public Bone GetOrCreateBone(int index)
     {
-        if (_bones.TryGetValue(index, out var bone))
+        if(_bones.TryGetValue(index, out var bone))
             return bone;
 
         return _bones[index] = new Bone(index, Skeleton, this);
@@ -32,7 +32,7 @@ internal unsafe class PartialSkeleton(Skeleton skeleton, int id)
 
     public Bone? GetBone(int index)
     {
-        if (_bones.TryGetValue(index, out var bone))
+        if(_bones.TryGetValue(index, out var bone))
             return bone;
 
         return null;
@@ -40,9 +40,9 @@ internal unsafe class PartialSkeleton(Skeleton skeleton, int id)
 
     public Bone? GetBone(string name)
     {
-        foreach (var bone in _bones.Values)
+        foreach(var bone in _bones.Values)
         {
-            if (bone.Name == name)
+            if(bone.Name == name)
                 return bone;
         }
 
@@ -52,7 +52,7 @@ internal unsafe class PartialSkeleton(Skeleton skeleton, int id)
     public hkaPose* GetBestPose()
     {
         var best = Poses.FirstOrDefault(0);
-        if (best == 0)
+        if(best == 0)
             return null;
 
         return (hkaPose*)best;

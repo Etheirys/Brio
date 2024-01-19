@@ -1,7 +1,7 @@
-﻿using ImGuiNET;
-using Brio.Game.Types;
+﻿using Brio.Game.Types;
 using Brio.Resources;
 using Brio.UI.Controls.Stateless;
+using ImGuiNET;
 using Lumina.Excel.GeneratedSheets;
 using System;
 using System.Collections.Generic;
@@ -27,21 +27,21 @@ internal class NpcSelector(string id) : Selector<NpcSelectorEntry>(id)
 
     protected override void PopulateList()
     {
-        foreach (var (_, npc) in GameDataProvider.Instance.BNpcBases)
+        foreach(var (_, npc) in GameDataProvider.Instance.BNpcBases)
         {
             string name = $"B:{npc.RowId:D7}";
             name = ResolveName(name);
             AddItem(new NpcSelectorEntry(name, 0, npc));
         }
 
-        foreach (var (_, npc) in GameDataProvider.Instance.ENpcBases)
+        foreach(var (_, npc) in GameDataProvider.Instance.ENpcBases)
         {
             string name = $"E:{npc.RowId:D7}";
 
             var resident = GameDataProvider.Instance.ENpcResidents[npc.RowId];
-            if (resident != null)
+            if(resident != null)
             {
-                if (!string.IsNullOrEmpty(resident.Singular))
+                if(!string.IsNullOrEmpty(resident.Singular))
                     name = resident.Singular;
             }
 
@@ -49,17 +49,17 @@ internal class NpcSelector(string id) : Selector<NpcSelectorEntry>(id)
             AddItem(new NpcSelectorEntry(name, 0, npc));
         }
 
-        foreach (var (_, mount) in GameDataProvider.Instance.Mounts)
+        foreach(var (_, mount) in GameDataProvider.Instance.Mounts)
         {
             AddItem(new NpcSelectorEntry(mount.Singular ?? $"Mount {mount.RowId}", mount.Icon, mount));
         }
 
-        foreach (var (_, companion) in GameDataProvider.Instance.Companions)
+        foreach(var (_, companion) in GameDataProvider.Instance.Companions)
         {
             AddItem(new NpcSelectorEntry(companion.Singular ?? $"Companion {companion.RowId}", companion.Icon, companion));
         }
 
-        foreach (var (_, ornament) in GameDataProvider.Instance.Ornaments)
+        foreach(var (_, ornament) in GameDataProvider.Instance.Ornaments)
         {
             AddItem(new NpcSelectorEntry(ornament.Singular ?? $"Ornament {ornament.RowId}", ornament.Icon, ornament));
         }
@@ -69,14 +69,14 @@ internal class NpcSelector(string id) : Selector<NpcSelectorEntry>(id)
     {
         var names = ResourceProvider.Instance.GetResourceDocument<IReadOnlyDictionary<string, string>>("Data.NpcNames.json");
 
-        if (names.TryGetValue(name, out var nameOverride))
+        if(names.TryGetValue(name, out var nameOverride))
             name = nameOverride;
 
-        if (name.StartsWith("N:"))
+        if(name.StartsWith("N:"))
         {
             var nameId = uint.Parse(name.Substring(2));
-            if (GameDataProvider.Instance.BNpcNames.TryGetValue(nameId, out var nameRef))
-                if (nameRef != null && !string.IsNullOrEmpty(nameRef.Singular))
+            if(GameDataProvider.Instance.BNpcNames.TryGetValue(nameId, out var nameRef))
+                if(nameRef != null && !string.IsNullOrEmpty(nameRef.Singular))
                     name = nameRef.Singular;
         }
 
@@ -85,25 +85,25 @@ internal class NpcSelector(string id) : Selector<NpcSelectorEntry>(id)
 
     protected override void DrawOptions()
     {
-        if (ImGui.Checkbox("Battle NPCs", ref showBNpcs))
+        if(ImGui.Checkbox("Battle NPCs", ref showBNpcs))
             UpdateList();
 
         ImGui.SameLine();
 
-        if (ImGui.Checkbox("Event NPCs", ref showENpcs))
+        if(ImGui.Checkbox("Event NPCs", ref showENpcs))
             UpdateList();
 
         ImGui.SameLine();
 
-        if (ImGui.Checkbox("Mounts", ref showMounts))
+        if(ImGui.Checkbox("Mounts", ref showMounts))
             UpdateList();
 
-        if (ImGui.Checkbox("Companions", ref showCompanions))
+        if(ImGui.Checkbox("Companions", ref showCompanions))
             UpdateList();
 
         ImGui.SameLine();
 
-        if (ImGui.Checkbox("Ornaments", ref showOrnaments))
+        if(ImGui.Checkbox("Ornaments", ref showOrnaments))
             UpdateList();
     }
 
@@ -134,7 +134,7 @@ internal class NpcSelector(string id) : Selector<NpcSelectorEntry>(id)
             none => true
         );
 
-        if (shouldHide)
+        if(shouldHide)
             return false;
 
         string searchTerm = item.Appearance.Match(
@@ -146,7 +146,7 @@ internal class NpcSelector(string id) : Selector<NpcSelectorEntry>(id)
             none => ""
         );
 
-        if (searchTerm.Contains(search, StringComparison.InvariantCultureIgnoreCase))
+        if(searchTerm.Contains(search, StringComparison.InvariantCultureIgnoreCase))
             return true;
 
         return false;
@@ -155,64 +155,64 @@ internal class NpcSelector(string id) : Selector<NpcSelectorEntry>(id)
     protected override int Compare(NpcSelectorEntry itemA, NpcSelectorEntry itemB)
     {
         // Mounts
-        if (itemA.Appearance.Value is Mount && itemB.Appearance.Value is not Mount)
+        if(itemA.Appearance.Value is Mount && itemB.Appearance.Value is not Mount)
             return -1;
 
-        if (itemA.Appearance.Value is not Mount && itemB.Appearance.Value is Mount)
+        if(itemA.Appearance.Value is not Mount && itemB.Appearance.Value is Mount)
             return 1;
 
         // Companions
-        if (itemA.Appearance.Value is Companion && itemB.Appearance.Value is not Companion)
+        if(itemA.Appearance.Value is Companion && itemB.Appearance.Value is not Companion)
             return -1;
 
-        if (itemA.Appearance.Value is not Companion && itemB.Appearance.Value is Companion)
+        if(itemA.Appearance.Value is not Companion && itemB.Appearance.Value is Companion)
             return 1;
 
         // Event NPCs
-        if (itemA.Appearance.Value is ENpcBase && itemB.Appearance.Value is not ENpcBase)
+        if(itemA.Appearance.Value is ENpcBase && itemB.Appearance.Value is not ENpcBase)
             return -1;
 
-        if (itemA.Appearance.Value is not ENpcBase && itemB.Appearance.Value is ENpcBase)
+        if(itemA.Appearance.Value is not ENpcBase && itemB.Appearance.Value is ENpcBase)
             return 1;
 
         // Then Battle NPCs
-        if (itemA.Appearance.Value is BNpcBase && itemB.Appearance.Value is not BNpcBase)
+        if(itemA.Appearance.Value is BNpcBase && itemB.Appearance.Value is not BNpcBase)
             return -1;
 
-        if (itemA.Appearance.Value is not BNpcBase && itemB.Appearance.Value is BNpcBase)
+        if(itemA.Appearance.Value is not BNpcBase && itemB.Appearance.Value is BNpcBase)
             return 1;
 
         // Ornaments
-        if (itemA.Appearance.Value is Ornament && itemB.Appearance.Value is not Ornament)
+        if(itemA.Appearance.Value is Ornament && itemB.Appearance.Value is not Ornament)
             return -1;
 
-        if (itemA.Appearance.Value is not Ornament && itemB.Appearance.Value is Ornament)
+        if(itemA.Appearance.Value is not Ornament && itemB.Appearance.Value is Ornament)
             return 1;
 
         // Move unknown names down
-        if (itemA.Name.StartsWith("B:") && !itemB.Name.StartsWith("B:"))
+        if(itemA.Name.StartsWith("B:") && !itemB.Name.StartsWith("B:"))
             return 1;
 
-        if (!itemA.Name.StartsWith("B:") && itemB.Name.StartsWith("B:"))
+        if(!itemA.Name.StartsWith("B:") && itemB.Name.StartsWith("B:"))
             return 1;
 
-        if (itemA.Name.StartsWith("E:") && !itemB.Name.StartsWith("E:"))
+        if(itemA.Name.StartsWith("E:") && !itemB.Name.StartsWith("E:"))
             return 1;
 
-        if (!itemA.Name.StartsWith("E:") && itemB.Name.StartsWith("E:"))
+        if(!itemA.Name.StartsWith("E:") && itemB.Name.StartsWith("E:"))
             return 1;
 
-        if (itemA.Name.StartsWith("N:") && !itemB.Name.StartsWith("N:"))
+        if(itemA.Name.StartsWith("N:") && !itemB.Name.StartsWith("N:"))
             return 1;
 
-        if (!itemA.Name.StartsWith("N:") && itemB.Name.StartsWith("N:"))
+        if(!itemA.Name.StartsWith("N:") && itemB.Name.StartsWith("N:"))
             return 1;
 
         // Blank string to bottom
-        if (string.IsNullOrWhiteSpace(itemA.Name) && !string.IsNullOrWhiteSpace(itemB.Name))
+        if(string.IsNullOrWhiteSpace(itemA.Name) && !string.IsNullOrWhiteSpace(itemB.Name))
             return 1;
 
-        if (!string.IsNullOrWhiteSpace(itemA.Name) && string.IsNullOrWhiteSpace(itemB.Name))
+        if(!string.IsNullOrWhiteSpace(itemA.Name) && string.IsNullOrWhiteSpace(itemB.Name))
             return -1;
 
         // Alphabetical

@@ -1,5 +1,5 @@
-﻿using System.Collections.Generic;
-using Brio.Resources;
+﻿using Brio.Resources;
+using System.Collections.Generic;
 
 namespace Brio.Game.Posing;
 
@@ -13,7 +13,7 @@ internal class BoneCategories
     {
         var boneCategoryFile = ResourceProvider.Instance.GetResourceDocument<BoneCategoryFile>("Data.BoneCategories.json");
 
-        foreach (var (id, entry) in boneCategoryFile.Categories)
+        foreach(var (id, entry) in boneCategoryFile.Categories)
         {
             var name = Localize.Get($"bone_categories.{id}", id);
             var category = new BoneCategory(id, name, entry.Type, entry.Bones);

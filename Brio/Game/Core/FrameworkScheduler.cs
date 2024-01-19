@@ -14,16 +14,16 @@ internal class FrameworkScheduler(IFramework framework, bool alwaysDefer) : Task
 
     protected override IEnumerable<Task>? GetScheduledTasks()
     {
-        lock (_tasks)
+        lock(_tasks)
             return _tasks.ToList();
     }
 
     protected override void QueueTask(Task task)
     {
-        if (TryExecuteTaskInline(task, false))
+        if(TryExecuteTaskInline(task, false))
             return;
 
-        lock (_tasks)
+        lock(_tasks)
             _tasks.AddLast(task);
 
         _framework.RunOnTick(task.RunSynchronously).ContinueWith((_) => TryDequeue(task));
@@ -31,13 +31,13 @@ internal class FrameworkScheduler(IFramework framework, bool alwaysDefer) : Task
 
     protected sealed override bool TryDequeue(Task task)
     {
-        lock (_tasks)
+        lock(_tasks)
             return _tasks.Remove(task);
     }
 
     protected override bool TryExecuteTaskInline(Task task, bool taskWasPreviouslyQueued)
     {
-        if (!_alwaysDefer && _framework.IsInFrameworkUpdateThread)
+        if(!_alwaysDefer && _framework.IsInFrameworkUpdateThread)
             return base.TryExecuteTask(task);
 
         return false;

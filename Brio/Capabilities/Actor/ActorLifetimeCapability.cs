@@ -1,10 +1,10 @@
-﻿using Dalamud.Game.ClientState.Objects.Types;
-using Brio.Entities;
+﻿using Brio.Entities;
 using Brio.Entities.Actor;
 using Brio.Game.Actor;
 using Brio.Game.Actor.Extensions;
-using Brio.UI.Widgets.Actor;
 using Brio.Game.Core;
+using Brio.UI.Widgets.Actor;
+using Dalamud.Game.ClientState.Objects.Types;
 
 namespace Brio.Capabilities.Actor;
 
@@ -32,12 +32,12 @@ internal class ActorLifetimeCapability : ActorCapability
 
     public void Clone(bool selectInHierarchy)
     {
-        if (!CanClone)
+        if(!CanClone)
             return;
 
-        if (_actorSpawnService.CloneCharacter((Character)GameObject, out var chara))
+        if(_actorSpawnService.CloneCharacter((Character)GameObject, out var chara))
         {
-            if (selectInHierarchy)
+            if(selectInHierarchy)
             {
                 _entityManager.SetSelectedEntity(chara);
             }
@@ -50,12 +50,12 @@ internal class ActorLifetimeCapability : ActorCapability
 
     public void Destroy()
     {
-        if (!CanDestroy)
+        if(!CanDestroy)
             return;
 
-        if (Actor.Parent is ActorContainerEntity)
+        if(Actor.Parent is ActorContainerEntity)
             _actorSpawnService.DestroyObject(GameObject);
-        else if (Actor.Parent is ActorEntity actorEntity)
+        else if(Actor.Parent is ActorEntity actorEntity)
             _actorSpawnService.DestroyCompanion((Character)((ActorEntity)Actor.Parent).GameObject);
     }
 

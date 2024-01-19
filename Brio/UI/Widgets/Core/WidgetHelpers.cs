@@ -1,9 +1,9 @@
-﻿using Dalamud.Interface.Utility.Raii;
-using ImGuiNET;
-using Brio.Capabilities.Core;
-using System.Collections.Generic;
+﻿using Brio.Capabilities.Core;
 using Brio.UI.Controls.Stateless;
 using Dalamud.Interface;
+using Dalamud.Interface.Utility.Raii;
+using ImGuiNET;
+using System.Collections.Generic;
 
 namespace Brio.UI.Widgets.Core;
 
@@ -11,7 +11,7 @@ internal class WidgetHelpers
 {
     public static void DrawBodies(IEnumerable<Capability> capabilities)
     {
-        foreach (var w in capabilities)
+        foreach(var w in capabilities)
             DrawBody(w);
     }
 
@@ -19,28 +19,28 @@ internal class WidgetHelpers
 
     public static void DrawBody(IWidget? widget)
     {
-        if (widget == null || !widget.Flags.HasFlag(WidgetFlags.DrawBody))
+        if(widget == null || !widget.Flags.HasFlag(WidgetFlags.DrawBody))
             return;
 
-        using (ImRaii.PushId(widget.GetType().Name))
+        using(ImRaii.PushId(widget.GetType().Name))
         {
             ImGuiTreeNodeFlags treeFlags = ImGuiTreeNodeFlags.None;
 
-            if (widget.Flags.HasFlag(WidgetFlags.DefaultOpen))
+            if(widget.Flags.HasFlag(WidgetFlags.DefaultOpen))
                 treeFlags |= ImGuiTreeNodeFlags.DefaultOpen;
 
-            if (widget.Flags.HasFlag(WidgetFlags.HasAdvanced))
+            if(widget.Flags.HasFlag(WidgetFlags.HasAdvanced))
             {
                 var startPos = ImGui.GetCursorPos();
                 string tool = $"Advanced {widget.HeaderName}";
 
-                if (ImBrio.FontIconButtonRight("advanced", FontAwesomeIcon.SquareArrowUpRight, 1, tool, bordered: false))
+                if(ImBrio.FontIconButtonRight("advanced", FontAwesomeIcon.SquareArrowUpRight, 1, tool, bordered: false))
                     widget.ActivateAdvanced();
 
                 ImGui.SetCursorPos(startPos);
             }
 
-            if (ImGui.CollapsingHeader(widget.HeaderName, treeFlags))
+            if(ImGui.CollapsingHeader(widget.HeaderName, treeFlags))
                 widget.DrawBody();
         }
     }
@@ -48,14 +48,14 @@ internal class WidgetHelpers
     public static void DrawQuickIcons(IEnumerable<Capability> capabilities)
     {
         bool drewAny = false;
-        foreach (var w in capabilities)
+        foreach(var w in capabilities)
         {
             drewAny = true;
             DrawQuickIconSection(w);
             ImGui.SameLine();
         }
 
-        if (drewAny)
+        if(drewAny)
             ImGui.NewLine();
     }
 
@@ -63,10 +63,10 @@ internal class WidgetHelpers
 
     public static void DrawQuickIconSection(IWidget? widget)
     {
-        if (widget == null || !widget.Flags.HasFlag(WidgetFlags.DrawQuickIcons))
+        if(widget == null || !widget.Flags.HasFlag(WidgetFlags.DrawQuickIcons))
             return;
 
-        using (ImRaii.PushId(widget.GetType().Name))
+        using(ImRaii.PushId(widget.GetType().Name))
         {
             widget.DrawQuickIcons();
         }

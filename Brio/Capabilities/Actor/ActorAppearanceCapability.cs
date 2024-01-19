@@ -1,17 +1,17 @@
-﻿using Dalamud.Game.ClientState.Objects.Types;
+﻿using Brio.Core;
 using Brio.Entities.Actor;
+using Brio.Files;
 using Brio.Game.Actor;
 using Brio.Game.Actor.Appearance;
 using Brio.Game.Actor.Extensions;
 using Brio.Game.GPose;
+using Brio.Game.Types;
 using Brio.IPC;
+using Brio.Resources;
 using Brio.UI.Widgets.Actor;
+using Dalamud.Game.ClientState.Objects.Types;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Brio.Files;
-using Brio.Resources;
-using Brio.Core;
-using Brio.Game.Types;
 
 namespace Brio.Capabilities.Actor;
 
@@ -57,7 +57,7 @@ internal class ActorAppearanceCapability : ActorCharacterCapability
 
     public void SetCollection(string collection)
     {
-        if (IsCollectionOverridden && collection.Equals(_oldCollection))
+        if(IsCollectionOverridden && collection.Equals(_oldCollection))
         {
             ResetCollection();
             return;
@@ -65,7 +65,7 @@ internal class ActorAppearanceCapability : ActorCharacterCapability
 
         var old = _penumbraService.SetCollectionForObject(Character, collection);
 
-        if (!IsCollectionOverridden)
+        if(!IsCollectionOverridden)
             _oldCollection = old;
 
         _ = _actorAppearanceService.Redraw(Character);
@@ -73,7 +73,7 @@ internal class ActorAppearanceCapability : ActorCharacterCapability
 
     public void ResetCollection()
     {
-        if (IsCollectionOverridden)
+        if(IsCollectionOverridden)
         {
             _penumbraService.SetCollectionForObject(Character, _oldCollection!);
             _oldCollection = null;
@@ -88,7 +88,7 @@ internal class ActorAppearanceCapability : ActorCharacterCapability
         _originalAppearance ??= _actorAppearanceService.GetActorAppearance(Character);
         _ = await _actorAppearanceService.SetCharacterAppearance(Character, appearance, options);
 
-        if (options.HasFlag(AppearanceImportOptions.Shaders))
+        if(options.HasFlag(AppearanceImportOptions.Shaders))
         {
             ApplyShaderOverride();
         }
@@ -103,13 +103,13 @@ internal class ActorAppearanceCapability : ActorCharacterCapability
     public void ImportAppearance(string file, AppearanceImportOptions options)
     {
         var doc = ResourceProvider.Instance.GetFileDocument<AnamnesisCharaFile>(file);
-        if (doc.Race == 0 && doc.ModelType == 0)
+        if(doc.Race == 0 && doc.ModelType == 0)
         {
             EventBus.Instance.NotifyError("Invalid character appearance file.");
             return;
         }
 
-        if (doc != null)
+        if(doc != null)
             _ = SetAppearance(doc, options);
     }
 
@@ -158,7 +158,7 @@ internal class ActorAppearanceCapability : ActorCharacterCapability
     public async Task ResetAppearance()
     {
         _modelShaderOverride.Reset();
-        if (_originalAppearance.HasValue)
+        if(_originalAppearance.HasValue)
         {
             var oldAppearance = _originalAppearance.Value;
             _originalAppearance = null;
@@ -174,7 +174,7 @@ internal class ActorAppearanceCapability : ActorCharacterCapability
     private unsafe void ApplyShaderOverride()
     {
         var shaders = Character.GetShaderParams();
-        if (shaders != null)
+        if(shaders != null)
         {
             _modelShaderOverride.Apply(ref *shaders);
         }
@@ -182,7 +182,7 @@ internal class ActorAppearanceCapability : ActorCharacterCapability
 
     private void OnGPoseStateChanged(bool newState)
     {
-        if (newState)
+        if(newState)
             return;
 
         ResetCollection();
@@ -191,7 +191,7 @@ internal class ActorAppearanceCapability : ActorCharacterCapability
 
     private void OnPenumbraRedraw(int gameObjectId)
     {
-        if (Character.ObjectIndex == gameObjectId && IsAppearanceOverridden)
+        if(Character.ObjectIndex == gameObjectId && IsAppearanceOverridden)
             _ = SetAppearance(CurrentAppearance, AppearanceImportOptions.All);
     }
 

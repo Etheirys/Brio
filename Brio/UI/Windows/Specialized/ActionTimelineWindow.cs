@@ -38,7 +38,7 @@ internal class ActionTimelineWindow : Window, IDisposable
 
     public override bool DrawConditions()
     {
-        if (!_entityManager.SelectedHasCapability<ActionTimelineCapability>())
+        if(!_entityManager.SelectedHasCapability<ActionTimelineCapability>())
         {
             return false;
         }
@@ -48,7 +48,7 @@ internal class ActionTimelineWindow : Window, IDisposable
 
     public override void Draw()
     {
-        if (!_entityManager.TryGetCapabilityFromSelectedEntity<ActionTimelineCapability>(out var capability, considerParents: true))
+        if(!_entityManager.TryGetCapabilityFromSelectedEntity<ActionTimelineCapability>(out var capability, considerParents: true))
         {
             return;
         }
@@ -60,7 +60,7 @@ internal class ActionTimelineWindow : Window, IDisposable
 
     private void OnGPoseStateChange(bool newState)
     {
-        if (!newState)
+        if(!newState)
             IsOpen = false;
     }
 

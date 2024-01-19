@@ -1,7 +1,7 @@
-﻿using ImGuiNET;
-using Brio.Game.Types;
+﻿using Brio.Game.Types;
 using Brio.Resources;
 using Brio.UI.Controls.Stateless;
+using ImGuiNET;
 using Lumina.Excel.GeneratedSheets;
 using OneOf.Types;
 using System.Numerics;
@@ -18,7 +18,7 @@ internal class DyeSelector(string id) : Selector<DyeUnion>(id)
 
     protected override void PopulateList()
     {
-        foreach (var stain in GameDataProvider.Instance.Stains.Values)
+        foreach(var stain in GameDataProvider.Instance.Stains.Values)
             AddItem(stain);
 
         AddItem(new None());
@@ -33,7 +33,7 @@ internal class DyeSelector(string id) : Selector<DyeUnion>(id)
         string label = $"{name} ({id})";
         var size = new Vector2(ImGui.GetContentRegionAvail().X, ImGui.GetTextLineHeight() * 1.1f);
 
-        if (isHovered)
+        if(isHovered)
         {
             ImGui.PushStyleVar(ImGuiStyleVar.FrameBorderSize, 5f);
             ImGui.PushStyleColor(ImGuiCol.Border, 0xFFFFFFFF);
@@ -41,7 +41,7 @@ internal class DyeSelector(string id) : Selector<DyeUnion>(id)
 
         ImBrio.DrawLabeledColor(id.ToString(), color, label, label, size);
 
-        if (isHovered)
+        if(isHovered)
         {
             ImGui.PopStyleColor();
             ImGui.PopStyleVar();
@@ -56,7 +56,7 @@ internal class DyeSelector(string id) : Selector<DyeUnion>(id)
             none => false
         );
 
-        if (isInvalid)
+        if(isInvalid)
             return false;
 
         string match = item.Match(
@@ -64,7 +64,7 @@ internal class DyeSelector(string id) : Selector<DyeUnion>(id)
             none => "None 0"
         );
 
-        if (!match.Contains(search, System.StringComparison.InvariantCultureIgnoreCase))
+        if(!match.Contains(search, System.StringComparison.InvariantCultureIgnoreCase))
             return false;
 
         return true;
@@ -73,19 +73,19 @@ internal class DyeSelector(string id) : Selector<DyeUnion>(id)
     protected override int Compare(DyeUnion itemA, DyeUnion itemB)
     {
         // None first
-        if (itemA.Value is None && itemB.Value is not None)
+        if(itemA.Value is None && itemB.Value is not None)
             return -1;
 
-        if (itemA.Value is not None && itemB.Value is None)
+        if(itemA.Value is not None && itemB.Value is None)
             return 1;
 
         // Sort by ID
-        if (itemA.Value is Stain stainA && itemB.Value is Stain stainB)
+        if(itemA.Value is Stain stainA && itemB.Value is Stain stainB)
         {
-            if (stainA.RowId < stainB.RowId)
+            if(stainA.RowId < stainB.RowId)
                 return -1;
 
-            if (stainA.RowId > stainB.RowId)
+            if(stainA.RowId > stainB.RowId)
                 return 1;
         }
 

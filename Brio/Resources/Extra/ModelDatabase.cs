@@ -1,6 +1,6 @@
-﻿using FFXIVClientStructs.FFXIV.Client.Game.Character;
-using Brio.Core;
+﻿using Brio.Core;
 using Brio.Game.Actor.Appearance;
+using FFXIVClientStructs.FFXIV.Client.Game.Character;
 using Lumina.Excel.GeneratedSheets;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,15 +20,15 @@ internal class ModelDatabase
 
         // From Game
         var items = GameDataProvider.Instance.Items.Values;
-        foreach (var item in items)
+        foreach(var item in items)
         {
             var slots = item.EquipSlotCategory.Value?.GetEquipSlots() ?? ActorEquipSlot.None;
-            if (slots != ActorEquipSlot.None)
+            if(slots != ActorEquipSlot.None)
             {
                 var modelInfo = new ModelInfo(item.ModelMain, item.RowId, item.Name, item.Icon, slots, item);
                 AddModel(modelInfo);
 
-                if (item.ModelSub != 0)
+                if(item.ModelSub != 0)
                 {
                     modelInfo = new ModelInfo(item.ModelSub, item.RowId, item.Name, item.Icon, ActorEquipSlot.OffHand, item);
                     AddModel(modelInfo);
@@ -46,7 +46,7 @@ internal class ModelDatabase
 
     public ModelInfo? GetModelById(ulong modelId, ActorEquipSlot slot)
     {
-        if (_modelLookupTable.TryGetValues(modelId & 0x00FFFFFFFFFFFFFF, out var values))
+        if(_modelLookupTable.TryGetValues(modelId & 0x00FFFFFFFFFFFFFF, out var values))
             return values.FirstOrDefault(x => x != null && (x.Slots & slot) != 0, null);
 
         return null;
@@ -57,9 +57,9 @@ internal class ModelDatabase
     public IEnumerable<ModelInfo> GetEquippableInSlots(ActorEquipSlot slots)
     {
         List<ModelInfo> models = [];
-        foreach (var model in _modelsList)
+        foreach(var model in _modelsList)
         {
-            if (model.Slots.HasFlag(slots))
+            if(model.Slots.HasFlag(slots))
                 models.Add(model);
         }
         return models;

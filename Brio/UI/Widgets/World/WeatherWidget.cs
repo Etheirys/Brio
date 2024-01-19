@@ -1,11 +1,11 @@
-﻿using Dalamud.Interface;
-using Dalamud.Interface.Utility.Raii;
-using ImGuiNET;
-using Brio.Capabilities.World;
+﻿using Brio.Capabilities.World;
 using Brio.Game.Types;
 using Brio.UI.Controls.Selectors;
 using Brio.UI.Controls.Stateless;
 using Brio.UI.Widgets.Core;
+using Dalamud.Interface;
+using Dalamud.Interface.Utility.Raii;
+using ImGuiNET;
 using System.Numerics;
 
 namespace Brio.UI.Widgets.World;
@@ -27,7 +27,7 @@ internal class WeatherWidget(WeatherCapability weatherCapability) : Widget<Weath
         Vector2 unlockPos = Vector2.Zero;
 
 
-        if (ImBrio.BorderedGameIcon("current_weather", (WeatherUnion)Capability.WeatherService.CurrentWeather, showText: false))
+        if(ImBrio.BorderedGameIcon("current_weather", (WeatherUnion)Capability.WeatherService.CurrentWeather, showText: false))
         {
             _weatherSelector.SetNaturalWeathers(Capability.WeatherService.TerritoryWeatherTable);
             _weatherSelector.Select(Capability.WeatherService.CurrentWeather);
@@ -50,13 +50,13 @@ internal class WeatherWidget(WeatherCapability weatherCapability) : Widget<Weath
             none => ImGui.NewLine()
         );
 
-        using (var popup = ImRaii.Popup("weather_selector"))
+        using(var popup = ImRaii.Popup("weather_selector"))
         {
-            if (popup.Success)
+            if(popup.Success)
             {
                 _weatherSelector.Draw();
 
-                if (_weatherSelector.SoftSelectionChanged && _weatherSelector.SoftSelected != null)
+                if(_weatherSelector.SoftSelectionChanged && _weatherSelector.SoftSelected != null)
                 {
                     currentWeather = _weatherSelector.SoftSelected.Match(
                         naturalWeather => (int)naturalWeather.RowId,
@@ -64,32 +64,32 @@ internal class WeatherWidget(WeatherCapability weatherCapability) : Widget<Weath
                     );
                 }
 
-                if (_weatherSelector.SelectionChanged)
+                if(_weatherSelector.SelectionChanged)
                     ImGui.CloseCurrentPopup();
             }
         }
 
         var preservePos = ImGui.GetCursorPos();
         ImGui.SetCursorPos(unlockPos);
-        if (isLocked)
+        if(isLocked)
         {
-            if (ImBrio.FontIconButtonRight("lock", FontAwesomeIcon.Unlock, 1, "Unlock Weather", bordered: false))
+            if(ImBrio.FontIconButtonRight("lock", FontAwesomeIcon.Unlock, 1, "Unlock Weather", bordered: false))
                 isLocked = false;
         }
         else
         {
-            if (ImBrio.FontIconButtonRight("lock", FontAwesomeIcon.Lock, 1, "Lock Weather", bordered: false))
+            if(ImBrio.FontIconButtonRight("lock", FontAwesomeIcon.Lock, 1, "Lock Weather", bordered: false))
                 isLocked = true;
         }
         ImGui.SetCursorPos(preservePos);
 
-        if (currentWeather != previousWeather)
+        if(currentWeather != previousWeather)
         {
             isLocked = true;
             Capability.WeatherService.CurrentWeather = currentWeather;
         }
 
-        if (isLocked != isLockedPrevious)
+        if(isLocked != isLockedPrevious)
             Capability.WeatherService.WeatherOverrideEnabled = isLocked;
     }
 }

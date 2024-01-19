@@ -1,6 +1,6 @@
-﻿using OneOf.Types;
+﻿using Brio.Resources;
 using OneOf;
-using Brio.Resources;
+using OneOf.Types;
 
 namespace Brio.Game.Posing;
 
@@ -26,19 +26,19 @@ internal partial class PosingSelectionType : OneOfBase<BonePoseInfoId, ModelTran
 
     public override bool Equals(object? obj)
     {
-        if (obj is null)
+        if(obj is null)
             return false;
 
-        if (obj is PosingSelectionType other)
+        if(obj is PosingSelectionType other)
             return UniqueId.Equals(other.UniqueId);
 
-        if (obj is None && Value is None)
+        if(obj is None && Value is None)
             return true;
 
-        if (obj is ModelTransformSelection && Value is ModelTransformSelection)
+        if(obj is ModelTransformSelection && Value is ModelTransformSelection)
             return true;
 
-        if (obj is BonePoseInfoId bone && obj is BonePoseInfoId otherBone)
+        if(obj is BonePoseInfoId bone && obj is BonePoseInfoId otherBone)
             return bone.Equals(otherBone);
 
         return base.Equals(obj);

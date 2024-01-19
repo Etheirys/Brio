@@ -1,5 +1,5 @@
-﻿using Dalamud.Interface;
-using Brio.Capabilities.Core;
+﻿using Brio.Capabilities.Core;
+using Dalamud.Interface;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
@@ -36,8 +36,8 @@ internal abstract class Entity : IDisposable
         Id = id;
         _serviceProvider = serviceProvider;
 
-        if (children != null)
-            foreach (var child in children)
+        if(children != null)
+            foreach(var child in children)
                 AddChild(child);
     }
 
@@ -77,7 +77,7 @@ internal abstract class Entity : IDisposable
 
     public void AddCapability<T>(T? capability) where T : Capability
     {
-        if (capability == null)
+        if(capability == null)
             return;
 
         _capabilities[capability.GetType()] = capability;
@@ -90,7 +90,7 @@ internal abstract class Entity : IDisposable
 
     public void ClearCapabilities()
     {
-        foreach (var capability in _capabilities.Values)
+        foreach(var capability in _capabilities.Values)
             capability.Dispose();
 
         _capabilities.Clear();
@@ -103,7 +103,7 @@ internal abstract class Entity : IDisposable
 
     public T GetCapability<T>() where T : Capability
     {
-        if (TryGetCapability<T>(out var capability))
+        if(TryGetCapability<T>(out var capability))
             return capability;
 
         throw new InvalidOperationException($"Entity {Id} does not have capability {typeof(T)}");
@@ -113,7 +113,7 @@ internal abstract class Entity : IDisposable
     {
         capability = null;
 
-        if (TryGetCapabilities<T>(out var capabilities, considerChildren, considerParents))
+        if(TryGetCapabilities<T>(out var capabilities, considerChildren, considerParents))
         {
             capability = capabilities.First();
             return true;
@@ -127,25 +127,25 @@ internal abstract class Entity : IDisposable
         var results = new List<T>();
         capabilities = results;
 
-        if (_capabilities.TryGetValue(typeof(T), out var cap))
+        if(_capabilities.TryGetValue(typeof(T), out var cap))
         {
             results.Add((T)cap);
         }
 
-        if (considerChildren)
+        if(considerChildren)
         {
-            foreach (var child in Children)
+            foreach(var child in Children)
             {
-                if (child.TryGetCapabilities<T>(out var childCaps, true, false))
+                if(child.TryGetCapabilities<T>(out var childCaps, true, false))
                 {
                     results.AddRange(childCaps);
                 }
             }
         }
 
-        if (considerParents && Parent != null)
+        if(considerParents && Parent != null)
         {
-            if (Parent.TryGetCapabilities<T>(out var parentCaps, false, true))
+            if(Parent.TryGetCapabilities<T>(out var parentCaps, false, true))
             {
                 results.AddRange(parentCaps);
             }
@@ -166,7 +166,7 @@ internal abstract class Entity : IDisposable
 
     public override bool Equals(object? obj)
     {
-        if (obj is Entity ent)
+        if(obj is Entity ent)
             return Id == ent.Id;
 
         return false;

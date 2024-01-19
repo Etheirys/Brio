@@ -1,6 +1,6 @@
-﻿using Dalamud.Interface.Internal;
+﻿using Brio.Resources;
+using Dalamud.Interface.Internal;
 using ImGuiNET;
-using Brio.Resources;
 using Lumina.Excel.GeneratedSheets;
 using System;
 using System.Numerics;
@@ -23,9 +23,9 @@ internal class StatusEffectSelector(string id) : Selector<Status>(id)
     protected override void DrawItem(Status item, bool isHovered)
     {
         IDalamudTextureWrap? tex = null;
-        if (item.Icon != 0)
+        if(item.Icon != 0)
             tex = UIManager.Instance.TextureProvider.GetIcon(item.Icon);
-        if (tex == null)
+        if(tex == null)
             tex = ResourceProvider.Instance.GetResourceImage("Images.StatusEffect.png");
 
         float ratio = tex.Size.X / tex.Size.Y;
@@ -38,10 +38,10 @@ internal class StatusEffectSelector(string id) : Selector<Status>(id)
 
     protected override int Compare(Status itemA, Status itemB)
     {
-        if (itemA.RowId < itemB.RowId)
+        if(itemA.RowId < itemB.RowId)
             return -1;
 
-        if (itemA.RowId > itemB.RowId)
+        if(itemA.RowId > itemB.RowId)
             return 1;
 
         return 0;
@@ -49,12 +49,12 @@ internal class StatusEffectSelector(string id) : Selector<Status>(id)
 
     protected override bool Filter(Status item, string search)
     {
-        if (item.StatusCategory == 0)
+        if(item.StatusCategory == 0)
             return false;
 
         var searchTerm = $"{item.Name} {item.RowId} {item.VFX.Row} {item.HitEffect.Row}";
 
-        if (searchTerm.Contains(search, StringComparison.InvariantCultureIgnoreCase))
+        if(searchTerm.Contains(search, StringComparison.InvariantCultureIgnoreCase))
             return true;
 
         return false;

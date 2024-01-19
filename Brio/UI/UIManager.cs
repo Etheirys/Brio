@@ -1,13 +1,13 @@
-﻿using Dalamud.Interface.Windowing;
-using Dalamud.Plugin;
-using Dalamud.Plugin.Services;
-using Brio.Config;
+﻿using Brio.Config;
 using Brio.Game.GPose;
 using Brio.UI.Windows;
-using System;
-using Dalamud.Interface.ImGuiFileDialog;
-using ImGuiNET;
 using Brio.UI.Windows.Specialized;
+using Dalamud.Interface.ImGuiFileDialog;
+using Dalamud.Interface.Windowing;
+using Dalamud.Plugin;
+using Dalamud.Plugin.Services;
+using ImGuiNET;
+using System;
 
 namespace Brio.UI;
 
@@ -137,7 +137,7 @@ internal class UIManager : IDisposable
 
     private void OnGPoseStateChange(bool newState)
     {
-        if (_configurationService.Configuration.Interface.OpenBrioBehavior == OpenBrioBehavior.OnGPoseEnter)
+        if(_configurationService.Configuration.Interface.OpenBrioBehavior == OpenBrioBehavior.OnGPoseEnter)
             _mainWindow.IsOpen = newState;
     }
 

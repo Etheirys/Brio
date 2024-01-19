@@ -178,7 +178,7 @@ namespace Brio.Files.Converters
 
         public static string AnamnesisToGame(string name)
         {
-            if (_anaToGame.TryGetValue(name, out string? gameName))
+            if(_anaToGame.TryGetValue(name, out string? gameName))
                 return gameName;
 
             return name;

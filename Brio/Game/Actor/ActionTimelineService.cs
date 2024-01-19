@@ -1,9 +1,9 @@
-﻿using Dalamud.Game;
+﻿using Brio.Capabilities.Actor;
+using Brio.Entities;
+using Dalamud.Game;
 using Dalamud.Hooking;
 using Dalamud.Plugin.Services;
 using FFXIVClientStructs.FFXIV.Client.Game;
-using Brio.Capabilities.Actor;
-using Brio.Entities;
 using System;
 
 namespace Brio.Game.Actor;
@@ -32,17 +32,17 @@ internal unsafe class ActionTimelineService : IDisposable
     private bool CalculateAndApplyOverallSpeedDetour(ActionTimelineManager* a1)
     {
         bool result = _calculateAndApplyOverallSpeedHook.Original(a1);
-        if (_entityManager.TryGetEntity(a1->Parent, out var entity))
+        if(_entityManager.TryGetEntity(a1->Parent, out var entity))
         {
-            if (entity.TryGetCapability<ActionTimelineCapability>(out var atc))
+            if(entity.TryGetCapability<ActionTimelineCapability>(out var atc))
             {
-                if (atc.SpeedMultiplierOverride.HasValue)
+                if(atc.SpeedMultiplierOverride.HasValue)
                 {
                     a1->OverallSpeed = atc.SpeedMultiplierOverride.Value;
                     result |= true;
                 }
 
-                if (atc.CheckAndResetDirtySlots())
+                if(atc.CheckAndResetDirtySlots())
                     result |= true;
             }
 
@@ -57,11 +57,11 @@ internal unsafe class ActionTimelineService : IDisposable
 
         var owner = a1->Parent;
 
-        if (_entityManager.TryGetEntity(owner, out var entity))
+        if(_entityManager.TryGetEntity(owner, out var entity))
         {
-            if (entity.TryGetCapability<ActionTimelineCapability>(out var atc))
+            if(entity.TryGetCapability<ActionTimelineCapability>(out var atc))
             {
-                if (atc.HasSlotSpeedOverride(slot))
+                if(atc.HasSlotSpeedOverride(slot))
                 {
                     finalSpeed = atc.GetSlotSpeed(slot);
                 }

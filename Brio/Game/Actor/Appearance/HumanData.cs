@@ -9,7 +9,7 @@ internal class HumanData
     {
         var size = buffer.Length / 4;
         _rawColors = new uint[size];
-        for (var i = 0; i < size; i++)
+        for(var i = 0; i < size; i++)
         {
             _rawColors[i] = BitConverter.ToUInt32(buffer, i * 4);
         }

@@ -24,7 +24,7 @@ internal class Bone(int index, Skeleton skeleton, PartialSkeleton partial)
         {
             var end = $"{Name} ({PartialId}.{Index})";
             var friendly = Localize.GetNullable($"bones.{Name}");
-            if (friendly != null)
+            if(friendly != null)
                 return $"{friendly} - {end}";
             return end;
         }
@@ -47,13 +47,13 @@ internal class Bone(int index, Skeleton skeleton, PartialSkeleton partial)
         get
         {
             // If we're a partial root, or the root bone and we're not attached to anything, we should not be displayed
-            if (IsPartialRoot && !(IsSkeletonRoot && Skeleton.AttachedTo != null))
+            if(IsPartialRoot && !(IsSkeletonRoot && Skeleton.AttachedTo != null))
                 return true;
 
             // The jaw on partial 0 in humans is a special case, we don't want to display it
-            if (Skeleton.CharacterBase != null)
-                if (Skeleton.CharacterBase->CharacterBase.GetModelType() == ModelType.Human)
-                    if (Name == "j_ago" && PartialId == 0)
+            if(Skeleton.CharacterBase != null)
+                if(Skeleton.CharacterBase->CharacterBase.GetModelType() == ModelType.Human)
+                    if(Name == "j_ago" && PartialId == 0)
                         return true;
 
             return false;
@@ -64,10 +64,10 @@ internal class Bone(int index, Skeleton skeleton, PartialSkeleton partial)
 
     public Bone? GetFirstVisibleParent()
     {
-        if (Parent == null)
+        if(Parent == null)
             return null;
 
-        if (Parent.IsHidden)
+        if(Parent.IsHidden)
             return Parent.GetFirstVisibleParent();
 
         return Parent;
@@ -85,7 +85,7 @@ internal class Bone(int index, Skeleton skeleton, PartialSkeleton partial)
 
         bones.Add(this);
 
-        if (depth == 0 || Parent == null)
+        if(depth == 0 || Parent == null)
             return bones;
 
         if(stopAtHidden && Parent.IsHidden)

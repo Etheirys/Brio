@@ -53,7 +53,7 @@ internal class BrioIPCService : IDisposable
 
     private GameObject? SpawnActorImpl()
     {
-        if(_actorSpawnService.CreateCharacter(out var character)) 
+        if(_actorSpawnService.CreateCharacter(out var character))
             return character;
 
         return null;

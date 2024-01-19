@@ -8,10 +8,10 @@ namespace Brio.Capabilities.World;
 internal class WorldRenderingCapability : Capability
 {
     public WorldRenderingService WorldRenderingService { get; }
-    
+
     public WorldRenderingCapability(Entity parent, WorldRenderingService service) : base(parent)
     {
-        WorldRenderingService= service;
+        WorldRenderingService = service;
         Widget = new WorldRenderingWidget(this);
     }
 }

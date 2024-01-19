@@ -11,7 +11,7 @@ internal class MultiValueDictionary<TKey, TValue> where TKey : notnull
     public int Count => _underlyingDictionary.Count;
     public void Add(TKey key, TValue val)
     {
-        if (_underlyingDictionary.ContainsKey(key))
+        if(_underlyingDictionary.ContainsKey(key))
         {
             _underlyingDictionary[key].Add(val);
         }
@@ -30,16 +30,16 @@ internal class MultiValueDictionary<TKey, TValue> where TKey : notnull
     }
     public void Remove(TKey key)
     {
-        if (_underlyingDictionary.ContainsKey(key))
+        if(_underlyingDictionary.ContainsKey(key))
         {
             _underlyingDictionary.Remove(key);
         }
     }
     public void Remove(TKey key, TValue val)
     {
-        if (_underlyingDictionary.TryGetValue(key, out var collection) && collection.Remove(val))
+        if(_underlyingDictionary.TryGetValue(key, out var collection) && collection.Remove(val))
         {
-            if (collection.Count == 0)
+            if(collection.Count == 0)
                 _underlyingDictionary.Remove(key);
         }
     }
@@ -57,7 +57,7 @@ internal class MultiValueDictionary<TKey, TValue> where TKey : notnull
     {
         get
         {
-            if (_underlyingDictionary.TryGetValue(key, out var collection))
+            if(_underlyingDictionary.TryGetValue(key, out var collection))
                 return collection;
 
             throw new KeyNotFoundException();
@@ -65,11 +65,11 @@ internal class MultiValueDictionary<TKey, TValue> where TKey : notnull
     }
     public IEnumerator<KeyValuePair<TKey, TValue>> GetEnumerator()
     {
-        foreach (var entry in _underlyingDictionary)
+        foreach(var entry in _underlyingDictionary)
         {
             var collection = entry.Value;
 
-            foreach (var item in collection)
+            foreach(var item in collection)
             {
                 yield return new KeyValuePair<TKey, TValue>(entry.Key, item);
             }

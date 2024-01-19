@@ -1,6 +1,6 @@
-﻿using Dalamud.Interface.Internal;
+﻿using Brio.Files.Converters;
+using Dalamud.Interface.Internal;
 using Dalamud.Plugin;
-using Brio.Files.Converters;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -42,7 +42,7 @@ internal class ResourceProvider : IDisposable
 
     public T GetResourceDocument<T>(string name)
     {
-        if (_cachedDocuments.TryGetValue(name, out var cached))
+        if(_cachedDocuments.TryGetValue(name, out var cached))
             return (T)cached;
 
         using var stream = GetRawResourceStream(name);
@@ -55,7 +55,7 @@ internal class ResourceProvider : IDisposable
 
     public IDalamudTextureWrap GetResourceImage(string name)
     {
-        if (_cachedImages.TryGetValue(name, out var cached))
+        if(_cachedImages.TryGetValue(name, out var cached))
             return cached;
 
         using var stream = GetRawResourceStream(name);
@@ -100,7 +100,7 @@ internal class ResourceProvider : IDisposable
 
     public void Dispose()
     {
-        foreach (var img in _cachedImages.Values)
+        foreach(var img in _cachedImages.Values)
             img.Dispose();
 
         _cachedImages.Clear();

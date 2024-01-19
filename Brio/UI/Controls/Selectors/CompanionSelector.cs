@@ -1,7 +1,7 @@
-﻿using ImGuiNET;
-using Brio.Game.Types;
+﻿using Brio.Game.Types;
 using Brio.Resources;
 using Brio.UI.Controls.Stateless;
+using ImGuiNET;
 using OneOf.Types;
 using System.Numerics;
 
@@ -23,13 +23,13 @@ internal class CompanionSelector(string id) : Selector<CompanionRowUnion>(id)
 
     protected override void PopulateList()
     {
-        foreach (var companion in GameDataProvider.Instance.Companions.Values)
+        foreach(var companion in GameDataProvider.Instance.Companions.Values)
             AddItem(companion);
 
-        foreach (var mount in GameDataProvider.Instance.Mounts.Values)
+        foreach(var mount in GameDataProvider.Instance.Mounts.Values)
             AddItem(mount);
 
-        foreach (var ornament in GameDataProvider.Instance.Ornaments.Values)
+        foreach(var ornament in GameDataProvider.Instance.Ornaments.Values)
             AddItem(ornament);
 
         AddItem(new None());
@@ -43,24 +43,24 @@ internal class CompanionSelector(string id) : Selector<CompanionRowUnion>(id)
 
     protected override void DrawOptions()
     {
-        if (ImGui.Checkbox("Minions", ref _showCompanions))
+        if(ImGui.Checkbox("Minions", ref _showCompanions))
             UpdateList();
 
         ImGui.SameLine();
 
-        if (ImGui.Checkbox("Mounts", ref _showMounts))
+        if(ImGui.Checkbox("Mounts", ref _showMounts))
             UpdateList();
 
         ImGui.SameLine();
 
-        if (ImGui.Checkbox("Ornaments", ref _showOrnaments))
+        if(ImGui.Checkbox("Ornaments", ref _showOrnaments))
             UpdateList();
     }
 
     protected override bool Filter(CompanionRowUnion item, string search)
     {
         // Always show none
-        if (item.Value is None)
+        if(item.Value is None)
             return true;
 
         bool shouldFilter = item.Match(
@@ -70,7 +70,7 @@ internal class CompanionSelector(string id) : Selector<CompanionRowUnion>(id)
             none => false
         );
 
-        if (shouldFilter)
+        if(shouldFilter)
             return false;
 
         var searchText = item.Match(
@@ -80,7 +80,7 @@ internal class CompanionSelector(string id) : Selector<CompanionRowUnion>(id)
             none => "none"
         );
 
-        if (searchText.Contains(search, System.StringComparison.InvariantCultureIgnoreCase))
+        if(searchText.Contains(search, System.StringComparison.InvariantCultureIgnoreCase))
             return true;
 
 
@@ -90,10 +90,10 @@ internal class CompanionSelector(string id) : Selector<CompanionRowUnion>(id)
     protected override int Compare(CompanionRowUnion itemA, CompanionRowUnion itemB)
     {
         // None to top
-        if (itemA.Value is None && itemB.Value is not None)
+        if(itemA.Value is None && itemB.Value is not None)
             return -1;
 
-        if (itemA.Value is not None && itemB.Value is None)
+        if(itemA.Value is not None && itemB.Value is None)
             return 1;
 
         // Get name
@@ -112,10 +112,10 @@ internal class CompanionSelector(string id) : Selector<CompanionRowUnion>(id)
         );
 
         // Blank string to bottom
-        if (string.IsNullOrEmpty(textA) && !string.IsNullOrEmpty(textB))
+        if(string.IsNullOrEmpty(textA) && !string.IsNullOrEmpty(textB))
             return 1;
 
-        if (!string.IsNullOrEmpty(textA) && string.IsNullOrEmpty(textB))
+        if(!string.IsNullOrEmpty(textA) && string.IsNullOrEmpty(textB))
             return -1;
 
         // Alphabetical

@@ -1,7 +1,7 @@
-﻿using System.Globalization;
-using System.Text.Json;
-using System;
+﻿using System;
+using System.Globalization;
 using System.Numerics;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 
 namespace Brio.Files.Converters;
@@ -13,7 +13,7 @@ internal class QuaternionConverter : JsonConverter<Quaternion>
         string? str = reader.GetString() ?? throw new Exception("Cannot convert null to Vector3");
         string[] parts = str.Split(new[] { ", " }, StringSplitOptions.RemoveEmptyEntries);
 
-        if (parts.Length != 4)
+        if(parts.Length != 4)
             throw new FormatException();
 
         Quaternion q = default;

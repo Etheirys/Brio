@@ -13,7 +13,7 @@ internal class Vector2Converter : JsonConverter<Vector2>
         string? str = reader.GetString() ?? throw new Exception("Cannot convert null to Vector2");
         string[] parts = str.Split(new[] { ", " }, StringSplitOptions.RemoveEmptyEntries);
 
-        if (parts.Length != 2)
+        if(parts.Length != 2)
             throw new FormatException();
 
         Vector2 v = default;
@@ -36,7 +36,7 @@ internal class Vector3Converter : JsonConverter<Vector3>
         string? str = reader.GetString() ?? throw new Exception("Cannot convert null to Vector3");
         string[] parts = str.Split(new[] { ", " }, StringSplitOptions.RemoveEmptyEntries);
 
-        if (parts.Length != 3)
+        if(parts.Length != 3)
             throw new FormatException();
 
         Vector3 v = default;
@@ -60,7 +60,7 @@ internal class Vector4Converter : JsonConverter<Vector4>
         string? str = reader.GetString() ?? throw new Exception("Cannot convert null to Vector4");
         string[] parts = str.Split(new[] { ", " }, StringSplitOptions.RemoveEmptyEntries);
 
-        if (parts.Length != 4)
+        if(parts.Length != 4)
             throw new FormatException();
 
         Vector4 v = default;

@@ -1,7 +1,7 @@
-﻿using Dalamud.Plugin.Services;
-using Brio.Game.Actor.Appearance;
+﻿using Brio.Game.Actor.Appearance;
 using Brio.Resources.Extra;
 using Brio.Resources.Sheets;
+using Dalamud.Plugin.Services;
 using Lumina.Excel.GeneratedSheets;
 using System.Collections.Generic;
 using System.Linq;

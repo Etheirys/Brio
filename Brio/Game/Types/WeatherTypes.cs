@@ -1,7 +1,7 @@
 ﻿using Brio.Resources;
 using Lumina.Excel.GeneratedSheets;
-using OneOf.Types;
 using OneOf;
+using OneOf.Types;
 
 namespace Brio.Game.Types;
 
@@ -10,7 +10,7 @@ internal partial class WeatherUnion : OneOfBase<Weather, None>
 {
     public static implicit operator WeatherUnion(WeatherId weatherId)
     {
-        if (weatherId.Id != 0 && GameDataProvider.Instance.Weathers.TryGetValue(weatherId.Id, out var weather))
+        if(weatherId.Id != 0 && GameDataProvider.Instance.Weathers.TryGetValue(weatherId.Id, out var weather))
             return weather;
 
         return new None();

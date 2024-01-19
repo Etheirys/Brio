@@ -1,6 +1,6 @@
-﻿using Dalamud.Game.ClientState.Objects.Types;
-using Brio.Capabilities.Core;
+﻿using Brio.Capabilities.Core;
 using Brio.Entities.Actor;
+using Dalamud.Game.ClientState.Objects.Types;
 
 namespace Brio.Capabilities.Actor;
 

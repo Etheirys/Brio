@@ -1,10 +1,10 @@
-﻿using Dalamud.Interface;
+﻿using Brio.Resources;
+using Brio.UI.Controls.Core;
+using Dalamud.Interface;
 using Dalamud.Interface.Internal;
 using Dalamud.Interface.Utility.Raii;
 using ImGuiNET;
-using Brio.Resources;
 using System.Numerics;
-using Brio.UI.Controls.Core;
 
 namespace Brio.UI.Controls.Stateless;
 internal static partial class ImBrio
@@ -13,31 +13,31 @@ internal static partial class ImBrio
     {
         bool wasClicked = false;
 
-        if (!enabled)
+        if(!enabled)
             ImGui.BeginDisabled();
 
-        if (!bordered)
+        if(!bordered)
             ImGui.PushStyleColor(ImGuiCol.Button, UIConstants.Transparent);
 
-        if (textColor.HasValue)
+        if(textColor.HasValue)
             ImGui.PushStyleColor(ImGuiCol.Text, textColor.Value);
 
-        using (ImRaii.PushFont(UiBuilder.IconFont))
+        using(ImRaii.PushFont(UiBuilder.IconFont))
         {
-            if (ImGui.Button($"{icon.ToIconString()}###{id}"))
+            if(ImGui.Button($"{icon.ToIconString()}###{id}"))
                 wasClicked = true;
         }
 
-        if (textColor.HasValue)
+        if(textColor.HasValue)
             ImGui.PopStyleColor();
 
-        if (!bordered)
+        if(!bordered)
             ImGui.PopStyleColor();
 
-        if (tooltip != null && ImGui.IsItemHovered())
+        if(tooltip != null && ImGui.IsItemHovered())
             ImGui.SetTooltip(tooltip);
 
-        if (!enabled)
+        if(!enabled)
             ImGui.EndDisabled();
 
         return wasClicked;
@@ -46,35 +46,35 @@ internal static partial class ImBrio
     {
         bool wasClicked = false;
 
-        if (!enabled)
+        if(!enabled)
             ImGui.BeginDisabled();
 
         var pixelPos = ImGui.GetWindowSize().X - ((ImGui.CalcTextSize("XXX").X + (ImGui.GetStyle().FramePadding.X * 2)) * position);
 
         ImGui.SetCursorPosX(pixelPos);
 
-        if (!bordered)
+        if(!bordered)
             ImGui.PushStyleColor(ImGuiCol.Button, UIConstants.Transparent);
 
-        if (textColor.HasValue)
+        if(textColor.HasValue)
             ImGui.PushStyleColor(ImGuiCol.Text, textColor.Value);
 
-        using (ImRaii.PushFont(UiBuilder.IconFont))
+        using(ImRaii.PushFont(UiBuilder.IconFont))
         {
-            if (ImGui.Button($"{icon.ToIconString()}###{id}"))
+            if(ImGui.Button($"{icon.ToIconString()}###{id}"))
                 wasClicked = true;
         }
 
-        if (textColor.HasValue)
+        if(textColor.HasValue)
             ImGui.PopStyleColor();
 
-        if (!bordered)
+        if(!bordered)
             ImGui.PopStyleColor();
 
-        if (tooltip != null && ImGui.IsItemHovered())
+        if(tooltip != null && ImGui.IsItemHovered())
             ImGui.SetTooltip(tooltip);
 
-        if (!enabled)
+        if(!enabled)
             ImGui.EndDisabled();
 
         return wasClicked;
@@ -86,7 +86,7 @@ internal static partial class ImBrio
     {
         IDalamudTextureWrap? iconTex = null;
 
-        if (iconId != 0)
+        if(iconId != 0)
             iconTex = UIManager.Instance.TextureProvider.GetIcon(iconId);
 
         iconTex ??= ResourceProvider.Instance.GetResourceImage(fallback);
@@ -96,7 +96,7 @@ internal static partial class ImBrio
 
     public static bool BorderedGameIcon(string id, IDalamudTextureWrap texture, string? description = null, ImGuiButtonFlags flags = ImGuiButtonFlags.MouseButtonLeft, Vector2? size = null)
     {
-        using (ImRaii.PushId(id))
+        using(ImRaii.PushId(id))
         {
             bool result = false;
 
@@ -120,15 +120,15 @@ internal static partial class ImBrio
             ImGui.SetCursorPos(startPos + scaleOffsetTopLeft);
             ImGui.Image(texture.ImGuiHandle, containedSize);
 
-            if (flags.HasFlag(ImGuiButtonFlags.MouseButtonLeft) || flags.HasFlag(ImGuiButtonFlags.MouseButtonRight) || flags.HasFlag(ImGuiButtonFlags.MouseButtonMiddle))
+            if(flags.HasFlag(ImGuiButtonFlags.MouseButtonLeft) || flags.HasFlag(ImGuiButtonFlags.MouseButtonRight) || flags.HasFlag(ImGuiButtonFlags.MouseButtonMiddle))
             {
 
                 ImGui.SetCursorPos(startPos + scaleOffsetTopLeft);
-                if (ImGui.InvisibleButton($"button", containedSize, flags))
+                if(ImGui.InvisibleButton($"button", containedSize, flags))
                 {
                     result = true;
                 }
-                if (ImGui.IsItemHovered())
+                if(ImGui.IsItemHovered())
                 {
                     Vector2 topPos = ImGui.GetItemRectMin();
                     ImGui.GetWindowDrawList().AddRectFilled(topPos, topPos + containedSize, ImGui.GetColorU32(new Vector4(1, 1, 1, 0.2f)));
@@ -139,7 +139,7 @@ internal static partial class ImBrio
             ImGui.SetCursorPos(startPos);
             ImGui.Image(border.ImGuiHandle, totalSize);
 
-            if (!string.IsNullOrEmpty(description))
+            if(!string.IsNullOrEmpty(description))
             {
                 ImGui.SameLine();
                 ImGui.Text(description);
