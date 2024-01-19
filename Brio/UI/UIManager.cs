@@ -43,6 +43,7 @@ internal class UIManager : IDisposable
 
     public static UIManager Instance { get; private set; } = null!;
 
+    public static bool IsPosingGraphicalWindowOpen => Instance._graphicalWindow.IsOpen;
 
     public UIManager
         (
