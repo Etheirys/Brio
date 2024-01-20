@@ -1,4 +1,5 @@
 ﻿using Brio.Config;
+using Brio.Core;
 using Brio.IPC;
 using Brio.UI.Controls.Stateless;
 using Brio.Web;
@@ -29,7 +30,7 @@ internal class SettingsWindow : Window
         _webService = webService;
         _brioIPCService = brioIPCService;
 
-        Size = new Vector2(300, 450);
+        Size = new Vector2(400, 450);
     }
 
     public override void Draw()
@@ -328,6 +329,54 @@ internal class SettingsWindow : Window
             if(ImGui.DragFloat("Circle Size", ref circleSize, 0.01f, 0.01f, 20f))
             {
                 _configurationService.Configuration.Posing.BoneCircleSize = circleSize;
+                _configurationService.ApplyChange();
+            }
+
+            Vector4 boneCircleNormalColor = ImGui.ColorConvertU32ToFloat4(_configurationService.Configuration.Posing.BoneCircleNormalColor);
+            if(ImGui.ColorEdit4("Bone Circle Normal Color", ref boneCircleNormalColor, ImGuiColorEditFlags.NoInputs))
+            {
+
+                _configurationService.Configuration.Posing.BoneCircleNormalColor = ImGui.ColorConvertFloat4ToU32(boneCircleNormalColor);
+                _configurationService.ApplyChange();
+            }
+
+            Vector4 boneCircleInactiveColor = ImGui.ColorConvertU32ToFloat4(_configurationService.Configuration.Posing.BoneCircleInactiveColor);
+            if(ImGui.ColorEdit4("Bone Circle Inactive Color", ref boneCircleInactiveColor, ImGuiColorEditFlags.NoInputs))
+            {
+
+                _configurationService.Configuration.Posing.BoneCircleInactiveColor = ImGui.ColorConvertFloat4ToU32(boneCircleInactiveColor);
+                _configurationService.ApplyChange();
+            }
+
+            Vector4 boneCircleHoveredColor = ImGui.ColorConvertU32ToFloat4(_configurationService.Configuration.Posing.BoneCircleHoveredColor);
+            if(ImGui.ColorEdit4("Bone Circle Hovered Color", ref boneCircleHoveredColor, ImGuiColorEditFlags.NoInputs))
+            {
+
+                _configurationService.Configuration.Posing.BoneCircleHoveredColor = ImGui.ColorConvertFloat4ToU32(boneCircleHoveredColor);
+                _configurationService.ApplyChange();
+            }
+
+            Vector4 boneCircleSelectedColor = ImGui.ColorConvertU32ToFloat4(_configurationService.Configuration.Posing.BoneCircleSelectedColor);
+            if(ImGui.ColorEdit4("Bone Circle Selected Color", ref boneCircleSelectedColor, ImGuiColorEditFlags.NoInputs))
+            {
+
+                _configurationService.Configuration.Posing.BoneCircleSelectedColor = ImGui.ColorConvertFloat4ToU32(boneCircleSelectedColor);
+                _configurationService.ApplyChange();
+            }
+
+            Vector4 skeletonLineActive = ImGui.ColorConvertU32ToFloat4(_configurationService.Configuration.Posing.SkeletonLineActiveColor);
+            if (ImGui.ColorEdit4("Skeleton Active Color", ref skeletonLineActive, ImGuiColorEditFlags.NoInputs))
+            {
+                
+                _configurationService.Configuration.Posing.SkeletonLineActiveColor = ImGui.ColorConvertFloat4ToU32(skeletonLineActive);
+                _configurationService.ApplyChange();
+            }
+
+            Vector4 skeletonLineInactive = ImGui.ColorConvertU32ToFloat4(_configurationService.Configuration.Posing.SkeletonLineInactiveColor);
+            if(ImGui.ColorEdit4("Skeleton Inactive Color", ref skeletonLineInactive, ImGuiColorEditFlags.NoInputs))
+            {
+
+                _configurationService.Configuration.Posing.SkeletonLineInactiveColor = ImGui.ColorConvertFloat4ToU32(skeletonLineInactive);
                 _configurationService.ApplyChange();
             }
         }
