@@ -16,11 +16,11 @@ internal static class ImGuizmoExtensions
 
         if(mouseWheel != 0)
         {
-            bool smallIncrement = ImGui.IsKeyDown(ConfigurationService.Instance.Configuration.Interface.IncrementSmall);
+            bool smallIncrement = ConfigurationService.Instance.Configuration.Interface.IncrementSmallModifierKeyBind.IsDown();
             if(smallIncrement)
                 mouseWheel /= 10;
 
-            bool largeIncrement = ImGui.IsKeyDown(ConfigurationService.Instance.Configuration.Interface.IncrementLarge);
+            bool largeIncrement = ConfigurationService.Instance.Configuration.Interface.IncrementLargeModifierKeyBind.IsDown();
             if(largeIncrement)
                 mouseWheel *= 10;
 

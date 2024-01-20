@@ -470,9 +470,9 @@ internal class PosingOverlayWindow : Window, IDisposable
         public bool HoveringGizmo = ImGuizmo.IsOver();
         public bool AnyActive = ImGui.IsAnyItemActive();
         public bool AnyWindowHovered = ImGui.IsWindowHovered(ImGuiHoveredFlags.AnyWindow);
-        public bool UserDisablingSkeleton = ImGui.IsKeyDown(configuration.DisableSkeletonHotkey);
-        public bool UserDisablingGizmo = ImGui.IsKeyDown(configuration.DisableGizmoHotkey);
-        public bool UserHidingOverlay = ImGui.IsKeyDown(configuration.HideOverlayHotkey);
+        public bool UserDisablingSkeleton = configuration.DisableSkeletonKeyBind.IsDown();
+        public bool UserDisablingGizmo = configuration.DisableGizmoKeyBind.IsDown();
+        public bool UserHidingOverlay = configuration.HideOverlayKeyBind.IsDown();
 
 
         public bool AnythingBusy => PopupOpen || UsingGizmo || AnyActive || AnyWindowHovered;

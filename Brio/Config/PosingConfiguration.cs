@@ -1,4 +1,5 @@
-﻿using ImGuiNET;
+﻿using Brio.Input;
+using Dalamud.Game.ClientState.Keys;
 
 namespace Brio.Config;
 
@@ -18,9 +19,9 @@ internal class PosingConfiguration
     public bool ShowSkeletonLines { get; set; } = true;
     public bool HideGizmoWhenAdvancedPosingOpen { get; set; } = false;
     public bool HideSkeletonWhenGizmoActive { get; set; } = false;
-    public ImGuiKey DisableGizmoHotkey { get; set; } = ImGuiKey.LeftShift;
-    public ImGuiKey DisableSkeletonHotkey { get; set; } = ImGuiKey.LeftCtrl;
-    public ImGuiKey HideOverlayHotkey { get; set; } = ImGuiKey.LeftAlt;
+    public KeyBind DisableGizmoKeyBind { get; set; } = new(VirtualKey.SHIFT);
+    public KeyBind DisableSkeletonKeyBind { get; set; } = new(VirtualKey.CONTROL);
+    public KeyBind HideOverlayKeyBind { get; set; } = new(VirtualKey.MENU);
 
     // Graphical Posing
     public bool GraphicalSidesSwapped { get; set; } = false;

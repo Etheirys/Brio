@@ -1,4 +1,5 @@
 ﻿using Brio.Config;
+using Brio.Input;
 using Brio.IPC;
 using Brio.UI.Controls.Stateless;
 using Brio.Web;
@@ -29,7 +30,7 @@ internal class SettingsWindow : Window
         _webService = webService;
         _brioIPCService = brioIPCService;
 
-        Size = new Vector2(300, 450);
+        Size = new Vector2(400, 450);
     }
 
     public override void Draw()
@@ -45,6 +46,7 @@ internal class SettingsWindow : Window
                     DrawAppearanceTab();
                     DrawPosingTab();
                     DrawWorldTab();
+                    DrawKeysTab();
                 }
             }
         }
@@ -380,6 +382,56 @@ internal class SettingsWindow : Window
             {
                 _configurationService.Configuration.Environment.ResetWaterOnGPoseExit = resetWaterOnGPoseExit;
                 _configurationService.ApplyChange();
+            }
+        }
+    }
+
+    private void DrawKeysTab()
+    {
+        using(var tab = ImRaii.TabItem("Key Binds"))
+        {
+            if(!tab.Success)
+                return;
+
+            if(ImGui.CollapsingHeader("Interface", ImGuiTreeNodeFlags.DefaultOpen))
+            {
+                var incrementSmallModifierKeyBind = _configurationService.Configuration.Interface.IncrementSmallModifierKeyBind;
+                if(Keybinds.KeySelector("Increment Small Modifier", ref incrementSmallModifierKeyBind))
+                {
+                    _configurationService.Configuration.Interface.IncrementSmallModifierKeyBind = incrementSmallModifierKeyBind;
+                    _configurationService.ApplyChange();
+                }
+
+                var incrementLargeModifierKeyBind = _configurationService.Configuration.Interface.IncrementLargeModifierKeyBind;
+                if(Keybinds.KeySelector("Increment Large Modifier", ref incrementLargeModifierKeyBind))
+                {
+                    _configurationService.Configuration.Interface.IncrementLargeModifierKeyBind = incrementLargeModifierKeyBind;
+                    _configurationService.ApplyChange();
+                }
+            }
+
+            if(ImGui.CollapsingHeader("Posing", ImGuiTreeNodeFlags.DefaultOpen))
+            {
+                var disableGizmo = _configurationService.Configuration.Posing.DisableGizmoKeyBind;
+                if(Keybinds.KeySelector("Disable Gizmo", ref disableGizmo))
+                {
+                    _configurationService.Configuration.Posing.DisableGizmoKeyBind = disableGizmo;
+                    _configurationService.ApplyChange();
+                }
+
+                var disableSkeleton = _configurationService.Configuration.Posing.DisableSkeletonKeyBind;
+                if(Keybinds.KeySelector("Disable Skeleton", ref disableSkeleton))
+                {
+                    _configurationService.Configuration.Posing.DisableSkeletonKeyBind = disableSkeleton;
+                    _configurationService.ApplyChange();
+                }
+
+                var hideOverlayKeyBind = _configurationService.Configuration.Posing.HideOverlayKeyBind;
+                if(Keybinds.KeySelector("Hide Overlay", ref hideOverlayKeyBind))
+                {
+                    _configurationService.Configuration.Posing.HideOverlayKeyBind = hideOverlayKeyBind;
+                    _configurationService.ApplyChange();
+                }
             }
         }
     }
