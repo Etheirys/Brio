@@ -101,12 +101,20 @@
           "Position": "630, 540"
         },
         {
+          "Name": "iv_hito_c_l",
+          "Position": "630, 250"
+        },
+        {
           "Name": "j_naka_a_l",
           "Position": "440, 850"
         },
         {
           "Name": "j_naka_b_l",
           "Position": "430, 540"
+        },
+        {
+          "Name": "iv_naka_c_l",
+          "Position": "430, 250"
         },
         {
           "Name": "j_kusu_a_l",
@@ -117,12 +125,20 @@
           "Position": "250, 540"
         },
         {
+          "Name": "iv_kusu_c_l",
+          "Position": "250, 250"
+        },
+        {
           "Name": "j_ko_a_l",
           "Position": "140, 920"
         },
         {
           "Name": "j_ko_b_l",
           "Position": "120, 660"
+        },
+        {
+          "Name": "iv_ko_c_l",
+          "Position": "80, 400"
         },
         {
           "Name": "n_hte_l",
@@ -241,59 +257,63 @@
       "Bones": [
         {
           "Name": "j_mimi_l",
-          "Position": "102, 730"
+          "Position": "102, 330"
         },
         {
           "Name": "n_ear_a_l",
-          "Position": "102, 790"
+          "Position": "102, 390"
         },
         {
           "Name": "n_ear_b_l",
-          "Position": "102, 850"
+          "Position": "102, 450"
         },
         {
           "Name": "j_f_mayu_l",
-          "Position": "257, 550"
+          "Position": "257, 150"
         },
         {
           "Name": "j_f_miken_l",
-          "Position": "375, 580"
+          "Position": "375, 180"
         },
         {
           "Name": "j_f_umab_l",
-          "Position": "310, 600"
+          "Position": "310, 200"
         },
         {
           "Name": "j_f_eye_l",
-          "Position": "310, 650"
+          "Position": "310, 250"
         },
         {
           "Name": "j_f_dmab_l",
-          "Position": "310, 700"
+          "Position": "310, 300"
+        },
+        {
+          "Name": "j_f_hoho_l",
+          "Position": "310, 400"
         },
         {
           "Name": "j_f_memoto",
-          "Position": "458.5, 694"
+          "Position": "458.5, 294"
         },
         {
           "Name": "j_f_hana",
-          "Position": "458.5, 820"
+          "Position": "458.5, 420"
         },
         {
           "Name": "j_f_ulip_a",
-          "Position": "458.5, 920"
+          "Position": "458.5, 520"
         },
         {
           "Name": "j_f_dlip_a",
-          "Position": "458.5, 1000"
+          "Position": "458.5, 600"
         },
         {
           "Name": "j_f_lip_l",
-          "Position": "350, 950"
+          "Position": "350, 550"
         },
         {
           "Name": "j_ago",
-          "Position": "458.5, 1100"
+          "Position": "458.5, 700"
         }
       ]
     },
@@ -302,59 +322,63 @@
       "Bones": [
         {
           "Name": "j_mimi_l",
-          "Position": "142, 213"
+          "Position": "142, 113"
         },
         {
           "Name": "n_ear_a_l",
-          "Position": "77, 283"
+          "Position": "77, 183"
         },
         {
           "Name": "n_ear_b_l",
-          "Position": "77, 363"
+          "Position": "77, 263"
         },
         {
           "Name": "j_f_mayu_l",
-          "Position": "337, 638"
+          "Position": "337, 438"
         },
         {
           "Name": "j_f_miken_l",
-          "Position": "468, 683"
+          "Position": "468, 483"
         },
         {
           "Name": "j_f_umab_l",
-          "Position": "395, 696"
+          "Position": "395, 496"
         },
         {
           "Name": "j_f_eye_l",
-          "Position": "395, 748"
+          "Position": "395, 548"
         },
         {
           "Name": "j_f_dmab_l",
-          "Position": "395, 813"
+          "Position": "395, 613"
+        },
+        {
+          "Name": "j_f_hoho_l",
+          "Position": "395, 690"
         },
         {
           "Name": "j_f_memoto",
-          "Position": "571, 817"
+          "Position": "571, 617"
         },
         {
           "Name": "j_f_hana",
-          "Position": "571, 888"
+          "Position": "571, 688"
         },
         {
           "Name": "j_f_ulip_a",
-          "Position": "571, 1043"
+          "Position": "571, 843"
         },
         {
           "Name": "j_f_dlip_a",
-          "Position": "571, 1143"
+          "Position": "571, 943"
         },
         {
           "Name": "j_f_lip_l",
-          "Position": "447, 1073"
+          "Position": "447, 873"
         },
         {
           "Name": "j_ago",
-          "Position": "571, 1243"
+          "Position": "571, 1043"
         }
       ]
     },
@@ -388,6 +412,10 @@
         {
           "Name": "j_f_dmab_l",
           "Position": "400, 727"
+        },
+        {
+          "Name": "j_f_hoho_l",
+          "Position": "400, 827"
         },
         {
           "Name": "j_f_memoto",
@@ -476,63 +504,165 @@
       "Bones": [
         {
           "Name": "n_ear_a_l",
-          "Position": "145, 380"
+          "Position": "145, 180"
         },
         {
           "Name": "n_ear_b_l",
-          "Position": "145, 480"
+          "Position": "145, 280"
         },
         {
           "Name": "j_f_mayu_l",
-          "Position": "400, 680"
+          "Position": "400, 480"
         },
         {
           "Name": "j_f_miken_l",
-          "Position": "550, 760"
+          "Position": "550, 560"
         },
         {
           "Name": "j_f_umab_l",
-          "Position": "469, 743"
+          "Position": "469, 543"
         },
         {
           "Name": "j_f_eye_l",
-          "Position": "469, 820"
+          "Position": "469, 620"
         },
         {
           "Name": "j_f_dmab_l",
-          "Position": "469, 890"
+          "Position": "469, 690"
         },
         {
           "Name": "j_f_hige_l",
-          "Position": "450, 1130"
+          "Position": "450, 930"
         },
         {
           "Name": "n_f_ulip_l",
-          "Position": "480, 1275"
+          "Position": "480, 1075"
         },
         {
           "Name": "n_f_lip_l",
-          "Position": "480, 1360"
+          "Position": "480, 1160"
         },
         {
           "Name": "j_f_hana",
-          "Position": "696.5, 1106"
+          "Position": "696.5, 906"
         },
         {
           "Name": "j_f_uago",
-          "Position": "696.5, 1240"
+          "Position": "696.5, 1040"
         },
         {
           "Name": "j_f_ulip",
-          "Position": "696.5, 1316"
+          "Position": "696.5, 1116"
         },
         {
           "Name": "j_f_dlip",
-          "Position": "696.5, 1401"
+          "Position": "696.5, 1201"
         },
         {
           "Name": "j_ago",
-          "Position": "696.5, 1517"
+          "Position": "696.5, 1317"
+        }
+      ]
+    },
+    "ivcs": {
+      "Bones": [
+        {
+          "Name": "iv_ochinko_f",
+          "Position": "120, 50"
+        },
+        {
+          "Name": "iv_ochinko_e",
+          "Position": "120, 125"
+        },
+        {
+          "Name": "iv_ochinko_d",
+          "Position": "120, 200"
+        },
+        {
+          "Name": "iv_ochinko_c",
+          "Position": "120, 275"
+        },
+        {
+          "Name": "iv_ochinko_b",
+          "Position": "120, 350"
+        },
+        {
+          "Name": "iv_ochinko_a",
+          "Position": "120, 425"
+        },
+        {
+          "Name": "iv_kougan_l",
+          "Position": "40, 450"
+        },
+        {
+          "Name": "iv_kougan_r",
+          "Position": "200, 450"
+        },
+
+        {
+          "Name": "iv_kuritto",
+          "Position": "300, 100"
+        },
+        {
+          "Name": "iv_omanko",
+          "Position": "300, 300"
+        },
+        {
+          "Name": "iv_inshin_l",
+          "Position": "250, 200"
+        },
+        {
+          "Name": "iv_inshin_r",
+          "Position": "350, 200"
+        }
+      ]
+    },
+    "ivcs_toes": {
+      "Image": "PoseToes",
+      "Bones": [
+        {
+          "Name": "j_asi_e_l",
+          "Position": "600, 650"
+        },
+        {
+          "Name": "iv_asi_oya_a_l",
+          "Position": "830, 400"
+        },
+        {
+          "Name": "iv_asi_oya_b_l",
+          "Position": "830, 175"
+        },
+        {
+          "Name": "iv_asi_hito_a_l",
+          "Position": "630, 420"
+        },
+        {
+          "Name": "iv_asi_hito_b_l",
+          "Position": "630, 200"
+        },
+        {
+          "Name": "iv_asi_naka_a_l",
+          "Position": "480, 460"
+        },
+        {
+          "Name": "iv_asi_naka_b_l",
+          "Position": "450, 240"
+        },
+        {
+          "Name": "iv_asi_kusu_a_l",
+          "Position": "330, 540"
+        },
+        {
+          "Name": "iv_asi_kusu_b_l",
+          "Position": "310, 360"
+        },
+        {
+          "Name": "iv_asi_ko_a_l",
+          "Position": "180, 620"
+        },
+        {
+          "Name": "iv_asi_ko_b_l",
+          "Position": "160, 460"
         }
       ]
     }

@@ -462,23 +462,53 @@ internal class PosingGraphicalWindow : Window, IDisposable
                         break;
                 }
 
-                bool hasTail = currentAppearance.Customize.Race == Races.AuRa || currentAppearance.Customize.Race == Races.Miqote || currentAppearance.Customize.Race == Races.Hrothgar;
-                if(hasTail)
+
+                if(posing.SkeletonPosing.CharacterHasTail || posing.SkeletonPosing.CharacterIsIVCS)
                 {
                     using(var splitChild = ImRaii.Child("###split_details_hands", new Vector2(contentWidth * 0.7f - (ImGui.GetStyle().FramePadding.X * 2), -1), false, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse))
                     {
                         if(splitChild.Success)
                         {
-
                             DrawBoneSection("hands", true, posing);
+
+                            DrawBoneSection("ivcs_toes", true, posing);
                         }
                     }
                     ImGui.SameLine();
-                    using(var splitChild = ImRaii.Child("###split_details_tail", new Vector2(contentWidth * 0.3f - (ImGui.GetStyle().FramePadding.X * 2), -1), false, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse))
+
+                    float tailWidth = contentWidth * 0.3f - (ImGui.GetStyle().FramePadding.X * 2);
+                    using(var splitChild = ImRaii.Child("###split_details_tail", new Vector2(tailWidth, -1), false, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse))
                     {
                         if(splitChild.Success)
                         {
-                            DrawBoneSection("tail", false, posing);
+                            if(posing.SkeletonPosing.CharacterIsIVCS)
+                            {
+                                using(var splitTailChild = ImRaii.Child("###split_details_tail_ivcs", new Vector2(tailWidth, -1), false, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse))
+                                {
+                                    if(splitTailChild.Success)
+                                    {
+                                        using(var splitTailChildTail = ImRaii.Child("###split_details_tail_ivcs_tail", new Vector2(tailWidth, 75), false, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse))
+                                        {
+                                            if(splitTailChildTail.Success)
+                                            {
+                                                DrawBoneSection("tail", false, posing);
+                                            }
+                                        }
+
+                                        using(var splitTailChildIvcs = ImRaii.Child("###split_details_tail_ivcs_ivcs", new Vector2(tailWidth, 150), false, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse))
+                                        {
+                                            if(splitTailChildIvcs.Success)
+                                            {
+                                                DrawBoneSection("ivcs", false, posing);
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                DrawBoneSection("tail", false, posing);
+                            }
                         }
                     }
                 }
@@ -502,7 +532,13 @@ internal class PosingGraphicalWindow : Window, IDisposable
     {
         var section = _posePositions.PoseImages[sectionName];
         var position = ImGui.GetCursorPos();
-        var (imageSize, scalingFactors) = DrawImage($"Images.{section.Image}.png");
+
+        Vector2 imageSize = new(1024, 2048);
+        Vector2 scalingFactors =  new(0.2f, 0.2f);
+
+        if (!string.IsNullOrEmpty(section.Image))
+            DrawImage($"Images.{section.Image}.png", out imageSize, out scalingFactors);
+
         var endPosition = ImGui.GetCursorPos();
 
         var drawBones = new List<DrawBoneEntry>();
@@ -614,14 +650,13 @@ internal class PosingGraphicalWindow : Window, IDisposable
         }
     }
 
-    private (Vector2 ImageSize, Vector2 ScalingFactors) DrawImage(string image)
+    private void DrawImage(string image, out Vector2 imageSizeToFit, out Vector2 scalingFactors)
     {
         var img = ResourceProvider.Instance.GetResourceImage(image);
-
         var available = ImGui.GetContentRegionAvail() - (ImGui.GetStyle().FramePadding * 2f);
         var imageSize = new Vector2(img.Width, img.Height);
         var aspectRatio = imageSize.X / imageSize.Y;
-        var imageSizeToFit = new Vector2(available.X, available.X / aspectRatio);
+        imageSizeToFit = new Vector2(available.X, available.X / aspectRatio);
         if(imageSizeToFit.Y > available.Y)
         {
             imageSizeToFit = new Vector2(available.Y * aspectRatio, available.Y);
@@ -631,7 +666,7 @@ internal class PosingGraphicalWindow : Window, IDisposable
         var scaleX = imageSizeToFit.X / imageSize.X;
         var scaleY = imageSizeToFit.Y / imageSize.Y;
 
-        return (imageSizeToFit, new Vector2(scaleX, scaleY));
+        scalingFactors = new Vector2(scaleX, scaleY);
     }
 
     private void OnGPoseStateChanged(bool newState)
