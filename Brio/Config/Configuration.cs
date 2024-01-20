@@ -1,4 +1,6 @@
-﻿using Dalamud.Configuration;
+﻿using Brio.Input;
+using Dalamud.Configuration;
+using System.Collections.Generic;
 
 namespace Brio.Config;
 
@@ -29,6 +31,9 @@ internal class Configuration : IPluginConfiguration
 
     // Paths
     public PathsConfiguration Paths { get; set; } = new PathsConfiguration();
+
+    // Input
+    public InputConfiguration Input { get; set; } = new InputConfiguration();
 
     // Developer
     public bool ForceDebug { get; set; } = false;

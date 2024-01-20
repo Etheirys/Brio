@@ -11,6 +11,7 @@ internal class InterfaceConfiguration
     public bool ShowWhenUIHidden { get; set; } = false;
     public bool CensorActorNames { get; set; } = false;
 
+    public KeyBind ToggleBrioWindowKeyBind { get; set; } = new(VirtualKey.B, true);
     public KeyBind IncrementSmallModifierKeyBind { get; set; } = new(VirtualKey.NO_KEY);
     public KeyBind IncrementLargeModifierKeyBind { get; set; } = new(VirtualKey.NO_KEY);
 }

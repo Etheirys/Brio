@@ -1,4 +1,5 @@
 ﻿using Brio.Config;
+using Brio.Input;
 using ImGuiNET;
 using ImGuizmoNET;
 using System.Numerics;
@@ -16,11 +17,11 @@ internal static class ImGuizmoExtensions
 
         if(mouseWheel != 0)
         {
-            bool smallIncrement = ConfigurationService.Instance.Configuration.Interface.IncrementSmallModifierKeyBind.IsDown();
+            bool smallIncrement = InputService.IsKeyBindDown(KeyBindEvents.Interface_IncrementSmallModifier);
             if(smallIncrement)
                 mouseWheel /= 10;
 
-            bool largeIncrement = ConfigurationService.Instance.Configuration.Interface.IncrementLargeModifierKeyBind.IsDown();
+            bool largeIncrement = InputService.IsKeyBindDown(KeyBindEvents.Interface_IncrementLargeModifier);
             if(largeIncrement)
                 mouseWheel *= 10;
 

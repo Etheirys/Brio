@@ -1,19 +1,16 @@
 ﻿using Brio.Config;
 using Dalamud.Game.ClientState.Keys;
-using Dalamud.Interface.Utility;
 using ImGuiNET;
-using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Brio.Input;
 
-internal static class Keybinds
+internal static class KeybindEditor
 {
     private static string[] virtualKeyNames;
     private static List<VirtualKey> virtualKeys;
 
-    static Keybinds()
+    static KeybindEditor()
     {
         List<string> names = new();
         List<VirtualKey> keys = new();
@@ -49,22 +46,20 @@ internal static class Keybinds
         virtualKeys = keys;
     }
 
+    public static bool KeySelector(string label, KeyBindEvents evt, InputConfiguration config)
+    {
+        if(!config.Bindings.ContainsKey(evt))
+            config.Bindings.Add(evt, new());
+
+        KeyBind bind = config.Bindings[evt];
+        return KeySelector(label, ref bind);
+    }
+
     public static bool KeySelector(string label, ref KeyBind keyBind)
     {
         bool changed = false;
 
-        // Test
-        ImGui.BeginDisabled();
-        ImGui.RadioButton($"##{label}_Test", keyBind.IsDown());
-        if(ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled))
-        {
-            ImGui.SetTooltip("Test your keys");
-        }
-        ImGui.EndDisabled();
-
         // Control
-        ImGui.SameLine();
-
         if(keyBind.Key == VirtualKey.CONTROL)
             ImGui.BeginDisabled();
 
@@ -136,60 +131,5 @@ internal static class Keybinds
         }
 
         return changed;
-    }
-}
-
-internal class KeyBind
-{
-    public VirtualKey Key { get; set; }
-    public bool Control { get; set; }
-    public bool Alt { get; set; }
-    public bool Shift { get; set; }
-
-    public KeyBind(VirtualKey key, bool control = false, bool alt = false, bool shift = false)
-    {
-        Key = key;
-        Control = control;
-        Alt = alt;
-        Shift = shift;
-    }
-
-    public bool IsDown()
-    {
-        if(Key == VirtualKey.NO_KEY)
-            return false;
-
-        bool down = InputService.IsKeyDown(Key);
-
-        if(Key != VirtualKey.CONTROL)
-            down &= InputService.IsKeyDown(VirtualKey.CONTROL) == Control;
-
-        if(Key != VirtualKey.MENU)
-            down &= InputService.IsKeyDown(VirtualKey.MENU) == Alt;
-
-        if(Key != VirtualKey.SHIFT)
-            down &= InputService.IsKeyDown(VirtualKey.SHIFT) == Shift;
-
-        return down;
-    }
-
-    public override string ToString()
-    {
-        if(!Control && !Alt && !Shift)
-            return Key.GetFancyName();
-
-        string str = string.Empty;
-
-        if(Control)
-            str += "Ctrl ";
-
-        if(Alt)
-            str += "Alt ";
-
-        if(Shift)
-            str += "Shift ";
-
-        str += $"+ {Key.GetFancyName()}";
-        return str;
     }
 }

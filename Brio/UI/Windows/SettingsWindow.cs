@@ -395,44 +395,25 @@ internal class SettingsWindow : Window
 
             if(ImGui.CollapsingHeader("Interface", ImGuiTreeNodeFlags.DefaultOpen))
             {
-                var incrementSmallModifierKeyBind = _configurationService.Configuration.Interface.IncrementSmallModifierKeyBind;
-                if(Keybinds.KeySelector("Increment Small Modifier", ref incrementSmallModifierKeyBind))
-                {
-                    _configurationService.Configuration.Interface.IncrementSmallModifierKeyBind = incrementSmallModifierKeyBind;
-                    _configurationService.ApplyChange();
-                }
-
-                var incrementLargeModifierKeyBind = _configurationService.Configuration.Interface.IncrementLargeModifierKeyBind;
-                if(Keybinds.KeySelector("Increment Large Modifier", ref incrementLargeModifierKeyBind))
-                {
-                    _configurationService.Configuration.Interface.IncrementLargeModifierKeyBind = incrementLargeModifierKeyBind;
-                    _configurationService.ApplyChange();
-                }
+                DrawKeyBind("Toggle Brio Window", KeyBindEvents.Interface_ToggleBrioWindow);
+                DrawKeyBind("Increment Small Modifier", KeyBindEvents.Interface_IncrementSmallModifier);
+                DrawKeyBind("Increment Large Modifier", KeyBindEvents.Interface_IncrementLargeModifier);
             }
 
             if(ImGui.CollapsingHeader("Posing", ImGuiTreeNodeFlags.DefaultOpen))
             {
-                var disableGizmo = _configurationService.Configuration.Posing.DisableGizmoKeyBind;
-                if(Keybinds.KeySelector("Disable Gizmo", ref disableGizmo))
-                {
-                    _configurationService.Configuration.Posing.DisableGizmoKeyBind = disableGizmo;
-                    _configurationService.ApplyChange();
-                }
-
-                var disableSkeleton = _configurationService.Configuration.Posing.DisableSkeletonKeyBind;
-                if(Keybinds.KeySelector("Disable Skeleton", ref disableSkeleton))
-                {
-                    _configurationService.Configuration.Posing.DisableSkeletonKeyBind = disableSkeleton;
-                    _configurationService.ApplyChange();
-                }
-
-                var hideOverlayKeyBind = _configurationService.Configuration.Posing.HideOverlayKeyBind;
-                if(Keybinds.KeySelector("Hide Overlay", ref hideOverlayKeyBind))
-                {
-                    _configurationService.Configuration.Posing.HideOverlayKeyBind = hideOverlayKeyBind;
-                    _configurationService.ApplyChange();
-                }
+                DrawKeyBind("Disable Gizmo", KeyBindEvents.Posing_DisableGizmo);
+                DrawKeyBind("Disable Skeleton", KeyBindEvents.Posing_DisableSkeleton);
+                DrawKeyBind("Hide Overlay", KeyBindEvents.Posing_HideOverlay);
             }
+        }
+    }
+
+    private void DrawKeyBind(string label, KeyBindEvents evt)
+    {
+        if(KeybindEditor.KeySelector(label, evt, _configurationService.Configuration.Input))
+        {
+            _configurationService.ApplyChange();
         }
     }
 }
