@@ -34,19 +34,19 @@ internal static class CameraEditor
                     const string rotationText = "Rotation";
                     float rotation = camera->Rotation;
                     ImGui.SetNextItemWidth(width);
-                    if(ImGui.SliderAngle(rotationText, ref rotation, -180, 180, "%.2f"))
+                    if(ImBrio.SliderAngle(rotationText, ref rotation, -180, 180, "%.2f"))
                         camera->Rotation = rotation;
 
                     const string zoomText = "Zoom";
                     float zoom = camera->Camera.Distance;
                     ImGui.SetNextItemWidth(width);
-                    if(ImGui.SliderFloat(zoomText, ref zoom, camera->Camera.MaxDistance, camera->Camera.MinDistance, "%.2f", ImGuiSliderFlags.AlwaysClamp))
+                    if(ImBrio.SliderFloat(zoomText, ref zoom, camera->Camera.MaxDistance, camera->Camera.MinDistance, "%.2f", ImGuiSliderFlags.AlwaysClamp))
                         camera->Camera.Distance = zoom;
 
                     const string fovText = "FoV";
                     float fov = camera->FoV;
                     ImGui.SetNextItemWidth(width);
-                    if(ImGui.SliderAngle(fovText, ref fov, -44, 120, "%.2f", ImGuiSliderFlags.AlwaysClamp))
+                    if(ImBrio.SliderAngle(fovText, ref fov, -44, 120, "%.2f", ImGuiSliderFlags.AlwaysClamp))
                         camera->FoV = fov;
 
                     const string panText = "Pan";
