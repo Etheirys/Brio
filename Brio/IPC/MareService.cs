@@ -1,13 +1,9 @@
 ﻿using Brio.Config;
-using Brio.Game.Actor;
-using Brio.Game.GPose;
 using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Ipc;
-using Dalamud.Plugin.Services;
 using System;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace Brio.IPC;
 
