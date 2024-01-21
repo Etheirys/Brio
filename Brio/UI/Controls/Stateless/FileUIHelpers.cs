@@ -77,4 +77,20 @@ internal class FileUIHelpers
 
                 }, null, true);
     }
+
+    public static void ShowImportMcdfModal(ActorAppearanceCapability capability)
+    {
+        UIManager.Instance.FileDialogManager.OpenFileDialog("Import MCDF File###import_character_window", "Mare Character Data File (*.mcdf){.mcdf}",
+                 (success, paths) =>
+                 {
+                     if(success && paths.Count == 1)
+                     {
+                         var path = paths[0];
+                         var directory = Path.GetDirectoryName(path);
+                         ConfigurationService.Instance.Configuration.Paths.LastMcdfPath = directory;
+
+                         capability.LoadMcdf(path);
+                     }
+                 }, 1, ConfigurationService.Instance.Configuration.Paths.LastMcdfPath, true);
+    }
 }
