@@ -19,8 +19,9 @@ internal class SettingsWindow : Window
     private readonly GlamourerService _glamourerService;
     private readonly WebService _webService;
     private readonly BrioIPCService _brioIPCService;
+    private readonly MareService _mareService;
 
-    public SettingsWindow(ConfigurationService configurationService, PenumbraService penumbraService, GlamourerService glamourerService, WebService webService, BrioIPCService brioIPCService) : base($"{Brio.Name} Settings###brio_settings_window", ImGuiWindowFlags.NoResize)
+    public SettingsWindow(ConfigurationService configurationService, PenumbraService penumbraService, GlamourerService glamourerService, WebService webService, BrioIPCService brioIPCService, MareService mareService) : base($"{Brio.Name} Settings###brio_settings_window", ImGuiWindowFlags.NoResize)
     {
         Namespace = "brio_settings_namespace";
 
@@ -29,6 +30,7 @@ internal class SettingsWindow : Window
         _glamourerService = glamourerService;
         _webService = webService;
         _brioIPCService = brioIPCService;
+        _mareService = mareService;
 
         Size = new Vector2(400, 450);
     }
@@ -153,7 +155,10 @@ internal class SettingsWindow : Window
             {
                 ImGui.Text($"Penumbra Status: {(_penumbraService.IsPenumbraAvailable ? "Active" : "Inactive")}");
                 ImGui.SameLine();
-                ImBrio.FontIconButton("refresh_penumbra", FontAwesomeIcon.Sync, "Refresh Penumbra Status");
+                if (ImBrio.FontIconButton("refresh_penumbra", FontAwesomeIcon.Sync, "Refresh Penumbra Status"))
+                {
+                    _penumbraService.RefreshPenumbraStatus();
+                }
             }
 
             bool enableGlamourer = _configurationService.Configuration.IPC.AllowGlamourerIntegration;
@@ -167,7 +172,27 @@ internal class SettingsWindow : Window
             {
                 ImGui.Text($"Glamourer Status: {(_glamourerService.IsGlamourerAvailable ? "Active" : "Inactive")}");
                 ImGui.SameLine();
-                ImBrio.FontIconButton("refresh_glamourer", FontAwesomeIcon.Sync, "Refresh Glamourer Status");
+                if (ImBrio.FontIconButton("refresh_glamourer", FontAwesomeIcon.Sync, "Refresh Glamourer Status"))
+                {
+                    _glamourerService.RefreshGlamourerStatus();
+                }
+            }
+
+            bool enableMare = _configurationService.Configuration.IPC.AllowMareIntegration;
+            if(ImGui.Checkbox("Allow Mare Synchronos Integration", ref enableMare))
+            {
+                _configurationService.Configuration.IPC.AllowMareIntegration = enableMare;
+                _configurationService.ApplyChange();
+            }
+
+            using(ImRaii.Disabled(!enableMare))
+            {
+                ImGui.Text($"Mare Synchronos Status: {(_mareService.IsMareAvailable ? "Active" : "Inactive")}");
+                ImGui.SameLine();
+                if (ImBrio.FontIconButton("refresh_mare", FontAwesomeIcon.Sync, "Refresh Mare Synchronos Status"))
+                {
+                    _mareService.RefreshMareStatus();
+                }
             }
         }
     }
