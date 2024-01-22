@@ -492,7 +492,7 @@ internal class PosingGraphicalWindow : Window, IDisposable
         // Check if the user has clicked on the background to clear selection.
         Vector2 mousePos = ImGui.GetMousePos() - ImGui.GetWindowPos();
         bool isMouseOverArea = (mousePos.X > 0 && mousePos.Y > 0 && mousePos.X < contentArea.X && mousePos.Y < contentArea.Y);
-        if(ImGui.IsAnyMouseDown() && !ImGui.IsAnyItemHovered() && isMouseOverArea)
+        if(ImGui.IsMouseClicked(ImGuiMouseButton.Left) && !ImGui.IsAnyItemHovered() && isMouseOverArea)
         {
             posing.ClearSelection();
         }
