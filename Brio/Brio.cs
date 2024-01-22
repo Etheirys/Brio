@@ -9,6 +9,7 @@ using Brio.Game.GPose;
 using Brio.Game.Posing;
 using Brio.Game.World;
 using Brio.IPC;
+using Brio.Library;
 using Brio.Resources;
 using Brio.UI;
 using Brio.UI.Windows;
@@ -104,6 +105,7 @@ public class Brio : IDalamudPlugin
         serviceCollection.AddSingleton<ResourceProvider>();
         serviceCollection.AddSingleton<GameDataProvider>();
         serviceCollection.AddSingleton<WelcomeService>();
+        serviceCollection.AddSingleton<LibraryManager>();
 
         // IPC
         serviceCollection.AddSingleton<BrioIPCService>();
