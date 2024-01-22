@@ -1,4 +1,5 @@
 ﻿using Brio.Capabilities.Posing;
+using Brio.Config;
 using Brio.Entities;
 using Brio.Game.Posing;
 using Brio.UI.Controls.Core;
@@ -20,6 +21,7 @@ internal class PosingOverlayToolbarWindow : Window
     private readonly EntityManager _entityManager;
     private readonly PosingTransformWindow _overlayTransformWindow;
     private readonly PosingService _posingService;
+    private readonly ConfigurationService _configurationService;
 
     private readonly BoneSearchControl _boneSearchControl = new();
 
@@ -27,7 +29,7 @@ internal class PosingOverlayToolbarWindow : Window
 
     private const string _boneFilterPopupName = "bone_filter_popup";
 
-    public PosingOverlayToolbarWindow(PosingOverlayWindow overlayWindow, EntityManager entityManager, PosingTransformWindow overlayTransformWindow, PosingService posingService) : base($"Brio - Overlay###brio_posing_overlay_toolbar_window", ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoCollapse)
+    public PosingOverlayToolbarWindow(PosingOverlayWindow overlayWindow, EntityManager entityManager, PosingTransformWindow overlayTransformWindow, PosingService posingService, ConfigurationService configurationService) : base($"Brio - Overlay###brio_posing_overlay_toolbar_window", ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoCollapse)
     {
         Namespace = "brio_posing_overlay_toolbar_namespace";
 
@@ -36,12 +38,19 @@ internal class PosingOverlayToolbarWindow : Window
         _entityManager = entityManager;
         _overlayTransformWindow = overlayTransformWindow;
         _posingService = posingService;
+        _configurationService = configurationService;
         ShowCloseButton = false;
     }
 
     public override void PreOpenCheck()
     {
         IsOpen = _overlayWindow.IsOpen;
+
+        if(UIManager.IsPosingGraphicalWindowOpen && _configurationService.Configuration.Posing.HideToolbarWhenAdvandedPosingOpen)
+        {
+            IsOpen = false;
+        }
+
         base.PreOpenCheck();
     }
 
