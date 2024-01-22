@@ -9,6 +9,16 @@ using System.Numerics;
 namespace Brio.UI.Controls.Stateless;
 internal static partial class ImBrio
 {
+    public static void FontIcon(FontAwesomeIcon icon, float scale = 1.0f)
+    {
+        ImGui.SetWindowFontScale(scale);
+        using(ImRaii.PushFont(UiBuilder.IconFont))
+        {
+            ImGui.Text(icon.ToIconString());
+        }
+        ImGui.SetWindowFontScale(1.0f);
+    }
+
     public static bool FontIconButton(string id, FontAwesomeIcon icon, string? tooltip = null, bool enabled = true, bool bordered = true, uint? textColor = null)
     {
         bool wasClicked = false;
