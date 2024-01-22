@@ -22,7 +22,8 @@ namespace Brio.Capabilities.Posing
         public Skeleton? MainHandSkeleton { get; private set; }
         public Skeleton? OffHandSkeleton { get; private set; }
 
-
+        public bool CharacterHasTail { get; private set; }
+        public bool CharacterIsIVCS { get; private set; }
 
         public IReadOnlyList<(Skeleton Skeleton, PoseInfoSlot Slot)> Skeletons => new[] { (CharacterSkeleton, PoseInfoSlot.Character), (MainHandSkeleton, PoseInfoSlot.MainHand), (OffHandSkeleton, PoseInfoSlot.OffHand) }.Where(s => s.Item1 != null).Cast<(Skeleton Skeleton, PoseInfoSlot Slot)>().ToList();
 
@@ -160,6 +161,9 @@ namespace Brio.Capabilities.Posing
             _skeletonService.RegisterForFrameUpdate(CharacterSkeleton, this);
             _skeletonService.RegisterForFrameUpdate(MainHandSkeleton, this);
             _skeletonService.RegisterForFrameUpdate(OffHandSkeleton, this);
+
+            CharacterHasTail = CharacterSkeleton?.GetFirstVisibleBone("n_sippo_a") != null;
+            CharacterIsIVCS = CharacterSkeleton?.GetFirstVisibleBone("iv_ko_c_l") != null;
         }
 
         private void OnSkeletonUpdateStart()
