@@ -329,6 +329,13 @@ internal class SettingsWindow : Window
                 _configurationService.ApplyChange();
             }
 
+            bool hideToolbarWhenAdvancedPosingOpen = _configurationService.Configuration.Posing.HideToolbarWhenAdvandedPosingOpen;
+            if(ImGui.Checkbox("Hide Toolbar while Advanced Posing", ref hideToolbarWhenAdvancedPosingOpen))
+            {
+                _configurationService.Configuration.Posing.HideToolbarWhenAdvandedPosingOpen = hideToolbarWhenAdvancedPosingOpen;
+                _configurationService.ApplyChange();
+            }
+
             bool showSkeletonLines = _configurationService.Configuration.Posing.ShowSkeletonLines;
             if(ImGui.Checkbox("Show Skeleton Lines", ref showSkeletonLines))
             {
