@@ -601,19 +601,19 @@
 
         {
           "Name": "iv_kuritto",
-          "Position": "300, 100"
+          "Position": "120, 550"
         },
         {
           "Name": "iv_omanko",
-          "Position": "300, 300"
+          "Position": "120, 710"
         },
         {
           "Name": "iv_inshin_l",
-          "Position": "250, 200"
+          "Position": "70, 630"
         },
         {
           "Name": "iv_inshin_r",
-          "Position": "350, 200"
+          "Position": "180, 630"
         }
       ]
     },

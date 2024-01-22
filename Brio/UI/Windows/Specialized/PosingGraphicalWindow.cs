@@ -392,6 +392,15 @@ internal class PosingGraphicalWindow : Window, IDisposable
             return;
         }
 
+        bool showGenitalia = false;
+        if(posing.SkeletonPosing.CharacterIsIVCS)
+        {
+            showGenitalia = _configurationService.Configuration.Posing.ShowGenitaliaInAdvancedPoseWindow;
+            if(ImGui.Checkbox("Show Genitalia", ref showGenitalia))
+            {
+                _configurationService.Configuration.Posing.ShowGenitaliaInAdvancedPoseWindow = showGenitalia;
+            }
+        }
 
         var contentArea = ImGui.GetContentRegionAvail();
         var contentWidth = contentArea.X / 3f;
@@ -471,41 +480,47 @@ internal class PosingGraphicalWindow : Window, IDisposable
                         {
                             DrawBoneSection("hands", true, posing);
 
-                            DrawBoneSection("ivcs_toes", true, posing);
+                            if(posing.SkeletonPosing.CharacterIsIVCS)
+                            {
+                                DrawBoneSection("ivcs_toes", true, posing);
+                            }
                         }
                     }
                     ImGui.SameLine();
 
                     float tailWidth = contentWidth * 0.3f - (ImGui.GetStyle().FramePadding.X * 2);
-                    using(var splitChild = ImRaii.Child("###split_details_tail", new Vector2(tailWidth, -1), false, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse))
+                    using(var splitChild = ImRaii.Child("###split_details_more", new Vector2(tailWidth, -1), false, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse))
                     {
                         if(splitChild.Success)
                         {
                             if(posing.SkeletonPosing.CharacterIsIVCS)
                             {
-                                using(var splitTailChild = ImRaii.Child("###split_details_tail_ivcs", new Vector2(tailWidth, -1), false, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse))
+                                using(var splitTailChild = ImRaii.Child("###split_details_more_ivcs", new Vector2(tailWidth, -1), false, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse))
                                 {
                                     if(splitTailChild.Success)
                                     {
-                                        using(var splitTailChildTail = ImRaii.Child("###split_details_tail_ivcs_tail", new Vector2(tailWidth, 75), false, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse))
+                                        using(var splitTailChildTail = ImRaii.Child("###split_details_more_ivcs_tail", new Vector2(tailWidth, 75), false, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse))
                                         {
-                                            if(splitTailChildTail.Success)
+                                            if(splitTailChildTail.Success && posing.SkeletonPosing.CharacterHasTail)
                                             {
                                                 DrawBoneSection("tail", false, posing);
                                             }
                                         }
 
-                                        using(var splitTailChildIvcs = ImRaii.Child("###split_details_tail_ivcs_ivcs", new Vector2(tailWidth, 150), false, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse))
+                                        if(showGenitalia)
                                         {
-                                            if(splitTailChildIvcs.Success)
+                                            using(var splitTailChildIvcs = ImRaii.Child("###split_details_more_ivcs_genitalia", new Vector2(tailWidth, 150), false, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse))
                                             {
-                                                DrawBoneSection("ivcs", false, posing);
+                                                if(splitTailChildIvcs.Success)
+                                                {
+                                                    DrawBoneSection("ivcs", false, posing);
+                                                }
                                             }
                                         }
                                     }
                                 }
                             }
-                            else
+                            else if(posing.SkeletonPosing.CharacterHasTail)
                             {
                                 DrawBoneSection("tail", false, posing);
                             }
