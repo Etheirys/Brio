@@ -19,6 +19,17 @@ internal static partial class ImBrio
         ImGui.SetWindowFontScale(1.0f);
     }
 
+    public static bool FontIconButton(FontAwesomeIcon icon)
+    {
+        bool clicked = false;
+        using(ImRaii.PushFont(UiBuilder.IconFont))
+        {
+            clicked = ImGui.Button(icon.ToIconString());
+        }
+
+        return clicked;
+    }
+
     public static bool FontIconButton(string id, FontAwesomeIcon icon, string? tooltip = null, bool enabled = true, bool bordered = true, uint? textColor = null)
     {
         bool wasClicked = false;
