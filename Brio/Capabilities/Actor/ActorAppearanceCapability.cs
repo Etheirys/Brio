@@ -20,6 +20,7 @@ internal class ActorAppearanceCapability : ActorCharacterCapability
     private readonly ActorAppearanceService _actorAppearanceService;
     private readonly PenumbraService _penumbraService;
     private readonly GlamourerService _glamourerService;
+    private readonly MareService _mareService;
     private readonly GPoseService _gposeService;
 
     public string CurrentCollection => _penumbraService.GetCollectionForObject(Character);
@@ -43,16 +44,24 @@ internal class ActorAppearanceCapability : ActorCharacterCapability
 
     public bool CanTint => _actorAppearanceService.CanTint;
 
-    public ActorAppearanceCapability(ActorEntity parent, ActorAppearanceService actorAppearanceService, PenumbraService penumbraService, GlamourerService glamourerService, GPoseService gPoseService) : base(parent)
+    public bool CanMcdf => _mareService.IsMareAvailable;
+
+    public ActorAppearanceCapability(ActorEntity parent, ActorAppearanceService actorAppearanceService, PenumbraService penumbraService, GlamourerService glamourerService, MareService mareService, GPoseService gPoseService) : base(parent)
     {
         _actorAppearanceService = actorAppearanceService;
         _penumbraService = penumbraService;
         _glamourerService = glamourerService;
+        _mareService = mareService;
         _gposeService = gPoseService;
         Widget = new ActorAppearanceWidget(this);
 
         _gposeService.OnGPoseStateChange += OnGPoseStateChanged;
         _penumbraService.OnPenumbraRedraw += OnPenumbraRedraw;
+    }
+
+    public void LoadMcdf(string path)
+    {
+        this._mareService.LoadMcdf(path, GameObject);
     }
 
     public void SetCollection(string collection)

@@ -18,10 +18,12 @@ internal class PosingConfiguration
     public uint SkeletonLineInactiveColor { get; set; } = 0x55555555;
     public bool ShowSkeletonLines { get; set; } = true;
     public bool HideGizmoWhenAdvancedPosingOpen { get; set; } = false;
+    public bool HideToolbarWhenAdvandedPosingOpen { get; set; } = false;
     public bool HideSkeletonWhenGizmoActive { get; set; } = false;
 
     // Graphical Posing
     public bool GraphicalSidesSwapped { get; set; } = false;
+    public bool ShowGenitaliaInAdvancedPoseWindow { get; set; } = true;
 
     // Hooks
     public bool DisableGPoseMouseSelect { get; set; } = false;
