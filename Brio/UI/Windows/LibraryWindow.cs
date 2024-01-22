@@ -1,10 +1,13 @@
 ﻿using Brio.Config;
 using Brio.Library;
+using Brio.Resources;
 using Brio.UI.Controls.Stateless;
 using Dalamud.Interface;
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Interface.Windowing;
+using EmbedIO.Authentication;
 using ImGuiNET;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace Brio.UI.Windows;
 
@@ -114,14 +117,14 @@ internal class LibraryWindow : Window
             {
                 ImGui.PushStyleColor(ImGuiCol.Button, 0);
 
-                ImGui.Button("Library");
+                ImGui.Button(_currentCategory?.Title);
                 ImGui.SameLine();
 
                 ImGui.SetCursorPosY(ImGui.GetCursorPosY() + 5);
                 ImBrio.FontIcon(FontAwesomeIcon.ChevronRight, 0.5f);
                 ImGui.SameLine();
 
-                ImGui.Button("Characters");
+                ImGui.Button("Brio");
 
                 ImGui.PopStyleColor();
 
@@ -149,10 +152,52 @@ internal class LibraryWindow : Window
 
     private void DrawFiles()
     {
+        int columnCount = 6;
+        int column = 0;
+
+        var files = _libraryManager.AllFiles;
+        float fileWidth = (WindowContentWidth - 50) / columnCount;
+
         using(var child = ImRaii.Child("library_files_area", new(-1, -1)))
         {
             if(!child.Success)
                 return;
+
+            foreach (var file in files)
+            {
+                DrawFile(file, fileWidth);
+
+                column++;
+                if(column >= columnCount)
+                {
+                    column = 0;
+                }
+                else
+                {
+                    ImGui.SameLine();
+                }
+            }
+        }
+    }
+
+    private void DrawFile(FileInfo file, float width)
+    {
+        float height = width + 50;
+        using(var child = ImRaii.Child($"library_files_file{file.Path}", new(width, height), false))
+        {
+            if(!child.Success)
+                return;
+
+            var tex = ResourceProvider.Instance.GetResourceImage(file.Icon);
+            ImGui.Image(tex.ImGuiHandle, new(width, width));
+
+            ImGui.SetCursorPosY(width);
+            ImBrio.TextCentered(file.Name, width);
+        }
+
+        if (ImGui.IsItemHovered())
+        {
+            ImGui.SetTooltip(file.Path);
         }
     }
 }

@@ -17,77 +17,11 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-	  <None Remove="Resources\Embedded\Data\BoneCategories.json" />
-	  <None Remove="Resources\Embedded\Data\GraphicalBonePosePositions.json" />
-	  <None Remove="Resources\Embedded\Data\NpcNames.json" />
-	  <None Remove="Resources\Embedded\Images\PoseArmor.png" />
-	  <None Remove="Resources\Embedded\Images\PoseBody.png" />
-	  <None Remove="Resources\Embedded\Images\PoseHand.png" />
-	  <None Remove="Resources\Embedded\Images\PoseHeadHroth.png" />
-	  <None Remove="Resources\Embedded\Images\PoseHeadMiqote.png" />
-	  <None Remove="Resources\Embedded\Images\PoseHeadVieraFloppy.png" />
-	  <None Remove="Resources\Embedded\Images\PoseHeadWithEars.png" />
-	  <None Remove="Resources\Embedded\Images\PoseTail.png" />
-	  <None Remove="Resources\Embedded\Language\en.json" />
-	  <None Remove="Resources\Embedded\Images\ActionTimeline.png" />
-	  <None Remove="Resources\Embedded\Images\Body.png" />
-	  <None Remove="Resources\Embedded\Images\Companion.png" />
-	  <None Remove="Resources\Embedded\Images\Ears.png" />
-	  <None Remove="Resources\Embedded\Images\Feet.png" />
-	  <None Remove="Resources\Embedded\Images\Hands.png" />
-	  <None Remove="Resources\Embedded\Images\Head.png" />
-	  <None Remove="Resources\Embedded\Images\IconBorder.png" />
-	  <None Remove="Resources\Embedded\Images\LeftRing.png" />
-	  <None Remove="Resources\Embedded\Images\LegacyTattoo.png" />
-	  <None Remove="Resources\Embedded\Images\Legs.png" />
-	  <None Remove="Resources\Embedded\Images\MainHand.png" />
-	  <None Remove="Resources\Embedded\Images\Mount.png" />
-	  <None Remove="Resources\Embedded\Images\Neck.png" />
-	  <None Remove="Resources\Embedded\Images\OffHand.png" />
-	  <None Remove="Resources\Embedded\Images\Ornament.png" />
-	  <None Remove="Resources\Embedded\Images\RightRing.png" />
-	  <None Remove="Resources\Embedded\Images\Ring.png" />
-	  <None Remove="Resources\Embedded\Images\StatusEffect.png" />
-	  <None Remove="Resources\Embedded\Images\UnknownIcon.png" />
-	  <None Remove="Resources\Embedded\Images\Waist.png" />
-	  <None Remove="Resources\Embedded\Images\Weather.png" />
-	  <None Remove="Resources\Embedded\Images\Wrists.png" />
+	  <None Remove="Resources\Embedded\**\*.*" />
 	</ItemGroup>
 
 	<ItemGroup>
-	  <EmbeddedResource Include="Resources\Embedded\Data\BoneCategories.json" />
-	  <EmbeddedResource Include="Resources\Embedded\Data\Festivals.json" />
-	  <EmbeddedResource Include="Resources\Embedded\Data\GraphicalBonePosePositions.json" />
-	  <EmbeddedResource Include="Resources\Embedded\Data\NpcNames.json" />
-	  <EmbeddedResource Include="Resources\Embedded\Images\ActionTimeline.png" />
-	  <EmbeddedResource Include="Resources\Embedded\Images\Body.png" />
-	  <EmbeddedResource Include="Resources\Embedded\Images\Companion.png" />
-	  <EmbeddedResource Include="Resources\Embedded\Images\Ears.png" />
-	  <EmbeddedResource Include="Resources\Embedded\Images\Feet.png" />
-	  <EmbeddedResource Include="Resources\Embedded\Images\Hands.png" />
-	  <EmbeddedResource Include="Resources\Embedded\Images\Head.png" />
-	  <EmbeddedResource Include="Resources\Embedded\Images\IconBorder.png" />
-	  <EmbeddedResource Include="Resources\Embedded\Images\LegacyTattoo.png" />
-	  <EmbeddedResource Include="Resources\Embedded\Images\Legs.png" />
-	  <EmbeddedResource Include="Resources\Embedded\Images\MainHand.png" />
-	  <EmbeddedResource Include="Resources\Embedded\Images\Mount.png" />
-	  <EmbeddedResource Include="Resources\Embedded\Images\Neck.png" />
-	  <EmbeddedResource Include="Resources\Embedded\Images\OffHand.png" />
-	  <EmbeddedResource Include="Resources\Embedded\Images\Ornament.png" />
-	  <EmbeddedResource Include="Resources\Embedded\Images\PoseArmor.png" />
-	  <EmbeddedResource Include="Resources\Embedded\Images\PoseBody.png" />
-	  <EmbeddedResource Include="Resources\Embedded\Images\PoseHand.png" />
-	  <EmbeddedResource Include="Resources\Embedded\Images\PoseHeadHroth.png" />
-	  <EmbeddedResource Include="Resources\Embedded\Images\PoseHeadMiqote.png" />
-	  <EmbeddedResource Include="Resources\Embedded\Images\PoseHeadVieraFloppy.png" />
-	  <EmbeddedResource Include="Resources\Embedded\Images\PoseHeadWithEars.png" />
-	  <EmbeddedResource Include="Resources\Embedded\Images\PoseTail.png" />
-	  <EmbeddedResource Include="Resources\Embedded\Images\Ring.png" />
-	  <EmbeddedResource Include="Resources\Embedded\Images\StatusEffect.png" />
-	  <EmbeddedResource Include="Resources\Embedded\Images\UnknownIcon.png" />
-	  <EmbeddedResource Include="Resources\Embedded\Images\Weather.png" />
-	  <EmbeddedResource Include="Resources\Embedded\Images\Wrists.png" />
-	  <EmbeddedResource Include="Resources\Embedded\Language\en.json" />
+	  <EmbeddedResource Include="Resources\Embedded\**\*.*" />
 	</ItemGroup>
 
 	<ItemGroup>
