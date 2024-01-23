@@ -15,4 +15,5 @@ public interface ILibraryEntry
     public void Add(ILibraryEntry entry);
     public bool PassesFilters(params LibraryFilterBase[] filters);
     public void FilterEntries(params LibraryFilterBase[] filters);
+    public IEnumerable<ILibraryEntry>? GetFilteredEntries(bool flatten);
 }

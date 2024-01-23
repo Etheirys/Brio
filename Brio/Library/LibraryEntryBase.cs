@@ -23,16 +23,20 @@ public abstract class LibraryEntryBase : ILibraryEntry
 
     public bool PassesFilters(params LibraryFilterBase[] filters)
     {
-        foreach(LibraryFilterBase filter in filters)
+        if(FileType != null)
         {
-            if(!filter.Filter(this))
+            foreach(LibraryFilterBase filter in filters)
             {
-                return false;
+                if(!filter.Filter(this))
+                {
+                    return false;
+                }
             }
         }
-
-        if(FileType == null && _filteredEntries.Count <= 0)
+        else if(_filteredEntries.Count <= 0)
+        {
             return false;
+        }
 
         return true;
     }
@@ -58,6 +62,35 @@ public abstract class LibraryEntryBase : ILibraryEntry
                 {
                     _filteredEntries.Add(entry);
                 }
+            }
+        }
+    }
+
+    public IEnumerable<ILibraryEntry>? GetFilteredEntries(bool flatten)
+    {
+        if(!flatten)
+            return this.FilteredEntries;
+
+        List<ILibraryEntry> entries = new();
+        Flatten(ref entries);
+        return entries;
+    }
+
+    private void Flatten(ref List<ILibraryEntry> entries)
+    {
+        if(this.FilteredEntries == null)
+            return;
+
+        foreach(ILibraryEntry entry in this.FilteredEntries)
+        {
+            if(entry.FileType != null)
+            {
+                entries.Add(entry);
+            }
+
+            if (entry is LibraryEntryBase entryBase)
+            {
+                entryBase.Flatten(ref entries);
             }
         }
     }

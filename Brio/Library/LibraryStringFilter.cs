@@ -1,4 +1,6 @@
-﻿namespace Brio.Library;
+﻿using Brio.UI.Windows;
+
+namespace Brio.Library;
 
 public class LibraryStringFilter : LibraryFilterBase
 {
@@ -15,6 +17,6 @@ public class LibraryStringFilter : LibraryFilterBase
             return false;
 
         // way too basic.
-        return entry.Name.Contains(this.SearchString);
+        return entry.Name.ToLower().Contains(this.SearchString.ToLower());
     }
 }

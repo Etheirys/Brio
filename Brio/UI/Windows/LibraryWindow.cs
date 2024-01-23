@@ -32,6 +32,8 @@ internal class LibraryWindow : Window
 
     private readonly List<ILibraryEntry> _path = new();
 
+    public static IPluginLog? Log;
+
     public LibraryWindow(
         IPluginLog log,
         ConfigurationService configurationService,
@@ -41,6 +43,7 @@ internal class LibraryWindow : Window
         this.Namespace = "brio_library_namespace";
         this.Size = new(800, 450);
 
+        Log = log;
         _log = log;
         _configurationService = configurationService;
         _libraryManager = libraryManager;
@@ -50,6 +53,7 @@ internal class LibraryWindow : Window
     }
 
     private float WindowContentWidth => ImGui.GetWindowContentRegionMax().X - ImGui.GetWindowContentRegionMin().X;
+    public bool IsSearching => !string.IsNullOrEmpty(_searchFilter.SearchString);
 
     public override void OnOpen()
     {
@@ -89,7 +93,7 @@ internal class LibraryWindow : Window
 
             ImBrio.ToggleButton(filter.Name, new(buttonWidth, 0), ref isCurrent, false);
 
-            if(isCurrent)
+            if(isCurrent && _currentFilter != filter)
             {
                 _currentFilter = filter;
                 Filter();
@@ -167,11 +171,9 @@ internal class LibraryWindow : Window
     {
         ImGui.SetNextItemWidth(width - ImGui.GetStyle().FramePadding.X * 2);
         string searchText = _searchFilter.SearchString ?? string.Empty;
-        bool changed = ImGui.InputTextWithHint("###library_search_input", "Search", ref searchText, 256);
-        _searchFilter.SearchString = searchText;
-
-        if (changed)
+        if (ImGui.InputTextWithHint("###library_search_input", "Search", ref searchText, 256))
         {
+            _searchFilter.SearchString = searchText;
             Filter();
         }
     }
@@ -184,7 +186,7 @@ internal class LibraryWindow : Window
 
         ILibraryEntry currentEntry = _path[_path.Count - 1];
 
-        var entries = currentEntry.FilteredEntries;
+        IEnumerable<ILibraryEntry>? entries = currentEntry.GetFilteredEntries(IsSearching);
         float fileWidth = (WindowContentWidth - 50) / columnCount;
 
         using(var child = ImRaii.Child("library_files_area", new(-1, -1)))
@@ -255,6 +257,13 @@ internal class LibraryWindow : Window
 
     private void Filter()
     {
-        _libraryManager.Root.FilterEntries(_currentFilter, _searchFilter);
+        if(IsSearching)
+        {
+            _libraryManager.Root.FilterEntries(_currentFilter, _searchFilter);
+        }
+        else
+        {
+            _libraryManager.Root.FilterEntries(_currentFilter);
+        }
     }
 }
