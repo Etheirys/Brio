@@ -32,8 +32,6 @@ internal class LibraryWindow : Window
 
     private readonly List<ILibraryEntry> _path = new();
 
-    public static IPluginLog? Log;
-
     public LibraryWindow(
         IPluginLog log,
         ConfigurationService configurationService,
@@ -43,7 +41,6 @@ internal class LibraryWindow : Window
         this.Namespace = "brio_library_namespace";
         this.Size = new(800, 450);
 
-        Log = log;
         _log = log;
         _configurationService = configurationService;
         _libraryManager = libraryManager;
