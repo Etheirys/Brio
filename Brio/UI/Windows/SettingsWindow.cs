@@ -475,6 +475,13 @@ internal class SettingsWindow : Window
             if(!tab.Success)
                 return;
 
+            bool showPrompts = _configurationService.Configuration.Input.ShowPromptsInGPose;
+            if(ImGui.Checkbox("Show prompts in GPose", ref showPrompts))
+            {
+                _configurationService.Configuration.Input.ShowPromptsInGPose = showPrompts;
+                _configurationService.ApplyChange();
+            }
+
             if(ImGui.CollapsingHeader("Interface", ImGuiTreeNodeFlags.DefaultOpen))
             {
                 DrawKeyBind(KeyBindEvents.Interface_ToggleBrioWindow);

@@ -148,6 +148,7 @@ public class Brio : IDalamudPlugin
         serviceCollection.AddSingleton<ActorAppearanceWindow>();
         serviceCollection.AddSingleton<ActionTimelineWindow>();
         serviceCollection.AddSingleton<PosingOverlayWindow>();
+        serviceCollection.AddSingleton<KeyBindPromptWindow>();
         serviceCollection.AddSingleton<PosingOverlayToolbarWindow>();
         serviceCollection.AddSingleton<PosingTransformWindow>();
         serviceCollection.AddSingleton<CameraWindow>();

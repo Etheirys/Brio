@@ -20,4 +20,6 @@ internal class InputConfiguration
         { KeyBindEvents.Posing_DisableSkeleton, new(VirtualKey.CONTROL) },
         { KeyBindEvents.Posing_HideOverlay, new(VirtualKey.MENU) },
     };
+
+    public bool ShowPromptsInGPose { get; set; } = true;
 }
