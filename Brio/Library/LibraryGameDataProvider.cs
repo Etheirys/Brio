@@ -12,7 +12,7 @@ internal class LibraryGameDataNpcProvider : LibraryProviderBase
     private GameDataProvider _lumina;
 
     public LibraryGameDataNpcProvider(GameDataProvider lumina)
-        : base("Battle NPCs", ResourceProvider.Instance.GetResourceImage("Images.ProviderIcon_GameData.png"))
+        : base("NPCs", ResourceProvider.Instance.GetResourceImage("Images.ProviderIcon_GameData.png"))
     {
         _lumina = lumina;
     }
