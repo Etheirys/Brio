@@ -32,25 +32,40 @@ internal class InputService
         return Instance._keyState.GetValidVirtualKeys();
     }
 
-    public static bool IsKeyBindDown(KeyBindEvents keyBind)
+    public static bool IsKeyBindDown(KeyBindEvents evt)
     {
-        return Instance._eventsDown.Contains(keyBind);
+        return Instance._eventsDown.Contains(evt);
     }
 
-    public void AddListener(KeyBindEvents keyBind, Action callback)
+    public bool HasListener(KeyBindEvents evt)
     {
-        if(!_listeners.ContainsKey(keyBind))
-            _listeners.Add(keyBind, new());
+        if(!_listeners.ContainsKey(evt))
+            return false;
 
-        _listeners[keyBind].Add(callback);
+        return _listeners[evt].Count > 0;
     }
 
-    public void RemoveListener(KeyBindEvents keyBind, Action callback)
+    public void AddListener(KeyBindEvents evt, Action callback)
     {
-        if(!_listeners.ContainsKey(keyBind))
+        if(!_listeners.ContainsKey(evt))
+            _listeners.Add(evt, new());
+
+        _listeners[evt].Add(callback);
+    }
+
+    public void RemoveListener(KeyBindEvents evt, Action callback)
+    {
+        if(!_listeners.ContainsKey(evt))
             return;
 
-        _listeners[keyBind].Remove(callback);
+        _listeners[evt].Remove(callback);
+    }
+
+    public KeyBind? GetKeyBind(KeyBindEvents evt)
+    {
+        KeyBind? bind = null;
+        _configService.Configuration.Input.Bindings.TryGetValue(evt, out bind);
+        return bind;
     }
 
     private void OnFrameworkUpdate(IFramework framework)
