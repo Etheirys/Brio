@@ -10,6 +10,7 @@ using Dalamud.Interface.Windowing;
 using ImGuiNET;
 using System;
 using System.Numerics;
+using Brio.Resources;
 
 namespace Brio.UI.Windows;
 
@@ -476,24 +477,26 @@ internal class SettingsWindow : Window
 
             if(ImGui.CollapsingHeader("Interface", ImGuiTreeNodeFlags.DefaultOpen))
             {
-                DrawKeyBind("Toggle Brio Window", KeyBindEvents.Interface_ToggleBrioWindow);
-                DrawKeyBind("Increment Small Modifier", KeyBindEvents.Interface_IncrementSmallModifier);
-                DrawKeyBind("Increment Large Modifier", KeyBindEvents.Interface_IncrementLargeModifier);
+                DrawKeyBind(KeyBindEvents.Interface_ToggleBrioWindow);
+                DrawKeyBind(KeyBindEvents.Interface_IncrementSmallModifier);
+                DrawKeyBind(KeyBindEvents.Interface_IncrementLargeModifier);
             }
 
             if(ImGui.CollapsingHeader("Posing", ImGuiTreeNodeFlags.DefaultOpen))
             {
-                DrawKeyBind("Disable Gizmo", KeyBindEvents.Posing_DisableGizmo);
-                DrawKeyBind("Disable Skeleton", KeyBindEvents.Posing_DisableSkeleton);
-                DrawKeyBind("Hide Overlay", KeyBindEvents.Posing_HideOverlay);
-                DrawKeyBind("Toggle Overlay", KeyBindEvents.Posing_ToggleOverlay);
+                DrawKeyBind(KeyBindEvents.Posing_DisableGizmo);
+                DrawKeyBind(KeyBindEvents.Posing_DisableSkeleton);
+                DrawKeyBind(KeyBindEvents.Posing_HideOverlay);
+                DrawKeyBind(KeyBindEvents.Posing_ToggleOverlay);
             }
         }
     }
 
-    private void DrawKeyBind(string label, KeyBindEvents evt)
+    private void DrawKeyBind(KeyBindEvents evt)
     {
-        if(KeybindEditor.KeySelector(label, evt, _configurationService.Configuration.Input))
+        string evtText = Localize.Get($"keys.{evt}") ?? evt.ToString();
+
+        if(KeybindEditor.KeySelector(evtText, evt, _configurationService.Configuration.Input))
         {
             _configurationService.ApplyChange();
         }
