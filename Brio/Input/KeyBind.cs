@@ -21,6 +21,11 @@ internal class KeyBind
         Shift = shift;
     }
 
+    public bool GetIsEmpty()
+    {
+        return this.Key == VirtualKey.NO_KEY;
+    }
+
     public override string ToString()
     {
         if(!Control && !Alt && !Shift)

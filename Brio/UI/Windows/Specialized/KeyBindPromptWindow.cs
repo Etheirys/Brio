@@ -55,7 +55,7 @@ internal class KeyBindPromptWindow : Window, IDisposable
                 continue;
 
             KeyBind? bind = _inputService.GetKeyBind(evt);
-            if(bind == null)
+            if(bind == null || bind.GetIsEmpty())
                 continue;
 
             ImGui.SetCursorPosX(20);
