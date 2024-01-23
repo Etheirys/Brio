@@ -16,6 +16,8 @@ public abstract class LibraryEntryBase : ILibraryEntry
     public abstract IDalamudTextureWrap? Icon { get; }
     public virtual Type? FileType => null;
 
+    public virtual bool IsVisible { get; set; }
+
     public void Add(ILibraryEntry entry)
     {
         _allEntries.Add(entry);
@@ -92,6 +94,14 @@ public abstract class LibraryEntryBase : ILibraryEntry
             {
                 entryBase.Flatten(ref entries);
             }
+        }
+    }
+
+    public virtual void Dispose()
+    {
+        foreach(ILibraryEntry entry in _allEntries)
+        {
+            entry.Dispose();
         }
     }
 }

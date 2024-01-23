@@ -31,6 +31,8 @@ internal class LibraryWindow : Window
     private LibraryStringFilter _searchFilter = new();
 
     private readonly List<ILibraryEntry> _path = new();
+    private IEnumerable<ILibraryEntry>? _currentEntries;
+    private ILibraryEntry? _toOpen = null;
 
     public LibraryWindow(
         IPluginLog log,
@@ -55,7 +57,7 @@ internal class LibraryWindow : Window
     public override void OnOpen()
     {
         base.OnOpen();
-        Filter();
+        Refresh(true);
     }
 
     public override void Draw()
@@ -93,7 +95,7 @@ internal class LibraryWindow : Window
             if(isCurrent && _currentFilter != filter)
             {
                 _currentFilter = filter;
-                Filter();
+                Refresh(true);
             }
         }
     }
@@ -108,6 +110,7 @@ internal class LibraryWindow : Window
         if (ImBrio.FontIconButton(FontAwesomeIcon.LevelUpAlt))
         {
             _path.RemoveAt(_path.Count - 1);
+            Refresh(false);
         }
 
         if(_path.Count <= 1)
@@ -145,6 +148,7 @@ internal class LibraryWindow : Window
                 if (ImGui.Button(_path[i].Name))
                 {
                     _path.RemoveRange(i + 1, (_path.Count - 1) - i);
+                    Refresh(false);
                     break;
                 }
 
@@ -171,7 +175,7 @@ internal class LibraryWindow : Window
         if (ImGui.InputTextWithHint("###library_search_input", "Search", ref searchText, 256))
         {
             _searchFilter.SearchString = searchText;
-            Filter();
+            Refresh(true);
         }
     }
 
@@ -180,10 +184,7 @@ internal class LibraryWindow : Window
         int columnCount = 6;
         int column = 0;
         int index = 0;
-
-        ILibraryEntry currentEntry = _path[_path.Count - 1];
-
-        IEnumerable<ILibraryEntry>? entries = currentEntry.GetFilteredEntries(IsSearching);
+        
         float fileWidth = (WindowContentWidth - 50) / columnCount;
 
         using(var child = ImRaii.Child("library_files_area", new(-1, -1)))
@@ -191,9 +192,9 @@ internal class LibraryWindow : Window
             if(!child.Success)
                 return;
 
-            if(entries != null)
+            if(_currentEntries != null)
             {
-                foreach(var entry in entries)
+                foreach(var entry in _currentEntries)
                 {
                     DrawEntry(entry, fileWidth, index);
                     index++;
@@ -210,6 +211,12 @@ internal class LibraryWindow : Window
                 }
             }
         }
+
+        if(_toOpen != null)
+        {
+            OnOpen(_toOpen);
+            _toOpen = null;
+        }
     }
 
     private void DrawEntry(ILibraryEntry entry, float width, int id)
@@ -221,7 +228,7 @@ internal class LibraryWindow : Window
 
         if (ImGui.Button($"###library_entry_{id}_button", size))
         {
-            OnOpen(entry);
+            _toOpen = entry;
         }
 
         ImGui.PopStyleColor();
@@ -232,8 +239,11 @@ internal class LibraryWindow : Window
             if(!child.Success)
                 return;
 
-            if (entry.Icon != null)
-                ImGui.Image(entry.Icon.ImGuiHandle, new(width, width));
+            if(entry.Icon != null)
+            {
+                float fitWidth = width; //// entry.Icon.Width / width * height;
+                ImGui.Image(entry.Icon.ImGuiHandle, new(fitWidth, width));
+            }
 
             ImGui.SetCursorPosY(width);
             ImBrio.TextCentered(entry.Name, width);
@@ -249,18 +259,41 @@ internal class LibraryWindow : Window
         else
         {
             _path.Add(entry);
+            Refresh(false);
         }
     }
 
-    private void Filter()
+    private void Refresh(bool filter)
     {
-        if(IsSearching)
+        if (_currentEntries != null)
         {
-            _libraryManager.Root.FilterEntries(_currentFilter, _searchFilter);
+            foreach(ILibraryEntry entry in _currentEntries)
+            {
+                entry.IsVisible = false;
+            }
         }
-        else
+
+        if(filter)
         {
-            _libraryManager.Root.FilterEntries(_currentFilter);
+            if(IsSearching)
+            {
+                _libraryManager.Root.FilterEntries(_currentFilter, _searchFilter);
+            }
+            else
+            {
+                _libraryManager.Root.FilterEntries(_currentFilter);
+            }
+        }
+
+        ILibraryEntry currentEntry = _path[_path.Count - 1];
+        _currentEntries = currentEntry.GetFilteredEntries(IsSearching);
+
+        if(_currentEntries != null)
+        {
+            foreach(ILibraryEntry entry in _currentEntries)
+            {
+                entry.IsVisible = true;
+            }
         }
     }
 }

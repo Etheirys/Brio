@@ -7,7 +7,7 @@ namespace Brio.Files;
 
 [Serializable]
 [FileType("Character File", "Images.FileIcon_Chara.png", ".chara")]
-internal class AnamnesisCharaFile
+internal class AnamnesisCharaFile : FileBase
 {
     public uint ModelType { get; set; } = 0;
     public Races Race { get; set; }

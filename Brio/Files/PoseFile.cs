@@ -6,7 +6,7 @@ using System.Numerics;
 namespace Brio.Files;
 
 [FileType("Pose File", "Images.FileIcon_Pose.png", ".pose")]
-internal class PoseFile
+internal class PoseFile : FileBase
 {
     public Bone ModelDifference { get; set; } = Transform.Identity;
 

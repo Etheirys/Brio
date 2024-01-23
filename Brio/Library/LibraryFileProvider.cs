@@ -1,6 +1,8 @@
 ﻿using Brio.Files;
 using Brio.Resources;
+using Brio.UI;
 using Dalamud.Interface.Internal;
+using ImGuiNET;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -116,6 +118,8 @@ public class LibraryFileInfo : LibraryEntryBase
 
     private string _name;
     private Type _fileType;
+    private IDalamudTextureWrap? _icon;
+    private bool _isFileIcon;
 
     public LibraryFileInfo(string path, FileTypeAttribute fileTypeAttribute, Type fileType)
     {
@@ -132,6 +136,60 @@ public class LibraryFileInfo : LibraryEntryBase
     }
 
     public override string Name => _name;
-    public override IDalamudTextureWrap? Icon => FileTypeAttribute.GetIcon(_fileType);
+    public override IDalamudTextureWrap? Icon => GetIcon();
     public override Type? FileType => _fileType;
+
+    public override bool IsVisible
+    {
+        get => base.IsVisible;
+        set
+        {
+            base.IsVisible = value;
+
+            if(!value && _icon != null && _isFileIcon)
+            {
+                _icon.Dispose();
+            }
+        }
+    }
+
+    private IDalamudTextureWrap GetIcon()
+    {
+        if(_icon == null || _icon.ImGuiHandle == 0)
+        {
+            if(FileType != null && typeof(FileBase).IsAssignableFrom(FileType))
+            {
+                try
+                {
+                    FileBase? doc = ResourceProvider.Instance.GetFileDocument(FilePath, FileType) as FileBase;
+                    if(doc != null && doc.Base64Image != null)
+                    {
+                        byte[] imgData = Convert.FromBase64String(doc.Base64Image);
+                        _icon = UIManager.Instance.LoadImage(imgData);
+                        _isFileIcon = true;
+                        return _icon;
+                    }
+                }
+                catch(Exception)
+                {
+                }
+            }
+
+            _icon = this.FileTypeAttribute.GetIcon(_fileType);
+            _isFileIcon = false;
+            return _icon;
+        }
+
+        return _icon;
+    }
+
+    public override void Dispose()
+    {
+        base.Dispose();
+
+        if (_icon != null && _isFileIcon)
+        {
+            _icon.Dispose();
+        }
+    }
 }

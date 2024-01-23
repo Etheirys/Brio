@@ -32,6 +32,10 @@ internal class LibraryManager : IDisposable
 
     public void Dispose()
     {
+        foreach(LibraryProviderBase provider in Providers)
+        {
+            provider.Dispose();
+        }
     }
 
     public void AddProvider(LibraryProviderBase provider)
