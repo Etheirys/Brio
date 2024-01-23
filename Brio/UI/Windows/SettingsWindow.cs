@@ -495,6 +495,8 @@ internal class SettingsWindow : Window
                 DrawKeyBind(KeyBindEvents.Posing_DisableSkeleton);
                 DrawKeyBind(KeyBindEvents.Posing_HideOverlay);
                 DrawKeyBind(KeyBindEvents.Posing_ToggleOverlay);
+                DrawKeyBind(KeyBindEvents.Posing_Undo);
+                DrawKeyBind(KeyBindEvents.Posing_Redo);
             }
         }
     }
