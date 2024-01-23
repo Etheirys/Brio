@@ -131,7 +131,7 @@ internal class LibraryWindow : Window
 
                 if (ImGui.Button(_path[i].Name))
                 {
-                    _path.RemoveRange(i + 1, _path.Count - 1);
+                    _path.RemoveRange(i + 1, (_path.Count - 1) - i);
                     break;
                 }
 
