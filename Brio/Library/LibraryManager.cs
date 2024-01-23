@@ -1,4 +1,5 @@
 ﻿using Brio.Config;
+using Brio.Resources;
 using Dalamud.Interface.Internal;
 using System;
 using System.Collections.Generic;
@@ -8,11 +9,13 @@ namespace Brio.Library;
 internal class LibraryManager : IDisposable
 {
     private readonly ConfigurationService _configurationService;
+    private readonly GameDataProvider _luminaProvider;
     private readonly LibraryRoot _rootItem;
 
-    public LibraryManager (ConfigurationService configurationService)
+    public LibraryManager (ConfigurationService configurationService, GameDataProvider luminaProvider)
     {
         _configurationService = configurationService;
+        _luminaProvider = luminaProvider;
         _rootItem = new();
 
         // TODO: add a configuration option to set the locations of these
@@ -23,6 +26,12 @@ internal class LibraryManager : IDisposable
 
         // TODO: swap this for a package
         AddProvider(new LibraryFileProvider("Standard Poses", "Images.ProviderIcon_Directory.png", Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Anamnesis", "StandardPoses"));
+
+        // Game Data
+        AddProvider(new LibraryGameDataNpcProvider(_luminaProvider));
+        AddProvider(new LibraryGameDataMountProvider(_luminaProvider));
+        AddProvider(new LibraryGameDataCompanionsProvider(_luminaProvider));
+        AddProvider(new LibraryGameDataOrnamentsProvider(_luminaProvider));
 
         Scan();
     }
