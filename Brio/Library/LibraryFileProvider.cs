@@ -1,7 +1,10 @@
-﻿using Brio.Resources;
+﻿using Brio.Files;
+using Brio.Resources;
 using Dalamud.Interface.Internal;
+using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Reflection;
 
 namespace Brio.Library;
 
@@ -9,18 +12,24 @@ public class LibraryFileProvider : LibraryProviderBase
 {
     public readonly string DirectoryPath;
 
-    public LibraryFileProvider(string name, string icon, string directoryPath)
+    // We could probably scan the assembly for any types that have a FileTypeAttribute in them, but this is fine too.
+    private static List<Type> fileTypes = new List<Type>()
     {
-        this.Name = name;
+        typeof(AnamnesisCharaFile),
+        typeof(CMToolPoseFile),
+        typeof(PoseFile)
+    };
+
+    public LibraryFileProvider(string name, string icon, string directoryPath)
+        : base(name, ResourceProvider.Instance.GetResourceImage(icon))
+    {
         this.DirectoryPath = directoryPath;
-        this.Icon = ResourceProvider.Instance.GetResourceImage(icon);
     }
 
     public LibraryFileProvider(string name, string icon, params string[] paths)
+          : base(name, ResourceProvider.Instance.GetResourceImage(icon))
     {
-        this.Name = name;
         this.DirectoryPath = Path.Combine(paths);
-        this.Icon = ResourceProvider.Instance.GetResourceImage(icon);
     }
 
     public override void Scan()
@@ -48,76 +57,81 @@ public class LibraryFileProvider : LibraryProviderBase
         string[] filePaths = Directory.GetFiles(directory, "*.*");
         foreach(string filePath in filePaths)
         {
-            parent.Add(new LibraryFileInfo(filePath));
+            FileTypeAttribute? fileTypeAttribute;
+            Type? fileType;
+            if(!GetFileType(filePath, out fileTypeAttribute, out fileType) || fileTypeAttribute == null || fileType == null)
+                continue;
+
+            parent.Add(new LibraryFileInfo(filePath, fileTypeAttribute, fileType));
         }
+    }
+
+    private bool GetFileType(string path, out FileTypeAttribute? file, out Type? type)
+    {
+        file = null;
+        type = null;
+
+        foreach(Type possibleType in fileTypes)
+        {
+            FileTypeAttribute? fileType = possibleType.GetCustomAttribute<FileTypeAttribute>();
+            if(fileType == null)
+                continue;
+
+            if(fileType.IsFile(path))
+            {
+                file = fileType;
+                type = possibleType;
+                return true;
+            }
+        }
+
+        return false;
     }
 }
 
-public class LibraryDirectoryInfo : ILibraryEntry
+public class LibraryDirectoryInfo : LibraryEntryBase
 {
-    public string Name { get; }
-    public IEnumerable<ILibraryEntry>? Entries => _entries;
-    public IDalamudTextureWrap? Icon => ResourceProvider.Instance.GetResourceImage("Images.FileIcon_Directory.png");
-
-    private List<ILibraryEntry> _entries = new List<ILibraryEntry>();
+    private string _name;
+    private IDalamudTextureWrap _icon;
 
     public LibraryDirectoryInfo(string path)
     {
-        this.Name = System.IO.Path.GetFileNameWithoutExtension(path);
-
-        if(this.Name.Length >= 60)
+        _name = System.IO.Path.GetFileNameWithoutExtension(path);
+        if(_name.Length >= 60)
         {
-            this.Name = this.Name.Substring(0, 55) + "...";
+            _name = this.Name.Substring(0, 55) + "...";
         }
+
+        _icon = ResourceProvider.Instance.GetResourceImage("Images.FileIcon_Directory.png");
     }
 
-    public void Add(ILibraryEntry entry)
-    {
-        _entries.Add(entry);
-    }
+    public override string Name => _name;
+    public override IDalamudTextureWrap? Icon => _icon;
 }
 
-public class LibraryFileInfo : ILibraryEntry
+public class LibraryFileInfo : LibraryEntryBase
 {
     public readonly string FilePath;
+    public readonly FileTypeAttribute FileTypeAttribute;
 
-    public LibraryFileInfo(string path)
+    private string _name;
+    private Type _fileType;
+
+    public LibraryFileInfo(string path, FileTypeAttribute fileTypeAttribute, Type fileType)
     {
         this.FilePath = path;
-        this.Name = System.IO.Path.GetFileNameWithoutExtension(path);
+        this.FileTypeAttribute = fileTypeAttribute;
 
-        if(this.Name.Length >= 60)
+        _name = System.IO.Path.GetFileNameWithoutExtension(path);
+        if(_name.Length >= 60)
         {
-            this.Name = this.Name.Substring(0, 55) + "...";
+            _name = _name.Substring(0, 55) + "...";
         }
+
+        _fileType = fileType;
     }
 
-    public string Name { get; private set; }
-    public IEnumerable<ILibraryEntry>? Entries => null;
-
-    public IDalamudTextureWrap? Icon
-    {
-        get
-        {
-            // TODO: look up what type the file is, and get its icon from that
-            string ext = System.IO.Path.GetExtension(this.FilePath);
-
-            if(ext == ".pose")
-            {
-                return ResourceProvider.Instance.GetResourceImage("Images.FileIcon_Pose.png");
-            }
-            if(ext == ".chara")
-            {
-                return ResourceProvider.Instance.GetResourceImage("Images.FileIcon_Chara.png");
-            }
-            else
-            {
-                return ResourceProvider.Instance.GetResourceImage("Images.FileIcon_Unknown.png");
-            }
-        }
-    }
-
-    public void Add(ILibraryEntry entry)
-    {
-    }
+    public override string Name => _name;
+    public override IDalamudTextureWrap? Icon => FileTypeAttribute.GetIcon(_fileType);
+    public override Type? FileType => _fileType;
 }

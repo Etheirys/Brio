@@ -1,21 +1,20 @@
-﻿using Brio.Resources;
-using Dalamud.Interface.Internal;
-using System.Collections.Generic;
+﻿using Dalamud.Interface.Internal;
 
 namespace Brio.Library;
 
-public abstract class LibraryProviderBase : ILibraryEntry
+public abstract class LibraryProviderBase : LibraryEntryBase
 {
-    public string Name { get; protected set; } = string.Empty;
-    public IEnumerable<ILibraryEntry>? Entries => this._entries;
-    public IDalamudTextureWrap? Icon { get; protected set; }
+    private string _name;
+    private IDalamudTextureWrap _icon;
 
-    private List<ILibraryEntry> _entries = new List<ILibraryEntry>();
+    public LibraryProviderBase(string name, IDalamudTextureWrap icon)
+    {
+        _name = name;
+        _icon = icon;
+    }
+
+    public override string Name => _name;
+    public override IDalamudTextureWrap? Icon => _icon;
 
     public abstract void Scan();
-
-    public void Add(ILibraryEntry entry)
-    {
-        _entries.Add(entry);
-    }
 }

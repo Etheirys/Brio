@@ -5,10 +5,9 @@ using System.Numerics;
 
 namespace Brio.Files;
 
+[FileType("Pose File", "Images.FileIcon_Pose.png", ".pose")]
 internal class PoseFile
 {
-    public string TypeName { get; set; } = "Brio Pose";
-
     public Bone ModelDifference { get; set; } = Transform.Identity;
 
     public Dictionary<string, Bone> Bones { get; set; } = [];

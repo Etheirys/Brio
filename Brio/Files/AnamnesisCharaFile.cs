@@ -6,9 +6,9 @@ using System.Numerics;
 namespace Brio.Files;
 
 [Serializable]
+[FileType("Character File", "Images.FileIcon_Chara.png", ".chara")]
 internal class AnamnesisCharaFile
 {
-    public string TypeName { get; set; } = "Brio Character File";
     public uint ModelType { get; set; } = 0;
     public Races Race { get; set; }
     public Genders Gender { get; set; }

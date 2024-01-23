@@ -1,4 +1,5 @@
 ﻿using Brio.Config;
+using Brio.Files;
 using Brio.Library;
 using Brio.Resources;
 using Brio.UI.Controls.Stateless;
@@ -7,6 +8,7 @@ using Dalamud.Interface.Utility.Raii;
 using Dalamud.Interface.Windowing;
 using Dalamud.Plugin.Services;
 using ImGuiNET;
+using System;
 using System.Collections.Generic;
 using System.Numerics;
 
@@ -18,8 +20,15 @@ internal class LibraryWindow : Window
     private readonly LibraryManager _libraryManager;
     private readonly IPluginLog _log;
 
-    private CategoryBase? _currentCategory;
-    private string _currentSearchText = string.Empty;
+    private readonly static List<LibraryFilterBase> filters = new()
+    {
+        new LibraryFavoritesFilter(),
+        new LibraryTypeFilter("Characters", typeof(AnamnesisCharaFile)),
+        new LibraryTypeFilter("Poses", typeof(PoseFile), typeof(CMToolPoseFile)),
+    };
+
+    private LibraryFilterBase _currentFilter = filters[0];
+    private LibraryStringFilter _searchFilter = new();
 
     private readonly List<ILibraryEntry> _path = new();
 
@@ -37,18 +46,24 @@ internal class LibraryWindow : Window
         _libraryManager = libraryManager;
 
         IsOpen = true;
-        _path.Add(_libraryManager);
+        _path.Add(_libraryManager.Root);
     }
 
     private float WindowContentWidth => ImGui.GetWindowContentRegionMax().X - ImGui.GetWindowContentRegionMin().X;
+
+    public override void OnOpen()
+    {
+        base.OnOpen();
+        Filter();
+    }
 
     public override void Draw()
     {
         using(ImRaii.PushId("brio_library"))
         {
-            DrawCategoryPicker();
+            DrawFilters();
 
-            if(_currentCategory == null)
+            if(_currentFilter == null)
                 return;
 
             DrawPath(WindowContentWidth - 200);
@@ -58,29 +73,26 @@ internal class LibraryWindow : Window
         }
     }
 
-
-    private void DrawCategoryPicker()
+    private void DrawFilters()
     {
-        if(_libraryManager.Categories.Count <= 1)
+        if(filters.Count <= 1)
             return;
 
-        if(_currentCategory == null)
-            _currentCategory = _libraryManager.Categories[0];
-
-        float buttonWidth = (WindowContentWidth / _libraryManager.Categories.Count) - ImGui.GetStyle().FramePadding.X;
-        for(int i = 0; i < _libraryManager.Categories.Count; i++)
+        float buttonWidth = (WindowContentWidth / filters.Count) - ImGui.GetStyle().FramePadding.X;
+        for(int i = 0; i < filters.Count; i++)
         {
-            CategoryBase category = _libraryManager.Categories[i];
-            bool isCurrent = category == _currentCategory;
+            LibraryFilterBase filter = filters[i];
+            bool isCurrent = filter == _currentFilter;
 
             if (i > 0)
                 ImGui.SameLine();
 
-            ImBrio.ToggleButton(category.Title, new(buttonWidth, 0), ref isCurrent, false);
+            ImBrio.ToggleButton(filter.Name, new(buttonWidth, 0), ref isCurrent, false);
 
             if(isCurrent)
             {
-                _currentCategory = category;
+                _currentFilter = filter;
+                Filter();
             }
         }
     }
@@ -154,7 +166,14 @@ internal class LibraryWindow : Window
     private void DrawSearch(float width = -1)
     {
         ImGui.SetNextItemWidth(width - ImGui.GetStyle().FramePadding.X * 2);
-        ImGui.InputTextWithHint("###library_search_input", "Search", ref _currentSearchText, 256);
+        string searchText = _searchFilter.SearchString ?? string.Empty;
+        bool changed = ImGui.InputTextWithHint("###library_search_input", "Search", ref searchText, 256);
+        _searchFilter.SearchString = searchText;
+
+        if (changed)
+        {
+            Filter();
+        }
     }
 
     private void DrawFiles()
@@ -165,7 +184,7 @@ internal class LibraryWindow : Window
 
         ILibraryEntry currentEntry = _path[_path.Count - 1];
 
-        var entries = currentEntry.Entries;
+        var entries = currentEntry.FilteredEntries;
         float fileWidth = (WindowContentWidth - 50) / columnCount;
 
         using(var child = ImRaii.Child("library_files_area", new(-1, -1)))
@@ -224,13 +243,18 @@ internal class LibraryWindow : Window
 
     private void OnOpen(ILibraryEntry entry)
     {
-        if (entry.Entries == null)
+        if (entry.FileType != null)
         {
-            // Execute file?
+            // open the file?
         }
         else
         {
             _path.Add(entry);
         }
+    }
+
+    private void Filter()
+    {
+        _libraryManager.Root.FilterEntries(_currentFilter, _searchFilter);
     }
 }

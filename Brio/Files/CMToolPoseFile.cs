@@ -36,6 +36,7 @@ using System.Reflection;
 
 namespace Brio.Files;
 
+[FileType("CMTool Pose File", "Images.FileIcon_Pose.png", ".cmp")]
 internal class CMToolPoseFile
 {
     public string? Race { get; set; }
