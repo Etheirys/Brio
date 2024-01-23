@@ -234,20 +234,40 @@ internal class LibraryWindow : Window
         ImGui.PopStyleColor();
         ImGui.SetCursorPos(pos);
 
-        using(var child = ImRaii.Child($"library_entry_{id}", size, false, ImGuiWindowFlags.NoBackground | ImGuiWindowFlags.NoInputs))
+        using(var child = ImRaii.Child($"library_entry_{id}", size, true, ImGuiWindowFlags.NoBackground | ImGuiWindowFlags.NoInputs))
         {
             if(!child.Success)
                 return;
 
             if(entry.Icon != null)
             {
-                float fitWidth = width; //// entry.Icon.Width / width * height;
-                ImGui.Image(entry.Icon.ImGuiHandle, new(fitWidth, width));
+                float fitWidth = ImGui.GetContentRegionAvail().X;
+                float fitHeight = ImGui.GetContentRegionAvail().X;
+                float indent = 0;
+                if(entry.Icon.Width < entry.Icon.Height)
+                {
+                    fitWidth = ((float)entry.Icon.Width / (float)entry.Icon.Height) * ImGui.GetContentRegionAvail().X;
+                    indent = (ImGui.GetContentRegionAvail().X - fitWidth) / 2;
+                    ImGui.Indent(indent);
+                }
+
+                else if(entry.Icon.Height < entry.Icon.Width)
+                {
+                    fitHeight = ((float)entry.Icon.Height / (float)entry.Icon.Width) * ImGui.GetContentRegionAvail().X;
+                }
+
+                ImGui.Image(entry.Icon.ImGuiHandle, new(fitWidth, fitHeight));
+
+                if(indent != 0)
+                {
+                    ImGui.Unindent(indent);
+                }
+
             }
 
-            ImGui.SetCursorPosY(width);
-            ImBrio.TextCentered(entry.Name, width);
+            ImBrio.TextCentered(entry.Name, ImGui.GetContentRegionAvail().X);
         }
+        
     }
 
     private void OnOpen(ILibraryEntry entry)
