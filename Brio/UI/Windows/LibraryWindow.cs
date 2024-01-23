@@ -1,14 +1,13 @@
 ﻿using Brio.Config;
 using Brio.Files;
+using Brio.Game.Types;
 using Brio.Library;
-using Brio.Resources;
 using Brio.UI.Controls.Stateless;
 using Dalamud.Interface;
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Interface.Windowing;
 using Dalamud.Plugin.Services;
 using ImGuiNET;
-using System;
 using System.Collections.Generic;
 using System.Numerics;
 
@@ -23,7 +22,7 @@ internal class LibraryWindow : Window
     private readonly static List<LibraryFilterBase> filters = new()
     {
         new LibraryFavoritesFilter(),
-        new LibraryTypeFilter("Characters", typeof(AnamnesisCharaFile)),
+        new LibraryTypeFilter("Characters", typeof(AnamnesisCharaFile), typeof(ActorAppearanceUnion)),
         new LibraryTypeFilter("Poses", typeof(PoseFile), typeof(CMToolPoseFile)),
     };
 
@@ -187,7 +186,7 @@ internal class LibraryWindow : Window
         
         float fileWidth = (WindowContentWidth - 50) / columnCount;
 
-        using(var child = ImRaii.Child("library_files_area", new(-1, -1)))
+        using(var child = ImRaii.Child("library_files_area", new(-1, -1), true))
         {
             if(!child.Success)
                 return;
@@ -221,53 +220,55 @@ internal class LibraryWindow : Window
 
     private void DrawEntry(ILibraryEntry entry, float width, int id)
     {
-        float height = width + 50;
+        float height = width + 60;
         Vector2 size = new(width, height);
         Vector2 pos = ImGui.GetCursorPos();
         ImGui.PushStyleColor(ImGuiCol.Button, ImGui.GetColorU32(ImGuiCol.ChildBg));
 
-        if (ImGui.Button($"###library_entry_{id}_button", size))
+        if(ImGui.Button($"###library_entry_{id}_button", size))
         {
             _toOpen = entry;
         }
 
         ImGui.PopStyleColor();
-        ImGui.SetCursorPos(pos);
 
-        using(var child = ImRaii.Child($"library_entry_{id}", size, true, ImGuiWindowFlags.NoBackground | ImGuiWindowFlags.NoInputs))
+        if(ImGui.IsItemVisible())
         {
-            if(!child.Success)
-                return;
+            ImGui.SetCursorPos(pos);
 
-            if(entry.Icon != null)
+            using(var child = ImRaii.Child($"library_entry_{id}", size, true, ImGuiWindowFlags.NoBackground | ImGuiWindowFlags.NoInputs))
             {
-                float fitWidth = ImGui.GetContentRegionAvail().X;
-                float fitHeight = ImGui.GetContentRegionAvail().X;
-                float indent = 0;
-                if(entry.Icon.Width < entry.Icon.Height)
+                if(!child.Success)
+                    return;
+
+                if(entry.Icon != null)
                 {
-                    fitWidth = ((float)entry.Icon.Width / (float)entry.Icon.Height) * ImGui.GetContentRegionAvail().X;
-                    indent = (ImGui.GetContentRegionAvail().X - fitWidth) / 2;
-                    ImGui.Indent(indent);
+                    float fitWidth = ImGui.GetContentRegionAvail().X;
+                    float fitHeight = ImGui.GetContentRegionAvail().X;
+                    float indent = 0;
+                    if(entry.Icon.Width < entry.Icon.Height)
+                    {
+                        fitWidth = ((float)entry.Icon.Width / (float)entry.Icon.Height) * ImGui.GetContentRegionAvail().X;
+                        indent = (ImGui.GetContentRegionAvail().X - fitWidth) / 2;
+                        ImGui.Indent(indent);
+                    }
+
+                    else if(entry.Icon.Height < entry.Icon.Width)
+                    {
+                        fitHeight = ((float)entry.Icon.Height / (float)entry.Icon.Width) * ImGui.GetContentRegionAvail().X;
+                    }
+
+                    ImGui.Image(entry.Icon.ImGuiHandle, new(fitWidth, fitHeight));
+
+                    if(indent != 0)
+                    {
+                        ImGui.Unindent(indent);
+                    }
                 }
 
-                else if(entry.Icon.Height < entry.Icon.Width)
-                {
-                    fitHeight = ((float)entry.Icon.Height / (float)entry.Icon.Width) * ImGui.GetContentRegionAvail().X;
-                }
-
-                ImGui.Image(entry.Icon.ImGuiHandle, new(fitWidth, fitHeight));
-
-                if(indent != 0)
-                {
-                    ImGui.Unindent(indent);
-                }
-
+                ImBrio.TextCentered(entry.Name, ImGui.GetContentRegionAvail().X);
             }
-
-            ImBrio.TextCentered(entry.Name, ImGui.GetContentRegionAvail().X);
         }
-        
     }
 
     private void OnOpen(ILibraryEntry entry)
