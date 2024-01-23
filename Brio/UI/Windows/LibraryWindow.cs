@@ -87,7 +87,6 @@ internal class LibraryWindow : Window
 
     private void DrawPath(float width = -1)
     {
-        string currentPath = "Library/Characters/";
         float lineHeight = ImGui.GetTextLineHeightWithSpacing() + ImGui.GetStyle().FramePadding.Y;
 
         if(_path.Count <= 1)
@@ -162,10 +161,11 @@ internal class LibraryWindow : Window
     {
         int columnCount = 6;
         int column = 0;
+        int index = 0;
 
         ILibraryEntry currentEntry = _path[_path.Count - 1];
 
-        var entries = currentEntry.Children;
+        var entries = currentEntry.Entries;
         float fileWidth = (WindowContentWidth - 50) / columnCount;
 
         using(var child = ImRaii.Child("library_files_area", new(-1, -1)))
@@ -177,7 +177,8 @@ internal class LibraryWindow : Window
             {
                 foreach(var entry in entries)
                 {
-                    DrawEntry(entry, fileWidth);
+                    DrawEntry(entry, fileWidth, index);
+                    index++;
 
                     column++;
                     if(column >= columnCount)
@@ -193,14 +194,14 @@ internal class LibraryWindow : Window
         }
     }
 
-    private void DrawEntry(ILibraryEntry entry, float width)
+    private void DrawEntry(ILibraryEntry entry, float width, int id)
     {
         float height = width + 50;
         Vector2 size = new(width, height);
         Vector2 pos = ImGui.GetCursorPos();
         ImGui.PushStyleColor(ImGuiCol.Button, ImGui.GetColorU32(ImGuiCol.ChildBg));
 
-        if (ImGui.Button($"###library_entry_{entry.Name}_button", size))
+        if (ImGui.Button($"###library_entry_{id}_button", size))
         {
             OnOpen(entry);
         }
@@ -208,7 +209,7 @@ internal class LibraryWindow : Window
         ImGui.PopStyleColor();
         ImGui.SetCursorPos(pos);
 
-        using(var child = ImRaii.Child($"library_entry_{entry.Name}", size, false, ImGuiWindowFlags.NoBackground | ImGuiWindowFlags.NoInputs))
+        using(var child = ImRaii.Child($"library_entry_{id}", size, false, ImGuiWindowFlags.NoBackground | ImGuiWindowFlags.NoInputs))
         {
             if(!child.Success)
                 return;
@@ -223,7 +224,7 @@ internal class LibraryWindow : Window
 
     private void OnOpen(ILibraryEntry entry)
     {
-        if (entry.Children == null)
+        if (entry.Entries == null)
         {
             // Execute file?
         }
