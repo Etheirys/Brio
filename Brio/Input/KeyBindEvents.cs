@@ -9,4 +9,7 @@ internal enum KeyBindEvents
     Posing_DisableGizmo,
     Posing_DisableSkeleton,
     Posing_HideOverlay,
+    Posing_ToggleOverlay,
+    Posing_Undo,
+    Posing_Redo,
 }

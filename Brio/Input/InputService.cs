@@ -45,6 +45,14 @@ internal class InputService
         _listeners[keyBind].Add(callback);
     }
 
+    public void RemoveListener(KeyBindEvents keyBind, Action callback)
+    {
+        if(!_listeners.ContainsKey(keyBind))
+            return;
+
+        _listeners[keyBind].Remove(callback);
+    }
+
     private void OnFrameworkUpdate(IFramework framework)
     {
         foreach (var evt in Enum.GetValues<KeyBindEvents>())

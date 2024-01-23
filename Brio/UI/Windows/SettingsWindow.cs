@@ -486,6 +486,7 @@ internal class SettingsWindow : Window
                 DrawKeyBind("Disable Gizmo", KeyBindEvents.Posing_DisableGizmo);
                 DrawKeyBind("Disable Skeleton", KeyBindEvents.Posing_DisableSkeleton);
                 DrawKeyBind("Hide Overlay", KeyBindEvents.Posing_HideOverlay);
+                DrawKeyBind("Toggle Overlay", KeyBindEvents.Posing_ToggleOverlay);
             }
         }
     }
