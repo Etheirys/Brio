@@ -384,7 +384,9 @@ internal class LibraryWindow : Window
         ImGui.Spacing();
         ImGui.Spacing();
 
-        ImGui.TextWrapped(entry.Tags?.ToString());
+        ImGui.Text("Tags:");
+        ImGui.SameLine();
+        ImBrio.DrawTags(entry.Tags);
     }
 
     private void OnOpen(ILibraryEntry entry)

@@ -11,5 +11,9 @@ internal abstract class FileBase
 
     public virtual void GetAutoTags(ref TagCollection tags)
     {
+        if(this.Author != null)
+        {
+            tags.Add(this.Author);
+        }
     }
 }
