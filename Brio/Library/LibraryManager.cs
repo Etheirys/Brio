@@ -1,8 +1,11 @@
 ﻿using Brio.Config;
 using Brio.Resources;
 using Dalamud.Interface.Internal;
+using Dalamud.Logging;
+using Dalamud.Plugin.Services;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Brio.Library;
 
@@ -10,12 +13,16 @@ internal class LibraryManager : IDisposable
 {
     private readonly ConfigurationService _configurationService;
     private readonly GameDataProvider _luminaProvider;
+    private readonly IPluginLog _log;
     private readonly LibraryRoot _rootItem;
 
-    public LibraryManager (ConfigurationService configurationService, GameDataProvider luminaProvider)
+    public bool IsScanning { get; private set; }
+
+    public LibraryManager (ConfigurationService configurationService, GameDataProvider luminaProvider, IPluginLog log)
     {
         _configurationService = configurationService;
         _luminaProvider = luminaProvider;
+        _log = log;
         _rootItem = new();
 
         // TODO: add a configuration option to set the locations of these
@@ -55,9 +62,33 @@ internal class LibraryManager : IDisposable
 
     private void Scan()
     {
-        foreach (LibraryProviderBase provider in Providers)
+        Task.Run(ScanAsync);
+    }
+
+    private async Task ScanAsync()
+    {
+        IsScanning = true;
+
+        List<Task> scanTasks = new();
+        foreach(LibraryProviderBase provider in Providers)
+        {
+            scanTasks.Add(Task.Run(()=> ScanProvider(provider)));
+        }
+
+        await Task.WhenAll(scanTasks.ToArray());
+
+        IsScanning = false;
+    }
+
+    private void ScanProvider(LibraryProviderBase provider)
+    {
+        try
         {
             provider.Scan();
+        }
+        catch(Exception ex)
+        {
+            _log.Error(ex, $"Error in library provider: {provider.Name}");
         }
     }
 }
