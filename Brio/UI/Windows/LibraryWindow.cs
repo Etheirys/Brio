@@ -46,9 +46,10 @@ internal class LibraryWindow : Window
     private ILibraryEntry? _toOpen = null;
     private ILibraryEntry? _selected = null;
     private float spinnerAngle = 0;
-    private bool _searchNeedsFocus = true;
-
+    private bool _searchNeedsFocus = false;
+    private int _searchLostFocus = 0;
     private bool _isSearchSuggestWindowOpen = false;
+    private bool _isSearchFocused = false;
     private Vector2? _searchSuggestPos;
     private Vector2? _searchSuggestSize;
 
@@ -255,6 +256,7 @@ internal class LibraryWindow : Window
                     _searchString = string.Empty;
                     _searchFilter.Clear();
                     _tagFilter.Clear();
+                    _searchNeedsFocus = true;
                     Refresh(true);
                 }
 
@@ -287,6 +289,7 @@ internal class LibraryWindow : Window
                 if (toRemove != null)
                 {
                     _tagFilter.Tags.Remove(toRemove);
+                    _searchNeedsFocus = true;
                     Refresh(true);
                 }
             }
@@ -319,17 +322,19 @@ internal class LibraryWindow : Window
                 Refresh(true);
             }
 
-            bool isSearchActive = ImGui.IsItemActive();
-            if(isSearchActive)
+            _isSearchFocused = ImGui.IsItemActive();
+
+            if(!_isSearchFocused)
             {
-                _searchSuggestPos = new Vector2(searchbarPosition.X, searchbarPosition.Y + searchBarHeight);
-                _searchSuggestSize = new Vector2(searchBarWidth, 0);
-                _isSearchSuggestWindowOpen = true;
+                _searchLostFocus++;
             }
             else
             {
-                _isSearchSuggestWindowOpen = false;
+                _searchLostFocus = 0;
             }
+
+            _searchSuggestPos = new Vector2(searchbarPosition.X, searchbarPosition.Y + searchBarHeight);
+            _searchSuggestSize = new Vector2(searchBarWidth, 0);
         }
 
         ImGui.PopStyleColor();
@@ -365,7 +370,13 @@ internal class LibraryWindow : Window
 
     private void DrawSearchSuggest()
     {
-        if(_searchSuggestPos == null || _searchSuggestSize == null || !_isSearchSuggestWindowOpen)
+        if(_searchSuggestPos == null || _searchSuggestSize == null)
+            return;
+
+        if(_isSearchFocused)
+            _isSearchSuggestWindowOpen = true;
+
+        if(!_isSearchSuggestWindowOpen && !_isSearchFocused)
             return;
 
         ImGui.SetNextWindowPos((Vector2)_searchSuggestPos);
@@ -378,11 +389,23 @@ internal class LibraryWindow : Window
             ImGuiWindowFlags.NoTitleBar | ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoResize | ImGuiWindowFlags.Tooltip
             | ImGuiWindowFlags.NoFocusOnAppearing | ImGuiWindowFlags.ChildWindow))
         {
-            ImBrio.DrawTags(_allTags, SearchUtility.ToQuery(_searchString));
+            Tag? selected = ImBrio.DrawTags(_allTags, _tagFilter.Tags, SearchUtility.ToQuery(_searchString));
+            if (selected != null)
+            {
+                _tagFilter.Add(selected);
+                _searchNeedsFocus = true;
+
+                Refresh(true);
+            }
         }
 
         ImGui.End();
         ImGui.PopStyleVar();
+
+        if (_searchLostFocus > 10 && !_searchNeedsFocus)
+        {
+            _isSearchSuggestWindowOpen = false;
+        }
     }
 
     private void DrawFiles()

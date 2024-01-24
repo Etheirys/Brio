@@ -10,12 +10,15 @@ internal static partial class ImBrio
         return ImGui.Button(tag.Name);
     }
 
-    public static Tag? DrawTags(TagCollection tags, string[]? query = null)
+    public static Tag? DrawTags(TagCollection tags, TagCollection? skip = null, string[]? query = null)
     {
         Tag? clicked = null;
         float maxWidth = ImGui.GetContentRegionAvail().X;
         foreach(var tag in tags)
         {
+            if(skip?.Contains(tag) == true)
+                continue;
+
             if(query == null || tag.Search(query))
             {
                 float itemWidth = ImGui.CalcTextSize(tag.Name).X + 10;
