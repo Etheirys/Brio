@@ -1,4 +1,5 @@
-﻿using Brio.Library.Sources;
+﻿using Brio.Library.Filters;
+using Brio.Library.Sources;
 using Brio.Library.Tags;
 using Dalamud.Interface.Internal;
 using System;
@@ -38,11 +39,11 @@ public abstract class LibraryEntryBase : ILibraryEntry, ITagged
         _allEntries.Add(entry);
     }
 
-    public bool PassesFilters(params LibraryFilterBase[] filters)
+    public bool PassesFilters(params FilterBase[] filters)
     {
         if(FileType != null)
         {
-            foreach(LibraryFilterBase filter in filters)
+            foreach(FilterBase filter in filters)
             {
                 if(!filter.Filter(this))
                 {
@@ -58,7 +59,7 @@ public abstract class LibraryEntryBase : ILibraryEntry, ITagged
         return true;
     }
 
-    public void FilterEntries(params LibraryFilterBase[] filters)
+    public void FilterEntries(params FilterBase[] filters)
     {
         if(_allEntries.Count <= 0)
             return;
@@ -108,6 +109,25 @@ public abstract class LibraryEntryBase : ILibraryEntry, ITagged
             if (entry is LibraryEntryBase entryBase)
             {
                 entryBase.Flatten(ref entries);
+            }
+        }
+    }
+
+    public void GetAllTags(ref TagCollection tags)
+    {
+        if(this.FilteredEntries == null)
+            return;
+
+        foreach(ILibraryEntry entry in this.FilteredEntries)
+        {
+            if(entry.Tags != null)
+            {
+                tags.AddRange(entry.Tags);
+            }
+
+            if(entry is LibraryEntryBase entryBase)
+            {
+                entryBase.GetAllTags(ref tags);
             }
         }
     }

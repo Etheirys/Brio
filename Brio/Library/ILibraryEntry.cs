@@ -1,4 +1,5 @@
-﻿using Brio.Library.Sources;
+﻿using Brio.Library.Filters;
+using Brio.Library.Sources;
 using Brio.Library.Tags;
 using Dalamud.Interface.Internal;
 using System;
@@ -24,7 +25,8 @@ public interface ILibraryEntry : IDisposable, ITagged
     public IEnumerable<ILibraryEntry>? AllEntries { get; }
 
     public void Add(ILibraryEntry entry);
-    public bool PassesFilters(params LibraryFilterBase[] filters);
-    public void FilterEntries(params LibraryFilterBase[] filters);
+    public bool PassesFilters(params FilterBase[] filters);
+    public void FilterEntries(params FilterBase[] filters);
     public IEnumerable<ILibraryEntry>? GetFilteredEntries(bool flatten);
+    public void GetAllTags(ref TagCollection tags);
 }

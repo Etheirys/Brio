@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Brio.Library;
+namespace Brio.Library.Filters;
 
-public class LibraryTypeFilter : LibraryFilterBase
+public class TypeFilter : FilterBase
 {
     private HashSet<Type> _types = new();
 
-    public LibraryTypeFilter(string name, params Type[] fileTypes)
+    public TypeFilter(string name, params Type[] fileTypes)
         : base(name)
     {
         foreach(Type type in fileTypes)
@@ -16,11 +16,16 @@ public class LibraryTypeFilter : LibraryFilterBase
         }
     }
 
+    public override void Clear()
+    {
+        _types.Clear();
+    }
+
     public override bool Filter(ILibraryEntry entry)
     {
-        if (entry.FileType != null)
+        if(entry.FileType != null)
             return _types.Contains(entry.FileType);
-        
+
         return true;
     }
 }

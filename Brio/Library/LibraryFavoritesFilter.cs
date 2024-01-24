@@ -1,9 +1,15 @@
-﻿namespace Brio.Library;
+﻿using Brio.Library.Filters;
 
-public class LibraryFavoritesFilter : LibraryFilterBase
+namespace Brio.Library;
+
+public class LibraryFavoritesFilter : FilterBase
 {
     public LibraryFavoritesFilter()
         : base("Favorites")
+    {
+    }
+
+    public override void Clear()
     {
     }
 
