@@ -60,12 +60,12 @@ internal class LibraryManager : IDisposable
         _rootItem.Add(provider);
     }
 
-    private void Scan()
+    public void Scan()
     {
         Task.Run(ScanAsync);
     }
 
-    private async Task ScanAsync()
+    public async Task ScanAsync()
     {
         IsScanning = true;
 

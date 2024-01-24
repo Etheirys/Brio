@@ -8,6 +8,7 @@ using Dalamud.Interface.Utility.Raii;
 using Dalamud.Interface.Windowing;
 using Dalamud.Plugin.Services;
 using ImGuiNET;
+using System;
 using System.Collections.Generic;
 using System.Numerics;
 
@@ -15,6 +16,8 @@ namespace Brio.UI.Windows;
 
 internal class LibraryWindow : Window
 {
+    private const float InfoPaneWidth = 300;
+
     private readonly ConfigurationService _configurationService;
     private readonly LibraryManager _libraryManager;
     private readonly IPluginLog _log;
@@ -42,7 +45,11 @@ internal class LibraryWindow : Window
         : base($"{Brio.Name} Library###brio_library_window")
     {
         this.Namespace = "brio_library_namespace";
-        this.Size = new(800, 450);
+
+        WindowSizeConstraints constraints = new();
+        constraints.MinimumSize = new(850, 500);
+        constraints.MaximumSize = ImGui.GetIO().DisplaySize;
+        this.SizeConstraints = constraints;
 
         _log = log;
         _configurationService = configurationService;
@@ -71,10 +78,32 @@ internal class LibraryWindow : Window
             if(_currentFilter == null)
                 return;
 
+            ImGui.Spacing();
+            ImGui.Spacing();
             DrawPath(WindowContentWidth - 200);
             ImGui.SameLine();
             DrawSearch(200);
-            DrawFiles();
+
+
+            var windowSize = ImGui.GetWindowSize();
+            using(var child = ImRaii.Child("###left_pane", new Vector2(windowSize.X - InfoPaneWidth, -1), true))
+            {
+                if(child.Success)
+                {
+                    DrawFiles();
+                }
+            }
+
+            ImGui.SameLine();
+
+            using(var child = ImRaii.Child("###right_pane", new Vector2(ImBrio.GetRemainingWidth(), -1), true, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse))
+            {
+                if(child.Success)
+                {
+                    
+                }
+            }
+           
         }
     }
 
@@ -127,6 +156,7 @@ internal class LibraryWindow : Window
             width = WindowContentWidth;
 
         width -= ImGui.GetCursorPosX() - ImGui.GetStyle().FramePadding.X;
+        width -= 25;
 
         using(var child = ImRaii.Child("library_path_input", new(width, lineHeight)))
         {
@@ -163,11 +193,25 @@ internal class LibraryWindow : Window
             ImGui.PopStyleColor();
 
             ImGui.SameLine();
-            
         }
 
         ImGui.PopStyleVar();
         ImGui.PopStyleColor();
+
+        ImGui.SameLine();
+
+        if (_libraryManager.IsScanning)
+            ImGui.BeginDisabled();
+
+        if (ImBrio.FontIconButton(FontAwesomeIcon.Repeat))
+        {
+            _libraryManager.Scan();
+        }
+
+        if(_libraryManager.IsScanning)
+        {
+            ImGui.EndDisabled();
+        }
     }
 
     private void DrawSearch(float width = -1)
@@ -183,49 +227,44 @@ internal class LibraryWindow : Window
 
     private void DrawFiles()
     {
-        int columnCount = 6;
+        float fileWidth = 120;
+
+        int columnCount = (int)Math.Floor(WindowContentWidth / 120.0f);
         int column = 0;
         int index = 0;
-        
-        float fileWidth = (WindowContentWidth - 50) / columnCount;
 
-        using(var child = ImRaii.Child("library_files_area", new(-1, -1), true))
+        if(_libraryManager.IsScanning)
         {
-            if(!child.Success)
-                return;
-
-            if(_libraryManager.IsScanning)
+            ImGui.SetCursorPosX((WindowContentWidth / 2) - 24);
+            ImGui.SetCursorPosY((WindowContentHeight / 2) - 24);
+            ImBrio.Spinner(ref spinnerAngle);
+        }
+        else
+        {
+            if(_currentEntries == null)
             {
-                ImGui.SetCursorPosX((WindowContentWidth / 2) - 24);
-                ImGui.SetCursorPosY((WindowContentHeight / 2) - 24);
-                ImBrio.Spinner(ref spinnerAngle);
+                Refresh(true);
             }
             else
             {
-                if(_currentEntries == null)
+                foreach(var entry in _currentEntries)
                 {
-                    Refresh(true);
-                }
-                else
-                {
-                    foreach(var entry in _currentEntries)
-                    {
-                        DrawEntry(entry, fileWidth, index);
-                        index++;
+                    DrawEntry(entry, fileWidth, index);
+                    index++;
 
-                        column++;
-                        if(column >= columnCount)
-                        {
-                            column = 0;
-                        }
-                        else
-                        {
-                            ImGui.SameLine();
-                        }
+                    column++;
+                    if(column >= columnCount)
+                    {
+                        column = 0;
+                    }
+                    else
+                    {
+                        ImGui.SameLine();
                     }
                 }
             }
         }
+        
 
         if(_toOpen != null)
         {
