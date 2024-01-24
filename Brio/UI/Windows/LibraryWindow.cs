@@ -329,7 +329,10 @@ internal class LibraryWindow : Window
             {
                 _searchLostFocus++;
 
-                _searchString = _searchFilter.GetSearchString();
+                if(_searchLostFocus > 10)
+                {
+                    _searchString = _searchFilter.GetSearchString();
+                }
             }
             else
             {
