@@ -36,7 +36,7 @@ internal class LibraryWindow : Window
     };
 
     private FilterBase _typeFilter = filters[0];
-    private SearchQuerryFilter _searchFilter = new();
+    private SearchQueryFilter _searchFilter = new();
     private TagFilter _tagFilter = new();
     private string _searchString = string.Empty;
 
@@ -50,6 +50,7 @@ internal class LibraryWindow : Window
     private int _searchLostFocus = 0;
     private bool _isSearchSuggestWindowOpen = false;
     private bool _isSearchFocused = false;
+    private bool _searchNeedsClear = false;
     private Vector2? _searchSuggestPos;
     private Vector2? _searchSuggestSize;
 
@@ -76,7 +77,7 @@ internal class LibraryWindow : Window
 
     private float WindowContentWidth => ImGui.GetWindowContentRegionMax().X - ImGui.GetWindowContentRegionMin().X;
     private float WindowContentHeight => ImGui.GetWindowContentRegionMax().Y - ImGui.GetWindowContentRegionMin().Y;
-    public bool IsSearching => (_searchFilter.Querry != null && _searchFilter.Querry.Length > 0) || (_tagFilter.Tags != null && _tagFilter.Tags.Count > 0);
+    public bool IsSearching => (_searchFilter.Query != null && _searchFilter.Query.Length > 0) || (_tagFilter.Tags != null && _tagFilter.Tags.Count > 0);
 
     public override void OnOpen()
     {
@@ -253,7 +254,7 @@ internal class LibraryWindow : Window
                 ImGui.PushStyleColor(ImGuiCol.Button, ImGui.GetColorU32(ImGuiCol.FrameBg));
                 if (ImBrio.FontIconButton(FontAwesomeIcon.TimesCircle))
                 {
-                    _searchString = string.Empty;
+                    ClearSearch();
                     _searchFilter.Clear();
                     _tagFilter.Clear();
                     _searchNeedsFocus = true;
@@ -307,16 +308,16 @@ internal class LibraryWindow : Window
 
             if (ImGui.InputText("###library_search_input", ref _searchString, 256, 
                 ImGuiInputTextFlags.EnterReturnsTrue | ImGuiInputTextFlags.NoHorizontalScroll | ImGuiInputTextFlags.NoUndoRedo
-                | ImGuiInputTextFlags.CallbackCompletion | ImGuiInputTextFlags.CallbackHistory,
+                | ImGuiInputTextFlags.CallbackAlways,
                 OnSearchFunc))
             {
                 if(string.IsNullOrEmpty(_searchString))
                 {
-                    _searchFilter.Querry = null;
+                    _searchFilter.Query = null;
                 }
                 else
                 {
-                    _searchFilter.Querry = SearchUtility.ToQuery(_searchString);
+                    _searchFilter.Query = SearchUtility.ToQuery(_searchString);
                 }
 
                 Refresh(true);
@@ -327,6 +328,8 @@ internal class LibraryWindow : Window
             if(!_isSearchFocused)
             {
                 _searchLostFocus++;
+
+                _searchString = _searchFilter.GetSearchString();
             }
             else
             {
@@ -341,10 +344,19 @@ internal class LibraryWindow : Window
         ImGui.PopStyleVar();
     }
 
+    private void ClearSearch()
+    {
+        _searchString = string.Empty;
+        _searchNeedsClear = true;
+    }
+
     private unsafe int OnSearchFunc(ImGuiInputTextCallbackData* data)
     {
-        if(data->EventKey == ImGuiKey.Tab)
+        if(_searchNeedsClear)
         {
+            _searchNeedsClear = false;
+            _searchString = string.Empty;
+
             // clear the search input buffer
             data->BufTextLen = 0;
             data->BufSize = 0;
@@ -352,17 +364,6 @@ internal class LibraryWindow : Window
             data->SelectionStart = 0;
             data->SelectionEnd = 0;
             data->BufDirty = 1;
-
-            _tagFilter.Add("Yuki");
-            _searchString = string.Empty;
-
-            Refresh(true);
-        }
-        else if (data->EventKey == ImGuiKey.UpArrow)
-        {
-        }
-        else if(data->EventKey == ImGuiKey.DownArrow)
-        {
         }
 
         return 1;
@@ -394,6 +395,8 @@ internal class LibraryWindow : Window
             {
                 _tagFilter.Add(selected);
                 _searchNeedsFocus = true;
+
+                ClearSearch();
 
                 Refresh(true);
             }
