@@ -1,4 +1,5 @@
 ﻿using Brio.Files;
+using Brio.Library.Tags;
 using Brio.Resources;
 using Brio.UI;
 using Dalamud.Interface.Internal;
@@ -133,6 +134,28 @@ public class LibraryFileInfo : LibraryEntryBase
         }
 
         _fileType = fileType;
+
+    
+        // Get tags
+        if(FileType != null && typeof(FileBase).IsAssignableFrom(FileType))
+        {
+            try
+            {
+                FileBase? doc = ResourceProvider.Instance.GetFileDocument(FilePath, FileType) as FileBase;
+                if(doc != null)
+                {
+                    if (doc.Tags != null)
+                        Tags.AddRange(doc.Tags);
+
+                    TagCollection tags = Tags;
+                    doc.GetAutoTags(ref tags);
+                    Tags = tags;
+                }
+            }
+            catch(Exception)
+            {
+            }
+        }
     }
 
     public override string Name => _name;

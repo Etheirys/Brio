@@ -106,7 +106,7 @@ internal class LibraryWindow : Window
         if(_path.Count <= 1)
             ImGui.BeginDisabled();
 
-        if (ImBrio.FontIconButton(FontAwesomeIcon.LevelUpAlt))
+        if (ImBrio.FontIconButton(FontAwesomeIcon.CaretUp))
         {
             _path.RemoveAt(_path.Count - 1);
             Refresh(false);
@@ -137,7 +137,7 @@ internal class LibraryWindow : Window
                 if (i > 0)
                 {
                     ImGui.SetCursorPosY(ImGui.GetCursorPosY() + 5);
-                    ImBrio.FontIcon(FontAwesomeIcon.ChevronRight, 0.5f);
+                    ImBrio.FontIcon(FontAwesomeIcon.CaretRight, 0.5f);
                     ImGui.SameLine();
                 }
 

@@ -1,4 +1,5 @@
 ﻿using Brio.Game.Actor.Appearance;
+using Brio.Library.Tags;
 using FFXIVClientStructs.FFXIV.Client.Game.Character;
 using System;
 using System.Numerics;
@@ -61,6 +62,15 @@ internal class AnamnesisCharaFile : FileBase
     public float Transparency { get; set; }
     public float MuscleTone { get; set; }
     public float HeightMultiplier { get; set; }
+
+    public override void GetAutoTags(ref TagCollection tags)
+    {
+        base.GetAutoTags(ref tags);
+
+        tags.Add(this.Race.ToDisplayName());
+        tags.Add(this.Gender.ToDisplayName());
+        tags.Add(this.Tribe.ToDisplayName());
+    }
 
     public static implicit operator ActorAppearance(AnamnesisCharaFile chara)
     {

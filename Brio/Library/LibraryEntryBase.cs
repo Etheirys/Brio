@@ -1,10 +1,11 @@
-﻿using Dalamud.Interface.Internal;
+﻿using Brio.Library.Tags;
+using Dalamud.Interface.Internal;
 using System;
 using System.Collections.Generic;
 
 namespace Brio.Library;
 
-public abstract class LibraryEntryBase : ILibraryEntry
+public abstract class LibraryEntryBase : ILibraryEntry, ITagged
 {
     private List<ILibraryEntry> _allEntries = new List<ILibraryEntry>();
     private List<ILibraryEntry> _filteredEntries = new List<ILibraryEntry>();
@@ -17,6 +18,7 @@ public abstract class LibraryEntryBase : ILibraryEntry
     public virtual Type? FileType => null;
 
     public virtual bool IsVisible { get; set; }
+    public TagCollection Tags { get; init; } = new();
 
     public void Add(ILibraryEntry entry)
     {

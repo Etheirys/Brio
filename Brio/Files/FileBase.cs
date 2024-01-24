@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Brio.Library.Tags;
 
 namespace Brio.Files;
 internal abstract class FileBase
@@ -11,4 +7,9 @@ internal abstract class FileBase
     public string? Description { get; set; }
     public string? Version { get; set; }
     public string? Base64Image { get; set; }
+    public TagCollection? Tags { get; set; }
+
+    public virtual void GetAutoTags(ref TagCollection tags)
+    {
+    }
 }

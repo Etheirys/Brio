@@ -23,7 +23,13 @@ internal class LibraryGameDataNpcProvider : LibraryProviderBase
         {
             string name = $"B:{npc.RowId:D7}";
             name = ResolveName(name);
-            Add(new NpcEntry(name, 0, npc));
+            var entry = new NpcEntry(name, 0, npc);
+            entry.Tags.Add("NPC");
+
+            if(!string.IsNullOrEmpty(name))
+                entry.Tags.Add("Named");
+
+            Add(entry);
         }
 
         foreach(var (_, npc) in _lumina.ENpcBases)
@@ -38,7 +44,13 @@ internal class LibraryGameDataNpcProvider : LibraryProviderBase
             }
 
             name = ResolveName(name);
-            Add(new NpcEntry(name, 0, npc));
+            var entry = new NpcEntry(name, 0, npc);
+            entry.Tags.Add("NPC");
+
+            if(!string.IsNullOrEmpty(name))
+                entry.Tags.Add("Named");
+
+            Add(entry);
         }
     }
 
@@ -75,7 +87,9 @@ internal class LibraryGameDataMountProvider : LibraryProviderBase
     {
         foreach(var (_, mount) in _lumina.Mounts)
         {
-            Add(new NpcEntry(mount.Singular ?? $"Mount {mount.RowId}", mount.Icon, mount));
+            var entry = new NpcEntry(mount.Singular ?? $"Mount {mount.RowId}", mount.Icon, mount);
+            entry.Tags.Add("Mount");
+            Add(entry);
         }
     }
 }
@@ -94,7 +108,9 @@ internal class LibraryGameDataCompanionsProvider : LibraryProviderBase
     {
         foreach(var (_, companion) in _lumina.Companions)
         {
-            Add(new NpcEntry(companion.Singular ?? $"Companion {companion.RowId}", companion.Icon, companion));
+            var entry = new NpcEntry(companion.Singular ?? $"Companion {companion.RowId}", companion.Icon, companion);
+            entry.Tags.Add("Companion").WithAlias("Minion");
+            Add(entry);
         }
     }
 }
@@ -113,7 +129,9 @@ internal class LibraryGameDataOrnamentsProvider : LibraryProviderBase
     {
         foreach(var (_, ornament) in _lumina.Ornaments)
         {
-            Add(new NpcEntry(ornament.Singular ?? $"Ornament {ornament.RowId}", ornament.Icon, ornament));
+            var entry = new NpcEntry(ornament.Singular ?? $"Ornament {ornament.RowId}", ornament.Icon, ornament);
+            entry.Tags.Add("Ornament").WithAlias("Fashion Accessory");
+            Add(entry);
         }
     }
 }
