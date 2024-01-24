@@ -32,6 +32,7 @@ internal class LibraryWindow : Window
     private readonly List<ILibraryEntry> _path = new();
     private IEnumerable<ILibraryEntry>? _currentEntries;
     private ILibraryEntry? _toOpen = null;
+    private ILibraryEntry? _selected = null;
     private float spinnerAngle = 0;
 
     public LibraryWindow(
@@ -238,14 +239,17 @@ internal class LibraryWindow : Window
         float height = width + 60;
         Vector2 size = new(width, height);
         Vector2 pos = ImGui.GetCursorPos();
-        ImGui.PushStyleColor(ImGuiCol.Button, ImGui.GetColorU32(ImGuiCol.ChildBg));
 
-        if(ImGui.Button($"###library_entry_{id}_button", size))
+        bool selected = _selected == entry;
+        if (ImGui.Selectable($"###library_entry_{id}_selectable", ref selected, ImGuiSelectableFlags.AllowDoubleClick, size))
         {
-            _toOpen = entry;
-        }
+            _selected = entry;
 
-        ImGui.PopStyleColor();
+            if(ImGui.IsMouseDoubleClicked(ImGuiMouseButton.Left))
+            {
+                _toOpen = entry;
+            }
+        }
 
         if(ImGui.IsItemVisible())
         {
@@ -303,6 +307,8 @@ internal class LibraryWindow : Window
     {
         if(_libraryManager.IsScanning)
             return;
+
+        _selected = null;
 
         if (_currentEntries != null)
         {
