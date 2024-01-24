@@ -1,7 +1,7 @@
 ﻿using Brio.Config;
+using Brio.Library.Sources;
 using Brio.Resources;
 using Dalamud.Interface.Internal;
-using Dalamud.Logging;
 using Dalamud.Plugin.Services;
 using System;
 using System.Collections.Generic;
@@ -26,38 +26,38 @@ internal class LibraryManager : IDisposable
         _rootItem = new();
 
         // TODO: add a configuration option to set the locations of these
-        AddProvider(new LibraryFileProvider("Brio Poses", "Images.ProviderIcon_Directory.png", Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Brio", "Poses"));
-        AddProvider(new LibraryFileProvider("Brio Characters", "Images.ProviderIcon_Directory.png", Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Brio", "Characters"));
-        AddProvider(new LibraryFileProvider("Anamnesis Poses", "Images.ProviderIcon_Anamnesis.png", Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Anamnesis", "Poses"));
-        AddProvider(new LibraryFileProvider("Anamnesis Characters", "Images.ProviderIcon_Anamnesis.png", Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Anamnesis", "Characters"));
+        AddSource(new FileSource("Brio Poses", "Images.ProviderIcon_Directory.png", Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Brio", "Poses"));
+        AddSource(new FileSource("Brio Characters", "Images.ProviderIcon_Directory.png", Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Brio", "Characters"));
+        AddSource(new FileSource("Anamnesis Poses", "Images.ProviderIcon_Anamnesis.png", Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Anamnesis", "Poses"));
+        AddSource(new FileSource("Anamnesis Characters", "Images.ProviderIcon_Anamnesis.png", Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Anamnesis", "Characters"));
 
         // TODO: swap this for a package
-        AddProvider(new LibraryFileProvider("Standard Poses", "Images.ProviderIcon_Directory.png", Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Anamnesis", "StandardPoses"));
+        AddSource(new FileSource("Standard Poses", "Images.ProviderIcon_Directory.png", Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Anamnesis", "StandardPoses"));
 
         // Game Data
-        AddProvider(new LibraryGameDataNpcProvider(_luminaProvider));
-        AddProvider(new LibraryGameDataMountProvider(_luminaProvider));
-        AddProvider(new LibraryGameDataCompanionsProvider(_luminaProvider));
-        AddProvider(new LibraryGameDataOrnamentsProvider(_luminaProvider));
+        AddSource(new GameDataNpcSource(_luminaProvider));
+        AddSource(new GameDataMountSource(_luminaProvider));
+        AddSource(new GameDataCompanionSource(_luminaProvider));
+        AddSource(new GameDataOrnamentSource(_luminaProvider));
 
         Scan();
     }
 
-    public List<LibraryProviderBase> Providers { get; init; } = new();
+    public List<SourceBase> Sources { get; init; } = new();
     public ILibraryEntry Root => _rootItem;
 
     public void Dispose()
     {
-        foreach(LibraryProviderBase provider in Providers)
+        foreach(SourceBase source in Sources)
         {
-            provider.Dispose();
+            source.Dispose();
         }
     }
 
-    public void AddProvider(LibraryProviderBase provider)
+    public void AddSource(SourceBase source)
     {
-        Providers.Add(provider);
-        _rootItem.Add(provider);
+        Sources.Add(source);
+        _rootItem.Add(source);
     }
 
     public void Scan()
@@ -70,9 +70,9 @@ internal class LibraryManager : IDisposable
         IsScanning = true;
 
         List<Task> scanTasks = new();
-        foreach(LibraryProviderBase provider in Providers)
+        foreach(SourceBase source in Sources)
         {
-            scanTasks.Add(Task.Run(()=> ScanProvider(provider)));
+            scanTasks.Add(Task.Run(()=> ScanSource(source)));
         }
 
         await Task.WhenAll(scanTasks.ToArray());
@@ -80,21 +80,26 @@ internal class LibraryManager : IDisposable
         IsScanning = false;
     }
 
-    private void ScanProvider(LibraryProviderBase provider)
+    private void ScanSource(SourceBase source)
     {
         try
         {
-            provider.Scan();
+            source.Scan();
         }
         catch(Exception ex)
         {
-            _log.Error(ex, $"Error in library provider: {provider.Name}");
+            _log.Error(ex, $"Error in library source: {source.Name}");
         }
     }
 }
 
 public class LibraryRoot : LibraryEntryBase
 {
+    public LibraryRoot()
+        : base(null)
+    {
+    }
+
     public override string Name => "Library";
     public override IDalamudTextureWrap? Icon => null;
 }

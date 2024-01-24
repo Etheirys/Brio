@@ -3,15 +3,14 @@ using Brio.Library.Tags;
 using Brio.Resources;
 using Brio.UI;
 using Dalamud.Interface.Internal;
-using ImGuiNET;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 
-namespace Brio.Library;
+namespace Brio.Library.Sources;
 
-public class LibraryFileProvider : LibraryProviderBase
+public class FileSource : SourceBase
 {
     public readonly string DirectoryPath;
 
@@ -23,24 +22,24 @@ public class LibraryFileProvider : LibraryProviderBase
         typeof(PoseFile)
     };
 
-    public LibraryFileProvider(string name, string icon, string directoryPath)
+    public FileSource(string name, string icon, string directoryPath)
         : base(name, ResourceProvider.Instance.GetResourceImage(icon))
     {
-        this.DirectoryPath = directoryPath;
+        DirectoryPath = directoryPath;
     }
 
-    public LibraryFileProvider(string name, string icon, params string[] paths)
+    public FileSource(string name, string icon, params string[] paths)
           : base(name, ResourceProvider.Instance.GetResourceImage(icon))
     {
-        this.DirectoryPath = Path.Combine(paths);
+        DirectoryPath = Path.Combine(paths);
     }
 
     public override void Scan()
     {
-        if(!Directory.Exists(this.DirectoryPath))
+        if(!Directory.Exists(DirectoryPath))
             return;
 
-        this.Scan(this.DirectoryPath, this);
+        Scan(DirectoryPath, this);
     }
 
     public void Scan(string directory, ILibraryEntry parent)
@@ -51,7 +50,7 @@ public class LibraryFileProvider : LibraryProviderBase
         string[] dirPaths = Directory.GetDirectories(directory);
         foreach(string dirPath in dirPaths)
         {
-            LibraryDirectoryInfo dir = new(dirPath);
+            DirectoryEntry dir = new(this, dirPath);
             parent.Add(dir);
 
             Scan(dirPath, dir);
@@ -65,7 +64,7 @@ public class LibraryFileProvider : LibraryProviderBase
             if(!GetFileType(filePath, out fileTypeAttribute, out fileType) || fileTypeAttribute == null || fileType == null)
                 continue;
 
-            parent.Add(new LibraryFileInfo(filePath, fileTypeAttribute, fileType));
+            parent.Add(new FileEntry(this, filePath, fileTypeAttribute, fileType));
         }
     }
 
@@ -92,17 +91,18 @@ public class LibraryFileProvider : LibraryProviderBase
     }
 }
 
-public class LibraryDirectoryInfo : LibraryEntryBase
+public class DirectoryEntry : LibraryEntryBase
 {
     private string _name;
     private IDalamudTextureWrap _icon;
 
-    public LibraryDirectoryInfo(string path)
+    public DirectoryEntry(FileSource source, string path)
+        : base(source)
     {
-        _name = System.IO.Path.GetFileNameWithoutExtension(path);
+        _name = Path.GetFileNameWithoutExtension(path);
         if(_name.Length >= 60)
         {
-            _name = this.Name.Substring(0, 55) + "...";
+            _name = Name.Substring(0, 55) + "...";
         }
 
         _icon = ResourceProvider.Instance.GetResourceImage("Images.FileIcon_Directory.png");
@@ -112,7 +112,7 @@ public class LibraryDirectoryInfo : LibraryEntryBase
     public override IDalamudTextureWrap? Icon => _icon;
 }
 
-public class LibraryFileInfo : LibraryEntryBase
+public class FileEntry : LibraryEntryBase
 {
     public readonly string FilePath;
     public readonly FileTypeAttribute FileTypeAttribute;
@@ -122,12 +122,13 @@ public class LibraryFileInfo : LibraryEntryBase
     private IDalamudTextureWrap? _icon;
     private bool _isFileIcon;
 
-    public LibraryFileInfo(string path, FileTypeAttribute fileTypeAttribute, Type fileType)
+    public FileEntry(FileSource source, string path, FileTypeAttribute fileTypeAttribute, Type fileType)
+        : base(source)
     {
-        this.FilePath = path;
-        this.FileTypeAttribute = fileTypeAttribute;
+        FilePath = path;
+        FileTypeAttribute = fileTypeAttribute;
 
-        _name = System.IO.Path.GetFileNameWithoutExtension(path);
+        _name = Path.GetFileNameWithoutExtension(path);
         if(_name.Length >= 60)
         {
             _name = _name.Substring(0, 55) + "...";
@@ -135,7 +136,7 @@ public class LibraryFileInfo : LibraryEntryBase
 
         _fileType = fileType;
 
-    
+
         // Get tags
         if(FileType != null && typeof(FileBase).IsAssignableFrom(FileType))
         {
@@ -144,7 +145,7 @@ public class LibraryFileInfo : LibraryEntryBase
                 FileBase? doc = ResourceProvider.Instance.GetFileDocument(FilePath, FileType) as FileBase;
                 if(doc != null)
                 {
-                    if (doc.Tags != null)
+                    if(doc.Tags != null)
                         Tags.AddRange(doc.Tags);
 
                     TagCollection tags = Tags;
@@ -198,7 +199,7 @@ public class LibraryFileInfo : LibraryEntryBase
                 }
             }
 
-            _icon = this.FileTypeAttribute.GetIcon(_fileType);
+            _icon = FileTypeAttribute.GetIcon(_fileType);
             _isFileIcon = false;
             return _icon;
         }
@@ -210,7 +211,7 @@ public class LibraryFileInfo : LibraryEntryBase
     {
         base.Dispose();
 
-        if (_icon != null && _isFileIcon)
+        if(_icon != null && _isFileIcon)
         {
             _icon.Dispose();
         }

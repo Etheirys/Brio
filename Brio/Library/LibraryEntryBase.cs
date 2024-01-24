@@ -1,4 +1,5 @@
-﻿using Brio.Library.Tags;
+﻿using Brio.Library.Sources;
+using Brio.Library.Tags;
 using Dalamud.Interface.Internal;
 using System;
 using System.Collections.Generic;
@@ -9,6 +10,12 @@ public abstract class LibraryEntryBase : ILibraryEntry, ITagged
 {
     private List<ILibraryEntry> _allEntries = new List<ILibraryEntry>();
     private List<ILibraryEntry> _filteredEntries = new List<ILibraryEntry>();
+    private SourceBase? _source;
+
+    public LibraryEntryBase(SourceBase? source)
+    {
+        _source = source;
+    }
 
     public IEnumerable<ILibraryEntry>? FilteredEntries => this._filteredEntries;
     public IEnumerable<ILibraryEntry>? AllEntries => this._allEntries;
@@ -19,6 +26,7 @@ public abstract class LibraryEntryBase : ILibraryEntry, ITagged
 
     public virtual bool IsVisible { get; set; }
     public TagCollection Tags { get; init; } = new();
+    public SourceBase? Source => _source;
 
     public void Add(ILibraryEntry entry)
     {

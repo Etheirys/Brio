@@ -1,14 +1,15 @@
 ﻿using Dalamud.Interface.Internal;
 using System;
 
-namespace Brio.Library;
+namespace Brio.Library.Sources;
 
-public abstract class LibraryProviderBase : LibraryEntryBase
+public abstract class SourceBase : LibraryEntryBase
 {
     private string _name;
     private IDalamudTextureWrap _icon;
 
-    public LibraryProviderBase(string name, IDalamudTextureWrap icon)
+    public SourceBase(string name, IDalamudTextureWrap icon)
+        : base(null)
     {
         _name = name;
         _icon = icon;
