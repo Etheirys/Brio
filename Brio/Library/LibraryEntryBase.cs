@@ -22,6 +22,7 @@ public abstract class LibraryEntryBase : ILibraryEntry, ITagged
 
     public abstract string Name { get; }
     public abstract IDalamudTextureWrap? Icon { get; }
+    public virtual IDalamudTextureWrap? PreviewImage => null;
     public virtual Type? FileType => null;
 
     public virtual bool IsVisible { get; set; }

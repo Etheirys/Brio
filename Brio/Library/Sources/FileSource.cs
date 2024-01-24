@@ -119,8 +119,7 @@ public class FileEntry : LibraryEntryBase
 
     private string _name;
     private Type _fileType;
-    private IDalamudTextureWrap? _icon;
-    private bool _isFileIcon;
+    private IDalamudTextureWrap? _previewImage;
 
     public FileEntry(FileSource source, string path, FileTypeAttribute fileTypeAttribute, Type fileType)
         : base(source)
@@ -161,6 +160,7 @@ public class FileEntry : LibraryEntryBase
 
     public override string Name => _name;
     public override IDalamudTextureWrap? Icon => GetIcon();
+    public override IDalamudTextureWrap? PreviewImage => GetPreviewImage();
     public override Type? FileType => _fileType;
 
     public override bool IsVisible
@@ -170,16 +170,25 @@ public class FileEntry : LibraryEntryBase
         {
             base.IsVisible = value;
 
-            if(!value && _icon != null && _isFileIcon)
+            if(!value)
             {
-                _icon.Dispose();
+                _previewImage?.Dispose();
             }
         }
     }
 
     private IDalamudTextureWrap GetIcon()
     {
-        if(_icon == null || _icon.ImGuiHandle == 0)
+        IDalamudTextureWrap? preview = GetPreviewImage();
+        if(preview != null)
+            return preview;
+
+        return FileTypeAttribute.GetIcon(_fileType);
+    }
+
+    private IDalamudTextureWrap? GetPreviewImage()
+    {
+        if(_previewImage == null || _previewImage.ImGuiHandle == 0)
         {
             if(FileType != null && typeof(FileBase).IsAssignableFrom(FileType))
             {
@@ -189,31 +198,22 @@ public class FileEntry : LibraryEntryBase
                     if(doc != null && doc.Base64Image != null)
                     {
                         byte[] imgData = Convert.FromBase64String(doc.Base64Image);
-                        _icon = UIManager.Instance.LoadImage(imgData);
-                        _isFileIcon = true;
-                        return _icon;
+                        _previewImage = UIManager.Instance.LoadImage(imgData);
+                        return _previewImage;
                     }
                 }
                 catch(Exception)
                 {
                 }
             }
-
-            _icon = FileTypeAttribute.GetIcon(_fileType);
-            _isFileIcon = false;
-            return _icon;
         }
 
-        return _icon;
+        return _previewImage;
     }
 
     public override void Dispose()
     {
         base.Dispose();
-
-        if(_icon != null && _isFileIcon)
-        {
-            _icon.Dispose();
-        }
+        _previewImage?.Dispose();
     }
 }

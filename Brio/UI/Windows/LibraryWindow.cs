@@ -100,7 +100,10 @@ internal class LibraryWindow : Window
             {
                 if(child.Success)
                 {
-                    
+                    if(_selected != null)
+                    {
+                        DrawInfo(_selected);
+                    }
                 }
             }
            
@@ -301,32 +304,30 @@ internal class LibraryWindow : Window
 
                 if(entry.Icon != null)
                 {
-                    float fitWidth = ImGui.GetContentRegionAvail().X;
-                    float fitHeight = ImGui.GetContentRegionAvail().X;
-                    float indent = 0;
-                    if(entry.Icon.Width < entry.Icon.Height)
-                    {
-                        fitWidth = ((float)entry.Icon.Width / (float)entry.Icon.Height) * ImGui.GetContentRegionAvail().X;
-                        indent = (ImGui.GetContentRegionAvail().X - fitWidth) / 2;
-                        ImGui.Indent(indent);
-                    }
-
-                    else if(entry.Icon.Height < entry.Icon.Width)
-                    {
-                        fitHeight = ((float)entry.Icon.Height / (float)entry.Icon.Width) * ImGui.GetContentRegionAvail().X;
-                    }
-
-                    ImGui.Image(entry.Icon.ImGuiHandle, new(fitWidth, fitHeight));
-
-                    if(indent != 0)
-                    {
-                        ImGui.Unindent(indent);
-                    }
+                    ImBrio.ImageFit(entry.Icon, ImGui.GetContentRegionAvail());
                 }
 
                 ImBrio.TextCentered(entry.Name, ImGui.GetContentRegionAvail().X);
             }
         }
+    }
+
+    private void DrawInfo(ILibraryEntry entry)
+    {
+        ImGui.Text(entry.Name);
+        if(entry.Source != null)
+        {
+            ImGui.Text(entry.Source.Name);
+        }
+
+        if(entry.PreviewImage != null)
+        {
+            Vector2 size = ImGui.GetContentRegionAvail();
+            size.Y = size.X;
+            ImBrio.ImageFit(entry.PreviewImage, size);
+        }
+
+        ImGui.TextWrapped(entry.Tags?.ToString());
     }
 
     private void OnOpen(ILibraryEntry entry)

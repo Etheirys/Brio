@@ -12,6 +12,7 @@ public interface ILibraryEntry : IDisposable, ITagged
     public IEnumerable<ILibraryEntry>? FilteredEntries { get; }
     public IEnumerable<ILibraryEntry>? AllEntries { get; }
     public IDalamudTextureWrap? Icon { get; }
+    public IDalamudTextureWrap? PreviewImage { get; }
     public Type? FileType { get; }
     public SourceBase? Source { get; }
 
