@@ -10,22 +10,29 @@ internal static partial class ImBrio
         return ImGui.Button(tag.Name);
     }
 
-    public static void DrawTags(TagCollection tags)
+    public static Tag? DrawTags(TagCollection tags, string[]? query = null)
     {
+        Tag? clicked = null;
         float maxWidth = ImGui.GetContentRegionAvail().X;
         foreach(var tag in tags)
         {
-            float itemWidth = ImGui.CalcTextSize(tag.Name).X + 10;
-            float nextX = ImGui.GetCursorPosX() + itemWidth;
-            if(nextX > maxWidth)
+            if(query == null || tag.Search(query))
             {
-                ImGui.NewLine();
-            }
+                float itemWidth = ImGui.CalcTextSize(tag.Name).X + 10;
+                float nextX = ImGui.GetCursorPosX() + itemWidth;
+                if(nextX > maxWidth)
+                {
+                    ImGui.NewLine();
+                }
 
-            ImBrio.DrawTag(tag);
-            ImGui.SameLine();
+                if(ImBrio.DrawTag(tag))
+                    clicked = tag;
+
+                ImGui.SameLine();
+            }
         }
 
         ImGui.NewLine();
+        return clicked;
     }
 }

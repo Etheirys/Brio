@@ -2,6 +2,8 @@
 using Brio.Files;
 using Brio.Game.Types;
 using Brio.Library;
+using Brio.Library.Filters;
+using Brio.Library.Tags;
 using Brio.UI.Controls.Stateless;
 using Dalamud.Interface;
 using Dalamud.Interface.Utility.Raii;
@@ -20,26 +22,35 @@ namespace Brio.UI.Windows;
 internal class LibraryWindow : Window
 {
     private const float InfoPaneWidth = 300;
+    private const float SearchWidth = 350;
 
     private readonly ConfigurationService _configurationService;
     private readonly LibraryManager _libraryManager;
     private readonly IPluginLog _log;
 
-    private readonly static List<LibraryFilterBase> filters = new()
+    private readonly static List<FilterBase> filters = new()
     {
         new LibraryFavoritesFilter(),
-        new LibraryTypeFilter("Characters", typeof(AnamnesisCharaFile), typeof(ActorAppearanceUnion)),
-        new LibraryTypeFilter("Poses", typeof(PoseFile), typeof(CMToolPoseFile)),
+        new TypeFilter("Characters", typeof(AnamnesisCharaFile), typeof(ActorAppearanceUnion)),
+        new TypeFilter("Poses", typeof(PoseFile), typeof(CMToolPoseFile)),
     };
 
-    private LibraryFilterBase _currentFilter = filters[0];
-    private LibraryStringFilter _searchFilter = new();
+    private FilterBase _typeFilter = filters[0];
+    private SearchQuerryFilter _searchFilter = new();
+    private TagFilter _tagFilter = new();
+    private string _searchString = string.Empty;
 
     private readonly List<ILibraryEntry> _path = new();
     private IEnumerable<ILibraryEntry>? _currentEntries;
+    private TagCollection _allTags = new();
     private ILibraryEntry? _toOpen = null;
     private ILibraryEntry? _selected = null;
     private float spinnerAngle = 0;
+    private bool _searchNeedsFocus = true;
+
+    private bool _isSearchSuggestWindowOpen = false;
+    private Vector2? _searchSuggestPos;
+    private Vector2? _searchSuggestSize;
 
     public LibraryWindow(
         IPluginLog log,
@@ -64,7 +75,7 @@ internal class LibraryWindow : Window
 
     private float WindowContentWidth => ImGui.GetWindowContentRegionMax().X - ImGui.GetWindowContentRegionMin().X;
     private float WindowContentHeight => ImGui.GetWindowContentRegionMax().Y - ImGui.GetWindowContentRegionMin().Y;
-    public bool IsSearching => !string.IsNullOrEmpty(_searchFilter.SearchString);
+    public bool IsSearching => (_searchFilter.Querry != null && _searchFilter.Querry.Length > 0) || (_tagFilter.Tags != null && _tagFilter.Tags.Count > 0);
 
     public override void OnOpen()
     {
@@ -78,14 +89,14 @@ internal class LibraryWindow : Window
         {
             DrawFilters();
 
-            if(_currentFilter == null)
+            if(_typeFilter == null)
                 return;
 
             ImGui.Spacing();
             ImGui.Spacing();
-            DrawPath(WindowContentWidth - 200);
+            DrawPath(WindowContentWidth - SearchWidth);
             ImGui.SameLine();
-            DrawSearch(200);
+            DrawSearch();
 
 
             var windowSize = ImGui.GetWindowSize();
@@ -109,7 +120,8 @@ internal class LibraryWindow : Window
                     }
                 }
             }
-           
+
+            DrawSearchSuggest();
         }
     }
 
@@ -121,17 +133,17 @@ internal class LibraryWindow : Window
         float buttonWidth = (WindowContentWidth / filters.Count) - ImGui.GetStyle().FramePadding.X;
         for(int i = 0; i < filters.Count; i++)
         {
-            LibraryFilterBase filter = filters[i];
-            bool isCurrent = filter == _currentFilter;
+            FilterBase filter = filters[i];
+            bool isCurrent = filter == _typeFilter;
 
             if (i > 0)
                 ImGui.SameLine();
 
             ImBrio.ToggleButton(filter.Name, new(buttonWidth, 0), ref isCurrent, false);
 
-            if(isCurrent && _currentFilter != filter)
+            if(isCurrent && _typeFilter != filter)
             {
-                _currentFilter = filter;
+                _typeFilter = filter;
                 Refresh(true);
             }
         }
@@ -220,15 +232,157 @@ internal class LibraryWindow : Window
         }
     }
 
-    private void DrawSearch(float width = -1)
+    private unsafe void DrawSearch()
     {
-        ImGui.SetNextItemWidth(width - ImGui.GetStyle().FramePadding.X * 2);
-        string searchText = _searchFilter.SearchString ?? string.Empty;
-        if (ImGui.InputTextWithHint("###library_search_input", "Search", ref searchText, 256))
+        float searchBarWidth = ImBrio.GetRemainingWidth();
+        float searchBarHeight = ImGui.GetTextLineHeightWithSpacing() + ImGui.GetStyle().FramePadding.Y;
+        Vector2 searchbarPosition = ImGui.GetCursorScreenPos();
+        
+        ImGui.PushStyleColor(ImGuiCol.ChildBg, ImGui.GetColorU32(ImGuiCol.FrameBg));
+        ImGui.PushStyleVar(ImGuiStyleVar.ChildRounding, ImGui.GetStyle().FrameRounding);
+
+        using(var child = ImRaii.Child("library_search_input", new(searchBarWidth, searchBarHeight), false, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse))
         {
-            _searchFilter.SearchString = searchText;
+            if(!child.Success)
+                return;
+
+            // search / clear icons
+            if(IsSearching)
+            {
+                ImGui.PushStyleColor(ImGuiCol.Button, ImGui.GetColorU32(ImGuiCol.FrameBg));
+                if (ImBrio.FontIconButton(FontAwesomeIcon.TimesCircle))
+                {
+                    _searchString = string.Empty;
+                    _searchFilter.Clear();
+                    _tagFilter.Clear();
+                    Refresh(true);
+                }
+
+                ImGui.PopStyleColor();
+            }
+            else
+            {
+                ImGui.SetCursorPosY(5);
+                ImGui.SetCursorPosX(5);
+                ImGui.BeginDisabled();
+                ImBrio.FontIcon(FontAwesomeIcon.Search, 0.75f);
+                ImGui.EndDisabled();
+            }
+
+            // Tags
+            if(_tagFilter.Tags != null)
+            {
+                Tag? toRemove = null;
+                foreach(Tag tag in _tagFilter.Tags)
+                {
+                    ImGui.SameLine();
+                    ImGui.SetCursorPosY(0);
+
+                    if(ImBrio.DrawTag(tag))
+                    {
+                        toRemove = tag;
+                    }
+                }
+
+                if (toRemove != null)
+                {
+                    _tagFilter.Tags.Remove(toRemove);
+                    Refresh(true);
+                }
+            }
+
+            // String input
+            ImGui.SameLine();
+            ImGui.SetCursorPosY(0);
+            ImGui.SetNextItemWidth(ImBrio.GetRemainingWidth());
+
+            if(_searchNeedsFocus)
+            {
+                ImGui.SetKeyboardFocusHere();
+                _searchNeedsFocus = false;
+            }
+
+            if (ImGui.InputText("###library_search_input", ref _searchString, 256, 
+                ImGuiInputTextFlags.EnterReturnsTrue | ImGuiInputTextFlags.NoHorizontalScroll | ImGuiInputTextFlags.NoUndoRedo
+                | ImGuiInputTextFlags.CallbackCompletion | ImGuiInputTextFlags.CallbackHistory,
+                OnSearchFunc))
+            {
+                if(string.IsNullOrEmpty(_searchString))
+                {
+                    _searchFilter.Querry = null;
+                }
+                else
+                {
+                    _searchFilter.Querry = SearchUtility.ToQuery(_searchString);
+                }
+
+                Refresh(true);
+            }
+
+            bool isSearchActive = ImGui.IsItemActive();
+            if(isSearchActive)
+            {
+                _searchSuggestPos = new Vector2(searchbarPosition.X, searchbarPosition.Y + searchBarHeight);
+                _searchSuggestSize = new Vector2(searchBarWidth, 0);
+                _isSearchSuggestWindowOpen = true;
+            }
+            else
+            {
+                _isSearchSuggestWindowOpen = false;
+            }
+        }
+
+        ImGui.PopStyleColor();
+        ImGui.PopStyleVar();
+    }
+
+    private unsafe int OnSearchFunc(ImGuiInputTextCallbackData* data)
+    {
+        if(data->EventKey == ImGuiKey.Tab)
+        {
+            // clear the search input buffer
+            data->BufTextLen = 0;
+            data->BufSize = 0;
+            data->CursorPos = 0;
+            data->SelectionStart = 0;
+            data->SelectionEnd = 0;
+            data->BufDirty = 1;
+
+            _tagFilter.Add("Yuki");
+            _searchString = string.Empty;
+
             Refresh(true);
         }
+        else if (data->EventKey == ImGuiKey.UpArrow)
+        {
+        }
+        else if(data->EventKey == ImGuiKey.DownArrow)
+        {
+        }
+
+        return 1;
+    }
+
+    private void DrawSearchSuggest()
+    {
+        if(_searchSuggestPos == null || _searchSuggestSize == null || !_isSearchSuggestWindowOpen)
+            return;
+
+        ImGui.SetNextWindowPos((Vector2)_searchSuggestPos);
+        ImGui.SetNextWindowSize((Vector2)_searchSuggestSize);
+        ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Vector2(7, 7));
+
+        if(ImGui.Begin(
+            "##library_search_suggest",
+            ref _isSearchSuggestWindowOpen,
+            ImGuiWindowFlags.NoTitleBar | ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoResize | ImGuiWindowFlags.Tooltip
+            | ImGuiWindowFlags.NoFocusOnAppearing | ImGuiWindowFlags.ChildWindow))
+        {
+            ImBrio.DrawTags(_allTags, SearchUtility.ToQuery(_searchString));
+        }
+
+        ImGui.End();
+        ImGui.PopStyleVar();
     }
 
     private void DrawFiles()
@@ -419,18 +573,23 @@ internal class LibraryWindow : Window
 
         if(filter)
         {
-            if(IsSearching)
-            {
-                _libraryManager.Root.FilterEntries(_currentFilter, _searchFilter);
-            }
-            else
-            {
-                _libraryManager.Root.FilterEntries(_currentFilter);
-            }
+            List<FilterBase> filters = new();
+            filters.Add(_typeFilter);
+
+            if(!string.IsNullOrEmpty(_searchString))
+                filters.Add(_searchFilter);
+
+            if(_tagFilter.Tags != null && _tagFilter.Tags.Count > 0)
+                filters.Add(_tagFilter);
+
+            _libraryManager.Root.FilterEntries(filters.ToArray());
         }
 
         ILibraryEntry currentEntry = _path[_path.Count - 1];
         _currentEntries = currentEntry.GetFilteredEntries(IsSearching);
+
+        _allTags.Clear();
+        currentEntry.GetAllTags(ref _allTags);
 
         if(_currentEntries != null)
         {
