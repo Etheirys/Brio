@@ -391,16 +391,8 @@ internal class PosingGraphicalWindow : Window, IDisposable
 
             return;
         }
-
+       
         bool showGenitalia = false;
-        if(posing.SkeletonPosing.CharacterIsIVCS)
-        {
-            showGenitalia = _configurationService.Configuration.Posing.ShowGenitaliaInAdvancedPoseWindow;
-            if(ImGui.Checkbox("Show Genitalia", ref showGenitalia))
-            {
-                _configurationService.Configuration.Posing.ShowGenitaliaInAdvancedPoseWindow = showGenitalia;
-            }
-        }
 
         var contentArea = ImGui.GetContentRegionAvail();
         var contentWidth = contentArea.X / 3f;
@@ -409,12 +401,23 @@ internal class PosingGraphicalWindow : Window, IDisposable
             if(child.Success)
             {
                 var opening = ImGui.GetCursorPos();
+                if(posing.SkeletonPosing.CharacterIsIVCS)
+                {
+                    showGenitalia = _configurationService.Configuration.Posing.ShowGenitaliaInAdvancedPoseWindow;
+                    if(ImGui.Checkbox("Show Genitalia", ref showGenitalia))
+                    {
+                        _configurationService.Configuration.Posing.ShowGenitaliaInAdvancedPoseWindow = showGenitalia;
+                    }
+
+                    opening += new Vector2(0, 5);
+                }
                 var swapped = _configurationService.Configuration.Posing.GraphicalSidesSwapped;
                 if(ImGui.Checkbox("Swap", ref swapped))
                 {
                     _configurationService.Configuration.Posing.GraphicalSidesSwapped = swapped;
                 }
                 ImGui.SetCursorPos(opening);
+
                 DrawBoneSection("body", true, posing);
             }
         }
