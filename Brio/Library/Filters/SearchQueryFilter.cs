@@ -1,24 +1,25 @@
 ﻿using Brio.Library.Tags;
+using System.Text;
 
 namespace Brio.Library.Filters;
 
-public class SearchQuerryFilter : FilterBase
+public class SearchQueryFilter : FilterBase
 {
-    public string[]? Querry;
+    public string[]? Query;
 
-    public SearchQuerryFilter()
+    public SearchQueryFilter()
         : base("Search")
     {
     }
 
     public override void Clear()
     {
-        this.Querry = null;
+        this.Query = null;
     }
 
     public override bool Filter(ILibraryEntry entry)
     {
-        if(Querry == null)
+        if(Query == null)
             return false;
 
         // search the tags for now, eventually move to a tag filter instead
@@ -26,12 +27,12 @@ public class SearchQuerryFilter : FilterBase
         {
             foreach(Tag tag in tagged.Tags)
             {
-                if(SearchUtility.Matches(tag.Name, Querry))
+                if(SearchUtility.Matches(tag.Name, Query))
                     return true;
 
                 foreach(string alias in tag.Aliases)
                 {
-                    if(SearchUtility.Matches(alias, Querry))
+                    if(SearchUtility.Matches(alias, Query))
                     {
                         return true;
                     }
@@ -39,6 +40,21 @@ public class SearchQuerryFilter : FilterBase
             }
         }
 
-        return SearchUtility.Matches(entry.Name, Querry);
+        return SearchUtility.Matches(entry.Name, Query);
+    }
+
+    public string GetSearchString()
+    {
+        if(Query == null)
+            return string.Empty;
+
+        StringBuilder sb = new();
+        foreach(string str in Query)
+        {
+            sb.Append(str);
+            sb.Append(' ');
+        }
+
+        return sb.ToString().TrimEnd(' ');
     }
 }
