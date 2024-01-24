@@ -7,8 +7,7 @@ internal static partial class ImBrio
 {
     public static bool DrawTag(Tag tag)
     {
-        ImGui.Button(tag.Name);
-        return false;
+        return ImGui.Button(tag.Name);
     }
 
     public static void DrawTags(TagCollection tags)

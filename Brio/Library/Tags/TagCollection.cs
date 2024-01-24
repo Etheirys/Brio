@@ -119,7 +119,7 @@ public class TagCollection : IEnumerable<Tag>, INotifyCollectionChanged
 
     public bool Contains(Tag tag) => this.tags.Contains(tag);
 
-    public bool Matches(TagCollection other)
+    public bool Contains(TagCollection other)
     {
         foreach(Tag tag in other)
         {
