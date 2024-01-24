@@ -7,6 +7,7 @@ using Dalamud.Interface;
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Interface.Windowing;
 using Dalamud.Plugin.Services;
+using Dalamud.Utility;
 using ImGuiNET;
 using System;
 using System.Collections.Generic;
@@ -317,6 +318,7 @@ internal class LibraryWindow : Window
     private void DrawInfo(ILibraryEntry entry)
     {
         ImGui.Text(entry.Name);
+
         if(entry.Source != null)
         {
             float x = ImGui.GetCursorPosX();
@@ -352,20 +354,36 @@ internal class LibraryWindow : Window
 
         if(entry.PreviewImage != null)
         {
-            using(var child = ImRaii.Child($"library_info_image", ImGui.GetContentRegionAvail(), true, ImGuiWindowFlags.NoInputs))
+            Vector2 size = ImGui.GetContentRegionAvail();
+            size.Y = size.X;
+            using(var child = ImRaii.Child($"library_info_image", size, true, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoInputs))
             {
                 if(!child.Success)
                     return;
 
-                Vector2 size = ImGui.GetContentRegionAvail();
-                size.Y = size.X;
-                ImBrio.ImageFit(entry.PreviewImage, size);
+                ImBrio.ImageFit(entry.PreviewImage);
             }
         }
 
         ImGui.Spacing();
         ImGui.Spacing();
         ImGui.Spacing();
+
+        if(!string.IsNullOrEmpty(entry.Description))
+            ImGui.TextWrapped(entry.Description);
+
+        ImGui.Spacing();
+        ImGui.Spacing();
+
+        if (!string.IsNullOrEmpty(entry.Author))
+            ImGui.Text($"Author: {entry.Author}");
+
+        if(!string.IsNullOrEmpty(entry.Version))
+            ImGui.Text($"Version: {entry.Version}");
+
+        ImGui.Spacing();
+        ImGui.Spacing();
+
         ImGui.TextWrapped(entry.Tags?.ToString());
     }
 

@@ -29,6 +29,9 @@ public abstract class LibraryEntryBase : ILibraryEntry, ITagged
     public TagCollection Tags { get; init; } = new();
     public SourceBase? Source => _source;
     public string? SourceInfo { get; set; }
+    public string? Description { get; set; }
+    public string? Author { get; set; }
+    public string? Version { get; set; }
 
     public void Add(ILibraryEntry entry)
     {

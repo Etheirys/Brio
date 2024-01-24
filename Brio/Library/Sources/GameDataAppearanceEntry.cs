@@ -18,6 +18,8 @@ internal class GameDataAppearanceEntry : LibraryEntryBase
         _name = name;
         _icon = icon;
         _appearance = appearance;
+
+        Author = "Square Enix";
     }
 
     public override string Name => _name;

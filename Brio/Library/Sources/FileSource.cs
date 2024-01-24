@@ -152,6 +152,10 @@ public class FileEntry : LibraryEntryBase
                     TagCollection tags = Tags;
                     doc.GetAutoTags(ref tags);
                     Tags = tags;
+
+                    Description = doc.Description;
+                    Author = doc.Author;
+                    Version = doc.Version;
                 }
             }
             catch(Exception)

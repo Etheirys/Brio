@@ -8,6 +8,11 @@ namespace Brio.UI.Controls.Stateless;
 
 internal static partial class ImBrio
 {
+    public static void ImageFit(IDalamudTextureWrap texture)
+    {
+        ImageFit(texture, ImGui.GetContentRegionAvail());
+    }
+
     public static void ImageFit(IDalamudTextureWrap texture, Vector2 size)
     {
         float fitWidth = size.X;
