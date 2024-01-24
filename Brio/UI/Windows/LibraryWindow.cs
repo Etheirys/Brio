@@ -32,6 +32,7 @@ internal class LibraryWindow : Window
     private readonly List<ILibraryEntry> _path = new();
     private IEnumerable<ILibraryEntry>? _currentEntries;
     private ILibraryEntry? _toOpen = null;
+    private float spinnerAngle = 0;
 
     public LibraryWindow(
         IPluginLog log,
@@ -51,6 +52,7 @@ internal class LibraryWindow : Window
     }
 
     private float WindowContentWidth => ImGui.GetWindowContentRegionMax().X - ImGui.GetWindowContentRegionMin().X;
+    private float WindowContentHeight => ImGui.GetWindowContentRegionMax().Y - ImGui.GetWindowContentRegionMin().Y;
     public bool IsSearching => !string.IsNullOrEmpty(_searchFilter.SearchString);
 
     public override void OnOpen()
@@ -191,21 +193,34 @@ internal class LibraryWindow : Window
             if(!child.Success)
                 return;
 
-            if(_currentEntries != null)
+            if(_libraryManager.IsScanning)
             {
-                foreach(var entry in _currentEntries)
+                ImGui.SetCursorPosX((WindowContentWidth / 2) - 24);
+                ImGui.SetCursorPosY((WindowContentHeight / 2) - 24);
+                ImBrio.Spinner(ref spinnerAngle);
+            }
+            else
+            {
+                if(_currentEntries == null)
                 {
-                    DrawEntry(entry, fileWidth, index);
-                    index++;
+                    Refresh(true);
+                }
+                else
+                {
+                    foreach(var entry in _currentEntries)
+                    {
+                        DrawEntry(entry, fileWidth, index);
+                        index++;
 
-                    column++;
-                    if(column >= columnCount)
-                    {
-                        column = 0;
-                    }
-                    else
-                    {
-                        ImGui.SameLine();
+                        column++;
+                        if(column >= columnCount)
+                        {
+                            column = 0;
+                        }
+                        else
+                        {
+                            ImGui.SameLine();
+                        }
                     }
                 }
             }
@@ -286,6 +301,9 @@ internal class LibraryWindow : Window
 
     private void Refresh(bool filter)
     {
+        if(_libraryManager.IsScanning)
+            return;
+
         if (_currentEntries != null)
         {
             foreach(ILibraryEntry entry in _currentEntries)
