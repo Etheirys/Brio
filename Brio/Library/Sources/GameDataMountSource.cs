@@ -16,8 +16,11 @@ internal class GameDataMountSource : SourceBase
     {
         foreach(var (_, mount) in _lumina.Mounts)
         {
-            var entry = new GameDataAppearanceEntry(this, mount.Singular ?? $"Mount {mount.RowId}", mount.Icon, mount);
+            string rowName = $"Mount {mount.RowId}";
+
+            var entry = new GameDataAppearanceEntry(this, mount.Singular ?? rowName, mount.Icon, mount);
             entry.Tags.Add("Mount");
+            entry.SourceInfo = rowName;
             Add(entry);
         }
     }

@@ -127,6 +127,8 @@ public class FileEntry : LibraryEntryBase
         FilePath = path;
         FileTypeAttribute = fileTypeAttribute;
 
+        SourceInfo = Path.GetRelativePath(source.DirectoryPath, path);
+
         _name = Path.GetFileNameWithoutExtension(path);
         if(_name.Length >= 60)
         {

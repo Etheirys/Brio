@@ -20,7 +20,9 @@ internal class GameDataNpcSource : SourceBase
             string name = $"B:{npc.RowId:D7}";
             name = ResolveName(name);
             var entry = new GameDataAppearanceEntry(this, name, 0, npc);
+            entry.SourceInfo = $"BNpc {npc.RowId}";
             entry.Tags.Add("NPC");
+
 
             if(!string.IsNullOrEmpty(name))
                 entry.Tags.Add("Named");
@@ -41,6 +43,7 @@ internal class GameDataNpcSource : SourceBase
 
             name = ResolveName(name);
             var entry = new GameDataAppearanceEntry(this, name, 0, npc);
+            entry.SourceInfo = $"ENpc {npc.RowId}";
             entry.Tags.Add("NPC");
 
             if(!string.IsNullOrEmpty(name))

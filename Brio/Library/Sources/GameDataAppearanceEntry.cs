@@ -33,4 +33,15 @@ internal class GameDataAppearanceEntry : LibraryEntryBase
             return UIManager.Instance.TextureProvider.GetIcon(_icon);
         }
     }
+
+    public override IDalamudTextureWrap? PreviewImage
+    {
+        get
+        {
+            if(_icon <= 0)
+                return null;
+
+            return UIManager.Instance.TextureProvider.GetIcon(_icon);
+        }
+    }
 }

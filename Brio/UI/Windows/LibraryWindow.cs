@@ -10,7 +10,9 @@ using Dalamud.Plugin.Services;
 using ImGuiNET;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Numerics;
+using static Dalamud.Interface.Utility.Raii.ImRaii;
 
 namespace Brio.UI.Windows;
 
@@ -317,16 +319,53 @@ internal class LibraryWindow : Window
         ImGui.Text(entry.Name);
         if(entry.Source != null)
         {
+            float x = ImGui.GetCursorPosX();
+            float y = ImGui.GetCursorPosY();
+            float sourceIconBottom = y;
+            if(entry.Source.Icon != null)
+            {
+                ImGui.SetCursorPosY(y + 3);
+                ImBrio.ImageFit(entry.Source.Icon, new(42, 42));
+                sourceIconBottom = ImGui.GetCursorPosY();
+
+                ImGui.SameLine();
+                x = ImGui.GetCursorPosX();
+            }
+
             ImGui.Text(entry.Source.Name);
+
+            if(entry.SourceInfo != null)
+            {
+                ImGui.SetCursorPosY(y + 18);
+                ImGui.SetCursorPosX(x);
+                ImGui.SetWindowFontScale(0.7f);
+                ImGui.BeginDisabled();
+                ImGui.TextWrapped(entry.SourceInfo);
+                ImGui.EndDisabled();
+                ImGui.SetWindowFontScale(1.0f);
+            }
+
+            if (ImGui.GetCursorPosY() < sourceIconBottom)
+                ImGui.SetCursorPosY(sourceIconBottom);
         }
+
 
         if(entry.PreviewImage != null)
         {
-            Vector2 size = ImGui.GetContentRegionAvail();
-            size.Y = size.X;
-            ImBrio.ImageFit(entry.PreviewImage, size);
+            using(var child = ImRaii.Child($"library_info_image", ImGui.GetContentRegionAvail(), true, ImGuiWindowFlags.NoInputs))
+            {
+                if(!child.Success)
+                    return;
+
+                Vector2 size = ImGui.GetContentRegionAvail();
+                size.Y = size.X;
+                ImBrio.ImageFit(entry.PreviewImage, size);
+            }
         }
 
+        ImGui.Spacing();
+        ImGui.Spacing();
+        ImGui.Spacing();
         ImGui.TextWrapped(entry.Tags?.ToString());
     }
 

@@ -15,6 +15,7 @@ public interface ILibraryEntry : IDisposable, ITagged
     public IDalamudTextureWrap? PreviewImage { get; }
     public Type? FileType { get; }
     public SourceBase? Source { get; }
+    public string? SourceInfo { get; }
 
     public bool IsVisible { get; set; }
 
