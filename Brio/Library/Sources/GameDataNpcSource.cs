@@ -18,13 +18,13 @@ internal class GameDataNpcSource : SourceBase
         foreach(var (_, npc) in _lumina.BNpcBases)
         {
             string name = $"B:{npc.RowId:D7}";
-            name = ResolveName(name);
-            var entry = new GameDataAppearanceEntry(this, name, 0, npc);
+            string? displayName = ResolveName(name);
+            var entry = new GameDataAppearanceEntry(this, displayName ?? name, 0, npc);
             entry.SourceInfo = $"BNpc {npc.RowId}";
             entry.Tags.Add("NPC");
 
 
-            if(!string.IsNullOrEmpty(name))
+            if(!string.IsNullOrEmpty(displayName))
                 entry.Tags.Add("Named");
 
             Add(entry);
@@ -41,19 +41,19 @@ internal class GameDataNpcSource : SourceBase
                     name = resident.Singular;
             }
 
-            name = ResolveName(name);
-            var entry = new GameDataAppearanceEntry(this, name, 0, npc);
+            string? displayName = ResolveName(name);
+            var entry = new GameDataAppearanceEntry(this, displayName ?? name, 0, npc);
             entry.SourceInfo = $"ENpc {npc.RowId}";
             entry.Tags.Add("NPC");
 
-            if(!string.IsNullOrEmpty(name))
+            if(!string.IsNullOrEmpty(displayName))
                 entry.Tags.Add("Named");
 
             Add(entry);
         }
     }
 
-    public static string ResolveName(string name)
+    public static string? ResolveName(string name)
     {
         var names = ResourceProvider.Instance.GetResourceDocument<IReadOnlyDictionary<string, string>>("Data.NpcNames.json");
 
@@ -64,10 +64,14 @@ internal class GameDataNpcSource : SourceBase
         {
             var nameId = uint.Parse(name.Substring(2));
             if(GameDataProvider.Instance.BNpcNames.TryGetValue(nameId, out var nameRef))
+            {
                 if(nameRef != null && !string.IsNullOrEmpty(nameRef.Singular))
-                    name = nameRef.Singular;
+                {
+                    return nameRef.Singular;
+                }
+            }
         }
 
-        return name;
+        return null;
     }
 }
