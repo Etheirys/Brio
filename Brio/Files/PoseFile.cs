@@ -1,13 +1,16 @@
 ﻿using Brio.Core;
 using Brio.Files.Converters;
+using Brio.Resources;
 using System.Collections.Generic;
 using System.Numerics;
 
 namespace Brio.Files;
 
-[FileType("Pose File", "Images.FileIcon_Pose.png", ".pose")]
-internal class PoseFile : FileBase
+[FileType("Pose File", "Images.FileIcon_Pose.png", ".pose", "Load")]
+internal class PoseFile : JsonDocumentBase
 {
+    public static PoseFile? Load(string filePath) => ResourceProvider.Instance.GetFileDocument<PoseFile>(filePath);
+
     public Bone ModelDifference { get; set; } = Transform.Identity;
 
     public Dictionary<string, Bone> Bones { get; set; } = [];

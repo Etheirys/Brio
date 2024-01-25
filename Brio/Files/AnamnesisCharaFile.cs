@@ -1,5 +1,6 @@
 ﻿using Brio.Game.Actor.Appearance;
 using Brio.Library.Tags;
+using Brio.Resources;
 using FFXIVClientStructs.FFXIV.Client.Game.Character;
 using System;
 using System.Numerics;
@@ -7,9 +8,11 @@ using System.Numerics;
 namespace Brio.Files;
 
 [Serializable]
-[FileType("Character File", "Images.FileIcon_Chara.png", ".chara")]
-internal class AnamnesisCharaFile : FileBase
+[FileType("Character File", "Images.FileIcon_Chara.png", ".chara", "Load")]
+internal class AnamnesisCharaFile : JsonDocumentBase
 {
+    public static AnamnesisCharaFile? Load(string filePath) => ResourceProvider.Instance.GetFileDocument<AnamnesisCharaFile>(filePath);
+
     public uint ModelType { get; set; } = 0;
     public Races Race { get; set; }
     public Genders Gender { get; set; }
@@ -71,7 +74,7 @@ internal class AnamnesisCharaFile : FileBase
         tags.Add(this.Gender.ToDisplayName());
         tags.Add(this.Tribe.ToDisplayName());
     }
-
+    
     public static implicit operator ActorAppearance(AnamnesisCharaFile chara)
     {
         var appearance = new ActorAppearance

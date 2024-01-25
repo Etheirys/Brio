@@ -1,7 +1,8 @@
-﻿using Brio.Library.Tags;
+﻿using Brio.Library.Sources;
+using Brio.Library.Tags;
 
 namespace Brio.Files;
-internal abstract class FileBase
+internal abstract class JsonDocumentBase : IFile
 {
     public string? Author { get; set; }
     public string? Description { get; set; }

@@ -29,6 +29,7 @@
 
 using Brio.Files.Converters;
 using Brio.Game.Actor.Appearance;
+using Brio.Resources;
 using System;
 using System.Globalization;
 using System.Numerics;
@@ -36,9 +37,11 @@ using System.Reflection;
 
 namespace Brio.Files;
 
-[FileType("CMTool Pose File", "Images.FileIcon_Pose.png", ".cmp")]
+[FileType("CMTool Pose File", "Images.FileIcon_Pose.png", ".cmp", "Load")]
 internal class CMToolPoseFile
 {
+    public static CMToolPoseFile? Load(string filePath) => ResourceProvider.Instance.GetFileDocument<CMToolPoseFile>(filePath);
+
     public string? Race { get; set; }
 
     public string? Root { get; set; }

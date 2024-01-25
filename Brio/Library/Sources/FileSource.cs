@@ -113,6 +113,16 @@ public class DirectoryEntry : LibraryEntryBase
     public override IDalamudTextureWrap? Icon => _icon;
 }
 
+public interface IFile
+{
+    string? Author { get; }
+    string? Description { get; }
+    string? Version { get; }
+    TagCollection? Tags { get; }
+
+    void GetAutoTags(ref TagCollection tags);
+}
+
 public class FileEntry : LibraryEntryBase
 {
     public readonly string FilePath;
@@ -121,6 +131,7 @@ public class FileEntry : LibraryEntryBase
     private string _name;
     private Type _fileType;
     private IDalamudTextureWrap? _previewImage;
+    private FileTypeAttribute.LoadDelegate? _loadDelegate;
 
     public FileEntry(FileSource source, string path, FileTypeAttribute fileTypeAttribute, Type fileType)
         : base(source)
@@ -138,30 +149,35 @@ public class FileEntry : LibraryEntryBase
 
         _fileType = fileType;
 
-
-        // Get tags
-        if(FileType != null && typeof(FileBase).IsAssignableFrom(FileType))
+        // if this type has a load method, invoke it to load the file
+        try
         {
-            try
+            if(FileType != null)
             {
-                FileBase? doc = ResourceProvider.Instance.GetFileDocument(FilePath, FileType) as FileBase;
-                if(doc != null)
+                _loadDelegate = FileTypeAttribute.GetLoadMethod(FileType);
+            }
+
+           
+            if(_loadDelegate != null)
+            {
+                object? file = _loadDelegate.Invoke(path);
+                if(file is IFile fileInterface)
                 {
-                    if(doc.Tags != null)
-                        Tags.AddRange(doc.Tags);
+                    if(fileInterface.Tags != null)
+                        Tags.AddRange(fileInterface.Tags);
 
                     TagCollection tags = Tags;
-                    doc.GetAutoTags(ref tags);
+                    fileInterface.GetAutoTags(ref tags);
                     Tags = tags;
 
-                    Description = doc.Description;
-                    Author = doc.Author;
-                    Version = doc.Version;
+                    Description = fileInterface.Description;
+                    Author = fileInterface.Author;
+                    Version = fileInterface.Version;
                 }
             }
-            catch(Exception)
-            {
-            }
+        }
+        catch (Exception)
+        {
         }
     }
 
@@ -197,12 +213,13 @@ public class FileEntry : LibraryEntryBase
     {
         if(_previewImage == null || _previewImage.ImGuiHandle == 0)
         {
-            if(FileType != null && typeof(FileBase).IsAssignableFrom(FileType))
+            if(FileType != null && typeof(JsonDocumentBase).IsAssignableFrom(FileType))
             {
                 try
                 {
-                    FileBase? doc = ResourceProvider.Instance.GetFileDocument(FilePath, FileType) as FileBase;
-                    if(doc != null && doc.Base64Image != null)
+                    object? file = _loadDelegate?.Invoke(FilePath);
+
+                    if(file != null && file is JsonDocumentBase doc && doc.Base64Image != null)
                     {
                         byte[] imgData = Convert.FromBase64String(doc.Base64Image);
                         _previewImage = UIManager.Instance.LoadImage(imgData);
