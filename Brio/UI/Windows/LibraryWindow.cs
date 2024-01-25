@@ -28,7 +28,7 @@ internal class LibraryWindow : Window
 
     private readonly ConfigurationService _configurationService;
     private readonly LibraryManager _libraryManager;
-    private readonly IPluginLog _log;
+    public static IPluginLog _log;
 
     private readonly static List<FilterBase> filters = new()
     {
@@ -97,7 +97,6 @@ internal class LibraryWindow : Window
                 return;
 
             ImGui.Spacing();
-            ImGui.Spacing();
             DrawPath(WindowContentWidth - SearchWidth);
             ImGui.SameLine();
             DrawSearch();
@@ -141,22 +140,20 @@ internal class LibraryWindow : Window
         if(filters.Count <= 1)
             return;
 
-        float buttonWidth = (WindowContentWidth / filters.Count) - ImGui.GetStyle().FramePadding.X;
-        for(int i = 0; i < filters.Count; i++)
+        List<string> ops = new();
+        int selected = 0;
+        for (int i = 0; i < filters.Count; i++)
         {
-            FilterBase filter = filters[i];
-            bool isCurrent = filter == _typeFilter;
+            if(filters[i] == _typeFilter)
+                selected = i;
 
-            if (i > 0)
-                ImGui.SameLine();
+            ops.Add(filters[i].Name);
+        }
 
-            ImBrio.ToggleButton(filter.Name, new(buttonWidth, 0), ref isCurrent, false);
-
-            if(isCurrent && _typeFilter != filter)
-            {
-                _typeFilter = filter;
-                Refresh(true);
-            }
+        if (ImBrio.ToggleButtonStrip("library_filters_selector", new(ImBrio.GetRemainingWidth(), ImBrio.GetLineHeight()), ref selected, ops.ToArray()))
+        {
+            _typeFilter = filters[selected];
+            Refresh(true);
         }
     }
 

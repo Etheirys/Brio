@@ -1,4 +1,5 @@
-﻿using ImGuiNET;
+﻿using Brio.UI.Windows;
+using ImGuiNET;
 using System.Numerics;
 
 namespace Brio.UI.Controls.Stateless;
@@ -15,7 +16,7 @@ internal static partial class ImBrio
         if(canDeselect && selected)
             ImGui.BeginDisabled();
 
-        ImGui.PushStyleColor(ImGuiCol.Button, ImGui.GetColorU32(selected ? ImGuiCol.CheckMark : ImGuiCol.Button));
+        ImGui.PushStyleColor(ImGuiCol.Button, ImGui.GetColorU32(selected ? ImGuiCol.TabActive : ImGuiCol.Tab));
 
         bool clicked = false;
         if(ImGui.Button(label, size))
@@ -30,5 +31,40 @@ internal static partial class ImBrio
             ImGui.EndDisabled();
 
         return clicked;
+    }
+
+    public static bool ToggleButtonStrip(string id, Vector2 size, ref int selected, string[] options)
+    {
+        bool changed = false;
+        float buttonWidth = (size.X / options.Length);
+
+        ImGui.PushStyleColor(ImGuiCol.ChildBg, ImGui.GetColorU32(ImGuiCol.Tab));
+        ImGui.PushStyleVar(ImGuiStyleVar.ChildRounding, ImGui.GetStyle().FrameRounding);
+        if(ImGui.BeginChild(id, size))
+        {
+            ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, new Vector2(0, 0));
+
+            for(int i = 0; i < options.Length; i++)
+            {
+                if(i > 0)
+                    ImGui.SameLine();
+
+                bool val = i == selected;
+                bool clicked = ImBrio.ToggleButton($"{options[i]}##{id}", new(buttonWidth, size.Y), ref val, false);
+
+                if(val && i != selected)
+                {
+                    selected = i;
+                    changed = true;
+                }
+            }
+
+            ImGui.PopStyleVar();
+            ImGui.EndChild();
+        }
+
+        ImGui.PopStyleVar();
+        ImGui.PopStyleColor();
+        return changed;
     }
 }
