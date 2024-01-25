@@ -18,8 +18,16 @@ internal class GameDataMountSource : SourceBase
         {
             string rowName = $"Mount {mount.RowId}";
 
-            var entry = new GameDataAppearanceEntry(this, mount.Singular ?? rowName, mount.Icon, mount);
+            string name = mount.Singular;
+            if(string.IsNullOrEmpty(name))
+                name = rowName;
+
+            var entry = new GameDataAppearanceEntry(this, name, mount.Icon, mount);
             entry.Tags.Add("Mount");
+
+            if (name != rowName)
+                entry.Tags.Add("Named");
+
             entry.SourceInfo = rowName;
             Add(entry);
         }
