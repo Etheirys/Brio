@@ -32,7 +32,7 @@ internal class LibraryWindow : Window
     private readonly static List<FilterBase> filters = new()
     {
         new LibraryFavoritesFilter(),
-        new TypeFilter("Characters", typeof(AnamnesisCharaFile), typeof(ActorAppearanceUnion)),
+        new TypeFilter("Characters", typeof(AnamnesisCharaFile), typeof(ActorAppearanceUnion), typeof(MareCharacterDataFile)),
         new TypeFilter("Poses", typeof(PoseFile), typeof(CMToolPoseFile)),
     };
 
@@ -679,7 +679,14 @@ internal class LibraryWindow : Window
         float browseButtonWidth = lineHeight;
         float openButtonWidth = 100;
 
-        ImGui.Button("...", new(browseButtonWidth, lineHeight));
+        if (ImGui.Button("...", new(browseButtonWidth, lineHeight)))
+        {
+            // TODO!
+        }
+
+        if(ImGui.IsItemHovered())
+            ImGui.SetTooltip("Open file picker");
+
         ImGui.SameLine();
 
         float space = ImBrio.GetRemainingWidth() - openButtonWidth;

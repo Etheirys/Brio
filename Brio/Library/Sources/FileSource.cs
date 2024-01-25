@@ -19,7 +19,8 @@ public class FileSource : SourceBase
     {
         typeof(AnamnesisCharaFile),
         typeof(CMToolPoseFile),
-        typeof(PoseFile)
+        typeof(PoseFile),
+        typeof(MareCharacterDataFile),
     };
 
     public FileSource(string name, string icon, string directoryPath)
