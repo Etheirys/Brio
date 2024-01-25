@@ -5,6 +5,16 @@ internal static partial class ImBrio
 {
     public static float GetRemainingWidth()
     {
-        return (ImGui.GetWindowSize().X - ImGui.GetCursorPosX()) - ImGui.GetStyle().WindowPadding.X;
+        return ImGui.GetContentRegionAvail().X;
+    }
+
+    public static float GetRemainingHeight()
+    {
+        return ImGui.GetContentRegionAvail().Y;
+    }
+
+    public static float GetLineHeight()
+    {
+        return ImGui.GetTextLineHeight() + (ImGui.GetStyle().FramePadding.Y * 2);
     }
 }

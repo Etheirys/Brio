@@ -15,6 +15,7 @@ using ImGuiNET;
 using System;
 using System.Collections.Generic;
 using System.Numerics;
+using static FFXIVClientStructs.FFXIV.Client.UI.Misc.GroupPoseModule;
 
 namespace Brio.UI.Windows;
 
@@ -110,18 +111,25 @@ internal class LibraryWindow : Window
                     DrawFiles();
                 }
             }
-
             ImGui.SameLine();
 
-            using(var child = ImRaii.Child("###right_pane", new Vector2(ImBrio.GetRemainingWidth(), -1), true))
+            if(ImGui.BeginChild("###right_pane", new Vector2(ImBrio.GetRemainingWidth(), -1), false,
+                ImGuiWindowFlags.NoBackground | ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse))
             {
-                if(child.Success)
+                float height = ImBrio.GetRemainingHeight() - ImBrio.GetLineHeight() - ImGui.GetStyle().ItemSpacing.Y;
+                if (ImGui.BeginChild("###library_info_pane", new Vector2(ImBrio.GetRemainingWidth(), height), true))
                 {
                     if(_selected != null)
                     {
                         DrawInfo(_selected);
                     }
+
+                    ImGui.EndChild();
                 }
+
+                DrawActions();
+
+                ImGui.EndChild();
             }
 
             DrawSearchSuggest();
@@ -166,7 +174,7 @@ internal class LibraryWindow : Window
 
     private void DrawPath(float width = -1)
     {
-        float lineHeight = ImGui.GetTextLineHeightWithSpacing() + ImGui.GetStyle().FramePadding.Y;
+        float lineHeight = ImBrio.GetLineHeight();
 
         ImGui.PushStyleColor(ImGuiCol.ChildBg, ImGui.GetColorU32(ImGuiCol.FrameBg));
         ImGui.PushStyleVar(ImGuiStyleVar.ChildRounding, ImGui.GetStyle().FrameRounding);
@@ -224,7 +232,7 @@ internal class LibraryWindow : Window
 
                 // Blank area
                 {
-                    float blankWidth = ImBrio.GetRemainingWidth() - PathBarButtonWidth;
+                    float blankWidth = ImBrio.GetRemainingWidth() - PathBarButtonWidth - ImGui.GetStyle().ItemSpacing.X;
                     if(ImGui.InvisibleButton("###library_path_input_blank", new(blankWidth, lineHeight)))
                     {
                     }
@@ -261,7 +269,7 @@ internal class LibraryWindow : Window
     private unsafe void DrawSearch()
     {
         float searchBarWidth = ImBrio.GetRemainingWidth();
-        float searchBarHeight = ImGui.GetTextLineHeightWithSpacing() + ImGui.GetStyle().FramePadding.Y;
+        float searchBarHeight = ImBrio.GetLineHeight();
         Vector2 searchbarPosition = ImGui.GetCursorScreenPos();
         
         ImGui.PushStyleColor(ImGuiCol.ChildBg, ImGui.GetColorU32(ImGuiCol.FrameBg));
@@ -274,7 +282,7 @@ internal class LibraryWindow : Window
                 // search / clear icons
                 if(IsSearching)
                 {
-                    ImGui.PushStyleColor(ImGuiCol.Button, ImGui.GetColorU32(ImGuiCol.FrameBg));
+                    ImGui.PushStyleColor(ImGuiCol.Button, 0x000000);
                     if(ImBrio.FontIconButton(FontAwesomeIcon.TimesCircle))
                     {
                         ClearSearchText();
@@ -288,10 +296,11 @@ internal class LibraryWindow : Window
                 }
                 else
                 {
-                    ImGui.SetCursorPosY(5);
-                    ImGui.SetCursorPosX(5);
+
                     ImGui.BeginDisabled();
-                    ImBrio.FontIcon(FontAwesomeIcon.Search, 0.75f);
+                    ImGui.PushStyleColor(ImGuiCol.Button, 0x000000);
+                    ImBrio.FontIconButton(FontAwesomeIcon.Search);
+                    ImGui.PopStyleColor();
                     ImGui.EndDisabled();
                 }
 
@@ -329,6 +338,7 @@ internal class LibraryWindow : Window
                     _searchNeedsFocus = false;
                 }
 
+                ImGui.PushStyleColor(ImGuiCol.FrameBg, 0x000000);
                 if(ImGui.InputText("###library_search_input", ref _searchText, 256,
                     ImGuiInputTextFlags.EnterReturnsTrue | ImGuiInputTextFlags.NoHorizontalScroll | ImGuiInputTextFlags.NoUndoRedo
                     | ImGuiInputTextFlags.CallbackAlways,
@@ -345,6 +355,8 @@ internal class LibraryWindow : Window
 
                     Refresh(true);
                 }
+
+                ImGui.PopStyleColor();
 
                 _isSearchFocused = ImGui.IsItemActive();
 
@@ -629,7 +641,7 @@ internal class LibraryWindow : Window
         {
             Vector2 size = ImGui.GetContentRegionAvail();
             size.Y = size.X;
-            using(var child = ImRaii.Child($"library_info_image", size, true, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoInputs))
+            using(var child = ImRaii.Child($"library_info_image", size, false, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoInputs))
             {
                 if(!child.Success)
                     return;
@@ -660,6 +672,20 @@ internal class LibraryWindow : Window
         ImGui.Text("Tags:");
         ImGui.SameLine();
         ImBrio.DrawTags(entry.Tags);
+    }
+
+    private void DrawActions()
+    {
+        float lineHeight = ImBrio.GetLineHeight();
+        float browseButtonWidth = lineHeight;
+        float openButtonWidth = 100;
+
+        ImGui.Button("...", new(browseButtonWidth, lineHeight));
+        ImGui.SameLine();
+
+        float space = ImBrio.GetRemainingWidth() - openButtonWidth;
+        ImGui.SetCursorPosX(ImGui.GetCursorPosX() +  space);
+        ImGui.Button("Open", new(openButtonWidth, lineHeight));
     }
 
     private void OnOpen(ILibraryEntry entry)
