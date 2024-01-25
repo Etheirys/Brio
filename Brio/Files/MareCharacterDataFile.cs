@@ -11,6 +11,16 @@ namespace Brio.Files;
 [FileType("Mare Character Data", "Images.FileIcon_Mcdf.png", ".mcdf", "Load")]
 internal class MareCharacterDataFile : IFile
 {
+    public string? Author => null;
+    public string? Description { get; set; }
+    public string? Version => null;
+    public TagCollection? Tags => null;
+
+    public void GetAutoTags(ref TagCollection tags)
+    {
+        tags.Add("Mare Synchronos");
+    }
+
     public static MareCharacterDataFile? Load(string filePath)
     {
         /*using var unwrapped = File.OpenRead(filePath);
@@ -30,16 +40,5 @@ internal class MareCharacterDataFile : IFile
         string json = Encoding.UTF8.GetString(data);
         return JsonSerializer.Deserialize<MareCharacterDataFile>(json);*/
         return null;
-    }
-
-    public string? Author => "Someone?";
-    public string? Description => "something?";
-    public string? Version => "1";
-    public string? Base64Image => null;
-    public TagCollection? Tags => null;
-
-    public void GetAutoTags(ref TagCollection tags)
-    {
-        tags.Add("Mare");
     }
 }
