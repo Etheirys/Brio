@@ -23,6 +23,7 @@ internal class LibraryWindow : Window
     private const float InfoPaneWidth = 300;
     private const float SearchWidth = 350;
     private const int MaxTagsInSuggest = 25;
+    private const float PathBarButtonWidth = 25;
 
     private readonly ConfigurationService _configurationService;
     private readonly LibraryManager _libraryManager;
@@ -167,28 +168,11 @@ internal class LibraryWindow : Window
     {
         float lineHeight = ImGui.GetTextLineHeightWithSpacing() + ImGui.GetStyle().FramePadding.Y;
 
-        if(_path.Count <= 1)
-            ImGui.BeginDisabled();
-
-        if (ImBrio.FontIconButton(FontAwesomeIcon.CaretUp))
-        {
-            _path.RemoveAt(_path.Count - 1);
-            ClearFilters();
-        }
-
-        if(_path.Count <= 1)
-            ImGui.EndDisabled();
-
-        ImGui.SameLine();
-
         ImGui.PushStyleColor(ImGuiCol.ChildBg, ImGui.GetColorU32(ImGuiCol.FrameBg));
         ImGui.PushStyleVar(ImGuiStyleVar.ChildRounding, ImGui.GetStyle().FrameRounding);
 
         if(width == -1)
-            width = WindowContentWidth;
-
-        width -= ImGui.GetCursorPosX() - ImGui.GetStyle().FramePadding.X;
-        width -= 25;
+            width = ImBrio.GetRemainingWidth();
 
         using(var child = ImRaii.Child("library_path_input", new(width, lineHeight)))
         {
@@ -196,6 +180,26 @@ internal class LibraryWindow : Window
             {
                 ImGui.PushStyleColor(ImGuiCol.Button, 0);
 
+                // Go Up Button
+                {
+                    if(_path.Count <= 1)
+                        ImGui.BeginDisabled();
+
+                    if(ImBrio.FontIconButton(FontAwesomeIcon.CaretUp, new(PathBarButtonWidth, lineHeight)))
+                    {
+                        _path.RemoveAt(_path.Count - 1);
+                        ClearFilters();
+                    }
+
+                    if(_path.Count <= 1)
+                    {
+                        ImGui.EndDisabled();
+                    }
+                }
+
+                ImGui.SameLine();
+
+                // Path segments
                 for(int i = 0; i < _path.Count; i++)
                 {
                     if(i > 0)
@@ -205,20 +209,43 @@ internal class LibraryWindow : Window
                         ImGui.SameLine();
                     }
 
-                    if(i + 1 > _path.Count - 1)
-                        ImGui.BeginDisabled();
-
                     if(ImGui.Button(_path[i].Name))
                     {
-                        _path.RemoveRange(i + 1, (_path.Count - 1) - i);
-                        ClearFilters();
-                        break;
+                        if((i + 1) < _path.Count)
+                        {
+                            _path.RemoveRange((i + 1), _path.Count - (i + 1));
+                            ClearFilters();
+                            break;
+                        }
                     }
 
-                    if(i + 1 > _path.Count - 1)
-                        ImGui.EndDisabled();
-
                     ImGui.SameLine();
+                }
+
+                // Blank area
+                {
+                    float blankWidth = ImBrio.GetRemainingWidth() - PathBarButtonWidth;
+                    if(ImGui.InvisibleButton("###library_path_input_blank", new(blankWidth, lineHeight)))
+                    {
+                    }
+                }
+
+                ImGui.SameLine();
+
+                // Refresh Button
+                {
+                    if(_libraryManager.IsScanning)
+                        ImGui.BeginDisabled();
+
+                    if(ImBrio.FontIconButton(FontAwesomeIcon.Repeat, new(PathBarButtonWidth, lineHeight)))
+                    {
+                        _libraryManager.Scan();
+                    }
+
+                    if(_libraryManager.IsScanning)
+                    {
+                        ImGui.EndDisabled();
+                    }
                 }
 
                 ImGui.PopStyleColor();
@@ -229,21 +256,6 @@ internal class LibraryWindow : Window
 
         ImGui.PopStyleVar();
         ImGui.PopStyleColor();
-
-        ImGui.SameLine();
-
-        if (_libraryManager.IsScanning)
-            ImGui.BeginDisabled();
-
-        if (ImBrio.FontIconButton(FontAwesomeIcon.Repeat))
-        {
-            _libraryManager.Scan();
-        }
-
-        if(_libraryManager.IsScanning)
-        {
-            ImGui.EndDisabled();
-        }
     }
 
     private unsafe void DrawSearch()
