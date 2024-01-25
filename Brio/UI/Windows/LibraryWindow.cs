@@ -15,7 +15,6 @@ using ImGuiNET;
 using System;
 using System.Collections.Generic;
 using System.Numerics;
-using static FFXIVClientStructs.FFXIV.Client.UI.Misc.GroupPoseModule;
 
 namespace Brio.UI.Windows;
 
@@ -28,7 +27,7 @@ internal class LibraryWindow : Window
 
     private readonly ConfigurationService _configurationService;
     private readonly LibraryManager _libraryManager;
-    public static IPluginLog _log;
+    private readonly IPluginLog _log;
 
     private readonly static List<FilterBase> filters = new()
     {
@@ -179,84 +178,87 @@ internal class LibraryWindow : Window
         if(width == -1)
             width = ImBrio.GetRemainingWidth();
 
-        using(var child = ImRaii.Child("library_path_input", new(width, lineHeight)))
+        if (ImGui.BeginChild("library_path_input", new(width, lineHeight), false, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse))
         {
-            if(child.Success)
+            ImGui.PushStyleColor(ImGuiCol.Button, 0);
+
+            // Go Up Button
             {
-                ImGui.PushStyleColor(ImGuiCol.Button, 0);
+                if(_path.Count <= 1)
+                    ImGui.BeginDisabled();
 
-                // Go Up Button
+                if(ImBrio.FontIconButton(FontAwesomeIcon.CaretUp, new(PathBarButtonWidth, lineHeight)))
                 {
-                    if(_path.Count <= 1)
-                        ImGui.BeginDisabled();
-
-                    if(ImBrio.FontIconButton(FontAwesomeIcon.CaretUp, new(PathBarButtonWidth, lineHeight)))
-                    {
-                        _path.RemoveAt(_path.Count - 1);
-                        ClearFilters();
-                    }
-
-                    if(_path.Count <= 1)
-                    {
-                        ImGui.EndDisabled();
-                    }
+                    _path.RemoveAt(_path.Count - 1);
+                    ClearFilters();
                 }
 
-                ImGui.SameLine();
-
-                // Path segments
-                for(int i = 0; i < _path.Count; i++)
+                if(_path.Count <= 1)
                 {
-                    if(i > 0)
-                    {
-                        ImGui.SetCursorPosY(ImGui.GetCursorPosY() + 5);
-                        ImBrio.FontIcon(FontAwesomeIcon.CaretRight, 0.5f);
-                        ImGui.SameLine();
-                    }
-
-                    if(ImGui.Button(_path[i].Name))
-                    {
-                        if((i + 1) < _path.Count)
-                        {
-                            _path.RemoveRange((i + 1), _path.Count - (i + 1));
-                            ClearFilters();
-                            break;
-                        }
-                    }
-
-                    ImGui.SameLine();
+                    ImGui.EndDisabled();
                 }
-
-                // Blank area
-                {
-                    float blankWidth = ImBrio.GetRemainingWidth() - PathBarButtonWidth - ImGui.GetStyle().ItemSpacing.X;
-                    if(ImGui.InvisibleButton("###library_path_input_blank", new(blankWidth, lineHeight)))
-                    {
-                    }
-                }
-
-                ImGui.SameLine();
-
-                // Refresh Button
-                {
-                    if(_libraryManager.IsScanning)
-                        ImGui.BeginDisabled();
-
-                    if(ImBrio.FontIconButton(FontAwesomeIcon.Repeat, new(PathBarButtonWidth, lineHeight)))
-                    {
-                        _libraryManager.Scan();
-                    }
-
-                    if(_libraryManager.IsScanning)
-                    {
-                        ImGui.EndDisabled();
-                    }
-                }
-
-                ImGui.PopStyleColor();
             }
 
             ImGui.SameLine();
+
+            // Path segments
+            for(int i = 0; i < _path.Count; i++)
+            {
+                if(i > 0)
+                {
+                    ImGui.SetCursorPosY(ImGui.GetCursorPosY() + 5);
+                    ImBrio.FontIcon(FontAwesomeIcon.CaretRight, 0.5f);
+                    ImGui.SameLine();
+                }
+
+                if(ImGui.Button(_path[i].Name))
+                {
+                    if((i + 1) < _path.Count)
+                    {
+                        _path.RemoveRange((i + 1), _path.Count - (i + 1));
+                        ClearFilters();
+                        break;
+                    }
+                }
+
+                ImGui.SameLine();
+            }
+
+            ImGui.SameLine();
+
+            // Blank area
+            {
+                float blankWidth = ImBrio.GetRemainingWidth() - PathBarButtonWidth - ImGui.GetStyle().ItemSpacing.X;
+                if(ImGui.InvisibleButton("###library_path_input_blank", new(blankWidth, lineHeight)))
+                {
+                    // consider: clicking here swaps to an InputText for pasting paths?
+                }
+            }
+
+            ImGui.SameLine();
+
+            // Refresh Button
+            {
+                if(_libraryManager.IsScanning)
+                    ImGui.BeginDisabled();
+
+                if(ImBrio.FontIconButton(FontAwesomeIcon.Repeat, new(PathBarButtonWidth, lineHeight)))
+                {
+                    _libraryManager.Scan();
+                }
+
+                if(_libraryManager.IsScanning)
+                {
+                    ImGui.EndDisabled();
+                }
+            }
+
+            ImGui.PopStyleColor();
+
+
+            
+            ImGui.SameLine();
+            ImGui.EndChild();
         }
 
         ImGui.PopStyleVar();
