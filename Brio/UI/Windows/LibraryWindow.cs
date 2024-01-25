@@ -325,6 +325,9 @@ internal class LibraryWindow : Window
 
             _isSearchFocused = ImGui.IsItemActive();
 
+            // TODO: Try to capture backspace keys to remove tags. possibly with the new key bind input system?
+            // ImGui.IsKeyPressed(ImGuiKey.Backspace) doesn't work, as expected.
+
             if(!_isSearchFocused)
             {
                 _searchLostFocus++;
