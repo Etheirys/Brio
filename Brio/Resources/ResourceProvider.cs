@@ -1,12 +1,10 @@
-﻿using Brio.Files.Converters;
-using Dalamud.Interface.Internal;
+﻿using Dalamud.Interface.Internal;
 using Dalamud.Plugin;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
-using System.Text.Json;
-using System.Text.Json.Serialization;
+using Brio.Core;
 
 namespace Brio.Resources;
 
@@ -18,24 +16,11 @@ internal class ResourceProvider : IDisposable
     private readonly Dictionary<string, IDalamudTextureWrap> _cachedImages = [];
 
     private readonly DalamudPluginInterface _pluginInterface;
-
-    readonly JsonSerializerOptions _serializeOptions = new();
-
+   
     public ResourceProvider(DalamudPluginInterface pluginInterface)
     {
         Instance = this;
         _pluginInterface = pluginInterface;
-
-        _serializeOptions = new()
-        {
-            WriteIndented = true
-        };
-
-        _serializeOptions.Converters.Add(new JsonStringEnumConverter());
-        _serializeOptions.Converters.Add(new Vector2Converter());
-        _serializeOptions.Converters.Add(new Vector3Converter());
-        _serializeOptions.Converters.Add(new Vector4Converter());
-        _serializeOptions.Converters.Add(new QuaternionConverter());
 
         Localize.Load(this);
     }
@@ -48,8 +33,8 @@ internal class ResourceProvider : IDisposable
         using var stream = GetRawResourceStream(name);
         using var reader = new StreamReader(stream);
         var txt = reader.ReadToEnd();
-        var document = JsonSerializer.Deserialize<T>(txt, _serializeOptions) ?? throw new Exception($"Failed to deserialize {name}.");
-        _cachedDocuments[name] = document;
+        var document = JsonSerializer.Deserialize<T>(txt);
+        _cachedDocuments[name] = document!;
         return document;
     }
 
@@ -86,7 +71,7 @@ internal class ResourceProvider : IDisposable
         using var stream = GetFileStream(path);
         using var reader = new StreamReader(stream);
         var txt = reader.ReadToEnd();
-        var document = JsonSerializer.Deserialize<T>(txt, _serializeOptions) ?? throw new Exception($"Failed to deserialize {path}.");
+        var document = JsonSerializer.Deserialize<T>(txt);
         return document;
     }
 
@@ -95,13 +80,14 @@ internal class ResourceProvider : IDisposable
         using var stream = GetFileStream(path);
         using var reader = new StreamReader(stream);
         var txt = reader.ReadToEnd();
-        var document = JsonSerializer.Deserialize(txt, type, _serializeOptions) ?? throw new Exception($"Failed to deserialize {path}.");
+        var document = JsonSerializer.Deserialize(txt, type);
         return document;
     }
 
     public void SaveFileDocument<T>(string path, T doc)
+        where T : notnull
     {
-        var txt = JsonSerializer.Serialize(doc, _serializeOptions);
+        var txt = JsonSerializer.Serialize(doc);
         File.WriteAllText(path, txt);
     }
 
