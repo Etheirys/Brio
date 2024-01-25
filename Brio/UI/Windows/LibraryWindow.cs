@@ -4,6 +4,7 @@ using Brio.Game.Types;
 using Brio.Library;
 using Brio.Library.Filters;
 using Brio.Library.Tags;
+using Brio.UI.Controls.Selectors;
 using Brio.UI.Controls.Stateless;
 using Dalamud.Interface;
 using Dalamud.Interface.Utility.Raii;
@@ -13,9 +14,7 @@ using Dalamud.Utility;
 using ImGuiNET;
 using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Numerics;
-using static Dalamud.Interface.Utility.Raii.ImRaii;
 
 namespace Brio.UI.Windows;
 
@@ -23,6 +22,7 @@ internal class LibraryWindow : Window
 {
     private const float InfoPaneWidth = 300;
     private const float SearchWidth = 350;
+    private const int MaxTagsInSuggest = 25;
 
     private readonly ConfigurationService _configurationService;
     private readonly LibraryManager _libraryManager;
@@ -393,15 +393,61 @@ internal class LibraryWindow : Window
             ImGuiWindowFlags.NoTitleBar | ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoResize | ImGuiWindowFlags.Tooltip
             | ImGuiWindowFlags.NoFocusOnAppearing | ImGuiWindowFlags.ChildWindow))
         {
-            Tag? selected = ImBrio.DrawTags(_allTags, _tagFilter.Tags, SearchUtility.ToQuery(_searchString));
-            if (selected != null)
+            bool hasContent = false;
+            List<Tag> availableTags = GetAvailableTags(SearchUtility.ToQuery(_searchString));
+
+            int trimmedTags = 0;
+            if (availableTags.Count > MaxTagsInSuggest)
             {
-                _tagFilter.Add(selected);
-                _searchNeedsFocus = true;
+                trimmedTags = availableTags.Count - MaxTagsInSuggest;
+                availableTags = availableTags.GetRange(0, MaxTagsInSuggest);
+            }
 
-                ClearSearch();
+            // click tags
+            if(availableTags.Count > 0)
+            {
+                Tag? selected = ImBrio.DrawTags(availableTags);
+                if(selected != null)
+                {
+                    _tagFilter.Add(selected);
+                    _searchNeedsFocus = true;
 
-                Refresh(true);
+                    ClearSearch();
+                    Refresh(true);
+                }
+
+                if (trimmedTags > 0)
+                {
+                    ImBrio.Text($"plus \"{trimmedTags}\" more tags...", 0.75f, 0x88FFFFFF);
+                }
+
+                hasContent = true;
+            }
+
+            // search string
+            if(!string.IsNullOrEmpty(_searchString))
+            {
+                ImBrio.Text($"Press ENTER to search for \"{_searchString}\"", 0x88FFFFFF);
+                hasContent = true;
+            }
+
+            // quick tag
+            if(availableTags.Count >= 1)
+            {
+                ImBrio.Text($"Press TAB to filter by tag \"{availableTags[0].DisplayName}\"", 0x88FFFFFF);
+                hasContent = true;
+
+                if(ImGui.IsKeyPressed(ImGuiKey.Tab))
+                {
+                    _tagFilter.Add(availableTags[0]);
+                    ClearSearch();
+                    Refresh(true);
+                }
+            }
+
+            if (!hasContent)
+            {
+                ImBrio.Text($"Start typing to search...", 0x88FFFFFF);
             }
         }
 
@@ -412,6 +458,23 @@ internal class LibraryWindow : Window
         {
             _isSearchSuggestWindowOpen = false;
         }
+    }
+
+    private List<Tag> GetAvailableTags(string[] query)
+    {
+        List<Tag> results = new();
+        foreach(var tag in _allTags)
+        {
+            if(_tagFilter.Tags?.Contains(tag) == true)
+                continue;
+
+            if(query == null || tag.Search(query))
+            {
+                results.Add(tag);
+            }
+        }
+
+        return results;
     }
 
     private void DrawFiles()
