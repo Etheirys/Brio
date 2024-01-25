@@ -38,7 +38,7 @@ internal class LibraryWindow : Window
     private FilterBase _typeFilter = filters[0];
     private SearchQueryFilter _searchFilter = new();
     private TagFilter _tagFilter = new();
-    private string _searchString = string.Empty;
+    private string _searchText = string.Empty;
 
     private readonly List<ILibraryEntry> _path = new();
     private IEnumerable<ILibraryEntry>? _currentEntries;
@@ -50,7 +50,7 @@ internal class LibraryWindow : Window
     private int _searchLostFocus = 0;
     private bool _isSearchSuggestWindowOpen = false;
     private bool _isSearchFocused = false;
-    private bool _searchNeedsClear = false;
+    private bool _searchTextNeedsClear = false;
     private Vector2? _searchSuggestPos;
     private Vector2? _searchSuggestSize;
 
@@ -151,6 +151,18 @@ internal class LibraryWindow : Window
         }
     }
 
+    private void ClearFilters()
+    {
+        ClearSearchText();
+        _searchFilter.Clear();
+        _tagFilter.Clear();
+
+        // cant clear type filter.
+        ////_typeFilter.Clear();
+
+        Refresh(true);
+    }
+
     private void DrawPath(float width = -1)
     {
         float lineHeight = ImGui.GetTextLineHeightWithSpacing() + ImGui.GetStyle().FramePadding.Y;
@@ -161,7 +173,7 @@ internal class LibraryWindow : Window
         if (ImBrio.FontIconButton(FontAwesomeIcon.CaretUp))
         {
             _path.RemoveAt(_path.Count - 1);
-            Refresh(false);
+            ClearFilters();
         }
 
         if(_path.Count <= 1)
@@ -199,7 +211,7 @@ internal class LibraryWindow : Window
                     if(ImGui.Button(_path[i].Name))
                     {
                         _path.RemoveRange(i + 1, (_path.Count - 1) - i);
-                        Refresh(false);
+                        ClearFilters();
                         break;
                     }
 
@@ -253,7 +265,7 @@ internal class LibraryWindow : Window
                     ImGui.PushStyleColor(ImGuiCol.Button, ImGui.GetColorU32(ImGuiCol.FrameBg));
                     if(ImBrio.FontIconButton(FontAwesomeIcon.TimesCircle))
                     {
-                        ClearSearch();
+                        ClearSearchText();
                         _searchFilter.Clear();
                         _tagFilter.Clear();
                         _searchNeedsFocus = true;
@@ -305,18 +317,18 @@ internal class LibraryWindow : Window
                     _searchNeedsFocus = false;
                 }
 
-                if(ImGui.InputText("###library_search_input", ref _searchString, 256,
+                if(ImGui.InputText("###library_search_input", ref _searchText, 256,
                     ImGuiInputTextFlags.EnterReturnsTrue | ImGuiInputTextFlags.NoHorizontalScroll | ImGuiInputTextFlags.NoUndoRedo
                     | ImGuiInputTextFlags.CallbackAlways,
                     OnSearchFunc))
                 {
-                    if(string.IsNullOrEmpty(_searchString))
+                    if(string.IsNullOrEmpty(_searchText))
                     {
                         _searchFilter.Query = null;
                     }
                     else
                     {
-                        _searchFilter.Query = SearchUtility.ToQuery(_searchString);
+                        _searchFilter.Query = SearchUtility.ToQuery(_searchText);
                     }
 
                     Refresh(true);
@@ -333,7 +345,7 @@ internal class LibraryWindow : Window
 
                     if(_searchLostFocus > 10)
                     {
-                        _searchString = _searchFilter.GetSearchString();
+                        _searchText = _searchFilter.GetSearchString();
                     }
                 }
                 else
@@ -350,18 +362,18 @@ internal class LibraryWindow : Window
         ImGui.PopStyleVar();
     }
 
-    private void ClearSearch()
+    private void ClearSearchText()
     {
-        _searchString = string.Empty;
-        _searchNeedsClear = true;
+        _searchText = string.Empty;
+        _searchTextNeedsClear = true;
     }
 
     private unsafe int OnSearchFunc(ImGuiInputTextCallbackData* data)
     {
-        if(_searchNeedsClear)
+        if(_searchTextNeedsClear)
         {
-            _searchNeedsClear = false;
-            _searchString = string.Empty;
+            _searchTextNeedsClear = false;
+            _searchText = string.Empty;
 
             // clear the search input buffer
             data->BufTextLen = 0;
@@ -397,7 +409,7 @@ internal class LibraryWindow : Window
             | ImGuiWindowFlags.NoFocusOnAppearing | ImGuiWindowFlags.ChildWindow))
         {
             bool hasContent = false;
-            List<Tag> availableTags = GetAvailableTags(SearchUtility.ToQuery(_searchString));
+            List<Tag> availableTags = GetAvailableTags(SearchUtility.ToQuery(_searchText));
 
             int trimmedTags = 0;
             if (availableTags.Count > MaxTagsInSuggest)
@@ -415,7 +427,7 @@ internal class LibraryWindow : Window
                     _tagFilter.Add(selected);
                     _searchNeedsFocus = true;
 
-                    ClearSearch();
+                    ClearSearchText();
                     Refresh(true);
                 }
 
@@ -428,9 +440,9 @@ internal class LibraryWindow : Window
             }
 
             // search string
-            if(!string.IsNullOrEmpty(_searchString))
+            if(!string.IsNullOrEmpty(_searchText))
             {
-                ImBrio.Text($"Press ENTER to search for \"{_searchString}\"", 0x88FFFFFF);
+                ImBrio.Text($"Press ENTER to search for \"{_searchText}\"", 0x88FFFFFF);
                 hasContent = true;
             }
 
@@ -443,7 +455,7 @@ internal class LibraryWindow : Window
                 if(ImGui.IsKeyPressed(ImGuiKey.Tab))
                 {
                     _tagFilter.Add(availableTags[0]);
-                    ClearSearch();
+                    ClearSearchText();
                     Refresh(true);
                 }
             }
@@ -671,7 +683,7 @@ internal class LibraryWindow : Window
             List<FilterBase> filters = new();
             filters.Add(_typeFilter);
 
-            if(!string.IsNullOrEmpty(_searchString))
+            if(!string.IsNullOrEmpty(_searchText))
                 filters.Add(_searchFilter);
 
             if(_tagFilter.Tags != null && _tagFilter.Tags.Count > 0)
