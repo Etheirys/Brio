@@ -112,7 +112,7 @@ internal class LibraryWindow : Window
 
             ImGui.SameLine();
 
-            using(var child = ImRaii.Child("###right_pane", new Vector2(ImBrio.GetRemainingWidth(), -1), true, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse))
+            using(var child = ImRaii.Child("###right_pane", new Vector2(ImBrio.GetRemainingWidth(), -1), true))
             {
                 if(child.Success)
                 {
@@ -180,37 +180,37 @@ internal class LibraryWindow : Window
 
         using(var child = ImRaii.Child("library_path_input", new(width, lineHeight)))
         {
-            if(!child.Success)
-                return;
-
-            ImGui.PushStyleColor(ImGuiCol.Button, 0);
-
-            for (int i = 0; i < _path.Count; i++)
+            if(child.Success)
             {
-                if (i > 0)
+                ImGui.PushStyleColor(ImGuiCol.Button, 0);
+
+                for(int i = 0; i < _path.Count; i++)
                 {
-                    ImGui.SetCursorPosY(ImGui.GetCursorPosY() + 5);
-                    ImBrio.FontIcon(FontAwesomeIcon.CaretRight, 0.5f);
+                    if(i > 0)
+                    {
+                        ImGui.SetCursorPosY(ImGui.GetCursorPosY() + 5);
+                        ImBrio.FontIcon(FontAwesomeIcon.CaretRight, 0.5f);
+                        ImGui.SameLine();
+                    }
+
+                    if(i + 1 > _path.Count - 1)
+                        ImGui.BeginDisabled();
+
+                    if(ImGui.Button(_path[i].Name))
+                    {
+                        _path.RemoveRange(i + 1, (_path.Count - 1) - i);
+                        Refresh(false);
+                        break;
+                    }
+
+                    if(i + 1 > _path.Count - 1)
+                        ImGui.EndDisabled();
+
                     ImGui.SameLine();
                 }
 
-                if (i + 1 > _path.Count - 1)
-                    ImGui.BeginDisabled();
-
-                if (ImGui.Button(_path[i].Name))
-                {
-                    _path.RemoveRange(i + 1, (_path.Count - 1) - i);
-                    Refresh(false);
-                    break;
-                }
-
-                if(i + 1 > _path.Count - 1)
-                    ImGui.EndDisabled();
-
-                ImGui.SameLine();
+                ImGui.PopStyleColor();
             }
-
-            ImGui.PopStyleColor();
 
             ImGui.SameLine();
         }
@@ -245,105 +245,105 @@ internal class LibraryWindow : Window
 
         using(var child = ImRaii.Child("library_search_input", new(searchBarWidth, searchBarHeight), false, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse))
         {
-            if(!child.Success)
-                return;
-
-            // search / clear icons
-            if(IsSearching)
+            if(child.Success)
             {
-                ImGui.PushStyleColor(ImGuiCol.Button, ImGui.GetColorU32(ImGuiCol.FrameBg));
-                if (ImBrio.FontIconButton(FontAwesomeIcon.TimesCircle))
+                // search / clear icons
+                if(IsSearching)
                 {
-                    ClearSearch();
-                    _searchFilter.Clear();
-                    _tagFilter.Clear();
-                    _searchNeedsFocus = true;
-                    Refresh(true);
-                }
-
-                ImGui.PopStyleColor();
-            }
-            else
-            {
-                ImGui.SetCursorPosY(5);
-                ImGui.SetCursorPosX(5);
-                ImGui.BeginDisabled();
-                ImBrio.FontIcon(FontAwesomeIcon.Search, 0.75f);
-                ImGui.EndDisabled();
-            }
-
-            // Tags
-            if(_tagFilter.Tags != null)
-            {
-                Tag? toRemove = null;
-                foreach(Tag tag in _tagFilter.Tags)
-                {
-                    ImGui.SameLine();
-                    ImGui.SetCursorPosY(0);
-
-                    if(ImBrio.DrawTag(tag))
+                    ImGui.PushStyleColor(ImGuiCol.Button, ImGui.GetColorU32(ImGuiCol.FrameBg));
+                    if(ImBrio.FontIconButton(FontAwesomeIcon.TimesCircle))
                     {
-                        toRemove = tag;
+                        ClearSearch();
+                        _searchFilter.Clear();
+                        _tagFilter.Clear();
+                        _searchNeedsFocus = true;
+                        Refresh(true);
                     }
-                }
 
-                if (toRemove != null)
-                {
-                    _tagFilter.Tags.Remove(toRemove);
-                    _searchNeedsFocus = true;
-                    Refresh(true);
-                }
-            }
-
-            // String input
-            ImGui.SameLine();
-            ImGui.SetCursorPosY(0);
-            ImGui.SetNextItemWidth(ImBrio.GetRemainingWidth());
-
-            if(_searchNeedsFocus)
-            {
-                ImGui.SetKeyboardFocusHere();
-                _searchNeedsFocus = false;
-            }
-
-            if (ImGui.InputText("###library_search_input", ref _searchString, 256, 
-                ImGuiInputTextFlags.EnterReturnsTrue | ImGuiInputTextFlags.NoHorizontalScroll | ImGuiInputTextFlags.NoUndoRedo
-                | ImGuiInputTextFlags.CallbackAlways,
-                OnSearchFunc))
-            {
-                if(string.IsNullOrEmpty(_searchString))
-                {
-                    _searchFilter.Query = null;
+                    ImGui.PopStyleColor();
                 }
                 else
                 {
-                    _searchFilter.Query = SearchUtility.ToQuery(_searchString);
+                    ImGui.SetCursorPosY(5);
+                    ImGui.SetCursorPosX(5);
+                    ImGui.BeginDisabled();
+                    ImBrio.FontIcon(FontAwesomeIcon.Search, 0.75f);
+                    ImGui.EndDisabled();
                 }
 
-                Refresh(true);
-            }
-
-            _isSearchFocused = ImGui.IsItemActive();
-
-            // TODO: Try to capture backspace keys to remove tags. possibly with the new key bind input system?
-            // ImGui.IsKeyPressed(ImGuiKey.Backspace) doesn't work, as expected.
-
-            if(!_isSearchFocused)
-            {
-                _searchLostFocus++;
-
-                if(_searchLostFocus > 10)
+                // Tags
+                if(_tagFilter.Tags != null)
                 {
-                    _searchString = _searchFilter.GetSearchString();
-                }
-            }
-            else
-            {
-                _searchLostFocus = 0;
-            }
+                    Tag? toRemove = null;
+                    foreach(Tag tag in _tagFilter.Tags)
+                    {
+                        ImGui.SameLine();
+                        ImGui.SetCursorPosY(0);
 
-            _searchSuggestPos = new Vector2(searchbarPosition.X, searchbarPosition.Y + searchBarHeight);
-            _searchSuggestSize = new Vector2(searchBarWidth, 0);
+                        if(ImBrio.DrawTag(tag))
+                        {
+                            toRemove = tag;
+                        }
+                    }
+
+                    if(toRemove != null)
+                    {
+                        _tagFilter.Tags.Remove(toRemove);
+                        _searchNeedsFocus = true;
+                        Refresh(true);
+                    }
+                }
+
+                // String input
+                ImGui.SameLine();
+                ImGui.SetCursorPosY(0);
+                ImGui.SetNextItemWidth(ImBrio.GetRemainingWidth());
+
+                if(_searchNeedsFocus)
+                {
+                    ImGui.SetKeyboardFocusHere();
+                    _searchNeedsFocus = false;
+                }
+
+                if(ImGui.InputText("###library_search_input", ref _searchString, 256,
+                    ImGuiInputTextFlags.EnterReturnsTrue | ImGuiInputTextFlags.NoHorizontalScroll | ImGuiInputTextFlags.NoUndoRedo
+                    | ImGuiInputTextFlags.CallbackAlways,
+                    OnSearchFunc))
+                {
+                    if(string.IsNullOrEmpty(_searchString))
+                    {
+                        _searchFilter.Query = null;
+                    }
+                    else
+                    {
+                        _searchFilter.Query = SearchUtility.ToQuery(_searchString);
+                    }
+
+                    Refresh(true);
+                }
+
+                _isSearchFocused = ImGui.IsItemActive();
+
+                // TODO: Try to capture backspace keys to remove tags. possibly with the new key bind input system?
+                // ImGui.IsKeyPressed(ImGuiKey.Backspace) doesn't work, as expected.
+
+                if(!_isSearchFocused)
+                {
+                    _searchLostFocus++;
+
+                    if(_searchLostFocus > 10)
+                    {
+                        _searchString = _searchFilter.GetSearchString();
+                    }
+                }
+                else
+                {
+                    _searchLostFocus = 0;
+                }
+
+                _searchSuggestPos = new Vector2(searchbarPosition.X, searchbarPosition.Y + searchBarHeight);
+                _searchSuggestSize = new Vector2(searchBarWidth, 0);
+            }
         }
 
         ImGui.PopStyleColor();
