@@ -48,6 +48,7 @@ internal class SettingsWindow : Window
                     DrawAppearanceTab();
                     DrawPosingTab();
                     DrawWorldTab();
+                    DrawLibraryTab();
                 }
             }
         }
@@ -155,7 +156,7 @@ internal class SettingsWindow : Window
             {
                 ImGui.Text($"Penumbra Status: {(_penumbraService.IsPenumbraAvailable ? "Active" : "Inactive")}");
                 ImGui.SameLine();
-                if (ImBrio.FontIconButton("refresh_penumbra", FontAwesomeIcon.Sync, "Refresh Penumbra Status"))
+                if(ImBrio.FontIconButton("refresh_penumbra", FontAwesomeIcon.Sync, "Refresh Penumbra Status"))
                 {
                     _penumbraService.RefreshPenumbraStatus();
                 }
@@ -172,7 +173,7 @@ internal class SettingsWindow : Window
             {
                 ImGui.Text($"Glamourer Status: {(_glamourerService.IsGlamourerAvailable ? "Active" : "Inactive")}");
                 ImGui.SameLine();
-                if (ImBrio.FontIconButton("refresh_glamourer", FontAwesomeIcon.Sync, "Refresh Glamourer Status"))
+                if(ImBrio.FontIconButton("refresh_glamourer", FontAwesomeIcon.Sync, "Refresh Glamourer Status"))
                 {
                     _glamourerService.RefreshGlamourerStatus();
                 }
@@ -189,7 +190,7 @@ internal class SettingsWindow : Window
             {
                 ImGui.Text($"Mare Synchronos Status: {(_mareService.IsMareAvailable ? "Active" : "Inactive")}");
                 ImGui.SameLine();
-                if (ImBrio.FontIconButton("refresh_mare", FontAwesomeIcon.Sync, "Refresh Mare Synchronos Status"))
+                if(ImBrio.FontIconButton("refresh_mare", FontAwesomeIcon.Sync, "Refresh Mare Synchronos Status"))
                 {
                     _mareService.RefreshMareStatus();
                 }
@@ -397,9 +398,9 @@ internal class SettingsWindow : Window
             }
 
             Vector4 skeletonLineActive = ImGui.ColorConvertU32ToFloat4(_configurationService.Configuration.Posing.SkeletonLineActiveColor);
-            if (ImGui.ColorEdit4("Skeleton Active Color", ref skeletonLineActive, ImGuiColorEditFlags.NoInputs))
+            if(ImGui.ColorEdit4("Skeleton Active Color", ref skeletonLineActive, ImGuiColorEditFlags.NoInputs))
             {
-                
+
                 _configurationService.Configuration.Posing.SkeletonLineActiveColor = ImGui.ColorConvertFloat4ToU32(skeletonLineActive);
                 _configurationService.ApplyChange();
             }
@@ -462,6 +463,76 @@ internal class SettingsWindow : Window
                 _configurationService.Configuration.Environment.ResetWaterOnGPoseExit = resetWaterOnGPoseExit;
                 _configurationService.ApplyChange();
             }
+        }
+    }
+
+    private void DrawLibraryTab()
+    {
+        using(var tab = ImRaii.TabItem("Library"))
+        {
+            if(tab.Success)
+            {
+                DrawLibrarySection();
+            }
+        }
+    }
+
+    private string? _selectedSourceName;
+    private void DrawLibrarySection()
+    {
+        float itemHeight = ImBrio.GetLineHeight() * 2;
+        float buttonWidth = 32;
+
+        float paneHeight = ImBrio.GetRemainingHeight() - ImBrio.GetLineHeight() - ImGui.GetStyle().ItemSpacing.Y;
+        if (ImGui.BeginChild("library_sources_pane", new (-1, paneHeight), true))
+        {
+            foreach((string name, string path) in _configurationService.Configuration.Library.Directories)
+            {
+                bool selected = _selectedSourceName == name;
+                float itemTop = ImGui.GetCursorPosY();
+                if(ImGui.Selectable($"###source_dir_{name}_selectable", ref selected, ImGuiSelectableFlags.None, new(ImBrio.GetRemainingWidth(), itemHeight)))
+                {
+                    _selectedSourceName = name;
+                }
+
+                bool isHover = ImGui.IsItemActive();
+                ImGui.SetCursorPosY(itemTop + ImGui.GetStyle().FramePadding.Y);
+
+
+                ImGui.Text(name);
+                ImGui.TextDisabled(path);
+
+
+                ImGui.SetCursorPosY(itemTop + itemHeight + ImGui.GetStyle().ItemSpacing.Y);
+            }
+
+            ImGui.EndChild();
+        } 
+
+        
+
+        if(_selectedSourceName == null)
+            ImGui.BeginDisabled();
+
+        if(ImBrio.FontIconButton(FontAwesomeIcon.Minus, new(buttonWidth, 0)))
+        {
+        }
+
+        ImGui.SameLine();
+        ImGui.SetCursorPosX(ImGui.GetCursorPosX() + (ImBrio.GetRemainingWidth() - (buttonWidth * 2) - ImGui.GetStyle().ItemSpacing.X));
+        if(ImBrio.FontIconButton(FontAwesomeIcon.Edit, new (buttonWidth, 0)))
+        {
+        }
+
+        if(_selectedSourceName == null)
+        {
+            ImGui.EndDisabled();
+        }
+
+        ImGui.SameLine();
+        ImGui.SetCursorPosX(ImGui.GetCursorPosX() + (ImBrio.GetRemainingWidth() - buttonWidth));
+        if(ImBrio.FontIconButton(FontAwesomeIcon.Plus, new(buttonWidth, 0)))
+        {
         }
     }
 }

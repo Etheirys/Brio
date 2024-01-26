@@ -41,6 +41,17 @@ internal static partial class ImBrio
         return clicked;
     }
 
+    public static bool FontIconButton(string id, FontAwesomeIcon icon, Vector2 size)
+    {
+        bool clicked = false;
+        using(ImRaii.PushFont(UiBuilder.IconFont))
+        {
+            clicked = ImGui.Button($"{icon.ToIconString()}###{id}", size);
+        }
+
+        return clicked;
+    }
+
     public static bool FontIconButton(string id, FontAwesomeIcon icon, string? tooltip = null, bool enabled = true, bool bordered = true, uint? textColor = null)
     {
         bool wasClicked = false;
