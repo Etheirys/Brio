@@ -25,7 +25,7 @@ internal class MareCharacterDataFileInfo : FileTypeInfoBase<MareCharacterDataFil
     {
         base.GetLibraryActions(ref actions);
 
-        actions.Add(new ApplyToSelectedActorAction(Apply, true));
+        actions.Add(new ApplyFileToSelectedActorAction(Apply, true));
     }
 
     private Task Apply(FileEntry entry, ActorEntity actor)
@@ -33,7 +33,7 @@ internal class MareCharacterDataFileInfo : FileTypeInfoBase<MareCharacterDataFil
         ActorAppearanceCapability? capability;
         if(actor.TryGetCapability<ActorAppearanceCapability>(out capability) && capability != null)
         {
-            capability.LoadMcdf(entry.FilePath);
+            return capability.LoadMcdfAsync(entry.FilePath);
         }
 
         return Task.CompletedTask;
