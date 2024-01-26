@@ -23,7 +23,7 @@ internal class GameDataOrnamentSource : SourceBase
         foreach(var (_, ornament) in _lumina.Ornaments)
         {
             string rowName = $"Ornament {ornament.RowId}";
-            var entry = new GameDataAppearanceEntry(this, ornament.Singular ?? rowName, ornament.Icon, ornament);
+            var entry = new GameDataAppearanceEntry(this, ornament.RowId, ornament.Singular ?? rowName, ornament.Icon, ornament);
             entry.Tags.Add("Ornament").WithAlias("Fashion Accessory");
             entry.SourceInfo = rowName;
             Add(entry);

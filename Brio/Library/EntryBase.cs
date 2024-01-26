@@ -29,6 +29,11 @@ internal abstract class EntryBase : ITagged
 
     public abstract bool PassesFilters(params FilterBase[] filters);
 
+    public virtual bool Search(string[] query)
+    {
+        return SearchUtility.Matches(this.Name, query);
+    }
+
     public virtual void Dispose()
     {
     }

@@ -351,7 +351,7 @@ internal class LibraryWindow : Window
 
                 ImGui.PushStyleColor(ImGuiCol.FrameBg, 0x000000);
                 if(ImGui.InputText("###library_search_input", ref _searchText, 256,
-                    ImGuiInputTextFlags.EnterReturnsTrue | ImGuiInputTextFlags.NoHorizontalScroll | ImGuiInputTextFlags.NoUndoRedo
+                    ImGuiInputTextFlags.NoHorizontalScroll | ImGuiInputTextFlags.NoUndoRedo
                     | ImGuiInputTextFlags.CallbackAlways,
                     OnSearchFunc))
                 {
@@ -377,11 +377,6 @@ internal class LibraryWindow : Window
                 if(!_isSearchFocused)
                 {
                     _searchLostFocus++;
-
-                    if(_searchLostFocus > 10)
-                    {
-                        _searchText = _searchFilter.GetSearchString();
-                    }
                 }
                 else
                 {
@@ -471,13 +466,6 @@ internal class LibraryWindow : Window
                     ImBrio.Text($"plus \"{trimmedTags}\" more tags...", 0.75f, 0x88FFFFFF);
                 }
 
-                hasContent = true;
-            }
-
-            // search string
-            if(!string.IsNullOrEmpty(_searchText))
-            {
-                ImBrio.Text($"Press ENTER to search for \"{_searchText}\"", 0x88FFFFFF);
                 hasContent = true;
             }
 

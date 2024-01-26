@@ -34,4 +34,13 @@ internal abstract class ItemEntryBase : EntryBase
 
         return true;
     }
+
+    public override bool Search(string[] query)
+    {
+        bool match = base.Search(query);
+        match |= SearchUtility.Matches(this.Description, query);
+        match |= SearchUtility.Matches(this.Author, query);
+        match |= SearchUtility.Matches(this.Version, query);
+        return match;
+    }
 }

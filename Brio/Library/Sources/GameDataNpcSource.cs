@@ -24,7 +24,7 @@ internal class GameDataNpcSource : SourceBase
         {
             string name = $"B:{npc.RowId:D7}";
             string? displayName = ResolveName(name);
-            var entry = new GameDataAppearanceEntry(this, displayName ?? name, 0, npc);
+            var entry = new GameDataAppearanceEntry(this, npc.RowId, displayName ?? name, 0, npc);
             entry.SourceInfo = $"BNpc {npc.RowId}";
             entry.Tags.Add("NPC");
 
@@ -47,7 +47,7 @@ internal class GameDataNpcSource : SourceBase
             }
 
             string? displayName = ResolveName(name);
-            var entry = new GameDataAppearanceEntry(this, displayName ?? name, 0, npc);
+            var entry = new GameDataAppearanceEntry(this, npc.RowId, displayName ?? name, 0, npc);
             entry.SourceInfo = $"ENpc {npc.RowId}";
             entry.Tags.Add("NPC");
 

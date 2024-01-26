@@ -22,7 +22,7 @@ internal class GameDataCompanionSource : SourceBase
         foreach(var (_, companion) in _lumina.Companions)
         {
             string rowName = $"Companion {companion.RowId}";
-            var entry = new GameDataAppearanceEntry(this, companion.Singular ?? rowName, companion.Icon, companion);
+            var entry = new GameDataAppearanceEntry(this, companion.RowId, companion.Singular ?? rowName, companion.Icon, companion);
             entry.Tags.Add("Companion").WithAlias("Minion");
             entry.SourceInfo = rowName;
             Add(entry);

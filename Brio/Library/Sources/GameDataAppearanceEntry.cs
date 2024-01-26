@@ -14,13 +14,15 @@ internal class GameDataAppearanceEntry : ItemEntryBase
     private string _name;
     private uint _icon;
     private ActorAppearanceUnion _appearance;
+    private uint _rowId;
 
-    public GameDataAppearanceEntry(SourceBase source, string name, uint icon, ActorAppearanceUnion appearance)
+    public GameDataAppearanceEntry(SourceBase source, uint rowId, string name, uint icon, ActorAppearanceUnion appearance)
         : base(source)
     {
         _name = name;
         _icon = icon;
         _appearance = appearance;
+        _rowId = rowId;
 
         ActorAppearance app = _appearance;
 
@@ -66,5 +68,12 @@ internal class GameDataAppearanceEntry : ItemEntryBase
 
             return UIManager.Instance.TextureProvider.GetIcon(_icon);
         }
+    }
+
+    public override bool Search(string[] query)
+    {
+        bool match = base.Search(query);
+        match |= SearchUtility.Matches(this._rowId, query);
+        return match;
     }
 }

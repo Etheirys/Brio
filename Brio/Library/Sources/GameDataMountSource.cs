@@ -27,7 +27,7 @@ internal class GameDataMountSource : SourceBase
             if(string.IsNullOrEmpty(name))
                 name = rowName;
 
-            var entry = new GameDataAppearanceEntry(this, name, mount.Icon, mount);
+            var entry = new GameDataAppearanceEntry(this, mount.RowId, name, mount.Icon, mount);
             entry.Tags.Add("Mount");
 
             if (name != rowName)
