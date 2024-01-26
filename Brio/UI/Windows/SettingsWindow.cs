@@ -7,8 +7,12 @@ using Dalamud.Interface;
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Interface.Windowing;
 using ImGuiNET;
+using Swan;
 using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Numerics;
+using System.Xml.Linq;
 
 namespace Brio.UI.Windows;
 
@@ -21,7 +25,13 @@ internal class SettingsWindow : Window
     private readonly BrioIPCService _brioIPCService;
     private readonly MareService _mareService;
 
-    public SettingsWindow(ConfigurationService configurationService, PenumbraService penumbraService, GlamourerService glamourerService, WebService webService, BrioIPCService brioIPCService, MareService mareService) : base($"{Brio.Name} Settings###brio_settings_window", ImGuiWindowFlags.NoResize)
+    public SettingsWindow(
+        ConfigurationService configurationService,
+        PenumbraService penumbraService,
+        GlamourerService glamourerService,
+        WebService webService,
+        BrioIPCService brioIPCService,
+        MareService mareService) : base($"{Brio.Name} Settings###brio_settings_window", ImGuiWindowFlags.NoResize)
     {
         Namespace = "brio_settings_namespace";
 
@@ -478,38 +488,23 @@ internal class SettingsWindow : Window
     }
 
     private string? _selectedSourceName;
+    private object? _selectedSource;
+    private bool _editing;
+
     private void DrawLibrarySection()
     {
-        float itemHeight = ImBrio.GetLineHeight() * 2;
         float buttonWidth = 32;
 
         float paneHeight = ImBrio.GetRemainingHeight() - ImBrio.GetLineHeight() - ImGui.GetStyle().ItemSpacing.Y;
         if (ImGui.BeginChild("library_sources_pane", new (-1, paneHeight), true))
         {
-            foreach((string name, string path) in _configurationService.Configuration.Library.Directories)
+            foreach((string name, LibraryConfiguration.FileSource source) in _configurationService.Configuration.Library.FileSources)
             {
-                bool selected = _selectedSourceName == name;
-                float itemTop = ImGui.GetCursorPosY();
-                if(ImGui.Selectable($"###source_dir_{name}_selectable", ref selected, ImGuiSelectableFlags.None, new(ImBrio.GetRemainingWidth(), itemHeight)))
-                {
-                    _selectedSourceName = name;
-                }
-
-                bool isHover = ImGui.IsItemActive();
-                ImGui.SetCursorPosY(itemTop + ImGui.GetStyle().FramePadding.Y);
-
-
-                ImGui.Text(name);
-                ImGui.TextDisabled(path);
-
-
-                ImGui.SetCursorPosY(itemTop + itemHeight + ImGui.GetStyle().ItemSpacing.Y);
+                DrawSourceItem(name, source);
             }
 
             ImGui.EndChild();
         } 
-
-        
 
         if(_selectedSourceName == null)
             ImGui.BeginDisabled();
@@ -522,6 +517,8 @@ internal class SettingsWindow : Window
         ImGui.SetCursorPosX(ImGui.GetCursorPosX() + (ImBrio.GetRemainingWidth() - (buttonWidth * 2) - ImGui.GetStyle().ItemSpacing.X));
         if(ImBrio.FontIconButton(FontAwesomeIcon.Edit, new (buttonWidth, 0)))
         {
+            ImGui.OpenPopup("###settings_edit_source");
+            _editing = true;
         }
 
         if(_selectedSourceName == null)
@@ -533,6 +530,120 @@ internal class SettingsWindow : Window
         ImGui.SetCursorPosX(ImGui.GetCursorPosX() + (ImBrio.GetRemainingWidth() - buttonWidth));
         if(ImBrio.FontIconButton(FontAwesomeIcon.Plus, new(buttonWidth, 0)))
         {
+
+        }
+
+
+        if(_editing && _selectedSourceName != null)
+        {
+            bool isCreating = false;
+            ImGui.SetNextWindowSize(new(400, 200));
+
+            if(ImGui.BeginPopupModal("###settings_edit_source", ref _editing,
+                ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoTitleBar))
+            {
+                ImGui.Text($"Edit source \"{_selectedSourceName}\"");
+
+                if(isCreating)
+                {
+                    string name = _selectedSourceName;
+                    if(ImGui.InputText("Name", ref name, 80, ImGuiInputTextFlags.EnterReturnsTrue))
+                    {
+                        // ...
+                    }
+                }
+
+                Vector2 areaSize = new(-1, ImBrio.GetRemainingHeight() - ImBrio.GetLineHeight() - ImGui.GetStyle().ItemSpacing.Y);
+
+                if (ImGui.BeginChild("###settings_edit_source", areaSize, true))
+                {
+                    if(_selectedSource is LibraryConfiguration.FileSource fileSource)
+                    {
+                        DrawSource(fileSource, true);
+                    }
+
+                    ImGui.EndChild();
+                }
+
+                ImGui.SetCursorPosX(ImGui.GetCursorPosX() + ImBrio.GetRemainingWidth() - 100);
+                ImGui.SetCursorPosY(ImGui.GetCursorPosY() + ImBrio.GetRemainingHeight() - ImBrio.GetLineHeight());
+                if(ImGui.Button("Save", new(100, 0)))
+                {
+                    ImGui.CloseCurrentPopup();
+                    _configurationService.Save();
+                }
+
+                ImGui.EndPopup();
+            }
+        }
+    }
+
+    private void DrawSourceItem(string name, object sourceConfig)
+    {
+        float itemHeight = ImBrio.GetLineHeight() * 2;
+
+        bool selected = _selectedSourceName == name;
+        float itemTop = ImGui.GetCursorPosY();
+        if(ImGui.Selectable($"###settings_source_dir_{name}_selectable", ref selected, ImGuiSelectableFlags.None, new(ImBrio.GetRemainingWidth(), itemHeight)))
+        {
+            _selectedSourceName = name;
+            _selectedSource = sourceConfig;
+        }
+
+        bool isHover = ImGui.IsItemActive();
+        ImGui.SetCursorPosY(itemTop + ImGui.GetStyle().FramePadding.Y);
+
+        ImGui.Text(name);
+
+        if(sourceConfig is LibraryConfiguration.FileSource fileSource)
+        {
+            DrawSource(fileSource, false);
+        }
+
+        ImGui.SetCursorPosY(itemTop + itemHeight + ImGui.GetStyle().ItemSpacing.Y);
+    }
+
+    private void DrawSource(LibraryConfiguration.FileSource fileSource, bool edit)
+    {
+        if(edit)
+        {
+            // TODO: make a nicer version of this...
+            // maybe a 'select folder' button?
+
+
+            ////string[] names = Enum.GetNames<Environment.SpecialFolder>();
+            ///
+            if(fileSource.Root == null)
+                fileSource.Root = Environment.SpecialFolder.MyComputer;
+
+            List<string> names = new();
+            names.Add(Environment.SpecialFolder.MyComputer.ToString());
+            names.Add(Environment.SpecialFolder.MyDocuments.ToString());
+            names.Add(Environment.SpecialFolder.Desktop.ToString());
+            names.Add(Environment.SpecialFolder.LocalApplicationData.ToString());
+            int current = names.IndexOf(fileSource.Root.ToString()!);
+
+            if (ImGui.Combo("Root", ref current, names.ToArray(), names.Count))
+            {
+                fileSource.Root = Enum.Parse<Environment.SpecialFolder>(names[current]);
+            }
+
+            string path = fileSource.Path ?? string.Empty;
+            if (ImGui.InputText("Path", ref path, 120))
+            {
+                fileSource.Path = path;
+            }
+        }
+        else
+        {
+            if(fileSource.Root != null && fileSource.Root != Environment.SpecialFolder.MyComputer)
+            {
+                ImGui.TextDisabled($"{fileSource.Root}{fileSource.Path}");
+            }
+            else if(fileSource.Path != null)
+            {
+                ImGui.TextDisabled(fileSource.Path);
+            }
         }
     }
 }

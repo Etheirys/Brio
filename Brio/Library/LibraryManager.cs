@@ -72,9 +72,9 @@ internal class LibraryManager : IDisposable
         _sources.AddRange(_internalSources);
         
         // Directory configurations
-        foreach((string name, string path) in _configurationService.Configuration.Library.Directories)
+        foreach((var name, var sourceConfig) in _configurationService.Configuration.Library.FileSources)
         {
-            _sources.Add(new FileSource(name, path));
+            _sources.Add(new FileSource(name, sourceConfig));
         }
 
         foreach (SourceBase source in _sources)

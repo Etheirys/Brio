@@ -1,4 +1,5 @@
-﻿using Brio.Files;
+﻿using Brio.Config;
+using Brio.Files;
 using Brio.Library.Actions;
 using Brio.Library.Tags;
 using Brio.Resources;
@@ -12,7 +13,7 @@ namespace Brio.Library.Sources;
 
 internal class FileSource : SourceBase
 {
-    public readonly string DirectoryPath;
+    public readonly string DirectoryPath = string.Empty;
 
     private string _name;
 
@@ -26,33 +27,26 @@ internal class FileSource : SourceBase
         new MareCharacterDataFileInfo(),
     };
 
-    public FileSource(string name, string directoryPath)
+    public FileSource(string name, LibraryConfiguration.FileSource config)
         : base()
     {
         _name = name;
 
-        string path = directoryPath;
-        path = path.Replace('/', '\\');
-
-        // Parse any special folder names (%MyDocuments%, %AppData%, etc)
-        if (path.StartsWith('%'))
+        if(config.Root != null)
         {
-            path = path.Substring(1);
-            int endSpecialFolder = path.IndexOf('%');
-            string specialFolderName = path.Substring(0, endSpecialFolder);
-
-            path = path.Substring(endSpecialFolder + 1, path.Length - endSpecialFolder - 1);
-
-            Environment.SpecialFolder specialFolder;
-            if(Enum.TryParse(specialFolderName, out specialFolder))
-            {
-                path = Environment.GetFolderPath(specialFolder) + path;
-            }
-
-            Brio.Log.Info($"{path}");
+            DirectoryPath = Environment.GetFolderPath((Environment.SpecialFolder)config.Root) + config.Path;
         }
+        else if (config.Path != null)
+        {
+            DirectoryPath = config.Path;
+        }
+    }
 
-        DirectoryPath = path;
+    public FileSource(string name, string directoryPath)
+        : base()
+    {
+        _name = name;
+        DirectoryPath = directoryPath;
     }
 
     public FileSource(string name, params string[] paths)
