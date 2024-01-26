@@ -1,11 +1,13 @@
-﻿using Brio.Files;
+﻿using Brio.Capabilities.Actor;
+using Brio.Entities.Actor;
 using Brio.Game.Actor.Appearance;
 using Brio.Game.Types;
-using Brio.Library.Tags;
+using Brio.Library.Actions;
 using Brio.Resources;
 using Brio.UI;
 using Dalamud.Interface.Internal;
 using System;
+using System.Threading.Tasks;
 
 namespace Brio.Library.Sources;
 
@@ -23,6 +25,8 @@ internal class GameDataAppearanceEntry : ItemEntryBase
         _icon = icon;
         _appearance = appearance;
         _rowId = rowId;
+
+        Actions.Add(new ApplyToSelectedActorAction(Apply, true));
 
         ActorAppearance app = _appearance;
 
@@ -75,5 +79,14 @@ internal class GameDataAppearanceEntry : ItemEntryBase
         bool match = base.Search(query);
         match |= SearchUtility.Matches(this._rowId, query);
         return match;
+    }
+
+    private async Task Apply(ActorEntity actor)
+    {
+        ActorAppearanceCapability? capability;
+        if(actor.TryGetCapability<ActorAppearanceCapability>(out capability) && capability != null)
+        {
+            await capability.SetAppearance(_appearance, AppearanceImportOptions.All);
+        }
     }
 }

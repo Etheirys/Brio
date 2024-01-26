@@ -54,3 +54,45 @@ internal class ApplyFileToSelectedActorAction<T> : EntryActionBase<FileEntry>
         await _apply.Invoke(obj, SelectedActor);
     }
 }
+
+internal class ApplyToSelectedActorAction : EntryActionBase<ItemEntryBase>
+{
+    private Func<ActorEntity, Task> _apply;
+
+    internal ApplyToSelectedActorAction(Func<ActorEntity, Task> apply, bool isPrimaryAction)
+        : base(isPrimaryAction)
+    {
+        _apply = apply;
+    }
+
+    public ActorEntity? SelectedActor => GetService<EntityManager>().SelectedEntity as ActorEntity;
+
+    public override string Label
+    {
+        get
+        {
+            if(SelectedActor != null)
+            {
+                return $"Apply to {SelectedActor.FriendlyName}";
+            }
+
+            return "Select an Actor to apply";
+        }
+    }
+
+    public override bool GetCanInvoke()
+    {
+        if(!base.GetCanInvoke())
+            return false;
+
+        return SelectedActor != null;
+    }
+
+    protected override sealed async Task InvokeAsync(ItemEntryBase entry)
+    {
+        if(SelectedActor == null)
+            return;
+
+        await _apply.Invoke(SelectedActor);
+    }
+}
