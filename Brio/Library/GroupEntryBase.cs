@@ -26,6 +26,12 @@ internal abstract class GroupEntryBase : EntryBase
         _allEntries.Add(entry);
     }
 
+    public void Clear()
+    {
+        _allEntries.Clear();
+        _filteredEntries.Clear();
+    }
+
     public override bool PassesFilters(params FilterBase[] filters)
     {
         return _filteredEntries.Count > 0;
@@ -46,6 +52,9 @@ internal abstract class GroupEntryBase : EntryBase
         {
             foreach(EntryBase entry in _allEntries)
             {
+                if(entry == null)
+                    continue;
+
                 if(entry is GroupEntryBase dir)
                 {
                     dir.FilterEntries(filters);
@@ -112,6 +121,9 @@ internal abstract class GroupEntryBase : EntryBase
 
         foreach(EntryBase entry in _allEntries)
         {
+            if(entry == null)
+                continue;
+
             entry.Dispose();
         }
     }
