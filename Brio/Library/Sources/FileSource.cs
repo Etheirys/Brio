@@ -16,7 +16,7 @@ internal class FileSource : SourceBase
 
     // We could probably put these in a file type manager or something,
     // but currently only the library needs them, so here is fine too.
-    private static List<FileInfoBase> fileTypes = new()
+    private static List<FileTypeInfoBase> fileTypes = new()
     {
         new AnamnesisCharaFileInfo(),
         new CMToolPoseFileInfo(),
@@ -61,7 +61,7 @@ internal class FileSource : SourceBase
         string[] filePaths = Directory.GetFiles(directory, "*.*");
         foreach(string filePath in filePaths)
         {
-            FileInfoBase? fileTypeInfo = GetFileType(filePath);
+            FileTypeInfoBase? fileTypeInfo = GetFileType(filePath);
             if(fileTypeInfo == null)
                 continue;
 
@@ -69,9 +69,9 @@ internal class FileSource : SourceBase
         }
     }
 
-    private FileInfoBase? GetFileType(string path)
+    private FileTypeInfoBase? GetFileType(string path)
     {
-        foreach (FileInfoBase fileType in fileTypes)
+        foreach (FileTypeInfoBase fileType in fileTypes)
         {
             if(fileType.IsFile(path))
             {
@@ -119,13 +119,13 @@ internal class FileEntry : ItemEntryBase
     public readonly string FilePath;
 
     private string _name;
-    private FileInfoBase _fileInfo;
+    private FileTypeInfoBase _fileInfo;
     private IDalamudTextureWrap? _previewImage;
     private string? _description;
     private string? _author;
     private string? _version;
 
-    public FileEntry(FileSource source, string path, FileInfoBase fileInfo)
+    public FileEntry(FileSource source, string path, FileTypeInfoBase fileInfo)
         : base(source)
     {
         _fileInfo = fileInfo;

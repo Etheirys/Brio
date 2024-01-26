@@ -6,7 +6,7 @@ using System;
 
 namespace Brio.Files;
 
-internal abstract class JsonDocumentBaseFileInfo<T> : FileInfoBase<T>
+internal abstract class JsonDocumentBaseFileInfo<T> : FileTypeInfoBase<T>
 {
     public override object? Load(string filePath) => ResourceProvider.Instance.GetFileDocument<T>(filePath);
 }

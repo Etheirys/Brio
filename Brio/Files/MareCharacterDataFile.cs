@@ -6,7 +6,7 @@ using Dalamud.Interface.Internal;
 
 namespace Brio.Files;
 
-internal class MareCharacterDataFileInfo : FileInfoBase<MareCharacterDataFile>
+internal class MareCharacterDataFileInfo : FileTypeInfoBase<MareCharacterDataFile>
 {
     public override string Name => "Mare Character Data";
     public override IDalamudTextureWrap Icon => ResourceProvider.Instance.GetResourceImage("Images.FileIcon_Mcdf.png");
