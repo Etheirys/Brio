@@ -2,6 +2,7 @@
 using Brio.Files;
 using Brio.Game.Types;
 using Brio.Library;
+using Brio.Library.Actions;
 using Brio.Library.Filters;
 using Brio.Library.Sources;
 using Brio.Library.Tags;
@@ -32,6 +33,7 @@ internal class LibraryWindow : Window
     private const int MinEntrySize = 100;
     private const int MaxEntrySize = 250;
 
+    private readonly IServiceProvider _serviceProvider;
     private readonly ConfigurationService _configurationService;
     private readonly LibraryManager _libraryManager;
     private readonly IPluginLog _log;
@@ -66,6 +68,7 @@ internal class LibraryWindow : Window
     private long _lastRefreshTimeMs = 0;
 
     public LibraryWindow(
+        IServiceProvider serviceProvider,
         IPluginLog log,
         ConfigurationService configurationService,
         LibraryManager libraryManager)
@@ -81,6 +84,7 @@ internal class LibraryWindow : Window
         _log = log;
         _configurationService = configurationService;
         _libraryManager = libraryManager;
+        _serviceProvider = serviceProvider;
 
         IsOpen = true;
         _path.Add(_libraryManager.Root);
@@ -129,15 +133,12 @@ internal class LibraryWindow : Window
             ImGui.SameLine();
 
       
-            if (ImGui.BeginChild("###library_info_pane", new Vector2(ImBrio.GetRemainingWidth(), ImBrio.GetRemainingHeight()), true))
+            if (ImGui.BeginChild("###library_info_pane", new Vector2(ImBrio.GetRemainingWidth(), ImBrio.GetRemainingHeight()), true,
+                ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse))
             {
-                if(_selected is ItemEntryBase file)
+                if(_selected != null)
                 {
-                    DrawInfo(file);
-                }
-                else if (_selected is SourceBase source)
-                {
-                    DrawInfo(source);
+                    DrawInfo(_selected);
                 }
 
                 ImGui.EndChild();
@@ -533,7 +534,7 @@ internal class LibraryWindow : Window
         int column = 0;
         int index = 0;
 
-        if(_libraryManager.IsScanning)
+        if(_libraryManager.IsScanning || _isRefreshing)
         {
             ImGui.SetCursorPosX((WindowContentWidth / 2) - 24);
             ImGui.SetCursorPosY((WindowContentHeight / 2) - 24);
@@ -631,10 +632,69 @@ internal class LibraryWindow : Window
         }
     }
 
-    private void DrawInfo(ItemEntryBase entry)
+    private void DrawInfo(EntryBase entry)
     {
         ImGui.Text(entry.Name);
 
+        float infoAreaHeight = ImBrio.GetRemainingHeight() - ImBrio.GetLineHeight() - ImGui.GetStyle().ItemSpacing.Y;
+        if(ImGui.BeginChild("###library_info_pane", new Vector2(ImBrio.GetRemainingWidth(), infoAreaHeight), false))
+        {
+            if(_selected is ItemEntryBase file)
+            {
+                DrawInfo(file);
+            }
+            else if(_selected is SourceBase source)
+            {
+                DrawInfo(source);
+            }
+
+
+            ImGui.Spacing();
+            ImGui.Spacing();
+            ImGui.Spacing();
+            ImGui.Spacing();
+
+            ImGui.EndChild();
+        }
+
+
+        // Actions
+        float totalWidth = 0;
+        for(int i =0; i < entry.Actions.Count; i++)
+        {
+            entry.Actions[i].Initialize(_serviceProvider);
+
+            if(i > 0)
+                totalWidth += ImGui.GetStyle().ItemSpacing.X;
+
+            
+            totalWidth += ImGui.CalcTextSize(entry.Actions[i].Label).X;
+            totalWidth += ImGui.GetStyle().FramePadding.X * 2;
+        }
+
+        ImGui.SetCursorPosX(ImGui.GetCursorPosX() + (ImBrio.GetRemainingWidth() - totalWidth));
+
+        foreach (var action in entry.Actions)
+        {
+            bool canInvoke = action.GetCanInvoke() && !action.IsInvoking;
+
+            if(!canInvoke)
+                ImGui.BeginDisabled();
+
+            if (ImGui.Button(action.Label))
+            {
+                action.Invoke(entry);
+            }
+
+            if(!canInvoke)
+                ImGui.EndDisabled();
+
+            ImGui.SameLine();
+        }
+    }
+
+    private void DrawInfo(ItemEntryBase entry)
+    {
         if(entry.Source != null)
         {
             float x = ImGui.GetCursorPosX();
@@ -671,7 +731,8 @@ internal class LibraryWindow : Window
         if(entry.PreviewImage != null)
         {
             Vector2 size = ImGui.GetContentRegionAvail();
-            size.Y = size.X;
+
+            size.Y = Math.Min(size.X, size.Y * 0.5f);
             using(var child = ImRaii.Child($"library_info_image", size, false, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoInputs))
             {
                 if(!child.Success)
@@ -708,20 +769,10 @@ internal class LibraryWindow : Window
             _tagFilter.Add(selected);
             Refresh(true);
         }
-
-
-        // Actions..
-        ImGui.Button("Save");
-        ImGui.SameLine();
-        ImGui.Button("Delete");
-        ImGui.SameLine();
-        ImGui.Button("Open");
     }
 
     private void DrawInfo(SourceBase source)
     {
-        ImGui.Text(source.Name);
-
         if(source.Description != null)
         {
             ImGui.TextWrapped(source.Description);
@@ -737,7 +788,18 @@ internal class LibraryWindow : Window
         }
         else
         {
-            // open the file?
+            foreach(EntryActionBase action in entry.Actions)
+            {
+                action.Initialize(_serviceProvider);
+
+                if(!action.GetCanInvoke() || action.IsInvoking)
+                    continue;
+
+                if (action.IsPrimary)
+                {
+                    action.Invoke(entry);
+                }
+            }
         }
     }
 

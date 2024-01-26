@@ -1,10 +1,17 @@
-﻿using Brio.Game.Actor.Appearance;
+﻿using Brio.Capabilities.Actor;
+using Brio.Entities.Actor;
+using Brio.Game.Actor.Appearance;
+using Brio.Library;
+using Brio.Library.Actions;
+using Brio.Library.Sources;
 using Brio.Library.Tags;
 using Brio.Resources;
 using Dalamud.Interface.Internal;
 using FFXIVClientStructs.FFXIV.Client.Game.Character;
 using System;
+using System.Collections.Generic;
 using System.Numerics;
+using System.Threading.Tasks;
 
 namespace Brio.Files;
 
@@ -13,6 +20,22 @@ internal class AnamnesisCharaFileInfo : JsonDocumentBaseFileInfo<AnamnesisCharaF
     public override string Name => "Character File";
     public override IDalamudTextureWrap Icon => ResourceProvider.Instance.GetResourceImage("Images.FileIcon_Chara.png");
     public override string Extension => ".chara";
+
+    public override void GetLibraryActions(ref List<EntryActionBase> actions)
+    {
+        base.GetLibraryActions(ref actions);
+
+        actions.Add(new ApplyFileToSelectedActorAction<AnamnesisCharaFile>(Apply, true));
+    }
+
+    private async Task Apply(AnamnesisCharaFile file, ActorEntity actor)
+    {
+        ActorAppearanceCapability? capability;
+        if (actor.TryGetCapability<ActorAppearanceCapability>(out capability) && capability != null)
+        {
+            await capability.SetAppearance(file, AppearanceImportOptions.All);
+        }
+    }
 }
 
 [Serializable]

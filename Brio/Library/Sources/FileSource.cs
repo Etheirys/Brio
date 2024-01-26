@@ -1,4 +1,5 @@
 ﻿using Brio.Files;
+using Brio.Library.Actions;
 using Brio.Library.Tags;
 using Brio.Resources;
 using Brio.UI;
@@ -141,8 +142,8 @@ internal class FileEntry : ItemEntryBase
     {
         _fileInfo = fileInfo;
 
-        FilePath = path;
-        SourceInfo = Path.GetRelativePath(source.DirectoryPath, path);
+        this.FilePath = path;
+        this.SourceInfo = Path.GetRelativePath(source.DirectoryPath, path);
 
         _name = Path.GetFileNameWithoutExtension(path);
         if(_name.Length >= 60)
@@ -150,7 +151,10 @@ internal class FileEntry : ItemEntryBase
             _name = _name.Substring(0, 55) + "...";
         }
 
-        // if this type has a load method, invoke it to load the file
+        List<EntryActionBase> actions = new();
+        _fileInfo.GetLibraryActions(ref actions);
+        this.Actions.AddRange(actions);
+
         try
         {
             if (_fileInfo.IsFileType<IFileMetadata>() == true)
@@ -183,6 +187,7 @@ internal class FileEntry : ItemEntryBase
     public override IDalamudTextureWrap? Icon => GetIcon();
     public override IDalamudTextureWrap? PreviewImage => GetPreviewImage();
     public override Type LoadsType => _fileInfo.Type;
+    public FileTypeInfoBase FileTypeInfo => _fileInfo;
 
     public override bool IsVisible
     {

@@ -1,9 +1,10 @@
 ﻿using Brio.Files;
+using Brio.Library.Actions;
 using Brio.Library.Filters;
 using Brio.Library.Sources;
 using Brio.Library.Tags;
 using Dalamud.Interface.Internal;
-using System;
+using System.Collections.Generic;
 
 namespace Brio.Library;
 
@@ -26,6 +27,7 @@ internal abstract class EntryBase : ITagged
     public TagCollection Tags { get; init; } = new();
     public SourceBase? Source => _source;
     public string? SourceInfo { get; set; }
+    public List<EntryActionBase> Actions { get; init; } = new();
 
     public abstract bool PassesFilters(params FilterBase[] filters);
 
