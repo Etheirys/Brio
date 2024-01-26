@@ -165,6 +165,10 @@ internal class LibraryWindow : Window
         if (ImBrio.ToggleButtonStrip("library_filters_selector", new(ImBrio.GetRemainingWidth(), ImBrio.GetLineHeight()), ref selected, ops.ToArray()))
         {
             _typeFilter = filters[selected];
+
+            if (_path.Count > 1)
+                _path.RemoveRange(1, _path.Count - 1);
+
             Refresh(true);
         }
     }
