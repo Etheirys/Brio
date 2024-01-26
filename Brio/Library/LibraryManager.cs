@@ -1,7 +1,6 @@
 ﻿using Brio.Config;
 using Brio.Library.Sources;
 using Brio.Resources;
-using Dalamud.Interface.Internal;
 using Dalamud.Plugin.Services;
 using System;
 using System.Collections.Generic;
@@ -25,7 +24,7 @@ internal class LibraryManager : IDisposable
         _configurationService = configurationService;
         _luminaProvider = luminaProvider;
         _log = log;
-        _rootItem = new();
+        _rootItem = new(this, configurationService);
 
         _configurationService.Configuration.Library.CheckDefaults();
         _configurationService.OnConfigurationChanged += OnConfigurationChanged;
@@ -121,15 +120,4 @@ internal class LibraryManager : IDisposable
             _log.Error(ex, $"Error in library source: {source.Name}");
         }
     }
-}
-
-internal class LibraryRoot : GroupEntryBase
-{
-    public LibraryRoot()
-        : base(null)
-    {
-    }
-
-    public override string Name => "Library";
-    public override IDalamudTextureWrap? Icon => null;
 }

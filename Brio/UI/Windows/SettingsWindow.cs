@@ -1,6 +1,7 @@
 ﻿using Brio.Config;
 using Brio.Core;
 using Brio.IPC;
+using Brio.UI.Controls.Editors;
 using Brio.UI.Controls.Stateless;
 using Brio.Web;
 using Dalamud.Interface;
@@ -487,165 +488,10 @@ internal class SettingsWindow : Window
         }
     }
 
-    private LibraryConfiguration.SourceConfigBase? _selectedSource;
-    private bool _editing;
-
+    private LibraryConfiguration.SourceConfigBase? _selectedSourceConfig;
+    private bool _isEditingSource;
     private void DrawLibrarySection()
     {
-        _configurationService.Configuration.Library.CheckDefaults();
-
-        float buttonWidth = 32;
-
-        float paneHeight = ImBrio.GetRemainingHeight() - ImBrio.GetLineHeight() - ImGui.GetStyle().ItemSpacing.Y;
-        if (ImGui.BeginChild("library_sources_pane", new (-1, paneHeight), true))
-        {
-            int index = 0;
-            foreach(LibraryConfiguration.SourceConfigBase config in _configurationService.Configuration.Library.GetAllConfigs())
-            {
-                DrawSourceItem(index, config);
-                index++;
-            }
-
-            ImGui.EndChild();
-        } 
-
-        if(_selectedSource == null)
-            ImGui.BeginDisabled();
-
-        if(ImBrio.FontIconButton(FontAwesomeIcon.Minus, new(buttonWidth, 0)))
-        {
-            // TODO: confirm?
-            if(_selectedSource != null)
-            {
-                _configurationService.Configuration.Library.RemoveSource(_selectedSource);
-                _configurationService.Save();
-            }
-        }
-
-        ImGui.SameLine();
-        ImGui.SetCursorPosX(ImGui.GetCursorPosX() + (ImBrio.GetRemainingWidth() - (buttonWidth * 2) - ImGui.GetStyle().ItemSpacing.X));
-        if(ImBrio.FontIconButton(FontAwesomeIcon.Edit, new (buttonWidth, 0)))
-        {
-            ImGui.OpenPopup("###settings_edit_source");
-            _editing = true;
-        }
-
-        if(_selectedSource == null)
-        {
-            ImGui.EndDisabled();
-        }
-
-        ImGui.SameLine();
-        ImGui.SetCursorPosX(ImGui.GetCursorPosX() + (ImBrio.GetRemainingWidth() - buttonWidth));
-        if(ImBrio.FontIconButton(FontAwesomeIcon.Plus, new(buttonWidth, 0)))
-        {
-            _editing = true;
-            _selectedSource = new LibraryConfiguration.FileSourceConfig();
-            _selectedSource.Name = "New Source";
-            _configurationService.Configuration.Library.AddSource(_selectedSource);
-            ImGui.OpenPopup("###settings_edit_source");
-        }
-
-
-        if(_editing && _selectedSource != null)
-        {
-            ImGui.SetNextWindowSize(new(400, 200));
-
-            if(ImGui.BeginPopupModal("###settings_edit_source", ref _editing,
-                ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoMove))
-            {
-                string name = _selectedSource.Name ?? string.Empty;
-                if(ImGui.InputText("Name###settings_edit_source_name", ref name, 80))
-                {
-                    _selectedSource.Name = name;
-                }
-
-                if(_selectedSource is LibraryConfiguration.FileSourceConfig fileSource)
-                {
-                    DrawSource(fileSource, true);
-                }
-
-                ImGui.SetCursorPosX(ImGui.GetCursorPosX() + ImBrio.GetRemainingWidth() - 100);
-                ImGui.SetCursorPosY(ImGui.GetCursorPosY() + ImBrio.GetRemainingHeight() - ImBrio.GetLineHeight());
-                if(ImGui.Button("Save", new(100, 0)))
-                {
-                    ImGui.CloseCurrentPopup();
-                    _configurationService.Save();
-                }
-
-                ImGui.EndPopup();
-            }
-        }
-    }
-
-    private void DrawSourceItem(int id, LibraryConfiguration.SourceConfigBase sourceConfig)
-    {
-        float itemHeight = ImBrio.GetLineHeight() * 2;
-
-        bool selected = _selectedSource == sourceConfig;
-        float itemTop = ImGui.GetCursorPosY();
-        if(ImGui.Selectable($"###settings_source_{id}_{sourceConfig.Name}_selectable", ref selected, ImGuiSelectableFlags.None, new(ImBrio.GetRemainingWidth(), itemHeight)))
-        {
-            if(selected)
-            {
-                _selectedSource = sourceConfig;
-            }
-        }
-
-        bool isHover = ImGui.IsItemActive();
-        ImGui.SetCursorPosY(itemTop + ImGui.GetStyle().FramePadding.Y);
-
-        ImGui.Text(sourceConfig.Name ?? "Unnamed Source");
-
-        if(sourceConfig is LibraryConfiguration.FileSourceConfig fileSource)
-        {
-            DrawSource(fileSource, false);
-        }
-
-        ImGui.SetCursorPosY(itemTop + itemHeight + ImGui.GetStyle().ItemSpacing.Y);
-    }
-
-    private void DrawSource(LibraryConfiguration.FileSourceConfig fileSource, bool edit)
-    {
-        if(edit)
-        {
-            // TODO: make a nicer version of this...
-            // maybe a 'select folder' button?
-
-
-            ////string[] names = Enum.GetNames<Environment.SpecialFolder>();
-            ///
-            if(fileSource.Root == null)
-                fileSource.Root = Environment.SpecialFolder.MyComputer;
-
-            List<string> names = new();
-            names.Add(Environment.SpecialFolder.MyComputer.ToString());
-            names.Add(Environment.SpecialFolder.MyDocuments.ToString());
-            names.Add(Environment.SpecialFolder.Desktop.ToString());
-            names.Add(Environment.SpecialFolder.LocalApplicationData.ToString());
-            int current = names.IndexOf(fileSource.Root.ToString()!);
-
-            if (ImGui.Combo("Root", ref current, names.ToArray(), names.Count))
-            {
-                fileSource.Root = Enum.Parse<Environment.SpecialFolder>(names[current]);
-            }
-
-            string path = fileSource.Path ?? string.Empty;
-            if (ImGui.InputText("Path", ref path, 120))
-            {
-                fileSource.Path = path;
-            }
-        }
-        else
-        {
-            if(fileSource.Root != null && fileSource.Root != Environment.SpecialFolder.MyComputer)
-            {
-                ImGui.TextDisabled($"{fileSource.Root}{fileSource.Path}");
-            }
-            else if(fileSource.Path != null)
-            {
-                ImGui.TextDisabled(fileSource.Path);
-            }
-        }
+        LibrarySourcesEditor.Draw(null, _configurationService, _configurationService.Configuration.Library, ref _selectedSourceConfig, ref _isEditingSource);
     }
 }

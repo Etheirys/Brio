@@ -1,6 +1,5 @@
-﻿using Brio.Library.Actions;
-using Dalamud.Interface.Internal;
-using System;
+﻿using Brio.UI.Windows;
+using ImGuiNET;
 
 namespace Brio.Library.Sources;
 
@@ -13,4 +12,14 @@ internal abstract class SourceBase : GroupEntryBase
 
     public abstract string Description { get; }
     public abstract void Scan();
+
+    public override void DrawInfo(LibraryWindow window)
+    {
+        base.DrawInfo(window);
+
+        if(this.Description != null)
+        {
+            ImGui.TextWrapped(this.Description);
+        }
+    }
 }

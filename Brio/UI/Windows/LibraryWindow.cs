@@ -45,9 +45,9 @@ internal class LibraryWindow : Window
         new TypeFilter("Poses", typeof(PoseFile), typeof(CMToolPoseFile)),
     };
 
-    private FilterBase _typeFilter = filters[0];
-    private SearchQueryFilter _searchFilter = new();
-    private TagFilter _tagFilter = new();
+    public FilterBase TypeFilter = filters[0];
+    public readonly SearchQueryFilter SearchFilter = new();
+    public readonly TagFilter TagFilter = new();
     private string _searchText = string.Empty;
 
     private readonly List<GroupEntryBase> _path = new();
@@ -91,7 +91,7 @@ internal class LibraryWindow : Window
 
     private float WindowContentWidth => ImGui.GetWindowContentRegionMax().X - ImGui.GetWindowContentRegionMin().X;
     private float WindowContentHeight => ImGui.GetWindowContentRegionMax().Y - ImGui.GetWindowContentRegionMin().Y;
-    public bool IsSearching => (_searchFilter.Query != null && _searchFilter.Query.Length > 0) || (_tagFilter.Tags != null && _tagFilter.Tags.Count > 0);
+    public bool IsSearching => (SearchFilter.Query != null && SearchFilter.Query.Length > 0) || (TagFilter.Tags != null && TagFilter.Tags.Count > 0);
 
     public override void OnOpen()
     {
@@ -105,7 +105,7 @@ internal class LibraryWindow : Window
         {
             DrawFilters();
 
-            if(_typeFilter == null)
+            if(TypeFilter == null)
                 return;
 
             ImGui.Spacing();
@@ -119,10 +119,19 @@ internal class LibraryWindow : Window
                 ImGuiWindowFlags.NoBackground | ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse))
             {
                 float entriesPaneHeight = ImBrio.GetRemainingHeight() - ImBrio.GetLineHeight() - ImGui.GetStyle().ItemSpacing.Y;
-                if(ImGui.BeginChild("###library_entries_pane", new Vector2(ImBrio.GetRemainingWidth(), entriesPaneHeight), true))
+                float entriesPaneWidth = ImBrio.GetRemainingWidth();
+                if(ImGui.BeginChild("###library_entries_pane", new Vector2(entriesPaneWidth, entriesPaneHeight), true))
                 {
                     DrawFiles();
                     ImGui.EndChild();
+                }
+
+                // Check if the user has clicked on the background to clear selection.
+                Vector2 mousePos = ImGui.GetMousePos() - ImGui.GetWindowPos();
+                bool isMouseOverArea = (mousePos.X > 0 && mousePos.Y > 0 && mousePos.X < entriesPaneWidth && mousePos.Y < entriesPaneHeight);
+                if(ImGui.IsMouseClicked(ImGuiMouseButton.Left) && !ImGui.IsAnyItemHovered() && isMouseOverArea)
+                {
+                    _selected = null;
                 }
 
                 DrawFooter();
@@ -138,6 +147,10 @@ internal class LibraryWindow : Window
                 if(_selected != null)
                 {
                     DrawInfo(_selected);
+                }
+                else
+                {
+                    DrawInfo(_path[_path.Count - 1]);
                 }
 
                 ImGui.EndChild();
@@ -156,7 +169,7 @@ internal class LibraryWindow : Window
         int selected = 0;
         for (int i = 0; i < filters.Count; i++)
         {
-            if(filters[i] == _typeFilter)
+            if(filters[i] == TypeFilter)
                 selected = i;
 
             ops.Add(filters[i].Name);
@@ -164,7 +177,7 @@ internal class LibraryWindow : Window
 
         if (ImBrio.ToggleButtonStrip("library_filters_selector", new(ImBrio.GetRemainingWidth(), ImBrio.GetLineHeight()), ref selected, ops.ToArray()))
         {
-            _typeFilter = filters[selected];
+            TypeFilter = filters[selected];
 
             if (_path.Count > 1)
                 _path.RemoveRange(1, _path.Count - 1);
@@ -176,8 +189,8 @@ internal class LibraryWindow : Window
     private void ClearFilters()
     {
         ClearSearchText();
-        _searchFilter.Clear();
-        _tagFilter.Clear();
+        SearchFilter.Clear();
+        TagFilter.Clear();
 
         // cant clear type filter.
         ////_typeFilter.Clear();
@@ -307,8 +320,8 @@ internal class LibraryWindow : Window
                     if(ImBrio.FontIconButton(FontAwesomeIcon.TimesCircle))
                     {
                         ClearSearchText();
-                        _searchFilter.Clear();
-                        _tagFilter.Clear();
+                        SearchFilter.Clear();
+                        TagFilter.Clear();
                         _searchNeedsFocus = true;
                         Refresh(true);
                     }
@@ -326,10 +339,10 @@ internal class LibraryWindow : Window
                 }
 
                 // Tags
-                if(_tagFilter.Tags != null)
+                if(TagFilter.Tags != null)
                 {
                     Tag? toRemove = null;
-                    foreach(Tag tag in _tagFilter.Tags)
+                    foreach(Tag tag in TagFilter.Tags)
                     {
                         ImGui.SameLine();
                         ImGui.SetCursorPosY(0);
@@ -342,7 +355,7 @@ internal class LibraryWindow : Window
 
                     if(toRemove != null)
                     {
-                        _tagFilter.Tags.Remove(toRemove);
+                        TagFilter.Tags.Remove(toRemove);
                         _searchNeedsFocus = true;
                         Refresh(true);
                     }
@@ -367,11 +380,11 @@ internal class LibraryWindow : Window
                 {
                     if(string.IsNullOrEmpty(_searchText))
                     {
-                        _searchFilter.Query = null;
+                        SearchFilter.Query = null;
                     }
                     else
                     {
-                        _searchFilter.Query = SearchUtility.ToQuery(_searchText);
+                        SearchFilter.Query = SearchUtility.ToQuery(_searchText);
                     }
 
                     Refresh(true);
@@ -464,7 +477,7 @@ internal class LibraryWindow : Window
                 Tag? selected = ImBrio.DrawTags(availableTags);
                 if(selected != null)
                 {
-                    _tagFilter.Add(selected);
+                    TagFilter.Add(selected);
                     _searchNeedsFocus = true;
 
                     ClearSearchText();
@@ -487,7 +500,7 @@ internal class LibraryWindow : Window
 
                 if(ImGui.IsKeyPressed(ImGuiKey.Tab))
                 {
-                    _tagFilter.Add(availableTags[0]);
+                    TagFilter.Add(availableTags[0]);
                     ClearSearchText();
                     Refresh(true);
                 }
@@ -513,7 +526,7 @@ internal class LibraryWindow : Window
         List<Tag> results = new();
         foreach(var tag in _allTags)
         {
-            if(_tagFilter.Tags?.Contains(tag) == true)
+            if(TagFilter.Tags?.Contains(tag) == true)
                 continue;
 
             if(query == null || tag.Search(query))
@@ -635,146 +648,57 @@ internal class LibraryWindow : Window
     {
         ImGui.Text(entry.Name);
 
-        float infoAreaHeight = ImBrio.GetRemainingHeight() - ImBrio.GetLineHeight() - ImGui.GetStyle().ItemSpacing.Y;
+        List<EntryActionBase> allActions = entry.Actions;
+
+        float infoAreaHeight = ImBrio.GetRemainingHeight();
+
+        if (allActions.Count > 0)
+            infoAreaHeight -= ImBrio.GetLineHeight() + ImGui.GetStyle().ItemSpacing.Y;
+
+        // internal info
+        ImGui.PushStyleColor(ImGuiCol.ChildBg, 0x000000);
         if(ImGui.BeginChild("###library_info_pane", new Vector2(ImBrio.GetRemainingWidth(), infoAreaHeight), false))
         {
-            if(_selected is ItemEntryBase file)
-            {
-                DrawInfo(file);
-            }
-            else if(_selected is SourceBase source)
-            {
-                DrawInfo(source);
-            }
-
-
-            ImGui.Spacing();
-            ImGui.Spacing();
-            ImGui.Spacing();
-            ImGui.Spacing();
-
+            entry.DrawInfo(this);
             ImGui.EndChild();
         }
-
+        ImGui.PopStyleColor();
 
         // Actions
-        float totalWidth = 0;
-        for(int i =0; i < entry.Actions.Count; i++)
+        if(allActions.Count > 0)
         {
-            entry.Actions[i].Initialize(_serviceProvider);
-
-            if(i > 0)
-                totalWidth += ImGui.GetStyle().ItemSpacing.X;
-
-            
-            totalWidth += ImGui.CalcTextSize(entry.Actions[i].Label).X;
-            totalWidth += ImGui.GetStyle().FramePadding.X * 2;
-        }
-
-        ImGui.SetCursorPosX(ImGui.GetCursorPosX() + (ImBrio.GetRemainingWidth() - totalWidth));
-
-        foreach (var action in entry.Actions)
-        {
-            bool canInvoke = action.GetCanInvoke() && !action.IsInvoking;
-
-            if(!canInvoke)
-                ImGui.BeginDisabled();
-
-            if (ImGui.Button(action.Label))
+            float totalWidth = 0;
+            for(int i = 0; i < allActions.Count; i++)
             {
-                action.Invoke(entry);
+                allActions[i].Initialize(_serviceProvider);
+
+                if(i > 0)
+                    totalWidth += ImGui.GetStyle().ItemSpacing.X;
+
+
+                totalWidth += ImGui.CalcTextSize(allActions[i].Label).X;
+                totalWidth += ImGui.GetStyle().FramePadding.X * 2;
             }
 
-            if(!canInvoke)
-                ImGui.EndDisabled();
+            ImGui.SetCursorPosX(ImGui.GetCursorPosX() + (ImBrio.GetRemainingWidth() - totalWidth));
 
-            ImGui.SameLine();
-        }
-    }
-
-    private void DrawInfo(ItemEntryBase entry)
-    {
-        if(entry.Source != null)
-        {
-            float x = ImGui.GetCursorPosX();
-            float y = ImGui.GetCursorPosY();
-            float sourceIconBottom = y;
-            if(entry.Source.Icon != null)
+            foreach(var action in allActions)
             {
-                ImGui.SetCursorPosY(y + 3);
-                ImBrio.ImageFit(entry.Source.Icon, new(42, 42));
-                sourceIconBottom = ImGui.GetCursorPosY();
+                bool canInvoke = action.GetCanInvoke() && !action.IsInvoking;
+
+                if(!canInvoke)
+                    ImGui.BeginDisabled();
+
+                if(ImGui.Button(action.Label))
+                {
+                    action.Invoke(entry);
+                }
+
+                if(!canInvoke)
+                    ImGui.EndDisabled();
 
                 ImGui.SameLine();
-                x = ImGui.GetCursorPosX();
             }
-
-            ImGui.Text(entry.Source.Name);
-
-            if(entry.SourceInfo != null)
-            {
-                ImGui.SetCursorPosY(y + 18);
-                ImGui.SetCursorPosX(x);
-                ImGui.SetWindowFontScale(0.7f);
-                ImGui.BeginDisabled();
-                ImGui.TextWrapped(entry.SourceInfo);
-                ImGui.EndDisabled();
-                ImGui.SetWindowFontScale(1.0f);
-            }
-
-            if (ImGui.GetCursorPosY() < sourceIconBottom)
-                ImGui.SetCursorPosY(sourceIconBottom);
-        }
-
-
-        if(entry.PreviewImage != null)
-        {
-            Vector2 size = ImGui.GetContentRegionAvail();
-
-            size.Y = Math.Min(size.X, size.Y * 0.5f);
-            using(var child = ImRaii.Child($"library_info_image", size, false, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoInputs))
-            {
-                if(!child.Success)
-                    return;
-
-                ImBrio.ImageFit(entry.PreviewImage);
-            }
-        }
-
-        ImGui.Spacing();
-        ImGui.Spacing();
-        ImGui.Spacing();
-
-        if(!string.IsNullOrEmpty(entry.Description))
-            ImGui.TextWrapped(entry.Description);
-
-        ImGui.Spacing();
-        ImGui.Spacing();
-
-        if (!string.IsNullOrEmpty(entry.Author))
-            ImGui.Text($"Author: {entry.Author}");
-
-        if(!string.IsNullOrEmpty(entry.Version))
-            ImGui.Text($"Version: {entry.Version}");
-
-        ImGui.Spacing();
-        ImGui.Spacing();
-
-        ImGui.Text("Tags:");
-        ImGui.SameLine();
-        Tag? selected = ImBrio.DrawTags(entry.Tags);
-        if(selected != null)
-        {
-            _tagFilter.Add(selected);
-            Refresh(true);
-        }
-    }
-
-    private void DrawInfo(SourceBase source)
-    {
-        if(source.Description != null)
-        {
-            ImGui.TextWrapped(source.Description);
         }
     }
 
@@ -802,7 +726,7 @@ internal class LibraryWindow : Window
         }
     }
 
-    private void ReScan()
+    public void ReScan()
     {
         Task.Run(async () =>
         {
@@ -820,7 +744,7 @@ internal class LibraryWindow : Window
         });
     }
 
-    private void Refresh(bool filter)
+    public void Refresh(bool filter)
     {
         // TODO: it is possible that the refresh function could take so long that new refresh requests
         // end up discarded, resulting in mixed results, with half the results being from the previous refresh
@@ -853,13 +777,13 @@ internal class LibraryWindow : Window
             if(filter)
             {
                 List<FilterBase> filters = new();
-                filters.Add(_typeFilter);
+                filters.Add(TypeFilter);
 
                 if(!string.IsNullOrEmpty(_searchText))
-                    filters.Add(_searchFilter);
+                    filters.Add(SearchFilter);
 
-                if(_tagFilter.Tags != null && _tagFilter.Tags.Count > 0)
-                    filters.Add(_tagFilter);
+                if(TagFilter.Tags != null && TagFilter.Tags.Count > 0)
+                    filters.Add(TagFilter);
 
                 _libraryManager.Root.FilterEntries(filters.ToArray());
             }

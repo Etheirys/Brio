@@ -23,7 +23,7 @@ internal class LibraryConfiguration
     {
         if (config is FileSourceConfig fileConfig)
         {
-            this.Files.Add(fileConfig);
+            this.Files.Insert(0, fileConfig);
         }
     }
 

@@ -3,7 +3,10 @@ using Brio.Library.Actions;
 using Brio.Library.Filters;
 using Brio.Library.Sources;
 using Brio.Library.Tags;
+using Brio.UI.Controls.Stateless;
+using Brio.UI.Windows;
 using Dalamud.Interface.Internal;
+using ImGuiNET;
 using System.Collections.Generic;
 
 namespace Brio.Library;
@@ -38,5 +41,40 @@ internal abstract class EntryBase : ITagged
 
     public virtual void Dispose()
     {
+    }
+
+    public virtual void DrawInfo(LibraryWindow window)
+    {
+        if(this.Source != null)
+        {
+            float x = ImGui.GetCursorPosX();
+            float y = ImGui.GetCursorPosY();
+            float sourceIconBottom = y;
+            if(this.Source.Icon != null)
+            {
+                ImGui.SetCursorPosY(y + 3);
+                ImBrio.ImageFit(this.Source.Icon, new(42, 42));
+                sourceIconBottom = ImGui.GetCursorPosY();
+
+                ImGui.SameLine();
+                x = ImGui.GetCursorPosX();
+            }
+
+            ImGui.Text(this.Source.Name);
+
+            if(this.SourceInfo != null)
+            {
+                ImGui.SetCursorPosY(y + 18);
+                ImGui.SetCursorPosX(x);
+                ImGui.SetWindowFontScale(0.7f);
+                ImGui.BeginDisabled();
+                ImGui.TextWrapped(this.SourceInfo);
+                ImGui.EndDisabled();
+                ImGui.SetWindowFontScale(1.0f);
+            }
+
+            if(ImGui.GetCursorPosY() < sourceIconBottom)
+                ImGui.SetCursorPosY(sourceIconBottom);
+        }
     }
 }
