@@ -15,6 +15,7 @@ using ImGuiNET;
 using System;
 using System.Collections.Generic;
 using System.Numerics;
+using System.Threading.Tasks;
 
 namespace Brio.UI.Windows;
 
@@ -54,6 +55,7 @@ internal class LibraryWindow : Window
     private bool _searchTextNeedsClear = false;
     private Vector2? _searchSuggestPos;
     private Vector2? _searchSuggestSize;
+    private bool _isRescanning;
 
     public LibraryWindow(
         IPluginLog log,
@@ -239,15 +241,20 @@ internal class LibraryWindow : Window
 
             // Refresh Button
             {
-                if(_libraryManager.IsScanning)
+                if(_isRescanning)
                     ImGui.BeginDisabled();
 
                 if(ImBrio.FontIconButton(FontAwesomeIcon.Repeat, new(PathBarButtonWidth, lineHeight)))
                 {
-                    _libraryManager.Scan();
+                    ReScan();
                 }
 
-                if(_libraryManager.IsScanning)
+                if (ImGui.IsItemHovered())
+                {
+                    ImGui.SetTooltip("Scan all library sources and refresh the view");
+                }
+
+                if(_isRescanning)
                 {
                     ImGui.EndDisabled();
                 }
@@ -705,6 +712,17 @@ internal class LibraryWindow : Window
         {
             // open the file?
         }
+    }
+
+    private void ReScan()
+    {
+        Task.Run(async () =>
+        {
+            _isRescanning = true;
+            await _libraryManager.ScanAsync();
+            Refresh(true);
+            _isRescanning = false;
+        });
     }
 
     private void Refresh(bool filter)
