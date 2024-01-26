@@ -1,4 +1,5 @@
 ﻿using Brio.Resources;
+using Dalamud.Interface.Internal;
 using System.Collections.Generic;
 
 namespace Brio.Library.Sources;
@@ -8,10 +9,14 @@ internal class GameDataNpcSource : SourceBase
     private GameDataProvider _lumina;
 
     public GameDataNpcSource(GameDataProvider lumina)
-        : base("NPCs", ResourceProvider.Instance.GetResourceImage("Images.ProviderIcon_GameData.png"))
+        : base()
     {
         _lumina = lumina;
     }
+
+    public override string Name => "NPCs";
+    public override IDalamudTextureWrap? Icon => ResourceProvider.Instance.GetResourceImage("Images.ProviderIcon_GameData.png");
+    public override string Description => "Non Player Characters from FFXIV";
 
     public override void Scan()
     {

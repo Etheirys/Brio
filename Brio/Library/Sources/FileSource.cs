@@ -6,13 +6,15 @@ using Dalamud.Interface.Internal;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Reflection;
 
 namespace Brio.Library.Sources;
 
 internal class FileSource : SourceBase
 {
     public readonly string DirectoryPath;
+
+    private string _name;
+    private string _icon;
 
     // We could probably put these in a file type manager or something,
     // but currently only the library needs them, so here is fine too.
@@ -25,16 +27,25 @@ internal class FileSource : SourceBase
     };
 
     public FileSource(string name, string icon, string directoryPath)
-        : base(name, ResourceProvider.Instance.GetResourceImage(icon))
+        : base()
     {
+        _name = name;
+        _icon = icon;
         DirectoryPath = directoryPath;
     }
 
     public FileSource(string name, string icon, params string[] paths)
-          : base(name, ResourceProvider.Instance.GetResourceImage(icon))
+          : base()
     {
+        _name = name;
+        _icon = icon;
         DirectoryPath = Path.Combine(paths);
     }
+
+    public override string Name => _name;
+    public override IDalamudTextureWrap? Icon => ResourceProvider.Instance.GetResourceImage(_icon);
+    public override string Description => DirectoryPath;
+
 
     public override void Scan()
     {

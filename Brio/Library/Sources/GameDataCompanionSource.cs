@@ -1,4 +1,5 @@
 ﻿using Brio.Resources;
+using Dalamud.Interface.Internal;
 
 namespace Brio.Library.Sources;
 
@@ -7,10 +8,14 @@ internal class GameDataCompanionSource : SourceBase
     private GameDataProvider _lumina;
 
     public GameDataCompanionSource(GameDataProvider lumina)
-        : base("Companions", ResourceProvider.Instance.GetResourceImage("Images.ProviderIcon_GameData.png"))
+        : base()
     {
         _lumina = lumina;
     }
+
+    public override string Name => "Minions";
+    public override IDalamudTextureWrap? Icon => ResourceProvider.Instance.GetResourceImage("Images.ProviderIcon_GameData.png");
+    public override string Description => "Minions from FFXIV";
 
     public override void Scan()
     {

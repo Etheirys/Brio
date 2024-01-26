@@ -3,6 +3,7 @@ using Brio.Files;
 using Brio.Game.Types;
 using Brio.Library;
 using Brio.Library.Filters;
+using Brio.Library.Sources;
 using Brio.Library.Tags;
 using Brio.UI.Controls.Selectors;
 using Brio.UI.Controls.Stateless;
@@ -119,9 +120,13 @@ internal class LibraryWindow : Window
                 float height = ImBrio.GetRemainingHeight() - ImBrio.GetLineHeight() - ImGui.GetStyle().ItemSpacing.Y;
                 if (ImGui.BeginChild("###library_info_pane", new Vector2(ImBrio.GetRemainingWidth(), height), true))
                 {
-                    if(_selected != null && _selected is ItemEntryBase file)
+                    if(_selected is ItemEntryBase file)
                     {
                         DrawInfo(file);
+                    }
+                    else if (_selected is SourceBase source)
+                    {
+                        DrawInfo(source);
                     }
 
                     ImGui.EndChild();
@@ -678,6 +683,16 @@ internal class LibraryWindow : Window
         ImGui.Text("Tags:");
         ImGui.SameLine();
         ImBrio.DrawTags(entry.Tags);
+    }
+
+    private void DrawInfo(SourceBase source)
+    {
+        ImGui.Text(source.Name);
+
+        if(source.Description != null)
+        {
+            ImGui.TextWrapped(source.Description);
+        }
     }
 
     private void DrawActions()

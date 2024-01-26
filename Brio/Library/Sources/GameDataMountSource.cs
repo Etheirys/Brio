@@ -1,4 +1,5 @@
 ﻿using Brio.Resources;
+using Dalamud.Interface.Internal;
 
 namespace Brio.Library.Sources;
 
@@ -7,10 +8,14 @@ internal class GameDataMountSource : SourceBase
     private GameDataProvider _lumina;
 
     public GameDataMountSource(GameDataProvider lumina)
-        : base("Mounts", ResourceProvider.Instance.GetResourceImage("Images.ProviderIcon_GameData.png"))
+        : base()
     {
         _lumina = lumina;
     }
+
+    public override string Name => "Mounts";
+    public override IDalamudTextureWrap? Icon => ResourceProvider.Instance.GetResourceImage("Images.ProviderIcon_GameData.png");
+    public override string Description => "Mounts from FFXIV";
 
     public override void Scan()
     {
