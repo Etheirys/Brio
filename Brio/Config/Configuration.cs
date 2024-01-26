@@ -30,6 +30,9 @@ internal class Configuration : IPluginConfiguration
     // Paths
     public PathsConfiguration Paths { get; set; } = new PathsConfiguration();
 
+    // Library
+    public LibraryConfiguration Library { get; set; } = new LibraryConfiguration();
+
     // Developer
     public bool ForceDebug { get; set; } = false;
 }

@@ -15,6 +15,8 @@ using Dalamud.Utility;
 using ImGuiNET;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
 using System.Numerics;
 using System.Threading.Tasks;
 
@@ -26,6 +28,9 @@ internal class LibraryWindow : Window
     private const float SearchWidth = 350;
     private const int MaxTagsInSuggest = 25;
     private const float PathBarButtonWidth = 25;
+    private const float FooterScaleSliderWidth = 150;
+    private const int MinEntrySize = 100;
+    private const int MaxEntrySize = 250;
 
     private readonly ConfigurationService _configurationService;
     private readonly LibraryManager _libraryManager;
@@ -57,6 +62,8 @@ internal class LibraryWindow : Window
     private Vector2? _searchSuggestPos;
     private Vector2? _searchSuggestSize;
     private bool _isRescanning;
+    private bool _isRefreshing;
+    private long _lastRefreshTimeMs = 0;
 
     public LibraryWindow(
         IPluginLog log,
@@ -105,34 +112,33 @@ internal class LibraryWindow : Window
 
 
             var windowSize = ImGui.GetWindowSize();
-            using(var child = ImRaii.Child("###left_pane", new Vector2(windowSize.X - InfoPaneWidth, -1), true))
-            {
-                if(child.Success)
-                {
-                    DrawFiles();
-                }
-            }
-            ImGui.SameLine();
-
-            if(ImGui.BeginChild("###right_pane", new Vector2(ImBrio.GetRemainingWidth(), -1), false,
+            if(ImGui.BeginChild("###left_pane", new Vector2(windowSize.X - InfoPaneWidth, -1), false,
                 ImGuiWindowFlags.NoBackground | ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse))
             {
-                float height = ImBrio.GetRemainingHeight() - ImBrio.GetLineHeight() - ImGui.GetStyle().ItemSpacing.Y;
-                if (ImGui.BeginChild("###library_info_pane", new Vector2(ImBrio.GetRemainingWidth(), height), true))
+                float entriesPaneHeight = ImBrio.GetRemainingHeight() - ImBrio.GetLineHeight() - ImGui.GetStyle().ItemSpacing.Y;
+                if(ImGui.BeginChild("###library_entries_pane", new Vector2(ImBrio.GetRemainingWidth(), entriesPaneHeight), true))
                 {
-                    if(_selected is ItemEntryBase file)
-                    {
-                        DrawInfo(file);
-                    }
-                    else if (_selected is SourceBase source)
-                    {
-                        DrawInfo(source);
-                    }
-
+                    DrawFiles();
                     ImGui.EndChild();
                 }
 
-                DrawActions();
+                DrawFooter();
+
+                ImGui.EndChild();
+            }
+            ImGui.SameLine();
+
+      
+            if (ImGui.BeginChild("###library_info_pane", new Vector2(ImBrio.GetRemainingWidth(), ImBrio.GetRemainingHeight()), true))
+            {
+                if(_selected is ItemEntryBase file)
+                {
+                    DrawInfo(file);
+                }
+                else if (_selected is SourceBase source)
+                {
+                    DrawInfo(source);
+                }
 
                 ImGui.EndChild();
             }
@@ -517,7 +523,7 @@ internal class LibraryWindow : Window
 
     private void DrawFiles()
     {
-        float fileWidth = 120;
+        float fileWidth = _configurationService.Configuration.Library.IconSize;
 
         int columnCount = (int)Math.Floor(WindowContentWidth / 120.0f);
         int column = 0;
@@ -599,6 +605,28 @@ internal class LibraryWindow : Window
         }
     }
 
+    private void DrawFooter()
+    {
+        if(_isRescanning || _libraryManager.IsScanning)
+        {
+            ImGui.TextDisabled("Scanning...");
+        }
+        else
+        {
+            ImGui.TextDisabled($"found {_currentEntries?.Count().ToString("N0")} items in {_lastRefreshTimeMs}ms");
+        }
+
+        ImGui.SameLine();
+        ImGui.SetCursorPosX(ImGui.GetCursorPosX() + ImBrio.GetRemainingWidth() - FooterScaleSliderWidth);
+
+        int size = (int)_configurationService.Configuration.Library.IconSize;
+        ImGui.SetNextItemWidth(FooterScaleSliderWidth);
+        if (ImGui.SliderInt("###library_scale_slider", ref size, MinEntrySize, MaxEntrySize))
+        {
+            _configurationService.Configuration.Library.IconSize = size;
+        }
+    }
+
     private void DrawInfo(ItemEntryBase entry)
     {
         ImGui.Text(entry.Name);
@@ -676,6 +704,14 @@ internal class LibraryWindow : Window
             _tagFilter.Add(selected);
             Refresh(true);
         }
+
+
+        // Actions..
+        ImGui.Button("Save");
+        ImGui.SameLine();
+        ImGui.Button("Delete");
+        ImGui.SameLine();
+        ImGui.Button("Open");
     }
 
     private void DrawInfo(SourceBase source)
@@ -686,27 +722,6 @@ internal class LibraryWindow : Window
         {
             ImGui.TextWrapped(source.Description);
         }
-    }
-
-    private void DrawActions()
-    {
-        float lineHeight = ImBrio.GetLineHeight();
-        float browseButtonWidth = lineHeight;
-        float openButtonWidth = 100;
-
-        if (ImGui.Button("...", new(browseButtonWidth, lineHeight)))
-        {
-            // TODO!
-        }
-
-        if(ImGui.IsItemHovered())
-            ImGui.SetTooltip("Open file picker");
-
-        ImGui.SameLine();
-
-        float space = ImBrio.GetRemainingWidth() - openButtonWidth;
-        ImGui.SetCursorPosX(ImGui.GetCursorPosX() +  space);
-        ImGui.Button("Open", new(openButtonWidth, lineHeight));
     }
 
     private void OnOpen(EntryBase entry)
@@ -727,53 +742,80 @@ internal class LibraryWindow : Window
         Task.Run(async () =>
         {
             _isRescanning = true;
+
+            Stopwatch sw = new();
+            sw.Start();
+
             await _libraryManager.ScanAsync();
             Refresh(true);
+           
+            sw.Stop();
+            _lastRefreshTimeMs = sw.ElapsedMilliseconds;
             _isRescanning = false;
         });
     }
 
     private void Refresh(bool filter)
     {
-        if(_libraryManager.IsScanning)
+        // TODO: it is possible that the refresh function could take so long that new refresh requests
+        // end up discarded, resulting in mixed results, with half the results being from the previous refresh
+        // and half being with updated values.
+        // to correct this, we _should_ include an abort flag so we can stop a refresh and trigger a new one
+        // on each request here.
+        if(_libraryManager.IsScanning || _isRefreshing)
             return;
 
-        _selected = null;
-
-        if (_currentEntries != null)
+        Task.Run(() =>
         {
-            foreach(EntryBase entry in _currentEntries)
+            if(_libraryManager.IsScanning || _isRefreshing)
+                return;
+
+            _isRefreshing = true;
+
+            Stopwatch sw = new();
+            sw.Start();
+
+            _selected = null;
+
+            if(_currentEntries != null)
             {
-                entry.IsVisible = false;
+                foreach(EntryBase entry in _currentEntries)
+                {
+                    entry.IsVisible = false;
+                }
             }
-        }
 
-        if(filter)
-        {
-            List<FilterBase> filters = new();
-            filters.Add(_typeFilter);
-
-            if(!string.IsNullOrEmpty(_searchText))
-                filters.Add(_searchFilter);
-
-            if(_tagFilter.Tags != null && _tagFilter.Tags.Count > 0)
-                filters.Add(_tagFilter);
-
-            _libraryManager.Root.FilterEntries(filters.ToArray());
-        }
-
-        GroupEntryBase currentEntry = _path[_path.Count - 1];
-        _currentEntries = currentEntry.GetFilteredEntries(IsSearching);
-
-        _allTags.Clear();
-        currentEntry.GetAllTags(ref _allTags);
-
-        if(_currentEntries != null)
-        {
-            foreach(EntryBase entry in _currentEntries)
+            if(filter)
             {
-                entry.IsVisible = true;
+                List<FilterBase> filters = new();
+                filters.Add(_typeFilter);
+
+                if(!string.IsNullOrEmpty(_searchText))
+                    filters.Add(_searchFilter);
+
+                if(_tagFilter.Tags != null && _tagFilter.Tags.Count > 0)
+                    filters.Add(_tagFilter);
+
+                _libraryManager.Root.FilterEntries(filters.ToArray());
             }
-        }
+
+            GroupEntryBase currentEntry = _path[_path.Count - 1];
+            _currentEntries = currentEntry.GetFilteredEntries(IsSearching);
+
+            _allTags.Clear();
+            currentEntry.GetAllTags(ref _allTags);
+
+            if(_currentEntries != null)
+            {
+                foreach(EntryBase entry in _currentEntries)
+                {
+                    entry.IsVisible = true;
+                }
+            }
+
+            sw.Stop();
+            _lastRefreshTimeMs = sw.ElapsedMilliseconds;
+            _isRefreshing = false;
+        });
     }
 }
