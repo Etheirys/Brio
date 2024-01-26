@@ -81,7 +81,7 @@ internal class GameDataAppearanceEntry : ItemEntryBase
         return match;
     }
 
-    private async Task Apply(ActorEntity actor)
+    private async Task Apply(ItemEntryBase entry, ActorEntity actor)
     {
         ActorAppearanceCapability? capability;
         if(actor.TryGetCapability<ActorAppearanceCapability>(out capability) && capability != null)

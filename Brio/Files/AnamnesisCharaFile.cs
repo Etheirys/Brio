@@ -25,15 +25,19 @@ internal class AnamnesisCharaFileInfo : JsonDocumentBaseFileInfo<AnamnesisCharaF
     {
         base.GetLibraryActions(ref actions);
 
-        actions.Add(new ApplyFileToSelectedActorAction<AnamnesisCharaFile>(Apply, true));
+        actions.Add(new ApplyFileToSelectedActorAction(Apply, true));
     }
 
-    private async Task Apply(AnamnesisCharaFile file, ActorEntity actor)
+    private async Task Apply(FileEntry fileEntry, ActorEntity actor)
     {
-        ActorAppearanceCapability? capability;
-        if (actor.TryGetCapability<ActorAppearanceCapability>(out capability) && capability != null)
+        AnamnesisCharaFile? file = Load(fileEntry.FilePath) as AnamnesisCharaFile;
+        if(file != null)
         {
-            await capability.SetAppearance(file, AppearanceImportOptions.All);
+            ActorAppearanceCapability? capability;
+            if(actor.TryGetCapability<ActorAppearanceCapability>(out capability) && capability != null)
+            {
+                await capability.SetAppearance(file, AppearanceImportOptions.All);
+            }
         }
     }
 }

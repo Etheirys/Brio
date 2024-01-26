@@ -7,12 +7,12 @@ using System.Threading.Tasks;
 
 namespace Brio.Library.Actions;
 
-internal class ApplyFileToSelectedActorAction<T> : EntryActionBase<FileEntry>
-    where T : class
+internal class ApplyToSelectedActorAction<T> : EntryActionBase<T>
+    where T : EntryBase
 {
     private Func<T, ActorEntity, Task> _apply;
 
-    internal ApplyFileToSelectedActorAction(Func<T, ActorEntity, Task> apply, bool isPrimaryAction)
+    internal ApplyToSelectedActorAction(Func<T, ActorEntity, Task> apply, bool isPrimaryAction)
         : base(isPrimaryAction)
     {
         _apply = apply;
@@ -41,58 +41,27 @@ internal class ApplyFileToSelectedActorAction<T> : EntryActionBase<FileEntry>
         return SelectedActor != null;
     }
 
-    protected override sealed async Task InvokeAsync(FileEntry entry)
+    protected override sealed async Task InvokeAsync(T entry)
     {
         if(SelectedActor == null)
             return;
 
-        T? obj = entry.FileTypeInfo.Load(entry.FilePath) as T;
-
-        if(obj == null)
-            return;
-
-        await _apply.Invoke(obj, SelectedActor);
+        await _apply.Invoke(entry, SelectedActor);
     }
 }
 
-internal class ApplyToSelectedActorAction : EntryActionBase<ItemEntryBase>
+internal class ApplyToSelectedActorAction : ApplyToSelectedActorAction<ItemEntryBase>
 {
-    private Func<ActorEntity, Task> _apply;
-
-    internal ApplyToSelectedActorAction(Func<ActorEntity, Task> apply, bool isPrimaryAction)
-        : base(isPrimaryAction)
+    internal ApplyToSelectedActorAction(Func<ItemEntryBase, ActorEntity, Task> apply, bool isPrimaryAction)
+        : base(apply, isPrimaryAction)
     {
-        _apply = apply;
     }
+}
 
-    public ActorEntity? SelectedActor => GetService<EntityManager>().SelectedEntity as ActorEntity;
-
-    public override string Label
+internal class ApplyFileToSelectedActorAction : ApplyToSelectedActorAction<FileEntry>
+{
+    internal ApplyFileToSelectedActorAction(Func<FileEntry, ActorEntity, Task> apply, bool isPrimaryAction)
+        : base(apply, isPrimaryAction)
     {
-        get
-        {
-            if(SelectedActor != null)
-            {
-                return $"Apply to {SelectedActor.FriendlyName}";
-            }
-
-            return "Select an Actor to apply";
-        }
-    }
-
-    public override bool GetCanInvoke()
-    {
-        if(!base.GetCanInvoke())
-            return false;
-
-        return SelectedActor != null;
-    }
-
-    protected override sealed async Task InvokeAsync(ItemEntryBase entry)
-    {
-        if(SelectedActor == null)
-            return;
-
-        await _apply.Invoke(SelectedActor);
     }
 }

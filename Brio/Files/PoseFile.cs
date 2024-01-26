@@ -3,6 +3,7 @@ using Brio.Core;
 using Brio.Entities.Actor;
 using Brio.Files.Converters;
 using Brio.Library.Actions;
+using Brio.Library.Sources;
 using Brio.Resources;
 using Dalamud.Interface.Internal;
 using System;
@@ -22,15 +23,19 @@ internal class PoseFileInfo : JsonDocumentBaseFileInfo<PoseFile>
     {
         base.GetLibraryActions(ref actions);
 
-        actions.Add(new ApplyFileToSelectedActorAction<PoseFile>(Apply, true));
+        actions.Add(new ApplyFileToSelectedActorAction(Apply, true));
     }
 
-    private Task Apply(PoseFile file, ActorEntity actor)
+    private Task Apply(FileEntry fileEntry, ActorEntity actor)
     {
-        PosingCapability? capability;
-        if(actor.TryGetCapability<PosingCapability>(out capability) && capability != null)
+        PoseFile? file = Load(fileEntry.FilePath) as PoseFile;
+        if(file != null)
         {
-            capability.ImportPose(file);
+            PosingCapability? capability;
+            if(actor.TryGetCapability<PosingCapability>(out capability) && capability != null)
+            {
+                capability.ImportPose(file);
+            }
         }
 
         return Task.CompletedTask;

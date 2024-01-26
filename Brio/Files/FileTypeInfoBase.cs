@@ -1,5 +1,4 @@
-﻿using Brio.Library;
-using Brio.Library.Actions;
+﻿using Brio.Library.Actions;
 using Dalamud.Interface.Internal;
 using System;
 using System.Collections.Generic;
