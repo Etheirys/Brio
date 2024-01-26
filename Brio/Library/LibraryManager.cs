@@ -15,6 +15,8 @@ internal class LibraryManager : IDisposable
     private readonly GameDataProvider _luminaProvider;
     private readonly IPluginLog _log;
     private readonly LibraryRoot _rootItem;
+    private readonly List<SourceBase> _sources = new();
+    private readonly List<SourceBase> _internalSources = new();
 
     public bool IsScanning { get; private set; }
 
@@ -25,41 +27,60 @@ internal class LibraryManager : IDisposable
         _log = log;
         _rootItem = new();
 
-        // TODO: add a configuration option to set the locations of these
-        AddSource(new FileSource("Brio Poses", "Images.ProviderIcon_Directory.png", Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Brio", "Poses"));
-        AddSource(new FileSource("Brio Characters", "Images.ProviderIcon_Directory.png", Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Brio", "Characters"));
-        AddSource(new FileSource("Anamnesis Poses", "Images.ProviderIcon_Anamnesis.png", Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Anamnesis", "Poses"));
-        AddSource(new FileSource("Anamnesis Characters", "Images.ProviderIcon_Anamnesis.png", Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Anamnesis", "Characters"));
-        
-        AddSource(new FileSource("Mare Character Data Files", "Images.ProviderIcon_Directory.png", Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Mare"));
-
-        // TODO: swap this for a package
-        AddSource(new FileSource("Standard Poses", "Images.ProviderIcon_Directory.png", Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Anamnesis", "StandardPoses"));
+        _configurationService.OnConfigurationChanged += OnConfigurationChanged;
 
         // Game Data
-        AddSource(new GameDataNpcSource(_luminaProvider));
-        AddSource(new GameDataMountSource(_luminaProvider));
-        AddSource(new GameDataCompanionSource(_luminaProvider));
-        AddSource(new GameDataOrnamentSource(_luminaProvider));
+        _internalSources.Add(new GameDataNpcSource(_luminaProvider));
+        _internalSources.Add(new GameDataMountSource(_luminaProvider));
+        _internalSources.Add(new GameDataCompanionSource(_luminaProvider));
+        _internalSources.Add(new GameDataOrnamentSource(_luminaProvider));
 
+        // TODO: swap this for a package
+        _internalSources.Add(new FileSource("Standard Poses", "Images.ProviderIcon_Directory.png", Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Anamnesis", "StandardPoses"));
+
+        LoadSources();
         Scan();
     }
 
-    public List<SourceBase> Sources { get; init; } = new();
+    private void OnConfigurationChanged()
+    {
+        LoadSources();
+        Scan();
+    }
+
     public GroupEntryBase Root => _rootItem;
 
     public void Dispose()
     {
-        foreach(SourceBase source in Sources)
+        foreach(SourceBase source in _internalSources)
+        {
+            source.Dispose();
+        }
+
+        foreach(SourceBase source in _sources)
         {
             source.Dispose();
         }
     }
 
-    public void AddSource(SourceBase source)
+    public void LoadSources()
     {
-        Sources.Add(source);
-        _rootItem.Add(source);
+        _rootItem.Clear();
+        _sources.Clear();
+
+        // Internal sources
+        _sources.AddRange(_internalSources);
+        
+        // Directory configurations
+        foreach((string name, string path) in _configurationService.Configuration.Library.Directories)
+        {
+            _sources.Add(new FileSource(name, path));
+        }
+
+        foreach (SourceBase source in _sources)
+        {
+            _rootItem.Add(source);
+        }
     }
 
     public void Scan()
@@ -72,9 +93,14 @@ internal class LibraryManager : IDisposable
         IsScanning = true;
 
         List<Task> scanTasks = new();
-        foreach(SourceBase source in Sources)
+        foreach(SourceBase source in _internalSources)
         {
-            scanTasks.Add(Task.Run(()=> ScanSource(source)));
+            scanTasks.Add(Task.Run(() => ScanSource(source)));
+        }
+
+        foreach(SourceBase source in _sources)
+        {
+            scanTasks.Add(Task.Run(() => ScanSource(source)));
         }
 
         await Task.WhenAll(scanTasks.ToArray());
@@ -86,6 +112,7 @@ internal class LibraryManager : IDisposable
     {
         try
         {
+            source.Clear();
             source.Scan();
         }
         catch(Exception ex)

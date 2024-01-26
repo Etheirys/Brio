@@ -15,7 +15,6 @@ internal class FileSource : SourceBase
     public readonly string DirectoryPath;
 
     private string _name;
-    private string _icon;
 
     // We could probably put these in a file type manager or something,
     // but currently only the library needs them, so here is fine too.
@@ -27,24 +26,44 @@ internal class FileSource : SourceBase
         new MareCharacterDataFileInfo(),
     };
 
-    public FileSource(string name, string icon, string directoryPath)
+    public FileSource(string name, string directoryPath)
         : base()
     {
         _name = name;
-        _icon = icon;
-        DirectoryPath = directoryPath;
+
+        string path = directoryPath;
+        path = path.Replace('/', '\\');
+
+        // Parse any special folder names (%MyDocuments%, %AppData%, etc)
+        if (path.StartsWith('%'))
+        {
+            path = path.Substring(1);
+            int endSpecialFolder = path.IndexOf('%');
+            string specialFolderName = path.Substring(0, endSpecialFolder);
+
+            path = path.Substring(endSpecialFolder + 1, path.Length - endSpecialFolder - 1);
+
+            Environment.SpecialFolder specialFolder;
+            if(Enum.TryParse(specialFolderName, out specialFolder))
+            {
+                path = Environment.GetFolderPath(specialFolder) + path;
+            }
+
+            Brio.Log.Info($"{path}");
+        }
+
+        DirectoryPath = path;
     }
 
-    public FileSource(string name, string icon, params string[] paths)
+    public FileSource(string name, params string[] paths)
           : base()
     {
         _name = name;
-        _icon = icon;
         DirectoryPath = Path.Combine(paths);
     }
 
     public override string Name => _name;
-    public override IDalamudTextureWrap? Icon => ResourceProvider.Instance.GetResourceImage(_icon);
+    public override IDalamudTextureWrap? Icon => ResourceProvider.Instance.GetResourceImage("Images.ProviderIcon_Directory.png");
     public override string Description => DirectoryPath;
 
 
