@@ -1,5 +1,7 @@
 ﻿using Brio.Files;
+using Brio.Game.Actor.Appearance;
 using Brio.Game.Types;
+using Brio.Library.Tags;
 using Brio.Resources;
 using Brio.UI;
 using Dalamud.Interface.Internal;
@@ -19,6 +21,25 @@ internal class GameDataAppearanceEntry : ItemEntryBase
         _name = name;
         _icon = icon;
         _appearance = appearance;
+
+        ActorAppearance app = _appearance;
+
+        if(app.ModelCharaId == 0)
+        {
+            Tags.Add("Human");
+
+            if(app.Customize.Race != 0)
+                Tags.Add(app.Customize.Race.ToDisplayName());
+
+            if(app.Customize.Tribe != 0)
+                Tags.Add(app.Customize.Tribe.ToDisplayName());
+
+            Tags.Add(app.Customize.Gender.ToDisplayName());
+        }
+        else
+        {
+            Tags.Add("Inhuman");
+        }
     }
 
     public override string Name => _name;
