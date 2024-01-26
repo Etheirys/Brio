@@ -96,9 +96,9 @@ internal class ResourceProvider : IDisposable
     public void Dispose()
     {
         foreach(var img in _cachedImages.Values)
-            img.Dispose();
+            img?.Dispose();
 
-        _cachedImages.Clear();
-        _cachedDocuments.Clear();
+        _cachedImages?.Clear();
+        _cachedDocuments?.Clear();
     }
 }
