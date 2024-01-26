@@ -3,7 +3,7 @@ using System.Text;
 
 namespace Brio.Library.Filters;
 
-public class SearchQueryFilter : FilterBase
+internal class SearchQueryFilter : FilterBase
 {
     public string[]? Query;
 
@@ -17,7 +17,7 @@ public class SearchQueryFilter : FilterBase
         this.Query = null;
     }
 
-    public override bool Filter(ILibraryEntry entry)
+    public override bool Filter(EntryBase entry)
     {
         if(Query == null)
             return false;

@@ -10,17 +10,18 @@ using System.Reflection;
 
 namespace Brio.Library.Sources;
 
-public class FileSource : SourceBase
+internal class FileSource : SourceBase
 {
     public readonly string DirectoryPath;
 
-    // We could probably scan the assembly for any types that have a FileTypeAttribute in them, but this is fine too.
-    private static List<Type> fileTypes = new List<Type>()
+    // We could probably put these in a file type manager or something,
+    // but currently only the library needs them, so here is fine too.
+    private static List<FileInfoBase> fileTypes = new()
     {
-        typeof(AnamnesisCharaFile),
-        typeof(CMToolPoseFile),
-        typeof(PoseFile),
-        typeof(MareCharacterDataFile),
+        new AnamnesisCharaFileInfo(),
+        new CMToolPoseFileInfo(),
+        new PoseFileInfo(),
+        new MareCharacterDataFileInfo(),
     };
 
     public FileSource(string name, string icon, string directoryPath)
@@ -43,7 +44,7 @@ public class FileSource : SourceBase
         Scan(DirectoryPath, this);
     }
 
-    public void Scan(string directory, ILibraryEntry parent)
+    public void Scan(string directory, GroupEntryBase parent)
     {
         if(!Directory.Exists(directory))
             return;
@@ -60,39 +61,39 @@ public class FileSource : SourceBase
         string[] filePaths = Directory.GetFiles(directory, "*.*");
         foreach(string filePath in filePaths)
         {
-            FileTypeAttribute? fileTypeAttribute;
-            Type? fileType;
-            if(!GetFileType(filePath, out fileTypeAttribute, out fileType) || fileTypeAttribute == null || fileType == null)
+            FileInfoBase? fileTypeInfo = GetFileType(filePath);
+            if(fileTypeInfo == null)
                 continue;
 
-            parent.Add(new FileEntry(this, filePath, fileTypeAttribute, fileType));
+            parent.Add(new FileEntry(this, filePath, fileTypeInfo));
         }
     }
 
-    private bool GetFileType(string path, out FileTypeAttribute? file, out Type? type)
+    private FileInfoBase? GetFileType(string path)
     {
-        file = null;
-        type = null;
-
-        foreach(Type possibleType in fileTypes)
+        foreach (FileInfoBase fileType in fileTypes)
         {
-            FileTypeAttribute? fileType = possibleType.GetCustomAttribute<FileTypeAttribute>();
-            if(fileType == null)
-                continue;
-
             if(fileType.IsFile(path))
             {
-                file = fileType;
-                type = possibleType;
-                return true;
+                return fileType;
             }
         }
 
-        return false;
+        return null;
     }
 }
 
-public class DirectoryEntry : LibraryEntryBase
+public interface IFileMetadata
+{
+    string? Author { get; }
+    string? Description { get; }
+    string? Version { get; }
+    TagCollection? Tags { get; }
+
+    void GetAutoTags(ref TagCollection tags);
+}
+
+internal class DirectoryEntry : GroupEntryBase
 {
     private string _name;
     private IDalamudTextureWrap _icon;
@@ -113,32 +114,23 @@ public class DirectoryEntry : LibraryEntryBase
     public override IDalamudTextureWrap? Icon => _icon;
 }
 
-public interface IFile
-{
-    string? Author { get; }
-    string? Description { get; }
-    string? Version { get; }
-    TagCollection? Tags { get; }
-
-    void GetAutoTags(ref TagCollection tags);
-}
-
-public class FileEntry : LibraryEntryBase
+internal class FileEntry : ItemEntryBase
 {
     public readonly string FilePath;
-    public readonly FileTypeAttribute FileTypeAttribute;
 
     private string _name;
-    private Type _fileType;
+    private FileInfoBase _fileInfo;
     private IDalamudTextureWrap? _previewImage;
-    private FileTypeAttribute.LoadDelegate? _loadDelegate;
+    private string? _description;
+    private string? _author;
+    private string? _version;
 
-    public FileEntry(FileSource source, string path, FileTypeAttribute fileTypeAttribute, Type fileType)
+    public FileEntry(FileSource source, string path, FileInfoBase fileInfo)
         : base(source)
     {
-        FilePath = path;
-        FileTypeAttribute = fileTypeAttribute;
+        _fileInfo = fileInfo;
 
+        FilePath = path;
         SourceInfo = Path.GetRelativePath(source.DirectoryPath, path);
 
         _name = Path.GetFileNameWithoutExtension(path);
@@ -147,32 +139,24 @@ public class FileEntry : LibraryEntryBase
             _name = _name.Substring(0, 55) + "...";
         }
 
-        _fileType = fileType;
-
         // if this type has a load method, invoke it to load the file
         try
         {
-            if(FileType != null)
+            if (_fileInfo.IsFileType<IFileMetadata>() == true)
             {
-                _loadDelegate = FileTypeAttribute.GetLoadMethod(FileType);
-            }
-
-           
-            if(_loadDelegate != null)
-            {
-                object? file = _loadDelegate.Invoke(path);
-                if(file is IFile fileInterface)
+                IFileMetadata? file = _fileInfo.Load(path) as IFileMetadata;
+                if (file != null)
                 {
-                    if(fileInterface.Tags != null)
-                        Tags.AddRange(fileInterface.Tags);
+                    if(file.Tags != null)
+                        Tags.AddRange(file.Tags);
 
                     TagCollection tags = Tags;
-                    fileInterface.GetAutoTags(ref tags);
+                    file.GetAutoTags(ref tags);
                     Tags = tags;
 
-                    Description = fileInterface.Description;
-                    Author = fileInterface.Author;
-                    Version = fileInterface.Version;
+                    _description = file.Description;
+                    _author = file.Author;
+                    _version = file.Version;
                 }
             }
         }
@@ -182,9 +166,12 @@ public class FileEntry : LibraryEntryBase
     }
 
     public override string Name => _name;
+    public override string? Description => _description;
+    public override string? Author => _author;
+    public override string? Version => _version;
     public override IDalamudTextureWrap? Icon => GetIcon();
     public override IDalamudTextureWrap? PreviewImage => GetPreviewImage();
-    public override Type? FileType => _fileType;
+    public override Type LoadsType => _fileInfo.Type;
 
     public override bool IsVisible
     {
@@ -206,29 +193,31 @@ public class FileEntry : LibraryEntryBase
         if(preview != null)
             return preview;
 
-        return FileTypeAttribute.GetIcon(_fileType);
+        if (_fileInfo == null)
+            return ResourceProvider.Instance.GetResourceImage("Images.FileIcon_Unknown.png");
+
+        return _fileInfo.Icon;
     }
 
     private IDalamudTextureWrap? GetPreviewImage()
     {
         if(_previewImage == null || _previewImage.ImGuiHandle == 0)
         {
-            if(FileType != null && typeof(JsonDocumentBase).IsAssignableFrom(FileType))
+            try
             {
-                try
+                if(_fileInfo?.IsFileType<JsonDocumentBase>() == true)
                 {
-                    object? file = _loadDelegate?.Invoke(FilePath);
-
-                    if(file != null && file is JsonDocumentBase doc && doc.Base64Image != null)
+                    JsonDocumentBase? file = _fileInfo.Load(FilePath) as JsonDocumentBase;
+                    if(file != null && file.Base64Image != null)
                     {
-                        byte[] imgData = Convert.FromBase64String(doc.Base64Image);
+                        byte[] imgData = Convert.FromBase64String(file.Base64Image);
                         _previewImage = UIManager.Instance.LoadImage(imgData);
                         return _previewImage;
                     }
                 }
-                catch(Exception)
-                {
-                }
+            }
+            catch(Exception)
+            {
             }
         }
 

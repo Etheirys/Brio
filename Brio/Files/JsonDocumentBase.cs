@@ -1,8 +1,18 @@
 ﻿using Brio.Library.Sources;
 using Brio.Library.Tags;
+using Brio.Resources;
+using Dalamud.Interface.Internal;
+using System;
 
 namespace Brio.Files;
-internal abstract class JsonDocumentBase : IFile
+
+internal abstract class JsonDocumentBaseFileInfo<T> : FileInfoBase<T>
+{
+    public override object? Load(string filePath) => ResourceProvider.Instance.GetFileDocument<T>(filePath);
+}
+
+[Serializable]
+internal abstract class JsonDocumentBase : IFileMetadata
 {
     public string? Author { get; set; }
     public string? Description { get; set; }

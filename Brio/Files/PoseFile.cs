@@ -1,16 +1,23 @@
 ﻿using Brio.Core;
 using Brio.Files.Converters;
 using Brio.Resources;
+using Dalamud.Interface.Internal;
+using System;
 using System.Collections.Generic;
 using System.Numerics;
 
 namespace Brio.Files;
 
-[FileType("Pose File", "Images.FileIcon_Pose.png", ".pose", "Load")]
+internal class PoseFileInfo : JsonDocumentBaseFileInfo<PoseFile>
+{
+    public override string Name => "Pose File";
+    public override IDalamudTextureWrap Icon => ResourceProvider.Instance.GetResourceImage("Images.FileIcon_Pose.png");
+    public override string Extension => ".pose";
+}
+
+[Serializable]
 internal class PoseFile : JsonDocumentBase
 {
-    public static PoseFile? Load(string filePath) => ResourceProvider.Instance.GetFileDocument<PoseFile>(filePath);
-
     public Bone ModelDifference { get; set; } = Transform.Identity;
 
     public Dictionary<string, Bone> Bones { get; set; } = [];

@@ -1,6 +1,6 @@
 ﻿namespace Brio.Library.Filters;
 
-public abstract class FilterBase
+internal abstract class FilterBase
 {
     public readonly string Name;
 
@@ -10,5 +10,5 @@ public abstract class FilterBase
     }
 
     public abstract void Clear();
-    public abstract bool Filter(ILibraryEntry entry);
+    public abstract bool Filter(EntryBase entry);
 }

@@ -2,7 +2,7 @@
 
 namespace Brio.Library;
 
-public class LibraryFavoritesFilter : FilterBase
+internal class LibraryFavoritesFilter : FilterBase
 {
     public LibraryFavoritesFilter()
         : base("Favorites")
@@ -13,7 +13,7 @@ public class LibraryFavoritesFilter : FilterBase
     {
     }
 
-    public override bool Filter(ILibraryEntry entry)
+    public override bool Filter(EntryBase entry)
     {
         // no favorites system yet!
         return false;

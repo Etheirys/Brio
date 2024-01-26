@@ -2,7 +2,7 @@
 
 namespace Brio.Library.Filters;
 
-public class TagFilter : FilterBase
+internal class TagFilter : FilterBase
 {
     public TagCollection? Tags;
 
@@ -24,7 +24,7 @@ public class TagFilter : FilterBase
         this.Tags.Add(tag);
     }
 
-    public override bool Filter(ILibraryEntry entry)
+    public override bool Filter(EntryBase entry)
     {
         if(this.Tags == null)
             return true;

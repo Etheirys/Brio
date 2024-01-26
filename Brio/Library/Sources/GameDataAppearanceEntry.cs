@@ -1,4 +1,5 @@
-﻿using Brio.Game.Types;
+﻿using Brio.Files;
+using Brio.Game.Types;
 using Brio.Resources;
 using Brio.UI;
 using Dalamud.Interface.Internal;
@@ -6,7 +7,7 @@ using System;
 
 namespace Brio.Library.Sources;
 
-internal class GameDataAppearanceEntry : LibraryEntryBase
+internal class GameDataAppearanceEntry : ItemEntryBase
 {
     private string _name;
     private uint _icon;
@@ -18,12 +19,11 @@ internal class GameDataAppearanceEntry : LibraryEntryBase
         _name = name;
         _icon = icon;
         _appearance = appearance;
-
-        Author = "Square Enix";
     }
 
     public override string Name => _name;
-    public override Type? FileType => typeof(ActorAppearanceUnion);
+    public override string? Author => "Square Enix";
+    public override Type LoadsType => typeof(ActorAppearanceUnion);
 
     public override IDalamudTextureWrap? Icon
     {

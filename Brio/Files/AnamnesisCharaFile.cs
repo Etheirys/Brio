@@ -1,18 +1,23 @@
 ﻿using Brio.Game.Actor.Appearance;
 using Brio.Library.Tags;
 using Brio.Resources;
+using Dalamud.Interface.Internal;
 using FFXIVClientStructs.FFXIV.Client.Game.Character;
 using System;
 using System.Numerics;
 
 namespace Brio.Files;
 
+internal class AnamnesisCharaFileInfo : JsonDocumentBaseFileInfo<AnamnesisCharaFile>
+{
+    public override string Name => "Character File";
+    public override IDalamudTextureWrap Icon => ResourceProvider.Instance.GetResourceImage("Images.FileIcon_Chara.png");
+    public override string Extension => ".chara";
+}
+
 [Serializable]
-[FileType("Character File", "Images.FileIcon_Chara.png", ".chara", "Load")]
 internal class AnamnesisCharaFile : JsonDocumentBase
 {
-    public static AnamnesisCharaFile? Load(string filePath) => ResourceProvider.Instance.GetFileDocument<AnamnesisCharaFile>(filePath);
-
     public uint ModelType { get; set; } = 0;
     public Races Race { get; set; }
     public Genders Gender { get; set; }

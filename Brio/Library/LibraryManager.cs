@@ -46,7 +46,7 @@ internal class LibraryManager : IDisposable
     }
 
     public List<SourceBase> Sources { get; init; } = new();
-    public ILibraryEntry Root => _rootItem;
+    public GroupEntryBase Root => _rootItem;
 
     public void Dispose()
     {
@@ -95,7 +95,7 @@ internal class LibraryManager : IDisposable
     }
 }
 
-public class LibraryRoot : LibraryEntryBase
+internal class LibraryRoot : GroupEntryBase
 {
     public LibraryRoot()
         : base(null)

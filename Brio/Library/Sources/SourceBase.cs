@@ -3,7 +3,7 @@ using System;
 
 namespace Brio.Library.Sources;
 
-public abstract class SourceBase : LibraryEntryBase
+internal abstract class SourceBase : GroupEntryBase
 {
     private string _name;
     private IDalamudTextureWrap _icon;

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Brio.Library.Filters;
 
-public class TypeFilter : FilterBase
+internal class TypeFilter : FilterBase
 {
     private HashSet<Type> _types = new();
 
@@ -21,10 +21,13 @@ public class TypeFilter : FilterBase
         _types.Clear();
     }
 
-    public override bool Filter(ILibraryEntry entry)
+    public override bool Filter(EntryBase entry)
     {
-        if(entry.FileType != null)
-            return _types.Contains(entry.FileType);
+        if (entry is ItemEntryBase file)
+        {
+            return _types.Contains(file.LoadsType);
+        }
+
 
         return true;
     }

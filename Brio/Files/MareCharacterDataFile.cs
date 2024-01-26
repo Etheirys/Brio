@@ -2,16 +2,22 @@
 using Brio.Library.Sources;
 using Brio.Library.Tags;
 using Brio.Resources;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Text;
+using Dalamud.Interface.Internal;
 
 namespace Brio.Files;
 
+internal class MareCharacterDataFileInfo : FileInfoBase<MareCharacterDataFile>
+{
+    public override string Name => "Mare Character Data";
+    public override IDalamudTextureWrap Icon => ResourceProvider.Instance.GetResourceImage("Images.FileIcon_Mcdf.png");
+    public override string Extension => ".mcdf";
 
-[FileType("Mare Character Data", "Images.FileIcon_Mcdf.png", ".mcdf", "Load")]
-internal class MareCharacterDataFile : IFile
+    // No support for actually loading an mcdf, as that's handled by IPC-ing to Mare.
+    // But this class is used for the library tags, so lets just fake it with an empty file. =)
+    public override object? Load(string filePath) => new MareCharacterDataFile();
+}
+
+internal class MareCharacterDataFile : IFileMetadata
 {
     public string? Description => null;
     public string? Author => null;
@@ -21,12 +27,5 @@ internal class MareCharacterDataFile : IFile
     public void GetAutoTags(ref TagCollection tags)
     {
         tags.Add("Mare Synchronos");
-    }
-
-    public static MareCharacterDataFile? Load(string filePath)
-    {
-        // No support for actually loading an mcdf, as thats handled by IPC-ing to Mare.
-        // But this class is used for the library tags, so lets just fake it with an empty file. =)
-        return new MareCharacterDataFile();
     }
 }

@@ -30,6 +30,7 @@
 using Brio.Files.Converters;
 using Brio.Game.Actor.Appearance;
 using Brio.Resources;
+using Dalamud.Interface.Internal;
 using System;
 using System.Globalization;
 using System.Numerics;
@@ -37,11 +38,16 @@ using System.Reflection;
 
 namespace Brio.Files;
 
-[FileType("CMTool Pose File", "Images.FileIcon_Pose.png", ".cmp", "Load")]
+internal class CMToolPoseFileInfo : JsonDocumentBaseFileInfo<CMToolPoseFile>
+{
+    public override string Name => "CMTool Pose File";
+    public override IDalamudTextureWrap Icon => ResourceProvider.Instance.GetResourceImage("Images.FileIcon_Pose.png");
+    public override string Extension => ".cmp";
+}
+
+[Serializable]
 internal class CMToolPoseFile
 {
-    public static CMToolPoseFile? Load(string filePath) => ResourceProvider.Instance.GetFileDocument<CMToolPoseFile>(filePath);
-
     public string? Race { get; set; }
 
     public string? Root { get; set; }

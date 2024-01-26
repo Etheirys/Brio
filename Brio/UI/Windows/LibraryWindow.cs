@@ -41,11 +41,11 @@ internal class LibraryWindow : Window
     private TagFilter _tagFilter = new();
     private string _searchText = string.Empty;
 
-    private readonly List<ILibraryEntry> _path = new();
-    private IEnumerable<ILibraryEntry>? _currentEntries;
+    private readonly List<GroupEntryBase> _path = new();
+    private IEnumerable<EntryBase>? _currentEntries;
     private TagCollection _allTags = new();
-    private ILibraryEntry? _toOpen = null;
-    private ILibraryEntry? _selected = null;
+    private EntryBase? _toOpen = null;
+    private EntryBase? _selected = null;
     private float spinnerAngle = 0;
     private bool _searchNeedsFocus = false;
     private int _searchLostFocus = 0;
@@ -117,9 +117,9 @@ internal class LibraryWindow : Window
                 float height = ImBrio.GetRemainingHeight() - ImBrio.GetLineHeight() - ImGui.GetStyle().ItemSpacing.Y;
                 if (ImGui.BeginChild("###library_info_pane", new Vector2(ImBrio.GetRemainingWidth(), height), true))
                 {
-                    if(_selected != null)
+                    if(_selected != null && _selected is ItemEntryBase file)
                     {
-                        DrawInfo(_selected);
+                        DrawInfo(file);
                     }
 
                     ImGui.EndChild();
@@ -563,7 +563,7 @@ internal class LibraryWindow : Window
         }
     }
 
-    private void DrawEntry(ILibraryEntry entry, float width, int id)
+    private void DrawEntry(EntryBase entry, float width, int id)
     {
         float height = width + 60;
         Vector2 size = new(width, height);
@@ -599,7 +599,7 @@ internal class LibraryWindow : Window
         }
     }
 
-    private void DrawInfo(ILibraryEntry entry)
+    private void DrawInfo(ItemEntryBase entry)
     {
         ImGui.Text(entry.Name);
 
@@ -694,16 +694,16 @@ internal class LibraryWindow : Window
         ImGui.Button("Open", new(openButtonWidth, lineHeight));
     }
 
-    private void OnOpen(ILibraryEntry entry)
+    private void OnOpen(EntryBase entry)
     {
-        if (entry.FileType != null)
+        if (entry is GroupEntryBase dir)
         {
-            // open the file?
+            _path.Add(dir);
+            Refresh(false);
         }
         else
         {
-            _path.Add(entry);
-            Refresh(false);
+            // open the file?
         }
     }
 
@@ -716,7 +716,7 @@ internal class LibraryWindow : Window
 
         if (_currentEntries != null)
         {
-            foreach(ILibraryEntry entry in _currentEntries)
+            foreach(EntryBase entry in _currentEntries)
             {
                 entry.IsVisible = false;
             }
@@ -736,7 +736,7 @@ internal class LibraryWindow : Window
             _libraryManager.Root.FilterEntries(filters.ToArray());
         }
 
-        ILibraryEntry currentEntry = _path[_path.Count - 1];
+        GroupEntryBase currentEntry = _path[_path.Count - 1];
         _currentEntries = currentEntry.GetFilteredEntries(IsSearching);
 
         _allTags.Clear();
@@ -744,7 +744,7 @@ internal class LibraryWindow : Window
 
         if(_currentEntries != null)
         {
-            foreach(ILibraryEntry entry in _currentEntries)
+            foreach(EntryBase entry in _currentEntries)
             {
                 entry.IsVisible = true;
             }
