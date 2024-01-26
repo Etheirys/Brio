@@ -86,7 +86,6 @@ internal class LibraryWindow : Window
         _libraryManager = libraryManager;
         _serviceProvider = serviceProvider;
 
-        IsOpen = true;
         _path.Add(_libraryManager.Root);
     }
 
