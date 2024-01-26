@@ -682,7 +682,12 @@ internal class LibraryWindow : Window
 
         ImGui.Text("Tags:");
         ImGui.SameLine();
-        ImBrio.DrawTags(entry.Tags);
+        Tag? selected = ImBrio.DrawTags(entry.Tags);
+        if(selected != null)
+        {
+            _tagFilter.Add(selected);
+            Refresh(true);
+        }
     }
 
     private void DrawInfo(SourceBase source)
