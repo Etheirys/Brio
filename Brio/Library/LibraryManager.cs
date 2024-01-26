@@ -27,6 +27,7 @@ internal class LibraryManager : IDisposable
         _log = log;
         _rootItem = new();
 
+        _configurationService.Configuration.Library.CheckDefaults();
         _configurationService.OnConfigurationChanged += OnConfigurationChanged;
 
         // Game Data
@@ -72,9 +73,9 @@ internal class LibraryManager : IDisposable
         _sources.AddRange(_internalSources);
         
         // Directory configurations
-        foreach((var name, var sourceConfig) in _configurationService.Configuration.Library.FileSources)
+        foreach(var sourceConfig in _configurationService.Configuration.Library.Files)
         {
-            _sources.Add(new FileSource(name, sourceConfig));
+            _sources.Add(new FileSource(sourceConfig));
         }
 
         foreach (SourceBase source in _sources)

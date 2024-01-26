@@ -27,10 +27,10 @@ internal class FileSource : SourceBase
         new MareCharacterDataFileInfo(),
     };
 
-    public FileSource(string name, LibraryConfiguration.FileSource config)
+    public FileSource(LibraryConfiguration.FileSourceConfig config)
         : base()
     {
-        _name = name;
+        _name = config.Name;
 
         if(config.Root != null)
         {

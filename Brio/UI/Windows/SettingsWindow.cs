@@ -487,30 +487,39 @@ internal class SettingsWindow : Window
         }
     }
 
-    private string? _selectedSourceName;
-    private object? _selectedSource;
+    private LibraryConfiguration.SourceConfigBase? _selectedSource;
     private bool _editing;
 
     private void DrawLibrarySection()
     {
+        _configurationService.Configuration.Library.CheckDefaults();
+
         float buttonWidth = 32;
 
         float paneHeight = ImBrio.GetRemainingHeight() - ImBrio.GetLineHeight() - ImGui.GetStyle().ItemSpacing.Y;
         if (ImGui.BeginChild("library_sources_pane", new (-1, paneHeight), true))
         {
-            foreach((string name, LibraryConfiguration.FileSource source) in _configurationService.Configuration.Library.FileSources)
+            int index = 0;
+            foreach(LibraryConfiguration.SourceConfigBase config in _configurationService.Configuration.Library.GetAllConfigs())
             {
-                DrawSourceItem(name, source);
+                DrawSourceItem(index, config);
+                index++;
             }
 
             ImGui.EndChild();
         } 
 
-        if(_selectedSourceName == null)
+        if(_selectedSource == null)
             ImGui.BeginDisabled();
 
         if(ImBrio.FontIconButton(FontAwesomeIcon.Minus, new(buttonWidth, 0)))
         {
+            // TODO: confirm?
+            if(_selectedSource != null)
+            {
+                _configurationService.Configuration.Library.RemoveSource(_selectedSource);
+                _configurationService.Save();
+            }
         }
 
         ImGui.SameLine();
@@ -521,7 +530,7 @@ internal class SettingsWindow : Window
             _editing = true;
         }
 
-        if(_selectedSourceName == null)
+        if(_selectedSource == null)
         {
             ImGui.EndDisabled();
         }
@@ -530,39 +539,30 @@ internal class SettingsWindow : Window
         ImGui.SetCursorPosX(ImGui.GetCursorPosX() + (ImBrio.GetRemainingWidth() - buttonWidth));
         if(ImBrio.FontIconButton(FontAwesomeIcon.Plus, new(buttonWidth, 0)))
         {
-
+            _editing = true;
+            _selectedSource = new LibraryConfiguration.FileSourceConfig();
+            _selectedSource.Name = "New Source";
+            _configurationService.Configuration.Library.AddSource(_selectedSource);
+            ImGui.OpenPopup("###settings_edit_source");
         }
 
 
-        if(_editing && _selectedSourceName != null)
+        if(_editing && _selectedSource != null)
         {
-            bool isCreating = false;
             ImGui.SetNextWindowSize(new(400, 200));
 
             if(ImGui.BeginPopupModal("###settings_edit_source", ref _editing,
-                ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoTitleBar))
+                ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoMove))
             {
-                ImGui.Text($"Edit source \"{_selectedSourceName}\"");
-
-                if(isCreating)
+                string name = _selectedSource.Name ?? string.Empty;
+                if(ImGui.InputText("Name###settings_edit_source_name", ref name, 80))
                 {
-                    string name = _selectedSourceName;
-                    if(ImGui.InputText("Name", ref name, 80, ImGuiInputTextFlags.EnterReturnsTrue))
-                    {
-                        // ...
-                    }
+                    _selectedSource.Name = name;
                 }
 
-                Vector2 areaSize = new(-1, ImBrio.GetRemainingHeight() - ImBrio.GetLineHeight() - ImGui.GetStyle().ItemSpacing.Y);
-
-                if (ImGui.BeginChild("###settings_edit_source", areaSize, true))
+                if(_selectedSource is LibraryConfiguration.FileSourceConfig fileSource)
                 {
-                    if(_selectedSource is LibraryConfiguration.FileSource fileSource)
-                    {
-                        DrawSource(fileSource, true);
-                    }
-
-                    ImGui.EndChild();
+                    DrawSource(fileSource, true);
                 }
 
                 ImGui.SetCursorPosX(ImGui.GetCursorPosX() + ImBrio.GetRemainingWidth() - 100);
@@ -578,24 +578,26 @@ internal class SettingsWindow : Window
         }
     }
 
-    private void DrawSourceItem(string name, object sourceConfig)
+    private void DrawSourceItem(int id, LibraryConfiguration.SourceConfigBase sourceConfig)
     {
         float itemHeight = ImBrio.GetLineHeight() * 2;
 
-        bool selected = _selectedSourceName == name;
+        bool selected = _selectedSource == sourceConfig;
         float itemTop = ImGui.GetCursorPosY();
-        if(ImGui.Selectable($"###settings_source_dir_{name}_selectable", ref selected, ImGuiSelectableFlags.None, new(ImBrio.GetRemainingWidth(), itemHeight)))
+        if(ImGui.Selectable($"###settings_source_{id}_{sourceConfig.Name}_selectable", ref selected, ImGuiSelectableFlags.None, new(ImBrio.GetRemainingWidth(), itemHeight)))
         {
-            _selectedSourceName = name;
-            _selectedSource = sourceConfig;
+            if(selected)
+            {
+                _selectedSource = sourceConfig;
+            }
         }
 
         bool isHover = ImGui.IsItemActive();
         ImGui.SetCursorPosY(itemTop + ImGui.GetStyle().FramePadding.Y);
 
-        ImGui.Text(name);
+        ImGui.Text(sourceConfig.Name ?? "Unnamed Source");
 
-        if(sourceConfig is LibraryConfiguration.FileSource fileSource)
+        if(sourceConfig is LibraryConfiguration.FileSourceConfig fileSource)
         {
             DrawSource(fileSource, false);
         }
@@ -603,7 +605,7 @@ internal class SettingsWindow : Window
         ImGui.SetCursorPosY(itemTop + itemHeight + ImGui.GetStyle().ItemSpacing.Y);
     }
 
-    private void DrawSource(LibraryConfiguration.FileSource fileSource, bool edit)
+    private void DrawSource(LibraryConfiguration.FileSourceConfig fileSource, bool edit)
     {
         if(edit)
         {
