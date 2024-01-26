@@ -24,8 +24,8 @@ namespace Brio.UI.Windows;
 
 internal class LibraryWindow : Window
 {
-    private const float InfoPaneWidth = 300;
-    private const float SearchWidth = 350;
+    private const float InfoPaneWidth = 350;
+    private const float SearchWidth = 400;
     private const int MaxTagsInSuggest = 25;
     private const float PathBarButtonWidth = 25;
     private const float FooterScaleSliderWidth = 150;
@@ -525,7 +525,7 @@ internal class LibraryWindow : Window
     {
         float fileWidth = _configurationService.Configuration.Library.IconSize;
 
-        int columnCount = (int)Math.Floor(WindowContentWidth / 120.0f);
+        int columnCount = (int)Math.Floor(WindowContentWidth / fileWidth);
         int column = 0;
         int index = 0;
 
