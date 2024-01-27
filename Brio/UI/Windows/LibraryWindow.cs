@@ -87,6 +87,8 @@ internal class LibraryWindow : Window
         _serviceProvider = serviceProvider;
 
         _path.Add(_libraryManager.Root);
+
+        _libraryManager.OnScanFinished += OnLibraryScanFinished;
     }
 
     private float WindowContentWidth => ImGui.GetWindowContentRegionMax().X - ImGui.GetWindowContentRegionMin().X;
@@ -96,6 +98,11 @@ internal class LibraryWindow : Window
     public override void OnOpen()
     {
         base.OnOpen();
+        Refresh(true);
+    }
+
+    private void OnLibraryScanFinished()
+    {
         Refresh(true);
     }
 

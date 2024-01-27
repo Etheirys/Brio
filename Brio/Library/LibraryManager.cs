@@ -12,18 +12,21 @@ internal class LibraryManager : IDisposable
 {
     private readonly ConfigurationService _configurationService;
     private readonly GameDataProvider _luminaProvider;
-    private readonly IPluginLog _log;
+    private readonly IFramework _framework;
     private readonly LibraryRoot _rootItem;
     private readonly List<SourceBase> _sources = new();
     private readonly List<SourceBase> _internalSources = new();
 
+    public delegate void OnScanFinishedDelegate();
+    public event OnScanFinishedDelegate? OnScanFinished;
+
     public bool IsScanning { get; private set; }
 
-    public LibraryManager (ConfigurationService configurationService, GameDataProvider luminaProvider, IPluginLog log)
+    public LibraryManager (ConfigurationService configurationService, GameDataProvider luminaProvider, IFramework framework)
     {
         _configurationService = configurationService;
         _luminaProvider = luminaProvider;
-        _log = log;
+        _framework = framework;
         _rootItem = new(this, configurationService);
 
         _configurationService.Configuration.Library.CheckDefaults();
@@ -65,6 +68,8 @@ internal class LibraryManager : IDisposable
 
     public void LoadSources()
     {
+        Brio.Log.Info("Loading library sources");
+
         _rootItem.Clear();
         _sources.Clear();
 
@@ -81,6 +86,8 @@ internal class LibraryManager : IDisposable
         {
             _rootItem.Add(source);
         }
+
+        Scan();
     }
 
     public void Scan()
@@ -106,6 +113,11 @@ internal class LibraryManager : IDisposable
         await Task.WhenAll(scanTasks.ToArray());
 
         IsScanning = false;
+
+        await _framework.RunOnFrameworkThread(() =>
+        {
+            OnScanFinished?.Invoke();
+        });
     }
 
     private void ScanSource(SourceBase source)
@@ -117,7 +129,7 @@ internal class LibraryManager : IDisposable
         }
         catch(Exception ex)
         {
-            _log.Error(ex, $"Error in library source: {source.Name}");
+            Brio.Log.Error(ex, $"Error in library source: {source.Name}");
         }
     }
 }

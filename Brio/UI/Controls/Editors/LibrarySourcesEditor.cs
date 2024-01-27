@@ -46,7 +46,7 @@ internal static class LibrarySourcesEditor
             if(selected != null)
             {
                 config.RemoveSource(selected);
-                service.Save();
+                service.ApplyChange();
             }
         }
 
@@ -98,7 +98,7 @@ internal static class LibrarySourcesEditor
                 if(ImGui.Button("Save", new(100, 0)))
                 {
                     ImGui.CloseCurrentPopup();
-                    service.Save();
+                    service.ApplyChange();
                 }
 
                 ImGui.EndPopup();
