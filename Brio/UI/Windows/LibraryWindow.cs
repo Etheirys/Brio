@@ -40,7 +40,7 @@ internal class LibraryWindow : Window
 
     private readonly static List<FilterBase> filters = new()
     {
-        new LibraryFavoritesFilter(),
+        ////new LibraryFavoritesFilter(),
         new TypeFilter("Characters", typeof(AnamnesisCharaFile), typeof(ActorAppearanceUnion), typeof(MareCharacterDataFile)),
         new TypeFilter("Poses", typeof(PoseFile), typeof(CMToolPoseFile)),
     };
