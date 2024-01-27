@@ -126,12 +126,28 @@ internal class LibraryWindow : Window
                     ImGui.EndChild();
                 }
 
-                // Check if the user has clicked on the background to clear selection.
+                
                 Vector2 mousePos = ImGui.GetMousePos() - ImGui.GetWindowPos();
                 bool isMouseOverArea = (mousePos.X > 0 && mousePos.Y > 0 && mousePos.X < entriesPaneWidth && mousePos.Y < entriesPaneHeight);
-                if(ImGui.IsMouseClicked(ImGuiMouseButton.Left) && !ImGui.IsAnyItemHovered() && isMouseOverArea)
+                if(isMouseOverArea)
                 {
-                    _selected = null;
+                    // Check if the user has clicked on the background to clear selection.
+                    if(ImGui.IsMouseClicked(ImGuiMouseButton.Left) && !ImGui.IsAnyItemHovered())
+                    {
+                        _selected = null;
+                    }
+
+                    // Ctrl+wheel to change icon size
+                    float mouseWheel = ImGui.GetIO().MouseWheel * 10;
+                    // TODO: replace this ctrl listener with the new key bind system when it is merged
+                    // as ImGUI ctrl support is _spotty_
+                    if (ImGui.IsKeyPressed(ImGuiKey.LeftCtrl) && mouseWheel != 0)
+                    {
+                        float val = _configurationService.Configuration.Library.IconSize;
+                        val = Math.Clamp(val + mouseWheel, MinEntrySize, MaxEntrySize);
+                        _configurationService.Configuration.Library.IconSize = val;
+                        _configurationService.Save();
+                    }
                 }
 
                 DrawFooter();
@@ -638,7 +654,7 @@ internal class LibraryWindow : Window
 
         int size = (int)_configurationService.Configuration.Library.IconSize;
         ImGui.SetNextItemWidth(FooterScaleSliderWidth);
-        if (ImGui.SliderInt("###library_scale_slider", ref size, MinEntrySize, MaxEntrySize))
+        if (ImGui.SliderInt("###library_scale_slider", ref size, MinEntrySize, MaxEntrySize, ""))
         {
             _configurationService.Configuration.Library.IconSize = size;
         }
