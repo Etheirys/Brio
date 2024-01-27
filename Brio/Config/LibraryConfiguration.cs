@@ -45,6 +45,7 @@ internal class LibraryConfiguration
     public abstract class SourceConfigBase
     {
         public string Name { get; set; } = string.Empty;
+        public bool Enabled { get; set; } = true;
 
         public SourceConfigBase(){}
         public SourceConfigBase(string name){ Name = name; }

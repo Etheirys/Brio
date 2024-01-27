@@ -79,6 +79,9 @@ internal class LibraryManager : IDisposable
         // Directory configurations
         foreach(var sourceConfig in _configurationService.Configuration.Library.Files)
         {
+            if(!sourceConfig.Enabled)
+                continue;
+
             _sources.Add(new FileSource(sourceConfig));
         }
 

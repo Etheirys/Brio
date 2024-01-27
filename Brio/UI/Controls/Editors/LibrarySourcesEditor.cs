@@ -4,6 +4,7 @@ using Dalamud.Interface;
 using ImGuiNET;
 using System;
 using System.Collections.Generic;
+using System.IO;
 
 namespace Brio.UI.Controls.Editors;
 internal static class LibrarySourcesEditor
@@ -50,13 +51,32 @@ internal static class LibrarySourcesEditor
             }
         }
 
+        if(ImGui.IsItemHovered())
+            ImGui.SetTooltip("Remove the selected source");
+
         ImGui.SameLine();
-        ImGui.SetCursorPosX(ImGui.GetCursorPosX() + (ImBrio.GetRemainingWidth() - (buttonWidth * 2) - ImGui.GetStyle().ItemSpacing.X));
+        ImGui.SetCursorPosX(ImGui.GetCursorPosX() + (ImBrio.GetRemainingWidth() - (buttonWidth * 3) - (ImGui.GetStyle().ItemSpacing.X * 2)));
+        if(ImBrio.FontIconButton(FontAwesomeIcon.ToggleOff, new(buttonWidth, 0)))
+        {
+            if(selected != null)
+            {
+                selected.Enabled = !selected.Enabled;
+                service.ApplyChange();
+            }
+        }
+
+        if(ImGui.IsItemHovered())
+            ImGui.SetTooltip("Toggle the selected source on or off");
+
+        ImGui.SameLine();
         if(ImBrio.FontIconButton(FontAwesomeIcon.Edit, new(buttonWidth, 0)))
         {
             ImGui.OpenPopup("###settings_edit_source");
             isEditing = true;
         }
+
+        if(ImGui.IsItemHovered())
+            ImGui.SetTooltip("Edit the selected source");
 
         if(selected == null)
         {
@@ -74,6 +94,8 @@ internal static class LibrarySourcesEditor
             ImGui.OpenPopup("###settings_edit_source");
         }
 
+        if(ImGui.IsItemHovered())
+            ImGui.SetTooltip("Add a new source");
 
         if(isEditing && selected != null)
         {
@@ -108,11 +130,10 @@ internal static class LibrarySourcesEditor
 
     private static void DrawSourceItem(int id, LibraryConfiguration.SourceConfigBase sourceConfig, ref bool isSelected)
     {
-        float itemHeight = ImBrio.GetLineHeight() * 2;
+        float itemHeight = (ImBrio.GetLineHeight() * 2) + ImGui.GetStyle().ItemSpacing.Y;
 
-        
         float itemTop = ImGui.GetCursorPosY();
-        if(ImGui.Selectable($"###settings_source_{id}_{sourceConfig.Name}_selectable", ref isSelected, ImGuiSelectableFlags.None, new(ImBrio.GetRemainingWidth(), itemHeight)))
+        if(ImGui.Selectable($"###settings_source_{id}_selectable", ref isSelected, ImGuiSelectableFlags.None, new(ImBrio.GetRemainingWidth(), itemHeight)))
         {
 
         }
@@ -120,6 +141,9 @@ internal static class LibrarySourcesEditor
         bool isHover = ImGui.IsItemActive();
         ImGui.SetCursorPosY(itemTop + ImGui.GetStyle().FramePadding.Y);
 
+
+        ImBrio.FontIcon(sourceConfig.Enabled ? FontAwesomeIcon.Check : FontAwesomeIcon.Times);
+        ImGui.SameLine();
         ImGui.Text(sourceConfig.Name ?? "Unnamed Source");
 
         if(sourceConfig is LibraryConfiguration.FileSourceConfig fileSource)
@@ -130,7 +154,7 @@ internal static class LibrarySourcesEditor
         ImGui.SetCursorPosY(itemTop + itemHeight + ImGui.GetStyle().ItemSpacing.Y);
     }
 
-    private static void DrawSource(LibraryConfiguration.FileSourceConfig fileSource, bool edit)
+    private static void DrawSource(LibraryConfiguration.FileSourceConfig config, bool edit)
     {
         if(edit)
         {
@@ -140,36 +164,49 @@ internal static class LibrarySourcesEditor
 
             ////string[] names = Enum.GetNames<Environment.SpecialFolder>();
             ///
-            if(fileSource.Root == null)
-                fileSource.Root = Environment.SpecialFolder.MyComputer;
+            if(config.Root == null)
+                config.Root = Environment.SpecialFolder.MyComputer;
 
             List<string> names = new();
             names.Add(Environment.SpecialFolder.MyComputer.ToString());
             names.Add(Environment.SpecialFolder.MyDocuments.ToString());
             names.Add(Environment.SpecialFolder.Desktop.ToString());
             names.Add(Environment.SpecialFolder.LocalApplicationData.ToString());
-            int current = names.IndexOf(fileSource.Root.ToString()!);
+            int current = names.IndexOf(config.Root.ToString()!);
 
             if(ImGui.Combo("Root", ref current, names.ToArray(), names.Count))
             {
-                fileSource.Root = Enum.Parse<Environment.SpecialFolder>(names[current]);
+                config.Root = Enum.Parse<Environment.SpecialFolder>(names[current]);
             }
 
-            string path = fileSource.Path ?? string.Empty;
+            string path = config.Path ?? string.Empty;
             if(ImGui.InputText("Path", ref path, 120))
             {
-                fileSource.Path = path;
+                config.Path = path;
             }
         }
         else
         {
-            if(fileSource.Root != null && fileSource.Root != Environment.SpecialFolder.MyComputer)
+            if(config.Root != null && config.Root != Environment.SpecialFolder.MyComputer)
             {
-                ImGui.TextDisabled($"{fileSource.Root}{fileSource.Path}");
+                string currentPath = Environment.GetFolderPath((Environment.SpecialFolder)config.Root) + config.Path;
+                bool valid = Directory.Exists(currentPath);
+                if (!valid)
+                {
+                    ImBrio.FontIcon(FontAwesomeIcon.ExclamationTriangle);
+                    ImGui.SameLine();
+
+                    if(ImGui.IsItemHovered())
+                    {
+                        ImGui.SetTooltip("This directory does not exist");
+                    }
+                }
+
+                ImGui.TextDisabled($"{config.Root}{config.Path}");
             }
-            else if(fileSource.Path != null)
+            else if(config.Path != null)
             {
-                ImGui.TextDisabled(fileSource.Path);
+                ImGui.TextDisabled(config.Path);
             }
         }
     }
