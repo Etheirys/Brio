@@ -3,7 +3,6 @@ using ImGuiNET;
 using System;
 using System.Numerics;
 
-
 namespace Brio.UI.Controls.Stateless;
 
 internal static partial class ImBrio
@@ -15,28 +14,26 @@ internal static partial class ImBrio
 
     public static void ImageFit(IDalamudTextureWrap texture, Vector2 size)
     {
-        float fitWidth = size.X;
-        float fitHeight = size.X;
-        float indent = 0;
+        float widthScale = 0;
+        float heightScale = 0;
 
-        if(texture.Width < texture.Height)
-        {
-            fitWidth = ((float)texture.Width / (float)texture.Height) * ImGui.GetContentRegionAvail().X;
-            indent = (ImGui.GetContentRegionAvail().X - fitWidth) / 2;
-            ImGui.Indent(indent);
-        }
+        if(texture.Width != 0)
+            widthScale = size.X / texture.Width;
 
-        else if(texture.Height < texture.Width)
-        {
-            fitHeight = ((float)texture.Height / (float)texture.Width) * ImGui.GetContentRegionAvail().X;
-        }
+        if(texture.Height != 0)
+            heightScale = size.Y / texture.Height;
+
+        float scale = Math.Min(widthScale, heightScale);
+        float fitWidth = (texture.Width * scale);
+        float fitHeight = (texture.Height * scale);
+
+        float offsetX = (size.X - fitWidth) / 2;
+        float offsetY = (size.Y - fitHeight) / 2;
+
+        ImGui.SetCursorPosX(ImGui.GetCursorPosX() + offsetX);
+        ImGui.SetCursorPosY(ImGui.GetCursorPosY() + offsetY);
 
         ImGui.Image(texture.ImGuiHandle, new(fitWidth, fitHeight));
-
-        if(indent != 0)
-        {
-            ImGui.Unindent(indent);
-        }
     }
 
     public static void ImageRotated(IDalamudTextureWrap texture, float angle)
