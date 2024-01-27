@@ -607,6 +607,7 @@ internal class LibraryWindow : Window
         float height = width + 60;
         Vector2 size = new(width, height);
         Vector2 pos = ImGui.GetCursorPos();
+        
 
         bool selected = _selected == entry;
         if (ImGui.Selectable($"###library_entry_{id}_selectable", ref selected, ImGuiSelectableFlags.AllowDoubleClick, size))
@@ -623,17 +624,20 @@ internal class LibraryWindow : Window
         {
             ImGui.SetCursorPos(pos);
 
-            using(var child = ImRaii.Child($"library_entry_{id}", size, true, ImGuiWindowFlags.NoBackground | ImGuiWindowFlags.NoInputs))
+            using(var child = ImRaii.Child($"library_entry_{id}", size, true,
+                ImGuiWindowFlags.NoBackground | ImGuiWindowFlags.NoInputs | ImGuiWindowFlags.NoScrollbar))
             {
                 if(!child.Success)
                     return;
 
+                Vector2 iconSize = new(ImGui.GetContentRegionAvail().X, ImGui.GetContentRegionAvail().X);
+
                 if(entry.Icon != null)
                 {
-                    ImBrio.ImageFit(entry.Icon, ImGui.GetContentRegionAvail());
+                    ImBrio.ImageFit(entry.Icon, iconSize);
                 }
 
-                ImBrio.TextCentered(entry.Name, ImGui.GetContentRegionAvail().X);
+                ImBrio.TextCentered(entry.Name, iconSize.Y);
             }
         }
     }
