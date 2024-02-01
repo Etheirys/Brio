@@ -1,11 +1,13 @@
-﻿using Brio.Config;
+﻿ using Brio.Config;
 using Brio.Library.Actions;
 using Brio.Library.Sources;
 using Brio.Resources;
 using Dalamud.Plugin.Services;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 
 namespace Brio.Library;
 
@@ -109,8 +111,6 @@ internal class LibraryManager : IDisposable
 
     public void LoadSources()
     {
-        Brio.Log.Info("Loading library sources");
-
         _rootItem.Clear();
         _sources.Clear();
 

@@ -32,4 +32,5 @@ internal abstract class GameDataAppearanceSourceBase : SourceBase
             await capability.SetAppearance(entry.Appearance, AppearanceImportOptions.All);
         }
     }
+
 }

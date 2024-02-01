@@ -35,11 +35,6 @@ internal class FileSource : SourceBase
         {
             fileTypeInfo.GetLibraryActions(ref fileTypeActions);
         }
-
-        foreach(EntryActionBase entryAction in fileTypeActions)
-        {
-            Brio.Log.Info($" >> {entryAction}");
-        }
     }
 
     public FileSource(LibraryManager manager, LibraryConfiguration.FileSourceConfig config)
@@ -78,6 +73,13 @@ internal class FileSource : SourceBase
     public override string Name => _name;
     public override IDalamudTextureWrap? Icon => ResourceProvider.Instance.GetResourceImage("Images.ProviderIcon_Directory.png");
     public override string Description => DirectoryPath;
+
+    protected override string GetInternalId()
+    {
+        // All file sources share the same internal Id, as the files themselves are unique on the
+        // file system.
+        return $"File";
+    }
 
     public override void Scan()
     {
@@ -148,10 +150,12 @@ internal class DirectoryEntry : GroupEntryBase
 {
     private string _name;
     private IDalamudTextureWrap _icon;
+    private string _path;
 
     public DirectoryEntry(FileSource source, string path)
         : base(source)
     {
+        _path = path;
         _name = Path.GetFileNameWithoutExtension(path);
         if(_name.Length >= 60)
         {
@@ -163,6 +167,11 @@ internal class DirectoryEntry : GroupEntryBase
 
     public override string Name => _name;
     public override IDalamudTextureWrap? Icon => _icon;
+
+    protected override string GetInternalId()
+    {
+        return _path;
+    }
 }
 
 internal class FileEntry : ItemEntryBase
@@ -279,6 +288,11 @@ internal class FileEntry : ItemEntryBase
     {
         base.Dispose();
         _previewImage?.Dispose();
+    }
+
+    protected override string GetInternalId()
+    {
+        return FilePath;
     }
 }
 

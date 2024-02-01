@@ -4,15 +4,12 @@ using Brio.Game.Types;
 using Brio.Library;
 using Brio.Library.Actions;
 using Brio.Library.Filters;
-using Brio.Library.Sources;
 using Brio.Library.Tags;
-using Brio.UI.Controls.Selectors;
 using Brio.UI.Controls.Stateless;
 using Dalamud.Interface;
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Interface.Windowing;
 using Dalamud.Plugin.Services;
-using Dalamud.Utility;
 using ImGuiNET;
 using System;
 using System.Collections.Generic;
@@ -37,18 +34,11 @@ internal class LibraryWindow : Window
     private readonly LibraryManager _libraryManager;
     private readonly IPluginLog _log;
 
-    private readonly static List<FilterBase> filters = new()
-    {
-        new LibraryFavoritesFilter(),
-        new TypeFilter("Characters", typeof(AnamnesisCharaFile), typeof(ActorAppearanceUnion), typeof(MareCharacterDataFile)),
-        new TypeFilter("Poses", typeof(PoseFile), typeof(CMToolPoseFile)),
-    };
-
-    public FilterBase TypeFilter = filters[0];
+    private readonly List<FilterBase> filters = new();
+    public FilterBase TypeFilter;
     public readonly SearchQueryFilter SearchFilter = new();
     public readonly TagFilter TagFilter = new();
     private string _searchText = string.Empty;
-
     private readonly List<GroupEntryBase> _path = new();
     private IEnumerable<EntryBase>? _currentEntries;
     private TagCollection _allTags = new();
@@ -83,6 +73,13 @@ internal class LibraryWindow : Window
         _path.Add(_libraryManager.Root);
 
         _libraryManager.OnScanFinished += OnLibraryScanFinished;
+        configurationService.OnConfigurationChanged += OnConfigurationChanged;
+
+        filters.Add(new LibraryFavoritesFilter(configurationService));
+        filters.Add(new TypeFilter("Characters", typeof(AnamnesisCharaFile), typeof(ActorAppearanceUnion), typeof(MareCharacterDataFile)));
+        filters.Add(new TypeFilter("Poses", typeof(PoseFile), typeof(CMToolPoseFile)));
+
+        TypeFilter = filters[0];
     }
 
     private float WindowContentWidth => ImGui.GetWindowContentRegionMax().X - ImGui.GetWindowContentRegionMin().X;
@@ -96,6 +93,11 @@ internal class LibraryWindow : Window
     }
 
     private void OnLibraryScanFinished()
+    {
+        Refresh(true);
+    }
+
+    private void OnConfigurationChanged()
     {
         Refresh(true);
     }
@@ -837,8 +839,13 @@ internal class LibraryWindow : Window
                 _libraryManager.Root.FilterEntries(filters.ToArray());
             }
 
+            bool flatten = IsSearching;
+
+            if(TypeFilter is LibraryFavoritesFilter)
+                flatten = true;
+
             GroupEntryBase currentEntry = _path[_path.Count - 1];
-            _currentEntries = currentEntry.GetFilteredEntries(IsSearching);
+            _currentEntries = currentEntry.GetFilteredEntries(flatten);
 
             _allTags.Clear();
             currentEntry.GetAllTags(ref _allTags);

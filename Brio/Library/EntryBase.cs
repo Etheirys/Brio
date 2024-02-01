@@ -1,13 +1,10 @@
-﻿using Brio.Files;
-using Brio.Library.Actions;
-using Brio.Library.Filters;
+﻿using Brio.Library.Filters;
 using Brio.Library.Sources;
 using Brio.Library.Tags;
 using Brio.UI.Controls.Stateless;
 using Brio.UI.Windows;
 using Dalamud.Interface.Internal;
 using ImGuiNET;
-using System.Collections.Generic;
 
 namespace Brio.Library;
 
@@ -30,6 +27,8 @@ internal abstract class EntryBase : ITagged
     public TagCollection Tags { get; init; } = new();
     public SourceBase? Source => _source;
     public string? SourceInfo { get; set; }
+
+    public string Identifier => $"{this.Source?.GetInternalId()}||{GetInternalId()}";
 
     public abstract bool PassesFilters(params FilterBase[] filters);
 
@@ -76,4 +75,6 @@ internal abstract class EntryBase : ITagged
                 ImGui.SetCursorPosY(sourceIconBottom);
         }
     }
+
+    protected abstract string GetInternalId();
 }

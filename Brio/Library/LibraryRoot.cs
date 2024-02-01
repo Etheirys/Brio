@@ -37,4 +37,9 @@ internal class LibraryRoot : GroupEntryBase
             ImGui.EndChild();
         }
     }
+
+    protected override string GetInternalId()
+    {
+        return "Root";
+    }
 }

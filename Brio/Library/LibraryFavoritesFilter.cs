@@ -1,12 +1,16 @@
-﻿using Brio.Library.Filters;
+﻿using Brio.Config;
+using Brio.Library.Filters;
 
 namespace Brio.Library;
 
 internal class LibraryFavoritesFilter : FilterBase
 {
-    public LibraryFavoritesFilter()
+    private ConfigurationService _configurationService;
+
+    public LibraryFavoritesFilter(ConfigurationService configurationService)
         : base("Favorites")
     {
+        _configurationService = configurationService;
     }
 
     public override void Clear()
@@ -15,7 +19,9 @@ internal class LibraryFavoritesFilter : FilterBase
 
     public override bool Filter(EntryBase entry)
     {
-        // no favorites system yet!
+        if(_configurationService.Configuration.Library.Favorites.Contains(entry.Identifier))
+            return true;
+
         return false;
     }
 }

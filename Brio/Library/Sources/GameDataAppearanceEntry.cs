@@ -13,14 +13,16 @@ internal class GameDataAppearanceEntry : ItemEntryBase
     private uint _icon;
     private ActorAppearanceUnion _appearance;
     private uint _rowId;
+    private string _id;
 
-    public GameDataAppearanceEntry(SourceBase source, uint rowId, string name, uint icon, ActorAppearanceUnion appearance)
+    public GameDataAppearanceEntry(SourceBase source, uint rowId, string name, uint icon, ActorAppearanceUnion appearance, string id)
         : base(source)
     {
         _name = name;
         _icon = icon;
         _appearance = appearance;
         _rowId = rowId;
+        _id = id;
 
         ActorAppearance app = _appearance;
 
@@ -40,6 +42,7 @@ internal class GameDataAppearanceEntry : ItemEntryBase
         {
             Tags.Add("Inhuman");
         }
+        
     }
 
     public override string Name => _name;
@@ -77,5 +80,5 @@ internal class GameDataAppearanceEntry : ItemEntryBase
         return match;
     }
 
-  
+    protected override string GetInternalId() => _id;
 }

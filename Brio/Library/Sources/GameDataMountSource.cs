@@ -22,7 +22,7 @@ internal class GameDataMountSource : GameDataAppearanceSourceBase
             if(string.IsNullOrEmpty(name))
                 name = rowName;
 
-            var entry = new GameDataAppearanceEntry(this, mount.RowId, name, mount.Icon, mount);
+            var entry = new GameDataAppearanceEntry(this, mount.RowId, name, mount.Icon, mount, $"{mount.RowId}");
             entry.Tags.Add("Mount");
 
             if (name != rowName)
@@ -31,5 +31,10 @@ internal class GameDataMountSource : GameDataAppearanceSourceBase
             entry.SourceInfo = rowName;
             Add(entry);
         }
+    }
+
+    protected override string GetInternalId()
+    {
+        return "Mounts";
     }
 }

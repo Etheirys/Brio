@@ -1,4 +1,5 @@
 ﻿using Brio.Resources;
+using Dalamud.Game.ClientState.Objects.SubKinds;
 
 namespace Brio.Library.Sources;
 
@@ -17,12 +18,15 @@ internal class GameDataCompanionSource : GameDataAppearanceSourceBase
         foreach(var (_, companion) in Lumina.Companions)
         {
             string rowName = $"Companion {companion.RowId}";
-            var entry = new GameDataAppearanceEntry(this, companion.RowId, companion.Singular ?? rowName, companion.Icon, companion);
+            var entry = new GameDataAppearanceEntry(this, companion.RowId, companion.Singular ?? rowName, companion.Icon, companion, $"{companion.RowId}");
             entry.Tags.Add("Companion").WithAlias("Minion");
             entry.SourceInfo = rowName;
             Add(entry);
         }
     }
 
-   
+    protected override string GetInternalId()
+    {
+        return "Companions";
+    }
 }

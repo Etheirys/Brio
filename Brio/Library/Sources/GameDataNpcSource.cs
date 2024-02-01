@@ -19,7 +19,7 @@ internal class GameDataNpcSource : GameDataAppearanceSourceBase
         {
             string name = $"B:{npc.RowId:D7}";
             string? displayName = ResolveName(name);
-            var entry = new GameDataAppearanceEntry(this, npc.RowId, displayName ?? name, 0, npc);
+            var entry = new GameDataAppearanceEntry(this, npc.RowId, displayName ?? name, 0, npc, $"B{npc.RowId}");
             entry.SourceInfo = $"BNpc {npc.RowId}";
             entry.Tags.Add("NPC");
 
@@ -42,7 +42,7 @@ internal class GameDataNpcSource : GameDataAppearanceSourceBase
             }
 
             string? displayName = ResolveName(name);
-            var entry = new GameDataAppearanceEntry(this, npc.RowId, displayName ?? name, 0, npc);
+            var entry = new GameDataAppearanceEntry(this, npc.RowId, displayName ?? name, 0, npc, $"E{npc.RowId}");
             entry.SourceInfo = $"ENpc {npc.RowId}";
             entry.Tags.Add("NPC");
 
@@ -73,5 +73,10 @@ internal class GameDataNpcSource : GameDataAppearanceSourceBase
         }
 
         return null;
+    }
+
+    protected override string GetInternalId()
+    {
+        return "NPCs";
     }
 }
