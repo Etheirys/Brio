@@ -49,19 +49,3 @@ internal class ApplyToSelectedActorAction<T> : EntryActionBase<T>
         await _apply.Invoke(entry, SelectedActor);
     }
 }
-
-internal class ApplyToSelectedActorAction : ApplyToSelectedActorAction<ItemEntryBase>
-{
-    internal ApplyToSelectedActorAction(Func<ItemEntryBase, ActorEntity, Task> apply, bool isPrimaryAction)
-        : base(apply, isPrimaryAction)
-    {
-    }
-}
-
-internal class ApplyFileToSelectedActorAction : ApplyToSelectedActorAction<FileEntry>
-{
-    internal ApplyFileToSelectedActorAction(Func<FileEntry, ActorEntity, Task> apply, bool isPrimaryAction)
-        : base(apply, isPrimaryAction)
-    {
-    }
-}

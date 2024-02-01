@@ -25,7 +25,7 @@ internal class MareCharacterDataFileInfo : FileTypeInfoBase<MareCharacterDataFil
     {
         base.GetLibraryActions(ref actions);
 
-        actions.Add(new ApplyFileToSelectedActorAction(Apply, true));
+        actions.Add(new ApplyFileToSelectedActorAction<MareCharacterDataFile>(Apply, true));
     }
 
     private Task Apply(FileEntry entry, ActorEntity actor)

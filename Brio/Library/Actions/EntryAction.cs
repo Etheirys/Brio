@@ -3,7 +3,8 @@ using System.Threading.Tasks;
 
 namespace Brio.Library.Actions;
 
-internal class EntryAction : EntryActionBase
+internal class EntryAction<T> : EntryActionBase<T>
+    where T: EntryBase
 {
     Action _action;
     string _label;
@@ -17,7 +18,7 @@ internal class EntryAction : EntryActionBase
 
     public override string Label => _label;
 
-    public override Task InvokeAsync(EntryBase entry)
+    protected override Task InvokeAsync(T entry)
     {
         _action?.Invoke();
         return Task.CompletedTask;

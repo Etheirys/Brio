@@ -30,7 +30,6 @@ internal abstract class EntryBase : ITagged
     public TagCollection Tags { get; init; } = new();
     public SourceBase? Source => _source;
     public string? SourceInfo { get; set; }
-    public List<EntryActionBase> Actions { get; init; } = new();
 
     public abstract bool PassesFilters(params FilterBase[] filters);
 

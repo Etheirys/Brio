@@ -40,7 +40,7 @@ internal class LibraryWindow : Window
 
     private readonly static List<FilterBase> filters = new()
     {
-        ////new LibraryFavoritesFilter(),
+        new LibraryFavoritesFilter(),
         new TypeFilter("Characters", typeof(AnamnesisCharaFile), typeof(ActorAppearanceUnion), typeof(MareCharacterDataFile)),
         new TypeFilter("Poses", typeof(PoseFile), typeof(CMToolPoseFile)),
     };
@@ -675,7 +675,7 @@ internal class LibraryWindow : Window
     {
         ImGui.Text(entry.Name);
 
-        List<EntryActionBase> allActions = entry.Actions;
+        List<EntryActionBase> allActions = _libraryManager.GetActions(entry);
 
         float infoAreaHeight = ImBrio.GetRemainingHeight();
 
@@ -738,7 +738,7 @@ internal class LibraryWindow : Window
         }
         else
         {
-            foreach(EntryActionBase action in entry.Actions)
+            foreach(EntryActionBase action in _libraryManager.GetActions(entry))
             {
                 action.Initialize(_serviceProvider);
 

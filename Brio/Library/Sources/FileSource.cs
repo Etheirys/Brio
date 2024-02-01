@@ -1,4 +1,5 @@
 ﻿using Brio.Config;
+using Brio.Entities.Actor;
 using Brio.Files;
 using Brio.Library.Actions;
 using Brio.Library.Tags;
@@ -8,6 +9,7 @@ using Dalamud.Interface.Internal;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading.Tasks;
 
 namespace Brio.Library.Sources;
 
@@ -19,15 +21,28 @@ internal class FileSource : SourceBase
 
     // We could probably put these in a file type manager or something,
     // but currently only the library needs them, so here is fine too.
-    private static List<FileTypeInfoBase> fileTypes = new()
-    {
-        new AnamnesisCharaFileInfo(),
-        new CMToolPoseFileInfo(),
-        new PoseFileInfo(),
-        new MareCharacterDataFileInfo(),
-    };
+    private static List<FileTypeInfoBase> fileTypes = new();
+    private static List<EntryActionBase> fileTypeActions = new();
 
-    public FileSource(LibraryConfiguration.FileSourceConfig config)
+    static FileSource()
+    {
+        fileTypes.Add(new AnamnesisCharaFileInfo());
+        fileTypes.Add(new CMToolPoseFileInfo());
+        fileTypes.Add(new PoseFileInfo());
+        fileTypes.Add(new MareCharacterDataFileInfo());
+
+        foreach(FileTypeInfoBase fileTypeInfo in fileTypes)
+        {
+            fileTypeInfo.GetLibraryActions(ref fileTypeActions);
+        }
+
+        foreach(EntryActionBase entryAction in fileTypeActions)
+        {
+            Brio.Log.Info($" >> {entryAction}");
+        }
+    }
+
+    public FileSource(LibraryManager manager, LibraryConfiguration.FileSourceConfig config)
         : base()
     {
         _name = config.Name;
@@ -40,26 +55,29 @@ internal class FileSource : SourceBase
         {
             DirectoryPath = config.Path;
         }
+
+        RegisterActions(manager);
     }
 
-    public FileSource(string name, string directoryPath)
+    public FileSource(LibraryManager manager, string name, string directoryPath)
         : base()
     {
         _name = name;
         DirectoryPath = directoryPath;
+        RegisterActions(manager);
     }
 
-    public FileSource(string name, params string[] paths)
+    public FileSource(LibraryManager manager, string name, params string[] paths)
           : base()
     {
         _name = name;
         DirectoryPath = Path.Combine(paths);
+        RegisterActions(manager);
     }
 
     public override string Name => _name;
     public override IDalamudTextureWrap? Icon => ResourceProvider.Instance.GetResourceImage("Images.ProviderIcon_Directory.png");
     public override string Description => DirectoryPath;
-
 
     public override void Scan()
     {
@@ -91,6 +109,14 @@ internal class FileSource : SourceBase
                 continue;
 
             parent.Add(new FileEntry(this, filePath, fileTypeInfo));
+        }
+    }
+
+    private void RegisterActions(LibraryManager manager)
+    {
+        foreach(EntryActionBase action in fileTypeActions)
+        {
+            manager.RegisterAction(action);
         }
     }
 
@@ -163,10 +189,6 @@ internal class FileEntry : ItemEntryBase
         {
             _name = _name.Substring(0, 55) + "...";
         }
-
-        List<EntryActionBase> actions = new();
-        _fileInfo.GetLibraryActions(ref actions);
-        this.Actions.AddRange(actions);
 
         try
         {
@@ -257,5 +279,24 @@ internal class FileEntry : ItemEntryBase
     {
         base.Dispose();
         _previewImage?.Dispose();
+    }
+}
+
+
+internal class ApplyFileToSelectedActorAction<T> : ApplyToSelectedActorAction<FileEntry>
+    where T : class
+{
+    internal ApplyFileToSelectedActorAction(Func<FileEntry, ActorEntity, Task> apply, bool isPrimaryAction)
+        : base(apply, isPrimaryAction)
+    {
+    }
+
+
+    protected override bool Filter(FileEntry entry)
+    {
+        if(!base.Filter(entry))
+            return false;
+
+        return entry.FileTypeInfo.IsFileType(typeof(T));
     }
 }

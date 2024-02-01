@@ -1,25 +1,20 @@
 ﻿using Brio.Resources;
-using Dalamud.Interface.Internal;
 
 namespace Brio.Library.Sources;
 
-internal class GameDataCompanionSource : SourceBase
+internal class GameDataCompanionSource : GameDataAppearanceSourceBase
 {
-    private GameDataProvider _lumina;
-
-    public GameDataCompanionSource(GameDataProvider lumina)
-        : base()
+    public GameDataCompanionSource(LibraryManager manager, GameDataProvider lumina)
+        : base(manager, lumina)
     {
-        _lumina = lumina;
     }
 
     public override string Name => "Minions";
-    public override IDalamudTextureWrap? Icon => ResourceProvider.Instance.GetResourceImage("Images.ProviderIcon_GameData.png");
     public override string Description => "Minions from FFXIV";
 
     public override void Scan()
     {
-        foreach(var (_, companion) in _lumina.Companions)
+        foreach(var (_, companion) in Lumina.Companions)
         {
             string rowName = $"Companion {companion.RowId}";
             var entry = new GameDataAppearanceEntry(this, companion.RowId, companion.Singular ?? rowName, companion.Icon, companion);
@@ -28,4 +23,6 @@ internal class GameDataCompanionSource : SourceBase
             Add(entry);
         }
     }
+
+   
 }

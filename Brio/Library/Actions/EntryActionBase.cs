@@ -36,6 +36,7 @@ internal abstract class EntryActionBase
     public bool IsPrimary => _isPrimary;
     public abstract Task InvokeAsync(EntryBase entry);
     public virtual bool GetCanInvoke() => !IsInvoking;
+    public abstract bool Filter(EntryBase entry);
 
     public void Invoke(EntryBase entry)
     {
@@ -62,4 +63,19 @@ internal abstract class EntryActionBase<T> : EntryActionBase
     }
 
     protected abstract Task InvokeAsync(T entry);
+
+    public sealed override bool Filter(EntryBase entry)
+    {
+        if (entry is T tEntry)
+        {
+            return Filter(tEntry);
+        }
+
+        return false;
+    }
+
+    protected virtual bool Filter(T entry)
+    {
+        return true;
+    }
 }

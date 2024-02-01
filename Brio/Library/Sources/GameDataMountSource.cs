@@ -1,25 +1,20 @@
 ﻿using Brio.Resources;
-using Dalamud.Interface.Internal;
 
 namespace Brio.Library.Sources;
 
-internal class GameDataMountSource : SourceBase
+internal class GameDataMountSource : GameDataAppearanceSourceBase
 {
-    private GameDataProvider _lumina;
-
-    public GameDataMountSource(GameDataProvider lumina)
-        : base()
+    public GameDataMountSource(LibraryManager manager, GameDataProvider lumina)
+        : base(manager, lumina)
     {
-        _lumina = lumina;
     }
 
     public override string Name => "Mounts";
-    public override IDalamudTextureWrap? Icon => ResourceProvider.Instance.GetResourceImage("Images.ProviderIcon_GameData.png");
     public override string Description => "Mounts from FFXIV";
 
     public override void Scan()
     {
-        foreach(var (_, mount) in _lumina.Mounts)
+        foreach(var (_, mount) in Lumina.Mounts)
         {
             string rowName = $"Mount {mount.RowId}";
 

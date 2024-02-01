@@ -25,7 +25,7 @@ internal class AnamnesisCharaFileInfo : JsonDocumentBaseFileInfo<AnamnesisCharaF
     {
         base.GetLibraryActions(ref actions);
 
-        actions.Add(new ApplyFileToSelectedActorAction(Apply, true));
+        actions.Add(new ApplyFileToSelectedActorAction<AnamnesisCharaFile>(Apply, true));
     }
 
     private async Task Apply(FileEntry fileEntry, ActorEntity actor)

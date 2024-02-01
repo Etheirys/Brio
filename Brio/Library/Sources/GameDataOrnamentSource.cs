@@ -1,26 +1,20 @@
 ﻿using Brio.Resources;
-using Dalamud.Interface.Internal;
 
 namespace Brio.Library.Sources;
 
-internal class GameDataOrnamentSource : SourceBase
+internal class GameDataOrnamentSource : GameDataAppearanceSourceBase
 {
-    private GameDataProvider _lumina;
-
-    public GameDataOrnamentSource(GameDataProvider lumina)
-        : base()
+    public GameDataOrnamentSource(LibraryManager manager, GameDataProvider lumina)
+        : base(manager, lumina)
     {
-        _lumina = lumina;
     }
 
-
     public override string Name => "Fashion Accessory";
-    public override IDalamudTextureWrap? Icon => ResourceProvider.Instance.GetResourceImage("Images.ProviderIcon_GameData.png");
     public override string Description => "Fashion Accessories from FFXIV";
 
     public override void Scan()
     {
-        foreach(var (_, ornament) in _lumina.Ornaments)
+        foreach(var (_, ornament) in Lumina.Ornaments)
         {
             string rowName = $"Ornament {ornament.RowId}";
             var entry = new GameDataAppearanceEntry(this, ornament.RowId, ornament.Singular ?? rowName, ornament.Icon, ornament);

@@ -1,13 +1,9 @@
-﻿using Brio.Capabilities.Actor;
-using Brio.Entities.Actor;
-using Brio.Game.Actor.Appearance;
+﻿using Brio.Game.Actor.Appearance;
 using Brio.Game.Types;
-using Brio.Library.Actions;
 using Brio.Resources;
 using Brio.UI;
 using Dalamud.Interface.Internal;
 using System;
-using System.Threading.Tasks;
 
 namespace Brio.Library.Sources;
 
@@ -25,8 +21,6 @@ internal class GameDataAppearanceEntry : ItemEntryBase
         _icon = icon;
         _appearance = appearance;
         _rowId = rowId;
-
-        Actions.Add(new ApplyToSelectedActorAction(Apply, true));
 
         ActorAppearance app = _appearance;
 
@@ -51,6 +45,8 @@ internal class GameDataAppearanceEntry : ItemEntryBase
     public override string Name => _name;
     public override string? Author => "Square Enix";
     public override Type LoadsType => typeof(ActorAppearanceUnion);
+
+    public ActorAppearanceUnion Appearance => _appearance;
 
     public override IDalamudTextureWrap? Icon
     {
@@ -81,12 +77,5 @@ internal class GameDataAppearanceEntry : ItemEntryBase
         return match;
     }
 
-    private async Task Apply(ItemEntryBase entry, ActorEntity actor)
-    {
-        ActorAppearanceCapability? capability;
-        if(actor.TryGetCapability<ActorAppearanceCapability>(out capability) && capability != null)
-        {
-            await capability.SetAppearance(_appearance, AppearanceImportOptions.All);
-        }
-    }
+  
 }

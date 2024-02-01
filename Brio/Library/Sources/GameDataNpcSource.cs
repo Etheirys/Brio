@@ -1,26 +1,21 @@
 ﻿using Brio.Resources;
-using Dalamud.Interface.Internal;
 using System.Collections.Generic;
 
 namespace Brio.Library.Sources;
 
-internal class GameDataNpcSource : SourceBase
+internal class GameDataNpcSource : GameDataAppearanceSourceBase
 {
-    private GameDataProvider _lumina;
-
-    public GameDataNpcSource(GameDataProvider lumina)
-        : base()
+    public GameDataNpcSource(LibraryManager manager, GameDataProvider lumina)
+        : base(manager, lumina)
     {
-        _lumina = lumina;
     }
 
     public override string Name => "NPCs";
-    public override IDalamudTextureWrap? Icon => ResourceProvider.Instance.GetResourceImage("Images.ProviderIcon_GameData.png");
     public override string Description => "Non Player Characters from FFXIV";
 
     public override void Scan()
     {
-        foreach(var (_, npc) in _lumina.BNpcBases)
+        foreach(var (_, npc) in Lumina.BNpcBases)
         {
             string name = $"B:{npc.RowId:D7}";
             string? displayName = ResolveName(name);
@@ -35,11 +30,11 @@ internal class GameDataNpcSource : SourceBase
             Add(entry);
         }
 
-        foreach(var (_, npc) in _lumina.ENpcBases)
+        foreach(var (_, npc) in Lumina.ENpcBases)
         {
             string name = $"E:{npc.RowId:D7}";
 
-            var resident = _lumina.ENpcResidents[npc.RowId];
+            var resident = Lumina.ENpcResidents[npc.RowId];
             if(resident != null)
             {
                 if(!string.IsNullOrEmpty(resident.Singular))

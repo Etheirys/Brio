@@ -23,7 +23,7 @@ internal class PoseFileInfo : JsonDocumentBaseFileInfo<PoseFile>
     {
         base.GetLibraryActions(ref actions);
 
-        actions.Add(new ApplyFileToSelectedActorAction(Apply, true));
+        actions.Add(new ApplyFileToSelectedActorAction<PoseFile>(Apply, true));
     }
 
     private Task Apply(FileEntry fileEntry, ActorEntity actor)

@@ -1,4 +1,5 @@
 ﻿using Brio.Config;
+using Brio.Library.Actions;
 using Brio.Library.Sources;
 using Brio.Resources;
 using Dalamud.Plugin.Services;
@@ -16,13 +17,14 @@ internal class LibraryManager : IDisposable
     private readonly LibraryRoot _rootItem;
     private readonly List<SourceBase> _sources = new();
     private readonly List<SourceBase> _internalSources = new();
+    private readonly HashSet<EntryActionBase> _actions = new();
 
     public delegate void OnScanFinishedDelegate();
     public event OnScanFinishedDelegate? OnScanFinished;
 
     public bool IsScanning { get; private set; }
 
-    public LibraryManager (ConfigurationService configurationService, GameDataProvider luminaProvider, IFramework framework)
+    public LibraryManager(ConfigurationService configurationService, GameDataProvider luminaProvider, IFramework framework)
     {
         _configurationService = configurationService;
         _luminaProvider = luminaProvider;
@@ -33,16 +35,50 @@ internal class LibraryManager : IDisposable
         _configurationService.OnConfigurationChanged += OnConfigurationChanged;
 
         // Game Data
-        _internalSources.Add(new GameDataNpcSource(_luminaProvider));
-        _internalSources.Add(new GameDataMountSource(_luminaProvider));
-        _internalSources.Add(new GameDataCompanionSource(_luminaProvider));
-        _internalSources.Add(new GameDataOrnamentSource(_luminaProvider));
+        AddInternalSource(new GameDataNpcSource(this, _luminaProvider));
+        AddInternalSource(new GameDataMountSource(this, _luminaProvider));
+        AddInternalSource(new GameDataCompanionSource(this, _luminaProvider));
+        AddInternalSource(new GameDataOrnamentSource(this, _luminaProvider));
 
         // TODO: swap this for a package
-        _internalSources.Add(new FileSource("Standard Poses", "Images.ProviderIcon_Directory.png", Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Anamnesis", "StandardPoses"));
+        AddInternalSource(new FileSource(this, "Standard Poses", "Images.ProviderIcon_Directory.png", Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Anamnesis", "StandardPoses"));
 
         LoadSources();
         Scan();
+    }
+
+    public void AddSource(SourceBase source)
+    {
+        _sources.Add(source);
+    }
+
+    private void AddInternalSource(SourceBase source)
+    {
+        _internalSources.Add(source);
+    }
+
+    public void RegisterAction(EntryActionBase action)
+    {
+        _actions.Add(action);
+    }
+
+    public void UnregisterAction(EntryActionBase action)
+    {
+        _actions.Remove(action);
+    }
+
+    public List<EntryActionBase> GetActions(EntryBase entry)
+    {
+        List<EntryActionBase> results = new();
+        foreach (EntryActionBase action in _actions)
+        {
+            if (action.Filter(entry))
+            {
+                results.Add(action);
+            }
+        }
+
+        return results;
     }
 
     private void OnConfigurationChanged()
@@ -82,7 +118,7 @@ internal class LibraryManager : IDisposable
             if(!sourceConfig.Enabled)
                 continue;
 
-            _sources.Add(new FileSource(sourceConfig));
+            AddSource(new FileSource(this, sourceConfig));
         }
 
         foreach (SourceBase source in _sources)
