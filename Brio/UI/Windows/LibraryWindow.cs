@@ -579,7 +579,7 @@ internal class LibraryWindow : Window
             }
             else
             {
-                foreach(var entry in _currentEntries)
+                foreach(var entry in _currentEntries.ToList())
                 {
                     DrawEntry(entry, fileWidth, index);
                     index++;
