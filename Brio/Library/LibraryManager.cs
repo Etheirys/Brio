@@ -11,6 +11,7 @@ namespace Brio.Library;
 
 internal class LibraryManager : IDisposable
 {
+    private readonly IServiceProvider _serviceProvider;
     private readonly ConfigurationService _configurationService;
     private readonly GameDataProvider _luminaProvider;
     private readonly IFramework _framework;
@@ -24,8 +25,9 @@ internal class LibraryManager : IDisposable
 
     public bool IsScanning { get; private set; }
 
-    public LibraryManager(ConfigurationService configurationService, GameDataProvider luminaProvider, IFramework framework)
+    public LibraryManager(IServiceProvider serviceProvider, ConfigurationService configurationService, GameDataProvider luminaProvider, IFramework framework)
     {
+        _serviceProvider = serviceProvider;
         _configurationService = configurationService;
         _luminaProvider = luminaProvider;
         _framework = framework;
@@ -42,6 +44,8 @@ internal class LibraryManager : IDisposable
 
         // TODO: swap this for a package
         AddInternalSource(new FileSource(this, "Standard Poses", "Images.ProviderIcon_Directory.png", Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Anamnesis", "StandardPoses"));
+
+        RegisterAction(new FavoriteAction());
 
         LoadSources();
         Scan();
@@ -60,6 +64,7 @@ internal class LibraryManager : IDisposable
     public void RegisterAction(EntryActionBase action)
     {
         _actions.Add(action);
+        action.Initialize(_serviceProvider);
     }
 
     public void UnregisterAction(EntryActionBase action)

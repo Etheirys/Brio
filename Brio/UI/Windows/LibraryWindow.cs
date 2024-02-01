@@ -33,7 +33,6 @@ internal class LibraryWindow : Window
     private const int MinEntrySize = 100;
     private const int MaxEntrySize = 250;
 
-    private readonly IServiceProvider _serviceProvider;
     private readonly ConfigurationService _configurationService;
     private readonly LibraryManager _libraryManager;
     private readonly IPluginLog _log;
@@ -67,11 +66,7 @@ internal class LibraryWindow : Window
     private bool _isRefreshing;
     private long _lastRefreshTimeMs = 0;
 
-    public LibraryWindow(
-        IServiceProvider serviceProvider,
-        IPluginLog log,
-        ConfigurationService configurationService,
-        LibraryManager libraryManager)
+    public LibraryWindow(IPluginLog log, ConfigurationService configurationService, LibraryManager libraryManager)
         : base($"{Brio.Name} Library###brio_library_window")
     {
         this.Namespace = "brio_library_namespace";
@@ -84,8 +79,7 @@ internal class LibraryWindow : Window
         _log = log;
         _configurationService = configurationService;
         _libraryManager = libraryManager;
-        _serviceProvider = serviceProvider;
-
+        
         _path.Add(_libraryManager.Root);
 
         _libraryManager.OnScanFinished += OnLibraryScanFinished;
@@ -671,11 +665,40 @@ internal class LibraryWindow : Window
         }
     }
 
+    private struct CachedAction
+    {
+        public EntryActionBase Action;
+        public string Label;
+        public FontAwesomeIcon Icon;
+    }
+
+    private List<CachedAction> GetActions(EntryBase entry)
+    {
+        List<CachedAction> results = new();
+
+        List<EntryActionBase> allActions = _libraryManager.GetActions(entry);
+        foreach(EntryActionBase action in allActions)
+        {
+            CachedAction cache = new();
+            cache.Action = action;
+            cache.Label = action.GetLabel(entry);
+            cache.Icon = action.GetIcon(entry);
+            results.Add(cache);
+        }
+
+        results.Sort((a, b) =>
+        {
+            return a.Action.IsPrimary.CompareTo(b.Action.IsPrimary);
+        });
+
+        return results;
+    }
+
     private void DrawInfo(EntryBase entry)
     {
         ImGui.Text(entry.Name);
 
-        List<EntryActionBase> allActions = _libraryManager.GetActions(entry);
+        List<CachedAction> allActions = GetActions(entry);
 
         float infoAreaHeight = ImBrio.GetRemainingHeight();
 
@@ -697,7 +720,7 @@ internal class LibraryWindow : Window
             float totalWidth = 0;
             for(int i = 0; i < allActions.Count; i++)
             {
-                allActions[i].Initialize(_serviceProvider);
+                
 
                 if(i > 0)
                     totalWidth += ImGui.GetStyle().ItemSpacing.X;
@@ -709,16 +732,16 @@ internal class LibraryWindow : Window
 
             ImGui.SetCursorPosX(ImGui.GetCursorPosX() + (ImBrio.GetRemainingWidth() - totalWidth));
 
-            foreach(var action in allActions)
+            foreach(CachedAction actionCache in allActions)
             {
-                bool canInvoke = action.GetCanInvoke() && !action.IsInvoking;
+                bool canInvoke = actionCache.Action.GetCanInvoke() && !actionCache.Action.IsInvoking;
 
                 if(!canInvoke)
                     ImGui.BeginDisabled();
 
-                if(ImGui.Button(action.Label))
+                if(ImGui.Button(actionCache.Label))
                 {
-                    action.Invoke(entry);
+                    actionCache.Action.Invoke(entry);
                 }
 
                 if(!canInvoke)
@@ -738,16 +761,15 @@ internal class LibraryWindow : Window
         }
         else
         {
-            foreach(EntryActionBase action in _libraryManager.GetActions(entry))
+            List<CachedAction> actions = GetActions(entry);
+            foreach(CachedAction cachedAction in actions)
             {
-                action.Initialize(_serviceProvider);
-
-                if(!action.GetCanInvoke() || action.IsInvoking)
+                if(!cachedAction.Action.GetCanInvoke() || cachedAction.Action.IsInvoking)
                     continue;
 
-                if (action.IsPrimary)
+                if (cachedAction.Action.IsPrimary)
                 {
-                    action.Invoke(entry);
+                    cachedAction.Action.Invoke(entry);
                 }
             }
         }

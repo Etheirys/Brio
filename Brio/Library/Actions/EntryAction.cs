@@ -16,7 +16,10 @@ internal class EntryAction<T> : EntryActionBase<T>
         _action = action;
     }
 
-    public override string Label => _label;
+    public override string GetLabel(EntryBase entry)
+    {
+        return _label;
+    }
 
     protected override Task InvokeAsync(T entry)
     {

@@ -7,6 +7,7 @@ internal class LibraryConfiguration
     public float IconSize { get; set; } = 120;
 
     public List<FileSourceConfig> Files { get; set; } = new();
+    public HashSet<string> Favorites { get; set; } = new();
 
     public void CheckDefaults()
     {

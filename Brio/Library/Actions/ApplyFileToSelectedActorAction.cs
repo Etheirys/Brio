@@ -1,7 +1,6 @@
 ﻿using Brio.Core;
 using Brio.Entities;
 using Brio.Entities.Actor;
-using Brio.Library.Sources;
 using System;
 using System.Threading.Tasks;
 
@@ -20,17 +19,14 @@ internal class ApplyToSelectedActorAction<T> : EntryActionBase<T>
 
     public ActorEntity? SelectedActor => GetService<EntityManager>().SelectedEntity as ActorEntity;
 
-    public override string Label
+    public override string GetLabel(EntryBase entry)
     {
-        get
+        if(SelectedActor != null)
         {
-            if(SelectedActor != null)
-            {
-                return $"Apply to {SelectedActor.FriendlyName}";
-            }
-
-            return "Select an Actor to apply";
+            return $"Apply to {SelectedActor.FriendlyName}";
         }
+
+        return "Select an Actor to apply";
     }
 
     public override bool GetCanInvoke()
