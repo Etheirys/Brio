@@ -21,11 +21,13 @@ internal class LibraryManager : IDisposable
     private readonly List<SourceBase> _sources = new();
     private readonly List<SourceBase> _internalSources = new();
     private readonly HashSet<EntryActionBase> _actions = new();
+    
 
     public delegate void OnScanFinishedDelegate();
     public event OnScanFinishedDelegate? OnScanFinished;
 
     public bool IsScanning { get; private set; }
+    public bool IsLoadingSources { get; private set; }
 
     public LibraryManager(IServiceProvider serviceProvider, ConfigurationService configurationService, GameDataProvider luminaProvider, IFramework framework)
     {
@@ -49,8 +51,7 @@ internal class LibraryManager : IDisposable
 
         RegisterAction(new FavoriteAction());
 
-        LoadSources();
-        Scan();
+        OnConfigurationChanged();
     }
 
     public void AddSource(SourceBase source)
@@ -90,6 +91,9 @@ internal class LibraryManager : IDisposable
 
     private void OnConfigurationChanged()
     {
+        if(IsLoadingSources || IsScanning)
+            return;
+
         LoadSources();
         Scan();
     }
@@ -111,6 +115,8 @@ internal class LibraryManager : IDisposable
 
     public void LoadSources()
     {
+        IsLoadingSources = true;
+
         _rootItem.Clear();
         _sources.Clear();
 
@@ -132,6 +138,8 @@ internal class LibraryManager : IDisposable
         }
 
         Scan();
+
+        IsLoadingSources = false;
     }
 
     public void Scan()
@@ -141,6 +149,9 @@ internal class LibraryManager : IDisposable
 
     public async Task ScanAsync()
     {
+        if(IsScanning)
+            return;
+
         IsScanning = true;
 
         List<Task> scanTasks = new();
