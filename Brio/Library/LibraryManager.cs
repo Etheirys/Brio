@@ -119,9 +119,6 @@ internal class LibraryManager : IDisposable
 
         _rootItem.Clear();
         _sources.Clear();
-
-        // Internal sources
-        _sources.AddRange(_internalSources);
         
         // Directory configurations
         foreach(var sourceConfig in _configurationService.Configuration.Library.Files)
@@ -130,6 +127,11 @@ internal class LibraryManager : IDisposable
                 continue;
 
             AddSource(new FileSource(this, sourceConfig));
+        }
+
+        foreach(SourceBase source in _internalSources)
+        {
+            _rootItem.Add(source);
         }
 
         foreach (SourceBase source in _sources)
@@ -149,23 +151,33 @@ internal class LibraryManager : IDisposable
 
     public async Task ScanAsync()
     {
-        if(IsScanning)
-            return;
-
-        IsScanning = true;
-
-        List<Task> scanTasks = new();
-        foreach(SourceBase source in _internalSources)
+        lock(this)
         {
-            scanTasks.Add(Task.Run(() => ScanSource(source)));
+            if(IsScanning)
+                return;
+
+            IsScanning = true;
         }
 
-        foreach(SourceBase source in _sources)
+        try
         {
-            scanTasks.Add(Task.Run(() => ScanSource(source)));
-        }
+            List<Task> scanTasks = new();
+            foreach(SourceBase source in _internalSources)
+            {
+                scanTasks.Add(Task.Run(() => ScanSource(source)));
+            }
 
-        await Task.WhenAll(scanTasks.ToArray());
+            foreach(SourceBase source in _sources)
+            {
+                scanTasks.Add(Task.Run(() => ScanSource(source)));
+            }
+
+            await Task.WhenAll(scanTasks.ToArray());
+        }
+        catch (Exception ex)
+        {
+            Brio.Log.Error(ex, "Error during library scan");
+        }
 
         IsScanning = false;
 
