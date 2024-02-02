@@ -4,10 +4,15 @@ using Brio.Game.World;
 using Brio.Library.Tags;
 using Brio.Resources;
 using Brio.UI;
+using Brio.UI.Controls.Stateless;
 using Brio.UI.Windows;
+using Dalamud.Interface;
 using Dalamud.Interface.Internal;
+using ImGuiNET;
 using System;
+using System.Diagnostics;
 using System.IO;
+using System.Runtime.InteropServices;
 
 namespace Brio.Library.Sources;
 
@@ -130,6 +135,24 @@ internal class DirectoryEntry : GroupEntryBase
     protected override string GetInternalId()
     {
         return _path;
+    }
+
+    public override void DrawActions(bool isModal)
+    {
+        base.DrawActions(isModal);
+
+        if(RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        {
+            if(ImBrio.FontIconButton(FontAwesomeIcon.FolderOpen))
+            {
+                Process.Start("explorer.exe", this._path);
+            }
+
+            if(ImGui.IsItemHovered())
+                ImGui.SetTooltip("Open folder");
+
+            ImGui.SameLine();
+        }
     }
 }
 
@@ -265,6 +288,23 @@ internal class FileEntry : ItemEntryBase
     public override void DrawActions(bool isModal)
     {
         base.DrawActions(isModal);
+
+        if(RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        {
+            string? dirPath = Path.GetDirectoryName(this.FilePath);
+            if(dirPath != null)
+            {
+                if(ImBrio.FontIconButton(FontAwesomeIcon.FolderOpen))
+                {
+                    Process.Start("explorer.exe", dirPath);
+                }
+
+                if(ImGui.IsItemHovered())
+                    ImGui.SetTooltip("Open containing folder");
+
+                ImGui.SameLine();
+            }
+        }
 
         if (FileTypeInfo != null)
         {
