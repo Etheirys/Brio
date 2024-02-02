@@ -5,7 +5,6 @@ using Brio.Resources;
 using Brio.UI;
 using Dalamud.Interface.Internal;
 using System;
-using System.Collections.Generic;
 using System.IO;
 
 namespace Brio.Library.Sources;
@@ -15,18 +14,6 @@ internal class FileSource : SourceBase
     public readonly string DirectoryPath = string.Empty;
 
     private string _name;
-
-    // We could probably put these in a file type manager or something,
-    // but currently only the library needs them, so here is fine too.
-    private static List<FileTypeInfoBase> fileTypes = new();
-
-    static FileSource()
-    {
-        fileTypes.Add(new AnamnesisCharaFileInfo());
-        fileTypes.Add(new CMToolPoseFileInfo());
-        fileTypes.Add(new PoseFileInfo());
-        fileTypes.Add(new MareCharacterDataFileInfo());
-    }
 
     public FileSource(LibraryManager manager, LibraryConfiguration.FileSourceConfig config)
         : base()
@@ -103,7 +90,7 @@ internal class FileSource : SourceBase
 
     private FileTypeInfoBase? GetFileType(string path)
     {
-        foreach (FileTypeInfoBase fileType in fileTypes)
+        foreach (FileTypeInfoBase fileType in FileUtility.FileTypeInfos)
         {
             if(fileType.IsFile(path))
             {

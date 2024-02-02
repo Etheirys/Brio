@@ -16,6 +16,8 @@ internal class TypeFilter : FilterBase
         }
     }
 
+    public IEnumerable<Type> Types => _types;
+
     public override void Clear()
     {
         _types.Clear();

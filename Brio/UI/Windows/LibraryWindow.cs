@@ -3,6 +3,7 @@ using Brio.Files;
 using Brio.Game.Types;
 using Brio.Library;
 using Brio.Library.Filters;
+using Brio.Library.Sources;
 using Brio.Library.Tags;
 using Brio.UI.Controls.Stateless;
 using Dalamud.Interface;
@@ -15,6 +16,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Numerics;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace Brio.UI.Windows;
@@ -61,7 +63,7 @@ internal class LibraryWindow : Window
     private bool _isRefreshing;
     private long _lastRefreshTimeMs = 0;
     private bool _isModal = false;
-    private Action<ItemEntryBase>? _modalCallback;
+    private Action<object>? _modalCallback;
 
     public LibraryWindow(IPluginLog log, ConfigurationService configurationService, LibraryManager libraryManager)
         : base($"{Brio.Name} Library###brio_library_window")
@@ -93,7 +95,7 @@ internal class LibraryWindow : Window
     private float WindowContentHeight => ImGui.GetWindowContentRegionMax().Y - ImGui.GetWindowContentRegionMin().Y;
     public bool IsSearching => (_searchFilter.Query != null && _searchFilter.Query.Length > 0) || (TagFilter.Tags != null && TagFilter.Tags.Count > 0);
 
-    public void OpenModal(FilterBase filter, Action<ItemEntryBase> callback)
+    public void OpenModal(FilterBase filter, Action<object> callback)
     {
         _isModal = true;
         _modalCallback = callback;
@@ -107,6 +109,8 @@ internal class LibraryWindow : Window
     public void Open()
     {
         _isModal = false;
+        _modalCallback = null;
+        _modalFilter = null;
 
         Flags = ImGuiWindowFlags.None;
 
@@ -118,9 +122,6 @@ internal class LibraryWindow : Window
     {
         IsOpen = false;
         _isModal = false;
-
-        _modalCallback = null;
-        _modalFilter = null;
     }
 
     public new void Toggle()
@@ -301,21 +302,10 @@ internal class LibraryWindow : Window
 
     private void DoBrowse()
     {
+        if (_modalFilter != null && _modalCallback != null)
+            _libraryManager.ShowFilePicker(_modalFilter, _modalCallback);
+
         Close();
-
-        string title = $"Import {_modalFilter?.Name}###import_browse";
-        string type = "Pose File (*.pose | *.cmp){.pose,.cmp}";
-
-        string? lastPath = null;
-
-        UIManager.Instance.FileDialogManager.OpenFileDialog(title, type,
-            (success, paths) =>
-            {
-                if(success && paths.Count == 1)
-                {
-                    var path = paths[0];
-                }
-            }, 1, lastPath, true);
     }
 
     private void DrawFilters()
@@ -879,8 +869,15 @@ internal class LibraryWindow : Window
         {
             if(_isModal && entry is ItemEntryBase itemEntry)
             {
-                if (_modalCallback != null)
-                    _modalCallback.Invoke(itemEntry);
+                if(_modalCallback != null)
+                {
+                    object? result = itemEntry.Load();
+                    
+                    if(result != null)
+                    {
+                        _modalCallback.Invoke(result);
+                    }
+                }
 
                 Close();
             }

@@ -1,11 +1,15 @@
 ﻿using Brio.Config;
+using Brio.Files;
 using Brio.Library.Filters;
 using Brio.Library.Sources;
 using Brio.Resources;
+using Brio.UI;
 using Brio.UI.Windows;
+using Dalamud.Interface;
 using Dalamud.Plugin.Services;
 using System;
 using System.Collections.Generic;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace Brio.Library;
@@ -75,15 +79,7 @@ internal class LibraryManager : IDisposable
         if(_instance == null || _instance._window == null)
             return;
 
-        _instance._window.OpenModal(filter, (ItemEntryBase item) =>
-        {
-            object? result = item.Load();
-
-            if(result == null)
-                return;
-
-            callback.Invoke(result);
-        });
+        _instance._window.OpenModal(filter, callback);
     }
 
     public void AddSource(SourceBase source)
@@ -99,6 +95,91 @@ internal class LibraryManager : IDisposable
     public void RegisterWindow(LibraryWindow window)
     {
         _window = window;
+    }
+
+    public void ShowFilePicker(FilterBase filter, Action<object> callback)
+    {
+        string title = $"Import {filter.Name}###import_browse";
+
+        // Build the filter string for Dalamud's file picker
+        // "Pose File (*.pose | *.cmp){.pose,.cmp}"
+        StringBuilder filterBuilder = new();
+        if(filter is TypeFilter typeFilter)
+        {
+            List<FileTypeInfoBase> allInfos = new();
+            foreach(Type filterType in typeFilter.Types)
+            {
+                FileTypeInfoBase? typeInfo = FileUtility.GetFileTypeInfo(filterType);
+                if(typeInfo == null)
+                    continue;
+
+                allInfos.Add(typeInfo);
+            }
+
+            filterBuilder.Append("Any File(");
+            for(int i = 0; i < allInfos.Count; i++)
+            {
+                if(i > 0)
+                    filterBuilder.Append(" | ");
+
+                filterBuilder.Append("*");
+                filterBuilder.Append(allInfos[i].Extension);
+            }
+
+            filterBuilder.Append("){");
+            foreach(FileTypeInfoBase typeInfo in allInfos)
+            {
+                filterBuilder.Append(typeInfo.Extension);
+                filterBuilder.Append(",");
+            }
+            filterBuilder.Append("},");
+
+            foreach(FileTypeInfoBase typeInfo in allInfos)
+            {
+                filterBuilder.Append(",");
+                filterBuilder.Append(typeInfo.Name);
+                filterBuilder.Append(" (*");
+                filterBuilder.Append(typeInfo.Extension);
+                filterBuilder.Append("){");
+                filterBuilder.Append(typeInfo.Extension);
+                filterBuilder.Append("}");
+
+            }
+        }
+
+        // Add the file source directories as shortcuts
+        UIManager.Instance.FileDialogManager.CustomSideBarItems.Clear();
+        foreach(SourceBase source in _sources)
+        {
+            if(source is FileSource fs)
+            {
+                UIManager.Instance.FileDialogManager.CustomSideBarItems.Add((fs.Name, fs.DirectoryPath, FontAwesomeIcon.FolderClosed, 0));
+            }
+        }
+
+        // TODO: last path cache
+        string? lastPath = null;
+
+        // Show the dalamud file picker
+        UIManager.Instance.FileDialogManager.OpenFileDialog(
+            title,
+            filterBuilder.ToString(),
+            (success, paths) =>
+            {
+                if(success && paths.Count == 1)
+                {
+                    var path = paths[0];
+                    object? result = FileUtility.Load(path);
+
+                    if(result == null)
+                        return;
+
+                    callback.Invoke(result);
+                }
+            }, 
+            1, 
+            lastPath,
+            true);
     }
 
     private void OnConfigurationChanged()
