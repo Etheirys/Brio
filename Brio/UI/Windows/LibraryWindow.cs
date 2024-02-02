@@ -29,7 +29,7 @@ internal class LibraryWindow : Window
     private const float SearchWidth = 400;
     private const int MaxTagsInSuggest = 25;
     private const float PathBarButtonWidth = 25;
-    private const float FooterScaleSliderWidth = 150;
+    private const float FooterScaleSliderWidth = 100;
     private const int MinEntrySize = 100;
     private const int MaxEntrySize = 250;
 
@@ -838,6 +838,18 @@ internal class LibraryWindow : Window
 
     private void DrawFooter()
     {
+        int size = (int)_configurationService.Configuration.Library.IconSize;
+        ImGui.SetNextItemWidth(FooterScaleSliderWidth);
+        if(ImGui.SliderInt("###library_scale_slider", ref size, MinEntrySize, MaxEntrySize, ""))
+        {
+            _configurationService.Configuration.Library.IconSize = size;
+        }
+
+        if(ImGui.IsItemHovered())
+            ImGui.SetTooltip($"Icon Size: {size}px");
+
+        ImGui.SameLine();
+
         if(_isRescanning || _libraryManager.IsScanning)
         {
             ImGui.TextDisabled("Scanning...");
@@ -845,16 +857,6 @@ internal class LibraryWindow : Window
         else
         {
             ImGui.TextDisabled($"found {_currentEntries?.Count().ToString("N0")} items in {_lastRefreshTimeMs}ms");
-        }
-
-        ImGui.SameLine();
-        ImGui.SetCursorPosX(ImGui.GetCursorPosX() + ImBrio.GetRemainingWidth() - FooterScaleSliderWidth);
-
-        int size = (int)_configurationService.Configuration.Library.IconSize;
-        ImGui.SetNextItemWidth(FooterScaleSliderWidth);
-        if (ImGui.SliderInt("###library_scale_slider", ref size, MinEntrySize, MaxEntrySize, ""))
-        {
-            _configurationService.Configuration.Library.IconSize = size;
         }
     }
 
