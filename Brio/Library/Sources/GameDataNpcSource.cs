@@ -34,15 +34,18 @@ internal class GameDataNpcSource : GameDataAppearanceSourceBase
         foreach(var (_, npc) in Lumina.ENpcBases)
         {
             string name = $"E:{npc.RowId:D7}";
+            string? displayName = null;
 
             var resident = Lumina.ENpcResidents[npc.RowId];
-            if(resident != null)
+            if(resident != null && !string.IsNullOrEmpty(resident.Singular))
             {
-                if(!string.IsNullOrEmpty(resident.Singular))
-                    name = resident.Singular;
+                displayName = resident.Singular;
             }
-
-            string? displayName = ResolveName(name);
+            else
+            {
+                displayName = ResolveName(name);
+            }
+            
             var entry = new GameDataAppearanceEntry(this, EntityManager, npc.RowId, displayName ?? name, 0, npc, $"E{npc.RowId}");
             entry.SourceInfo = $"ENpc {npc.RowId}";
             entry.Tags.Add("NPC");
