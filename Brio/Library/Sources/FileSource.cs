@@ -1,7 +1,5 @@
 ﻿using Brio.Config;
-using Brio.Entities.Actor;
 using Brio.Files;
-using Brio.Library.Actions;
 using Brio.Library.Tags;
 using Brio.Resources;
 using Brio.UI;
@@ -9,7 +7,6 @@ using Dalamud.Interface.Internal;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Threading.Tasks;
 
 namespace Brio.Library.Sources;
 
@@ -22,7 +19,6 @@ internal class FileSource : SourceBase
     // We could probably put these in a file type manager or something,
     // but currently only the library needs them, so here is fine too.
     private static List<FileTypeInfoBase> fileTypes = new();
-    private static List<EntryActionBase> fileTypeActions = new();
 
     static FileSource()
     {
@@ -30,11 +26,6 @@ internal class FileSource : SourceBase
         fileTypes.Add(new CMToolPoseFileInfo());
         fileTypes.Add(new PoseFileInfo());
         fileTypes.Add(new MareCharacterDataFileInfo());
-
-        foreach(FileTypeInfoBase fileTypeInfo in fileTypes)
-        {
-            fileTypeInfo.GetLibraryActions(ref fileTypeActions);
-        }
     }
 
     public FileSource(LibraryManager manager, LibraryConfiguration.FileSourceConfig config)
@@ -50,8 +41,6 @@ internal class FileSource : SourceBase
         {
             DirectoryPath = config.Path;
         }
-
-        RegisterActions(manager);
     }
 
     public FileSource(LibraryManager manager, string name, string directoryPath)
@@ -59,7 +48,6 @@ internal class FileSource : SourceBase
     {
         _name = name;
         DirectoryPath = directoryPath;
-        RegisterActions(manager);
     }
 
     public FileSource(LibraryManager manager, string name, params string[] paths)
@@ -67,7 +55,6 @@ internal class FileSource : SourceBase
     {
         _name = name;
         DirectoryPath = Path.Combine(paths);
-        RegisterActions(manager);
     }
 
     public override string Name => _name;
@@ -111,14 +98,6 @@ internal class FileSource : SourceBase
                 continue;
 
             parent.Add(new FileEntry(this, filePath, fileTypeInfo));
-        }
-    }
-
-    private void RegisterActions(LibraryManager manager)
-    {
-        foreach(EntryActionBase action in fileTypeActions)
-        {
-            manager.RegisterAction(action);
         }
     }
 
@@ -294,23 +273,12 @@ internal class FileEntry : ItemEntryBase
     {
         return FilePath;
     }
-}
 
-
-internal class ApplyFileToSelectedActorAction<T> : ApplyToSelectedActorAction<FileEntry>
-    where T : class
-{
-    internal ApplyFileToSelectedActorAction(Func<FileEntry, ActorEntity, Task> apply, bool isPrimaryAction)
-        : base(apply, isPrimaryAction)
+    public override object? Load()
     {
-    }
+        if(FileTypeInfo == null)
+            return null;
 
-
-    protected override bool Filter(FileEntry entry)
-    {
-        if(!base.Filter(entry))
-            return false;
-
-        return entry.FileTypeInfo.IsFileType(typeof(T));
+        return FileTypeInfo.Load(this.FilePath);
     }
 }

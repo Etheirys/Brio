@@ -73,6 +73,11 @@ internal class GameDataAppearanceEntry : ItemEntryBase
         }
     }
 
+    public override object? Load()
+    {
+        return _appearance;
+    }
+
     public override bool Search(string[] query)
     {
         bool match = base.Search(query);

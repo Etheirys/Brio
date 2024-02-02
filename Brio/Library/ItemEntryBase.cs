@@ -1,4 +1,4 @@
-﻿using Brio.Library.Actions;
+﻿
 using Brio.Library.Filters;
 using Brio.Library.Sources;
 using Brio.Library.Tags;
@@ -27,6 +27,8 @@ internal abstract class ItemEntryBase : EntryBase
     public virtual string? Version { get; }
     public virtual IDalamudTextureWrap? PreviewImage { get; }
     public abstract Type LoadsType { get; }
+
+    public abstract object? Load();
 
     public override bool PassesFilters(params FilterBase[] filters)
     {
