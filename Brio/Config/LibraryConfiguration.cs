@@ -1,7 +1,5 @@
-﻿using FFXIVClientStructs.FFXIV.Client.Game.UI;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.IO;
 
 namespace Brio.Config;
 internal class LibraryConfiguration
