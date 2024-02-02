@@ -1,16 +1,20 @@
 ﻿using Brio.Capabilities.Actor;
+using Brio.Entities;
 using Brio.Entities.Actor;
-
 using Brio.Library.Sources;
 using Brio.Library.Tags;
 using Brio.Resources;
 using Dalamud.Interface.Internal;
-using System.Threading.Tasks;
 
 namespace Brio.Files;
 
-internal class MareCharacterDataFileInfo : FileTypeInfoBase<MareCharacterDataFile>
+internal class MareCharacterDataFileInfo : AppliableActorFileInfoBase<MareCharacterDataFile>
 {
+    public MareCharacterDataFileInfo(EntityManager entityManager)
+    : base(entityManager)
+    {
+    }
+
     public override string Name => "Mare Character Data";
     public override IDalamudTextureWrap Icon => ResourceProvider.Instance.GetResourceImage("Images.FileIcon_Mcdf.png");
     public override string Extension => ".mcdf";
@@ -19,16 +23,13 @@ internal class MareCharacterDataFileInfo : FileTypeInfoBase<MareCharacterDataFil
     // But this class is used for the library tags, so lets just fake it with an empty file. =)
     public override object? Load(string filePath) => new MareCharacterDataFile(filePath);
 
-
-    private Task Apply(FileEntry entry, ActorEntity actor)
+    protected override void Apply(MareCharacterDataFile file, ActorEntity actor)
     {
         ActorAppearanceCapability? capability;
         if(actor.TryGetCapability<ActorAppearanceCapability>(out capability) && capability != null)
         {
-            return capability.LoadMcdfAsync(entry.FilePath);
+            capability.LoadMcdf(file.GetPath());
         }
-
-        return Task.CompletedTask;
     }
 }
 
