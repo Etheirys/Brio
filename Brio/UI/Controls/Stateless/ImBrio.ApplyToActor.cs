@@ -11,7 +11,6 @@ internal partial class ImBrio
     {
         if(entityManager.SelectedEntity == null || entityManager.SelectedEntity is not ActorEntity selectedActor)
         {
-            // YOKI TODO: combo box?
             ImGui.BeginDisabled();
             ImGui.Button($"Select an Actor");
             ImGui.EndDisabled();
