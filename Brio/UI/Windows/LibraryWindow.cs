@@ -38,6 +38,7 @@ internal class LibraryWindow : Window
     private readonly ConfigurationService _configurationService;
     private readonly LibraryManager _libraryManager;
     private readonly IPluginLog _log;
+    private readonly IServiceProvider _serviceProvider;
 
     private readonly LibraryFavoritesFilter _favoritesFilter;
     private readonly TypeFilter _charactersFilter;
@@ -65,7 +66,11 @@ internal class LibraryWindow : Window
     private bool _isModal = false;
     private Action<object>? _modalCallback;
 
-    public LibraryWindow(IPluginLog log, ConfigurationService configurationService, LibraryManager libraryManager)
+    public LibraryWindow(
+        IPluginLog log,
+        ConfigurationService configurationService,
+        LibraryManager libraryManager,
+        IServiceProvider serviceProvider)
         : base($"{Brio.Name} Library###brio_library_window")
     {
         this.Namespace = "brio_library_namespace";
@@ -78,6 +83,7 @@ internal class LibraryWindow : Window
         _log = log;
         _configurationService = configurationService;
         _libraryManager = libraryManager;
+        _serviceProvider = serviceProvider;
         
         _path.Add(_libraryManager.Root);
 
@@ -94,6 +100,7 @@ internal class LibraryWindow : Window
     private float WindowContentWidth => ImGui.GetWindowContentRegionMax().X - ImGui.GetWindowContentRegionMin().X;
     private float WindowContentHeight => ImGui.GetWindowContentRegionMax().Y - ImGui.GetWindowContentRegionMin().Y;
     public bool IsSearching => (_searchFilter.Query != null && _searchFilter.Query.Length > 0) || (TagFilter.Tags != null && TagFilter.Tags.Count > 0);
+    public bool IsModal => _isModal;
 
     public void OpenModal(FilterBase filter, Action<object> callback)
     {
@@ -240,9 +247,7 @@ internal class LibraryWindow : Window
             if(ImGui.BeginChild("###right_pane", new Vector2(ImBrio.GetRemainingWidth(), -1), false,
                 ImGuiWindowFlags.NoBackground | ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse))
             {
-                float paneHeight = ImBrio.GetRemainingHeight();
-                if(_isModal)
-                    paneHeight -= ImBrio.GetLineHeight() + ImGui.GetStyle().ItemSpacing.Y;
+                float paneHeight = ImBrio.GetRemainingHeight() - (ImBrio.GetLineHeight() + ImGui.GetStyle().ItemSpacing.Y);
 
                 if(ImGui.BeginChild("###library_info_pane", new Vector2(ImBrio.GetRemainingWidth(), paneHeight), true,
                     ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse))
@@ -259,7 +264,7 @@ internal class LibraryWindow : Window
                     ImGui.EndChild();
                 }
 
-                // Modal Buttons
+                // Actions
                 if(_isModal)
                 {
                     if (ImBrio.FontIconButton(FontAwesomeIcon.FolderOpen))
@@ -292,6 +297,17 @@ internal class LibraryWindow : Window
                     if(ImBrio.Button("Cancel", FontAwesomeIcon.Times, new Vector2(100, 0)))
                     {
                         Close();
+                    }
+                }
+                else
+                {
+                    if(_selected != null)
+                    {
+                        _selected.DrawActions(this, _serviceProvider);
+                    }
+                    else
+                    {
+                        _path[_path.Count - 1].DrawActions(this, _serviceProvider);
                     }
                 }
             }

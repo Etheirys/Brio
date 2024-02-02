@@ -1,12 +1,15 @@
 ﻿
+using Brio.Config;
 using Brio.Library.Filters;
 using Brio.Library.Sources;
 using Brio.Library.Tags;
 using Brio.UI.Controls.Stateless;
 using Brio.UI.Windows;
+using Dalamud.Interface;
 using Dalamud.Interface.Internal;
 using Dalamud.Interface.Utility.Raii;
 using ImGuiNET;
+using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Numerics;
 
@@ -97,5 +100,32 @@ internal abstract class ItemEntryBase : EntryBase
             window.TagFilter.Add(selected);
             window.Refresh(true);
         }
+    }
+
+    public override void DrawActions(LibraryWindow window, IServiceProvider serviceProvider)
+    {
+        base.DrawActions(window, serviceProvider);
+
+        // Favorite button
+        ConfigurationService configService = serviceProvider.GetRequiredService<ConfigurationService>();
+        bool isFavorite = configService.Configuration.Library.Favorites.Contains(this.Identifier);
+
+        ImGui.PushStyleColor(ImGuiCol.Text, ImGui.GetColorU32(isFavorite ? ImGuiCol.CheckMark : ImGuiCol.Text));
+
+        if (ImBrio.FontIconButton(FontAwesomeIcon.Heart))
+        {
+            if(!isFavorite)
+            {
+                configService.Configuration.Library.Favorites.Add(this.Identifier);
+            }
+            else
+            {
+                configService.Configuration.Library.Favorites.Remove(this.Identifier);
+            }
+
+            configService.Save();
+        }
+
+        ImGui.PopStyleColor();
     }
 }

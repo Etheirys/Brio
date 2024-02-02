@@ -3,8 +3,10 @@ using Brio.Library.Sources;
 using Brio.Library.Tags;
 using Brio.UI.Controls.Stateless;
 using Brio.UI.Windows;
+using Dalamud.Interface;
 using Dalamud.Interface.Internal;
 using ImGuiNET;
+using System;
 
 namespace Brio.Library;
 
@@ -74,6 +76,10 @@ internal abstract class EntryBase : ITagged
             if(ImGui.GetCursorPosY() < sourceIconBottom)
                 ImGui.SetCursorPosY(sourceIconBottom);
         }
+    }
+
+    public virtual void DrawActions(LibraryWindow window, IServiceProvider serviceProvider)
+    {
     }
 
     protected abstract string GetInternalId();
