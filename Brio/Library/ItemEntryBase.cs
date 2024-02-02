@@ -102,13 +102,13 @@ internal abstract class ItemEntryBase : EntryBase
         }
     }
 
-    public override void DrawActions(LibraryWindow window, IServiceProvider serviceProvider)
+    public override void DrawActions(bool isModal)
     {
-        base.DrawActions(window, serviceProvider);
+        base.DrawActions(isModal);
 
         // Favorite button
-        ConfigurationService configService = serviceProvider.GetRequiredService<ConfigurationService>();
-        bool isFavorite = configService.Configuration.Library.Favorites.Contains(this.Identifier);
+        var config = ConfigurationService.Instance.Configuration;
+        bool isFavorite = config.Library.Favorites.Contains(this.Identifier);
 
         ImGui.PushStyleColor(ImGuiCol.Text, ImGui.GetColorU32(isFavorite ? ImGuiCol.CheckMark : ImGuiCol.Text));
 
@@ -116,15 +116,16 @@ internal abstract class ItemEntryBase : EntryBase
         {
             if(!isFavorite)
             {
-                configService.Configuration.Library.Favorites.Add(this.Identifier);
+                config.Library.Favorites.Add(this.Identifier);
             }
             else
             {
-                configService.Configuration.Library.Favorites.Remove(this.Identifier);
+                config.Library.Favorites.Remove(this.Identifier);
             }
 
-            configService.Save();
+            ConfigurationService.Instance.Save();
         }
+        ImGui.SameLine();
 
         ImGui.PopStyleColor();
     }

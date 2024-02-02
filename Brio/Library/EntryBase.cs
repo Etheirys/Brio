@@ -78,7 +78,7 @@ internal abstract class EntryBase : ITagged
         }
     }
 
-    public virtual void DrawActions(LibraryWindow window, IServiceProvider serviceProvider)
+    public virtual void DrawActions(bool isModal)
     {
     }
 

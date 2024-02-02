@@ -1,6 +1,7 @@
 ﻿using Brio.Config;
 using Brio.Core;
 using Brio.Entities;
+using Brio.Files;
 using Brio.Game.Actor;
 using Brio.Game.Camera;
 using Brio.Game.Chat;
@@ -10,6 +11,7 @@ using Brio.Game.Posing;
 using Brio.Game.World;
 using Brio.IPC;
 using Brio.Library;
+using Brio.Library.Sources;
 using Brio.Resources;
 using Brio.UI;
 using Brio.UI.Windows;
@@ -152,6 +154,13 @@ public class Brio : IDalamudPlugin
         serviceCollection.AddSingleton<PosingTransformWindow>();
         serviceCollection.AddSingleton<CameraWindow>();
         serviceCollection.AddSingleton<PosingGraphicalWindow>();
+
+        // Library
+        serviceCollection.AddSingleton<FileTypeInfoBase, AnamnesisCharaFileInfo>();
+        serviceCollection.AddSingleton<FileTypeInfoBase, CMToolPoseFileInfo>();
+        serviceCollection.AddSingleton<FileTypeInfoBase, PoseFileInfo>();
+        serviceCollection.AddSingleton<FileTypeInfoBase, MareCharacterDataFileInfo>();
+        serviceCollection.AddSingleton<FileService>();
 
         return serviceCollection;
     }

@@ -1,4 +1,5 @@
 ﻿using Brio.Capabilities.Actor;
+using Brio.Entities;
 using Brio.Entities.Actor;
 using Brio.Game.Actor.Appearance;
 using Brio.Library.Sources;
@@ -6,27 +7,49 @@ using Brio.Library.Tags;
 using Brio.Resources;
 using Dalamud.Interface.Internal;
 using FFXIVClientStructs.FFXIV.Client.Game.Character;
+using ImGuiNET;
+using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Numerics;
-using System.Threading.Tasks;
 
 namespace Brio.Files;
 
 internal class AnamnesisCharaFileInfo : JsonDocumentBaseFileInfo<AnamnesisCharaFile>
 {
+    private EntityManager _entityManager;
+
     public override string Name => "Character File";
     public override IDalamudTextureWrap Icon => ResourceProvider.Instance.GetResourceImage("Images.FileIcon_Chara.png");
     public override string Extension => ".chara";
 
-    private async Task Apply(FileEntry fileEntry, ActorEntity actor)
+    public AnamnesisCharaFileInfo(EntityManager entityManager)
     {
-        AnamnesisCharaFile? file = Load(fileEntry.FilePath) as AnamnesisCharaFile;
-        if(file != null)
+        _entityManager = entityManager;
+    }
+
+    public override void DrawActions(FileEntry fileEntry, bool isModal)
+    {
+        base.DrawActions(fileEntry, isModal);
+
+        if(_entityManager.SelectedEntity == null || _entityManager.SelectedEntity is not ActorEntity selectedActor)
         {
-            ActorAppearanceCapability? capability;
-            if(actor.TryGetCapability<ActorAppearanceCapability>(out capability) && capability != null)
+            ImGui.BeginDisabled();
+            ImGui.Button($"Select an Actor");
+            ImGui.EndDisabled();
+        }
+        else
+        {
+            if(ImGui.Button($"Apply To {selectedActor.FriendlyName}"))
             {
-                await capability.SetAppearance(file, AppearanceImportOptions.All);
+                AnamnesisCharaFile? file = Load(fileEntry.FilePath) as AnamnesisCharaFile;
+                if(file != null)
+                {
+                    ActorAppearanceCapability? capability;
+                    if(selectedActor.TryGetCapability<ActorAppearanceCapability>(out capability) && capability != null)
+                    {
+                        _ = capability.SetAppearance(file, AppearanceImportOptions.All);
+                    }
+                }
             }
         }
     }

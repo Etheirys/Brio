@@ -1,8 +1,10 @@
 ﻿using Brio.Config;
 using Brio.Files;
+using Brio.Game.World;
 using Brio.Library.Tags;
 using Brio.Resources;
 using Brio.UI;
+using Brio.UI.Windows;
 using Dalamud.Interface.Internal;
 using System;
 using System.IO;
@@ -14,10 +16,12 @@ internal class FileSource : SourceBase
     public readonly string DirectoryPath = string.Empty;
 
     private string _name;
+    private FileService _fileService;
 
-    public FileSource(LibraryManager manager, LibraryConfiguration.FileSourceConfig config)
+    public FileSource(FileService fileService, LibraryConfiguration.FileSourceConfig config)
         : base()
     {
+        _fileService = fileService;
         _name = config.Name;
 
         if(config.Root != null)
@@ -30,16 +34,18 @@ internal class FileSource : SourceBase
         }
     }
 
-    public FileSource(LibraryManager manager, string name, string directoryPath)
+    public FileSource(FileService fileService, string name, string directoryPath)
         : base()
     {
+        _fileService = fileService;
         _name = name;
         DirectoryPath = directoryPath;
     }
 
-    public FileSource(LibraryManager manager, string name, params string[] paths)
+    public FileSource(FileService fileService, string name, params string[] paths)
           : base()
     {
+        _fileService = fileService;
         _name = name;
         DirectoryPath = Path.Combine(paths);
     }
@@ -80,25 +86,12 @@ internal class FileSource : SourceBase
         string[] filePaths = Directory.GetFiles(directory, "*.*");
         foreach(string filePath in filePaths)
         {
-            FileTypeInfoBase? fileTypeInfo = GetFileType(filePath);
+            FileTypeInfoBase? fileTypeInfo = _fileService.GetFileTypeInfo(filePath);
             if(fileTypeInfo == null)
                 continue;
 
             parent.Add(new FileEntry(this, filePath, fileTypeInfo));
         }
-    }
-
-    private FileTypeInfoBase? GetFileType(string path)
-    {
-        foreach (FileTypeInfoBase fileType in FileUtility.FileTypeInfos)
-        {
-            if(fileType.IsFile(path))
-            {
-                return fileType;
-            }
-        }
-
-        return null;
     }
 }
 
@@ -267,5 +260,15 @@ internal class FileEntry : ItemEntryBase
             return null;
 
         return FileTypeInfo.Load(this.FilePath);
+    }
+
+    public override void DrawActions(bool isModal)
+    {
+        base.DrawActions(isModal);
+
+        if (FileTypeInfo != null)
+        {
+            FileTypeInfo.DrawActions(this, isModal);
+        }
     }
 }

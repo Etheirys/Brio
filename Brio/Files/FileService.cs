@@ -3,20 +3,16 @@ using System.Collections.Generic;
 
 namespace Brio.Files;
 
-internal static class FileUtility
+internal class FileService
 {
-    internal static List<FileTypeInfoBase> FileTypeInfos = new();
+    private readonly IEnumerable<FileTypeInfoBase> _fileInfos;
+    private readonly Dictionary<Type, FileTypeInfoBase> _typeInfoMap = new();
 
-    private static readonly Dictionary<Type, FileTypeInfoBase> _typeInfoMap = new();
-
-    static FileUtility()
+    public FileService(IEnumerable<FileTypeInfoBase> fileInfos)
     {
-        FileTypeInfos.Add(new AnamnesisCharaFileInfo());
-        FileTypeInfos.Add(new CMToolPoseFileInfo());
-        FileTypeInfos.Add(new PoseFileInfo());
-        FileTypeInfos.Add(new MareCharacterDataFileInfo());
+        _fileInfos = fileInfos;
 
-        foreach (FileTypeInfoBase typeInfo in FileTypeInfos)
+        foreach (FileTypeInfoBase typeInfo in _fileInfos)
         {
             if (_typeInfoMap.ContainsKey(typeInfo.Type))
             {
@@ -28,21 +24,34 @@ internal static class FileUtility
         }
     }
 
-    internal static FileTypeInfoBase? GetFileTypeInfo(Type fileType)
+    internal FileTypeInfoBase? GetFileTypeInfo(Type fileType)
     {
         FileTypeInfoBase? result = null;
         _typeInfoMap.TryGetValue(fileType, out result);
         return result;
     }
 
+    internal FileTypeInfoBase? GetFileTypeInfo(string path)
+    {
+        foreach(FileTypeInfoBase fileType in _fileInfos)
+        {
+            if(fileType.IsFile(path))
+            {
+                return fileType;
+            }
+        }
+
+        return null;
+    }
+
     /// <summary>
     /// Attempt to load the file at the given path with any file type info that supports it.
     /// </summary>
-    internal static object? Load(string path)
+    internal object? Load(string path)
     {
         Exception? lastException = null;
 
-        foreach(FileTypeInfoBase typeInfo in FileTypeInfos)
+        foreach(FileTypeInfoBase typeInfo in _fileInfos)
         {
             if(typeInfo.IsFile(path))
             {

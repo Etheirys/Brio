@@ -303,11 +303,11 @@ internal class LibraryWindow : Window
                 {
                     if(_selected != null)
                     {
-                        _selected.DrawActions(this, _serviceProvider);
+                        _selected.DrawActions(_isModal);
                     }
                     else
                     {
-                        _path[_path.Count - 1].DrawActions(this, _serviceProvider);
+                        _path[_path.Count - 1].DrawActions(_isModal);
                     }
                 }
             }

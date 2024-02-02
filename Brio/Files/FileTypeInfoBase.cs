@@ -1,4 +1,6 @@
-﻿using Dalamud.Interface.Internal;
+﻿using Brio.Library.Sources;
+using Brio.UI.Windows;
+using Dalamud.Interface.Internal;
 using System;
 using System.IO;
 
@@ -27,6 +29,10 @@ internal abstract class FileTypeInfoBase
     {
         string ext = Path.GetExtension(path);
         return ext == Extension;
+    }
+
+    public virtual void DrawActions(FileEntry fileEntry, bool isModal)
+    {
     }
 }
 

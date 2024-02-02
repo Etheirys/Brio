@@ -10,6 +10,7 @@ using Dalamud.Plugin.Services;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -19,7 +20,7 @@ internal class LibraryManager : IDisposable
 {
     private static LibraryManager? _instance;
 
-    private readonly IServiceProvider _serviceProvider;
+    private readonly FileService _fileService;
     private readonly ConfigurationService _configurationService;
     private readonly GameDataProvider _luminaProvider;
     private readonly IFramework _framework;
@@ -36,13 +37,13 @@ internal class LibraryManager : IDisposable
     public bool IsLoadingSources { get; private set; }
 
     public LibraryManager(
-        IServiceProvider serviceProvider,
+        FileService fileService,
         ConfigurationService configurationService,
         GameDataProvider luminaProvider,
         IFramework framework)
     {
         _instance = this;
-        _serviceProvider = serviceProvider;
+        _fileService = fileService;
         _configurationService = configurationService;
         _luminaProvider = luminaProvider;
         _framework = framework;
@@ -58,7 +59,7 @@ internal class LibraryManager : IDisposable
         AddInternalSource(new GameDataOrnamentSource(this, _luminaProvider));
 
         // TODO: swap this for a package
-        AddInternalSource(new FileSource(this, "Standard Poses", "Images.ProviderIcon_Directory.png", Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Anamnesis", "StandardPoses"));
+        AddInternalSource(new FileSource(_fileService, "Standard Poses", "Images.ProviderIcon_Directory.png", Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Anamnesis", "StandardPoses"));
 
         OnConfigurationChanged();
     }
@@ -111,7 +112,7 @@ internal class LibraryManager : IDisposable
             List<FileTypeInfoBase> allInfos = new();
             foreach(Type filterType in typeFilter.Types)
             {
-                FileTypeInfoBase? typeInfo = FileUtility.GetFileTypeInfo(filterType);
+                FileTypeInfoBase? typeInfo = _fileService.GetFileTypeInfo(filterType);
                 if(typeInfo == null)
                     continue;
 
@@ -182,7 +183,7 @@ internal class LibraryManager : IDisposable
                 if(success && paths.Count == 1)
                 {
                     var path = paths[0];
-                    object? result = FileUtility.Load(path);
+                    object? result = _fileService.Load(path);
 
                     if(result == null)
                         return;
@@ -243,7 +244,7 @@ internal class LibraryManager : IDisposable
             if(!sourceConfig.Enabled)
                 continue;
 
-            AddSource(new FileSource(this, sourceConfig));
+            AddSource(new FileSource(_fileService, sourceConfig));
         }
 
         foreach(SourceBase source in _internalSources)
