@@ -756,7 +756,7 @@ internal class LibraryWindow : Window
         int column = 0;
         int index = 0;
 
-        if(_libraryManager.IsScanning || _isRefreshing)
+        if(_libraryManager.IsScanning)
         {
             ImGui.SetCursorPosX((WindowContentWidth / 2) - 24);
             ImGui.SetCursorPosY((WindowContentHeight / 2) - 24);
@@ -954,6 +954,8 @@ internal class LibraryWindow : Window
                 }
             }
 
+            GroupEntryBase currentEntry = _path[_path.Count - 1];
+
             if(filter)
             {
                 List<FilterBase> filters = new();
@@ -962,26 +964,29 @@ internal class LibraryWindow : Window
                 if(_modalFilter != null)
                     filters.Add(_modalFilter);
 
-                if(!string.IsNullOrEmpty(_searchText))
-                    filters.Add(_searchFilter);
-
                 if(TagFilter.Tags != null && TagFilter.Tags.Count > 0)
                     filters.Add(TagFilter);
 
                 _libraryManager.Root.FilterEntries(filters.ToArray());
+
+                _allTags.Clear();
+                currentEntry.GetAllTags(ref _allTags);
+
+                // Add the search filter last, and re-filter the entries now that we have all the
+                // tags
+                if(!string.IsNullOrEmpty(_searchText))
+                {
+                    filters.Add(_searchFilter);
+                    _libraryManager.Root.FilterEntries(filters.ToArray());
+                }
             }
 
             bool flatten = IsSearching;
 
             if(_selectedFilter is LibraryFavoritesFilter)
                 flatten = true;
-
-            GroupEntryBase currentEntry = _path[_path.Count - 1];
+           
             _currentEntries = currentEntry.GetFilteredEntries(flatten);
-
-            _allTags.Clear();
-            currentEntry.GetAllTags(ref _allTags);
-
             if(_currentEntries != null)
             {
                 foreach(EntryBase entry in _currentEntries)

@@ -68,17 +68,20 @@ public class Tag : IEquatable<Tag?>
         return this;
     }
 
-    public virtual bool Search(string[]? querry)
+    public virtual bool Search(string[]? query)
     {
-        if(SearchUtility.Matches(this.Name, querry))
+        if (query != null && query.Length == 1)
+            Brio.Log.Info($"{this.Name} == {query[0]} - {SearchUtility.Matches(this.Name, query)}");
+
+        if(SearchUtility.Matches(this.Name, query))
             return true;
 
-        if(SearchUtility.Matches(this.DisplayName, querry))
+        if(SearchUtility.Matches(this.DisplayName, query))
             return true;
 
         foreach(string alias in this.aliases)
         {
-            if(SearchUtility.Matches(alias, querry))
+            if(SearchUtility.Matches(alias, query))
             {
                 return true;
             }
