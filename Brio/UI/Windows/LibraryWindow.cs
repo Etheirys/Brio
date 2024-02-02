@@ -100,8 +100,8 @@ internal class LibraryWindow : Window
         _modalFilter = filter;
 
         Flags = ImGuiWindowFlags.Modal | ImGuiWindowFlags.NoCollapse;
-
         IsOpen = true;
+        Refresh(true);
     }
 
     public void Open()
@@ -111,6 +111,7 @@ internal class LibraryWindow : Window
         Flags = ImGuiWindowFlags.None;
 
         IsOpen = true;
+        Refresh(true);
     }
 
     public void Close()
@@ -165,14 +166,14 @@ internal class LibraryWindow : Window
 
     public void DrawModal()
     {
-        if(!this.IsOpen || !this._isModal)
+        if(!this.IsOpen || !this._isModal || _modalFilter == null)
             return;
 
-        ImGui.OpenPopup($"{Brio.Name} Library##brio_library_popup");
+        ImGui.OpenPopup($"Import {_modalFilter.Name}##brio_library_popup");
 
         ImGui.SetNextWindowSizeConstraints(MinimumSize, ImGui.GetIO().DisplaySize);
 
-        ImGui.BeginPopupModal($"{Brio.Name} Library##brio_library_popup");
+        ImGui.BeginPopupModal($"Import {_modalFilter.Name}##brio_library_popup");
 
         DrawInternal();
         ImGui.EndPopup();
