@@ -2,7 +2,6 @@
 using Brio.Core;
 using Brio.Entities.Actor;
 using Brio.Files.Converters;
-using Brio.Library.Actions;
 using Brio.Library.Sources;
 using Brio.Resources;
 using Dalamud.Interface.Internal;
@@ -19,12 +18,6 @@ internal class PoseFileInfo : JsonDocumentBaseFileInfo<PoseFile>
     public override IDalamudTextureWrap Icon => ResourceProvider.Instance.GetResourceImage("Images.FileIcon_Pose.png");
     public override string Extension => ".pose";
 
-    public override void GetLibraryActions(ref List<EntryActionBase> actions)
-    {
-        base.GetLibraryActions(ref actions);
-
-        actions.Add(new ApplyFileToSelectedActorAction<PoseFile>(Apply, true));
-    }
 
     private Task Apply(FileEntry fileEntry, ActorEntity actor)
     {

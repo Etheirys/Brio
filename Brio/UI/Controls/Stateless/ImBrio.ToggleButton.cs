@@ -1,6 +1,8 @@
 ﻿using Brio.UI.Windows;
 using ImGuiNET;
+using System;
 using System.Numerics;
+using static FFXIVClientStructs.FFXIV.Client.UI.Misc.ConfigModule;
 
 namespace Brio.UI.Controls.Stateless;
 
@@ -8,7 +10,7 @@ internal static partial class ImBrio
 {
     public static bool ToggleButton(string label, ref bool selected, bool canDeselect = true)
     {
-        return ToggleButton(label, new(0,0), ref selected, canDeselect);
+        return ToggleButton(label, new(0, 0), ref selected, canDeselect);
     }
 
     public static bool ToggleButton(string label, Vector2 size, ref bool selected, bool canDeselect = true)

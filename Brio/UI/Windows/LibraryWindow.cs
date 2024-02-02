@@ -2,7 +2,6 @@
 using Brio.Files;
 using Brio.Game.Types;
 using Brio.Library;
-using Brio.Library.Actions;
 using Brio.Library.Filters;
 using Brio.Library.Tags;
 using Brio.UI.Controls.Stateless;
@@ -22,6 +21,8 @@ namespace Brio.UI.Windows;
 
 internal class LibraryWindow : Window
 {
+    private static Vector2 MinimumSize = new(850, 500);
+
     private const float InfoPaneWidth = 350;
     private const float SearchWidth = 400;
     private const int MaxTagsInSuggest = 25;
@@ -30,16 +31,20 @@ internal class LibraryWindow : Window
     private const int MinEntrySize = 100;
     private const int MaxEntrySize = 250;
 
+    public readonly TagFilter TagFilter = new();
+
     private readonly ConfigurationService _configurationService;
     private readonly LibraryManager _libraryManager;
     private readonly IPluginLog _log;
 
-    private readonly List<FilterBase> filters = new();
-    public FilterBase TypeFilter;
-    public readonly SearchQueryFilter SearchFilter = new();
-    public readonly TagFilter TagFilter = new();
-    private string _searchText = string.Empty;
+    private readonly LibraryFavoritesFilter _favoritesFilter;
+    private readonly TypeFilter _charactersFilter;
+    private readonly TypeFilter _posesFilter;
+    private readonly SearchQueryFilter _searchFilter = new();
     private readonly List<GroupEntryBase> _path = new();
+    private FilterBase? _modalFilter;
+    private FilterBase _selectedFilter;
+    private string _searchText = string.Empty;
     private IEnumerable<EntryBase>? _currentEntries;
     private TagCollection _allTags = new();
     private EntryBase? _toOpen = null;
@@ -55,6 +60,8 @@ internal class LibraryWindow : Window
     private bool _isRescanning;
     private bool _isRefreshing;
     private long _lastRefreshTimeMs = 0;
+    private bool _isModal = false;
+    private Action<ItemEntryBase>? _modalCallback;
 
     public LibraryWindow(IPluginLog log, ConfigurationService configurationService, LibraryManager libraryManager)
         : base($"{Brio.Name} Library###brio_library_window")
@@ -62,7 +69,7 @@ internal class LibraryWindow : Window
         this.Namespace = "brio_library_namespace";
 
         WindowSizeConstraints constraints = new();
-        constraints.MinimumSize = new(850, 500);
+        constraints.MinimumSize = MinimumSize;
         constraints.MaximumSize = ImGui.GetIO().DisplaySize;
         this.SizeConstraints = constraints;
 
@@ -72,19 +79,60 @@ internal class LibraryWindow : Window
         
         _path.Add(_libraryManager.Root);
 
+        _libraryManager.RegisterWindow(this);
         _libraryManager.OnScanFinished += OnLibraryScanFinished;
         configurationService.OnConfigurationChanged += OnConfigurationChanged;
 
-        filters.Add(new LibraryFavoritesFilter(configurationService));
-        filters.Add(new TypeFilter("Characters", typeof(AnamnesisCharaFile), typeof(ActorAppearanceUnion), typeof(MareCharacterDataFile)));
-        filters.Add(new TypeFilter("Poses", typeof(PoseFile), typeof(CMToolPoseFile)));
-
-        TypeFilter = filters[0];
+        _favoritesFilter = new LibraryFavoritesFilter(configurationService);
+        _charactersFilter = new TypeFilter("Characters", typeof(AnamnesisCharaFile), typeof(ActorAppearanceUnion), typeof(MareCharacterDataFile));
+        _posesFilter = new TypeFilter("Poses", typeof(PoseFile), typeof(CMToolPoseFile));
+        _selectedFilter = _favoritesFilter;
     }
 
     private float WindowContentWidth => ImGui.GetWindowContentRegionMax().X - ImGui.GetWindowContentRegionMin().X;
     private float WindowContentHeight => ImGui.GetWindowContentRegionMax().Y - ImGui.GetWindowContentRegionMin().Y;
-    public bool IsSearching => (SearchFilter.Query != null && SearchFilter.Query.Length > 0) || (TagFilter.Tags != null && TagFilter.Tags.Count > 0);
+    public bool IsSearching => (_searchFilter.Query != null && _searchFilter.Query.Length > 0) || (TagFilter.Tags != null && TagFilter.Tags.Count > 0);
+
+    public void OpenModal(FilterBase filter, Action<ItemEntryBase> callback)
+    {
+        _isModal = true;
+        _modalCallback = callback;
+        _modalFilter = filter;
+
+        Flags = ImGuiWindowFlags.Modal | ImGuiWindowFlags.NoCollapse;
+
+        IsOpen = true;
+    }
+
+    public void Open()
+    {
+        _isModal = false;
+
+        Flags = ImGuiWindowFlags.None;
+
+        IsOpen = true;
+    }
+
+    public void Close()
+    {
+        IsOpen = false;
+        _isModal = false;
+
+        _modalCallback = null;
+        _modalFilter = null;
+    }
+
+    public new void Toggle()
+    {
+        if (IsOpen)
+        {
+            Close();
+        }
+        else
+        {
+            Open();
+        }
+    }
 
     public override void OnOpen()
     {
@@ -104,11 +152,39 @@ internal class LibraryWindow : Window
 
     public override void Draw()
     {
+        DrawInternal();
+    }
+
+    public override bool DrawConditions()
+    {
+        if(_isModal)
+            return false;
+
+        return base.DrawConditions();
+    }
+
+    public void DrawModal()
+    {
+        if(!this.IsOpen || !this._isModal)
+            return;
+
+        ImGui.OpenPopup($"{Brio.Name} Library##brio_library_popup");
+
+        ImGui.SetNextWindowSizeConstraints(MinimumSize, ImGui.GetIO().DisplaySize);
+
+        ImGui.BeginPopupModal($"{Brio.Name} Library##brio_library_popup");
+
+        DrawInternal();
+        ImGui.EndPopup();
+    }
+
+    private void DrawInternal()
+    {
         using(ImRaii.PushId("brio_library"))
         {
             DrawFilters();
 
-            if(TypeFilter == null)
+            if(_selectedFilter == null)
                 return;
 
             ImGui.Spacing();
@@ -159,56 +235,164 @@ internal class LibraryWindow : Window
             }
             ImGui.SameLine();
 
-      
-            if (ImGui.BeginChild("###library_info_pane", new Vector2(ImBrio.GetRemainingWidth(), ImBrio.GetRemainingHeight()), true,
-                ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse))
+            if(ImGui.BeginChild("###right_pane", new Vector2(ImBrio.GetRemainingWidth(), -1), false,
+                ImGuiWindowFlags.NoBackground | ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse))
             {
-                if(_selected != null)
+                float paneHeight = ImBrio.GetRemainingHeight();
+                if(_isModal)
+                    paneHeight -= ImBrio.GetLineHeight() + ImGui.GetStyle().ItemSpacing.Y;
+
+                if(ImGui.BeginChild("###library_info_pane", new Vector2(ImBrio.GetRemainingWidth(), paneHeight), true,
+                    ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse))
                 {
-                    DrawInfo(_selected);
-                }
-                else
-                {
-                    DrawInfo(_path[_path.Count - 1]);
+                    if(_selected != null)
+                    {
+                        DrawInfo(_selected);
+                    }
+                    else
+                    {
+                        DrawInfo(_path[_path.Count - 1]);
+                    }
+
+                    ImGui.EndChild();
                 }
 
-                ImGui.EndChild();
+                // Modal Buttons
+                if(_isModal)
+                {
+                    if (ImBrio.FontIconButton(FontAwesomeIcon.FolderOpen))
+                        DoBrowse();
+
+                    if(ImGui.IsItemHovered())
+                        ImGui.SetTooltip("Browse for a file");
+
+                    ImGui.SameLine();
+
+                    ImGui.SetCursorPosX(ImGui.GetCursorPosX() + (ImBrio.GetRemainingWidth() - (200 + ImGui.GetStyle().ItemSpacing.X)));
+                    if(_selected is not ItemEntryBase)
+                        ImGui.BeginDisabled();
+
+                    if (ImBrio.Button("Select", FontAwesomeIcon.Check, new Vector2(100, 0)))
+                    {
+                        if(_selected != null)
+                        {
+                            OnOpen(_selected);
+                        }
+                    }
+
+                    if(_selected is not ItemEntryBase)
+                    {
+                        ImGui.EndDisabled();
+                    }
+
+                    ImGui.SameLine();
+
+                    if(ImBrio.Button("Cancel", FontAwesomeIcon.Times, new Vector2(100, 0)))
+                    {
+                        Close();
+                    }
+                }
             }
 
             DrawSearchSuggest();
         }
     }
 
+    private void DoBrowse()
+    {
+        Close();
+
+        string title = $"Import {_modalFilter?.Name}###import_browse";
+        string type = "Pose File (*.pose | *.cmp){.pose,.cmp}";
+
+        string? lastPath = null;
+
+        UIManager.Instance.FileDialogManager.OpenFileDialog(title, type,
+            (success, paths) =>
+            {
+                if(success && paths.Count == 1)
+                {
+                    var path = paths[0];
+                }
+            }, 1, lastPath, true);
+    }
+
     private void DrawFilters()
     {
-        if(filters.Count <= 1)
-            return;
-
-        List<string> ops = new();
-        int selected = 0;
-        for (int i = 0; i < filters.Count; i++)
+        if(_isModal && _modalFilter != null)
         {
-            if(filters[i] == TypeFilter)
-                selected = i;
+            List<string> ops = new();
+            int selected = 0;
 
-            ops.Add(filters[i].Name);
+            ops.Add(_favoritesFilter.Name);
+            if(_favoritesFilter == _selectedFilter)
+                selected = 0;
+
+            ops.Add(_modalFilter.Name);
+            if(_modalFilter == _selectedFilter)
+                selected = 1;
+
+            if(ImBrio.ToggleButtonStrip("library_filters_selector", new(ImBrio.GetRemainingWidth(), ImBrio.GetLineHeight()), ref selected, ops.ToArray()))
+            {
+                if(selected == 0)
+                {
+                    _selectedFilter = _favoritesFilter;
+                }
+                else if(selected == 1)
+                {
+                    _selectedFilter = _modalFilter;
+                }
+
+                if(_path.Count > 1)
+                    _path.RemoveRange(1, _path.Count - 1);
+
+                Refresh(true);
+            }
         }
-
-        if (ImBrio.ToggleButtonStrip("library_filters_selector", new(ImBrio.GetRemainingWidth(), ImBrio.GetLineHeight()), ref selected, ops.ToArray()))
+        else
         {
-            TypeFilter = filters[selected];
+            List<string> ops = new();
+            int selected = 0;
 
-            if (_path.Count > 1)
-                _path.RemoveRange(1, _path.Count - 1);
+            ops.Add(_favoritesFilter.Name);
+            if(_favoritesFilter == _selectedFilter)
+                selected = 0;
 
-            Refresh(true);
+            ops.Add(_charactersFilter.Name);
+            if(_charactersFilter == _selectedFilter)
+                selected = 1;
+
+            ops.Add(_posesFilter.Name);
+            if(_posesFilter == _selectedFilter)
+                selected = 2;
+
+            if(ImBrio.ToggleButtonStrip("library_filters_selector", new(ImBrio.GetRemainingWidth(), ImBrio.GetLineHeight()), ref selected, ops.ToArray()))
+            {
+                if(selected == 0)
+                {
+                    _selectedFilter = _favoritesFilter;
+                }
+                else if(selected == 1)
+                {
+                    _selectedFilter = _charactersFilter;
+                }
+                else if(selected == 2)
+                {
+                    _selectedFilter = _posesFilter;
+                }
+
+                if(_path.Count > 1)
+                    _path.RemoveRange(1, _path.Count - 1);
+
+                Refresh(true);
+            }
         }
     }
 
     private void ClearFilters()
     {
         ClearSearchText();
-        SearchFilter.Clear();
+        _searchFilter.Clear();
         TagFilter.Clear();
 
         // cant clear type filter.
@@ -339,7 +523,7 @@ internal class LibraryWindow : Window
                     if(ImBrio.FontIconButton(FontAwesomeIcon.TimesCircle))
                     {
                         ClearSearchText();
-                        SearchFilter.Clear();
+                        _searchFilter.Clear();
                         TagFilter.Clear();
                         _searchNeedsFocus = true;
                         Refresh(true);
@@ -399,11 +583,11 @@ internal class LibraryWindow : Window
                 {
                     if(string.IsNullOrEmpty(_searchText))
                     {
-                        SearchFilter.Query = null;
+                        _searchFilter.Query = null;
                     }
                     else
                     {
-                        SearchFilter.Query = SearchUtility.ToQuery(_searchText);
+                        _searchFilter.Query = SearchUtility.ToQuery(_searchText);
                     }
 
                     Refresh(true);
@@ -667,91 +851,20 @@ internal class LibraryWindow : Window
         }
     }
 
-    private struct CachedAction
-    {
-        public EntryActionBase Action;
-        public string Label;
-        public FontAwesomeIcon Icon;
-    }
-
-    private List<CachedAction> GetActions(EntryBase entry)
-    {
-        List<CachedAction> results = new();
-
-        List<EntryActionBase> allActions = _libraryManager.GetActions(entry);
-        foreach(EntryActionBase action in allActions)
-        {
-            CachedAction cache = new();
-            cache.Action = action;
-            cache.Label = action.GetLabel(entry);
-            cache.Icon = action.GetIcon(entry);
-            results.Add(cache);
-        }
-
-        results.Sort((a, b) =>
-        {
-            return a.Action.IsPrimary.CompareTo(b.Action.IsPrimary);
-        });
-
-        return results;
-    }
 
     private void DrawInfo(EntryBase entry)
     {
         ImGui.Text(entry.Name);
 
-        List<CachedAction> allActions = GetActions(entry);
-
-        float infoAreaHeight = ImBrio.GetRemainingHeight();
-
-        if (allActions.Count > 0)
-            infoAreaHeight -= ImBrio.GetLineHeight() + ImGui.GetStyle().ItemSpacing.Y;
-
         // internal info
         ImGui.PushStyleColor(ImGuiCol.ChildBg, 0x000000);
-        if(ImGui.BeginChild("###library_info_pane", new Vector2(ImBrio.GetRemainingWidth(), infoAreaHeight), false))
+        if(ImGui.BeginChild("###library_info_pane", new Vector2(ImBrio.GetRemainingWidth(), ImBrio.GetRemainingHeight()), false))
         {
             entry.DrawInfo(this);
             ImGui.EndChild();
         }
+
         ImGui.PopStyleColor();
-
-        // Actions
-        if(allActions.Count > 0)
-        {
-            float totalWidth = 0;
-            for(int i = 0; i < allActions.Count; i++)
-            {
-                
-
-                if(i > 0)
-                    totalWidth += ImGui.GetStyle().ItemSpacing.X;
-
-
-                totalWidth += ImGui.CalcTextSize(allActions[i].Label).X;
-                totalWidth += ImGui.GetStyle().FramePadding.X * 2;
-            }
-
-            ImGui.SetCursorPosX(ImGui.GetCursorPosX() + (ImBrio.GetRemainingWidth() - totalWidth));
-
-            foreach(CachedAction actionCache in allActions)
-            {
-                bool canInvoke = actionCache.Action.GetCanInvoke() && !actionCache.Action.IsInvoking;
-
-                if(!canInvoke)
-                    ImGui.BeginDisabled();
-
-                if(ImGui.Button(actionCache.Label))
-                {
-                    actionCache.Action.Invoke(entry);
-                }
-
-                if(!canInvoke)
-                    ImGui.EndDisabled();
-
-                ImGui.SameLine();
-            }
-        }
     }
 
     private void OnOpen(EntryBase entry)
@@ -763,16 +876,16 @@ internal class LibraryWindow : Window
         }
         else
         {
-            List<CachedAction> actions = GetActions(entry);
-            foreach(CachedAction cachedAction in actions)
+            if(_isModal && entry is ItemEntryBase itemEntry)
             {
-                if(!cachedAction.Action.GetCanInvoke() || cachedAction.Action.IsInvoking)
-                    continue;
+                if (_modalCallback != null)
+                    _modalCallback.Invoke(itemEntry);
 
-                if (cachedAction.Action.IsPrimary)
-                {
-                    cachedAction.Action.Invoke(entry);
-                }
+                Close();
+            }
+            else
+            {
+               // YUKI TODO ?
             }
         }
     }
@@ -828,10 +941,13 @@ internal class LibraryWindow : Window
             if(filter)
             {
                 List<FilterBase> filters = new();
-                filters.Add(TypeFilter);
+                filters.Add(_selectedFilter);
+
+                if(_modalFilter != null)
+                    filters.Add(_modalFilter);
 
                 if(!string.IsNullOrEmpty(_searchText))
-                    filters.Add(SearchFilter);
+                    filters.Add(_searchFilter);
 
                 if(TagFilter.Tags != null && TagFilter.Tags.Count > 0)
                     filters.Add(TagFilter);
@@ -841,7 +957,7 @@ internal class LibraryWindow : Window
 
             bool flatten = IsSearching;
 
-            if(TypeFilter is LibraryFavoritesFilter)
+            if(_selectedFilter is LibraryFavoritesFilter)
                 flatten = true;
 
             GroupEntryBase currentEntry = _path[_path.Count - 1];

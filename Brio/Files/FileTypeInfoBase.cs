@@ -1,7 +1,5 @@
-﻿using Brio.Library.Actions;
-using Dalamud.Interface.Internal;
+﻿using Dalamud.Interface.Internal;
 using System;
-using System.Collections.Generic;
 using System.IO;
 
 namespace Brio.Files;
@@ -29,10 +27,6 @@ internal abstract class FileTypeInfoBase
     {
         string ext = Path.GetExtension(path);
         return ext == Extension;
-    }
-
-    public virtual void GetLibraryActions(ref List<EntryActionBase> actions)
-    {
     }
 }
 

@@ -158,6 +158,7 @@ internal class UIManager : IDisposable
     {
         _windowSystem.Draw();
         FileDialogManager.Draw();
+        _libraryWindow.DrawModal();
     }
 
     public void Dispose()

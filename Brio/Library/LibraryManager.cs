@@ -1,18 +1,19 @@
-﻿ using Brio.Config;
-using Brio.Library.Actions;
+﻿using Brio.Config;
+using Brio.Library.Filters;
 using Brio.Library.Sources;
 using Brio.Resources;
+using Brio.UI.Windows;
 using Dalamud.Plugin.Services;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Threading.Tasks;
-using System.Xml.Linq;
 
 namespace Brio.Library;
 
 internal class LibraryManager : IDisposable
 {
+    private static LibraryManager? _instance;
+
     private readonly IServiceProvider _serviceProvider;
     private readonly ConfigurationService _configurationService;
     private readonly GameDataProvider _luminaProvider;
@@ -20,8 +21,8 @@ internal class LibraryManager : IDisposable
     private readonly LibraryRoot _rootItem;
     private readonly List<SourceBase> _sources = new();
     private readonly List<SourceBase> _internalSources = new();
-    private readonly HashSet<EntryActionBase> _actions = new();
-    
+
+    private LibraryWindow? _window;
 
     public delegate void OnScanFinishedDelegate();
     public event OnScanFinishedDelegate? OnScanFinished;
@@ -29,8 +30,13 @@ internal class LibraryManager : IDisposable
     public bool IsScanning { get; private set; }
     public bool IsLoadingSources { get; private set; }
 
-    public LibraryManager(IServiceProvider serviceProvider, ConfigurationService configurationService, GameDataProvider luminaProvider, IFramework framework)
+    public LibraryManager(
+        IServiceProvider serviceProvider,
+        ConfigurationService configurationService,
+        GameDataProvider luminaProvider,
+        IFramework framework)
     {
+        _instance = this;
         _serviceProvider = serviceProvider;
         _configurationService = configurationService;
         _luminaProvider = luminaProvider;
@@ -49,9 +55,35 @@ internal class LibraryManager : IDisposable
         // TODO: swap this for a package
         AddInternalSource(new FileSource(this, "Standard Poses", "Images.ProviderIcon_Directory.png", Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Anamnesis", "StandardPoses"));
 
-        RegisterAction(new FavoriteAction());
-
         OnConfigurationChanged();
+    }
+
+    public static void Get<T>(string label, Action<T> callback)
+    {
+        TypeFilter typeFilter = new(label, typeof(T));
+        Get(typeFilter, (r) =>
+        {
+            if (r is T tr)
+            {
+                callback.Invoke(tr);
+            }
+        });
+    }
+
+    public static void Get(FilterBase filter, Action<object> callback)
+    {
+        if(_instance == null || _instance._window == null)
+            return;
+
+        _instance._window.OpenModal(filter, (ItemEntryBase item) =>
+        {
+            object? result = item.Load();
+
+            if(result == null)
+                return;
+
+            callback.Invoke(result);
+        });
     }
 
     public void AddSource(SourceBase source)
@@ -64,29 +96,9 @@ internal class LibraryManager : IDisposable
         _internalSources.Add(source);
     }
 
-    public void RegisterAction(EntryActionBase action)
+    public void RegisterWindow(LibraryWindow window)
     {
-        _actions.Add(action);
-        action.Initialize(_serviceProvider);
-    }
-
-    public void UnregisterAction(EntryActionBase action)
-    {
-        _actions.Remove(action);
-    }
-
-    public List<EntryActionBase> GetActions(EntryBase entry)
-    {
-        List<EntryActionBase> results = new();
-        foreach (EntryActionBase action in _actions)
-        {
-            if (action.Filter(entry))
-            {
-                results.Add(action);
-            }
-        }
-
-        return results;
+        _window = window;
     }
 
     private void OnConfigurationChanged()

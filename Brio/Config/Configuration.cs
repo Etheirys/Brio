@@ -27,9 +27,6 @@ internal class Configuration : IPluginConfiguration
     // Environment
     public EnvironmentConfiguration Environment { get; set; } = new EnvironmentConfiguration();
 
-    // Paths
-    public PathsConfiguration Paths { get; set; } = new PathsConfiguration();
-
     // Library
     public LibraryConfiguration Library { get; set; } = new LibraryConfiguration();
 

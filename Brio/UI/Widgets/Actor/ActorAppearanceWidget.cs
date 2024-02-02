@@ -23,24 +23,6 @@ internal class ActorAppearanceWidget(ActorAppearanceCapability capability) : Wid
 
     private void DrawLoadAppearance()
     {
-        if(ImBrio.FontIconButton("load_npc", FontAwesomeIcon.PersonArrowDownToLine, "Load NPC Appearance"))
-        {
-            AppearanceEditorCommon.ResetNPCSelector();
-            ImGui.OpenPopup("widget_npc_selector");
-        }
-
-
-        if(Capability.CanMcdf)
-        {
-            ImGui.SameLine();
-            if(ImBrio.FontIconButton("load_mcdf", FontAwesomeIcon.CloudDownloadAlt, "Load Mare Synchronos MCDF"))
-            {
-                FileUIHelpers.ShowImportMcdfModal(Capability);
-            }
-        }
-
-        ImGui.SameLine();
-
         if(ImBrio.FontIconButton("import_charafile", FontAwesomeIcon.FileImport, "Import Character File"))
             FileUIHelpers.ShowImportCharacterModal(Capability, AppearanceImportOptions.Default);
 

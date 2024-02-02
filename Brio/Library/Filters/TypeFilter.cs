@@ -7,10 +7,10 @@ internal class TypeFilter : FilterBase
 {
     private HashSet<Type> _types = new();
 
-    public TypeFilter(string name, params Type[] fileTypes)
+    public TypeFilter(string name, params Type[] loadTypes)
         : base(name)
     {
-        foreach(Type type in fileTypes)
+        foreach(Type type in loadTypes)
         {
             _types.Add(type);
         }

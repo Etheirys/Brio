@@ -123,6 +123,54 @@ internal static partial class ImBrio
         return wasClicked;
     }
 
+    public static bool Button(string label, FontAwesomeIcon icon, float iconScale = 1.0f)
+    {
+        return Button(label, icon, Vector2.Zero, iconScale);
+    }
+
+    public static bool Button(string label, FontAwesomeIcon icon, Vector2 size, float iconScale = 1.0f)
+    {
+        bool clicked = false;
+
+        // for consistency, hard-code this
+        float iconWidth = 40;
+
+        float textWidth = ImGui.CalcTextSize(label).X;
+        float innerWidth = iconWidth + ImGui.GetStyle().ItemInnerSpacing.X + textWidth;
+        float neededWidth = innerWidth + (ImGui.GetStyle().FramePadding.X * 2);
+
+        if(size.X == 0)
+        {
+            size.X = neededWidth;
+        }
+        else
+        {
+            neededWidth = size.X;
+            innerWidth = size.X - (ImGui.GetStyle().FramePadding.X * 2);
+        }
+
+        float iconR = iconWidth + ImGui.GetStyle().ItemInnerSpacing.X;
+        float textOffset = iconR / innerWidth;
+        ImGui.PushStyleVar(ImGuiStyleVar.ButtonTextAlign, new Vector2(textOffset, 0.5f));
+
+        Vector2 startPos = ImGui.GetCursorPos();
+        clicked = ImGui.Button(label, size);
+
+        ImGui.SetCursorPos(startPos + ImGui.GetStyle().FramePadding);
+        ImGui.SetWindowFontScale(iconScale);
+        using(ImRaii.PushFont(UiBuilder.IconFont))
+        {
+            ImGui.Text(icon.ToIconString());
+        }
+        ImGui.SetWindowFontScale(1.0f);
+        ImGui.SetCursorPos(startPos);
+        ImGui.InvisibleButton("##dummy", size);
+
+        ImGui.PopStyleVar();
+
+        return clicked;
+    }
+
     public static bool IsItemConfirmed() => ImGui.IsItemDeactivated() && (ImGui.IsKeyPressed(ImGuiKey.Enter) || ImGui.IsKeyPressed(ImGuiKey.KeypadEnter));
 
     public static bool BorderedGameIcon(string id, uint iconId, string fallback, string? description = null, ImGuiButtonFlags flags = ImGuiButtonFlags.MouseButtonLeft, Vector2? size = null)
