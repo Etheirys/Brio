@@ -8,6 +8,7 @@ internal class LibraryConfiguration
 
     public List<FileSourceConfig> Files { get; set; } = new();
     public HashSet<string> Favorites { get; set; } = new();
+    public Dictionary<string, string> LastBrowsePaths { get; set; } = new();
 
     public void CheckDefaults()
     {

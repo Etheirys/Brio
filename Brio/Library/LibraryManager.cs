@@ -9,6 +9,7 @@ using Dalamud.Interface;
 using Dalamud.Plugin.Services;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -104,6 +105,7 @@ internal class LibraryManager : IDisposable
         // Build the filter string for Dalamud's file picker
         // "Pose File (*.pose | *.cmp){.pose,.cmp}"
         StringBuilder filterBuilder = new();
+        StringBuilder typeIdBuilder = new();
         if(filter is TypeFilter typeFilter)
         {
             List<FileTypeInfoBase> allInfos = new();
@@ -114,6 +116,11 @@ internal class LibraryManager : IDisposable
                     continue;
 
                 allInfos.Add(typeInfo);
+            }
+
+            foreach(FileTypeInfoBase typeInfo in allInfos)
+            {
+                typeIdBuilder.Append(typeInfo.Extension);
             }
 
             filterBuilder.Append("Any File(");
@@ -153,13 +160,19 @@ internal class LibraryManager : IDisposable
         {
             if(source is FileSource fs)
             {
+                if(!Directory.Exists(fs.DirectoryPath))
+                    continue;
+
                 UIManager.Instance.FileDialogManager.CustomSideBarItems.Add((fs.Name, fs.DirectoryPath, FontAwesomeIcon.FolderClosed, 0));
             }
         }
 
-        // TODO: last path cache
-        string? lastPath = null;
-
+        // Get the last directory the user used for these types
+        string typesId = typeIdBuilder.ToString();
+        string? lastDirectory = null;
+        var lastDirectories = _configurationService.Configuration.Library.LastBrowsePaths;
+        lastDirectories.TryGetValue(typesId, out lastDirectory);
+        
         // Show the dalamud file picker
         UIManager.Instance.FileDialogManager.OpenFileDialog(
             title,
@@ -174,11 +187,22 @@ internal class LibraryManager : IDisposable
                     if(result == null)
                         return;
 
+                    string? dir = Path.GetDirectoryName(path);
+
+                    if(dir != null)
+                    {
+                        if(!lastDirectories.ContainsKey(typesId))
+                            lastDirectories.Add(typesId, dir);
+
+                        lastDirectories[typesId] = dir;
+                        _configurationService.Save();
+                    }
+
                     callback.Invoke(result);
                 }
             }, 
             1, 
-            lastPath,
+            lastDirectory,
             true);
     }
 
