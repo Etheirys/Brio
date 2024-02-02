@@ -2,6 +2,7 @@
 using Brio.Files;
 using Brio.Library.Filters;
 using Brio.Library.Sources;
+using Brio.Library.Tags;
 using Brio.Resources;
 using Brio.UI;
 using Brio.UI.Windows;
@@ -209,6 +210,8 @@ internal class LibraryManager : IDisposable
 
     public void Dispose()
     {
+        Tag.ClearTagCache();
+
         foreach(SourceBase source in _internalSources)
         {
             source.Dispose();
