@@ -1,7 +1,7 @@
-﻿using Brio.Library.Sources;
+﻿using Brio.Capabilities.Actor;
+using Brio.Library.Sources;
 using Brio.Library.Tags;
 using Brio.Resources;
-using Dalamud.Interface.Internal;
 using System;
 
 namespace Brio.Files;

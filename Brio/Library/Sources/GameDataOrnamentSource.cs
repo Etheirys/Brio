@@ -1,11 +1,12 @@
-﻿using Brio.Resources;
+﻿using Brio.Entities;
+using Brio.Resources;
 
 namespace Brio.Library.Sources;
 
 internal class GameDataOrnamentSource : GameDataAppearanceSourceBase
 {
-    public GameDataOrnamentSource(LibraryManager manager, GameDataProvider lumina)
-        : base(manager, lumina)
+    public GameDataOrnamentSource(GameDataProvider lumina, EntityManager entityManager)
+        : base(lumina, entityManager)
     {
     }
 
@@ -17,7 +18,7 @@ internal class GameDataOrnamentSource : GameDataAppearanceSourceBase
         foreach(var (_, ornament) in Lumina.Ornaments)
         {
             string rowName = $"Ornament {ornament.RowId}";
-            var entry = new GameDataAppearanceEntry(this, ornament.RowId, ornament.Singular ?? rowName, ornament.Icon, ornament, $"{ornament.RowId}");
+            var entry = new GameDataAppearanceEntry(this, EntityManager, ornament.RowId, ornament.Singular ?? rowName, ornament.Icon, ornament, $"{ornament.RowId}");
             entry.Tags.Add("Ornament").WithAlias("Fashion Accessory");
             entry.SourceInfo = rowName;
             Add(entry);

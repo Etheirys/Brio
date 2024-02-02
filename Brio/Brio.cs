@@ -107,7 +107,6 @@ public class Brio : IDalamudPlugin
         serviceCollection.AddSingleton<ResourceProvider>();
         serviceCollection.AddSingleton<GameDataProvider>();
         serviceCollection.AddSingleton<WelcomeService>();
-        serviceCollection.AddSingleton<LibraryManager>();
 
         // IPC
         serviceCollection.AddSingleton<BrioIPCService>();
@@ -141,6 +140,20 @@ public class Brio : IDalamudPlugin
         serviceCollection.AddSingleton<CameraService>();
         serviceCollection.AddSingleton<ObjectMonitorService>();
 
+        // Library
+        serviceCollection.AddSingleton<FileTypeInfoBase, AnamnesisCharaFileInfo>();
+        serviceCollection.AddSingleton<FileTypeInfoBase, CMToolPoseFileInfo>();
+        serviceCollection.AddSingleton<FileTypeInfoBase, PoseFileInfo>();
+        serviceCollection.AddSingleton<FileTypeInfoBase, MareCharacterDataFileInfo>();
+        serviceCollection.AddSingleton<FileService>();
+
+        serviceCollection.AddSingleton<SourceBase, GameDataNpcSource>();
+        serviceCollection.AddSingleton<SourceBase, GameDataMountSource>();
+        serviceCollection.AddSingleton<SourceBase, GameDataOrnamentSource>();
+        serviceCollection.AddSingleton<SourceBase, GameDataCompanionSource>();
+
+        serviceCollection.AddSingleton<LibraryManager>();
+
         // UI
         serviceCollection.AddSingleton<UIManager>();
         serviceCollection.AddSingleton<MainWindow>();
@@ -154,13 +167,6 @@ public class Brio : IDalamudPlugin
         serviceCollection.AddSingleton<PosingTransformWindow>();
         serviceCollection.AddSingleton<CameraWindow>();
         serviceCollection.AddSingleton<PosingGraphicalWindow>();
-
-        // Library
-        serviceCollection.AddSingleton<FileTypeInfoBase, AnamnesisCharaFileInfo>();
-        serviceCollection.AddSingleton<FileTypeInfoBase, CMToolPoseFileInfo>();
-        serviceCollection.AddSingleton<FileTypeInfoBase, PoseFileInfo>();
-        serviceCollection.AddSingleton<FileTypeInfoBase, MareCharacterDataFileInfo>();
-        serviceCollection.AddSingleton<FileService>();
 
         return serviceCollection;
     }

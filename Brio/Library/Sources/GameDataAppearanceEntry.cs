@@ -1,7 +1,10 @@
-﻿using Brio.Game.Actor.Appearance;
+﻿using Brio.Capabilities.Actor;
+using Brio.Entities;
+using Brio.Game.Actor.Appearance;
 using Brio.Game.Types;
 using Brio.Resources;
 using Brio.UI;
+using Brio.UI.Controls.Stateless;
 using Dalamud.Interface.Internal;
 using System;
 
@@ -14,8 +17,9 @@ internal class GameDataAppearanceEntry : ItemEntryBase
     private ActorAppearanceUnion _appearance;
     private uint _rowId;
     private string _id;
+    private EntityManager _entityManager;
 
-    public GameDataAppearanceEntry(SourceBase source, uint rowId, string name, uint icon, ActorAppearanceUnion appearance, string id)
+    public GameDataAppearanceEntry(SourceBase source, EntityManager entityManager, uint rowId, string name, uint icon, ActorAppearanceUnion appearance, string id)
         : base(source)
     {
         _name = name;
@@ -23,6 +27,7 @@ internal class GameDataAppearanceEntry : ItemEntryBase
         _appearance = appearance;
         _rowId = rowId;
         _id = id;
+        _entityManager = entityManager;
 
         ActorAppearance app = _appearance;
 
@@ -86,4 +91,18 @@ internal class GameDataAppearanceEntry : ItemEntryBase
     }
 
     protected override string GetInternalId() => _id;
+
+    public override void DrawActions(bool isModal)
+    {
+        base.DrawActions(isModal);
+
+        ImBrio.DrawApplyToActor(_entityManager, (actor) =>
+        {
+            ActorAppearanceCapability? capability;
+            if(actor.TryGetCapability<ActorAppearanceCapability>(out capability) && capability != null)
+            {
+                _ = capability.SetAppearance(Appearance, AppearanceImportOptions.All);
+            }
+        });
+    }
 }

@@ -1,11 +1,12 @@
-﻿using Brio.Resources;
+﻿using Brio.Entities;
+using Brio.Resources;
 
 namespace Brio.Library.Sources;
 
 internal class GameDataMountSource : GameDataAppearanceSourceBase
 {
-    public GameDataMountSource(LibraryManager manager, GameDataProvider lumina)
-        : base(manager, lumina)
+    public GameDataMountSource(GameDataProvider lumina, EntityManager entityManager)
+        : base(lumina, entityManager)
     {
     }
 
@@ -22,7 +23,7 @@ internal class GameDataMountSource : GameDataAppearanceSourceBase
             if(string.IsNullOrEmpty(name))
                 name = rowName;
 
-            var entry = new GameDataAppearanceEntry(this, mount.RowId, name, mount.Icon, mount, $"{mount.RowId}");
+            var entry = new GameDataAppearanceEntry(this, EntityManager, mount.RowId, name, mount.Icon, mount, $"{mount.RowId}");
             entry.Tags.Add("Mount");
 
             if (name != rowName)

@@ -22,11 +22,10 @@ internal class LibraryManager : IDisposable
 
     private readonly FileService _fileService;
     private readonly ConfigurationService _configurationService;
-    private readonly GameDataProvider _luminaProvider;
     private readonly IFramework _framework;
     private readonly LibraryRoot _rootItem;
     private readonly List<SourceBase> _sources = new();
-    private readonly List<SourceBase> _internalSources = new();
+    private readonly IEnumerable<SourceBase> _internalSources;
 
     private LibraryWindow? _window;
 
@@ -39,27 +38,22 @@ internal class LibraryManager : IDisposable
     public LibraryManager(
         FileService fileService,
         ConfigurationService configurationService,
-        GameDataProvider luminaProvider,
-        IFramework framework)
+        IFramework framework,
+        IEnumerable<SourceBase> internalSources)
     {
         _instance = this;
         _fileService = fileService;
         _configurationService = configurationService;
-        _luminaProvider = luminaProvider;
         _framework = framework;
         _rootItem = new(this, configurationService);
+        _internalSources = internalSources;
 
         _configurationService.Configuration.Library.CheckDefaults();
         _configurationService.OnConfigurationChanged += OnConfigurationChanged;
 
-        // Game Data
-        AddInternalSource(new GameDataNpcSource(this, _luminaProvider));
-        AddInternalSource(new GameDataMountSource(this, _luminaProvider));
-        AddInternalSource(new GameDataCompanionSource(this, _luminaProvider));
-        AddInternalSource(new GameDataOrnamentSource(this, _luminaProvider));
 
         // TODO: swap this for a package
-        AddInternalSource(new FileSource(_fileService, "Standard Poses", "Images.ProviderIcon_Directory.png", Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Anamnesis", "StandardPoses"));
+        ////AddInternalSource(new FileSource(_fileService, "Standard Poses", "Images.ProviderIcon_Directory.png", Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Anamnesis", "StandardPoses"));
 
         OnConfigurationChanged();
     }
@@ -87,11 +81,6 @@ internal class LibraryManager : IDisposable
     public void AddSource(SourceBase source)
     {
         _sources.Add(source);
-    }
-
-    private void AddInternalSource(SourceBase source)
-    {
-        _internalSources.Add(source);
     }
 
     public void RegisterWindow(LibraryWindow window)

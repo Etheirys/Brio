@@ -125,8 +125,12 @@ internal abstract class ItemEntryBase : EntryBase
 
             ConfigurationService.Instance.Save();
         }
-        ImGui.SameLine();
 
         ImGui.PopStyleColor();
+
+        if (ImGui.IsItemHovered())
+            ImGui.SetTooltip(isFavorite ? "Remove from favorites" : "Add to favorites");
+
+        ImGui.SameLine();
     }
 }

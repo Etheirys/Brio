@@ -1,12 +1,13 @@
-﻿using Brio.Resources;
+﻿using Brio.Entities;
+using Brio.Resources;
 using System.Collections.Generic;
 
 namespace Brio.Library.Sources;
 
 internal class GameDataNpcSource : GameDataAppearanceSourceBase
 {
-    public GameDataNpcSource(LibraryManager manager, GameDataProvider lumina)
-        : base(manager, lumina)
+    public GameDataNpcSource(GameDataProvider lumina, EntityManager entityManager)
+        : base(lumina, entityManager)
     {
     }
 
@@ -19,7 +20,7 @@ internal class GameDataNpcSource : GameDataAppearanceSourceBase
         {
             string name = $"B:{npc.RowId:D7}";
             string? displayName = ResolveName(name);
-            var entry = new GameDataAppearanceEntry(this, npc.RowId, displayName ?? name, 0, npc, $"B{npc.RowId}");
+            var entry = new GameDataAppearanceEntry(this, EntityManager, npc.RowId, displayName ?? name, 0, npc, $"B{npc.RowId}");
             entry.SourceInfo = $"BNpc {npc.RowId}";
             entry.Tags.Add("NPC");
 
@@ -42,7 +43,7 @@ internal class GameDataNpcSource : GameDataAppearanceSourceBase
             }
 
             string? displayName = ResolveName(name);
-            var entry = new GameDataAppearanceEntry(this, npc.RowId, displayName ?? name, 0, npc, $"E{npc.RowId}");
+            var entry = new GameDataAppearanceEntry(this, EntityManager, npc.RowId, displayName ?? name, 0, npc, $"E{npc.RowId}");
             entry.SourceInfo = $"ENpc {npc.RowId}";
             entry.Tags.Add("NPC");
 
