@@ -5,16 +5,32 @@ VisualStudioVersion = 17.8.34316.72
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Brio", "Brio\Brio.csproj", "{6E14631E-8223-427D-8A03-550EEE66B842}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WpfRemote", "WpfRemote\WpfRemote.csproj", "{7A54ABF2-1053-4446-AA79-4ADB666184D5}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
 		Debug|x64 = Debug|x64
+		Release|Any CPU = Release|Any CPU
 		Release|x64 = Release|x64
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{6E14631E-8223-427D-8A03-550EEE66B842}.Debug|Any CPU.ActiveCfg = Debug|x64
+		{6E14631E-8223-427D-8A03-550EEE66B842}.Debug|Any CPU.Build.0 = Debug|x64
 		{6E14631E-8223-427D-8A03-550EEE66B842}.Debug|x64.ActiveCfg = Debug|x64
 		{6E14631E-8223-427D-8A03-550EEE66B842}.Debug|x64.Build.0 = Debug|x64
+		{6E14631E-8223-427D-8A03-550EEE66B842}.Release|Any CPU.ActiveCfg = Release|x64
+		{6E14631E-8223-427D-8A03-550EEE66B842}.Release|Any CPU.Build.0 = Release|x64
 		{6E14631E-8223-427D-8A03-550EEE66B842}.Release|x64.ActiveCfg = Release|x64
 		{6E14631E-8223-427D-8A03-550EEE66B842}.Release|x64.Build.0 = Release|x64
+		{7A54ABF2-1053-4446-AA79-4ADB666184D5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7A54ABF2-1053-4446-AA79-4ADB666184D5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7A54ABF2-1053-4446-AA79-4ADB666184D5}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{7A54ABF2-1053-4446-AA79-4ADB666184D5}.Debug|x64.Build.0 = Debug|Any CPU
+		{7A54ABF2-1053-4446-AA79-4ADB666184D5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7A54ABF2-1053-4446-AA79-4ADB666184D5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7A54ABF2-1053-4446-AA79-4ADB666184D5}.Release|x64.ActiveCfg = Release|Any CPU
+		{7A54ABF2-1053-4446-AA79-4ADB666184D5}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
