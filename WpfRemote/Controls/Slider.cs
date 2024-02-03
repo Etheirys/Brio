@@ -1,4 +1,4 @@
-﻿namespace WpfUtils.Controls;
+﻿namespace WpfRemote.Controls;
 
 using System.Reflection;
 using System.Windows.Input;

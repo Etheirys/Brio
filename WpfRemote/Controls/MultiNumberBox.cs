@@ -1,4 +1,4 @@
-﻿namespace WpfUtils.Controls;
+﻿namespace WpfRemote.Controls;
 
 using PropertyChanged.SourceGenerator;
 using System;
@@ -7,8 +7,8 @@ using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using System.Windows.Controls;
 using System.Windows.Input;
-using WpfUtils;
-using WpfUtils.DependencyProperties;
+using WpfRemote;
+using WpfRemote.DependencyProperties;
 
 public partial class MultiNumberBox : TextBox
 {

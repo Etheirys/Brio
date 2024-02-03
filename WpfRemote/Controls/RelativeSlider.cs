@@ -1,8 +1,8 @@
-﻿namespace WpfUtils.Controls;
+﻿namespace WpfRemote.Controls;
 
 using System.Windows;
 using System.Windows.Input;
-using WpfUtils.DependencyProperties;
+using WpfRemote.DependencyProperties;
 
 public class RelativeSlider : Slider
 {

@@ -1,4 +1,4 @@
-﻿namespace WpfUtils.Converters;
+﻿namespace WpfRemote.Converters;
 
 using System;
 using System.Windows;

@@ -1,4 +1,4 @@
-﻿namespace WpfUtils.Converters;
+﻿namespace WpfRemote.Converters;
 
 public class BoolToIntConverter : ConverterBase<bool, int>
 {

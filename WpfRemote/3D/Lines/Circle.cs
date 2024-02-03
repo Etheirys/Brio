@@ -1,4 +1,4 @@
-﻿namespace WpfUtils.Meida3D.Lines;
+﻿namespace WpfRemote.Meida3D.Lines;
 
 using System;
 using System.Windows.Media.Media3D;

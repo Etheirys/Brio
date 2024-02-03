@@ -1,8 +1,8 @@
 ﻿<ResourceDictionary
 	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
 	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-	xmlns:XivtoolsWpf="clr-namespace:WpfUtils.Controls"
-	xmlns:converters="clr-namespace:WpfUtils.Converters">
+	xmlns:XivtoolsWpf="clr-namespace:WpfRemote.Controls"
+	xmlns:converters="clr-namespace:WpfRemote.Converters">
 
 	<Style
 		x:Key="WpfUtilsTabControl"

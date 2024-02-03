@@ -1,4 +1,4 @@
-﻿namespace WpfUtils;
+﻿namespace WpfRemote;
 
 using System;
 using System.Runtime.CompilerServices;

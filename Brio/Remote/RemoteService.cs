@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 namespace Brio.Remote;
 internal class RemoteService : IDisposable
 {
-    public const int SyncMs = 100;
+    public const int SyncMs = 33;
 
     private readonly EntityManager _entityManager;
     private EasyTcpServer? _server;

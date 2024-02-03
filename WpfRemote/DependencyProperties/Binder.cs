@@ -1,4 +1,4 @@
-﻿namespace WpfUtils.DependencyProperties;
+﻿namespace WpfRemote.DependencyProperties;
 
 using System;
 using System.Reflection;

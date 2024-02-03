@@ -1,4 +1,4 @@
-﻿namespace WpfUtils.Meida3D;
+﻿namespace WpfRemote.Meida3D;
 
 using System;
 using System.Windows;

@@ -1,4 +1,4 @@
-﻿namespace WpfUtils.Converters;
+﻿namespace WpfRemote.Converters;
 
 using System.Windows.Data;
 using System.Windows.Media;

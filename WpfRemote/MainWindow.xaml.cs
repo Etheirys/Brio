@@ -4,6 +4,7 @@ using Brio.Remote;
 using System.ComponentModel;
 using System.Windows;
 using PropertyChanged.SourceGenerator;
+using FFXIVClientStructs.Havok;
 
 public partial class MainWindow : Window
 {
@@ -37,9 +38,16 @@ public partial class MainWindow : Window
                 ViewModel.ScaleY = bm.ScaleY;
                 ViewModel.ScaleZ = bm.ScaleZ;
 
-                //RotationX = bm.RotationX;
-                //RotationY = bm.RotationY;
-                //RotationZ = bm.RotationZ;
+                hkQuaternionf rot = new hkQuaternionf();
+                rot.X = bm.RotationX;
+                rot.Y = bm.RotationY;
+                rot.Z = bm.RotationZ;
+                rot.W = bm.RotationW;
+
+                ViewModel.Rotation = rot;
+                ViewModel.EulerRotationX = rot.ToEuler().X;
+                ViewModel.EulerRotationY = rot.ToEuler().Y;
+                ViewModel.EulerRotationZ = rot.ToEuler().Z;
             });
         }
     }
@@ -55,7 +63,10 @@ public partial class MainWindowViewModel
     [Notify] public float scaleX = 0;
     [Notify] public float scaleY = 0;
     [Notify] public float scaleZ = 0;
-    [Notify] public float rotationX = 0;
-    [Notify] public float rotationY = 0;
-    [Notify] public float rotationZ = 0;
+    [Notify] public float eulerRotationX = 0;
+    [Notify] public float eulerRotationY = 1;
+    [Notify] public float eulerRotationZ = 0;
+
+    [Notify] public hkQuaternionf rootRotation;
+    [Notify] public hkQuaternionf rotation;
 }

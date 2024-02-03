@@ -1,4 +1,4 @@
-﻿namespace WpfUtils.Controls;
+﻿namespace WpfRemote.Controls;
 
 using System;
 using System.ComponentModel;
@@ -10,7 +10,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using PropertyChanged.SourceGenerator;
-using WpfUtils.DependencyProperties;
+using WpfRemote.DependencyProperties;
 using DrawPoint = System.Drawing.Point;
 using WinCur = System.Windows.Forms.Cursor;
 using WinPoint = System.Windows.Point;

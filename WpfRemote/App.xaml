@@ -2,8 +2,8 @@
 	x:Class="Remote.App"
 	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
 	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-	xmlns:controls="clr-namespace:WpfUtils.Controls"
-	xmlns:converters="clr-namespace:WpfUtils.Converters"
+	xmlns:controls="clr-namespace:WpfRemote.Controls"
+	xmlns:converters="clr-namespace:WpfRemote.Converters"
 	xmlns:local="clr-namespace:Remote"
 	StartupUri="MainWindow.xaml">
 
@@ -78,10 +78,6 @@
 			<Style
 				BasedOn="{StaticResource WpfUtilsCheckBox}"
 				TargetType="{x:Type CheckBox}" />
-
-			<Style
-				BasedOn="{StaticResource WpfUtilsMenuItem}"
-				TargetType="{x:Type MenuItem}" />
 
 			<Style
 				BasedOn="{StaticResource WpfUtilsGroupBox}"
