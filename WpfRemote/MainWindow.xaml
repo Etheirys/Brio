@@ -9,5 +9,49 @@
 	Width="800"
 	Height="450"
 	mc:Ignorable="d">
-	<Grid />
+
+	<Grid
+		Width="300"
+		HorizontalAlignment="Center"
+		VerticalAlignment="Center">
+
+		<Grid.ColumnDefinitions>
+			<ColumnDefinition />
+			<ColumnDefinition />
+			<ColumnDefinition />
+		</Grid.ColumnDefinitions>
+
+		<Grid.RowDefinitions>
+			<RowDefinition />
+			<RowDefinition />
+			<RowDefinition />
+		</Grid.RowDefinitions>
+
+		<TextBox
+			x:Name="PosXText"
+			Grid.Row="0"
+			Grid.Column="0" />
+		<TextBox
+			x:Name="PosYText"
+			Grid.Row="0"
+			Grid.Column="1" />
+		<TextBox
+			x:Name="PosZText"
+			Grid.Row="0"
+			Grid.Column="2" />
+
+		<TextBox
+			x:Name="ScaleXText"
+			Grid.Row="1"
+			Grid.Column="0" />
+		<TextBox
+			x:Name="ScaleYText"
+			Grid.Row="1"
+			Grid.Column="1" />
+		<TextBox
+			x:Name="ScaleZText"
+			Grid.Row="1"
+			Grid.Column="2" />
+
+	</Grid>
 </Window>

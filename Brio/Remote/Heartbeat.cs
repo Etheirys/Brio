@@ -5,6 +5,5 @@ namespace Brio.Remote;
 [MessagePackObject]
 public class Heartbeat
 {
-    [Key(0)]
-    public int Count { get; set; }
+    [Key(00)] public int Count { get; set; }
 }

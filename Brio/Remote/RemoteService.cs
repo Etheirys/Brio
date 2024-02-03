@@ -1,17 +1,26 @@
-﻿using EasyTcp4;
+﻿using Brio.Capabilities.Posing;
+using Brio.Entities;
+using Brio.Entities.Actor;
+using Brio.Game.Posing;
+using Brio.Game.Posing.Skeletons;
+using EasyTcp4;
 using EasyTcp4.ServerUtils;
 using MessagePack;
 using System;
+using System.Threading.Tasks;
 
 namespace Brio.Remote;
-public class RemoteService : IDisposable
+internal class RemoteService : IDisposable
 {
-    public const int Port = 1200;
+    public const int SyncMs = 100;
 
+    private readonly EntityManager _entityManager;
     private EasyTcpServer? _server;
 
-    public RemoteService()
+    public RemoteService(EntityManager entityManager)
     {
+        _entityManager = entityManager;
+
         StartServer();
     }
 
@@ -27,7 +36,9 @@ public class RemoteService : IDisposable
         _server.OnConnect += (s, e) => Brio.Log.Info("Remote client connected");
         _server.OnDisconnect += (s, e) => Brio.Log.Info("Remote client disconnected");
 
-        _server.Start(Port);
+        _server.Start(Configuration.Port);
+
+        Task.Run(Synchronizer);
 
         return _server.IsRunning;
     }
@@ -35,17 +46,58 @@ public class RemoteService : IDisposable
     public void Dispose()
     {
         _server?.Dispose();
+        _server = null;
     }
 
-    public void Send(byte[] data)
+    public void Send(object obj)
     {
+        byte[] data = MessagePackSerializer.Typeless.Serialize(obj);
         _server.SendAll(data);
     }
 
     private void OnDataReceived(object? sender, Message e)
     {
         object? obj = MessagePackSerializer.Typeless.Deserialize(e.Data);
+    }
 
-        Brio.Log.Info($"Received {obj?.GetType()}");
+    private async Task Synchronizer()
+    {
+        while(_server != null)
+        {
+            await Task.Delay(SyncMs);
+
+            if (_entityManager.SelectedEntity is ActorEntity actor)
+            {
+                PosingCapability? posing;
+                if (actor.TryGetCapability<PosingCapability>(out posing))
+                {
+                    SynchronizePosing(posing);
+                }
+            }
+        }
+    }
+
+    private void SynchronizePosing(PosingCapability posing)
+    {
+        posing.Selected.Switch(
+            bone =>
+            {
+                Bone? realBone = posing.SkeletonPosing.GetBone(bone);
+                if(realBone != null && realBone.Skeleton.IsValid)
+                {
+                    BoneMessage boneMessage = new();
+                    boneMessage.FromBone(realBone);
+                    Send(boneMessage);
+                }
+            },
+            _ =>
+            {
+                // Model
+            },
+            _ =>
+            {
+                // Model
+            }
+        );
     }
 }

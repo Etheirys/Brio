@@ -12,10 +12,10 @@ namespace WpfRemote;
 
 internal class RemoteService
 {
-    public const int Port = Brio.Remote.RemoteService.Port;
-
     private EasyTcpClient? _client;
     private int _heartbeatIndex = 0;
+
+    public Action<object>? OnMessageCallback;
 
     public RemoteService()
     {
@@ -31,7 +31,7 @@ internal class RemoteService
         _client.OnError += (s, e) => Log.Error(e, "IPC error");
         _client.OnDataReceive += this.OnDataReceived;
 
-        bool success = await _client.ConnectAsync(IPAddress.Loopback, Port);
+        bool success = await _client.ConnectAsync(IPAddress.Loopback, Configuration.Port);
 
         if (success)
             _ = Task.Run(HeartbeatTask);
@@ -47,6 +47,13 @@ internal class RemoteService
 
     private void OnDataReceived(object? sender, Message e)
     {
+        object? obj = MessagePackSerializer.Typeless.Deserialize(e.Data);
+        Log.Information($"Received {obj?.GetType()}");
+
+        if (obj == null)
+            return;
+
+        OnMessageCallback?.Invoke(obj);
     }
 
     private async Task HeartbeatTask()
