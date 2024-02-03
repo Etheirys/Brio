@@ -21,6 +21,9 @@ public class BoneMessage
 
     internal void FromBone(Bone bone)
     {
+        this.Name = bone.Name;
+        this.DisplayName = bone.FriendlyName;
+
         this.PositionX = bone.LastTransform.Position.X;
         this.PositionY = bone.LastTransform.Position.Y;
         this.PositionZ = bone.LastTransform.Position.Z;

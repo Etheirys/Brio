@@ -28,6 +28,8 @@ public partial class MainWindow : Window
 
             Dispatcher?.Invoke(() =>
             {
+                ViewModel.BoneName = bm.Name ?? string.Empty;
+                ViewModel.BoneDisplayName = bm.DisplayName ?? string.Empty;
                 ViewModel.PositionX = bm.PositionX;
                 ViewModel.PositionY = bm.PositionY;
                 ViewModel.PositionZ = bm.PositionZ;
@@ -45,6 +47,8 @@ public partial class MainWindow : Window
 
 public partial class MainWindowViewModel
 {
+    [Notify] public string boneName = string.Empty;
+    [Notify] public string boneDisplayName = string.Empty;
     [Notify] public float positionX = 0;
     [Notify] public float positionY = 0;
     [Notify] public float positionZ = 0;

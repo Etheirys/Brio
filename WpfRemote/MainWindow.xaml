@@ -25,24 +25,36 @@
 
 
 		<Grid.RowDefinitions>
+			<RowDefinition Height="Auto" />
 			<RowDefinition />
-			<RowDefinition />
-			<RowDefinition />
+			<RowDefinition Height="Auto" />
+			<RowDefinition Height="Auto" />
+			<RowDefinition Height="Auto" />
 		</Grid.RowDefinitions>
 
-		<controls:MultiNumberBox
+		<TextBlock
 			Grid.Row="0"
+			Style="{StaticResource Body}"
+			Text="{Binding BoneDisplayName}" />
+
+		<TextBlock
+			Grid.Row="1"
+			Style="{StaticResource Header}"
+			Text="{Binding BoneName}" />
+
+		<controls:MultiNumberBox
+			Grid.Row="2"
 			X="{Binding PositionX}"
 			Y="{Binding PositionY}"
 			Z="{Binding PositionZ}" />
 
 		<controls:MultiNumberBox
-			Grid.Row="1"
+			Grid.Row="3"
 			X="{Binding ScaleX}"
 			Y="{Binding ScaleY}"
 			Z="{Binding ScaleZ}" />
 
-		<controls:MultiNumberBox Grid.Row="2" />
+		<controls:MultiNumberBox Grid.Row="4" />
 
 	</Grid>
 </Window>
