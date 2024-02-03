@@ -1,5 +1,6 @@
 ﻿using EasyTcp4;
 using EasyTcp4.ServerUtils;
+using MessagePack;
 using System;
 
 namespace Brio.Remote;
@@ -43,7 +44,8 @@ public class RemoteService : IDisposable
 
     private void OnDataReceived(object? sender, Message e)
     {
-        byte[] data = e.Data;
-        Brio.Log.Info($"Received {data.Length} bytes");
+        object? obj = MessagePackSerializer.Typeless.Deserialize(e.Data);
+
+        Brio.Log.Info($"Received {obj?.GetType()}");
     }
 }
