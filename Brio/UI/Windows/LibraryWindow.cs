@@ -107,10 +107,12 @@ internal class LibraryWindow : Window
         _isModal = true;
         _modalCallback = callback;
         _modalFilter = filter;
+        _selectedFilter = _modalFilter;
 
         Flags = ImGuiWindowFlags.Modal | ImGuiWindowFlags.NoCollapse;
         IsOpen = true;
-        Refresh(true);
+
+        Reset();
     }
 
     public void Open()
@@ -118,11 +120,12 @@ internal class LibraryWindow : Window
         _isModal = false;
         _modalCallback = null;
         _modalFilter = null;
+        _selectedFilter = _favoritesFilter;
 
         Flags = ImGuiWindowFlags.None;
 
         IsOpen = true;
-        Refresh(true);
+        Reset();
     }
 
     public void Close()
@@ -143,9 +146,11 @@ internal class LibraryWindow : Window
         }
     }
 
-    public override void OnOpen()
+    public void Reset()
     {
-        base.OnOpen();
+        if(_path.Count > 1)
+            _path.RemoveRange(1, _path.Count - 1);
+
         Refresh(true);
     }
 

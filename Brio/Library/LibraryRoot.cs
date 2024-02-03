@@ -1,21 +1,13 @@
-﻿using Brio.Config;
-using Brio.UI.Windows;
+﻿using Brio.UI.Windows;
 using Dalamud.Interface.Internal;
 
 namespace Brio.Library;
 
 internal class LibraryRoot : GroupEntryBase
 {
-    private readonly LibraryManager _manager;
-    private readonly ConfigurationService _configurationService;
-    private LibraryConfiguration.SourceConfigBase? _selectedSourceConfig;
-    private bool _isEditingSource;
-
-    public LibraryRoot(LibraryManager manager, ConfigurationService configurationService)
+    public LibraryRoot()
         : base(null)
     {
-        _manager = manager;
-        _configurationService = configurationService;
     }
 
     public override string Name => "Library";

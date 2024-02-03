@@ -46,7 +46,7 @@ internal class LibraryManager : IDisposable
         _fileService = fileService;
         _configurationService = configurationService;
         _framework = framework;
-        _rootItem = new(this, configurationService);
+        _rootItem = new();
         _internalSources = internalSources;
 
         _configurationService.Configuration.Library.CheckDefaults();
