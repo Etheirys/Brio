@@ -70,9 +70,6 @@ public class Tag : IEquatable<Tag?>
 
     public virtual bool Search(string[]? query)
     {
-        if (query != null && query.Length == 1)
-            Brio.Log.Info($"{this.Name} == {query[0]} - {SearchUtility.Matches(this.Name, query)}");
-
         if(SearchUtility.Matches(this.Name, query))
             return true;
 
