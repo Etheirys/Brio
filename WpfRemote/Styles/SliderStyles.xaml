@@ -1,0 +1,217 @@
+﻿<ResourceDictionary
+	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+	<Style
+		x:Key="WpfUtilsSliderThumb"
+		TargetType="{x:Type Thumb}">
+
+		<Setter Property="Width" Value="12" />
+		<Setter Property="VerticalAlignment" Value="Center" />
+		<Setter Property="Focusable" Value="False" />
+		<Setter Property="OverridesDefaultStyle" Value="True" />
+		<Setter Property="Foreground" Value="{DynamicResource ForegroundBrush}" />
+		<Setter Property="Margin" Value="0" />
+		<Setter Property="SnapsToDevicePixels" Value="True" />
+		<Setter Property="UseLayoutRounding" Value="True" />
+		<Setter Property="Cursor" Value="SizeWE" />
+
+		<Setter Property="Template">
+			<Setter.Value>
+				<ControlTemplate TargetType="{x:Type Thumb}">
+
+					<Grid
+						HorizontalAlignment="Stretch"
+						VerticalAlignment="Stretch"
+						UseLayoutRounding="True">
+
+						<Border
+							x:Name="Background"
+							Margin="0"
+							Background="{TemplateBinding Foreground}"
+							BorderBrush="{DynamicResource ControlBackgroundBrush}"
+							BorderThickness="2"
+							CornerRadius="3"
+							Style="{DynamicResource WpfUtilsControlHoverBorder}" />
+					</Grid>
+
+					<ControlTemplate.Triggers>
+						<Trigger Property="IsMouseOver" Value="true">
+							<Setter TargetName="Background" Property="BorderBrush" Value="{DynamicResource ControlHighlightBrush}" />
+						</Trigger>
+						<Trigger Property="IsDragging" Value="True">
+							<Setter TargetName="Background" Property="Background" Value="{DynamicResource TrimBrush}" />
+						</Trigger>
+						<Trigger Property="IsEnabled" Value="false">
+							<Setter Property="Opacity" Value="0.5" />
+						</Trigger>
+					</ControlTemplate.Triggers>
+
+				</ControlTemplate>
+			</Setter.Value>
+		</Setter>
+	</Style>
+
+
+	<ControlTemplate
+		x:Key="WpfUtilsSliderTrackButtonLeftTemplate"
+		TargetType="{x:Type RepeatButton}">
+
+		<Border
+			x:Name="Hover"
+			CornerRadius="4,0,0,4"
+			Style="{DynamicResource WpfUtilsControlHoverBorder}">
+			<Path
+				Margin="3"
+				HorizontalAlignment="Left"
+				VerticalAlignment="Center"
+				Data="M 3,0 0,5 3,10"
+				Stroke="{DynamicResource ForegroundLightBrush}"
+				StrokeThickness="1" />
+		</Border>
+
+	</ControlTemplate>
+
+	<ControlTemplate
+		x:Key="WpfUtilsSliderTrackButtonRightTemplate"
+		TargetType="{x:Type RepeatButton}">
+		<Border
+			x:Name="Hover"
+			CornerRadius="0,4,4,0"
+			Style="{DynamicResource WpfUtilsControlHoverBorder}">
+			<Path
+				Margin="3"
+				HorizontalAlignment="Right"
+				VerticalAlignment="Center"
+				Data="M 0,0 3,5 0,10"
+				Stroke="{DynamicResource ForegroundLightBrush}"
+				StrokeThickness="1" />
+
+		</Border>
+	</ControlTemplate>
+
+	<Style
+		x:Key="WpfUtilsSliderTrackButton"
+		TargetType="{x:Type RepeatButton}">
+		<Setter Property="Foreground" Value="{DynamicResource ControlHighlightBrush}" />
+		<Setter Property="Margin" Value="0" />
+		<Setter Property="Opacity" Value="0" />
+		<Setter Property="Cursor" Value="Hand" />
+
+		<Style.Triggers>
+			<Trigger Property="IsMouseOver" Value="True">
+				<Trigger.EnterActions>
+					<BeginStoryboard>
+						<Storyboard>
+							<DoubleAnimation
+								Storyboard.TargetProperty="Opacity"
+								To="1"
+								Duration="0:00:00.150">
+								<DoubleAnimation.EasingFunction>
+									<SineEase EasingMode="EaseOut" />
+								</DoubleAnimation.EasingFunction>
+							</DoubleAnimation>
+						</Storyboard>
+					</BeginStoryboard>
+				</Trigger.EnterActions>
+				<Trigger.ExitActions>
+					<BeginStoryboard>
+						<Storyboard>
+							<DoubleAnimation
+								Storyboard.TargetProperty="Opacity"
+								To="0"
+								Duration="0:00:00.250">
+								<DoubleAnimation.EasingFunction>
+									<SineEase EasingMode="EaseIn" />
+								</DoubleAnimation.EasingFunction>
+							</DoubleAnimation>
+						</Storyboard>
+					</BeginStoryboard>
+				</Trigger.ExitActions>
+			</Trigger>
+		</Style.Triggers>
+	</Style>
+
+	<Style
+		x:Key="WpfUtilsSliderTrackButtonLeft"
+		BasedOn="{StaticResource WpfUtilsSliderTrackButton}"
+		TargetType="{x:Type RepeatButton}">
+		<Setter Property="Template" Value="{StaticResource WpfUtilsSliderTrackButtonLeftTemplate}" />
+	</Style>
+
+	<Style
+		x:Key="WpfUtilsSliderTrackButtonRight"
+		BasedOn="{StaticResource WpfUtilsSliderTrackButton}"
+		TargetType="{x:Type RepeatButton}">
+		<Setter Property="Template" Value="{StaticResource WpfUtilsSliderTrackButtonRightTemplate}" />
+	</Style>
+
+	<Style
+		x:Key="WpfUtilsSlider"
+		TargetType="{x:Type Slider}">
+
+		<Setter Property="Foreground" Value="{DynamicResource ForegroundLightBrush}" />
+		<Setter Property="Background" Value="{DynamicResource ControlBackgroundBrush}" />
+		<Setter Property="Height" Value="24" />
+		<Setter Property="Margin" Value="1" />
+
+		<Setter Property="Template">
+			<Setter.Value>
+				<ControlTemplate TargetType="{x:Type Slider}">
+
+					<Grid>
+						<Border
+							Background="{TemplateBinding Background}"
+							Style="{DynamicResource WpfUtilsControlBorder}" />
+
+
+
+						<Track
+							Name="PART_Track"
+							Grid.Row="1"
+							Margin="0">
+							<Track.DecreaseRepeatButton>
+								<RepeatButton
+									Margin="0,0,-6,0"
+									Command="Slider.DecreaseSmall"
+									Focusable="False"
+									KeyboardNavigation.IsTabStop="False"
+									Style="{StaticResource WpfUtilsSliderTrackButtonLeft}" />
+							</Track.DecreaseRepeatButton>
+							<Track.IncreaseRepeatButton>
+								<RepeatButton
+									Margin="-6,0,0,0"
+									Command="Slider.IncreaseSmall"
+									Focusable="False"
+									KeyboardNavigation.IsTabStop="False"
+									Style="{StaticResource WpfUtilsSliderTrackButtonRight}" />
+							</Track.IncreaseRepeatButton>
+							<Track.Thumb>
+								<Thumb
+									x:Name="Thumb"
+									VerticalAlignment="Stretch"
+									Focusable="False"
+									Foreground="{TemplateBinding Foreground}"
+									KeyboardNavigation.IsTabStop="False"
+									Style="{StaticResource WpfUtilsSliderThumb}" />
+							</Track.Thumb>
+						</Track>
+
+						<Border
+							x:Name="KeyboardFocusBorder"
+							IsHitTestVisible="False"
+							Opacity="0"
+							Style="{DynamicResource WpfUtilsKeyboardFocusBorder}" />
+					</Grid>
+
+					<ControlTemplate.Triggers>
+						<Trigger Property="IsKeyboardFocused" Value="True">
+							<Setter TargetName="KeyboardFocusBorder" Property="Opacity" Value="1" />
+						</Trigger>
+					</ControlTemplate.Triggers>
+
+				</ControlTemplate>
+			</Setter.Value>
+		</Setter>
+	</Style>
+</ResourceDictionary>

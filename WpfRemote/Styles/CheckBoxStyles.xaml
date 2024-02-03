@@ -1,0 +1,153 @@
+﻿<ResourceDictionary
+	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+	xmlns:controls="clr-namespace:WpfUtils.Controls">
+
+	<ControlTemplate
+		x:Key="WpfUtilsCheckBoxTemplate"
+		TargetType="{x:Type CheckBox}">
+
+		<Border
+			Background="{TemplateBinding Background}"
+			Style="{DynamicResource WpfUtilsControlBorder}">
+			<Grid x:Name="Content">
+				<Grid.ColumnDefinitions>
+					<ColumnDefinition Width="Auto" />
+					<ColumnDefinition />
+				</Grid.ColumnDefinitions>
+
+				<Border
+					x:Name="CheckBorder"
+					Grid.Column="0"
+					Width="25"
+					Background="{TemplateBinding Background}"
+					BorderThickness="1"
+					CornerRadius="6,0,0,6" />
+
+				<Border
+					x:Name="HoverBorder"
+					Grid.Column="0"
+					Width="25"
+					BorderThickness="1"
+					CornerRadius="6,0,0,6"
+					Opacity="0"
+					Style="{DynamicResource WpfUtilsControlHoverBorder}" />
+
+				<Ellipse
+					x:Name="CheckMark"
+					Grid.Column="0"
+					Width="6"
+					Height="6"
+					Margin="4"
+					Fill="{DynamicResource ForegroundLightBrush}"
+					Opacity="0.25" />
+
+				<ContentPresenter
+					Grid.Column="1"
+					Margin="0"
+					HorizontalAlignment="Left"
+					VerticalAlignment="Center"
+					RecognizesAccessKey="True" />
+			</Grid>
+		</Border>
+
+		<ControlTemplate.Triggers>
+			<Trigger Property="IsChecked" Value="true">
+				<Setter TargetName="CheckMark" Property="Fill" Value="{DynamicResource TrimBrush}" />
+				<Trigger.EnterActions>
+					<BeginStoryboard>
+						<Storyboard>
+							<DoubleAnimation
+								Storyboard.TargetName="CheckMark"
+								Storyboard.TargetProperty="Opacity"
+								To="1"
+								Duration="00:00:00.25" />
+						</Storyboard>
+					</BeginStoryboard>
+				</Trigger.EnterActions>
+				<Trigger.ExitActions>
+					<BeginStoryboard>
+						<Storyboard>
+							<DoubleAnimation
+								Storyboard.TargetName="CheckMark"
+								Storyboard.TargetProperty="Opacity"
+								To="0.25"
+								Duration="00:00:00.25" />
+						</Storyboard>
+					</BeginStoryboard>
+				</Trigger.ExitActions>
+			</Trigger>
+			<Trigger Property="IsEnabled" Value="false">
+				<Trigger.EnterActions>
+					<BeginStoryboard>
+						<Storyboard>
+							<DoubleAnimation
+								Storyboard.TargetName="Content"
+								Storyboard.TargetProperty="Opacity"
+								From="1"
+								To="0.25"
+								Duration="00:00:00.1" />
+						</Storyboard>
+					</BeginStoryboard>
+				</Trigger.EnterActions>
+
+				<Trigger.ExitActions>
+					<BeginStoryboard>
+						<Storyboard>
+							<DoubleAnimation
+								Storyboard.TargetName="Content"
+								Storyboard.TargetProperty="Opacity"
+								From="0.25"
+								To="1"
+								Duration="00:00:00.2" />
+						</Storyboard>
+					</BeginStoryboard>
+				</Trigger.ExitActions>
+			</Trigger>
+
+			<Trigger Property="IsMouseOver" Value="true">
+				<Trigger.EnterActions>
+					<BeginStoryboard>
+						<Storyboard>
+							<DoubleAnimation
+								Storyboard.TargetName="HoverBorder"
+								Storyboard.TargetProperty="Opacity"
+								From="0"
+								To="1"
+								Duration="00:00:00.1" />
+						</Storyboard>
+					</BeginStoryboard>
+				</Trigger.EnterActions>
+
+				<Trigger.ExitActions>
+					<BeginStoryboard>
+						<Storyboard>
+							<DoubleAnimation
+								Storyboard.TargetName="HoverBorder"
+								Storyboard.TargetProperty="Opacity"
+								From="1"
+								To="0"
+								Duration="00:00:00.2" />
+						</Storyboard>
+					</BeginStoryboard>
+				</Trigger.ExitActions>
+
+			</Trigger>
+
+		</ControlTemplate.Triggers>
+
+	</ControlTemplate>
+
+	<Style
+		x:Key="WpfUtilsCheckBox"
+		TargetType="{x:Type CheckBox}">
+
+		<Setter Property="Height" Value="26" />
+		<Setter Property="SnapsToDevicePixels" Value="true" />
+		<Setter Property="OverridesDefaultStyle" Value="true" />
+		<Setter Property="Template" Value="{StaticResource WpfUtilsCheckBoxTemplate}" />
+		<Setter Property="Foreground" Value="{DynamicResource ForegroundBrush}" />
+		<Setter Property="Background" Value="{DynamicResource ControlBackgroundBrush}" />
+	</Style>
+
+</ResourceDictionary>

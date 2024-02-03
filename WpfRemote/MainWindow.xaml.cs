@@ -1,7 +1,9 @@
 ﻿namespace WpfRemote;
 
 using Brio.Remote;
+using System.ComponentModel;
 using System.Windows;
+using PropertyChanged.SourceGenerator;
 
 public partial class MainWindow : Window
 {
@@ -15,26 +17,41 @@ public partial class MainWindow : Window
         _remoteService.OnMessageCallback = OnMessage;
     }
 
+    protected MainWindowViewModel ViewModel => (MainWindowViewModel)this.DataContext;
+
     private void OnMessage(object obj)
     {
         if (obj is BoneMessage bm)
         {
+            if (Dispatcher.HasShutdownStarted)
+                return;
+
             Dispatcher?.Invoke(() =>
             {
-                DisplayBone(bm);
-    
+                ViewModel.PositionX = bm.PositionX;
+                ViewModel.PositionY = bm.PositionY;
+                ViewModel.PositionZ = bm.PositionZ;
+                ViewModel.ScaleX = bm.ScaleX;
+                ViewModel.ScaleY = bm.ScaleY;
+                ViewModel.ScaleZ = bm.ScaleZ;
+
+                //RotationX = bm.RotationX;
+                //RotationY = bm.RotationY;
+                //RotationZ = bm.RotationZ;
             });
         }
     }
+}
 
-    public void DisplayBone(BoneMessage bm)
-    {
-        this.PosXText.Text = bm.PositionX.ToString();
-        this.PosYText.Text = bm.PositionY.ToString();
-        this.PosZText.Text = bm.PositionZ.ToString();
-
-        this.ScaleXText.Text = bm.ScaleX.ToString();
-        this.ScaleYText.Text = bm.ScaleY.ToString();
-        this.ScaleZText.Text = bm.ScaleZ.ToString();
-    }
+public partial class MainWindowViewModel
+{
+    [Notify] public float positionX = 0;
+    [Notify] public float positionY = 0;
+    [Notify] public float positionZ = 0;
+    [Notify] public float scaleX = 0;
+    [Notify] public float scaleY = 0;
+    [Notify] public float scaleZ = 0;
+    [Notify] public float rotationX = 0;
+    [Notify] public float rotationY = 0;
+    [Notify] public float rotationZ = 0;
 }

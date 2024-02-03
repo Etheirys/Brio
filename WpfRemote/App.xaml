@@ -1,9 +1,145 @@
-﻿<Application x:Class="Remote.App"
-             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:local="clr-namespace:Remote"
-             StartupUri="MainWindow.xaml">
-    <Application.Resources>
-         
-    </Application.Resources>
+﻿<Application
+	x:Class="Remote.App"
+	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+	xmlns:controls="clr-namespace:WpfUtils.Controls"
+	xmlns:converters="clr-namespace:WpfUtils.Converters"
+	xmlns:local="clr-namespace:Remote"
+	StartupUri="MainWindow.xaml">
+
+	<Application.Resources>
+		<ResourceDictionary>
+			<ResourceDictionary.MergedDictionaries>
+
+				<ResourceDictionary Source="Themes/Dark.xaml" />
+
+				<!--  Custom  -->
+				<ResourceDictionary Source="Styles/BorderStyles.xaml" />
+				<ResourceDictionary Source="Styles/GroupBoxStyles.xaml" />
+				<ResourceDictionary Source="Styles/ButtonStyles.xaml" />
+				<ResourceDictionary Source="Styles/TextBlockStyles.xaml" />
+				<ResourceDictionary Source="Styles/ToggleButtonStyles.xaml" />
+				<ResourceDictionary Source="Styles/ExpanderStyles.xaml" />
+				<ResourceDictionary Source="Styles/TabControlStyles.xaml" />
+				<ResourceDictionary Source="Styles/TextBoxStyles.xaml" />
+				<ResourceDictionary Source="Styles/ComboBoxStyles.xaml" />
+				<ResourceDictionary Source="Styles/WindowStyles.xaml" />
+				<ResourceDictionary Source="Styles/ScrollBarStyles.xaml" />
+				<ResourceDictionary Source="Styles/SliderStyles.xaml" />
+				<ResourceDictionary Source="Styles/ProgressBarStyles.xaml" />
+				<ResourceDictionary Source="Styles/CheckBoxStyles.xaml" />
+				<ResourceDictionary Source="Styles/ListBoxStyles.xaml" />
+
+				<!--  Controls  -->
+				<ResourceDictionary Source="Controls/MultiNumberBoxStyles.xaml" />
+
+			</ResourceDictionary.MergedDictionaries>
+
+			<Style
+				BasedOn="{StaticResource WpfUtilsButton}"
+				TargetType="{x:Type Button}" />
+
+			<Style
+				BasedOn="{StaticResource WpfUtilsComboBox}"
+				TargetType="{x:Type ComboBox}" />
+
+			<Style
+				BasedOn="{StaticResource WpfUtilsListBox}"
+				TargetType="{x:Type ListBox}" />
+
+			<Style
+				BasedOn="{StaticResource WpfUtilsListBoxItem}"
+				TargetType="{x:Type ListBoxItem}" />
+
+			<Style
+				BasedOn="{StaticResource WpfUtilsSlider}"
+				TargetType="{x:Type Slider}" />
+
+			<Style
+				BasedOn="{StaticResource WpfUtilsToggleButton}"
+				TargetType="{x:Type ToggleButton}" />
+
+			<Style
+				BasedOn="{StaticResource ScrollViewerStyle}"
+				TargetType="{x:Type ScrollViewer}" />
+
+			<Style
+				BasedOn="{StaticResource WpfUtilsTabControl}"
+				TargetType="{x:Type TabControl}" />
+
+			<Style
+				BasedOn="{StaticResource WpfUtilsTextBox}"
+				TargetType="{x:Type TextBox}" />
+
+			<Style
+				BasedOn="{StaticResource WpfUtilsProgressBar}"
+				TargetType="{x:Type ProgressBar}" />
+
+			<Style
+				BasedOn="{StaticResource WpfUtilsCheckBox}"
+				TargetType="{x:Type CheckBox}" />
+
+			<Style
+				BasedOn="{StaticResource WpfUtilsMenuItem}"
+				TargetType="{x:Type MenuItem}" />
+
+			<Style
+				BasedOn="{StaticResource WpfUtilsGroupBox}"
+				TargetType="{x:Type GroupBox}" />
+
+			<Style
+				BasedOn="{StaticResource WpfUtilsTextBlock}"
+				TargetType="{x:Type TextBlock}" />
+
+			<Style
+				BasedOn="{StaticResource WpfUtilsExpander}"
+				TargetType="{x:Type Expander}" />
+
+			<Style
+				BasedOn="{StaticResource WpfUtilsMultiNumberBox}"
+				TargetType="{x:Type controls:MultiNumberBox}" />
+
+			<Style
+				BasedOn="{StaticResource WpfUtilsSlider}"
+				TargetType="{x:Type controls:Slider}" />
+
+			<Style
+				BasedOn="{StaticResource WpfUtilsSlider}"
+				TargetType="{x:Type controls:RelativeSlider}" />
+
+			<!--  Custom converters  -->
+			<converters:StringHasContentToVisibilityConverter x:Key="StringHasContentToVisibility" />
+			<converters:StringHasContentToBoolConverter x:Key="StringHasContentToBool" />
+			<converters:NotNullToVisibilityConverter x:Key="NotNullToVisibilityConverter" />
+			<converters:NotEmptyToVisibilityConverter x:Key="NotEmptyToVisibilityConverter" />
+			<converters:IsEmptyToVisibilityConverter x:Key="IsEmptyToVisibilityConverter" />
+			<converters:NullToVisibilityConverter x:Key="NullToVisibilityConverter" />
+			<converters:NotNullToBoolConverter x:Key="NotNullToBoolConverter" />
+			<converters:NullToBoolConverter x:Key="NullToBoolConverter" />
+			<BooleanToVisibilityConverter x:Key="B2V" />
+			<converters:InvertedBoolToVisibilityConverter x:Key="!B2V" />
+			<converters:RadiansToDegreesConverter x:Key="Rad2Deg" />
+			<converters:NotZeroToVisibilityConverter x:Key="NotZeroToVisibility" />
+			<converters:IsZeroToVisibilityConverter x:Key="IsZeroToVisibility" />
+			<converters:NotZeroToBoolConverter x:Key="NotZeroToBool" />
+			<converters:IsZeroToBoolConverter x:Key="IsZeroToBool" />
+			<converters:BoolInversionConverter x:Key="!B" />
+			<converters:ListToStringConverter x:Key="ListToStringConverter" />
+			<converters:ColorToBrushConverter x:Key="ColorToBrush" />
+			<converters:EnumToBoolConverter x:Key="EnumToBool" />
+			<converters:EnumToVisibilityConverter x:Key="EnumToVisibility" />
+			<converters:LessThanToVisibilityConverter x:Key="LessThanToVisibility" />
+			<converters:LessThanToBoolConverter x:Key="LessThanToBool" />
+			<converters:GreaterThanToVisibilityConverter x:Key="GreaterThanToVisibility" />
+			<converters:AbsoluteNumberConverter x:Key="AbsoluteNumber" />
+			<converters:NumberConverter x:Key="NumberConverter" />
+
+			<!--  Multi converters  -->
+			<converters:MultiBoolAndConverter x:Key="MultiBoolAnd" />
+			<converters:MultiBoolOrConverter x:Key="MultiBoolOr" />
+			<converters:MultiBoolOrToVisibilityConverter x:Key="MultiBoolOrToVisibility" />
+			<converters:MultiBoolAndToVisibilityConverter x:Key="MultiBoolAndToVisibility" />
+			<converters:AnyBoolIsFalseToBoolMultiConverter x:Key="AnyBoolIsFalseToBool" />
+		</ResourceDictionary>
+	</Application.Resources>
 </Application>

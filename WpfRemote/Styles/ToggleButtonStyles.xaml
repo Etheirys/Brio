@@ -1,0 +1,210 @@
+﻿<ResourceDictionary
+	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+	<ControlTemplate
+		x:Key="WpfUtilsToggleButtonTemplate"
+		TargetType="{x:Type ToggleButton}">
+
+		<Grid
+			Cursor="Hand"
+			TextBlock.Foreground="{DynamicResource ForegroundLightBrush}">
+
+			<Border
+				x:Name="BackgroundBorder"
+				Background="{TemplateBinding Background}"
+				Style="{DynamicResource WpfUtilsControlBorder}" />
+
+			<Border
+				x:Name="HoverBorder"
+				Opacity="0"
+				SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"
+				Style="{DynamicResource WpfUtilsControlHoverBorder}" />
+
+			<Border
+				x:Name="KeyboardFocusBorder"
+				Opacity="0"
+				Style="{DynamicResource WpfUtilsKeyboardFocusBorder}" />
+
+			<Border
+				x:Name="Border"
+				Height="2"
+				Margin="6,0,6,3"
+				VerticalAlignment="Bottom"
+				Background="{TemplateBinding BorderBrush}"
+				BorderBrush="{TemplateBinding BorderBrush}"
+				BorderThickness="0"
+				CornerRadius="1"
+				RenderTransformOrigin="0.5,0.5"
+				SnapsToDevicePixels="True">
+				<Border.RenderTransform>
+					<ScaleTransform ScaleX="0" />
+				</Border.RenderTransform>
+			</Border>
+
+			<ContentControl
+				x:Name="Content"
+				Margin="0"
+				Padding="{TemplateBinding Padding}"
+				HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+				VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+				Content="{TemplateBinding Content}"
+				ContentStringFormat="{TemplateBinding ContentStringFormat}"
+				ContentTemplate="{TemplateBinding ContentTemplate}"
+				Focusable="False"
+				RenderTransformOrigin="0.5,0.5"
+				SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}">
+				<ContentControl.RenderTransform>
+					<TranslateTransform Y="0" />
+				</ContentControl.RenderTransform>
+			</ContentControl>
+		</Grid>
+
+		<ControlTemplate.Triggers>
+
+			<Trigger Property="IsKeyboardFocused" Value="True">
+				<Setter TargetName="KeyboardFocusBorder" Property="Opacity" Value="1" />
+			</Trigger>
+
+			<Trigger Property="IsMouseOver" Value="true">
+
+				<Trigger.EnterActions>
+					<BeginStoryboard>
+						<Storyboard>
+							<DoubleAnimation
+								Storyboard.TargetName="HoverBorder"
+								Storyboard.TargetProperty="Opacity"
+								From="0"
+								To="1"
+								Duration="00:00:00.1" />
+						</Storyboard>
+					</BeginStoryboard>
+				</Trigger.EnterActions>
+
+				<Trigger.ExitActions>
+					<BeginStoryboard>
+						<Storyboard>
+							<DoubleAnimation
+								Storyboard.TargetName="HoverBorder"
+								Storyboard.TargetProperty="Opacity"
+								From="1"
+								To="0"
+								Duration="00:00:00.2" />
+						</Storyboard>
+					</BeginStoryboard>
+				</Trigger.ExitActions>
+
+			</Trigger>
+			<Trigger Property="IsChecked" Value="true">
+				<Setter Property="Foreground" Value="{DynamicResource TrimBrush}" />
+
+				<Trigger.EnterActions>
+					<BeginStoryboard>
+						<Storyboard>
+							<DoubleAnimationUsingKeyFrames
+								BeginTime="00:00:00"
+								Storyboard.TargetName="Content"
+								Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.Y)">
+								<SplineDoubleKeyFrame
+									KeyTime="00:00:00.00"
+									Value="0" />
+								<SplineDoubleKeyFrame
+									KeyTime="00:00:00.10"
+									Value="-6" />
+								<SplineDoubleKeyFrame
+									KeyTime="00:00:00.15"
+									Value="-1" />
+								<SplineDoubleKeyFrame
+									KeyTime="00:00:00.18"
+									Value="-2" />
+							</DoubleAnimationUsingKeyFrames>
+
+							<DoubleAnimation
+								Storyboard.TargetName="Border"
+								Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleX)"
+								To="1"
+								Duration="00:00:00.30">
+								<DoubleAnimation.EasingFunction>
+									<SineEase EasingMode="EaseOut" />
+								</DoubleAnimation.EasingFunction>
+							</DoubleAnimation>
+
+						</Storyboard>
+					</BeginStoryboard>
+				</Trigger.EnterActions>
+
+				<Trigger.ExitActions>
+					<BeginStoryboard>
+						<Storyboard>
+							<DoubleAnimation
+								Storyboard.TargetName="Content"
+								Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.Y)"
+								To="0"
+								Duration="00:00:00.30">
+								<DoubleAnimation.EasingFunction>
+									<SineEase EasingMode="EaseOut" />
+								</DoubleAnimation.EasingFunction>
+							</DoubleAnimation>
+							<DoubleAnimation
+								Storyboard.TargetName="Border"
+								Storyboard.TargetProperty="(UIElement.RenderTransform).(ScaleTransform.ScaleX)"
+								To="0"
+								Duration="00:00:00.30">
+								<DoubleAnimation.EasingFunction>
+									<SineEase EasingMode="EaseOut" />
+								</DoubleAnimation.EasingFunction>
+							</DoubleAnimation>
+						</Storyboard>
+					</BeginStoryboard>
+				</Trigger.ExitActions>
+			</Trigger>
+			<Trigger Property="IsEnabled" Value="false">
+				<Trigger.EnterActions>
+					<BeginStoryboard>
+						<Storyboard>
+							<DoubleAnimation
+								Storyboard.TargetName="Content"
+								Storyboard.TargetProperty="Opacity"
+								From="1"
+								To="0.5"
+								Duration="00:00:00.1" />
+						</Storyboard>
+					</BeginStoryboard>
+				</Trigger.EnterActions>
+
+				<Trigger.ExitActions>
+					<BeginStoryboard>
+						<Storyboard>
+							<DoubleAnimation
+								Storyboard.TargetName="Content"
+								Storyboard.TargetProperty="Opacity"
+								From="0.5"
+								To="1"
+								Duration="00:00:00.2" />
+						</Storyboard>
+					</BeginStoryboard>
+				</Trigger.ExitActions>
+			</Trigger>
+
+		</ControlTemplate.Triggers>
+	</ControlTemplate>
+
+	<Style
+		x:Key="WpfUtilsToggleButton"
+		TargetType="{x:Type ToggleButton}">
+		<Setter Property="Foreground" Value="{DynamicResource ForegroundLightBrush}" />
+		<Setter Property="Background" Value="{DynamicResource ControlBackgroundBrush}" />
+		<Setter Property="BorderBrush" Value="{DynamicResource TrimBrush}" />
+		<Setter Property="BorderThickness" Value="1" />
+		<Setter Property="HorizontalContentAlignment" Value="Center" />
+		<Setter Property="VerticalContentAlignment" Value="Center" />
+		<Setter Property="Margin" Value="1" />
+		<Setter Property="Padding" Value="1,0,1,1" />
+		<Setter Property="MinWidth" Value="18" />
+		<Setter Property="MinHeight" Value="18" />
+		<Setter Property="SnapsToDevicePixels" Value="True" />
+		<Setter Property="Height" Value="26" />
+		<Setter Property="Template" Value="{StaticResource WpfUtilsToggleButtonTemplate}" />
+	</Style>
+
+</ResourceDictionary>
