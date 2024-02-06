@@ -59,17 +59,17 @@ internal class InfoWindow : Window
 
                 ImGui.PushStyleColor(ImGuiCol.Button, new Vector4(255, 0, 0, 255) / 255);
                 if(ImGui.Button("Report an Issue", buttonSize))
-                    Process.Start(new ProcessStartInfo { FileName = "https://github.com/AsgardXIV/Brio/issues", UseShellExecute = true });
+                    Process.Start(new ProcessStartInfo { FileName = "https://github.com/Etheirys/Brio/issues", UseShellExecute = true });
                 ImGui.PopStyleColor();
 
                 ImGui.PushStyleColor(ImGuiCol.Button, new Vector4(110, 84, 148, 255) / 255);
                 if(ImGui.Button("GitHub Repository", buttonSize))
-                    Process.Start(new ProcessStartInfo { FileName = "https://github.com/AsgardXIV/Brio", UseShellExecute = true });
+                    Process.Start(new ProcessStartInfo { FileName = "https://github.com/Etheirys/Brio", UseShellExecute = true });
                 ImGui.PopStyleColor();
 
                 ImGui.PushStyleColor(ImGuiCol.Button, new Vector4(0, 70, 0, 255) / 255);
                 if(ImGui.Button("License & Attributions", buttonSize))
-                    Process.Start(new ProcessStartInfo { FileName = "https://github.com/AsgardXIV/Brio/blob/main/Acknowledgements.md", UseShellExecute = true });
+                    Process.Start(new ProcessStartInfo { FileName = "https://github.com/Etheirys/Brio/blob/main/Acknowledgements.md", UseShellExecute = true });
                 ImGui.PopStyleColor();
 
             }
