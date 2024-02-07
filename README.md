@@ -19,14 +19,14 @@ Brio is currently in alpha, and as such, there may be bugs. If you find any, ple
 * Works with Ktisis and Anamnesis (Enable Brio integration within Anamnesis for a better experience)
 
 ## Installation
-1. Add the custom Dalamud repo `https://raw.githubusercontent.com/AsgardXIV/Brio/main/repo.json`
+1. Add the custom Dalamud repo `https://raw.githubusercontent.com/Etheirys/Brio/main/repo.json`
 2. Enable the `Brio` plugin
 3. Run the `/brio` command
 
 ## Support
 Brio is still early in Alpha so issues are expected.
 
-Please either open an [issue](https://github.com/AsgardXIV/Brio/issues) or visit us on [Discord](https://discord.gg/KvGJCCnG8t) if you need help!
+Please either open an [issue](https://github.com/Etheirys/Brio/issues) or visit us on [Discord](https://discord.gg/KvGJCCnG8t) if you need help!
 
 ## Authors
 * [Minmoose](https://github.com/Minmoose) - Maintainer.
@@ -45,7 +45,7 @@ A special thanks goes to:
 * [VFXEditor](https://github.com/0ceal0t/Dalamud-VFXEditor)
 * [Cammy](https://github.com/UnknownX7/Cammy)
 
-Find out more about this [here](https://github.com/AsgardXIV/Brio/blob/main/Acknowledgements.md).
+Find out more about this [here](https://github.com/Etheirys/Brio/blob/main/Acknowledgements.md).
 
 ## License
-Brio is licensed under the [GPL 3.0 license](https://github.com/AsgardXIV/Brio/blob/main/LICENSE).
+Brio is licensed under the [GPL 3.0 license](https://github.com/Etheirys/Brio/blob/main/LICENSE).
