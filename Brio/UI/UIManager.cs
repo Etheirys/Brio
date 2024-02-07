@@ -20,6 +20,7 @@ internal class UIManager : IDisposable
     private readonly MainWindow _mainWindow;
     private readonly SettingsWindow _settingsWindow;
     private readonly InfoWindow _infoWindow;
+    private readonly UpdateWindow _updateWindow;
     private readonly ActorAppearanceWindow _actorAppearanceWindow;
     private readonly ActionTimelineWindow _actionTimelineWindow;
     private readonly PosingOverlayWindow _overlayWindow;
@@ -55,6 +56,7 @@ internal class UIManager : IDisposable
             MainWindow mainWindow,
             SettingsWindow settingsWindow,
             InfoWindow infoWindow,
+            UpdateWindow updateWindow,
             ActorAppearanceWindow appearanceWindow,
             ActionTimelineWindow actionTimelineWindow,
             PosingOverlayWindow overlayWindow,
@@ -75,6 +77,7 @@ internal class UIManager : IDisposable
         _mainWindow = mainWindow;
         _settingsWindow = settingsWindow;
         _infoWindow = infoWindow;
+        _updateWindow = updateWindow;
         _actorAppearanceWindow = appearanceWindow;
         _actionTimelineWindow = actionTimelineWindow;
         _overlayWindow = overlayWindow;
@@ -88,6 +91,7 @@ internal class UIManager : IDisposable
         _windowSystem.AddWindow(_mainWindow);
         _windowSystem.AddWindow(_settingsWindow);
         _windowSystem.AddWindow(_infoWindow);
+        _windowSystem.AddWindow(_updateWindow);
         _windowSystem.AddWindow(_actorAppearanceWindow);
         _windowSystem.AddWindow(_actionTimelineWindow);
         _windowSystem.AddWindow(_overlayWindow);

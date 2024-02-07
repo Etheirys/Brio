@@ -14,18 +14,25 @@ internal class MainWindow : Window
 {
     private readonly SettingsWindow _settingsWindow;
     private readonly InfoWindow _infoWindow;
-    private readonly EntityManager _entityManager;
+    private readonly UpdateWindow _updateWindow;
 
+    private readonly EntityManager _entityManager;
     private readonly EntityHierarchyView _entitySelector;
 
-    public MainWindow(ConfigurationService configService, SettingsWindow settingsWindow, InfoWindow infoWindow, EntityManager entityManager) : base($"{Brio.Name} {configService.Version}###brio_main_window", ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.AlwaysAutoResize)
+    private readonly ConfigurationService _configService;
+
+    public MainWindow(ConfigurationService configService, SettingsWindow settingsWindow, InfoWindow infoWindow, EntityManager entityManager, UpdateWindow updateWindow) : base($"{Brio.Name} Scene Manager [{configService.Version}]###brio_main_window", ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.AlwaysAutoResize)
     {
         Namespace = "brio_main_namespace";
 
         _settingsWindow = settingsWindow;
         _infoWindow = infoWindow;
+        _updateWindow = updateWindow;
+
         _entityManager = entityManager;
         _entitySelector = new(_entityManager);
+        
+        _configService = configService;
 
         SizeConstraints = new WindowSizeConstraints
         {
@@ -40,7 +47,7 @@ internal class MainWindow : Window
 
         var rootEntity = _entityManager.RootEntity;
 
-        if(rootEntity == null)
+        if(rootEntity is null)
             return;
 
         using(var container = ImRaii.Child("###entity_hierarchy_container", new Vector2(-1, ImGui.GetTextLineHeight() * 15f), true))
@@ -66,6 +73,13 @@ internal class MainWindow : Window
         ImGui.SetCursorPosY(0);
         if(ImBrio.FontIconButtonRight("info_toggle", FontAwesomeIcon.InfoCircle, 3.3f, "Info", bordered: false))
             _infoWindow.Toggle();
+    
+        if(_configService.IsDebug)
+        {
+            ImGui.SetCursorPosY(0);
+            if(ImBrio.FontIconButtonRight("brio_update_toggle", FontAwesomeIcon.ArrowUpRightDots, 4.3f, "Update", bordered: false))
+                _updateWindow.Toggle();
+        }
 
         ImGui.PopClipRect();
         ImGui.SetCursorPos(initialPos);
