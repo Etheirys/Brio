@@ -45,7 +45,7 @@ internal class SettingsWindow : Window
         _brioIPCService = brioIPCService;
         _mareService = mareService;
 
-        Size = new Vector2(400, 450);
+        Size = new Vector2(500, 610);
     }
 
     public override void Draw()
