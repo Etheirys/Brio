@@ -330,9 +330,11 @@ internal class PosingGraphicalWindow : Window, IDisposable
 
         ImGuizmo.SetID(_gizmoId);
 
-        ImGuiHelpers.SetNextWindowPosRelativeMainViewport(new Vector2(0, 0));
-        var io = ImGui.GetIO();
-        ImGui.SetNextWindowSize(io.DisplaySize);
+        Vector2 windowPos = ImGui.GetWindowPos();
+        Vector2 size = ImGui.GetWindowSize();
+
+        ImGui.SetNextWindowPos(windowPos);
+        ImGui.SetNextWindowSize(size);
 
         if(ImGui.Begin("##graphic_pose_gizmo", flags))
         {
