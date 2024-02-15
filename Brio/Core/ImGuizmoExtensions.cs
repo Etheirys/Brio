@@ -108,7 +108,7 @@ internal static class ImBriozmo
         Matrix4x4 mat = Matrix4x4.CreateScale(-1, 1, 1);
         viewMatrix = viewMatrix * mat;
 
-        float radius = Math.Min(size.X / 2, size.Y / 2) - 10;
+        float radius = Math.Min(size.X / 2, size.Y / 2) - 20;
         int lineThickness = 2;
 
         // reset context
@@ -150,22 +150,31 @@ internal static class ImBriozmo
                     Vector2 lhs = mousePos - (Vector2)dragStartToPos;
                     float newDragDistance = Vector2.Dot(lhs, normal);
                     float dragDelta = newDragDistance - dragDistance;
+                    dragDistance = newDragDistance;
+
+                    float angleChange = dragDelta / 200;
+
+                    bool smallIncrement = ImGui.IsKeyDown(ConfigurationService.Instance.Configuration.Interface.IncrementSmall);
+                    if(smallIncrement)
+                        angleChange /= 10;
+
+                    bool largeIncrement = ImGui.IsKeyDown(ConfigurationService.Instance.Configuration.Interface.IncrementLarge);
+                    if(largeIncrement)
+                        angleChange *= 10;
 
                     Matrix4x4 rot = Matrix4x4.Identity;
                     if(dragAxis == Axis.X)
                     {
-                        rot = Matrix4x4.CreateRotationX(dragDelta / 200);
+                        rot = Matrix4x4.CreateRotationX(angleChange);
                     }
                     if(dragAxis == Axis.Y)
                     {
-                        rot = Matrix4x4.CreateRotationY(-(dragDelta / 200));
+                        rot = Matrix4x4.CreateRotationY(-angleChange);
                     }
                     if(dragAxis == Axis.Z)
                     {
-                        rot = Matrix4x4.CreateRotationZ(dragDelta / 200);
+                        rot = Matrix4x4.CreateRotationZ(angleChange);
                     }
-
-                    dragDistance = newDragDistance;
 
                     transformMatrix = rot * transformMatrix;
                     changed = true;
@@ -180,6 +189,38 @@ internal static class ImBriozmo
                     dragStartToPos = closestAxisMousePos;
                     dragStartFromPos = closestAxisMouseFromPos;
                     dragAxis = closestMouseAxis;
+                }
+                else
+                {
+                    float mouseWheel = ImGui.GetIO().MouseWheel / 100;
+
+                    if(mouseWheel != 0)
+                    {
+                        bool smallIncrement = ImGui.IsKeyDown(ConfigurationService.Instance.Configuration.Interface.IncrementSmall);
+                        if(smallIncrement)
+                            mouseWheel /= 10;
+
+                        bool largeIncrement = ImGui.IsKeyDown(ConfigurationService.Instance.Configuration.Interface.IncrementLarge);
+                        if(largeIncrement)
+                            mouseWheel *= 10;
+
+                        Matrix4x4 rot = Matrix4x4.Identity;
+                        if(closestMouseAxis == Axis.X)
+                        {
+                            rot = Matrix4x4.CreateRotationX(mouseWheel);
+                        }
+                        if(closestMouseAxis == Axis.Y)
+                        {
+                            rot = Matrix4x4.CreateRotationY(-mouseWheel);
+                        }
+                        if(closestMouseAxis == Axis.Z)
+                        {
+                            rot = Matrix4x4.CreateRotationZ(mouseWheel);
+                        }
+
+                        transformMatrix = rot * transformMatrix;
+                        changed = true;
+                    }
                 }
                 
                 drawList.AddCircle((Vector2)closestAxisMousePos, axisMouseDist, style.AxisForegroundColors[(int)closestMouseAxis]);
