@@ -326,75 +326,11 @@ internal class PosingGraphicalWindow : Window, IDisposable
             );
         }
 
-        // todo: snapshots
-        _trackingMatrix = null;
-
-        /*var projectionMatrix = Matrix4x4.CreatePerspectiveFieldOfView(camera->GetFoV(), 1, 0.01f, 1f);
-        var viewMatrix = Matrix4x4.CreateLookAt(camera->GetPosition(), matrix.Translation, Vector3.UnitY);
-
-        Vector2 gizmoSize = new(ImGui.GetContentRegionAvail().X, ImGui.GetContentRegionAvail().X);
-        var childStart = ImGui.GetCursorScreenPos();
-
-        ImGuiWindowFlags flags = ImGuiWindowFlags.NoInputs | ImGuiWindowFlags.ChildWindow | ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoDecoration | ImGuiWindowFlags.NoBackground;
-
-        if(ImGui.IsMouseHoveringRect(childStart, childStart + gizmoSize))
-            flags &= ~ImGuiWindowFlags.NoInputs;
-
-        if(_trackingMatrix.HasValue && ImGuizmo.IsUsing())
+        if(!ImBriozmo.IsUsing() && _trackingMatrix.HasValue)
         {
-            flags &= ~ImGuiWindowFlags.ChildWindow;
-            flags &= ~ImGuiWindowFlags.NoInputs;
+            posing.Snapshot(false, false);
+            _trackingMatrix = null;
         }
-
-        ImGuizmo.SetID(_gizmoId);
-
-        ImGuiHelpers.SetNextWindowPosRelativeMainViewport(new Vector2(0, 0));
-        var io = ImGui.GetIO();
-        ImGui.SetNextWindowSize(io.DisplaySize);
-
-        if(ImGui.Begin("##graphic_pose_gizmo", flags))
-        {
-            ImGuizmo.BeginFrame();
-            ImGuizmo.SetDrawlist();
-            ImGuizmo.SetRect(childStart.X, childStart.Y, gizmoSize.X, gizmoSize.Y);
-            ImGuizmo.SetGizmoSizeClipSpace(0.5f);
-            ImGuizmo.AllowAxisFlip(false);
-            ImGuizmo.SetOrthographic(false);
-
-            ImGuizmo.Enable(true);
-
-            if(ImGuizmoExtensions.MouseWheelManipulate(ref matrix))
-            {
-                _trackingMatrix = matrix;
-            }
-
-            if(ImGuizmo.Manipulate(ref viewMatrix.M11, ref projectionMatrix.M11, OPERATION.ROTATE, _posingService.CoordinateMode.AsGizmoMode(), ref matrix.M11))
-            {
-                _trackingMatrix = matrix;
-            }
-
-            if(_trackingMatrix.HasValue)
-            {
-                selected.Switch(
-                    boneSelect => posing.SkeletonPosing.GetBonePose(boneSelect).Apply(_trackingMatrix.Value.ToTransform(), originalMatrix.ToTransform()),
-                    _ => posing.ModelPosing.Transform += _trackingMatrix.Value.ToTransform().CalculateDiff(originalMatrix.ToTransform()),
-                    _ => posing.ModelPosing.Transform += _trackingMatrix.Value.ToTransform().CalculateDiff(originalMatrix.ToTransform())
-                );
-            }
-
-            if(!ImGuizmo.IsUsing() && _trackingMatrix.HasValue)
-            {
-                posing.Snapshot(false, false);
-                _trackingMatrix = null;
-            }
-
-            ImGuizmo.SetGizmoSizeClipSpace(0.1f);
-
-            ImGuizmo.SetID(0);
-        }
-        ImGui.End();
-
-        ImGui.SetCursorPosY(ImGui.GetCursorPosY() + gizmoSize.Y);*/
     }
 
     private void DrawGraphics(PosingCapability posing, ActorAppearanceCapability appearance)

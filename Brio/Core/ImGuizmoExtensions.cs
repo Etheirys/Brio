@@ -7,6 +7,7 @@ using ImGuizmoNET;
 using System;
 using System.Collections.Generic;
 using System.Numerics;
+using System.Reflection;
 
 namespace Brio.Core;
 
@@ -69,6 +70,7 @@ internal static class ImBriozmo
     private static float dragDistance = 0;
     private static Vector2 mousePos;
     private static Axis? lockedAxis = null;
+    private static bool isUsing = false;
 
     public enum Axis
     {
@@ -101,6 +103,8 @@ internal static class ImBriozmo
         }
     }
 
+    public static bool IsUsing() => isUsing;
+
     public unsafe static bool DrawRotation(ref Matrix4x4 matrix, Vector2 size)
     {
         bool changed = false;
@@ -121,14 +125,16 @@ internal static class ImBriozmo
         closestAxisMousePos = null;
         closestAxisMouseFromPos = null;
         transformMatrix = matrix;
-
-
+        isUsing = false;
 
         if(ImGui.BeginChild("##imbriozmo", size))
         {
             Vector2 topPos = ImGui.GetWindowPos() + ImGui.GetWindowContentRegionMin();
             Vector2 botPos = ImGui.GetWindowPos() + ImGui.GetWindowContentRegionMax();
             bool isMouseOverArea = (mousePos.X > topPos.X && mousePos.Y > topPos.Y && mousePos.X < botPos.X && mousePos.Y < botPos.Y);
+
+            if (isMouseOverArea)
+                isUsing = true;
 
             Vector2 center = topPos + ((botPos - topPos) / 2);
             
@@ -151,9 +157,12 @@ internal static class ImBriozmo
                     dragStartToPos = null;
                     dragStartFromPos = null;
                     dragDistance = 0;
+                    isUsing = false;
                 }
                 else
                 {
+                    isUsing = true;
+
                     Vector2 lhs = mousePos - (Vector2)dragStartToPos;
                     float newDragDistance = Vector2.Dot(lhs, normal);
                     float dragDelta = newDragDistance - dragDistance;
