@@ -53,6 +53,14 @@ internal static class ImGuizmoExtensions
 internal static class ImBriozmo
 {
     const int numPoints = 144;
+    const int axisMouseDist = 10;
+
+    private static Style style = new();
+    private static ImDrawListPtr drawList;
+    private static Matrix4x4 viewMatrix;
+    private static float closestAxisPointToMouseDistance;
+    private static Vector2? closestAxisMousePoint = null;
+    private static Axis closestMouseAxis = Axis.X;
 
     public enum Axis
     {
@@ -61,14 +69,40 @@ internal static class ImBriozmo
         Z,
     }
 
+    public struct Style
+    {
+        public uint[] AxisForegroundColors = new uint[3]
+        {
+            0xFF33FF33,
+            0xFF3333FF,
+            0xFFFF3333
+        };
+
+        public uint[] AxisBackgroundColors = new uint[3]
+        {
+            0x1033FF33,
+            0x103333FF,
+            0x10FF3333
+        };
+
+        public Style()
+        {
+        }
+    }
+
     public unsafe static bool DrawRotation(Matrix4x4 matrix)
     {
-        ImDrawListPtr drawList = ImGui.GetWindowDrawList();
+        drawList = ImGui.GetWindowDrawList();
 
         BrioCamera* camera = (BrioCamera*)CameraManager.Instance()->GetActiveCamera();
-        Matrix4x4 viewMatrix = camera->GetViewMatrix();
+        viewMatrix = camera->GetViewMatrix();
 
         float radius = 50;
+        int lineThickness = 2;
+
+        // reset context
+        closestAxisPointToMouseDistance = axisMouseDist;
+        closestAxisMousePoint = null;
 
         if(ImGui.BeginChild("##graphic_pose_gizmo", new Vector2(150,150)))
         {
@@ -79,15 +113,25 @@ internal static class ImBriozmo
 
             drawList.AddCircleFilled(center, radius, 0x50000000);
 
-            DrawAxis(center, 0xFF33FF33, 0x1033FF33, 2, radius, Axis.X, viewMatrix, drawList);
-            DrawAxis(center, 0xFF3333FF, 0x103333FF, 2, radius, Axis.Y, viewMatrix, drawList);
-            DrawAxis(center, 0xFFFF3333, 0x10FF3333, 2, radius, Axis.Z, viewMatrix, drawList);
+            DrawAxis(center, lineThickness, radius, Axis.X);
+            DrawAxis(center, lineThickness, radius, Axis.Y);
+            DrawAxis(center, lineThickness, radius, Axis.Z);
+
+            // Mouse
+            if(closestAxisMousePoint != null)
+            {
+                drawList.AddCircle((Vector2)closestAxisMousePoint, axisMouseDist, style.AxisForegroundColors[(int)closestMouseAxis]);
+            }
         }
 
         return false;
     }
 
-    public unsafe static void DrawAxis(Vector2 center, uint foregroundColor, uint backgroundColor, int thickness, float radius, Axis axis, Matrix4x4 view, ImDrawListPtr drawList)
+    private unsafe static void DrawAxis(
+        Vector2 center,
+        int thickness,
+        float radius,
+        Axis axis)
     {
         Vector3[] points3d = new Vector3[numPoints];
         for (int i = 0; i < points3d.Length; i++)
@@ -109,18 +153,34 @@ internal static class ImBriozmo
             }
         }
 
+        Vector2 mousePos = ImGui.GetMousePos();
+       
+
         float zClip = 0f;
         for(int i = 1; i < points3d.Length; i++)
         {
-            Vector3 fromPoint = Vector3.Transform(points3d[i - 1], view);
-            Vector3 toPoint = Vector3.Transform(points3d[i], view);
+            Vector3 fromPoint = Vector3.Transform(points3d[i - 1], viewMatrix);
+            Vector3 toPoint = Vector3.Transform(points3d[i], viewMatrix);
 
             bool isVisible = toPoint.Z < zClip;
 
             Vector2 fromPos = center + new Vector2(fromPoint.X, fromPoint.Y);
             Vector2 toPos = center + new Vector2(toPoint.X, toPoint.Y);
 
-            uint segmentColor = isVisible ? foregroundColor : backgroundColor;
+            uint segmentColor = isVisible ? style.AxisForegroundColors[(int)axis] : style.AxisBackgroundColors[(int)axis];
+
+            // check mouse
+            if(isVisible)
+            {
+                float distToMouse = Vector2.Distance(toPos, mousePos);
+                if(distToMouse <= closestAxisPointToMouseDistance)
+                {
+                    closestAxisPointToMouseDistance = distToMouse;
+                    closestAxisMousePoint = toPos;
+                    closestMouseAxis = axis;
+                }
+            }
+
             drawList.AddLine(fromPos, toPos, segmentColor, thickness);
         }
     }
