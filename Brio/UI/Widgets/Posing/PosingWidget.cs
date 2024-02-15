@@ -92,7 +92,7 @@ internal class PosingWidget(PosingCapability capability) : Widget<PosingCapabili
 
     private void DrawTransform()
     {
-        _posingTransformEditor.Draw("posing_widget_transform", Capability, -1);
+        _posingTransformEditor.Draw("posing_widget_transform", Capability);
     }
 
     public override void ActivateAdvanced()
