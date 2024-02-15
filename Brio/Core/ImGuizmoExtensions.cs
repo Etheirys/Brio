@@ -53,7 +53,7 @@ internal static class ImGuizmoExtensions
 internal static class ImBriozmo
 {
     const int numPoints = 144;
-    const int axisMouseDist = 10;
+    const int axisHoverMouseDist = 10;
 
     private static Style style = new();
     private static ImDrawListPtr drawList;
@@ -68,6 +68,7 @@ internal static class ImBriozmo
     private static Vector2? dragStartFromPos = null;
     private static float dragDistance = 0;
     private static Vector2 mousePos;
+    private static Axis? lockedAxis = null;
 
     public enum Axis
     {
@@ -78,6 +79,9 @@ internal static class ImBriozmo
 
     public struct Style
     {
+        public uint LockedAxisForegroundColor = 0xFFFFFFFF;
+        public uint LockedAxisBackgroundColor = 0x10FFFFFF;
+
         public uint[] AxisForegroundColors = new uint[3]
         {
             0xFFFF3333,
@@ -113,18 +117,21 @@ internal static class ImBriozmo
 
         // reset context
         mousePos = ImGui.GetMousePos();
-        closestAxisPointToMouseDistance = axisMouseDist;
+        closestAxisPointToMouseDistance = float.MaxValue;
         closestAxisMousePos = null;
         closestAxisMouseFromPos = null;
         transformMatrix = matrix;
+
+
 
         if(ImGui.BeginChild("##imbriozmo", size))
         {
             Vector2 topPos = ImGui.GetWindowPos() + ImGui.GetWindowContentRegionMin();
             Vector2 botPos = ImGui.GetWindowPos() + ImGui.GetWindowContentRegionMax();
+            bool isMouseOverArea = (mousePos.X > topPos.X && mousePos.Y > topPos.Y && mousePos.X < botPos.X && mousePos.Y < botPos.Y);
 
             Vector2 center = topPos + ((botPos - topPos) / 2);
-
+            
             drawList.AddCircleFilled(center, radius, 0x50000000);
 
             DrawAxis(center, lineThickness, radius, Axis.X);
@@ -182,13 +189,24 @@ internal static class ImBriozmo
             }
 
             // Mouse Hover
-            else if(closestAxisMousePos != null)
+            else if(isMouseOverArea && closestAxisMousePos != null && (closestAxisPointToMouseDistance < axisHoverMouseDist || lockedAxis != null))
             {
                 if(ImGui.IsMouseDown(ImGuiMouseButton.Left))
                 {
                     dragStartToPos = closestAxisMousePos;
                     dragStartFromPos = closestAxisMouseFromPos;
                     dragAxis = closestMouseAxis;
+                }
+                if (ImGui.IsMouseClicked(ImGuiMouseButton.Right))
+                {
+                    if(lockedAxis == null)
+                    {
+                        lockedAxis = closestMouseAxis;
+                    }
+                    else
+                    {
+                        lockedAxis = null;
+                    }
                 }
                 else
                 {
@@ -223,7 +241,7 @@ internal static class ImBriozmo
                     }
                 }
                 
-                drawList.AddCircle((Vector2)closestAxisMousePos, axisMouseDist, style.AxisForegroundColors[(int)closestMouseAxis]);
+                drawList.AddCircle((Vector2)closestAxisMousePos, axisHoverMouseDist, style.AxisForegroundColors[(int)closestMouseAxis]);
             }
 
             ImGui.InvisibleButton("##imbriozmo_cover", size);
@@ -277,8 +295,11 @@ internal static class ImBriozmo
 
             uint segmentColor = isVisible ? style.AxisForegroundColors[(int)axis] : style.AxisBackgroundColors[(int)axis];
 
+            if(lockedAxis == axis)
+                segmentColor = isVisible ? style.LockedAxisForegroundColor : style.LockedAxisBackgroundColor;
+
             // check mouse
-            if(isVisible)
+            if(isVisible && (lockedAxis == null || lockedAxis == axis))
             {
                 float distToMouse = Vector2.Distance(toPos, mousePos);
                 if(distToMouse <= closestAxisPointToMouseDistance)
