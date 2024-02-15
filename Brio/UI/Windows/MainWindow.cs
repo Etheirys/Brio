@@ -1,5 +1,6 @@
 ﻿using Brio.Config;
 using Brio.Entities;
+using Brio.Input;
 using Brio.UI.Controls.Stateless;
 using Brio.UI.Entitites;
 using Dalamud.Interface;
@@ -18,8 +19,9 @@ internal class MainWindow : Window
     private readonly EntityManager _entityManager;
 
     private readonly EntityHierarchyView _entitySelector;
-
-    public MainWindow(ConfigurationService configService, SettingsWindow settingsWindow, InfoWindow infoWindow, LibraryWindow libraryWindow, EntityManager entityManager) : base($"{Brio.Name} Scene Manager [{configService.Version}]###brio_main_window", ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.AlwaysAutoResize)
+    
+    public MainWindow(ConfigurationService configService, SettingsWindow settingsWindow, InfoWindow infoWindow, LibraryWindow libraryWindow, EntityManager entityManager, InputService input)
+        : base($"{Brio.Name} Scene Manager [{configService.Version}]###brio_main_window", ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.AlwaysAutoResize)
     {
         Namespace = "brio_main_namespace";
 
@@ -34,6 +36,8 @@ internal class MainWindow : Window
             MaximumSize = new Vector2(270, 5000),
             MinimumSize = new Vector2(270, 200)
         };
+
+        input.AddListener(KeyBindEvents.Interface_ToggleBrioWindow, this.OnToggle);
     }
 
     public override void Draw()
@@ -54,6 +58,11 @@ internal class MainWindow : Window
         }
 
         EntityHelpers.DrawEntitySection(_entityManager.SelectedEntity);
+    }
+
+    private void OnToggle()
+    {
+        this.IsOpen = !this.IsOpen;
     }
 
     private void DrawHeaderButtons()

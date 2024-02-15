@@ -25,6 +25,7 @@ internal class UIManager : IDisposable
     private readonly ActorAppearanceWindow _actorAppearanceWindow;
     private readonly ActionTimelineWindow _actionTimelineWindow;
     private readonly PosingOverlayWindow _overlayWindow;
+    private readonly KeyBindPromptWindow _keyBindPromptWindow;
     private readonly PosingOverlayToolbarWindow _overlayToolbarWindow;
     private readonly PosingTransformWindow _overlayTransformWindow;
     private readonly PosingGraphicalWindow _graphicalWindow;
@@ -61,6 +62,7 @@ internal class UIManager : IDisposable
             ActorAppearanceWindow appearanceWindow,
             ActionTimelineWindow actionTimelineWindow,
             PosingOverlayWindow overlayWindow,
+            KeyBindPromptWindow keyBindPromptWindow,
             PosingOverlayToolbarWindow overlayToolbarWindow,
             PosingTransformWindow overlayTransformWindow,
             PosingGraphicalWindow graphicalWindow,
@@ -82,6 +84,7 @@ internal class UIManager : IDisposable
         _actorAppearanceWindow = appearanceWindow;
         _actionTimelineWindow = actionTimelineWindow;
         _overlayWindow = overlayWindow;
+        _keyBindPromptWindow = keyBindPromptWindow;
         _overlayToolbarWindow = overlayToolbarWindow;
         _overlayTransformWindow = overlayTransformWindow;
         _graphicalWindow = graphicalWindow;
@@ -96,6 +99,7 @@ internal class UIManager : IDisposable
         _windowSystem.AddWindow(_actorAppearanceWindow);
         _windowSystem.AddWindow(_actionTimelineWindow);
         _windowSystem.AddWindow(_overlayWindow);
+        _windowSystem.AddWindow(_keyBindPromptWindow);
         _windowSystem.AddWindow(_overlayToolbarWindow);
         _windowSystem.AddWindow(_overlayTransformWindow);
         _windowSystem.AddWindow(_graphicalWindow);

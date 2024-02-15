@@ -10,8 +10,16 @@ internal abstract class Capability(Entity parent) : IDisposable
 
     public IWidget? Widget { get; protected set; }
 
+    public virtual void OnEntitySelected()
+    {
+    }
+
+    public virtual void OnEntityDeselected()
+    {
+    }
+
     public virtual void Dispose()
     {
-
+        OnEntityDeselected();
     }
 }
