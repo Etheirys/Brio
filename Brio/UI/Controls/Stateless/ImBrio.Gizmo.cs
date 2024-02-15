@@ -1,5 +1,6 @@
 ﻿using Brio.Config;
 using Brio.Game.Camera;
+using Brio.Input;
 using FFXIVClientStructs.FFXIV.Client.Game.Control;
 using ImGuiNET;
 using System;
@@ -126,11 +127,11 @@ internal static partial class ImBrioGizmo
 
                     float angleChange = dragDelta / 200;
 
-                    bool smallIncrement = ImGui.IsKeyDown(ConfigurationService.Instance.Configuration.Interface.IncrementSmall);
+                    bool smallIncrement = InputService.IsKeyBindDown(KeyBindEvents.Interface_IncrementSmallModifier);
                     if(smallIncrement)
                         angleChange /= 10;
 
-                    bool largeIncrement = ImGui.IsKeyDown(ConfigurationService.Instance.Configuration.Interface.IncrementLarge);
+                    bool largeIncrement = InputService.IsKeyBindDown(KeyBindEvents.Interface_IncrementLargeModifier);
                     if(largeIncrement)
                         angleChange *= 10;
 
@@ -179,11 +180,11 @@ internal static partial class ImBrioGizmo
 
                     if(mouseWheel != 0)
                     {
-                        bool smallIncrement = ImGui.IsKeyDown(ConfigurationService.Instance.Configuration.Interface.IncrementSmall);
+                        bool smallIncrement = InputService.IsKeyBindDown(KeyBindEvents.Interface_IncrementSmallModifier);
                         if(smallIncrement)
                             mouseWheel /= 10;
 
-                        bool largeIncrement = ImGui.IsKeyDown(ConfigurationService.Instance.Configuration.Interface.IncrementLarge);
+                        bool largeIncrement = InputService.IsKeyBindDown(KeyBindEvents.Interface_IncrementLargeModifier);
                         if(largeIncrement)
                             mouseWheel *= 10;
 
