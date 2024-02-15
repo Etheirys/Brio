@@ -114,7 +114,7 @@ internal class PosingGraphicalWindow : Window, IDisposable
                 ImGui.Separator();
                 DrawGizmo();
                 ImGui.Separator();
-                _transformEditor.Draw("graphical_transform", posing, -1);
+                _transformEditor.Draw("graphical_transform", posing);
                 ImGui.Separator();
                 DrawImportButtons(posing);
             }
