@@ -312,7 +312,7 @@ internal class PosingGraphicalWindow : Window, IDisposable
         var originalMatrix = matrix;
 
         Vector2 gizmoSize = new(ImGui.GetContentRegionAvail().X, ImGui.GetContentRegionAvail().X);
-        if (ImBriozmo.DrawRotation(ref matrix, gizmoSize))
+        if (ImBrioGizmo.DrawRotation(ref matrix, gizmoSize))
         {
             _trackingMatrix = matrix;
         }
@@ -326,7 +326,7 @@ internal class PosingGraphicalWindow : Window, IDisposable
             );
         }
 
-        if(!ImBriozmo.IsUsing() && _trackingMatrix.HasValue)
+        if(!ImBrioGizmo.IsUsing() && _trackingMatrix.HasValue)
         {
             posing.Snapshot(false, false);
             _trackingMatrix = null;
