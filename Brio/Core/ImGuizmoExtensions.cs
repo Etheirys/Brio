@@ -61,6 +61,8 @@ internal static class ImBriozmo
     private static float closestAxisPointToMouseDistance;
     private static Vector2? closestAxisMousePoint = null;
     private static Axis closestMouseAxis = Axis.X;
+    private static Axis dragAxis = Axis.X;
+    private static Vector2? dragStartPos = null;
 
     public enum Axis
     {
@@ -104,7 +106,8 @@ internal static class ImBriozmo
         closestAxisPointToMouseDistance = axisMouseDist;
         closestAxisMousePoint = null;
 
-        if(ImGui.BeginChild("##graphic_pose_gizmo", new Vector2(150,150)))
+        Vector2 size = new Vector2(150, 150);
+        if(ImGui.BeginChild("##imbriozmo", size))
         {
             Vector2 topPos = ImGui.GetWindowPos() + ImGui.GetWindowContentRegionMin();
             Vector2 botPos = ImGui.GetWindowPos() + ImGui.GetWindowContentRegionMax();
@@ -117,12 +120,32 @@ internal static class ImBriozmo
             DrawAxis(center, lineThickness, radius, Axis.Y);
             DrawAxis(center, lineThickness, radius, Axis.Z);
 
-            // Mouse
-            if(closestAxisMousePoint != null)
+            
+            // Mouse drag
+            if(dragStartPos != null)
             {
+                drawList.AddCircleFilled((Vector2)dragStartPos, lineThickness * 2, style.AxisForegroundColors[(int)dragAxis]);
+
+                if(!ImGui.IsMouseDown(ImGuiMouseButton.Left))
+                {
+                    dragStartPos = null;
+                }
+            }
+
+            // Mouse Hover
+            else if(closestAxisMousePoint != null)
+            {
+                if(ImGui.IsMouseDown(ImGuiMouseButton.Left))
+                {
+                    dragStartPos = closestAxisMousePoint;
+                    dragAxis = closestMouseAxis;
+                }
+                
                 drawList.AddCircle((Vector2)closestAxisMousePoint, axisMouseDist, style.AxisForegroundColors[(int)closestMouseAxis]);
             }
         }
+
+        ImGui.InvisibleButton("##imbriozmo_cover", size);
 
         return false;
     }
