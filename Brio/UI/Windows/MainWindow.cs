@@ -39,9 +39,7 @@ internal class MainWindow : Window
     {
         DrawHeaderButtons();
 
-        ImBriozmo.DrawRotation(Matrix4x4.Identity);
-
-        /*var rootEntity = _entityManager.RootEntity;
+        var rootEntity = _entityManager.RootEntity;
 
         if(rootEntity == null)
             return;
@@ -54,7 +52,7 @@ internal class MainWindow : Window
             }
         }
 
-        EntityHelpers.DrawEntitySection(_entityManager.SelectedEntity);*/
+        EntityHelpers.DrawEntitySection(_entityManager.SelectedEntity);
     }
 
     private void DrawHeaderButtons()

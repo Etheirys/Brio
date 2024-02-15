@@ -311,7 +311,25 @@ internal class PosingGraphicalWindow : Window, IDisposable
         var matrix = _trackingMatrix ?? targetMatrix.Value;
         var originalMatrix = matrix;
 
-        var projectionMatrix = Matrix4x4.CreatePerspectiveFieldOfView(camera->GetFoV(), 1, 0.01f, 1f);
+        Vector2 gizmoSize = new(ImGui.GetContentRegionAvail().X, ImGui.GetContentRegionAvail().X);
+        if (ImBriozmo.DrawRotation(ref matrix, gizmoSize))
+        {
+            _trackingMatrix = matrix;
+        }
+
+        if(_trackingMatrix.HasValue)
+        {
+            selected.Switch(
+                boneSelect => posing.SkeletonPosing.GetBonePose(boneSelect).Apply(_trackingMatrix.Value.ToTransform(), originalMatrix.ToTransform()),
+                _ => posing.ModelPosing.Transform += _trackingMatrix.Value.ToTransform().CalculateDiff(originalMatrix.ToTransform()),
+                _ => posing.ModelPosing.Transform += _trackingMatrix.Value.ToTransform().CalculateDiff(originalMatrix.ToTransform())
+            );
+        }
+
+        // todo: snapshots
+        _trackingMatrix = null;
+
+        /*var projectionMatrix = Matrix4x4.CreatePerspectiveFieldOfView(camera->GetFoV(), 1, 0.01f, 1f);
         var viewMatrix = Matrix4x4.CreateLookAt(camera->GetPosition(), matrix.Translation, Vector3.UnitY);
 
         Vector2 gizmoSize = new(ImGui.GetContentRegionAvail().X, ImGui.GetContentRegionAvail().X);
@@ -376,7 +394,7 @@ internal class PosingGraphicalWindow : Window, IDisposable
         }
         ImGui.End();
 
-        ImGui.SetCursorPosY(ImGui.GetCursorPosY() + gizmoSize.Y);
+        ImGui.SetCursorPosY(ImGui.GetCursorPosY() + gizmoSize.Y);*/
     }
 
     private void DrawGraphics(PosingCapability posing, ActorAppearanceCapability appearance)
