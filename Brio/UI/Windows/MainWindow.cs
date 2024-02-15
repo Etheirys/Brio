@@ -1,4 +1,5 @@
 ﻿using Brio.Config;
+using Brio.Core;
 using Brio.Entities;
 using Brio.UI.Controls.Stateless;
 using Brio.UI.Entitites;
@@ -38,7 +39,9 @@ internal class MainWindow : Window
     {
         DrawHeaderButtons();
 
-        var rootEntity = _entityManager.RootEntity;
+        ImBriozmo.DrawRotation(Matrix4x4.Identity);
+
+        /*var rootEntity = _entityManager.RootEntity;
 
         if(rootEntity == null)
             return;
@@ -51,7 +54,7 @@ internal class MainWindow : Window
             }
         }
 
-        EntityHelpers.DrawEntitySection(_entityManager.SelectedEntity);
+        EntityHelpers.DrawEntitySection(_entityManager.SelectedEntity);*/
     }
 
     private void DrawHeaderButtons()
