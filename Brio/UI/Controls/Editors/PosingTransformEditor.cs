@@ -54,12 +54,6 @@ internal class PosingTransformEditor
         bool didChange = false;
         bool anyActive = false;
 
-        var text = "No Bone Selected";
-        if(bone != null)
-            text = bone.FriendlyDescriptor;
-
-        ImGui.Text(text);
-
         if(ImBrio.FontIconButtonRight("ik", FontAwesomeIcon.Adjust, 1.2f, "Inverse Kinematics", bone?.EligibleForIK == true))
             ImGui.OpenPopup("transform_ik_popup");
 
@@ -151,8 +145,6 @@ internal class PosingTransformEditor
 
         bool didChange = false;
         bool anyActive = false;
-
-        ImGui.Text("Model Transform");
 
         didChange |= ImBrio.DragFloat3("P", ref realTransform.Position, 0.1f, "Position");
         anyActive |= ImGui.IsItemActive();
