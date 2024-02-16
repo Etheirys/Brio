@@ -39,8 +39,6 @@ internal class PosingGraphicalWindow : Window, IDisposable
 
     private Matrix4x4? _trackingMatrix;
 
-    private const int _gizmoId = 142859;
-
     public PosingGraphicalWindow(EntityManager entityManager, CameraService cameraService, ConfigurationService configurationService, PosingService posingService, GPoseService gPoseService) : base($"{Brio.Name} - Posing###brio_posing_graphical_window")
     {
         Namespace = "brio_posing_graphical_namespace";
@@ -280,7 +278,8 @@ internal class PosingGraphicalWindow : Window, IDisposable
 
 
         Vector2 gizmoSize = new(ImGui.GetContentRegionAvail().X, ImGui.GetContentRegionAvail().X);
-        if (ImBrioGizmo.DrawRotation(ref matrix, gizmoSize))
+
+        if (ImBrioGizmo.DrawRotation(ref matrix, gizmoSize, _posingService.CoordinateMode == PosingCoordinateMode.World))
         {
             _trackingMatrix = matrix;
         }

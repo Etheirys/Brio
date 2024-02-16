@@ -43,16 +43,16 @@ internal static partial class ImBrioGizmo
 
         public uint[] AxisForegroundColors = new uint[3]
         {
-            0xFFFF3333,
-            0xFF33FF33,
             0xFF3333FF,
+            0xFF33FF33,
+            0xFFFF3333,
         };
 
         public uint[] AxisBackgroundColors = new uint[3]
         {
-            0x10FF3333,
-            0x1033FF33,
             0x103333FF,
+            0x1033FF33,
+            0x10FF3333,
         };
 
         public Style()
@@ -62,7 +62,43 @@ internal static partial class ImBrioGizmo
 
     public static bool IsUsing() => isUsing;
 
-    public unsafe static bool DrawRotation(ref Matrix4x4 matrix, Vector2 size)
+    public unsafe static bool DrawRotation(ref Matrix4x4 matrix, Vector2 size, bool worldSpace = false)
+    {
+        // decompose the matrix
+        Vector3 scale;
+        Quaternion rotation;
+        Vector3 translation;
+        Matrix4x4.Decompose(matrix, out scale, out rotation, out translation);
+
+        Quaternion editingRotation = rotation;
+        if(worldSpace)
+            editingRotation = Quaternion.Identity;
+
+        bool changed = DrawRotation(ref editingRotation, size);
+
+        // recompose the matrix
+        if(changed)
+        {
+            if (worldSpace)
+            {
+                matrix = Matrix4x4.CreateScale(scale);
+                matrix = Matrix4x4.Transform(matrix, rotation);
+                matrix = Matrix4x4.Transform(matrix, editingRotation);
+                matrix.Translation = translation;
+            }
+            else
+            {
+                matrix = Matrix4x4.CreateScale(scale);
+                matrix = Matrix4x4.Transform(matrix, editingRotation);
+                matrix.Translation = translation;
+            }
+      
+        }
+
+        return changed;
+    }
+
+    public unsafe static bool DrawRotation(ref Quaternion rotation, Vector2 size)
     {
         bool changed = false;
         drawList = ImGui.GetWindowDrawList();
@@ -81,8 +117,12 @@ internal static partial class ImBrioGizmo
         closestAxisPointToMouseDistance = float.MaxValue;
         closestAxisMousePos = null;
         closestAxisMouseFromPos = null;
-        transformMatrix = matrix;
         isUsing = false;
+
+   
+        // create a transform matrix
+        transformMatrix = Matrix4x4.CreateFromQuaternion(rotation);
+        transformMatrix.Translation = new Vector3(0, -5, 0);
 
         if(ImGui.BeginChild("##imbriozmo", size))
         {
@@ -135,21 +175,21 @@ internal static partial class ImBrioGizmo
                     if(largeIncrement)
                         angleChange *= 10;
 
-                    Matrix4x4 rot = Matrix4x4.Identity;
+                    Quaternion rot = Quaternion.Identity;
                     if(dragAxis == Axis.X)
                     {
-                        rot = Matrix4x4.CreateRotationX(angleChange);
+                        rot = Quaternion.CreateFromAxisAngle(Vector3.UnitX, angleChange);
                     }
                     if(dragAxis == Axis.Y)
                     {
-                        rot = Matrix4x4.CreateRotationY(-angleChange);
+                        rot = Quaternion.CreateFromAxisAngle(Vector3.UnitY, -angleChange);
                     }
                     if(dragAxis == Axis.Z)
                     {
-                        rot = Matrix4x4.CreateRotationZ(angleChange);
+                        rot = Quaternion.CreateFromAxisAngle(Vector3.UnitZ, angleChange);
                     }
 
-                    transformMatrix = rot * transformMatrix;
+                    rotation = rotation * rot;
                     changed = true;
                 }
             }
@@ -188,21 +228,19 @@ internal static partial class ImBrioGizmo
                         if(largeIncrement)
                             mouseWheel *= 10;
 
-                        Matrix4x4 rot = Matrix4x4.Identity;
-                        if(closestMouseAxis == Axis.X)
+                        Quaternion rot = Quaternion.Identity;
+                        if(dragAxis == Axis.X)
                         {
-                            rot = Matrix4x4.CreateRotationX(mouseWheel);
+                            rot = Quaternion.CreateFromAxisAngle(Vector3.UnitX, mouseWheel);
                         }
-                        if(closestMouseAxis == Axis.Y)
+                        if(dragAxis == Axis.Y)
                         {
-                            rot = Matrix4x4.CreateRotationY(-mouseWheel);
+                            rot = Quaternion.CreateFromAxisAngle(Vector3.UnitY, -mouseWheel);
                         }
-                        if(closestMouseAxis == Axis.Z)
+                        if(dragAxis == Axis.Z)
                         {
-                            rot = Matrix4x4.CreateRotationZ(mouseWheel);
+                            rot = Quaternion.CreateFromAxisAngle(Vector3.UnitZ, mouseWheel);
                         }
-
-                        transformMatrix = rot * transformMatrix;
                         changed = true;
                     }
                 }
@@ -213,8 +251,6 @@ internal static partial class ImBrioGizmo
             ImGui.InvisibleButton("##imbriozmo_cover", size);
             ImGui.EndChild();
         }
-
-        matrix = transformMatrix;
 
         return changed;
     }
