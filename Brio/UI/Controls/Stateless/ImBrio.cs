@@ -164,8 +164,10 @@ internal static partial class ImBrio
             ImGui.Text(icon.ToIconString());
         }
         ImGui.SetWindowFontScale(1.0f);
+
+        ImGui.SetCursorPos(startPos);
+        ImGui.InvisibleButton("##dummy", size);
         ImGui.SetCursorPos(endPos);
-        
 
         ImGui.PopStyleVar();
 
