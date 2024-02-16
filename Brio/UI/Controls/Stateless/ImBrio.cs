@@ -155,6 +155,7 @@ internal static partial class ImBrio
 
         Vector2 startPos = ImGui.GetCursorPos();
         clicked = ImGui.Button(label, size);
+        Vector2 endPos = ImGui.GetCursorPos();
 
         ImGui.SetCursorPos(startPos + ImGui.GetStyle().FramePadding);
         ImGui.SetWindowFontScale(iconScale);
@@ -163,8 +164,8 @@ internal static partial class ImBrio
             ImGui.Text(icon.ToIconString());
         }
         ImGui.SetWindowFontScale(1.0f);
-        ImGui.SetCursorPos(startPos);
-        ImGui.InvisibleButton("##dummy", size);
+        ImGui.SetCursorPos(endPos);
+        
 
         ImGui.PopStyleVar();
 
