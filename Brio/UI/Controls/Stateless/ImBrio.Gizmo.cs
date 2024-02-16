@@ -42,16 +42,16 @@ internal static partial class ImBrioGizmo
 
         public uint[] AxisForegroundColors = new uint[3]
         {
-            0xFFFF3333,
-            0xFF33FF33,
             0xFF3333FF,
+            0xFF33FF33,
+            0xFFFF3333,
         };
 
         public uint[] AxisBackgroundColors = new uint[3]
         {
-            0x10FF3333,
-            0x1033FF33,
             0x103333FF,
+            0x1033FF33,
+            0x10FF3333,
         };
 
         public Style()
