@@ -61,7 +61,7 @@ internal static partial class ImBrioGizmo
 
     public static bool IsUsing() => isUsing;
 
-    public unsafe static bool DrawRotation(ref Matrix4x4 matrix, Vector2 size)
+    public unsafe static bool DrawRotation(ref Matrix4x4 matrix, Vector2 size, bool worldSpace = false)
     {
         // decompose the matrix
         Vector3 scale;
@@ -69,14 +69,29 @@ internal static partial class ImBrioGizmo
         Vector3 translation;
         Matrix4x4.Decompose(matrix, out scale, out rotation, out translation);
 
-        bool changed = DrawRotation(ref rotation, size);
+        Quaternion editingRotation = rotation;
+        if(worldSpace)
+            editingRotation = Quaternion.Identity;
+
+        bool changed = DrawRotation(ref editingRotation, size);
 
         // recompose the matrix
         if(changed)
         {
-            matrix = Matrix4x4.CreateScale(scale);
-            matrix = Matrix4x4.Transform(matrix, rotation);
-            matrix.Translation = translation;
+            if (worldSpace)
+            {
+                matrix = Matrix4x4.CreateScale(scale);
+                matrix = Matrix4x4.Transform(matrix, rotation);
+                matrix = Matrix4x4.Transform(matrix, editingRotation);
+                matrix.Translation = translation;
+            }
+            else
+            {
+                matrix = Matrix4x4.CreateScale(scale);
+                matrix = Matrix4x4.Transform(matrix, editingRotation);
+                matrix.Translation = translation;
+            }
+      
         }
 
         return changed;
