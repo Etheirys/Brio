@@ -14,9 +14,18 @@ internal class PosingTransformEditor
     private Transform? _trackingTransform;
     private Vector3? _trackingEuler;
 
-    public void Draw(string id, PosingCapability posingCapability, float? width = null)
+    private bool _compactMode = false;
+
+    public void Draw(string id, PosingCapability posingCapability, bool compactMode = false)
     {
         var selected = posingCapability.Selected;
+
+        _compactMode = compactMode;
+
+        if(_compactMode)
+            ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, new Vector2(4, 3));
+        else
+            ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, new Vector2(4, 5));
 
         using(ImRaii.PushId(id))
         {
@@ -26,24 +35,24 @@ internal class PosingTransformEditor
                     var realBone = posingCapability.SkeletonPosing.GetBone(bone);
                     if(realBone != null && realBone.Skeleton.IsValid)
                     {
-                        DrawBoneTransformEditor(posingCapability, bone, width);
+                        DrawBoneTransformEditor(posingCapability, bone);
                     }
                     else
                     {
-                        DrawModelTransformEditor(posingCapability, width);
+                        DrawModelTransformEditor(posingCapability);
                     }
                 },
-                _ => DrawModelTransformEditor(posingCapability, width),
-                _ => DrawModelTransformEditor(posingCapability, width)
+                _ => DrawModelTransformEditor(posingCapability),
+                _ => DrawModelTransformEditor(posingCapability)
             );
         }
+
+        ImGui.PopStyleVar();
+
     }
 
-    private void DrawBoneTransformEditor(PosingCapability posingCapability, BonePoseInfoId boneId, float? width)
+    private void DrawBoneTransformEditor(PosingCapability posingCapability, BonePoseInfoId boneId)
     {
-        if(width.HasValue)
-            width -= ImGui.CalcTextSize("XXXX").X;
-
         var bone = posingCapability.SkeletonPosing.GetBone(boneId);
         var bonePose = bone != null ? posingCapability.SkeletonPosing.GetBonePose(boneId) : null;
 
@@ -57,69 +66,44 @@ internal class PosingTransformEditor
         bool didChange = false;
         bool anyActive = false;
 
-
-        if(width.HasValue)
-            ImGui.PushItemWidth(width.Value);
-
         var text = "No Bone Selected";
         if(bone != null)
             text = bone.FriendlyDescriptor;
+
         ImGui.Text(text);
 
-        ImGui.SameLine();
-        if(ImBrio.FontIconButtonRight("ik", FontAwesomeIcon.Adjust, 1.2f, "Inverse Kinematics", bone?.EligibleForIK == true))
+        didChange |= ImBrio.DragFloat3($"{FontAwesomeIcon.ArrowsUpDownLeftRight.ToIconString()}", ref realTransform.Position, 0.1f, "Position");
+        anyActive |= ImGui.IsItemActive();
+
+        didChange |= ImBrio.DragFloat3($"{FontAwesomeIcon.ArrowsSpin.ToIconString()}", ref realEuler, 5.0f, "Rotation");
+        anyActive |= ImGui.IsItemActive();
+
+        didChange |= ImBrio.DragFloat3($"{FontAwesomeIcon.ExpandAlt.ToIconString()}", ref realTransform.Scale, 0.1f, "Scale");
+        anyActive |= ImGui.IsItemActive();
+      
+        ImGui.Spacing();
+
+        if(ImBrio.FontIconButton("ik", FontAwesomeIcon.Adjust, "Inverse Kinematics", bone?.EligibleForIK == true))
             ImGui.OpenPopup("transform_ik_popup");
 
-        didChange |= ImGui.DragFloat3("###position", ref realTransform.Position, 0.001f);
-        anyActive |= ImGui.IsItemActive();
-        if(ImGui.IsItemHovered())
-            ImGui.SetTooltip("Position");
         ImGui.SameLine();
-        bool propBool = propagate.HasFlag(TransformComponents.Position);
-        if(ImGui.Checkbox("###propagate_position", ref propBool))
-        {
-            didChange |= true;
-            propagate = propBool ? propagate | TransformComponents.Position : propagate & ~TransformComponents.Position;
-        }
-        if(ImGui.IsItemHovered())
-            ImGui.SetTooltip("Propagate");
 
-        didChange |= ImGui.DragFloat3("###rotation", ref realEuler, 0.1f);
-        anyActive |= ImGui.IsItemActive();
-        if(ImGui.IsItemHovered())
-            ImGui.SetTooltip("Rotation");
-        ImGui.SameLine();
-        propBool = propagate.HasFlag(TransformComponents.Rotation);
-        if(ImGui.Checkbox("###propagate_rotation", ref propBool))
-        {
-            didChange |= true;
-            propagate = propBool ? propagate | TransformComponents.Rotation : propagate & ~TransformComponents.Rotation;
-        }
-        if(ImGui.IsItemHovered())
-            ImGui.SetTooltip("Propagate");
-
-        didChange |= ImGui.DragFloat3("###scale", ref realTransform.Scale, 0.001f);
-        anyActive |= ImGui.IsItemActive();
-        if(ImGui.IsItemHovered())
-            ImGui.SetTooltip("Scale");
-        ImGui.SameLine();
-        propBool = propagate.HasFlag(TransformComponents.Scale);
-        if(ImGui.Checkbox("###propagate_scale", ref propBool))
-        {
-            didChange |= true;
-            propagate = propBool ? propagate | TransformComponents.Scale : propagate & ~TransformComponents.Scale;
-        }
-        if(ImGui.IsItemHovered())
-            ImGui.SetTooltip("Propagate");
-
-        if(width.HasValue)
-            ImGui.PopItemWidth();
+        if(ImBrio.FontIconButton("propagate", FontAwesomeIcon.Compress, "Propagate", bone?.EligibleForIK == true))
+            ImGui.OpenPopup("transform_propagate_popup");
 
         using(var popup = ImRaii.Popup("transform_ik_popup"))
         {
             if(popup.Success && bonePose != null)
             {
                 BoneIKEditor.Draw(bonePose, posingCapability);
+            }
+        }
+
+        using(var popup = ImRaii.Popup("transform_propagate_popup"))
+        {
+            if(popup.Success && bonePose != null)
+            {
+                didChange |= DrawPropagateCheckboxes(propagate);
             }
         }
 
@@ -149,8 +133,44 @@ internal class PosingTransformEditor
         }
     }
 
+    private bool DrawPropagateCheckboxes(TransformComponents propagate)
+    {
+        var didChange = false;
 
-    private void DrawModelTransformEditor(PosingCapability posingCapability, float? width)
+        bool propBool = propagate.HasFlag(TransformComponents.Position);
+        if(ImGui.Checkbox("P###propagate_position", ref propBool))
+        {
+            didChange |= true;
+            propagate = propBool ? propagate | TransformComponents.Position : propagate & ~TransformComponents.Position;
+        }
+        if(ImGui.IsItemHovered())
+            ImGui.SetTooltip("Propagate Positions");
+
+        ImGui.SameLine();
+        propBool = propagate.HasFlag(TransformComponents.Rotation);
+        if(ImGui.Checkbox("R###propagate_rotation", ref propBool))
+        {
+            didChange |= true;
+            propagate = propBool ? propagate | TransformComponents.Rotation : propagate & ~TransformComponents.Rotation;
+        }
+        if(ImGui.IsItemHovered())
+            ImGui.SetTooltip("Propagate Rotations");
+
+        ImGui.SameLine();
+
+        propBool = propagate.HasFlag(TransformComponents.Scale);
+        if(ImGui.Checkbox("S###propagate_scale", ref propBool))
+        {
+            didChange |= true;
+            propagate = propBool ? propagate | TransformComponents.Scale : propagate & ~TransformComponents.Scale;
+        }
+        if(ImGui.IsItemHovered())
+            ImGui.SetTooltip("Propagate Scales");
+
+        return didChange;
+    }
+
+    private void DrawModelTransformEditor(PosingCapability posingCapability)
     {
         var before = posingCapability.ModelPosing.Transform;
         var realTransform = _trackingTransform ?? before;
@@ -159,32 +179,16 @@ internal class PosingTransformEditor
         bool didChange = false;
         bool anyActive = false;
 
-
-        if(width.HasValue)
-            ImGui.PushItemWidth(width.Value);
-
         ImGui.Text("Model Transform");
 
-        didChange |= ImGui.DragFloat3("###position", ref realTransform.Position, 0.001f);
+        didChange |= ImBrio.DragFloat3($"{FontAwesomeIcon.ArrowsUpDownLeftRight.ToIconString()}", ref realTransform.Position, 0.1f, "Position");
         anyActive |= ImGui.IsItemActive();
-        if(ImGui.IsItemHovered())
-            ImGui.SetTooltip("Position");
 
-
-        didChange |= ImGui.DragFloat3("###rotation", ref realEuler, 0.1f);
+        didChange |= ImBrio.DragFloat3($"{FontAwesomeIcon.ArrowsSpin.ToIconString()}", ref realEuler, 5.0f, "Rotation");
         anyActive |= ImGui.IsItemActive();
-        if(ImGui.IsItemHovered())
-            ImGui.SetTooltip("Rotation");
 
-
-        didChange |= ImGui.DragFloat3("###scale", ref realTransform.Scale, 0.001f);
+        didChange |= ImBrio.DragFloat3($"{FontAwesomeIcon.ExpandAlt.ToIconString()}", ref realTransform.Scale, 0.1f, "Scale");
         anyActive |= ImGui.IsItemActive();
-        if(ImGui.IsItemHovered())
-            ImGui.SetTooltip("Scale");
-
-
-        if(width.HasValue)
-            ImGui.PopItemWidth();
 
 
         realTransform.Rotation = realEuler.ToQuaternion();
