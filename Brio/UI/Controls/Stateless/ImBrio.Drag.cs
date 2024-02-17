@@ -34,15 +34,27 @@ internal static partial class ImBrio
                 ImGui.Text(label);
             }
         }
-       
-        ImGui.SetNextItemWidth((ImGui.GetWindowContentRegionMax().X - ImGui.GetWindowContentRegionMin().X) - 32 - labelWidth);
-        changed |= ImGui.DragFloat3($"##{label}_drag3", ref value, step / 10.0f);
-
-        if(ImGui.IsItemHovered())
-            ImGui.SetTooltip(tooltip);
 
         uint id = ImGui.GetID(label);
         bool isExpanded = expanded.Contains(id);
+
+        if(isExpanded)
+        {
+            ImGui.PushStyleColor(ImGuiCol.FrameBg, 0);
+            ImGui.BeginDisabled();
+        }
+
+        ImGui.SetNextItemWidth((ImGui.GetWindowContentRegionMax().X - ImGui.GetWindowContentRegionMin().X) - 32 - labelWidth);
+        changed |= ImGui.DragFloat3($"##{label}_drag3", ref value, step / 10.0f);
+
+        if(isExpanded)
+        {
+            ImGui.EndDisabled();
+            ImGui.PopStyleColor();
+        }
+
+        if(ImGui.IsItemHovered())
+            ImGui.SetTooltip(tooltip);
 
         ImGui.SameLine();
         ImGui.SetNextItemWidth(32);
