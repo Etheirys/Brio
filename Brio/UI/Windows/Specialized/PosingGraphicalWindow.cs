@@ -23,6 +23,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
+using static FFXIVClientStructs.FFXIV.Client.UI.Misc.ConfigModule;
 
 namespace Brio.UI.Windows.Specialized;
 
@@ -128,6 +129,9 @@ internal class PosingGraphicalWindow : Window, IDisposable
                 DrawImportButtons(posing);
             }
         }
+
+        ImGui.PopStyleVar();
+
     }
 
     private void DrawGlobalButtons(PosingCapability posing)
@@ -267,6 +271,8 @@ internal class PosingGraphicalWindow : Window, IDisposable
 
         if(ImBrio.FontIconButton(FontAwesomeIcon.Cog, new(settingsSize, 0)))
             ImGui.OpenPopup("import_options_popup_posing_graphical");
+    
+        ImGui.SameLine();
 
         if(ImGui.IsItemHovered())
             ImGui.SetTooltip("Import Options");
