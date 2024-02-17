@@ -1,5 +1,6 @@
 ﻿using Brio.Config;
 using Brio.Core;
+using Brio.Input;
 using ImGuiNET;
 using System.Numerics;
 
@@ -42,11 +43,11 @@ internal static partial class ImBrio
         if(max < min)
             step = -step;
 
-        bool smallIncrement = ImGui.IsKeyDown(ConfigurationService.Instance.Configuration.Interface.IncrementSmall);
+        var smallIncrement = InputService.IsKeyBindDown(KeyBindEvents.Interface_IncrementSmallModifier);
         if(smallIncrement)
             step /= 10;
 
-        bool largeIncrement = ImGui.IsKeyDown(ConfigurationService.Instance.Configuration.Interface.IncrementLarge);
+        bool largeIncrement = InputService.IsKeyBindDown(KeyBindEvents.Interface_IncrementLargeModifier);
         if(largeIncrement)
             step *= 10;
 

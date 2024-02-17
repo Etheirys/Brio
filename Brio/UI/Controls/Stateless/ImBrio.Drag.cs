@@ -5,6 +5,7 @@ using Dalamud.Interface.Utility.Raii;
 using ImGuiNET;
 using System.Collections.Generic;
 using System.Numerics;
+using Brio.Input;
 
 namespace Brio.UI.Controls.Stateless;
 internal static partial class ImBrio
@@ -106,12 +107,10 @@ internal static partial class ImBrio
         bool changed = false;
         bool active = false;
 
-        bool smallIncrement = ImGui.IsKeyDown(ConfigurationService.Instance.Configuration.Interface.IncrementSmall);
-        if(smallIncrement)
+        if(InputService.IsKeyBindDown(KeyBindEvents.Interface_IncrementSmallModifier)) 
             step /= 10;
 
-        bool largeIncrement = ImGui.IsKeyDown(ConfigurationService.Instance.Configuration.Interface.IncrementLarge);
-        if(largeIncrement)
+        if(InputService.IsKeyBindDown(KeyBindEvents.Interface_IncrementLargeModifier))
             step *= 10;
 
         var itemSpacing = (ImGui.GetWindowContentRegionMax().X - ImGui.GetWindowContentRegionMin().X - 32 - 22) / 3;
@@ -148,12 +147,10 @@ internal static partial class ImBrio
         bool changed = false;
         bool active = false;
 
-        bool smallIncrement = ImGui.IsKeyDown(ConfigurationService.Instance.Configuration.Interface.IncrementSmall);
-        if(smallIncrement)
+        if(InputService.IsKeyBindDown(KeyBindEvents.Interface_IncrementSmallModifier))
             step /= 10;
 
-        bool largeIncrement = ImGui.IsKeyDown(ConfigurationService.Instance.Configuration.Interface.IncrementLarge);
-        if(largeIncrement)
+        if(InputService.IsKeyBindDown(KeyBindEvents.Interface_IncrementLargeModifier))
             step *= 10;
 
         float buttonWidth = ImGui.GetCursorPosX();
