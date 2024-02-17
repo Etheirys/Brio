@@ -66,13 +66,13 @@ internal class PosingTransformEditor
         bool didChange = false;
         bool anyActive = false;
 
-        didChange |= ImBrio.DragFloat3("P", ref realTransform.Position, 0.1f, "Position");
+        didChange |= ImBrio.DragFloat3($"{FontAwesomeIcon.ArrowsUpDownLeftRight.ToIconString()}", ref realTransform.Position, 0.1f, "Position");
         anyActive |= ImGui.IsItemActive();
 
-        didChange |= ImBrio.DragFloat3("R", ref realEuler, 5.0f, "Rotation");
+        didChange |= ImBrio.DragFloat3($"{FontAwesomeIcon.ArrowsSpin.ToIconString()}", ref realEuler, 5.0f, "Rotation");
         anyActive |= ImGui.IsItemActive();
 
-        didChange |= ImBrio.DragFloat3("S", ref realTransform.Scale, 0.1f, "Scale");
+        didChange |= ImBrio.DragFloat3($"{FontAwesomeIcon.ExpandAlt.ToIconString()}", ref realTransform.Scale, 0.1f, "Scale");
         anyActive |= ImGui.IsItemActive();
 
 
@@ -181,7 +181,7 @@ internal class PosingTransformEditor
         bool didChange = false;
         bool anyActive = false;
 
-        didChange |= ImBrio.DragFloat3("P", ref realTransform.Position, 0.1f, "Position");
+        didChange |= ImBrio.DragFloat3($"{FontAwesomeIcon.ArrowsUpDownLeftRight.ToIconString()}", ref realTransform.Position, 0.1f, "Position");
         anyActive |= ImGui.IsItemActive();
 
         didChange |= ImBrio.DragFloat3($"{FontAwesomeIcon.ArrowsSpin.ToIconString()}", ref realEuler, 5.0f, "Rotation");
