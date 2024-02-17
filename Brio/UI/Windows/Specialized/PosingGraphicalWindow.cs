@@ -22,6 +22,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
+using static FFXIVClientStructs.FFXIV.Client.UI.Misc.ConfigModule;
 
 namespace Brio.UI.Windows.Specialized;
 
@@ -106,7 +107,9 @@ internal class PosingGraphicalWindow : Window, IDisposable
 
         ImGui.SameLine();
 
-        using(var child = ImRaii.Child("###right_pane", new Vector2(windowSize.X * 0.2f - (ImGui.GetStyle().WindowPadding.X * 2), -1), true, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse))
+        ImGui.PushStyleVar(ImGuiStyleVar.ScrollbarSize, 8);
+
+        using(var child = ImRaii.Child("###right_pane", new Vector2(windowSize.X * 0.2f - (ImGui.GetStyle().WindowPadding.X * 2), -1), true))
         {
             if(child.Success)
             {
@@ -114,11 +117,14 @@ internal class PosingGraphicalWindow : Window, IDisposable
                 ImGui.Separator();
                 DrawGizmo();
                 ImGui.Separator();
-                _transformEditor.Draw("graphical_transform", posing);
+                _transformEditor.Draw("graphical_transform", posing, true);
                 ImGui.Separator();
                 DrawImportButtons(posing);
             }
         }
+
+        ImGui.PopStyleVar();
+
     }
 
     private void DrawButtons(PosingCapability posing)
@@ -247,9 +253,13 @@ internal class PosingGraphicalWindow : Window, IDisposable
         if(ImGui.Button("Import Pose##import_pose", buttonSize))
             FileUIHelpers.ShowImportPoseModal(posing);
 
-        if(ImBrio.FontIconButtonRight("import_options", FontAwesomeIcon.Cog, 1, "Import Options"))
+        if(ImBrio.FontIconButton("import_options", FontAwesomeIcon.Filter, "Import Options"))
             ImGui.OpenPopup("import_options_popup_posing_graphical");
+    
+        ImGui.SameLine();
 
+        ImGui.Text("Import Options");
+       
         using(var popup = ImRaii.Popup("import_options_popup_posing_graphical"))
         {
             if(popup.Success)
