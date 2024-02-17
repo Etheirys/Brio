@@ -1,0 +1,70 @@
+﻿<ResourceDictionary
+	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+	<Style
+		x:Key="WpfUtilsControlHoverBorder"
+		TargetType="{x:Type Border}">
+		<Setter Property="Background" Value="{DynamicResource ControlHighlightBrush}" />
+		<Setter Property="BorderThickness" Value="0" />
+		<Setter Property="SnapsToDevicePixels" Value="True" />
+		<Setter Property="BorderBrush" Value="{DynamicResource ControlBackgroundBrush}" />
+		<Setter Property="CornerRadius" Value="4" />
+		<Setter Property="ClipToBounds" Value="True" />
+		<Setter Property="Margin" Value="2" />
+		<Setter Property="UseLayoutRounding" Value="True" />
+	</Style>
+
+	<Style
+		x:Key="InsetPanel"
+		TargetType="{x:Type Border}">
+		<Setter Property="Background" Value="#33000000" />
+		<Setter Property="BorderThickness" Value="1" />
+		<Setter Property="SnapsToDevicePixels" Value="True" />
+		<Setter Property="BorderBrush" Value="#55000000" />
+		<Setter Property="CornerRadius" Value="6" />
+		<Setter Property="ClipToBounds" Value="True" />
+		<Setter Property="UseLayoutRounding" Value="True" />
+	</Style>
+
+	<Style
+		x:Key="WpfUtilsControlBorder"
+		TargetType="{x:Type Border}">
+		<Setter Property="Background" Value="{DynamicResource ControlBackgroundBrush}" />
+		<Setter Property="BorderThickness" Value="0" />
+		<Setter Property="SnapsToDevicePixels" Value="True" />
+		<Setter Property="BorderBrush" Value="{DynamicResource ControlBackgroundBrush}" />
+		<Setter Property="CornerRadius" Value="6" />
+		<Setter Property="ClipToBounds" Value="True" />
+		<Setter Property="Padding" Value="0" />
+		<Setter Property="UseLayoutRounding" Value="True" />
+	</Style>
+
+	<Style
+		x:Key="WpfUtilsSelectedBorder"
+		TargetType="{x:Type Border}">
+		<Setter Property="Background" Value="{DynamicResource TrimBrush}" />
+		<Setter Property="BorderThickness" Value="0" />
+		<Setter Property="SnapsToDevicePixels" Value="True" />
+		<Setter Property="CornerRadius" Value="4,0,0,4" />
+		<Setter Property="Padding" Value="0" />
+		<Setter Property="Margin" Value="2" />
+		<Setter Property="HorizontalAlignment" Value="Left" />
+		<Setter Property="Width" Value="4" />
+		<Setter Property="UseLayoutRounding" Value="True" />
+	</Style>
+
+	<Style
+		x:Key="WpfUtilsKeyboardFocusBorder"
+		TargetType="{x:Type Border}">
+		<Setter Property="BorderBrush" Value="{DynamicResource TrimBrush}" />
+		<Setter Property="BorderThickness" Value="1" />
+		<Setter Property="SnapsToDevicePixels" Value="True" />
+		<Setter Property="CornerRadius" Value="6" />
+		<Setter Property="Padding" Value="0" />
+		<Setter Property="Margin" Value="0" />
+		<Setter Property="UseLayoutRounding" Value="True" />
+	</Style>
+
+
+</ResourceDictionary>

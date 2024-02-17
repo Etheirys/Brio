@@ -1,0 +1,130 @@
+﻿<UserControl
+	x:Class="WpfRemote.Controls.NumberBox"
+	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+	xmlns:converters="clr-namespace:WpfRemote.Converters"
+	xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+	xmlns:local="clr-namespace:WpfRemote.Controls"
+	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+	Height="26"
+	Margin="1"
+	HorizontalAlignment="Stretch"
+	d:DesignWidth="128"
+	Loaded="UserControl_Loaded"
+	SnapsToDevicePixels="True"
+	UseLayoutRounding="True"
+	mc:Ignorable="d">
+
+
+	<Grid x:Name="ContentArea">
+		<Grid.ColumnDefinitions>
+			<ColumnDefinition x:Name="SliderColumn" />
+			<ColumnDefinition
+				x:Name="InputBoxColumn"
+				Width="Auto" />
+		</Grid.ColumnDefinitions>
+
+		<Border
+			x:Name="SliderArea"
+			Grid.Row="0"
+			Grid.Column="0"
+			Margin="0,0,2,0"
+			Background="{DynamicResource ControlBackgroundBrush}"
+			CornerRadius="6,0,0,6"
+			Style="{DynamicResource WpfUtilsControlBorder}">
+			<Slider
+				x:Name="InputSlider"
+				Margin="0"
+				HorizontalAlignment="Stretch"
+				VerticalAlignment="Center"
+				Background="Transparent"
+				Focusable="False"
+				IsSnapToTickEnabled="True"
+				Maximum="{Binding SliderMaximum}"
+				Minimum="{Binding SliderMinimum}"
+				PreviewMouseDown="OnSliderPreviewMouseDown"
+				PreviewMouseMove="OnSliderMouseMove"
+				PreviewMouseUp="OnSliderPreviewMouseUp"
+				TickFrequency="{Binding TickFrequency}"
+				Value="{Binding SliderValue, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+		</Border>
+
+		<Border
+			x:Name="BoxBorder"
+			Grid.Row="0"
+			Grid.Column="1"
+			Margin="0"
+			Padding="0"
+			Background="{DynamicResource ControlBackgroundBrush}"
+			CornerRadius="0, 6, 6, 0"
+			Style="{DynamicResource WpfUtilsControlBorder}">
+
+			<Grid>
+				<Grid.ColumnDefinitions>
+					<ColumnDefinition Width="Auto" />
+					<ColumnDefinition MinWidth="40" />
+					<ColumnDefinition Width="Auto" />
+					<ColumnDefinition Width="Auto" />
+					<ColumnDefinition Width="Auto" />
+				</Grid.ColumnDefinitions>
+
+				<ContentPresenter
+					Grid.Column="0"
+					VerticalAlignment="Stretch"
+					Content="{Binding Prefix}" />
+
+				<TextBox
+					x:Name="InputBox"
+					Grid.Column="1"
+					Margin="0,0,0,-1"
+					Background="Transparent"
+					BorderThickness="0"
+					Foreground="{DynamicResource ForegroundBrush}"
+					LostFocus="OnLostFocus"
+					LostKeyboardFocus="OnLostFocus"
+					Text="{Binding Text, UpdateSourceTrigger=PropertyChanged, FallbackValue=000.000}" />
+
+				<ContentPresenter
+					Grid.Column="2"
+					Content="{Binding Suffix}" />
+
+				<RepeatButton
+					x:Name="DownButton"
+					Grid.Column="3"
+					Width="26"
+					Margin="0"
+					Padding="1"
+					HorizontalContentAlignment="Center"
+					VerticalContentAlignment="Center"
+					Click="OnDownClick"
+					Content="-"
+					Style="{DynamicResource WpfUtilsRepeatButton}" />
+
+				<RepeatButton
+					x:Name="UpButton"
+					Grid.Column="4"
+					Width="26"
+					Margin="0"
+					Padding="1"
+					HorizontalContentAlignment="Center"
+					VerticalContentAlignment="Center"
+					Click="OnUpClick"
+					Content="+"
+					Style="{DynamicResource WpfUtilsRepeatButton}" />
+			</Grid>
+
+
+		</Border>
+
+		<Border
+			x:Name="ErrorDisplay"
+			Grid.Column="1"
+			Margin="2"
+			Background="Transparent"
+			BorderBrush="Red"
+			BorderThickness="1"
+			Style="{DynamicResource WpfUtilsControlHoverBorder}"
+			Visibility="Collapsed" />
+
+	</Grid>
+</UserControl>

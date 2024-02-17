@@ -9,6 +9,7 @@ using Brio.Game.GPose;
 using Brio.Game.Posing;
 using Brio.Game.World;
 using Brio.IPC;
+using Brio.Remote;
 using Brio.Resources;
 using Brio.UI;
 using Brio.UI.Windows;
@@ -136,6 +137,9 @@ public class Brio : IDalamudPlugin
         serviceCollection.AddSingleton<IKService>();
         serviceCollection.AddSingleton<CameraService>();
         serviceCollection.AddSingleton<ObjectMonitorService>();
+
+        // Remote
+        serviceCollection.AddSingleton<RemoteService>();
 
         // UI
         serviceCollection.AddSingleton<UIManager>();

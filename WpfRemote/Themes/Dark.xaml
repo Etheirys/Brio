@@ -1,0 +1,33 @@
+﻿<ResourceDictionary
+	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+	<SolidColorBrush
+		x:Key="ForegroundBrush"
+		Color="#ECECEC" />
+
+	<SolidColorBrush
+		x:Key="ForegroundLightBrush"
+		Color="#838383" />
+
+	<SolidColorBrush
+		x:Key="BackgroundBrush"
+		Color="#222222" />
+
+	<SolidColorBrush
+		x:Key="BackgroundLightBrush"
+		Color="#333333" />
+
+	<SolidColorBrush
+		x:Key="TrimBrush"
+		Color="DeepPink" />
+
+	<SolidColorBrush
+		x:Key="ControlBackgroundBrush"
+		Color="#1A1A1A" />
+
+	<SolidColorBrush
+		x:Key="ControlHighlightBrush"
+		Color="#343434" />
+
+</ResourceDictionary>

@@ -1,0 +1,245 @@
+﻿<ResourceDictionary
+	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+	xmlns:behaviours="clr-namespace:WpfRemote.Behaviours"
+	xmlns:controls="clr-namespace:WpfRemote.Controls"
+	xmlns:wpf="http://materialdesigninxaml.net/winfx/xaml/themes">
+
+	<Style
+		x:Key="WpfUtilsSwitchSelectorNoBorder"
+		TargetType="{x:Type ListBox}">
+
+		<Setter Property="Height" Value="26" />
+		<Setter Property="Margin" Value="1" />
+
+		<Setter Property="Template">
+			<Setter.Value>
+				<ControlTemplate TargetType="{x:Type ListBox}">
+					<ItemsPresenter SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
+				</ControlTemplate>
+			</Setter.Value>
+		</Setter>
+
+		<Setter Property="ItemsPanel">
+			<Setter.Value>
+				<ItemsPanelTemplate>
+					<UniformGrid Rows="1" />
+				</ItemsPanelTemplate>
+			</Setter.Value>
+		</Setter>
+
+
+		<Setter Property="ItemContainerStyle">
+			<Setter.Value>
+				<Style TargetType="{x:Type ListBoxItem}">
+
+					<Setter Property="Margin" Value="0" />
+
+					<Setter Property="Template">
+						<Setter.Value>
+							<ControlTemplate TargetType="{x:Type ListBoxItem}">
+
+								<ToggleButton
+									x:Name="Button"
+									Margin="0"
+									Background="Transparent"
+									IsChecked="{Binding IsSelected, RelativeSource={RelativeSource AncestorType={x:Type ListBoxItem}}}"
+									IsEnabled="{TemplateBinding IsEnabled}"
+									Style="{DynamicResource WpfUtilsToggleButton}">
+
+									<ContentPresenter
+										x:Name="Content"
+										Margin="3"
+										HorizontalAlignment="Center" />
+
+								</ToggleButton>
+
+							</ControlTemplate>
+						</Setter.Value>
+					</Setter>
+				</Style>
+			</Setter.Value>
+		</Setter>
+	</Style>
+
+	<Style
+		x:Key="WpfUtilsSwitchSelector"
+		BasedOn="{StaticResource WpfUtilsSwitchSelectorNoBorder}"
+		TargetType="{x:Type ListBox}">
+
+		<Setter Property="Template">
+			<Setter.Value>
+				<ControlTemplate TargetType="{x:Type ListBox}">
+					<Border Style="{DynamicResource WpfUtilsControlBorder}">
+						<ItemsPresenter SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
+					</Border>
+				</ControlTemplate>
+			</Setter.Value>
+		</Setter>
+	</Style>
+
+	<Style
+		x:Key="WpfUtilsListBoxItem"
+		TargetType="{x:Type ListBoxItem}">
+
+
+		<Setter Property="HorizontalAlignment" Value="Stretch" />
+		<Setter Property="HorizontalContentAlignment" Value="Stretch" />
+		<Setter Property="Foreground" Value="{DynamicResource ForegroundBrush}" />
+		<Setter Property="Background" Value="Transparent" />
+		<Setter Property="Padding" Value="2" />
+
+		<Setter Property="Template">
+			<Setter.Value>
+				<ControlTemplate TargetType="{x:Type ListBoxItem}">
+
+					<Border
+						Margin="{TemplateBinding Margin}"
+						Background="Transparent"
+						BorderBrush="{TemplateBinding BorderBrush}"
+						BorderThickness="{TemplateBinding BorderThickness}"
+						ClipToBounds="{TemplateBinding ClipToBounds}">
+						<Grid>
+
+							<Border
+								x:Name="SelectionBorder"
+								Margin="1"
+								Background="{DynamicResource BackgroundLightBrush}"
+								BorderBrush="{DynamicResource BackgroundLightBrush}"
+								BorderThickness="1"
+								CornerRadius="3"
+								Opacity="0" />
+
+							<Border
+								x:Name="HoverBorder"
+								Margin="1"
+								Background="{DynamicResource BackgroundLightBrush}"
+								BorderBrush="{DynamicResource BackgroundLightBrush}"
+								BorderThickness="1"
+								CornerRadius="3"
+								Opacity="0" />
+
+							<ContentPresenter
+								Margin="{TemplateBinding Padding}"
+								HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+								VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+								Content="{TemplateBinding Content}"
+								ContentTemplate="{TemplateBinding ContentTemplate}"
+								ContentTemplateSelector="{TemplateBinding ContentTemplateSelector}"
+								Focusable="False"
+								RecognizesAccessKey="False"
+								SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
+						</Grid>
+					</Border>
+
+					<ControlTemplate.Triggers>
+						<Trigger Property="IsEnabled" Value="False">
+							<Setter Property="Opacity" Value="0.5" />
+						</Trigger>
+
+						<Trigger Property="IsMouseOver" Value="True">
+							<Trigger.EnterActions>
+								<BeginStoryboard>
+									<Storyboard>
+										<DoubleAnimation
+											Storyboard.TargetName="HoverBorder"
+											Storyboard.TargetProperty="Opacity"
+											To="1"
+											Duration="0:0:0.100" />
+									</Storyboard>
+								</BeginStoryboard>
+							</Trigger.EnterActions>
+
+							<Trigger.ExitActions>
+								<BeginStoryboard>
+									<Storyboard>
+										<DoubleAnimation
+											Storyboard.TargetName="HoverBorder"
+											Storyboard.TargetProperty="Opacity"
+											From="1"
+											To="0"
+											Duration="0:0:0.250" />
+									</Storyboard>
+								</BeginStoryboard>
+							</Trigger.ExitActions>
+						</Trigger>
+
+						<Trigger Property="IsSelected" Value="True">
+							<Trigger.EnterActions>
+								<BeginStoryboard>
+									<Storyboard>
+										<DoubleAnimation
+											Storyboard.TargetName="SelectionBorder"
+											Storyboard.TargetProperty="Opacity"
+											To="0.5"
+											Duration="0:0:0.100" />
+									</Storyboard>
+								</BeginStoryboard>
+							</Trigger.EnterActions>
+
+							<Trigger.ExitActions>
+								<BeginStoryboard>
+									<Storyboard>
+										<DoubleAnimation
+											Storyboard.TargetName="SelectionBorder"
+											Storyboard.TargetProperty="Opacity"
+											To="0"
+											Duration="0:0:0.250" />
+									</Storyboard>
+								</BeginStoryboard>
+							</Trigger.ExitActions>
+						</Trigger>
+
+
+					</ControlTemplate.Triggers>
+
+				</ControlTemplate>
+			</Setter.Value>
+		</Setter>
+	</Style>
+
+	<Style
+		x:Key="WpfUtilsListBox"
+		TargetType="{x:Type ListBox}">
+		<Setter Property="ItemContainerStyle" Value="{DynamicResource WpfUtilsListBoxItem}" />
+		<Setter Property="Background" Value="{DynamicResource ControlBackgroundBrush}" />
+		<Setter Property="BorderThickness" Value="0" />
+		<Setter Property="BorderBrush" Value="Transparent" />
+		<Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Disabled" />
+		<Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Auto" />
+		<Setter Property="ScrollViewer.CanContentScroll" Value="true" />
+		<Setter Property="ScrollViewer.PanningMode" Value="VerticalOnly" />
+		<Setter Property="VerticalContentAlignment" Value="Center" />
+		<Setter Property="VirtualizingPanel.ScrollUnit" Value="Pixel" />
+
+		<Setter Property="ItemsPanel">
+			<Setter.Value>
+				<ItemsPanelTemplate>
+					<VirtualizingStackPanel />
+				</ItemsPanelTemplate>
+			</Setter.Value>
+		</Setter>
+
+		<Setter Property="Template">
+			<Setter.Value>
+				<ControlTemplate TargetType="{x:Type ListBox}">
+					<Border
+						Name="Bd"
+						Background="{TemplateBinding Background}"
+						BorderBrush="{TemplateBinding BorderBrush}"
+						BorderThickness="{TemplateBinding BorderThickness}"
+						SnapsToDevicePixels="true"
+						Style="{DynamicResource WpfUtilsControlBorder}">
+						<ScrollViewer
+							Padding="{TemplateBinding Padding}"
+							Focusable="false">
+							<ItemsPresenter SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
+						</ScrollViewer>
+					</Border>
+
+				</ControlTemplate>
+			</Setter.Value>
+		</Setter>
+	</Style>
+
+</ResourceDictionary>

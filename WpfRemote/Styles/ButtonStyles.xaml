@@ -1,0 +1,231 @@
+﻿<ResourceDictionary
+	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+	xmlns:converters="clr-namespace:WpfRemote.Converters">
+
+	<Style
+		x:Key="LinkButton"
+		TargetType="Button">
+		<Setter Property="Foreground" Value="{DynamicResource ForegroundBrush}" />
+		<Setter Property="Background" Value="Transparent" />
+		<Setter Property="BorderBrush" Value="{DynamicResource TrimBrush}" />
+		<Setter Property="BorderThickness" Value="1" />
+		<Setter Property="HorizontalContentAlignment" Value="Left" />
+		<Setter Property="Padding" Value="0" />
+		<Setter Property="SnapsToDevicePixels" Value="True" />
+
+		<Setter Property="Template">
+			<Setter.Value>
+				<ControlTemplate TargetType="Button">
+
+					<Grid
+						Cursor="Hand"
+						TextBlock.Foreground="{DynamicResource ForegroundLightBrush}">
+
+						<Border
+							x:Name="KeyboardFocusBorder"
+							Opacity="0"
+							Style="{DynamicResource WpfUtilsKeyboardFocusBorder}" />
+
+						<ContentPresenter
+							Margin="{TemplateBinding Padding}"
+							HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+							VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+							Content="{TemplateBinding Content}"
+							ContentStringFormat="{TemplateBinding ContentStringFormat}"
+							ContentTemplate="{TemplateBinding ContentTemplate}"
+							Focusable="False"
+							SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
+
+						<Line
+							x:Name="Line"
+							Margin="0,-1,0,1"
+							HorizontalAlignment="Stretch"
+							VerticalAlignment="Bottom"
+							Stretch="Fill"
+							Stroke="{TemplateBinding BorderBrush}"
+							StrokeThickness="1"
+							X1="0"
+							X2="10" />
+
+					</Grid>
+
+					<ControlTemplate.Triggers>
+						<Trigger Property="IsKeyboardFocused" Value="True">
+							<Setter TargetName="KeyboardFocusBorder" Property="Opacity" Value="1" />
+						</Trigger>
+						<Trigger Property="IsEnabled" Value="false">
+							<Setter TargetName="Line" Property="Opacity" Value="0" />
+						</Trigger>
+					</ControlTemplate.Triggers>
+				</ControlTemplate>
+			</Setter.Value>
+		</Setter>
+	</Style>
+
+	<Style
+		x:Key="WpfUtilsRepeatButton"
+		TargetType="{x:Type RepeatButton}">
+		<Setter Property="Foreground" Value="{DynamicResource ForegroundBrush}" />
+		<Setter Property="Background" Value="Transparent" />
+		<Setter Property="BorderBrush" Value="{DynamicResource TrimBrush}" />
+		<Setter Property="BorderThickness" Value="0" />
+		<Setter Property="HorizontalContentAlignment" Value="Stretch" />
+		<Setter Property="VerticalContentAlignment" Value="Stretch" />
+		<Setter Property="Margin" Value="1" />
+		<Setter Property="Padding" Value="0" />
+		<Setter Property="SnapsToDevicePixels" Value="True" />
+
+		<Setter Property="Template">
+			<Setter.Value>
+				<ControlTemplate TargetType="RepeatButton">
+
+					<Grid
+						Cursor="Hand"
+						TextBlock.Foreground="{DynamicResource ForegroundLightBrush}">
+
+						<Border
+							x:Name="HoverBorder"
+							Opacity="0"
+							Style="{DynamicResource WpfUtilsControlHoverBorder}" />
+
+						<Border
+							x:Name="KeyboardFocusBorder"
+							Opacity="0"
+							Style="{DynamicResource WpfUtilsKeyboardFocusBorder}" />
+
+						<ContentPresenter
+							x:Name="ContentRipple"
+							Margin="{TemplateBinding Padding}"
+							HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+							VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+							Content="{TemplateBinding Content}"
+							ContentStringFormat="{TemplateBinding ContentStringFormat}"
+							ContentTemplate="{TemplateBinding ContentTemplate}"
+							Focusable="False"
+							SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
+
+
+					</Grid>
+
+					<ControlTemplate.Triggers>
+						<Trigger Property="IsKeyboardFocused" Value="True">
+							<Setter TargetName="KeyboardFocusBorder" Property="Opacity" Value="1" />
+						</Trigger>
+						<Trigger Property="IsMouseOver" Value="true">
+							<Setter TargetName="HoverBorder" Property="Opacity" Value="1" />
+						</Trigger>
+						<Trigger Property="IsEnabled" Value="false">
+							<Setter TargetName="ContentRipple" Property="Opacity" Value="0.5" />
+						</Trigger>
+					</ControlTemplate.Triggers>
+				</ControlTemplate>
+			</Setter.Value>
+		</Setter>
+	</Style>
+
+	<Style
+		x:Key="TransparentRepeatButton"
+		BasedOn="{StaticResource WpfUtilsRepeatButton}"
+		TargetType="RepeatButton" />
+
+	<Style
+		x:Key="WpfUtilsButton"
+		TargetType="{x:Type Button}">
+		<Setter Property="Foreground" Value="{DynamicResource ForegroundLightBrush}" />
+		<Setter Property="Background" Value="{DynamicResource ControlBackgroundBrush}" />
+		<Setter Property="BorderBrush" Value="{DynamicResource TrimBrush}" />
+		<Setter Property="BorderThickness" Value="1" />
+		<Setter Property="HorizontalContentAlignment" Value="Center" />
+		<Setter Property="VerticalContentAlignment" Value="Center" />
+		<Setter Property="Margin" Value="1" />
+		<Setter Property="Padding" Value="6,0" />
+		<Setter Property="MinWidth" Value="18" />
+		<Setter Property="MinHeight" Value="18" />
+		<Setter Property="Height" Value="26" />
+		<Setter Property="SnapsToDevicePixels" Value="True" />
+
+		<Setter Property="Template">
+			<Setter.Value>
+				<ControlTemplate TargetType="Button">
+
+					<Grid
+						Cursor="Hand"
+						TextBlock.Foreground="{DynamicResource ForegroundLightBrush}">
+
+						<Border
+							Background="{TemplateBinding Background}"
+							Style="{DynamicResource WpfUtilsControlBorder}" />
+
+						<Border
+							x:Name="HoverBorder"
+							Margin="1"
+							Opacity="0"
+							Style="{DynamicResource WpfUtilsControlHoverBorder}" />
+
+						<Border
+							x:Name="KeyboardFocusBorder"
+							Opacity="0"
+							Style="{DynamicResource WpfUtilsKeyboardFocusBorder}" />
+
+						<ContentPresenter
+							x:Name="Content"
+							Margin="{TemplateBinding Padding}"
+							HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+							VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+							Content="{TemplateBinding Content}"
+							ContentStringFormat="{TemplateBinding ContentStringFormat}"
+							ContentTemplate="{TemplateBinding ContentTemplate}"
+							Focusable="False"
+							SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
+
+					</Grid>
+
+					<ControlTemplate.Triggers>
+
+						<Trigger Property="IsKeyboardFocused" Value="True">
+							<Setter TargetName="KeyboardFocusBorder" Property="Opacity" Value="1" />
+						</Trigger>
+
+						<Trigger Property="IsMouseOver" Value="true">
+							<Trigger.EnterActions>
+								<BeginStoryboard>
+									<Storyboard>
+										<DoubleAnimation
+											Storyboard.TargetName="HoverBorder"
+											Storyboard.TargetProperty="Opacity"
+											To="1"
+											Duration="0:0:0.150">
+											<DoubleAnimation.EasingFunction>
+												<SineEase EasingMode="EaseOut" />
+											</DoubleAnimation.EasingFunction>
+										</DoubleAnimation>
+									</Storyboard>
+								</BeginStoryboard>
+							</Trigger.EnterActions>
+							<Trigger.ExitActions>
+								<BeginStoryboard>
+									<Storyboard>
+										<DoubleAnimation
+											Storyboard.TargetName="HoverBorder"
+											Storyboard.TargetProperty="Opacity"
+											To="0"
+											Duration="0:0:0.250">
+											<DoubleAnimation.EasingFunction>
+												<SineEase EasingMode="EaseIn" />
+											</DoubleAnimation.EasingFunction>
+										</DoubleAnimation>
+									</Storyboard>
+								</BeginStoryboard>
+							</Trigger.ExitActions>
+						</Trigger>
+						<Trigger Property="IsEnabled" Value="false">
+							<Setter TargetName="Content" Property="Opacity" Value="0.5" />
+						</Trigger>
+					</ControlTemplate.Triggers>
+				</ControlTemplate>
+			</Setter.Value>
+		</Setter>
+	</Style>
+
+</ResourceDictionary>
