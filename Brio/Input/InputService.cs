@@ -1,4 +1,5 @@
 ﻿using Brio.Config;
+using Brio.Game.GPose;
 using Dalamud.Game.ClientState.Keys;
 using Dalamud.Plugin.Services;
 using System;
@@ -11,18 +12,20 @@ internal class InputService
     private readonly IKeyState _keyState;
     private readonly IFramework _framework;
     private readonly ConfigurationService _configService;
+    private readonly GPoseService _gPoseService;
 
     private readonly HashSet<KeyBindEvents> _eventsDown = new();
     private readonly Dictionary<KeyBindEvents, List<Action>> _listeners = new();
 
     public static InputService Instance { get; private set; } = null!;
 
-    public InputService(IKeyState keyState, IFramework framework, ConfigurationService configService)
+    public InputService(IKeyState keyState, IFramework framework, ConfigurationService configService, GPoseService gPoseService)
     {
         Instance = this;
         _keyState = keyState;
         _framework = framework;
         _configService = configService;
+        _gPoseService = gPoseService;
 
         _framework.Update += OnFrameworkUpdate;
     }
@@ -70,9 +73,12 @@ internal class InputService
 
     private void OnFrameworkUpdate(IFramework framework)
     {
-        foreach (var evt in Enum.GetValues<KeyBindEvents>())
+        if(_gPoseService.IsGPosing)
         {
-            this.CheckEvent(evt);
+            foreach(var evt in Enum.GetValues<KeyBindEvents>())
+            {
+                this.CheckEvent(evt);
+            }
         }
     }
 
