@@ -15,6 +15,8 @@ internal class BoneSearchControl
     private string _searchTerm = string.Empty;
     public void Draw(string id, PosingCapability posing)
     {
+        ImGui.PushStyleVar(ImGuiStyleVar.IndentSpacing, 10);
+
         using(ImRaii.PushId(id))
         {
             ImGui.SetNextItemWidth(-1);
@@ -75,6 +77,8 @@ internal class BoneSearchControl
                 }
             }
         }
+
+        ImGui.PopStyleVar();
     }
 
     private void DrawBone(Bone bone, PosingCapability posing, PoseInfoSlot slot)
