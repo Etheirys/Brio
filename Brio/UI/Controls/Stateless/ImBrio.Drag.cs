@@ -6,6 +6,7 @@ using ImGuiNET;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
+using Brio.Input;
 
 namespace Brio.UI.Controls.Stateless;
 internal static partial class ImBrio
@@ -109,12 +110,10 @@ internal static partial class ImBrio
     {
         bool changed = false;
 
-        bool smallIncrement = ImGui.IsKeyDown(ConfigurationService.Instance.Configuration.Interface.IncrementSmall);
-        if(smallIncrement)
+        if(InputService.IsKeyBindDown(KeyBindEvents.Interface_IncrementSmallModifier))
             step /= 10;
 
-        bool largeIncrement = ImGui.IsKeyDown(ConfigurationService.Instance.Configuration.Interface.IncrementLarge);
-        if(largeIncrement)
+        if(InputService.IsKeyBindDown(KeyBindEvents.Interface_IncrementLargeModifier))
             step *= 10;
 
         float buttonWidth = ImGui.GetCursorPosX();
