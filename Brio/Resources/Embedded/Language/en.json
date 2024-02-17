@@ -220,6 +220,7 @@
 
   "keys": {
     "Interface_ToggleBrioWindow": "Toggle Brio Window",
+    "Interface_ToggleBindPromptWindow": "Toggle Bind Prompt Window",
     "Interface_IncrementSmallModifier": "Increment Small Modifier",
     "Interface_IncrementLargeModifier": "Increment Large Modifier",
     "Posing_DisableGizmo": "Disable Gizmo",

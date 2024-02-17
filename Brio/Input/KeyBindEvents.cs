@@ -3,6 +3,7 @@
 internal enum KeyBindEvents
 {
     Interface_ToggleBrioWindow,
+    Interface_ToggleBindPromptWindow,
     Interface_IncrementSmallModifier,
     Interface_IncrementLargeModifier,
 

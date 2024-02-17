@@ -17,6 +17,7 @@ internal class MainWindow : Window
     private readonly SettingsWindow _settingsWindow;
     private readonly InfoWindow _infoWindow;
     private readonly EntityManager _entityManager;
+    private readonly ConfigurationService _configurationService;
 
     private readonly EntityHierarchyView _entitySelector;
 
@@ -24,6 +25,7 @@ internal class MainWindow : Window
     {
         Namespace = "brio_main_namespace";
 
+        _configurationService = configService;
         _settingsWindow = settingsWindow;
         _infoWindow = infoWindow;
         _entityManager = entityManager;
@@ -35,7 +37,8 @@ internal class MainWindow : Window
             MinimumSize = new Vector2(270, 200)
         };
 
-        input.AddListener(KeyBindEvents.Interface_ToggleBrioWindow, this.OnToggle);
+        input.AddListener(KeyBindEvents.Interface_ToggleBrioWindow, this.OnMainWindowToggle);
+        input.AddListener(KeyBindEvents.Interface_ToggleBindPromptWindow, this.OnPromptWindowToggle);
     }
 
     public override void Draw()
@@ -57,10 +60,17 @@ internal class MainWindow : Window
 
         EntityHelpers.DrawEntitySection(_entityManager.SelectedEntity);
     }
-
-    private void OnToggle()
+  
+    private void OnMainWindowToggle()
     {
         this.IsOpen = !this.IsOpen;
+    }
+
+    private void OnPromptWindowToggle()
+    {
+        _configurationService.Configuration.Input.ShowPromptsInGPose = !_configurationService.Configuration.Input.ShowPromptsInGPose;
+
+        _configurationService.ApplyChange();
     }
 
     private void DrawHeaderButtons()
