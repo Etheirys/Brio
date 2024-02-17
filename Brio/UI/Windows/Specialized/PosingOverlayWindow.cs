@@ -5,6 +5,7 @@ using Brio.Entities;
 using Brio.Game.Camera;
 using Brio.Game.GPose;
 using Brio.Game.Posing;
+using Brio.Input;
 using Brio.UI.Controls.Editors;
 using Dalamud.Interface.Utility;
 using Dalamud.Interface.Utility.Raii;
@@ -374,7 +375,7 @@ internal class PosingOverlayWindow : Window, IDisposable
                 {
                     Position = (Vector3)charaBase->CharacterBase.DrawObject.Object.Position,
                     Rotation = (Quaternion)charaBase->CharacterBase.DrawObject.Object.Rotation,
-                    Scale = (Vector3)charaBase->CharacterBase.DrawObject.Object.Scale * charaBase->ScaleFactor
+                    Scale = Vector3.Clamp((Vector3)charaBase->CharacterBase.DrawObject.Object.Scale * charaBase->ScaleFactor, new Vector3(.5f), new Vector3(1.5f))
                 }.ToMatrix();
 
                 worldViewMatrix = modelMatrix * viewMatrix;
@@ -411,7 +412,7 @@ internal class PosingOverlayWindow : Window, IDisposable
             newTransform = matrix.ToTransform();
             _trackingTransform = newTransform;
         }
-
+        
         if(ImGuizmo.Manipulate(
             ref worldViewMatrix.M11,
             ref projectionMatrix.M11,
@@ -470,9 +471,9 @@ internal class PosingOverlayWindow : Window, IDisposable
         public bool HoveringGizmo = ImGuizmo.IsOver();
         public bool AnyActive = ImGui.IsAnyItemActive();
         public bool AnyWindowHovered = ImGui.IsWindowHovered(ImGuiHoveredFlags.AnyWindow);
-        public bool UserDisablingSkeleton = ImGui.IsKeyDown(configuration.DisableSkeletonHotkey);
-        public bool UserDisablingGizmo = ImGui.IsKeyDown(configuration.DisableGizmoHotkey);
-        public bool UserHidingOverlay = ImGui.IsKeyDown(configuration.HideOverlayHotkey);
+        public bool UserDisablingSkeleton = InputService.IsKeyBindDown(KeyBindEvents.Posing_DisableSkeleton);
+        public bool UserDisablingGizmo = InputService.IsKeyBindDown(KeyBindEvents.Posing_DisableGizmo);
+        public bool UserHidingOverlay = InputService.IsKeyBindDown(KeyBindEvents.Posing_HideOverlay);
 
 
         public bool AnythingBusy => PopupOpen || UsingGizmo || AnyActive || AnyWindowHovered;

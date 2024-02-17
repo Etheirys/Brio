@@ -1,4 +1,5 @@
-﻿using Brio.Config;
+using Brio.Config;
+using Brio.Input;
 using Brio.Core;
 using Brio.IPC;
 using Brio.UI.Controls.Editors;
@@ -14,6 +15,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Numerics;
 using System.Xml.Linq;
+using Brio.Resources;
 
 namespace Brio.UI.Windows;
 
@@ -60,6 +62,7 @@ internal class SettingsWindow : Window
                     DrawPosingTab();
                     DrawWorldTab();
                     DrawLibraryTab();
+                    DrawKeysTab();
                 }
             }
         }
@@ -493,5 +496,49 @@ internal class SettingsWindow : Window
     private void DrawLibrarySection()
     {
         LibrarySourcesEditor.Draw(null, _configurationService, _configurationService.Configuration.Library, ref _selectedSourceConfig, ref _isEditingSource);
+    }
+    
+    private void DrawKeysTab()
+    {
+        using(var tab = ImRaii.TabItem("Key Binds"))
+        {
+            if(!tab.Success)
+                return;
+
+            bool showPrompts = _configurationService.Configuration.Input.ShowPromptsInGPose;
+            if(ImGui.Checkbox("Show prompts in GPose", ref showPrompts))
+            {
+                _configurationService.Configuration.Input.ShowPromptsInGPose = showPrompts;
+                _configurationService.ApplyChange();
+            }
+
+            if(ImGui.CollapsingHeader("Interface", ImGuiTreeNodeFlags.DefaultOpen))
+            {
+                DrawKeyBind(KeyBindEvents.Interface_ToggleBrioWindow);
+                DrawKeyBind(KeyBindEvents.Interface_IncrementSmallModifier);
+                DrawKeyBind(KeyBindEvents.Interface_IncrementLargeModifier);
+            }
+
+            if(ImGui.CollapsingHeader("Posing", ImGuiTreeNodeFlags.DefaultOpen))
+            {
+                DrawKeyBind(KeyBindEvents.Posing_DisableGizmo);
+                DrawKeyBind(KeyBindEvents.Posing_DisableSkeleton);
+                DrawKeyBind(KeyBindEvents.Posing_HideOverlay);
+                DrawKeyBind(KeyBindEvents.Posing_ToggleOverlay);
+                DrawKeyBind(KeyBindEvents.Posing_Undo);
+                DrawKeyBind(KeyBindEvents.Posing_Redo);
+            }
+        }
+    }
+
+    private void DrawKeyBind(KeyBindEvents evt)
+    {
+        string evtText = Localize.Get($"keys.{evt}") ?? evt.ToString();
+
+        if(KeybindEditor.KeySelector(evtText, evt, _configurationService.Configuration.Input))
+        {
+            _configurationService.ApplyChange();
+        }
+
     }
 }
