@@ -117,6 +117,18 @@ internal struct Transform
         Scale = -Scale
     };
 
+    public readonly bool ContainsNaN()
+    {
+        if(float.IsNaN(Position.X) || float.IsNaN(Position.Y) || float.IsNaN(Position.Z) ||
+            float.IsNaN(Rotation.X) || float.IsNaN(Rotation.Y) || float.IsNaN(Rotation.Z) ||
+            float.IsNaN(Scale.X) || float.IsNaN(Scale.Y)|| float.IsNaN(Scale.Z))
+        {
+            return true;
+        }
+
+        return false;
+    }
+
 }
 
 [Flags]

@@ -22,6 +22,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
+using static FFXIVClientStructs.FFXIV.Client.UI.Misc.ConfigModule;
 
 namespace Brio.UI.Windows.Specialized;
 
@@ -37,8 +38,6 @@ internal class PosingGraphicalWindow : Window, IDisposable
     private readonly BoneSearchControl _boneSearchControl = new();
 
     private Matrix4x4? _trackingMatrix;
-
-    private const int _gizmoId = 142859;
 
     public PosingGraphicalWindow(EntityManager entityManager, CameraService cameraService, ConfigurationService configurationService, PosingService posingService, GPoseService gPoseService) : base($"{Brio.Name} - Posing###brio_posing_graphical_window")
     {
@@ -106,7 +105,9 @@ internal class PosingGraphicalWindow : Window, IDisposable
 
         ImGui.SameLine();
 
-        using(var child = ImRaii.Child("###right_pane", new Vector2(windowSize.X * 0.2f - (ImGui.GetStyle().WindowPadding.X * 2), -1), true, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse))
+        ImGui.PushStyleVar(ImGuiStyleVar.ScrollbarSize, 8);
+
+        using(var child = ImRaii.Child("###right_pane", new Vector2(windowSize.X * 0.2f - (ImGui.GetStyle().WindowPadding.X * 2), -1), true))
         {
             if(child.Success)
             {
@@ -114,11 +115,14 @@ internal class PosingGraphicalWindow : Window, IDisposable
                 ImGui.Separator();
                 DrawGizmo();
                 ImGui.Separator();
-                _transformEditor.Draw("graphical_transform", posing, -1);
+                _transformEditor.Draw("graphical_transform", posing, true);
                 ImGui.Separator();
                 DrawImportButtons(posing);
             }
         }
+
+        ImGui.PopStyleVar();
+
     }
 
     private void DrawButtons(PosingCapability posing)
@@ -247,9 +251,13 @@ internal class PosingGraphicalWindow : Window, IDisposable
         if(ImGui.Button("Import Pose##import_pose", buttonSize))
             FileUIHelpers.ShowImportPoseModal(posing);
 
-        if(ImBrio.FontIconButtonRight("import_options", FontAwesomeIcon.Cog, 1, "Import Options"))
+        if(ImBrio.FontIconButton("import_options", FontAwesomeIcon.Filter, "Import Options"))
             ImGui.OpenPopup("import_options_popup_posing_graphical");
+    
+        ImGui.SameLine();
 
+        ImGui.Text("Import Options");
+       
         using(var popup = ImRaii.Popup("import_options_popup_posing_graphical"))
         {
             if(popup.Success)
@@ -311,72 +319,27 @@ internal class PosingGraphicalWindow : Window, IDisposable
         var matrix = _trackingMatrix ?? targetMatrix.Value;
         var originalMatrix = matrix;
 
-        var projectionMatrix = Matrix4x4.CreatePerspectiveFieldOfView(camera->GetFoV(), 1, 0.01f, 1f);
-        var viewMatrix = Matrix4x4.CreateLookAt(camera->GetPosition(), matrix.Translation, Vector3.UnitY);
-
         Vector2 gizmoSize = new(ImGui.GetContentRegionAvail().X, ImGui.GetContentRegionAvail().X);
-        var childStart = ImGui.GetCursorScreenPos();
 
-        ImGuiWindowFlags flags = ImGuiWindowFlags.NoInputs | ImGuiWindowFlags.ChildWindow | ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoDecoration | ImGuiWindowFlags.NoBackground;
-
-        if(ImGui.IsMouseHoveringRect(childStart, childStart + gizmoSize))
-            flags &= ~ImGuiWindowFlags.NoInputs;
-
-        if(_trackingMatrix.HasValue && ImGuizmo.IsUsing())
+        if (ImBrioGizmo.DrawRotation(ref matrix, gizmoSize, _posingService.CoordinateMode == PosingCoordinateMode.World))
         {
-            flags &= ~ImGuiWindowFlags.ChildWindow;
-            flags &= ~ImGuiWindowFlags.NoInputs;
+            _trackingMatrix = matrix;
         }
 
-        ImGuizmo.SetID(_gizmoId);
-
-        ImGuiHelpers.SetNextWindowPosRelativeMainViewport(new Vector2(0, 0));
-        var io = ImGui.GetIO();
-        ImGui.SetNextWindowSize(io.DisplaySize);
-
-        if(ImGui.Begin("##graphic_pose_gizmo", flags))
+        if(_trackingMatrix.HasValue)
         {
-            ImGuizmo.BeginFrame();
-            ImGuizmo.SetDrawlist();
-            ImGuizmo.SetRect(childStart.X, childStart.Y, gizmoSize.X, gizmoSize.Y);
-            ImGuizmo.SetGizmoSizeClipSpace(0.5f);
-            ImGuizmo.AllowAxisFlip(false);
-            ImGuizmo.SetOrthographic(false);
-
-            ImGuizmo.Enable(true);
-
-            if(ImGuizmoExtensions.MouseWheelManipulate(ref matrix))
-            {
-                _trackingMatrix = matrix;
-            }
-
-            if(ImGuizmo.Manipulate(ref viewMatrix.M11, ref projectionMatrix.M11, OPERATION.ROTATE, _posingService.CoordinateMode.AsGizmoMode(), ref matrix.M11))
-            {
-                _trackingMatrix = matrix;
-            }
-
-            if(_trackingMatrix.HasValue)
-            {
-                selected.Switch(
-                    boneSelect => posing.SkeletonPosing.GetBonePose(boneSelect).Apply(_trackingMatrix.Value.ToTransform(), originalMatrix.ToTransform()),
-                    _ => posing.ModelPosing.Transform += _trackingMatrix.Value.ToTransform().CalculateDiff(originalMatrix.ToTransform()),
-                    _ => posing.ModelPosing.Transform += _trackingMatrix.Value.ToTransform().CalculateDiff(originalMatrix.ToTransform())
-                );
-            }
-
-            if(!ImGuizmo.IsUsing() && _trackingMatrix.HasValue)
-            {
-                posing.Snapshot(false, false);
-                _trackingMatrix = null;
-            }
-
-            ImGuizmo.SetGizmoSizeClipSpace(0.1f);
-
-            ImGuizmo.SetID(0);
+            selected.Switch(
+                boneSelect => posing.SkeletonPosing.GetBonePose(boneSelect).Apply(_trackingMatrix.Value.ToTransform(), originalMatrix.ToTransform()),
+                _ => posing.ModelPosing.Transform += _trackingMatrix.Value.ToTransform().CalculateDiff(originalMatrix.ToTransform()),
+                _ => posing.ModelPosing.Transform += _trackingMatrix.Value.ToTransform().CalculateDiff(originalMatrix.ToTransform())
+            );
         }
-        ImGui.End();
 
-        ImGui.SetCursorPosY(ImGui.GetCursorPosY() + gizmoSize.Y);
+        if(!ImBrioGizmo.IsUsing() && _trackingMatrix.HasValue)
+        {
+            posing.Snapshot(false, false);
+            _trackingMatrix = null;
+        }
     }
 
     private void DrawGraphics(PosingCapability posing, ActorAppearanceCapability appearance)
@@ -391,16 +354,8 @@ internal class PosingGraphicalWindow : Window, IDisposable
 
             return;
         }
-
+       
         bool showGenitalia = false;
-        if(posing.SkeletonPosing.CharacterIsIVCS)
-        {
-            showGenitalia = _configurationService.Configuration.Posing.ShowGenitaliaInAdvancedPoseWindow;
-            if(ImGui.Checkbox("Show Genitalia", ref showGenitalia))
-            {
-                _configurationService.Configuration.Posing.ShowGenitaliaInAdvancedPoseWindow = showGenitalia;
-            }
-        }
 
         var contentArea = ImGui.GetContentRegionAvail();
         var contentWidth = contentArea.X / 3f;
@@ -409,12 +364,23 @@ internal class PosingGraphicalWindow : Window, IDisposable
             if(child.Success)
             {
                 var opening = ImGui.GetCursorPos();
+                if(posing.SkeletonPosing.CharacterIsIVCS)
+                {
+                    showGenitalia = _configurationService.Configuration.Posing.ShowGenitaliaInAdvancedPoseWindow;
+                    if(ImGui.Checkbox("Show Genitalia", ref showGenitalia))
+                    {
+                        _configurationService.Configuration.Posing.ShowGenitaliaInAdvancedPoseWindow = showGenitalia;
+                    }
+
+                    opening += new Vector2(0, 5);
+                }
                 var swapped = _configurationService.Configuration.Posing.GraphicalSidesSwapped;
                 if(ImGui.Checkbox("Swap", ref swapped))
                 {
                     _configurationService.Configuration.Posing.GraphicalSidesSwapped = swapped;
                 }
                 ImGui.SetCursorPos(opening);
+
                 DrawBoneSection("body", true, posing);
             }
         }

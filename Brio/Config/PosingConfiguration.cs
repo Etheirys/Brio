@@ -23,7 +23,7 @@ internal class PosingConfiguration
 
     // Graphical Posing
     public bool GraphicalSidesSwapped { get; set; } = false;
-    public bool ShowGenitaliaInAdvancedPoseWindow { get; set; } = true;
+    public bool ShowGenitaliaInAdvancedPoseWindow { get; set; } = false;
 
     // Hooks
     public bool DisableGPoseMouseSelect { get; set; } = false;

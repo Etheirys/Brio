@@ -375,7 +375,7 @@ internal class PosingOverlayWindow : Window, IDisposable
                 {
                     Position = (Vector3)charaBase->CharacterBase.DrawObject.Object.Position,
                     Rotation = (Quaternion)charaBase->CharacterBase.DrawObject.Object.Rotation,
-                    Scale = (Vector3)charaBase->CharacterBase.DrawObject.Object.Scale * charaBase->ScaleFactor
+                    Scale = Vector3.Clamp((Vector3)charaBase->CharacterBase.DrawObject.Object.Scale * charaBase->ScaleFactor, new Vector3(.5f), new Vector3(1.5f))
                 }.ToMatrix();
 
                 worldViewMatrix = modelMatrix * viewMatrix;
@@ -412,7 +412,7 @@ internal class PosingOverlayWindow : Window, IDisposable
             newTransform = matrix.ToTransform();
             _trackingTransform = newTransform;
         }
-
+        
         if(ImGuizmo.Manipulate(
             ref worldViewMatrix.M11,
             ref projectionMatrix.M11,

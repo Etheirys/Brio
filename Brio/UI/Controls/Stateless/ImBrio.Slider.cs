@@ -2,11 +2,30 @@
 using Brio.Core;
 using Brio.Input;
 using ImGuiNET;
-using System;
+using System.Numerics;
 
 namespace Brio.UI.Controls.Stateless;
 internal static partial class ImBrio
 {
+    public static bool SliderFloat3(string label, ref Vector3 value, float min, float max, string format = "%.2f", ImGuiSliderFlags flags = ImGuiSliderFlags.None, float step = 1.0f)
+    {
+        bool changed = false;
+
+        float x = value.X;
+        changed |= ImBrio.SliderFloat($"###{label}_x", ref x, min, max, format, flags, step);
+        value.X = x;
+
+        float y = value.Y;
+        changed |= ImBrio.SliderFloat($"###{label}_y", ref y, min, max, format, flags, step);
+        value.Y = y;
+
+        float z = value.Z;
+        changed |= ImBrio.SliderFloat($"###{label}_z", ref z, min, max, format, flags, step);
+        value.Z = z;
+
+        return changed;
+    }
+
     public static bool SliderFloat(string label, ref float value, float min, float max, string format = "%.2f", ImGuiSliderFlags flags = ImGuiSliderFlags.None, float step = 1.0f)
     {
         return SliderBase(label, ref value, min, max, format, flags, step, false);
@@ -42,7 +61,16 @@ internal static partial class ImBrio
 
         buttonWidth = ImGui.GetCursorPosX() - buttonWidth;
 
-        ImGui.SetNextItemWidth((ImGui.GetWindowWidth() * 0.65f) - (buttonWidth * 2) - ImGui.GetStyle().CellPadding.X);
+        bool hasLabel = !label.StartsWith("##");
+
+        if(hasLabel)
+        {
+            ImGui.SetNextItemWidth((ImGui.GetWindowWidth() * 0.65f) - (buttonWidth * 2) - ImGui.GetStyle().CellPadding.X);
+        }
+        else
+        {
+            ImGui.SetNextItemWidth(ImGui.GetWindowWidth() - ((buttonWidth * 2) + ImGui.GetStyle().CellPadding.X) - (ImGui.GetStyle().WindowPadding.X * 2));
+        }
 
         if(isAngle)
         {
@@ -60,8 +88,11 @@ internal static partial class ImBrio
             changed = true;
         }
 
-        ImGui.SameLine();
-        ImGui.Text(label);
+        if(hasLabel)
+        {
+            ImGui.SameLine();
+            ImGui.Text(label);
+        }
 
         return changed;
     }

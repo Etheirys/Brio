@@ -85,6 +85,9 @@ internal class BonePoseInfo(BonePoseInfoId id, PoseInfo parent)
         ikInfo ??= DefaultIK;
         var calc = original.HasValue ? transform.CalculateDiff(original.Value) : transform;
 
+        if(calc.ContainsNaN())
+            return;
+
         if(calc.IsApproximatelySame(Transform.Identity))
             return;
 
