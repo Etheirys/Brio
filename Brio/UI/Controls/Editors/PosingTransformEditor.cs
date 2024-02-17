@@ -14,18 +14,9 @@ internal class PosingTransformEditor
     private Transform? _trackingTransform;
     private Vector3? _trackingEuler;
 
-    private bool _compactMode = false;
-
-    public void Draw(string id, PosingCapability posingCapability, bool compactMode = false)
+    public void Draw(string id, PosingCapability posingCapability)
     {
         var selected = posingCapability.Selected;
-
-        _compactMode = compactMode;
-
-        if(_compactMode)
-            ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, new Vector2(4, 3));
-        else
-            ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, new Vector2(4, 5));
 
         using(ImRaii.PushId(id))
         {
@@ -46,9 +37,6 @@ internal class PosingTransformEditor
                 _ => DrawModelTransformEditor(posingCapability)
             );
         }
-
-        ImGui.PopStyleVar();
-
     }
 
     private void DrawBoneTransformEditor(PosingCapability posingCapability, BonePoseInfoId boneId)
@@ -66,14 +54,15 @@ internal class PosingTransformEditor
         bool didChange = false;
         bool anyActive = false;
 
-        didChange |= ImBrio.DragFloat3($"{FontAwesomeIcon.ArrowsUpDownLeftRight.ToIconString()}", ref realTransform.Position, 0.1f, "Position");
+        didChange |= ImBrio.DragFloat3("P", ref realTransform.Position, 0.1f, "Position");
         anyActive |= ImGui.IsItemActive();
 
-        didChange |= ImBrio.DragFloat3($"{FontAwesomeIcon.ArrowsSpin.ToIconString()}", ref realEuler, 5.0f, "Rotation");
+        didChange |= ImBrio.DragFloat3("R", ref realEuler, 5.0f, "Rotation");
         anyActive |= ImGui.IsItemActive();
 
-        didChange |= ImBrio.DragFloat3($"{FontAwesomeIcon.ExpandAlt.ToIconString()}", ref realTransform.Scale, 0.1f, "Scale");
+        didChange |= ImBrio.DragFloat3("S", ref realTransform.Scale, 0.1f, "Scale");
         anyActive |= ImGui.IsItemActive();
+
 
         ImGui.Spacing();
         ImGui.Text("Propagate: ");
@@ -134,42 +123,6 @@ internal class PosingTransformEditor
         }
     }
 
-    private bool DrawPropagateCheckboxes(TransformComponents propagate)
-    {
-        var didChange = false;
-
-        bool propBool = propagate.HasFlag(TransformComponents.Position);
-        if(ImGui.Checkbox("P###propagate_position", ref propBool))
-        {
-            didChange |= true;
-            propagate = propBool ? propagate | TransformComponents.Position : propagate & ~TransformComponents.Position;
-        }
-        if(ImGui.IsItemHovered())
-            ImGui.SetTooltip("Propagate Positions");
-
-        ImGui.SameLine();
-        propBool = propagate.HasFlag(TransformComponents.Rotation);
-        if(ImGui.Checkbox("R###propagate_rotation", ref propBool))
-        {
-            didChange |= true;
-            propagate = propBool ? propagate | TransformComponents.Rotation : propagate & ~TransformComponents.Rotation;
-        }
-        if(ImGui.IsItemHovered())
-            ImGui.SetTooltip("Propagate Rotations");
-
-        ImGui.SameLine();
-
-        propBool = propagate.HasFlag(TransformComponents.Scale);
-        if(ImGui.Checkbox("S###propagate_scale", ref propBool))
-        {
-            didChange |= true;
-            propagate = propBool ? propagate | TransformComponents.Scale : propagate & ~TransformComponents.Scale;
-        }
-        if(ImGui.IsItemHovered())
-            ImGui.SetTooltip("Propagate Scales");
-
-        return didChange;
-    }
 
     private void DrawModelTransformEditor(PosingCapability posingCapability)
     {
@@ -180,14 +133,15 @@ internal class PosingTransformEditor
         bool didChange = false;
         bool anyActive = false;
 
-        didChange |= ImBrio.DragFloat3($"{FontAwesomeIcon.ArrowsUpDownLeftRight.ToIconString()}", ref realTransform.Position, 0.1f, "Position");
+        didChange |= ImBrio.DragFloat3("P", ref realTransform.Position, 0.1f, "Position");
         anyActive |= ImGui.IsItemActive();
 
-        didChange |= ImBrio.DragFloat3($"{FontAwesomeIcon.ArrowsSpin.ToIconString()}", ref realEuler, 5.0f, "Rotation");
+        didChange |= ImBrio.DragFloat3("R", ref realEuler, 5.0f, "Rotation");
         anyActive |= ImGui.IsItemActive();
 
-        didChange |= ImBrio.DragFloat3($"{FontAwesomeIcon.ExpandAlt.ToIconString()}", ref realTransform.Scale, 0.1f, "Scale");
+        didChange |= ImBrio.DragFloat3("S", ref realTransform.Scale, 0.1f, "Scale");
         anyActive |= ImGui.IsItemActive();
+
 
         realTransform.Rotation = realEuler.ToQuaternion();
 

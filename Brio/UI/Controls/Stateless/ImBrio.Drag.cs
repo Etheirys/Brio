@@ -1,8 +1,5 @@
 ﻿using Brio.Config;
 using Brio.Input;
-using Brio.UI.Controls.Core;
-using Dalamud.Interface.Utility.Raii;
-using Dalamud.Interface;
 using ImGuiNET;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,7 +10,7 @@ internal static partial class ImBrio
 {
     static HashSet<uint> expanded = new();
 
-    public static bool DragFloat3(string label, ref Vector3 vectorValue, float step = 1.0f, string tooltip = "")
+    public static bool DragFloat3(string label, ref Vector3 value, float step = 1.0f, string tooltip = "")
     {
         bool changed = false;
 
@@ -26,12 +23,12 @@ internal static partial class ImBrio
                 ImGui.PushStyleColor(ImGuiCol.Button, 0);
                 ImGui.PushStyleColor(ImGuiCol.ButtonHovered, 0);
                 ImGui.PushStyleColor(ImGuiCol.ButtonActive, 0);
-                using(ImRaii.PushFont(UiBuilder.IconFont))
-                    ImGui.Button(label, new(labelWidth, 0));
+                ImGui.Button(label, new(labelWidth, 0));
                 ImGui.PopStyleColor();
                 ImGui.PopStyleColor();
                 ImGui.PopStyleColor();
                 ImGui.SameLine();
+                
             }
             else
             {
@@ -49,7 +46,7 @@ internal static partial class ImBrio
         }
 
         ImGui.SetNextItemWidth((ImGui.GetWindowContentRegionMax().X - ImGui.GetWindowContentRegionMin().X) - 32 - labelWidth);
-        changed |= ImGui.DragFloat3($"##{label}_drag3", ref vectorValue, step / 10.0f);
+        changed |= ImGui.DragFloat3($"##{label}_drag3", ref value, step / 10.0f);
 
         if(isExpanded)
         {
@@ -74,34 +71,20 @@ internal static partial class ImBrio
             }
         }
 
-
         if(isExpanded)
         {
-            ImGui.PushStyleColor(ImGuiCol.FrameBg, UIConstants.GizmoBlue);
-
-            float x = vectorValue.X;
+            float x = value.X;
             changed |= ImBrio.DragFloat($"###{label}_x", ref x, step, $"{tooltip} X");
-            vectorValue.X = x;
-           
-            ImGui.PopStyleColor();
-            ImGui.PushStyleColor(ImGuiCol.FrameBg, UIConstants.GizmoGreen);
+            value.X = x;
 
-            float y = vectorValue.Y;
+            float y = value.Y;
             changed |= ImBrio.DragFloat($"###{label}_y", ref y, step, $"{tooltip} Y");
-            vectorValue.Y = y;
-           
-            ImGui.PopStyleColor();
-            ImGui.PushStyleColor(ImGuiCol.FrameBg, UIConstants.GizmoRed);
+            value.Y = y;
 
-            float z = vectorValue.Z;
+            float z = value.Z;
             changed |= ImBrio.DragFloat($"###{label}_z", ref z, step, $"{tooltip} Z");
-            vectorValue.Z = z;
-
-            ImGui.PopStyleColor();
-         
-            ImGui.Separator();
+            value.Z = z;
         }
-
 
         return changed;
     }

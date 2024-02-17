@@ -3,7 +3,6 @@ using Brio.Entities;
 using Brio.UI.Controls.Editors;
 using Dalamud.Interface.Windowing;
 using ImGuiNET;
-using System.Numerics;
 
 namespace Brio.UI.Windows.Specialized;
 
@@ -12,18 +11,11 @@ internal class PosingTransformWindow : Window
     private readonly EntityManager _entityManager;
     private readonly PosingTransformEditor _posingTransformEditor = new();
 
-    public PosingTransformWindow(EntityManager entityManager) : base($"{Brio.Name} - Transform###brio_transform_window")
+    public PosingTransformWindow(EntityManager entityManager) : base($"{Brio.Name} - Transform###brio_transform_window", ImGuiWindowFlags.AlwaysAutoResize)
     {
         Namespace = "brio_transform_namespace";
 
         _entityManager = entityManager;
-
-        SizeConstraints = new WindowSizeConstraints
-        {
-            MaximumSize = new Vector2(350, 650),
-            MinimumSize = new Vector2(200, 150)
-        };
-
     }
 
     public override bool DrawConditions()
@@ -46,5 +38,4 @@ internal class PosingTransformWindow : Window
         _posingTransformEditor.Draw("overlay_transforms_edit", posing);
 
     }
-
 }
