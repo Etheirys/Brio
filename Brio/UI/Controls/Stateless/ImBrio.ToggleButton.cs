@@ -15,10 +15,10 @@ internal static partial class ImBrio
 
     public static bool ToggleButton(string label, Vector2 size, ref bool selected, bool canDeselect = true)
     {
-        if(canDeselect && selected)
+        if(!canDeselect && selected)
             ImGui.BeginDisabled();
 
-        ImGui.PushStyleColor(ImGuiCol.Button, ImGui.GetColorU32(selected ? ImGuiCol.TabActive : ImGuiCol.Tab));
+        ImGui.PushStyleColor(ImGuiCol.Button, ImGui.GetColorU32(selected ? ImGuiCol.TabActive : ImGuiCol.Button));
 
         bool clicked = false;
         if(ImGui.Button(label, size))
@@ -29,7 +29,7 @@ internal static partial class ImBrio
 
         ImGui.PopStyleColor();
 
-        if(canDeselect && selected)
+        if(!canDeselect && selected)
             ImGui.EndDisabled();
 
         return clicked;

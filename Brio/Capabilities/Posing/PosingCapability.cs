@@ -5,6 +5,7 @@ using Brio.Entities.Actor;
 using Brio.Entities.Core;
 using Brio.Files;
 using Brio.Game.Posing;
+using Brio.Game.Posing.Skeletons;
 using Brio.Input;
 using Brio.Resources;
 using Brio.UI.Widgets.Posing;

@@ -212,41 +212,43 @@ internal class PosingGraphicalWindow : Window, IDisposable
 
     private void DrawButtons(PosingCapability posing)
     {
-        float buttonWidth = ((ImGui.GetContentRegionAvail().X) - (ImGui.GetStyle().FramePadding.X * 3f)) / 3f;
+        float buttonWidth = ((ImGui.GetContentRegionAvail().X) - (ImGui.GetStyle().FramePadding.X * 4f)) / 4f;
 
+        // Mirror mode
         PosingEditorCommon.DrawMirrorModeSelect(posing, new Vector2(buttonWidth, 0));
 
+        // IK
         ImGui.SameLine();
+        PosingEditorCommon.DrawIKSelect(posing, new Vector2(buttonWidth, 0));
 
+        // Select Parent
+        ImGui.SameLine();
         var parentBone = posing.Selected.Match(
                boneSelect => posing.SkeletonPosing.GetBone(boneSelect)?.GetFirstVisibleParent(),
                _ => null,
                _ => null
         );
 
- 
+
         using(ImRaii.Disabled(parentBone == null))
         {
             if(ImBrio.FontIconButton(FontAwesomeIcon.LevelUpAlt, new Vector2(buttonWidth, 0)))
                 posing.Selected = new BonePoseInfoId(parentBone!.Name, parentBone!.PartialId, PoseInfoSlot.Character);
         }
-        
+
         if(ImGui.IsItemHovered())
             ImGui.SetTooltip("Select Parent");
 
+        // Clear Selection
         ImGui.SameLine();
-
-
         using(ImRaii.Disabled(posing.Selected.Value is None))
         {
             if(ImGui.Button($"Clear###clear_selected", new Vector2(buttonWidth, 0)))
                 posing.ClearSelection();
         }
-        
+
         if(ImGui.IsItemHovered())
             ImGui.SetTooltip("Clear Selection");
-
-
     }
 
     private void DrawImportButtons(PosingCapability posing)

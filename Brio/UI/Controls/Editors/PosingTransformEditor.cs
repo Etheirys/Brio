@@ -54,9 +54,6 @@ internal class PosingTransformEditor
         bool didChange = false;
         bool anyActive = false;
 
-        if(ImBrio.FontIconButtonRight("ik", FontAwesomeIcon.Adjust, 1.2f, "Inverse Kinematics", bone?.EligibleForIK == true))
-            ImGui.OpenPopup("transform_ik_popup");
-
         didChange |= ImBrio.DragFloat3("P", ref realTransform.Position, 0.1f, "Position");
         anyActive |= ImGui.IsItemActive();
 
@@ -99,16 +96,6 @@ internal class PosingTransformEditor
         }
         if(ImGui.IsItemHovered())
             ImGui.SetTooltip("Propagate Scales");
-
-
-
-        using(var popup = ImRaii.Popup("transform_ik_popup"))
-        {
-            if(popup.Success && bonePose != null)
-            {
-                BoneIKEditor.Draw(bonePose, posingCapability);
-            }
-        }
 
         realTransform.Rotation = realEuler.ToQuaternion();
         var toApply = before + realTransform.CalculateDiff(beforeMods);

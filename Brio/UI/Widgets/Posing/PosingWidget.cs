@@ -62,6 +62,10 @@ internal class PosingWidget(PosingCapability capability) : Widget<PosingCapabili
 
         ImGui.SameLine();
 
+        PosingEditorCommon.DrawIKSelect(Capability);
+
+        ImGui.SameLine();
+
         if(ImBrio.FontIconButton("undo", FontAwesomeIcon.Backward, "Undo", Capability.HasUndoStack))
         {
             Capability.Undo();
