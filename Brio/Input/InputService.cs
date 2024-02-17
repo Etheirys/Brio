@@ -92,12 +92,16 @@ internal class InputService
         else if (isDown && !wasDown)
         {
             _eventsDown.Add(evt);
-            
-            // just released, invoke listeners
-            foreach(Action callback in _listeners[evt])
+
+            try
             {
-                callback.Invoke();
+                // just released, invoke listeners
+                foreach(Action callback in _listeners[evt])
+                {
+                    callback?.Invoke();
+                }
             }
+            catch(Exception) { }
         }
     }
 
