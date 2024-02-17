@@ -117,8 +117,7 @@ internal class PosingGraphicalWindow : Window, IDisposable
 
                 float height = ImBrio.GetRemainingHeight() - ImBrio.GetLineHeight() - (ImGui.GetStyle().FramePadding.Y * 2);
 
-                using(var rightPaneSelection = ImRaii.Child("###right_pane_selection", new Vector2(-1, height), true, 
-                    ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse))
+                using(var rightPaneSelection = ImRaii.Child("###right_pane_selection", new Vector2(-1, height), true))
                 {
                     if(rightPaneSelection.Success)
                     {
