@@ -106,6 +106,12 @@ internal static partial class ImBrioGizmo
         BrioCamera* camera = (BrioCamera*)CameraManager.Instance()->GetActiveCamera();
         viewMatrix = camera->GetViewMatrix();
 
+        // extract just rotation from camera view
+        {
+            Matrix4x4.Decompose(viewMatrix, out var cameraScale, out var cameraRotation, out var cameraTranslation);
+            viewMatrix = Matrix4x4.CreateFromQuaternion(cameraRotation);
+        }
+
         Matrix4x4 mat = Matrix4x4.CreateScale(-1, 1, 1);
         viewMatrix = viewMatrix * mat;
 
