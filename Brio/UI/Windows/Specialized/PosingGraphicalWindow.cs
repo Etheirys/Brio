@@ -129,6 +129,9 @@ internal class PosingGraphicalWindow : Window, IDisposable
                 DrawImportButtons(posing);
             }
         }
+
+        ImGui.PopStyleVar();
+
     }
 
     private void DrawGlobalButtons(PosingCapability posing)
@@ -274,6 +277,8 @@ internal class PosingGraphicalWindow : Window, IDisposable
         if(ImGui.IsItemHovered())
             ImGui.SetTooltip("Import Options");
 
+        ImGui.Text("Import Options");
+       
         using(var popup = ImRaii.Popup("import_options_popup_posing_graphical"))
         {
             if(popup.Success)
