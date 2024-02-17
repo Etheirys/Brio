@@ -1,4 +1,5 @@
-﻿using Brio.Config;
+
+using Brio.Config;
 using ImGuiNET;
 using ImGuizmoNET;
 using System.Numerics;
