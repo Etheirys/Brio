@@ -4,6 +4,7 @@ using Dalamud.Plugin;
 using Dalamud.Plugin.Ipc;
 using System;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Brio.IPC;
 
@@ -15,6 +16,7 @@ internal class MareService : IDisposable
     private readonly ConfigurationService _configurationService;
 
     private readonly ICallGateSubscriber<string, GameObject, bool> _mareApplyMcdf;
+    private readonly ICallGateSubscriber<string, GameObject, Task<bool>> _mareApplyMcdfAsync;
 
     public MareService(DalamudPluginInterface pluginInterface, ConfigurationService configurationService)
     {
@@ -22,6 +24,7 @@ internal class MareService : IDisposable
         _configurationService = configurationService;
 
         _mareApplyMcdf = pluginInterface.GetIpcSubscriber<string, GameObject, bool>("MareSynchronos.LoadMcdf");
+        _mareApplyMcdfAsync = pluginInterface.GetIpcSubscriber<string, GameObject, Task<bool>>("MareSynchronos.LoadMcdfAsync");
 
         RefreshMareStatus();
 
@@ -50,6 +53,19 @@ internal class MareService : IDisposable
         {
             Brio.Log.Error(ex, $"Failed to Invoke MareSynchronos.LoadMcdf IPC");
             return false;
+        }
+    }
+
+    public Task<bool> LoadMcdfAsync(string fileName, GameObject target)
+    {
+        try
+        {
+            return _mareApplyMcdfAsync.InvokeFunc(fileName, target);
+        }
+        catch(Exception ex)
+        {
+            Brio.Log.Error(ex, $"Failed to Invoke MareSynchronos.LoadMcdfAsync IPC");
+            return Task.FromResult(false);
         }
     }
 

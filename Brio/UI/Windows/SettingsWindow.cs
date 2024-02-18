@@ -2,14 +2,19 @@ using Brio.Config;
 using Brio.Input;
 using Brio.Core;
 using Brio.IPC;
+using Brio.UI.Controls.Editors;
 using Brio.UI.Controls.Stateless;
 using Brio.Web;
 using Dalamud.Interface;
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Interface.Windowing;
 using ImGuiNET;
+using Swan;
 using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Numerics;
+using System.Xml.Linq;
 using Brio.Resources;
 
 namespace Brio.UI.Windows;
@@ -23,7 +28,13 @@ internal class SettingsWindow : Window
     private readonly BrioIPCService _brioIPCService;
     private readonly MareService _mareService;
 
-    public SettingsWindow(ConfigurationService configurationService, PenumbraService penumbraService, GlamourerService glamourerService, WebService webService, BrioIPCService brioIPCService, MareService mareService) : base($"{Brio.Name} Settings###brio_settings_window", ImGuiWindowFlags.NoResize)
+    public SettingsWindow(
+        ConfigurationService configurationService,
+        PenumbraService penumbraService,
+        GlamourerService glamourerService,
+        WebService webService,
+        BrioIPCService brioIPCService,
+        MareService mareService) : base($"{Brio.Name} Settings###brio_settings_window", ImGuiWindowFlags.NoResize)
     {
         Namespace = "brio_settings_namespace";
 
@@ -50,6 +61,7 @@ internal class SettingsWindow : Window
                     DrawAppearanceTab();
                     DrawPosingTab();
                     DrawWorldTab();
+                    DrawLibraryTab();
                     DrawKeysTab();
                 }
             }
@@ -158,7 +170,7 @@ internal class SettingsWindow : Window
             {
                 ImGui.Text($"Penumbra Status: {(_penumbraService.IsPenumbraAvailable ? "Active" : "Inactive")}");
                 ImGui.SameLine();
-                if (ImBrio.FontIconButton("refresh_penumbra", FontAwesomeIcon.Sync, "Refresh Penumbra Status"))
+                if(ImBrio.FontIconButton("refresh_penumbra", FontAwesomeIcon.Sync, "Refresh Penumbra Status"))
                 {
                     _penumbraService.RefreshPenumbraStatus();
                 }
@@ -175,7 +187,7 @@ internal class SettingsWindow : Window
             {
                 ImGui.Text($"Glamourer Status: {(_glamourerService.IsGlamourerAvailable ? "Active" : "Inactive")}");
                 ImGui.SameLine();
-                if (ImBrio.FontIconButton("refresh_glamourer", FontAwesomeIcon.Sync, "Refresh Glamourer Status"))
+                if(ImBrio.FontIconButton("refresh_glamourer", FontAwesomeIcon.Sync, "Refresh Glamourer Status"))
                 {
                     _glamourerService.RefreshGlamourerStatus();
                 }
@@ -192,7 +204,7 @@ internal class SettingsWindow : Window
             {
                 ImGui.Text($"Mare Synchronos Status: {(_mareService.IsMareAvailable ? "Active" : "Inactive")}");
                 ImGui.SameLine();
-                if (ImBrio.FontIconButton("refresh_mare", FontAwesomeIcon.Sync, "Refresh Mare Synchronos Status"))
+                if(ImBrio.FontIconButton("refresh_mare", FontAwesomeIcon.Sync, "Refresh Mare Synchronos Status"))
                 {
                     _mareService.RefreshMareStatus();
                 }
@@ -400,9 +412,9 @@ internal class SettingsWindow : Window
             }
 
             Vector4 skeletonLineActive = ImGui.ColorConvertU32ToFloat4(_configurationService.Configuration.Posing.SkeletonLineActiveColor);
-            if (ImGui.ColorEdit4("Skeleton Active Color", ref skeletonLineActive, ImGuiColorEditFlags.NoInputs))
+            if(ImGui.ColorEdit4("Skeleton Active Color", ref skeletonLineActive, ImGuiColorEditFlags.NoInputs))
             {
-                
+
                 _configurationService.Configuration.Posing.SkeletonLineActiveColor = ImGui.ColorConvertFloat4ToU32(skeletonLineActive);
                 _configurationService.ApplyChange();
             }
@@ -468,6 +480,24 @@ internal class SettingsWindow : Window
         }
     }
 
+    private void DrawLibraryTab()
+    {
+        using(var tab = ImRaii.TabItem("Library"))
+        {
+            if(tab.Success)
+            {
+                DrawLibrarySection();
+            }
+        }
+    }
+
+    private LibraryConfiguration.SourceConfigBase? _selectedSourceConfig;
+    private bool _isEditingSource;
+    private void DrawLibrarySection()
+    {
+        LibrarySourcesEditor.Draw(null, _configurationService, _configurationService.Configuration.Library, ref _selectedSourceConfig, ref _isEditingSource);
+    }
+    
     private void DrawKeysTab()
     {
         using(var tab = ImRaii.TabItem("Key Binds"))
@@ -509,5 +539,6 @@ internal class SettingsWindow : Window
         {
             _configurationService.ApplyChange();
         }
+
     }
 }

@@ -16,17 +16,19 @@ internal class MainWindow : Window
 {
     private readonly SettingsWindow _settingsWindow;
     private readonly InfoWindow _infoWindow;
+    private readonly LibraryWindow _libraryWindow;
     private readonly EntityManager _entityManager;
     private readonly ConfigurationService _configurationService;
 
     private readonly EntityHierarchyView _entitySelector;
 
-    public MainWindow(ConfigurationService configService, SettingsWindow settingsWindow, InfoWindow infoWindow, EntityManager entityManager, InputService input) : base($"{Brio.Name} Scene Manager [{configService.Version}]###brio_main_window", ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.AlwaysAutoResize)
+    public MainWindow(ConfigurationService configService, SettingsWindow settingsWindow, InfoWindow infoWindow, EntityManager entityManager,  LibraryWindow libraryWindow, InputService input) : base($"{Brio.Name} Scene Manager [{configService.Version}]###brio_main_window", ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.AlwaysAutoResize)
     {
         Namespace = "brio_main_namespace";
 
         _configurationService = configService;
         _settingsWindow = settingsWindow;
+        _libraryWindow = libraryWindow;
         _infoWindow = infoWindow;
         _entityManager = entityManager;
         _entitySelector = new(_entityManager);
@@ -85,6 +87,10 @@ internal class MainWindow : Window
         ImGui.SetCursorPosY(0);
         if(ImBrio.FontIconButtonRight("info_toggle", FontAwesomeIcon.InfoCircle, 3.3f, "Info", bordered: false))
             _infoWindow.Toggle();
+
+        ImGui.SetCursorPosY(0);
+        if(ImBrio.FontIconButtonRight("library_toggle", FontAwesomeIcon.Book, 4.3f, "Library", bordered: false))
+            _libraryWindow.Toggle();
 
         ImGui.PopClipRect();
         ImGui.SetCursorPos(initialPos);

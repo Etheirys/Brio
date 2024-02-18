@@ -1,14 +1,40 @@
-﻿using Brio.Core;
+﻿using Brio.Capabilities.Posing;
+using Brio.Core;
+using Brio.Entities;
+using Brio.Entities.Actor;
 using Brio.Files.Converters;
+using Brio.Resources;
+using Dalamud.Interface.Internal;
+using System;
 using System.Collections.Generic;
 using System.Numerics;
 
 namespace Brio.Files;
 
-internal class PoseFile
+internal class PoseFileInfo : AppliableActorFileInfoBase<PoseFile>
 {
-    public string TypeName { get; set; } = "Brio Pose";
+    public override string Name => "Pose File";
+    public override IDalamudTextureWrap Icon => ResourceProvider.Instance.GetResourceImage("Images.FileIcon_Pose.png");
+    public override string Extension => ".pose";
 
+    public PoseFileInfo(EntityManager entityManager)
+    : base(entityManager)
+    {
+    }
+
+    protected override void Apply(PoseFile file, ActorEntity actor)
+    {
+        PosingCapability? capability;
+        if(actor.TryGetCapability<PosingCapability>(out capability) && capability != null)
+        {
+            capability.ImportPose(file);
+        }
+    }
+}
+
+[Serializable]
+internal class PoseFile : JsonDocumentBase
+{
     public Bone ModelDifference { get; set; } = Transform.Identity;
 
     public Dictionary<string, Bone> Bones { get; set; } = [];

@@ -1,14 +1,40 @@
-﻿using Brio.Game.Actor.Appearance;
+﻿using Brio.Capabilities.Actor;
+using Brio.Entities;
+using Brio.Entities.Actor;
+using Brio.Game.Actor.Appearance;
+using Brio.Library.Tags;
+using Brio.Resources;
+using Dalamud.Interface.Internal;
 using FFXIVClientStructs.FFXIV.Client.Game.Character;
 using System;
 using System.Numerics;
 
 namespace Brio.Files;
 
-[Serializable]
-internal class AnamnesisCharaFile
+internal class AnamnesisCharaFileInfo : AppliableActorFileInfoBase<AnamnesisCharaFile>
 {
-    public string TypeName { get; set; } = "Brio Character File";
+    public override string Name => "Character File";
+    public override IDalamudTextureWrap Icon => ResourceProvider.Instance.GetResourceImage("Images.FileIcon_Chara.png");
+    public override string Extension => ".chara";
+
+    public AnamnesisCharaFileInfo(EntityManager entityManager)
+        : base(entityManager)
+    {
+    }
+
+    protected override void Apply(AnamnesisCharaFile file, ActorEntity actor)
+    { 
+        ActorAppearanceCapability? capability;
+        if(actor.TryGetCapability<ActorAppearanceCapability>(out capability) && capability != null)
+        {
+            _ = capability.SetAppearance(file, AppearanceImportOptions.All);
+        }
+    }
+}
+
+[Serializable]
+internal class AnamnesisCharaFile : JsonDocumentBase
+{
     public uint ModelType { get; set; } = 0;
     public Races Race { get; set; }
     public Genders Gender { get; set; }
@@ -62,6 +88,15 @@ internal class AnamnesisCharaFile
     public float MuscleTone { get; set; }
     public float HeightMultiplier { get; set; }
 
+    public override void GetAutoTags(ref TagCollection tags)
+    {
+        base.GetAutoTags(ref tags);
+
+        tags.Add(this.Race.ToDisplayName());
+        tags.Add(this.Gender.ToDisplayName());
+        tags.Add(this.Tribe.ToDisplayName());
+    }
+    
     public static implicit operator ActorAppearance(AnamnesisCharaFile chara)
     {
         var appearance = new ActorAppearance
