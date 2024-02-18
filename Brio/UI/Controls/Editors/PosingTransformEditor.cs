@@ -6,6 +6,8 @@ using Dalamud.Interface;
 using Dalamud.Interface.Utility.Raii;
 using ImGuiNET;
 using System.Numerics;
+using System.Reflection.Emit;
+using System.Threading.Channels;
 
 namespace Brio.UI.Controls.Editors;
 
@@ -54,7 +56,7 @@ internal class PosingTransformEditor
     private void DrawBoneTransformEditor(PosingCapability posingCapability, BonePoseInfoId boneId)
     {
         var bone = posingCapability.SkeletonPosing.GetBone(boneId);
-        var bonePose = bone != null ? posingCapability.SkeletonPosing.GetBonePose(boneId) : null;
+        var bonePose = bone is not null ? posingCapability.SkeletonPosing.GetBonePose(boneId) : null;
 
         var propagate = bonePose?.DefaultPropagation ?? TransformComponents.None;
         var before = bone?.LastTransform ?? Transform.Identity;
@@ -109,10 +111,18 @@ internal class PosingTransformEditor
         if(ImGui.IsItemHovered())
             ImGui.SetTooltip("Propagate Scales");
 
+        using(var popup = ImRaii.Popup("transform_propagate_popup"))
+        {
+            if(popup.Success && bonePose is not null)
+            {
+                didChange |= DrawPropagateCheckboxes(propagate);
+            }
+        }
+
         realTransform.Rotation = realEuler.ToQuaternion();
         var toApply = before + realTransform.CalculateDiff(beforeMods);
 
-        if(didChange && bone != null && bonePose != null)
+        if(didChange && bone is not null && bonePose is not null)
         {
             posingCapability.SkeletonPosing.GetBonePose(bone).Apply(toApply, before);
             bonePose.DefaultPropagation = propagate;
@@ -129,7 +139,7 @@ internal class PosingTransformEditor
             {
                 posingCapability.Snapshot(false, false);
             }
-
+           
             _trackingTransform = null;
             _trackingEuler = null;
         }
@@ -181,15 +191,16 @@ internal class PosingTransformEditor
         bool didChange = false;
         bool anyActive = false;
 
-        didChange |= ImBrio.DragFloat3($"{FontAwesomeIcon.ArrowsUpDownLeftRight.ToIconString()}", ref realTransform.Position, 0.1f, "Position");
-        anyActive |= ImGui.IsItemActive();
+        ImGui.Text("Model Transform");
 
-        didChange |= ImBrio.DragFloat3($"{FontAwesomeIcon.ArrowsSpin.ToIconString()}", ref realEuler, 5.0f, "Rotation");
-        anyActive |= ImGui.IsItemActive();
+        (var pdidChange, var panyActive) = ImBrio.DragFloat3($"###_transformPosition_0", ref realTransform.Position, 0.1f, FontAwesomeIcon.ArrowsUpDownLeftRight.ToIconString(), "Position");
 
-        didChange |= ImBrio.DragFloat3($"{FontAwesomeIcon.ExpandAlt.ToIconString()}", ref realTransform.Scale, 0.1f, "Scale");
-        anyActive |= ImGui.IsItemActive();
+        (var rdidChange, var ranyActive) = ImBrio.DragFloat3($"###_transformRotation_0", ref realEuler, 5.0f, FontAwesomeIcon.ArrowsSpin.ToIconString(), "Rotation");
 
+        (var sdidChange, var sanyActive) = ImBrio.DragFloat3($"###_transformScale_0", ref realTransform.Scale, 0.1f, FontAwesomeIcon.ExpandAlt.ToIconString(), "Scale");
+
+        didChange |= pdidChange |= rdidChange |= sdidChange;
+        anyActive |= panyActive |= ranyActive |= sanyActive;
 
         realTransform.Rotation = realEuler.ToQuaternion();
 

@@ -491,6 +491,13 @@ internal class SettingsWindow : Window
         }
     }
 
+    private LibraryConfiguration.SourceConfigBase? _selectedSourceConfig;
+    private bool _isEditingSource;
+    private void DrawLibrarySection()
+    {
+        LibrarySourcesEditor.Draw(null, _configurationService, _configurationService.Configuration.Library, ref _selectedSourceConfig, ref _isEditingSource);
+    }
+    
     private void DrawKeysTab()
     {
         using(var tab = ImRaii.TabItem("Key Binds"))
@@ -520,16 +527,8 @@ internal class SettingsWindow : Window
                 DrawKeyBind(KeyBindEvents.Posing_ToggleOverlay);
                 DrawKeyBind(KeyBindEvents.Posing_Undo);
                 DrawKeyBind(KeyBindEvents.Posing_Redo);
-
             }
         }
-    }
-
-    private LibraryConfiguration.SourceConfigBase? _selectedSourceConfig;
-    private bool _isEditingSource;
-    private void DrawLibrarySection()
-    {
-        LibrarySourcesEditor.Draw(null, _configurationService, _configurationService.Configuration.Library, ref _selectedSourceConfig, ref _isEditingSource);
     }
 
     private void DrawKeyBind(KeyBindEvents evt)

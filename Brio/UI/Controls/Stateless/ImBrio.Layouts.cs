@@ -29,5 +29,4 @@ internal static partial class ImBrio
     {
         ImGui.SetCursorPosX(ImGui.GetCursorPosX() + (GetRemainingWidth() - width));
     }
-
 }

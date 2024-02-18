@@ -129,6 +129,9 @@ internal class PosingGraphicalWindow : Window, IDisposable
                 DrawImportButtons(posing);
             }
         }
+
+        ImGui.PopStyleVar();
+
     }
 
     private void DrawGlobalButtons(PosingCapability posing)

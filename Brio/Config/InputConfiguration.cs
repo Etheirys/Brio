@@ -10,6 +10,7 @@ internal class InputConfiguration
     {
         // Default bindings
         { KeyBindEvents.Interface_ToggleBrioWindow, new(VirtualKey.B, true) },
+        { KeyBindEvents.Interface_ToggleBindPromptWindow, new(VirtualKey.M, true) },
         { KeyBindEvents.Interface_IncrementSmallModifier, new(VirtualKey.NO_KEY) },
         { KeyBindEvents.Interface_IncrementLargeModifier, new(VirtualKey.NO_KEY) },
         { KeyBindEvents.Posing_ToggleOverlay, new(VirtualKey.O, true) },
