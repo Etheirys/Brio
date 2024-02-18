@@ -77,22 +77,16 @@ internal class MainWindow : Window
 
     private void DrawHeaderButtons()
     {
-        var initialPos = ImGui.GetCursorPos();
-        ImGui.PushClipRect(ImGui.GetWindowPos(), ImGui.GetWindowPos() + ImGui.GetWindowSize(), false);
-
-        ImGui.SetCursorPosY(0);
-        if(ImBrio.FontIconButtonRight("settings_toggle", FontAwesomeIcon.Cog, 2.3f, "Settings", bordered: false))
+        ImGui.SameLine();
+        if(ImBrio.FontIconButtonRight("settings_toggle", FontAwesomeIcon.Cog, 1.3f, "Settings", bordered: false))
             _settingsWindow.Toggle();
 
-        ImGui.SetCursorPosY(0);
-        if(ImBrio.FontIconButtonRight("info_toggle", FontAwesomeIcon.InfoCircle, 3.3f, "Info", bordered: false))
+        ImGui.SameLine();
+        if(ImBrio.FontIconButtonRight("info_toggle", FontAwesomeIcon.InfoCircle, 2.3f, "Info", bordered: false))
             _infoWindow.Toggle();
 
-        ImGui.SetCursorPosY(0);
-        if(ImBrio.FontIconButtonRight("library_toggle", FontAwesomeIcon.Book, 4.3f, "Library", bordered: false))
+        ImGui.SameLine();
+        if(ImBrio.FontIconButtonRight("library_toggle", FontAwesomeIcon.Book, 3.3f, "Library", bordered: false))
             _libraryWindow.Toggle();
-
-        ImGui.PopClipRect();
-        ImGui.SetCursorPos(initialPos);
     }
 }
