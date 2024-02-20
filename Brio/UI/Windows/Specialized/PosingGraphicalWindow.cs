@@ -252,11 +252,6 @@ internal class PosingGraphicalWindow : Window, IDisposable
         float settingsSize = 28;
         var buttonSize = new Vector2(((ImGui.GetContentRegionAvail().X - settingsSize) / 2.0f) - (ImGui.GetStyle().FramePadding.X * 2), 0);
 
-        if(ImBrio.Button("Export##export_pose", FontAwesomeIcon.FileExport, buttonSize))
-            FileUIHelpers.ShowExportPoseModal(posing);
-
-        ImGui.SameLine();
-
         if(ImBrio.Button("Import##import_pose", FontAwesomeIcon.FileImport, buttonSize))
             FileUIHelpers.ShowImportPoseModal(posing);
 
@@ -277,6 +272,9 @@ internal class PosingGraphicalWindow : Window, IDisposable
                 PosingEditorCommon.DrawImportOptionEditor(_posingService.DefaultImporterOptions);
             }
         }
+
+        if(ImBrio.Button("Export##export_pose", FontAwesomeIcon.FileExport, buttonSize))
+            FileUIHelpers.ShowExportPoseModal(posing);
     }
 
     private unsafe void DrawGizmo()
