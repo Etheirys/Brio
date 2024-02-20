@@ -24,6 +24,7 @@ internal class PosingWidget(PosingCapability capability) : Widget<PosingCapabili
     {
         DrawButtons();
         ImGui.Separator();
+
         DrawTransform();
     }
 
@@ -62,6 +63,10 @@ internal class PosingWidget(PosingCapability capability) : Widget<PosingCapabili
 
         ImGui.SameLine();
 
+        PosingEditorCommon.DrawIKSelect(Capability);
+
+        ImGui.SameLine();
+
         if(ImBrio.FontIconButton("undo", FontAwesomeIcon.Backward, "Undo", Capability.HasUndoStack))
         {
             Capability.Undo();
@@ -92,6 +97,8 @@ internal class PosingWidget(PosingCapability capability) : Widget<PosingCapabili
 
     private void DrawTransform()
     {
+        PosingEditorCommon.DrawSelectionName(Capability);
+
         _posingTransformEditor.Draw("posing_widget_transform", Capability);
     }
 

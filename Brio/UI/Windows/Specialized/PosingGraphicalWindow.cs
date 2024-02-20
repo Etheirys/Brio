@@ -10,6 +10,7 @@ using Brio.Game.Posing;
 using Brio.Resources;
 using Brio.UI.Controls.Core;
 using Brio.UI.Controls.Editors;
+using Brio.UI.Controls.Selectors;
 using Brio.UI.Controls.Stateless;
 using Dalamud.Interface;
 using Dalamud.Interface.Utility;
@@ -28,6 +29,8 @@ namespace Brio.UI.Windows.Specialized;
 
 internal class PosingGraphicalWindow : Window, IDisposable
 {
+    private const float RightPanelWidth = 250;
+
     private readonly GraphicalPosePositionFile _posePositions;
     private readonly EntityManager _entityManager;
     private readonly CameraService _cameraService;
@@ -95,7 +98,8 @@ internal class PosingGraphicalWindow : Window, IDisposable
 
         var windowSize = ImGui.GetWindowSize();
 
-        using(var child = ImRaii.Child("###left_pane", new Vector2(windowSize.X * 0.8f - (ImGui.GetStyle().WindowPadding.X * 2), -1), true, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse))
+        using(var child = ImRaii.Child("###left_pane", new Vector2(ImBrio.GetRemainingWidth() - RightPanelWidth, -1), true,
+            ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse))
         {
             if(child.Success)
             {
@@ -105,128 +109,43 @@ internal class PosingGraphicalWindow : Window, IDisposable
 
         ImGui.SameLine();
 
-        ImGui.PushStyleVar(ImGuiStyleVar.ScrollbarSize, 8);
-
-        using(var child = ImRaii.Child("###right_pane", new Vector2(windowSize.X * 0.2f - (ImGui.GetStyle().WindowPadding.X * 2), -1), true))
+        using(var rightPane = ImRaii.Child("###right_pane", new Vector2(RightPanelWidth, -1), false,
+            ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse | ImGuiWindowFlags.NoBackground))
         {
-            if(child.Success)
+            if(rightPane.Success)
             {
-                DrawButtons(posing);
-                ImGui.Separator();
-                DrawGizmo();
-                ImGui.Separator();
-                _transformEditor.Draw("graphical_transform", posing, true);
-                ImGui.Separator();
+                DrawGlobalButtons(posing);
+
+                float height = ImBrio.GetRemainingHeight() - ImBrio.GetLineHeight() - (ImGui.GetStyle().FramePadding.Y * 2);
+
+                using(var rightPaneSelection = ImRaii.Child("###right_pane_selection", new Vector2(-1, height), true))
+                {
+                    if(rightPaneSelection.Success)
+                    {
+                        DrawSelection(posing);
+                    }
+                }
+
                 DrawImportButtons(posing);
             }
         }
-
-        ImGui.PopStyleVar();
-
     }
 
-    private void DrawButtons(PosingCapability posing)
+    private void DrawGlobalButtons(PosingCapability posing)
     {
-        float buttonSize = ((ImGui.GetContentRegionAvail().X) - (ImGui.GetStyle().FramePadding.X * 7f)) / 5f;
+        float buttonWidth = 28;
 
-        using(ImRaii.PushFont(UiBuilder.IconFont))
-        {
-            if(ImGui.Button($"{(posing.OverlayOpen ? FontAwesomeIcon.EyeSlash.ToIconString() : FontAwesomeIcon.Eye.ToIconString())}###toggle_overlay", new Vector2(buttonSize)))
-                posing.OverlayOpen = !posing.OverlayOpen;
-        }
+        if(ImBrio.FontIconButton((posing.OverlayOpen ? FontAwesomeIcon.EyeSlash : FontAwesomeIcon.Eye), new(buttonWidth, 0)))
+            posing.OverlayOpen = !posing.OverlayOpen;
+
         if(ImGui.IsItemHovered())
             ImGui.SetTooltip(posing.OverlayOpen ? "Close Overlay" : "Show Overlay");
 
         ImGui.SameLine();
 
-        using(ImRaii.PushFont(UiBuilder.IconFont))
-        {
-            if(ImGui.Button($"{(_posingService.CoordinateMode == PosingCoordinateMode.Local ? FontAwesomeIcon.Globe.ToIconString() : FontAwesomeIcon.Atom.ToIconString())}###select_mode", new Vector2(buttonSize)))
-                _posingService.CoordinateMode = _posingService.CoordinateMode == PosingCoordinateMode.Local ? PosingCoordinateMode.World : PosingCoordinateMode.Local;
-        }
-        if(ImGui.IsItemHovered())
-            ImGui.SetTooltip(_posingService.CoordinateMode == PosingCoordinateMode.World ? "Switch to Local" : "Switch to World");
+        if(ImBrio.FontIconButton(FontAwesomeIcon.Search, new(buttonWidth, 0)))
+            ImGui.OpenPopup("graphic_bone_search_popup");
 
-        ImGui.SameLine();
-
-        PosingEditorCommon.DrawMirrorModeSelect(posing, new Vector2(buttonSize));
-
-        ImGui.SameLine();
-
-        var parentBone = posing.Selected.Match(
-               boneSelect => posing.SkeletonPosing.GetBone(boneSelect)?.GetFirstVisibleParent(),
-               _ => null,
-               _ => null
-        );
-
-        using(ImRaii.PushFont(UiBuilder.IconFont))
-        {
-            using(ImRaii.Disabled(parentBone == null))
-            {
-                if(ImGui.Button($"{FontAwesomeIcon.ArrowUp.ToIconString()}###select_parent", new Vector2(buttonSize)))
-                    posing.Selected = new BonePoseInfoId(parentBone!.Name, parentBone!.PartialId, PoseInfoSlot.Character);
-            }
-        }
-        if(ImGui.IsItemHovered())
-            ImGui.SetTooltip("Select Parent");
-
-        ImGui.SameLine();
-
-        using(ImRaii.PushFont(UiBuilder.IconFont))
-        {
-            using(ImRaii.Disabled(posing.Selected.Value is None))
-            {
-                if(ImGui.Button($"{FontAwesomeIcon.MinusSquare.ToIconString()}###clear_selected", new Vector2(buttonSize)))
-                    posing.ClearSelection();
-            }
-        }
-        if(ImGui.IsItemHovered())
-            ImGui.SetTooltip("Clear Selection");
-
-        using(ImRaii.PushFont(UiBuilder.IconFont))
-        {
-            using(ImRaii.Disabled(!posing.HasUndoStack))
-            {
-                if(ImGui.Button($"{FontAwesomeIcon.Backward.ToIconString()}###undo", new Vector2(buttonSize)))
-                    posing.Undo();
-            }
-        }
-        if(ImGui.IsItemHovered())
-            ImGui.SetTooltip("Undo");
-
-        ImGui.SameLine();
-
-        using(ImRaii.PushFont(UiBuilder.IconFont))
-        {
-            using(ImRaii.Disabled(!posing.HasRedoStack))
-            {
-                if(ImGui.Button($"{FontAwesomeIcon.Forward.ToIconString()}###redo", new Vector2(buttonSize)))
-                    posing.Redo();
-            }
-        }
-        if(ImGui.IsItemHovered())
-            ImGui.SetTooltip("Redo");
-
-        ImGui.SameLine();
-
-        using(ImRaii.PushFont(UiBuilder.IconFont))
-        {
-            using(ImRaii.Disabled(!posing.HasOverride))
-            {
-                if(ImGui.Button($"{FontAwesomeIcon.Undo.ToIconString()}###reset_pose", new Vector2(buttonSize)))
-                    posing.Reset(false, false);
-            }
-        }
-        if(ImGui.IsItemHovered())
-            ImGui.SetTooltip("Reset Pose");
-
-        ImGui.SameLine();
-
-        using(ImRaii.PushFont(UiBuilder.IconFont))
-        {
-            if(ImGui.Button($"{FontAwesomeIcon.Search.ToIconString()}###bone_search", new Vector2(buttonSize)))
-                ImGui.OpenPopup("graphic_bone_search_popup");
-        }
         if(ImGui.IsItemHovered())
             ImGui.SetTooltip("Bone Search");
 
@@ -237,27 +156,120 @@ internal class PosingGraphicalWindow : Window, IDisposable
                 _boneSearchControl.Draw("graphic_bone_search", posing);
             }
         }
+
+        ImGui.SameLine();
+
+
+        ImBrio.RightAlign(buttonWidth, 3);
+
+        using(ImRaii.Disabled(!posing.HasUndoStack))
+        {
+            if(ImBrio.FontIconButton(FontAwesomeIcon.Backward, new(buttonWidth, 0)))
+                posing.Undo();
+        }
+
+        if(ImGui.IsItemHovered())
+            ImGui.SetTooltip("Undo");
+
+        ImGui.SameLine();
+
+        using(ImRaii.Disabled(!posing.HasRedoStack))
+        {
+            if(ImBrio.FontIconButton(FontAwesomeIcon.Forward, new(buttonWidth, 0)))
+                posing.Redo();
+        }
+
+        if(ImGui.IsItemHovered())
+            ImGui.SetTooltip("Redo");
+
+        ImGui.SameLine();
+
+
+        using(ImRaii.Disabled(!posing.HasOverride))
+        {
+            if(ImBrio.FontIconButton(FontAwesomeIcon.Undo, new(buttonWidth, 0)))
+                posing.Reset(false, false);
+        }
+
+        if(ImGui.IsItemHovered())
+            ImGui.SetTooltip("Reset Pose");
+    }
+
+    private void DrawSelection(PosingCapability posing)
+    {
+        PosingEditorCommon.DrawSelectionName(posing);
+
+        DrawButtons(posing);
+        ImGui.Separator();
+        DrawGizmo();
+        ImGui.Separator();
+        _transformEditor.Draw("graphical_transform", posing);
+    }
+
+    private void DrawButtons(PosingCapability posing)
+    {
+        float buttonWidth = ((ImGui.GetContentRegionAvail().X) - (ImGui.GetStyle().FramePadding.X * 4f)) / 4f;
+
+        // Mirror mode
+        PosingEditorCommon.DrawMirrorModeSelect(posing, new Vector2(buttonWidth, 0));
+
+        // IK
+        ImGui.SameLine();
+        PosingEditorCommon.DrawIKSelect(posing, new Vector2(buttonWidth, 0));
+
+        // Select Parent
+        ImGui.SameLine();
+        var parentBone = posing.Selected.Match(
+               boneSelect => posing.SkeletonPosing.GetBone(boneSelect)?.GetFirstVisibleParent(),
+               _ => null,
+               _ => null
+        );
+
+
+        using(ImRaii.Disabled(parentBone == null))
+        {
+            if(ImBrio.FontIconButton(FontAwesomeIcon.LevelUpAlt, new Vector2(buttonWidth, 0)))
+                posing.Selected = new BonePoseInfoId(parentBone!.Name, parentBone!.PartialId, PoseInfoSlot.Character);
+        }
+
+        if(ImGui.IsItemHovered())
+            ImGui.SetTooltip("Select Parent");
+
+        // Clear Selection
+        ImGui.SameLine();
+        using(ImRaii.Disabled(posing.Selected.Value is None))
+        {
+            if(ImGui.Button($"Clear###clear_selected", new Vector2(buttonWidth, 0)))
+                posing.ClearSelection();
+        }
+
+        if(ImGui.IsItemHovered())
+            ImGui.SetTooltip("Clear Selection");
     }
 
     private void DrawImportButtons(PosingCapability posing)
     {
-        var buttonSize = new Vector2(ImGui.GetContentRegionAvail().X / 2.0f - ImGui.GetStyle().FramePadding.X, 0);
+        float settingsSize = 28;
+        var buttonSize = new Vector2(((ImGui.GetContentRegionAvail().X - settingsSize) / 2.0f) - (ImGui.GetStyle().FramePadding.X * 2), 0);
 
-        if(ImGui.Button("Export Pose##export_pose", buttonSize))
+        if(ImBrio.Button("Export##export_pose", FontAwesomeIcon.FileExport, buttonSize))
             FileUIHelpers.ShowExportPoseModal(posing);
 
         ImGui.SameLine();
 
-        if(ImGui.Button("Import Pose##import_pose", buttonSize))
+        if(ImBrio.Button("Import##import_pose", FontAwesomeIcon.FileImport, buttonSize))
             FileUIHelpers.ShowImportPoseModal(posing);
 
-        if(ImBrio.FontIconButton("import_options", FontAwesomeIcon.Filter, "Import Options"))
-            ImGui.OpenPopup("import_options_popup_posing_graphical");
-    
         ImGui.SameLine();
 
-        ImGui.Text("Import Options");
-       
+        if(ImBrio.FontIconButton(FontAwesomeIcon.Cog, new(settingsSize, 0)))
+            ImGui.OpenPopup("import_options_popup_posing_graphical");
+
+        ImGui.SameLine();
+
+        if(ImGui.IsItemHovered())
+            ImGui.SetTooltip("Import Options");
+
         using(var popup = ImRaii.Popup("import_options_popup_posing_graphical"))
         {
             if(popup.Success)
@@ -319,9 +331,17 @@ internal class PosingGraphicalWindow : Window, IDisposable
         var matrix = _trackingMatrix ?? targetMatrix.Value;
         var originalMatrix = matrix;
 
+
+        if(ImBrio.FontIconButton((_posingService.CoordinateMode == PosingCoordinateMode.Local ? FontAwesomeIcon.Globe : FontAwesomeIcon.Atom)))
+            _posingService.CoordinateMode = _posingService.CoordinateMode == PosingCoordinateMode.Local ? PosingCoordinateMode.World : PosingCoordinateMode.Local;
+
+        if(ImGui.IsItemHovered())
+            ImGui.SetTooltip(_posingService.CoordinateMode == PosingCoordinateMode.World ? "Switch to Local" : "Switch to World");
+
+
         Vector2 gizmoSize = new(ImGui.GetContentRegionAvail().X, ImGui.GetContentRegionAvail().X);
 
-        if (ImBrioGizmo.DrawRotation(ref matrix, gizmoSize, _posingService.CoordinateMode == PosingCoordinateMode.World))
+        if(ImBrioGizmo.DrawRotation(ref matrix, gizmoSize, _posingService.CoordinateMode == PosingCoordinateMode.World))
         {
             _trackingMatrix = matrix;
         }
@@ -354,7 +374,7 @@ internal class PosingGraphicalWindow : Window, IDisposable
 
             return;
         }
-       
+
         bool showGenitalia = false;
 
         var contentArea = ImGui.GetContentRegionAvail();
@@ -515,9 +535,9 @@ internal class PosingGraphicalWindow : Window, IDisposable
         var position = ImGui.GetCursorPos();
 
         Vector2 imageSize = new(1024, 2048);
-        Vector2 scalingFactors =  new(0.2f, 0.2f);
+        Vector2 scalingFactors = new(0.2f, 0.2f);
 
-        if (!string.IsNullOrEmpty(section.Image))
+        if(!string.IsNullOrEmpty(section.Image))
             DrawImage($"Images.{section.Image}.png", out imageSize, out scalingFactors);
 
         var endPosition = ImGui.GetCursorPos();

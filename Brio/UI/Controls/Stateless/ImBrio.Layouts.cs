@@ -1,4 +1,5 @@
-﻿using ImGuiNET;
+﻿using Dalamud.Interface;
+using ImGuiNET;
 
 namespace Brio.UI.Controls.Stateless;
 internal static partial class ImBrio
@@ -16,5 +17,16 @@ internal static partial class ImBrio
     public static float GetLineHeight()
     {
         return ImGui.GetTextLineHeight() + (ImGui.GetStyle().FramePadding.Y * 2);
+    }
+
+    public static void RightAlign(float width, int numItems)
+    {
+        float finalWidth = (width * numItems) + (ImGui.GetStyle().FramePadding.X * numItems);
+        ImBrio.RightAlign(finalWidth);
+    }
+
+    public static void RightAlign(float width)
+    {
+        ImGui.SetCursorPosX(ImGui.GetCursorPosX() + (GetRemainingWidth() - width));
     }
 }
