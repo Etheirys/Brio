@@ -649,29 +649,43 @@ internal class PosingGraphicalWindow : Window, IDisposable
             _ => { }
         );
 
-        float circleSize = 8; //// * (entry.Scale + 1);
+        float circleSize = 8;
+        float hitSize = circleSize + 2;
 
         using(ImRaii.Disabled(!enabled))
         {
             ImGui.SetCursorPos(entry.Position - new Vector2(ImGui.GetFrameHeight() / 2));
             Vector2 pos = ImGui.GetCursorScreenPos() + new Vector2(ImGui.GetFrameHeight() / 2);
 
+            float mouseDistance = Vector2.Distance(ImGui.GetMousePos(), pos);
+            bool hovered = mouseDistance < hitSize;
+
             uint lineCol = ImGui.GetColorU32(ImGuiCol.TextDisabled);
             if(branchSelected)
+            {
                 lineCol = ImGui.GetColorU32(ImGuiCol.CheckMark);
+            }
             if(branchHovered)
+            {
                 lineCol = ImGui.GetColorU32(ImGuiCol.Text);
+            }
+
+            uint circleColor = lineCol;
+            if(selected)
+            {
+                circleColor = ImGui.GetColorU32(ImGuiCol.CheckMark);
+            }
+            if(hovered)
+            {
+                circleColor = ImGui.GetColorU32(ImGuiCol.Text);
+            }
 
             if(parentPosition != null)
             {
                 Vector2 parentPos = ImGui.GetCursorScreenPos() + (parentPosition.Value - entry.Position) + new Vector2(ImGui.GetFrameHeight() / 2);
                 Vector2 offset = Vector2.Normalize(parentPos - pos) * (circleSize - 0.5f);
 
-                ImGui.GetWindowDrawList().AddLine(
-                    pos + offset,
-                    parentPos - offset,
-                    lineCol,
-                    1);
+                ImGui.GetWindowDrawList().AddLine(pos + offset, parentPos - offset, lineCol, 1);
             }
 
             ImGui.GetWindowDrawList().AddCircleFilled(
@@ -679,15 +693,18 @@ internal class PosingGraphicalWindow : Window, IDisposable
                 circleSize,
                 ImGui.GetColorU32(ImGuiCol.ChildBg));
 
+            ImGui.GetWindowDrawList().AddCircle(pos, circleSize, circleColor);
 
-            // hover
-            if (ImGui.GetMousePos().X > pos.X - circleSize
-                && ImGui.GetMousePos().X < pos.X + circleSize
-                && ImGui.GetMousePos().Y > pos.Y - circleSize
-                && ImGui.GetMousePos().Y < pos.Y + circleSize)
+            if (hovered || selected)
             {
-                ImGui.GetWindowDrawList().AddCircle(pos, circleSize, ImGui.GetColorU32(ImGuiCol.Text));
-                ImGui.GetWindowDrawList().AddCircleFilled(pos, circleSize - 3, ImGui.GetColorU32(ImGuiCol.Text));
+                ImGui.GetWindowDrawList().AddCircleFilled(
+                    pos,
+                    circleSize - 3,
+                    selected ? ImGui.GetColorU32(ImGuiCol.CheckMark) : ImGui.GetColorU32(ImGuiCol.TextDisabled));
+            }
+
+            if (hovered)
+            {
                 posing.Hover = entry.Id;
 
                 if(ImGui.IsMouseDown(ImGuiMouseButton.Left))
@@ -696,18 +713,6 @@ internal class PosingGraphicalWindow : Window, IDisposable
                 }
 
                 ImGui.SetTooltip(entry.Id.DisplayName);
-            }
-            else if (selected)
-            {
-                ImGui.GetWindowDrawList().AddCircleFilled(pos, circleSize - 3, ImGui.GetColorU32(ImGuiCol.CheckMark));
-                ImGui.GetWindowDrawList().AddCircle(pos, circleSize, ImGui.GetColorU32(ImGuiCol.CheckMark));
-            }
-            else
-            {
-                ImGui.GetWindowDrawList().AddCircle(
-                   pos,
-                   circleSize,
-                   lineCol);
             }
         }
     }
