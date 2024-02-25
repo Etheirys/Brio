@@ -39,6 +39,7 @@ internal class PosingGraphicalWindow : Window, IDisposable
     private readonly GPoseService _gPoseService;
     private readonly PosingTransformEditor _transformEditor = new();
     private readonly BoneSearchControl _boneSearchControl = new();
+    private float _closestHover = float.MaxValue;
 
     private Matrix4x4? _trackingMatrix;
 
@@ -95,6 +96,7 @@ internal class PosingGraphicalWindow : Window, IDisposable
         }
 
         posing.Hover = new None();
+        _closestHover = float.MaxValue;
 
         WindowName = $"{Brio.Name} - Posing - {posing.Entity.FriendlyName}###brio_posing_graphical_window";
 
@@ -597,6 +599,7 @@ internal class PosingGraphicalWindow : Window, IDisposable
     {
         bool enabled = false;
         bool selected = posing.Selected == entry.Id;
+        bool hovered = posing.LastHover == entry.Id;
         Vector2? parentPosition = null;
         bool branchHovered = false;
         bool branchSelected = false;
@@ -650,7 +653,7 @@ internal class PosingGraphicalWindow : Window, IDisposable
         );
 
         float circleSize = 8;
-        float hitSize = circleSize + 2;
+        float hitSize = circleSize + 12;
 
         using(ImRaii.Disabled(!enabled))
         {
@@ -658,7 +661,11 @@ internal class PosingGraphicalWindow : Window, IDisposable
             Vector2 pos = ImGui.GetCursorScreenPos() + new Vector2(ImGui.GetFrameHeight() / 2);
 
             float mouseDistance = Vector2.Distance(ImGui.GetMousePos(), pos);
-            bool hovered = mouseDistance < hitSize;
+            if(mouseDistance < hitSize && mouseDistance < _closestHover)
+            {
+                _closestHover = mouseDistance;
+                posing.Hover = entry.Id;
+            }
 
             uint lineCol = ImGui.GetColorU32(ImGuiCol.TextDisabled);
             if(branchSelected)
@@ -705,8 +712,6 @@ internal class PosingGraphicalWindow : Window, IDisposable
 
             if (hovered)
             {
-                posing.Hover = entry.Id;
-
                 if(ImGui.IsMouseDown(ImGuiMouseButton.Left))
                 {
                     posing.Selected = entry.Id;
