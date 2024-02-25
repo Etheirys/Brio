@@ -94,6 +94,8 @@ internal class PosingGraphicalWindow : Window, IDisposable
             return;
         }
 
+        posing.Hover = new None();
+
         WindowName = $"{Brio.Name} - Posing - {posing.Entity.FriendlyName}###brio_posing_graphical_window";
 
         var windowSize = ImGui.GetWindowSize();
@@ -129,6 +131,8 @@ internal class PosingGraphicalWindow : Window, IDisposable
                 DrawImportButtons(posing);
             }
         }
+
+        posing.LastHover = posing.Hover;
     }
 
     private void DrawGlobalButtons(PosingCapability posing)
@@ -592,8 +596,13 @@ internal class PosingGraphicalWindow : Window, IDisposable
     private void DrawBone(DrawBoneEntry entry, IReadOnlyList<DrawBoneEntry> entries, PosingCapability posing)
     {
         bool enabled = false;
-        bool selected = false;
+        bool selected = posing.Selected == entry.Id;
         Vector2? parentPosition = null;
+        bool branchHovered = false;
+        bool branchSelected = false;
+
+        bool anyBoneSelected = posing.Selected.IsT0;
+        bool anyBoneHovered = posing.LastHover.IsT0;
 
         entry.Id.Switch(
             boneSelect =>
@@ -609,6 +618,27 @@ internal class PosingGraphicalWindow : Window, IDisposable
                         var parent = entries.FirstOrDefault(x => x.Id.Value.Equals(parentId));
                         if(parent != null)
                             parentPosition = parent.Position;
+
+                        // test skeleton branch selection
+                        if(anyBoneSelected || anyBoneHovered)
+                        {
+                            var branchParent = bone.Parent;
+                            while(branchParent != null)
+                            {
+                                var branchParentId = new BonePoseInfoId(branchParent.Name, branchParent.PartialId, PoseInfoSlot.Character);
+                                if(posing.Selected.IsT0 && posing.Selected.AsT0 == branchParentId)
+                                {
+                                    branchSelected = true;
+                                }
+
+                                if(posing.LastHover.IsT0 && posing.LastHover.AsT0 == branchParentId)
+                                {
+                                    branchHovered = true;
+                                }
+
+                                branchParent = branchParent.Parent;
+                            }
+                        }
                     }
                 }
             },
@@ -619,33 +649,66 @@ internal class PosingGraphicalWindow : Window, IDisposable
             _ => { }
         );
 
-        if(posing.Selected == entry.Id)
-            selected = true;
+        float circleSize = 8; //// * (entry.Scale + 1);
 
         using(ImRaii.Disabled(!enabled))
         {
-            float buttonSize = entry.Scale;
-            buttonSize *= 4f;
-
-            ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, new Vector2(buttonSize));
-            ImGui.PushStyleVar(ImGuiStyleVar.FrameBorderSize, 1f);
             ImGui.SetCursorPos(entry.Position - new Vector2(ImGui.GetFrameHeight() / 2));
-            if(parentPosition != null)
-                ImGui.GetWindowDrawList().AddLine(
-                    ImGui.GetCursorScreenPos() + new Vector2(ImGui.GetFrameHeight() / 2),
-                    ImGui.GetCursorScreenPos() + (parentPosition.Value - entry.Position) + new Vector2(ImGui.GetFrameHeight() / 2),
-                    UIConstants.SlightGrey
-                    );
+            Vector2 pos = ImGui.GetCursorScreenPos() + new Vector2(ImGui.GetFrameHeight() / 2);
 
-            if(ImGui.RadioButton($"###{entry.Id.UniqueId}", selected))
+            uint lineCol = ImGui.GetColorU32(ImGuiCol.TextDisabled);
+            if(branchSelected)
+                lineCol = ImGui.GetColorU32(ImGuiCol.CheckMark);
+            if(branchHovered)
+                lineCol = ImGui.GetColorU32(ImGuiCol.Text);
+
+            if(parentPosition != null)
             {
-                posing.Selected = entry.Id;
+                Vector2 parentPos = ImGui.GetCursorScreenPos() + (parentPosition.Value - entry.Position) + new Vector2(ImGui.GetFrameHeight() / 2);
+                Vector2 offset = Vector2.Normalize(parentPos - pos) * (circleSize - 0.5f);
+
+                ImGui.GetWindowDrawList().AddLine(
+                    pos + offset,
+                    parentPos - offset,
+                    lineCol,
+                    1);
             }
 
-            ImGui.PopStyleVar(2);
+            ImGui.GetWindowDrawList().AddCircleFilled(
+                pos,
+                circleSize,
+                ImGui.GetColorU32(ImGuiCol.ChildBg));
 
-            if(ImGui.IsItemHovered())
+
+            // hover
+            if (ImGui.GetMousePos().X > pos.X - circleSize
+                && ImGui.GetMousePos().X < pos.X + circleSize
+                && ImGui.GetMousePos().Y > pos.Y - circleSize
+                && ImGui.GetMousePos().Y < pos.Y + circleSize)
+            {
+                ImGui.GetWindowDrawList().AddCircle(pos, circleSize, ImGui.GetColorU32(ImGuiCol.Text));
+                ImGui.GetWindowDrawList().AddCircleFilled(pos, circleSize - 3, ImGui.GetColorU32(ImGuiCol.Text));
+                posing.Hover = entry.Id;
+
+                if(ImGui.IsMouseDown(ImGuiMouseButton.Left))
+                {
+                    posing.Selected = entry.Id;
+                }
+
                 ImGui.SetTooltip(entry.Id.DisplayName);
+            }
+            else if (selected)
+            {
+                ImGui.GetWindowDrawList().AddCircleFilled(pos, circleSize - 3, ImGui.GetColorU32(ImGuiCol.CheckMark));
+                ImGui.GetWindowDrawList().AddCircle(pos, circleSize, ImGui.GetColorU32(ImGuiCol.CheckMark));
+            }
+            else
+            {
+                ImGui.GetWindowDrawList().AddCircle(
+                   pos,
+                   circleSize,
+                   lineCol);
+            }
         }
     }
 
