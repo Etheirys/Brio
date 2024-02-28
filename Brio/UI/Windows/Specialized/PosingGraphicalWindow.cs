@@ -216,7 +216,7 @@ internal class PosingGraphicalWindow : Window, IDisposable
 
     private void DrawButtons(PosingCapability posing)
     {
-        float buttonWidth = ((ImGui.GetContentRegionAvail().X) - (ImGui.GetStyle().FramePadding.X * 4f)) / 4f;
+        float buttonWidth = ((ImGui.GetContentRegionAvail().X) - (ImGui.GetStyle().ItemSpacing.X * 3f)) / 4f;
 
         // Mirror mode
         PosingEditorCommon.DrawMirrorModeSelect(posing, new Vector2(buttonWidth, 0));
