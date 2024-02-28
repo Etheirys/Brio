@@ -102,7 +102,9 @@ internal class PosingGraphicalWindow : Window, IDisposable
 
         var windowSize = ImGui.GetWindowSize();
 
-        using(var child = ImRaii.Child("###left_pane", new Vector2(ImBrio.GetRemainingWidth() - RightPanelWidth, -1), true,
+        float leftPanelWidth = ImBrio.GetRemainingWidth() - RightPanelWidth - ImGui.GetStyle().ItemSpacing.X;
+
+        using(var child = ImRaii.Child("###left_pane", new Vector2(leftPanelWidth, -1), true,
             ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse))
         {
             if(child.Success)
