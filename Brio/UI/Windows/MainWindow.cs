@@ -91,9 +91,8 @@ internal class MainWindow : Window
     private void DrawHeaderButtons()
     {
         float buttonWidths = 25;
-        float finalWidth = ImBrio.GetRemainingWidth() - ((buttonWidths * 2) + (ImGui.GetStyle().FramePadding.X * 3) + ImGui.GetStyle().WindowBorderSize);
+        float finalWidth = ImBrio.GetRemainingWidth() - ((buttonWidths * 2) + (ImGui.GetStyle().ItemSpacing.X * 2) + ImGui.GetStyle().WindowBorderSize);
 
-        ImGui.SameLine();
         if(ImBrio.Button("Library", FontAwesomeIcon.Book, new Vector2(finalWidth, 0)))
             _libraryWindow.Toggle();
 
