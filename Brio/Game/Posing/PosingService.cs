@@ -5,6 +5,8 @@ namespace Brio.Game.Posing;
 
 internal class PosingService
 {
+    public PosingOperation Operation { get; set; } = PosingOperation.Translate;
+    
     public PosingCoordinateMode CoordinateMode { get; set; } = PosingCoordinateMode.Local;
 
     public BoneCategories BoneCategories { get; } = new();
@@ -28,6 +30,12 @@ internal enum PosingCoordinateMode
     World
 }
 
+internal enum PosingOperation {
+    Translate,
+    Rotate,
+    Scale
+}
+
 internal static class PosingExtensions
 {
     public static MODE AsGizmoMode(this PosingCoordinateMode mode) => mode switch
@@ -35,5 +43,13 @@ internal static class PosingExtensions
         PosingCoordinateMode.Local => MODE.LOCAL,
         PosingCoordinateMode.World => MODE.WORLD,
         _ => MODE.LOCAL
+    };
+
+    public static OPERATION AsGizmoOperation(this PosingOperation operation) => operation switch 
+    {
+        PosingOperation.Translate => OPERATION.TRANSLATE,
+        PosingOperation.Rotate => OPERATION.ROTATE,
+        PosingOperation.Scale => OPERATION.SCALE,
+        _ => OPERATION.TRANSLATE
     };
 }
