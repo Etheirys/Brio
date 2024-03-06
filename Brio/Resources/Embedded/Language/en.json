@@ -228,6 +228,9 @@
     "Posing_HideOverlay": "Hide Overlay",
     "Posing_ToggleOverlay": "Toggle Overlay",
     "Posing_Undo": "Undo",
-    "Posing_Redo": "Redo"
+    "Posing_Redo": "Redo",
+    "Posing_Translate": "Position",
+    "Posing_Rotate": "Rotation",
+    "Posing_Scale": "Scale"
   }
 }
