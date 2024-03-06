@@ -5,7 +5,7 @@ namespace Brio.Game.Posing;
 
 internal class PosingService
 {
-    public PosingOperation Operation { get; set; } = PosingOperation.Translate;
+    public PosingOperation Operation { get; set; } = PosingOperation.Rotate;
     
     public PosingCoordinateMode CoordinateMode { get; set; } = PosingCoordinateMode.Local;
 
@@ -50,6 +50,6 @@ internal static class PosingExtensions
         PosingOperation.Translate => OPERATION.TRANSLATE,
         PosingOperation.Rotate => OPERATION.ROTATE,
         PosingOperation.Scale => OPERATION.SCALE,
-        _ => OPERATION.TRANSLATE
+        _ => OPERATION.ROTATE
     };
 }
