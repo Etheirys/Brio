@@ -12,6 +12,15 @@ namespace Brio.UI.Controls.Editors;
 
 internal static class PosingEditorCommon
 {
+    public static void DrawSelectionName(PosingCapability posing)
+    {
+        ImGui.Text(posing.Selected.DisplayName);
+
+        ImGui.SetWindowFontScale(0.75f);
+        ImGui.TextDisabled(posing.Selected.Subtitle);
+        ImGui.SetWindowFontScale(1.0f);
+    }
+
     public static void DrawImportOptionEditor(PoseImporterOptions options)
     {
         DrawBoneFilterEditor(options.BoneFilter);
@@ -86,6 +95,7 @@ internal static class PosingEditorCommon
             }
         }
     }
+
     public static void DrawMirrorModeSelect(PosingCapability posing, Vector2 buttonSize)
     {
         using(ImRaii.PushFont(UiBuilder.IconFont))
@@ -142,5 +152,47 @@ internal static class PosingEditorCommon
                 }
             }
         }
+    }
+
+    public static void DrawIKSelect(PosingCapability posing)
+    {
+        DrawIKSelect(posing, Vector2.Zero);
+    }
+
+    public static void DrawIKSelect(PosingCapability posing, Vector2 buttonSize)
+    {
+        if(posing.Selected.Value is BonePoseInfoId boneId)
+        {
+            var bone = posing.SkeletonPosing.GetBone(boneId);
+            bool isValid = bone != null && bone.Skeleton.IsValid && bone.EligibleForIK;
+
+            if(isValid)
+            {
+                var bonePose = posing.SkeletonPosing.GetBonePose(boneId);
+                var ik = bonePose.DefaultIK;
+
+                bool enabled = ik.Enabled;
+                if(ImBrio.ToggleButton("IK", buttonSize, ref enabled))
+                    ImGui.OpenPopup("transform_ik_popup");
+
+                if(ImGui.IsItemHovered())
+                    ImGui.SetTooltip("Inverse Kinematics");
+
+                using(var popup = ImRaii.Popup("transform_ik_popup"))
+                {
+
+                    if(popup.Success && bonePose != null)
+                    {
+                        BoneIKEditor.Draw(bonePose, posing);
+                    }
+                }
+
+                return;
+            }
+        }
+
+        ImGui.BeginDisabled();
+        ImGui.Button("IK", buttonSize);
+        ImGui.EndDisabled();
     }
 }

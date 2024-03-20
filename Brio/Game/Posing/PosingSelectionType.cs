@@ -16,6 +16,12 @@ internal partial class PosingSelectionType : OneOfBase<BonePoseInfoId, ModelTran
         none => "None"
     );
 
+    public string Subtitle => Match(
+       bone => bone.BoneName,
+       model => "",
+       none => ""
+   );
+
     public string UniqueId => Match(
         bone => $"selection_{bone}",
         model => "selection_model",

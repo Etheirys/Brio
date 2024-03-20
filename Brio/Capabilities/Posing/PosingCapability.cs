@@ -20,6 +20,8 @@ namespace Brio.Capabilities.Posing;
 internal class PosingCapability : ActorCharacterCapability
 {
     public PosingSelectionType Selected { get; set; } = new None();
+    public PosingSelectionType Hover { get; set; } = new None();
+    public PosingSelectionType LastHover { get; set; } = new None();
 
     public SkeletonPosingCapability SkeletonPosing => Entity.GetCapability<SkeletonPosingCapability>();
     public ModelPosingCapability ModelPosing => Entity.GetCapability<ModelPosingCapability>();

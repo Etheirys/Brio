@@ -6,8 +6,6 @@ using Dalamud.Interface;
 using Dalamud.Interface.Utility.Raii;
 using ImGuiNET;
 using System.Numerics;
-using System.Reflection.Emit;
-using System.Threading.Channels;
 
 namespace Brio.UI.Controls.Editors;
 
@@ -68,38 +66,17 @@ internal class PosingTransformEditor
         bool didChange = false;
         bool anyActive = false;
 
-        var text = "No Bone Selected";
-        if(bone is not null)
-            text = bone.FriendlyDescriptor;
-
-        ImGui.Text(text);
-
-        (var pdidChange, var panyActive) = ImBrio.DragFloat3($"###_transformPosition_0", ref realTransform.Position, 0.1f, FontAwesomeIcon.ArrowsUpDownLeftRight.ToIconString(), "Position");
-
-        (var rdidChange, var ranyActive) = ImBrio.DragFloat3($"###_transformRotation_0", ref realEuler, 5.0f, FontAwesomeIcon.ArrowsSpin.ToIconString(), "Rotation");
-
-        (var sdidChange, var sanyActive) = ImBrio.DragFloat3($"###_transformScale_0", ref realTransform.Scale, 0.1f, FontAwesomeIcon.ExpandAlt.ToIconString(), "Scale");
+        (var pdidChange, var panyActive) = ImBrio.DragFloat3($"###_transformPosition_0", ref realTransform.Position, 0.1f, FontAwesomeIcon.ArrowsUpDownLeftRight, "Position");
+        (var rdidChange, var ranyActive) = ImBrio.DragFloat3($"###_transformRotation_0", ref realEuler, 5.0f, FontAwesomeIcon.ArrowsSpin, "Rotation");
+        (var sdidChange, var sanyActive) = ImBrio.DragFloat3($"###_transformScale_0", ref realTransform.Scale, 0.1f, FontAwesomeIcon.ExpandAlt, "Scale");
 
         didChange |= pdidChange |= rdidChange |= sdidChange; 
         anyActive |= panyActive |= ranyActive |= sanyActive;
      
         ImGui.Spacing();
 
-        if(ImBrio.FontIconButton("ik", FontAwesomeIcon.Adjust, "Inverse Kinematics", bone?.EligibleForIK == true))
-            ImGui.OpenPopup("transform_ik_popup");
-
-        ImGui.SameLine();
-
         if(ImBrio.FontIconButton("propagate", FontAwesomeIcon.Compress, "Propagate", bone?.EligibleForIK == true))
             ImGui.OpenPopup("transform_propagate_popup");
-
-        using(var popup = ImRaii.Popup("transform_ik_popup"))
-        {
-            if(popup.Success && bonePose is not null)
-            {
-                BoneIKEditor.Draw(bonePose, posingCapability);
-            }
-        }
 
         using(var popup = ImRaii.Popup("transform_propagate_popup"))
         {
@@ -181,14 +158,9 @@ internal class PosingTransformEditor
         bool didChange = false;
         bool anyActive = false;
 
-        ImGui.Text("Model Transform");
-
-        (var pdidChange, var panyActive) = ImBrio.DragFloat3($"###_transformPosition_0", ref realTransform.Position, 0.1f, FontAwesomeIcon.ArrowsUpDownLeftRight.ToIconString(), "Position");
-
-        (var rdidChange, var ranyActive) = ImBrio.DragFloat3($"###_transformRotation_0", ref realEuler, 5.0f, FontAwesomeIcon.ArrowsSpin.ToIconString(), "Rotation");
-
-        (var sdidChange, var sanyActive) = ImBrio.DragFloat3($"###_transformScale_0", ref realTransform.Scale, 0.1f, FontAwesomeIcon.ExpandAlt.ToIconString(), "Scale");
-
+        (var pdidChange, var panyActive) = ImBrio.DragFloat3($"###_transformPosition_0", ref realTransform.Position, 0.1f, FontAwesomeIcon.ArrowsUpDownLeftRight, "Position");
+        (var rdidChange, var ranyActive) = ImBrio.DragFloat3($"###_transformRotation_0", ref realEuler, 5.0f, FontAwesomeIcon.ArrowsSpin, "Rotation");
+        (var sdidChange, var sanyActive) = ImBrio.DragFloat3($"###_transformScale_0", ref realTransform.Scale, 0.1f, FontAwesomeIcon.ExpandAlt, "Scale");
 
         didChange |= pdidChange |= rdidChange |= sdidChange;
         anyActive |= panyActive |= ranyActive |= sanyActive;

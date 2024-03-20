@@ -22,7 +22,14 @@ internal class MainWindow : Window
 
     private readonly EntityHierarchyView _entitySelector;
 
-    public MainWindow(ConfigurationService configService, SettingsWindow settingsWindow, InfoWindow infoWindow, EntityManager entityManager,  LibraryWindow libraryWindow, InputService input) : base($"{Brio.Name} Scene Manager [{configService.Version}]###brio_main_window", ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.AlwaysAutoResize)
+    public MainWindow(
+        ConfigurationService configService,
+        SettingsWindow settingsWindow,
+        InfoWindow infoWindow,
+        LibraryWindow libraryWindow,
+        EntityManager entityManager,
+        InputService input)
+        : base($"{Brio.Name} Scene Manager [{configService.Version}]###brio_main_window", ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.AlwaysAutoResize)
     {
         Namespace = "brio_main_namespace";
 
@@ -41,6 +48,7 @@ internal class MainWindow : Window
 
         input.AddListener(KeyBindEvents.Interface_ToggleBrioWindow, this.OnMainWindowToggle);
         input.AddListener(KeyBindEvents.Interface_ToggleBindPromptWindow, this.OnPromptWindowToggle);
+
     }
 
     public override void Draw()
@@ -62,7 +70,7 @@ internal class MainWindow : Window
 
         EntityHelpers.DrawEntitySection(_entityManager.SelectedEntity);
     }
-  
+
     private void OnMainWindowToggle()
     {
         this.IsOpen = !this.IsOpen;
@@ -75,18 +83,34 @@ internal class MainWindow : Window
         _configurationService.ApplyChange();
     }
 
+    private void OnToggle()
+    {
+        this.IsOpen = !this.IsOpen;
+    }
+
     private void DrawHeaderButtons()
     {
-        ImGui.SameLine();
-        if(ImBrio.FontIconButtonRight("settings_toggle", FontAwesomeIcon.Cog, 1.3f, "Settings", bordered: false))
-            _settingsWindow.Toggle();
+        float buttonWidths = 25;
+        float finalWidth = ImBrio.GetRemainingWidth() - ((buttonWidths * 2) + (ImGui.GetStyle().ItemSpacing.X * 2) + ImGui.GetStyle().WindowBorderSize);
+
+        if(ImBrio.Button("Library", FontAwesomeIcon.Book, new Vector2(finalWidth, 0)))
+            _libraryWindow.Toggle();
+
+        if(ImGui.IsItemHovered())
+            ImGui.SetTooltip("Open the Library");
 
         ImGui.SameLine();
-        if(ImBrio.FontIconButtonRight("info_toggle", FontAwesomeIcon.InfoCircle, 2.3f, "Info", bordered: false))
+        if(ImBrio.FontIconButton(FontAwesomeIcon.InfoCircle, new(buttonWidths, 0)))
             _infoWindow.Toggle();
 
+        if(ImGui.IsItemHovered())
+            ImGui.SetTooltip("Information");
+
         ImGui.SameLine();
-        if(ImBrio.FontIconButtonRight("library_toggle", FontAwesomeIcon.Book, 3.3f, "Library", bordered: false))
-            _libraryWindow.Toggle();
+        if(ImBrio.FontIconButton(FontAwesomeIcon.Cog, new(buttonWidths, 0)))
+            _settingsWindow.Toggle();
+
+        if(ImGui.IsItemHovered())
+            ImGui.SetTooltip("Settings");
     }
 }
