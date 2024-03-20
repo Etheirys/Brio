@@ -22,5 +22,5 @@ internal class InputConfiguration
         { KeyBindEvents.Posing_HideOverlay, new(VirtualKey.MENU) },
     };
 
-    public bool ShowPromptsInGPose { get; set; } = true;
+    public bool ShowPromptsInGPose { get; set; } = false;
 }
