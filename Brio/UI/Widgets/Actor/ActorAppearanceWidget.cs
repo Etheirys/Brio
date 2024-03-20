@@ -30,6 +30,17 @@ internal class ActorAppearanceWidget(ActorAppearanceCapability capability) : Wid
 
         if(ImBrio.FontIconButton("export_charafile", FontAwesomeIcon.FileExport, "Export Character File"))
             FileUIHelpers.ShowExportCharacterModal(Capability);
+      
+        ImGui.SameLine();
+
+        if(Capability.CanMcdf)
+        {
+            ImGui.SameLine();
+            if(ImBrio.FontIconButton("load_mcdf", FontAwesomeIcon.CloudDownloadAlt, "Load Mare Synchronos MCDF"))
+            {
+                FileUIHelpers.ShowImportMcdfModal(Capability);
+            }
+        }
 
         ImGui.SameLine();
 
@@ -37,7 +48,6 @@ internal class ActorAppearanceWidget(ActorAppearanceCapability capability) : Wid
             ActivateAdvanced();
 
         ImGui.SameLine();
-
 
         if(ImBrio.FontIconButtonRight("reset_appearance", FontAwesomeIcon.Undo, 1, "Reset", Capability.IsAppearanceOverridden))
             _ = Capability.ResetAppearance();
