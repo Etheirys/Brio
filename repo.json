@@ -1,18 +1,18 @@
 [
     {
         "Author": "Asgard, Minmoose and Contributors",
-        "Name": "Brio",
+        "Name": "BrioTest",
         "Punchline": "Enhanced GPosing.",
         "Description": "Control actors during GPose sessions.",
         "InternalName": "Brio",
         "AssemblyVersion": "0.2.3.0",
         "TestingAssemblyVersion": "0.2.3.0",
-        "RepoUrl": "https://github.com/Etheirys/Brio",
+        "RepoUrl": "https://github.com/xenophero/BrioTestingStuff",
         "ApplicableVersion": "any",
         "DalamudApiLevel": 9,
-        "DownloadLinkInstall": "https://github.com/Etheirys/Brio/releases/download/v0.2.3.0/Brio.zip",
-        "DownloadLinkTesting": "https://github.com/Etheirys/Brio/releases/download/v0.2.3.0/Brio.zip",
-        "DownloadLinkUpdate": "https://github.com/Etheirys/Brio/releases/download/v0.2.3.0/Brio.zip",
+        "DownloadLinkInstall": "https://github.com/xenophero/BrioTestingStuff/archive/refs/tags/test.zip",
+        "DownloadLinkTesting": "https://github.com/xenophero/BrioTestingStuff/archive/refs/tags/test.zip",
+        "DownloadLinkUpdate": "https://github.com/xenophero/BrioTestingStuff/archive/refs/tags/test.zip",
         "IconUrl": "https://raw.githubusercontent.com/Etheirys/Brio/main/Resources/Images/BrioIcon.png",
         "Tags": [ 
             "gpose",
