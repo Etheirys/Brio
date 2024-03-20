@@ -88,9 +88,9 @@ internal class MainWindow : Window
         if(ImBrio.FontIconButtonRight("info_toggle", FontAwesomeIcon.InfoCircle, 3.3f, "Info", bordered: false))
             _infoWindow.Toggle();
 
-        ImGui.SetCursorPosY(0);
-        if(ImBrio.FontIconButtonRight("library_toggle", FontAwesomeIcon.Book, 4.3f, "Library", bordered: false))
-            _libraryWindow.Toggle();
+        //ImGui.SetCursorPosY(0);
+        //if(ImBrio.FontIconButtonRight("library_toggle", FontAwesomeIcon.Book, 4.3f, "Library", bordered: false))
+        //    _libraryWindow.Toggle();
 
         ImGui.PopClipRect();
         ImGui.SetCursorPos(initialPos);

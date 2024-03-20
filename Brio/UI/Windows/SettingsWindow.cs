@@ -61,7 +61,7 @@ internal class SettingsWindow : Window
                     DrawAppearanceTab();
                     DrawPosingTab();
                     DrawWorldTab();
-                    DrawLibraryTab();
+                    //DrawLibraryTab();
                     DrawKeysTab();
                 }
             }
