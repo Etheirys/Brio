@@ -32,6 +32,8 @@ internal class Configuration : IPluginConfiguration
     // Library
     public LibraryConfiguration Library { get; set; } = new LibraryConfiguration();
 
+    public string LastPath { get; set; } = string.Empty;
+
     // Input
     public InputConfiguration Input { get; set; } = new InputConfiguration();
 

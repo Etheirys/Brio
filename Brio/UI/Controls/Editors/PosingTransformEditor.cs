@@ -82,7 +82,7 @@ internal class PosingTransformEditor
         {
             if(popup.Success && bonePose is not null)
             {
-                didChange |= DrawPropagateCheckboxes(propagate);
+                didChange |= DrawPropagateCheckboxes(ref propagate);
             }
         }
 
@@ -112,7 +112,7 @@ internal class PosingTransformEditor
         }
     }
 
-    private bool DrawPropagateCheckboxes(TransformComponents propagate)
+    private bool DrawPropagateCheckboxes(ref TransformComponents propagate)
     {
         var didChange = false;
 

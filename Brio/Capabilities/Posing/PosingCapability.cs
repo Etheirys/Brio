@@ -133,6 +133,9 @@ internal class PosingCapability : ActorCharacterCapability
 
         options ??= _posingService.DefaultImporterOptions;
 
+        if(options.ApplyModelTransform && reset)
+            ModelPosing.ResetTransform();
+
         SkeletonPosing.ImportSkeletonPose(poseFile, options);
         ModelPosing.ImportModelPose(poseFile, options);
 
