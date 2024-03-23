@@ -33,6 +33,8 @@ internal class LibraryWindow : Window
     private const int MinEntrySize = 100;
     private const int MaxEntrySize = 250;
 
+    private readonly SettingsWindow _settingsWindow;
+
     public readonly TagFilter TagFilter = new();
 
     private readonly ConfigurationService _configurationService;
@@ -70,6 +72,7 @@ internal class LibraryWindow : Window
         IPluginLog log,
         ConfigurationService configurationService,
         LibraryManager libraryManager,
+        SettingsWindow settingsWindow,
         IServiceProvider serviceProvider)
         : base($"{Brio.Name} Library###brio_library_window")
     {
@@ -85,6 +88,8 @@ internal class LibraryWindow : Window
         _libraryManager = libraryManager;
         _serviceProvider = serviceProvider;
         
+        _settingsWindow = settingsWindow;
+
         _path.Add(_libraryManager.Root);
 
         _libraryManager.RegisterWindow(this);
@@ -196,16 +201,33 @@ internal class LibraryWindow : Window
     {
         using(ImRaii.PushId("brio_library"))
         {
+                
             DrawFilters();
 
             if(_selectedFilter == null)
                 return;
 
+
+            float pathWidth = WindowContentWidth - SearchWidth;
+            if(_isModal)
+                pathWidth -= 155;
+
             ImGui.Spacing();
-            DrawPath(WindowContentWidth - SearchWidth);
+            DrawPath(pathWidth);
+
+            if(_isModal)
+            {
+                ImGui.SameLine();
+
+                if(ImBrio.Button("Browse for File", FontAwesomeIcon.FolderOpen, new Vector2(155, 0), 0.9f))
+                    DoBrowse();
+
+                if(ImGui.IsItemHovered())
+                    ImGui.SetTooltip("Browse for a file");
+            }
+
             ImGui.SameLine();
             DrawSearch();
-
 
             var windowSize = ImGui.GetWindowSize();
             if(ImGui.BeginChild("###left_pane", new Vector2(windowSize.X - InfoPaneWidth, -1), false,
@@ -272,19 +294,50 @@ internal class LibraryWindow : Window
                 // Actions
                 if(_isModal)
                 {
-                    if (ImBrio.FontIconButton(FontAwesomeIcon.FolderOpen))
-                        DoBrowse();
+                    bool isIEB = false;
 
-                    if(ImGui.IsItemHovered())
-                        ImGui.SetTooltip("Browse for a file");
+                    if(_selected is ItemEntryBase ieb)
+                    {
+                        isIEB = true;
 
-                    ImGui.SameLine();
+                        if(ieb is not null)
+                        {
+                            var config = ConfigurationService.Instance.Configuration;
+                            bool isFavorite = config.Library.Favorites.Contains(ieb.Identifier);
+
+                            ImGui.PushStyleColor(ImGuiCol.Text, ImGui.GetColorU32(isFavorite ? ImGuiCol.CheckMark : ImGuiCol.Text));
+
+                            if(ImBrio.FontIconButton(FontAwesomeIcon.Heart))
+                            {
+                                if(!isFavorite)
+                                {
+                                    config.Library.Favorites.Add(ieb.Identifier);
+                                }
+                                else
+                                {
+                                    config.Library.Favorites.Remove(ieb.Identifier);
+                                }
+
+                                ConfigurationService.Instance.Save();
+                            }
+
+                            ImGui.PopStyleColor();
+
+                            if(ImGui.IsItemHovered())
+                                ImGui.SetTooltip(isFavorite ? "Remove from favorites" : "Add to favorites");
+
+                            ImGui.SameLine();
+                        }
+                    }
 
                     ImGui.SetCursorPosX(ImGui.GetCursorPosX() + (ImBrio.GetRemainingWidth() - (200 + ImGui.GetStyle().ItemSpacing.X)));
-                    if(_selected is not ItemEntryBase)
+                
+                    if(isIEB == false)
+                    {
                         ImGui.BeginDisabled();
+                    }
 
-                    if (ImBrio.Button("Select", FontAwesomeIcon.Check, new Vector2(100, 0)))
+                    if(ImBrio.Button("Select", FontAwesomeIcon.Check, new Vector2(100, 0)))
                     {
                         if(_selected != null)
                         {
@@ -292,7 +345,7 @@ internal class LibraryWindow : Window
                         }
                     }
 
-                    if(_selected is not ItemEntryBase)
+                    if(isIEB == false)
                     {
                         ImGui.EndDisabled();
                     }
@@ -377,6 +430,7 @@ internal class LibraryWindow : Window
             ops.Add(_posesFilter.Name);
             if(_posesFilter == _selectedFilter)
                 selected = 2;
+
 
             if(ImBrio.ToggleButtonStrip("library_filters_selector", new(ImBrio.GetRemainingWidth(), ImBrio.GetLineHeight()), ref selected, ops.ToArray()))
             {
@@ -843,6 +897,18 @@ internal class LibraryWindow : Window
 
     private void DrawFooter()
     {
+        if(ImBrio.Button("Add new source", FontAwesomeIcon.None, new Vector2(100, 0)))
+        {
+            if(_isModal)
+            {
+                Close();
+            }
+
+            _settingsWindow.OpenAsLibraryTab();
+        }
+
+        ImGui.SameLine();
+
         int size = (int)_configurationService.Configuration.Library.IconSize;
         ImGui.SetNextItemWidth(FooterScaleSliderWidth);
         if(ImGui.SliderInt("###library_scale_slider", ref size, MinEntrySize, MaxEntrySize, ""))

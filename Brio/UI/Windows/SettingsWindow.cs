@@ -48,29 +48,66 @@ internal class SettingsWindow : Window
         Size = new Vector2(400, 450);
     }
 
+    private bool _isModal = false;
+    private float? _libraryPadding = null;
+    public void OpenAsLibraryTab()
+    {
+        _libraryPadding = 35;
+
+        Flags = ImGuiWindowFlags.Modal | ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoResize;
+        IsOpen = true;
+
+        BringToFront();
+
+        _isModal = true;
+    }
+
+    public override void OnClose()
+    {
+        Flags = ImGuiWindowFlags.NoResize;
+        _isModal = false;
+
+        _libraryPadding = null;
+    }
+
     public override void Draw()
     {
         using(ImRaii.PushId("brio_settings"))
         {
-            using(var tab = ImRaii.TabBar("###brio_settings_tabs"))
+            if(_isModal)
             {
-                if(tab.Success)
+                DrawLibrarySection();
+
+                if(ImBrio.Button("Close", FontAwesomeIcon.Times, new Vector2(100, 0)))
                 {
-                    DrawInterfaceTab();
-                    DrawIPCTab();
-                    DrawAppearanceTab();
-                    DrawPosingTab();
-                    DrawWorldTab();
-                    //DrawLibraryTab();
-                    DrawKeysTab();
+                    IsOpen = false;
+                    
+                    //Flags = ImGuiWindowFlags.NoResize;
+                    //_isModal = false;
+                }
+
+            }
+            else
+            {
+                using(var tab = ImRaii.TabBar("###brio_settings_tabs"))
+                {
+                    if(tab.Success)
+                    {
+                        DrawGeneralTab();
+                        DrawIPCTab();
+                        DrawPosingTab();
+                        DrawWorldTab();
+                        DrawLibraryTab();
+                        DrawKeysTab();
+                    }
                 }
             }
         }
     }
 
-    private void DrawInterfaceTab()
+    private void DrawGeneralTab()
     {
-        using(var tab = ImRaii.TabItem("Interface"))
+        using(var tab = ImRaii.TabItem("General"))
         {
             if(tab.Success)
             {
@@ -79,6 +116,8 @@ internal class SettingsWindow : Window
                     DrawOpenBrioSetting();
                     DrawHideSettings();
                 }
+
+                DrawNPCAppearanceHack();
 
                 if(ImGui.CollapsingHeader("Display", ImGuiTreeNodeFlags.DefaultOpen))
                 {
@@ -235,17 +274,6 @@ internal class SettingsWindow : Window
             ImGui.Text($"Web API Status: {(_webService.IsRunning ? "Active" : "Inactive")}");
         }
 
-    }
-
-    private void DrawAppearanceTab()
-    {
-        using(var tab = ImRaii.TabItem("Appearance"))
-        {
-            if(tab.Success)
-            {
-                DrawNPCAppearanceHack();
-            }
-        }
     }
 
     private void DrawNPCAppearanceHack()
@@ -495,7 +523,7 @@ internal class SettingsWindow : Window
     private bool _isEditingSource;
     private void DrawLibrarySection()
     {
-        LibrarySourcesEditor.Draw(null, _configurationService, _configurationService.Configuration.Library, ref _selectedSourceConfig, ref _isEditingSource);
+        LibrarySourcesEditor.Draw(null, _configurationService, _configurationService.Configuration.Library, ref _selectedSourceConfig, ref _isEditingSource, _libraryPadding);
     }
     
     private void DrawKeysTab()
