@@ -5,17 +5,24 @@ using ImGuiNET;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Numerics;
 
 namespace Brio.UI.Controls.Editors;
 internal static class LibrarySourcesEditor
 {
-    public static void Draw(string? label, ConfigurationService service, LibraryConfiguration config, ref LibraryConfiguration.SourceConfigBase? selected, ref bool isEditing)
+    public static void Draw(string? label, ConfigurationService service, LibraryConfiguration config, ref LibraryConfiguration.SourceConfigBase? selected, ref bool isEditing, float? heightPadding = null)
     {
         config.CheckDefaults();
 
         float buttonWidth = 32;
 
         float paneHeight = ImBrio.GetRemainingHeight() - ImBrio.GetLineHeight() - ImGui.GetStyle().ItemSpacing.Y;
+
+        if(heightPadding.HasValue)
+        {
+            paneHeight -= heightPadding.Value;
+        }
+
         if(ImGui.BeginChild("library_sources_pane", new(-1, paneHeight), true))
         {
             if (label != null)
