@@ -100,7 +100,8 @@ internal class FileUIHelpers
                      {
                          var path = paths[0];
                          var directory = Path.GetDirectoryName(path);
-                         ConfigurationService.Instance.Configuration.LastPath = directory;
+                         if(directory is not null)
+                            ConfigurationService.Instance.Configuration.LastPath = directory;
                          capability.LoadMcdf(path);
                      }
                  }, 1, ConfigurationService.Instance.Configuration.LastPath, true);
