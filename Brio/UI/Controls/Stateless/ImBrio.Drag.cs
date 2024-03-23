@@ -40,7 +40,7 @@ internal static partial class ImBrio
         Vector2 size = new Vector2(0, 0);
         size.X = (ImBrio.GetRemainingWidth() - 32) + ImGui.GetStyle().ItemSpacing.X;
 
-        (var changedf3, var activef3) = DragFloat3Horizontal($"###{id}_drag3", ref vectorValue, 0.1f, size);
+        (var changedf3, var activef3) = DragFloat3Horizontal($"###{id}_drag3", ref vectorValue, step, size);
         changed |= changedf3;
         active |= activef3;
 

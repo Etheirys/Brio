@@ -23,6 +23,7 @@ internal class PosingWidget(PosingCapability capability) : Widget<PosingCapabili
     public override void DrawBody()
     {
         DrawButtons();
+
         ImGui.Separator();
 
         DrawTransform();
@@ -63,10 +64,6 @@ internal class PosingWidget(PosingCapability capability) : Widget<PosingCapabili
 
         ImGui.SameLine();
 
-        PosingEditorCommon.DrawIKSelect(Capability);
-
-        ImGui.SameLine();
-
         if(ImBrio.FontIconButton("undo", FontAwesomeIcon.Backward, "Undo", Capability.HasUndoStack))
         {
             Capability.Undo();
@@ -99,7 +96,7 @@ internal class PosingWidget(PosingCapability capability) : Widget<PosingCapabili
     {
         PosingEditorCommon.DrawSelectionName(Capability);
 
-        _posingTransformEditor.Draw("posing_widget_transform", Capability);
+        _posingTransformEditor.Draw("posing_widget_transform", Capability, true);
     }
 
     public override void ActivateAdvanced()

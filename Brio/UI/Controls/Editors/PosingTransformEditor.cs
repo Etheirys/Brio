@@ -1,4 +1,5 @@
-﻿using Brio.Capabilities.Posing;
+﻿using Brio.Capabilities.Core;
+using Brio.Capabilities.Posing;
 using Brio.Core;
 using Brio.Game.Posing;
 using Brio.UI.Controls.Stateless;
@@ -67,7 +68,7 @@ internal class PosingTransformEditor
         bool anyActive = false;
 
         (var pdidChange, var panyActive) = ImBrio.DragFloat3($"###_transformPosition_0", ref realTransform.Position, 0.1f, FontAwesomeIcon.ArrowsUpDownLeftRight, "Position");
-        (var rdidChange, var ranyActive) = ImBrio.DragFloat3($"###_transformRotation_0", ref realEuler, 5.0f, FontAwesomeIcon.ArrowsSpin, "Rotation");
+        (var rdidChange, var ranyActive) = ImBrio.DragFloat3($"###_transformRotation_0", ref realEuler, 0.01f, FontAwesomeIcon.ArrowsSpin, "Rotation");
         (var sdidChange, var sanyActive) = ImBrio.DragFloat3($"###_transformScale_0", ref realTransform.Scale, 0.1f, FontAwesomeIcon.ExpandAlt, "Scale");
 
         didChange |= pdidChange |= rdidChange |= sdidChange; 
@@ -77,6 +78,13 @@ internal class PosingTransformEditor
 
         if(ImBrio.FontIconButton("propagate", FontAwesomeIcon.Compress, "Propagate", bone?.EligibleForIK == true))
             ImGui.OpenPopup("transform_propagate_popup");
+    
+        if(_compactMode)
+        {
+            ImGui.SameLine();
+
+            PosingEditorCommon.DrawIKSelect(posingCapability);
+        }
 
         using(var popup = ImRaii.Popup("transform_propagate_popup"))
         {
