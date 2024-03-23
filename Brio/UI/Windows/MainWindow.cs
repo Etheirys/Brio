@@ -83,11 +83,6 @@ internal class MainWindow : Window
         _configurationService.ApplyChange();
     }
 
-    private void OnToggle()
-    {
-        this.IsOpen = !this.IsOpen;
-    }
-
     private void DrawHeaderButtons()
     {
         float buttonWidths = 25;
