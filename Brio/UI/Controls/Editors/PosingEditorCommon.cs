@@ -169,22 +169,20 @@ internal static class PosingEditorCommon
             if(isValid)
             {
                 var bonePose = posing.SkeletonPosing.GetBonePose(boneId);
-                var ik = bonePose.DefaultIK;
-
-                bool enabled = ik.Enabled;
-                if(ImBrio.ToggleButton("IK", buttonSize, ref enabled))
+                //var ik = bonePose.DefaultIK;
+                //bool enabled = ik.Enabled;
+       
+                if(ImGui.Button("IK", buttonSize))
                     ImGui.OpenPopup("transform_ik_popup");
 
                 if(ImGui.IsItemHovered())
                     ImGui.SetTooltip("Inverse Kinematics");
 
-                using(var popup = ImRaii.Popup("transform_ik_popup"))
-                {
+                using var popup = ImRaii.Popup("transform_ik_popup");
 
-                    if(popup.Success && bonePose != null)
-                    {
-                        BoneIKEditor.Draw(bonePose, posing);
-                    }
+                if(popup.Success && bonePose != null)
+                {
+                    BoneIKEditor.Draw(bonePose, posing);
                 }
 
                 return;
