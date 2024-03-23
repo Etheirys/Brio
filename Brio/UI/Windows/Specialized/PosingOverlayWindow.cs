@@ -22,7 +22,6 @@ namespace Brio.UI.Windows.Specialized;
 
 internal class PosingOverlayWindow : Window, IDisposable
 {
-    public OPERATION Operation = OPERATION.ROTATE;
 
     private readonly EntityManager _entityManager;
     private readonly CameraService _cameraService;
@@ -416,7 +415,7 @@ internal class PosingOverlayWindow : Window, IDisposable
         if(ImGuizmo.Manipulate(
             ref worldViewMatrix.M11,
             ref projectionMatrix.M11,
-            Operation,
+            _posingService.Operation.AsGizmoOperation(),
             _posingService.CoordinateMode.AsGizmoMode(),
             ref matrix.M11
         ))

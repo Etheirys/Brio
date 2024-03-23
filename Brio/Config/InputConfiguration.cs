@@ -20,6 +20,9 @@ internal class InputConfiguration
         { KeyBindEvents.Posing_DisableGizmo, new(VirtualKey.SHIFT) },
         { KeyBindEvents.Posing_DisableSkeleton, new(VirtualKey.CONTROL) },
         { KeyBindEvents.Posing_HideOverlay, new(VirtualKey.MENU) },
+        { KeyBindEvents.Posing_Translate, new(VirtualKey.NO_KEY) },
+        { KeyBindEvents.Posing_Rotate, new(VirtualKey.NO_KEY) },
+        { KeyBindEvents.Posing_Scale, new(VirtualKey.NO_KEY) },
     };
 
     public bool ShowPromptsInGPose { get; set; } = false;
