@@ -77,7 +77,7 @@ internal class GlamourerService : IDisposable
     {
         try
         {
-            bool glamourerInstalled = _pluginInterface.InstalledPlugins.Any(x => x.Name == "Glamourer");
+            bool glamourerInstalled = _pluginInterface.InstalledPlugins.Any(x => x.Name == "Glamourer" && x.IsLoaded == true);
             if(!glamourerInstalled)
             {
                 Brio.Log.Debug("Glamourer not present");

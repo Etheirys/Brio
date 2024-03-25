@@ -73,7 +73,8 @@ internal class MareService : IDisposable
     {
         try
         {
-            bool mareInstalled = _pluginInterface.InstalledPlugins.Any(x => x.Name == "Mare Synchronos");
+            bool mareInstalled = _pluginInterface.InstalledPlugins.Any(x => x.Name == "Mare Synchronos" && x.IsLoaded == true);
+
             if(!mareInstalled)
             {
                 Brio.Log.Debug("Mare Synchronos not present");

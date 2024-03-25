@@ -77,7 +77,7 @@ internal class PenumbraService : IDisposable
     {
         try
         {
-            bool penumInstalled = _pluginInterface.InstalledPlugins.Count(x => x.Name == "Penumbra") > 0;
+            bool penumInstalled = _pluginInterface.InstalledPlugins.Any(x => x.Name == "Penumbra" && x.IsLoaded == true);
             if(!penumInstalled)
             {
                 Brio.Log.Debug("Penumbra not present");
