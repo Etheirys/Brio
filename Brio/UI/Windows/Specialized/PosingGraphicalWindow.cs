@@ -100,8 +100,6 @@ internal class PosingGraphicalWindow : Window, IDisposable
 
         WindowName = $"{Brio.Name} - Posing - {posing.Entity.FriendlyName}###brio_posing_graphical_window";
 
-        var windowSize = ImGui.GetWindowSize();
-
         float leftPanelWidth = ImBrio.GetRemainingWidth() - RightPanelWidth - ImGui.GetStyle().ItemSpacing.X;
 
         using(var child = ImRaii.Child("###left_pane", new Vector2(leftPanelWidth, -1), true,
@@ -124,7 +122,7 @@ internal class PosingGraphicalWindow : Window, IDisposable
 
                 float height = ImBrio.GetRemainingHeight() - ImBrio.GetLineHeight() - (ImGui.GetStyle().FramePadding.Y * 2);
 
-                using(var rightPaneSelection = ImRaii.Child("###right_pane_selection", new Vector2(-1, height), true))
+                using(var rightPaneSelection = ImRaii.Child("###right_pane_selection", new Vector2(-1, height), true, ImGuiWindowFlags.AlwaysVerticalScrollbar))
                 {
                     if(rightPaneSelection.Success)
                     {
