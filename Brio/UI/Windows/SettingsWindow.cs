@@ -519,11 +519,9 @@ internal class SettingsWindow : Window
         }
     }
 
-    private LibraryConfiguration.SourceConfigBase? _selectedSourceConfig;
-    private bool _isEditingSource;
     private void DrawLibrarySection()
     {
-        LibrarySourcesEditor.Draw(null, _configurationService, _configurationService.Configuration.Library, ref _selectedSourceConfig, ref _isEditingSource, _libraryPadding);
+        LibrarySourcesEditor.Draw(null, _configurationService, _configurationService.Configuration.Library, _libraryPadding);
     }
     
     private void DrawKeysTab()

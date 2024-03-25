@@ -49,12 +49,8 @@ internal class LibraryManager : IDisposable
         _rootItem = new();
         _internalSources = internalSources;
 
-        _configurationService.Configuration.Library.CheckDefaults();
+        _configurationService.Configuration.Library.ReEstablishDefaultPaths();
         _configurationService.OnConfigurationChanged += OnConfigurationChanged;
-
-
-        // TODO: swap this for a package
-        ////AddInternalSource(new FileSource(_fileService, "Standard Poses", "Images.ProviderIcon_Directory.png", Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Anamnesis", "StandardPoses"));
 
         OnConfigurationChanged();
     }
@@ -97,6 +93,7 @@ internal class LibraryManager : IDisposable
         // "Pose File (*.pose | *.cmp){.pose,.cmp}"
         StringBuilder filterBuilder = new();
         StringBuilder typeIdBuilder = new();
+
         if(filter is TypeFilter typeFilter)
         {
             List<FileTypeInfoBase> allInfos = new();
