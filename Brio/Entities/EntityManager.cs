@@ -4,6 +4,7 @@ using Brio.Entities.Camera;
 using Brio.Entities.Core;
 using Brio.Entities.Debug;
 using Brio.Entities.World;
+using Brio.UI.Controls.Selectors;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
@@ -128,7 +129,11 @@ internal unsafe partial class EntityManager : IDisposable
 
     public void SetSelectedEntity(EntityId? id)
     {
+        SelectedEntity?.OnDeselected();
+
         SelectedEntityId = id;
+
+        SelectedEntity?.OnSelected();
     }
 
     public bool SelectedHasCapability<T>(bool considerChildren = false, bool considerParents = true) where T : Capability

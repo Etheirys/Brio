@@ -1,14 +1,37 @@
 ﻿using Brio.Capabilities.Actor;
+using Brio.Capabilities.Core;
 using Brio.Capabilities.Posing;
 using Brio.Config;
+using Brio.Files;
 using Brio.Game.Actor.Appearance;
 using Brio.Game.Posing;
+using Brio.Game.Types;
+using Brio.Library;
+using Brio.Library.Filters;
+using System;
+using System.Collections.Generic;
 using System.IO;
 
 namespace Brio.UI.Controls.Stateless;
 
 internal class FileUIHelpers
 {
+    public static void ShowImportPoseModal(PosingCapability capability, PoseImporterOptions? options = null)
+    {
+        TypeFilter filter = new TypeFilter("Poses", typeof(CMToolPoseFile), typeof(PoseFile));
+        LibraryManager.Get(filter, (r) =>
+        {
+            if(r is CMToolPoseFile cmPose)
+            {
+                capability.ImportPose(cmPose, options);
+            }
+            else if(r is PoseFile pose)
+            {
+                capability.ImportPose(pose, options);
+            }
+        });
+    }
+
     public static void ShowExportPoseModal(PosingCapability capability)
     {
         UIManager.Instance.FileDialogManager.SaveFileDialog("Export Pose###export_pose", "Pose File (*.pose){.pose}", "brio", ".pose",
@@ -19,44 +42,37 @@ internal class FileUIHelpers
                         if(!path.EndsWith(".pose"))
                             path += ".pose";
 
-                        var directory = Path.GetDirectoryName(path);
-                        ConfigurationService.Instance.Configuration.Paths.LastPosePath = directory;
-
                         capability.ExportPose(path);
                     }
-                }, ConfigurationService.Instance.Configuration.Paths.LastPosePath, true);
-    }
-
-    public static void ShowImportPoseModal(PosingCapability capability, PoseImporterOptions? options = null)
-    {
-        UIManager.Instance.FileDialogManager.OpenFileDialog("Import Pose###import_pose", "Pose File (*.pose | *.cmp){.pose,.cmp}",
-                 (success, paths) =>
-                 {
-                     if(success && paths.Count == 1)
-                     {
-                         var path = paths[0];
-                         var directory = Path.GetDirectoryName(path);
-                         ConfigurationService.Instance.Configuration.Paths.LastPosePath = directory;
-
-                         capability.ImportPose(path, options);
-                     }
-                 }, 1, ConfigurationService.Instance.Configuration.Paths.LastPosePath, true);
+                }, null, true);
     }
 
     public static void ShowImportCharacterModal(ActorAppearanceCapability capability, AppearanceImportOptions options)
     {
-        UIManager.Instance.FileDialogManager.OpenFileDialog("Import Character File###import_character_window", "Character File (*.chara){.chara}",
-                 (success, paths) =>
-                 {
-                     if(success && paths.Count == 1)
-                     {
-                         var path = paths[0];
-                         var directory = Path.GetDirectoryName(path);
-                         ConfigurationService.Instance.Configuration.Paths.LastCharacterPath = directory;
+        List<Type> types = new();
+        types.Add(typeof(ActorAppearanceUnion));
+        types.Add(typeof(AnamnesisCharaFile));
 
-                         capability.ImportAppearance(path, options);
-                     }
-                 }, 1, ConfigurationService.Instance.Configuration.Paths.LastCharacterPath, true);
+        if(capability.CanMcdf)
+            types.Add(typeof(MareCharacterDataFile));
+
+        TypeFilter filter = new TypeFilter("Characters", types.ToArray());
+        
+        LibraryManager.Get(filter, (r)=>
+        {
+            if (r is ActorAppearanceUnion appearance)
+            {
+                _ = capability.SetAppearance(appearance, options);
+            }
+            else if (r is AnamnesisCharaFile appearanceFile)
+            {
+                _ = capability.SetAppearance(appearanceFile, options);
+            }
+            else if (r is MareCharacterDataFile mareFile)
+            {
+                capability.LoadMcdf(mareFile.GetPath());
+            }
+        });
     }
 
     public static void ShowExportCharacterModal(ActorAppearanceCapability capability)
@@ -68,9 +84,6 @@ internal class FileUIHelpers
                     {
                         if(!path.EndsWith(".chara"))
                             path += ".chara";
-
-                        var directory = Path.GetDirectoryName(path);
-                        ConfigurationService.Instance.Configuration.Paths.LastCharacterPath = directory;
 
                         capability.ExportAppearance(path);
                     }
@@ -87,10 +100,10 @@ internal class FileUIHelpers
                      {
                          var path = paths[0];
                          var directory = Path.GetDirectoryName(path);
-                         ConfigurationService.Instance.Configuration.Paths.LastMcdfPath = directory;
-
+                         if(directory is not null)
+                            ConfigurationService.Instance.Configuration.LastPath = directory;
                          capability.LoadMcdf(path);
                      }
-                 }, 1, ConfigurationService.Instance.Configuration.Paths.LastMcdfPath, true);
+                 }, 1, ConfigurationService.Instance.Configuration.LastPath, true);
     }
 }

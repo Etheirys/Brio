@@ -1,4 +1,5 @@
 ﻿using Lumina.Excel.GeneratedSheets;
+using System;
 
 namespace Brio.Game.Actor.Appearance;
 
@@ -16,7 +17,23 @@ internal static class AppearanceExtensions
 
     public static Tribes GetFirstValidTribe(this Races race) => (Tribes)((byte)race * 2 - 1);
 
+    public static string ToDisplayName(this Races race)
+    {
+        switch(race)
+        {
+            case Races.Miqote: return "Miqo'te";
+            case Races.AuRa: return "Au Ra";
+        }
+
+        return race.ToString();
+    }
+
     public static Races GetRace(this Tribes tribe) => (Races)(((byte)tribe + 1) / 2);
+
+    public static string ToDisplayName(this Tribes tribe)
+    {
+        return tribe.ToString();
+    }
 
     public static Genders[] GetAllowedGenders(this Races race)
     {
@@ -47,6 +64,10 @@ internal static class AppearanceExtensions
 
     public static Genders[] GetAllowedGenders(this Tribes tribe) => GetAllowedGenders(tribe.GetRace());
 
+    public static string ToDisplayName(this Genders gender)
+    {
+        return gender.ToString();
+    }
 
     public static ActorEquipSlot GetEquipSlots(this EquipSlotCategory category)
     {

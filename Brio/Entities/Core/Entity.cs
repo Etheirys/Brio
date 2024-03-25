@@ -75,6 +75,22 @@ internal abstract class Entity : IDisposable
 
     }
 
+    public virtual void OnSelected()
+    {
+        foreach (Capability capability in Capabilities)
+        {
+            capability.OnEntitySelected();
+        }
+    }
+
+    public virtual void OnDeselected()
+    {
+        foreach(Capability capability in Capabilities)
+        {
+            capability.OnEntityDeselected();
+        }
+    }
+
     public void AddCapability<T>(T? capability) where T : Capability
     {
         if(capability == null)

@@ -64,6 +64,11 @@ internal class ActorAppearanceCapability : ActorCharacterCapability
         this._mareService.LoadMcdf(path, GameObject);
     }
 
+    public Task LoadMcdfAsync(string path)
+    {
+        return this._mareService.LoadMcdfAsync(path, GameObject);
+    }
+
     public void SetCollection(string collection)
     {
         if(IsCollectionOverridden && collection.Equals(_oldCollection))

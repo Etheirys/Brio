@@ -27,8 +27,13 @@
 // You should have received a copy of the GNU General Public License
 // along with this program. If not, see <https://www.gnu.org/licenses/gpl-3.0>.
 
+using Brio.Capabilities.Posing;
+using Brio.Entities;
+using Brio.Entities.Actor;
 using Brio.Files.Converters;
 using Brio.Game.Actor.Appearance;
+using Brio.Resources;
+using Dalamud.Interface.Internal;
 using System;
 using System.Globalization;
 using System.Numerics;
@@ -36,6 +41,28 @@ using System.Reflection;
 
 namespace Brio.Files;
 
+internal class CMToolPoseFileInfo : AppliableActorFileInfoBase<CMToolPoseFile>
+{
+    public override string Name => "CMTool Pose File";
+    public override IDalamudTextureWrap Icon => ResourceProvider.Instance.GetResourceImage("Images.FileIcon_Pose.png");
+    public override string Extension => ".cmp";
+
+    public CMToolPoseFileInfo(EntityManager entityManager)
+         : base(entityManager)
+    {
+    }
+
+    protected override void Apply(CMToolPoseFile file, ActorEntity actor)
+    {
+        PosingCapability? capability;
+        if(actor.TryGetCapability<PosingCapability>(out capability) && capability != null)
+        {
+            capability.ImportPose(file);
+        }
+    }
+}
+
+[Serializable]
 internal class CMToolPoseFile
 {
     public string? Race { get; set; }

@@ -3,6 +3,7 @@ using Brio.Game.GPose;
 using Brio.UI.Windows;
 using Brio.UI.Windows.Specialized;
 using Dalamud.Interface.ImGuiFileDialog;
+using Dalamud.Interface.Internal;
 using Dalamud.Interface.Windowing;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
@@ -21,9 +22,11 @@ internal class UIManager : IDisposable
     private readonly SettingsWindow _settingsWindow;
     private readonly InfoWindow _infoWindow;
     private readonly UpdateWindow _updateWindow;
+    private readonly LibraryWindow _libraryWindow;
     private readonly ActorAppearanceWindow _actorAppearanceWindow;
     private readonly ActionTimelineWindow _actionTimelineWindow;
     private readonly PosingOverlayWindow _overlayWindow;
+    private readonly KeyBindPromptWindow _keyBindPromptWindow;
     private readonly PosingOverlayToolbarWindow _overlayToolbarWindow;
     private readonly PosingTransformWindow _overlayTransformWindow;
     private readonly PosingGraphicalWindow _graphicalWindow;
@@ -57,9 +60,11 @@ internal class UIManager : IDisposable
             SettingsWindow settingsWindow,
             InfoWindow infoWindow,
             UpdateWindow updateWindow,
+            LibraryWindow libraryWindow,
             ActorAppearanceWindow appearanceWindow,
             ActionTimelineWindow actionTimelineWindow,
             PosingOverlayWindow overlayWindow,
+            KeyBindPromptWindow keyBindPromptWindow,
             PosingOverlayToolbarWindow overlayToolbarWindow,
             PosingTransformWindow overlayTransformWindow,
             PosingGraphicalWindow graphicalWindow,
@@ -76,11 +81,13 @@ internal class UIManager : IDisposable
 
         _mainWindow = mainWindow;
         _settingsWindow = settingsWindow;
+        _libraryWindow = libraryWindow;
         _infoWindow = infoWindow;
         _updateWindow = updateWindow;
         _actorAppearanceWindow = appearanceWindow;
         _actionTimelineWindow = actionTimelineWindow;
         _overlayWindow = overlayWindow;
+        _keyBindPromptWindow = keyBindPromptWindow;
         _overlayToolbarWindow = overlayToolbarWindow;
         _overlayTransformWindow = overlayTransformWindow;
         _graphicalWindow = graphicalWindow;
@@ -90,11 +97,13 @@ internal class UIManager : IDisposable
 
         _windowSystem.AddWindow(_mainWindow);
         _windowSystem.AddWindow(_settingsWindow);
+        _windowSystem.AddWindow(_libraryWindow);
         _windowSystem.AddWindow(_infoWindow);
         _windowSystem.AddWindow(_updateWindow);
         _windowSystem.AddWindow(_actorAppearanceWindow);
         _windowSystem.AddWindow(_actionTimelineWindow);
         _windowSystem.AddWindow(_overlayWindow);
+        _windowSystem.AddWindow(_keyBindPromptWindow);
         _windowSystem.AddWindow(_overlayToolbarWindow);
         _windowSystem.AddWindow(_overlayTransformWindow);
         _windowSystem.AddWindow(_graphicalWindow);
@@ -157,6 +166,7 @@ internal class UIManager : IDisposable
     {
         _windowSystem.Draw();
         FileDialogManager.Draw();
+        _libraryWindow.DrawModal();
     }
 
     public void Dispose()
@@ -170,4 +180,6 @@ internal class UIManager : IDisposable
 
         Instance = null!;
     }
+
+    public IDalamudTextureWrap LoadImage(byte[] data) => _pluginInterface.UiBuilder.LoadImage(data);
 }

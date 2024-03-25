@@ -23,12 +23,15 @@ internal class ActorAppearanceWidget(ActorAppearanceCapability capability) : Wid
 
     private void DrawLoadAppearance()
     {
-        if(ImBrio.FontIconButton("load_npc", FontAwesomeIcon.PersonArrowDownToLine, "Load NPC Appearance"))
-        {
-            AppearanceEditorCommon.ResetNPCSelector();
-            ImGui.OpenPopup("widget_npc_selector");
-        }
+        if(ImBrio.FontIconButton("import_charafile", FontAwesomeIcon.FileImport, "Import Character File"))
+            FileUIHelpers.ShowImportCharacterModal(Capability, AppearanceImportOptions.Default);
 
+        ImGui.SameLine();
+
+        if(ImBrio.FontIconButton("export_charafile", FontAwesomeIcon.FileExport, "Export Character File"))
+            FileUIHelpers.ShowExportCharacterModal(Capability);
+      
+        ImGui.SameLine();
 
         if(Capability.CanMcdf)
         {
@@ -41,21 +44,10 @@ internal class ActorAppearanceWidget(ActorAppearanceCapability capability) : Wid
 
         ImGui.SameLine();
 
-        if(ImBrio.FontIconButton("import_charafile", FontAwesomeIcon.FileImport, "Import Character File"))
-            FileUIHelpers.ShowImportCharacterModal(Capability, AppearanceImportOptions.Default);
-
-        ImGui.SameLine();
-
-        if(ImBrio.FontIconButton("export_charafile", FontAwesomeIcon.FileExport, "Export Character File"))
-            FileUIHelpers.ShowExportCharacterModal(Capability);
-
-        ImGui.SameLine();
-
         if(ImBrio.FontIconButton("advanced_appearance", FontAwesomeIcon.UserEdit, "Advanced"))
             ActivateAdvanced();
 
         ImGui.SameLine();
-
 
         if(ImBrio.FontIconButtonRight("reset_appearance", FontAwesomeIcon.Undo, 1, "Reset", Capability.IsAppearanceOverridden))
             _ = Capability.ResetAppearance();

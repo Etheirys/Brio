@@ -1,6 +1,7 @@
 ﻿using Brio.Config;
 using Brio.Core;
 using Brio.Entities;
+using Brio.Files;
 using Brio.Game.Actor;
 using Brio.Game.Camera;
 using Brio.Game.Chat;
@@ -8,7 +9,10 @@ using Brio.Game.Core;
 using Brio.Game.GPose;
 using Brio.Game.Posing;
 using Brio.Game.World;
+using Brio.Input;
 using Brio.IPC;
+using Brio.Library;
+using Brio.Library.Sources;
 using Brio.Resources;
 using Brio.UI;
 using Brio.UI.Windows;
@@ -97,6 +101,7 @@ public class Brio : IDalamudPlugin
         serviceCollection.AddSingleton(dalamudServices.TextureProvider);
         serviceCollection.AddSingleton(dalamudServices.Log);
         serviceCollection.AddSingleton(dalamudServices.ChatGui);
+        serviceCollection.AddSingleton(dalamudServices.KeyState);
 
         // Core / Misc
         serviceCollection.AddSingleton<EventBus>();
@@ -104,6 +109,7 @@ public class Brio : IDalamudPlugin
         serviceCollection.AddSingleton<ResourceProvider>();
         serviceCollection.AddSingleton<GameDataProvider>();
         serviceCollection.AddSingleton<WelcomeService>();
+        serviceCollection.AddSingleton<InputService>();
 
         // IPC
         serviceCollection.AddSingleton<BrioIPCService>();
@@ -137,15 +143,31 @@ public class Brio : IDalamudPlugin
         serviceCollection.AddSingleton<CameraService>();
         serviceCollection.AddSingleton<ObjectMonitorService>();
 
+        // Library
+        serviceCollection.AddSingleton<FileTypeInfoBase, AnamnesisCharaFileInfo>();
+        serviceCollection.AddSingleton<FileTypeInfoBase, CMToolPoseFileInfo>();
+        serviceCollection.AddSingleton<FileTypeInfoBase, PoseFileInfo>();
+        serviceCollection.AddSingleton<FileTypeInfoBase, MareCharacterDataFileInfo>();
+        serviceCollection.AddSingleton<FileService>();
+
+        serviceCollection.AddSingleton<SourceBase, GameDataNpcSource>();
+        serviceCollection.AddSingleton<SourceBase, GameDataMountSource>();
+        serviceCollection.AddSingleton<SourceBase, GameDataOrnamentSource>();
+        serviceCollection.AddSingleton<SourceBase, GameDataCompanionSource>();
+
+        serviceCollection.AddSingleton<LibraryManager>();
+
         // UI
         serviceCollection.AddSingleton<UIManager>();
         serviceCollection.AddSingleton<MainWindow>();
         serviceCollection.AddSingleton<SettingsWindow>();
         serviceCollection.AddSingleton<InfoWindow>();
         serviceCollection.AddSingleton<UpdateWindow>();
+        serviceCollection.AddSingleton<LibraryWindow>();
         serviceCollection.AddSingleton<ActorAppearanceWindow>();
         serviceCollection.AddSingleton<ActionTimelineWindow>();
         serviceCollection.AddSingleton<PosingOverlayWindow>();
+        serviceCollection.AddSingleton<KeyBindPromptWindow>();
         serviceCollection.AddSingleton<PosingOverlayToolbarWindow>();
         serviceCollection.AddSingleton<PosingTransformWindow>();
         serviceCollection.AddSingleton<CameraWindow>();
