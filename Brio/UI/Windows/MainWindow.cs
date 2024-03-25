@@ -18,7 +18,6 @@ internal class MainWindow : Window
     private readonly InfoWindow _infoWindow;
     private readonly UpdateWindow _updateWindow;
     private readonly LibraryWindow _libraryWindow;
-    private readonly EntityManager _entityManager;
     private readonly ConfigurationService _configurationService;
 
     private readonly EntityManager _entityManager;
