@@ -11,6 +11,8 @@ internal class LibraryConfiguration
 
     public Dictionary<string, string> LastBrowsePaths { get; set; } = [];
 
+    public bool ReturnLibraryToLastLocation { get; set; } = true;
+
     public void ReEstablishDefaultPaths()
     {
         if(Files.Count <= 0)

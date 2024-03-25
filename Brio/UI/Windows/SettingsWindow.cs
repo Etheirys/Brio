@@ -81,9 +81,6 @@ internal class SettingsWindow : Window
                 if(ImBrio.Button("Close", FontAwesomeIcon.Times, new Vector2(100, 0)))
                 {
                     IsOpen = false;
-                    
-                    //Flags = ImGuiWindowFlags.NoResize;
-                    //_isModal = false;
                 }
 
             }
@@ -116,6 +113,26 @@ internal class SettingsWindow : Window
                     DrawOpenBrioSetting();
                     DrawHideSettings();
                 }
+
+                if(ImGui.CollapsingHeader("Library", ImGuiTreeNodeFlags.DefaultOpen))
+                {
+                    bool returnToLastLocation = _configurationService.Configuration.Library.ReturnLibraryToLastLocation;
+                    if(ImGui.Checkbox("Open Library to the last Location I was previously", ref returnToLastLocation))
+                    {
+                        _configurationService.Configuration.Library.ReturnLibraryToLastLocation = returnToLastLocation;
+                        _configurationService.ApplyChange();
+                    }
+                }
+
+                //if(ImGui.CollapsingHeader("Pose & Character Import", ImGuiTreeNodeFlags.DefaultOpen))
+                //{
+                //    bool returnToLastLocation = _configurationService.Configuration.Library.ReturnLibraryToLastLocation;
+                //    if(ImGui.Checkbox("Open Importer to: The Location I was previously", ref returnToLastLocation))
+                //    {
+                //        _configurationService.Configuration.Library.ReturnLibraryToLastLocation = returnToLastLocation;
+                //        _configurationService.ApplyChange();
+                //    }
+                //}
 
                 DrawNPCAppearanceHack();
 

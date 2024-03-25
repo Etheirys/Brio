@@ -49,6 +49,7 @@ internal class LibraryWindow : Window
     private readonly List<GroupEntryBase> _path = new();
     private FilterBase? _modalFilter;
     private FilterBase _selectedFilter;
+    FilterBase? _lastFilter;
     private string _searchText = string.Empty;
     private IEnumerable<EntryBase>? _currentEntries;
     private TagCollection _allTags = new();
@@ -112,12 +113,21 @@ internal class LibraryWindow : Window
         _isModal = true;
         _modalCallback = callback;
         _modalFilter = filter;
+       
         _selectedFilter = _modalFilter;
 
         Flags = ImGuiWindowFlags.Modal | ImGuiWindowFlags.NoCollapse;
-        IsOpen = true;
 
-        Reset();
+        if(_configurationService.Configuration.Library.ReturnLibraryToLastLocation)
+        {
+            Refresh(true);
+        }
+        else
+        {
+            Reset();
+        }
+
+        IsOpen = true;
     }
 
     public void Open()
@@ -125,16 +135,35 @@ internal class LibraryWindow : Window
         _isModal = false;
         _modalCallback = null;
         _modalFilter = null;
-        _selectedFilter = _favoritesFilter;
 
         Flags = ImGuiWindowFlags.None;
+       
+        if(_configurationService.Configuration.Library.ReturnLibraryToLastLocation)
+        {
+            if(_lastFilter is not null)
+            {
+                _selectedFilter = _lastFilter;
+            }
+
+            Refresh(true);
+        }
+        else
+        {
+            _selectedFilter = _favoritesFilter;
+
+            Reset();
+        }
 
         IsOpen = true;
-        Reset();
     }
 
     public void Close()
     {
+        if(_isModal == false)
+        {
+            _lastFilter = _selectedFilter;
+        }
+
         IsOpen = false;
         _isModal = false;
     }
