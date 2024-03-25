@@ -1,6 +1,7 @@
 ﻿using Brio.Capabilities.Posing;
 using Brio.Core;
 using Brio.Game.Posing;
+using Brio.UI.Controls.Core;
 using Brio.UI.Controls.Stateless;
 using Dalamud.Interface;
 using Dalamud.Interface.Utility.Raii;
@@ -169,14 +170,25 @@ internal static class PosingEditorCommon
             if(isValid)
             {
                 var bonePose = posing.SkeletonPosing.GetBonePose(boneId);
-                //var ik = bonePose.DefaultIK;
-                //bool enabled = ik.Enabled;
-       
+               
+                var ik = bonePose.DefaultIK;
+                bool enabled = ik.Enabled && BrioStyle.EnableStyle;
+
+                if(enabled)
+                {
+                    ImGui.PushStyleColor(ImGuiCol.Button, UIConstants.GizmoRed);
+                }
+
                 if(ImGui.Button("IK", buttonSize))
                     ImGui.OpenPopup("transform_ik_popup");
 
                 if(ImGui.IsItemHovered())
                     ImGui.SetTooltip("Inverse Kinematics");
+
+                if(enabled)
+                {
+                    ImGui.PopStyleColor();
+                }
 
                 using var popup = ImRaii.Popup("transform_ik_popup");
 
