@@ -66,7 +66,7 @@ internal static partial class ImBrio
 
         if(isExpanded)
         {
-            float height = (ImBrio.GetLineHeight()) * 3 + (ImGui.GetStyle().ItemSpacing.Y * 2) + (ImGui.GetStyle().WindowPadding.Y * 2);
+            float height = (ImBrio.GetLineHeight() * 3) + (ImGui.GetStyle().ItemSpacing.Y * 2) + (ImGui.GetStyle().WindowPadding.Y * 2);
             if(ImGui.BeginChild($"###{label}_child", new Vector2(0, height), true))
             {
                 ImGui.PushStyleColor(ImGuiCol.FrameBg, UIConstants.GizmoBlue);
