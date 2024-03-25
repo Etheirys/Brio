@@ -16,13 +16,16 @@ internal class MainWindow : Window
 {
     private readonly SettingsWindow _settingsWindow;
     private readonly InfoWindow _infoWindow;
+    private readonly UpdateWindow _updateWindow;
     private readonly LibraryWindow _libraryWindow;
-    private readonly EntityManager _entityManager;
     private readonly ConfigurationService _configurationService;
 
+    private readonly EntityManager _entityManager;
     private readonly EntityHierarchyView _entitySelector;
 
-    public MainWindow(ConfigurationService configService, SettingsWindow settingsWindow, InfoWindow infoWindow, EntityManager entityManager,  LibraryWindow libraryWindow, InputService input) : base($"{Brio.Name} Scene Manager [{configService.Version}]###brio_main_window", ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.AlwaysAutoResize)
+    private readonly ConfigurationService _configService;
+  
+    public MainWindow(ConfigurationService configService, SettingsWindow settingsWindow, InfoWindow infoWindow, EntityManager entityManager, UpdateWindow updateWindow,  LibraryWindow libraryWindow, InputService input) : base($"{Brio.Name} Scene Manager [{configService.Version}]###brio_main_window", ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.AlwaysAutoResize)
     {
         Namespace = "brio_main_namespace";
 
@@ -30,8 +33,12 @@ internal class MainWindow : Window
         _settingsWindow = settingsWindow;
         _libraryWindow = libraryWindow;
         _infoWindow = infoWindow;
+        _updateWindow = updateWindow;
+
         _entityManager = entityManager;
         _entitySelector = new(_entityManager);
+        
+        _configService = configService;
 
         SizeConstraints = new WindowSizeConstraints
         {
@@ -49,7 +56,7 @@ internal class MainWindow : Window
 
         var rootEntity = _entityManager.RootEntity;
 
-        if(rootEntity == null)
+        if(rootEntity is null)
             return;
 
         using(var container = ImRaii.Child("###entity_hierarchy_container", new Vector2(-1, ImGui.GetTextLineHeight() * 15f), true))
@@ -87,7 +94,7 @@ internal class MainWindow : Window
         ImGui.SetCursorPosY(0);
         if(ImBrio.FontIconButtonRight("info_toggle", FontAwesomeIcon.InfoCircle, 3.3f, "Info", bordered: false))
             _infoWindow.Toggle();
-
+    
         //ImGui.SetCursorPosY(0);
         //if(ImBrio.FontIconButtonRight("library_toggle", FontAwesomeIcon.Book, 4.3f, "Library", bordered: false))
         //    _libraryWindow.Toggle();
