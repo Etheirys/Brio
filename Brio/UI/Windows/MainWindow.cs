@@ -95,13 +95,6 @@ internal class MainWindow : Window
         if(ImBrio.FontIconButtonRight("info_toggle", FontAwesomeIcon.InfoCircle, 3.3f, "Info", bordered: false))
             _infoWindow.Toggle();
     
-        if(_configService.IsDebug)
-        {
-            ImGui.SetCursorPosY(0);
-            if(ImBrio.FontIconButtonRight("brio_update_toggle", FontAwesomeIcon.ArrowUpRightDots, 4.3f, "Update", bordered: false))
-                _updateWindow.Toggle();
-        }
-
         //ImGui.SetCursorPosY(0);
         //if(ImBrio.FontIconButtonRight("library_toggle", FontAwesomeIcon.Book, 4.3f, "Library", bordered: false))
         //    _libraryWindow.Toggle();

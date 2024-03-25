@@ -1,4 +1,6 @@
 ﻿using Brio.Config;
+using Brio.Resources;
+using Brio.UI.Controls.Stateless;
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Interface.Windowing;
 using ImGuiNET;
@@ -8,40 +10,44 @@ namespace Brio.UI.Windows;
 
 internal class UpdateWindow : Window
 {
-    private readonly ConfigurationService _configurationService;
 
-    public UpdateWindow(ConfigurationService configurationService) : 
-        base($"{Brio.Name} Update###brio_update_window", ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoCollapse)
+    private readonly ConfigurationService _configurationService;
+    private string _changelogTest;
+
+    const float _closeButtonWidth = 210f;
+  
+    public UpdateWindow(ConfigurationService configurationService) :  base($" {Brio.Name} Changelog###brio_update_window", 
+        ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoCollapse)
     {
         Namespace = "brio_update_namespace";
 
         _configurationService = configurationService;
 
-        Size = new Vector2(600, -1);
+        Size = new Vector2(430, 535);
+
+        ShowCloseButton = false;
+
+        _changelogTest = ResourceProvider.Instance.GetRawResourceString("Data.Changelog.txt");
     }
 
     public override void Draw()
     {
         var segmentSize = ImGui.GetWindowSize().X / 1f;
 
-        using var textGroup = ImRaii.Group();
-
-        if(textGroup.Success)
+        if (ImGui.BeginChild("###brio_update_text", new Vector2(ImBrio.GetRemainingWidth(), ImBrio.GetRemainingHeight() - 35f), true))
         {
-            var text = $"""
-                    Welcome to Brio, Version {_configurationService.Version}!
-
-                    Lorem ipsum dolor sit amet, consectetur adipiscing elit, 
-                    sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
-                    Ut tortor pretium viverra suspendisse potenti nullam ac. 
-                    Iaculis at erat pellentesque adipiscing commodo elit.
-                    Egestas purus viverra accumsan in. Pharetra magna ac placerat 
-                    vestibulum lectus mauris ultrices eros in.
-                    """;
-
             ImGui.PushTextWrapPos(segmentSize);
-            ImGui.TextWrapped(text);
+            ImGui.TextWrapped(_changelogTest);
             ImGui.PopTextWrapPos();
+
+            ImGui.EndChild();
+        }
+
+        ImGui.SetCursorPosX(((ImBrio.GetRemainingWidth() - _closeButtonWidth) / 2));
+
+        if(ImBrio.Button("Close", Dalamud.Interface.FontAwesomeIcon.SquareXmark, new Vector2(_closeButtonWidth, 0)))
+        {
+            this.IsOpen = false;
         }
     }
 

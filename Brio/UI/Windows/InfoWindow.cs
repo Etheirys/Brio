@@ -10,19 +10,21 @@ namespace Brio.UI.Windows;
 internal class InfoWindow : Window
 {
     private readonly ConfigurationService _configurationService;
+    private readonly UpdateWindow _updateWindow;
 
-    public InfoWindow(ConfigurationService configurationService) : base($"{Brio.Name} Welcome###brio_info_window", ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.AlwaysAutoResize)
+    public InfoWindow(ConfigurationService configurationService, UpdateWindow updateWindow) : base($"{Brio.Name} Welcome###brio_info_window", ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.AlwaysAutoResize)
     {
         Namespace = "brio_info_namespace";
 
         _configurationService = configurationService;
+        _updateWindow = updateWindow;
 
         Size = new Vector2(580, -1);
     }
 
     public override void Draw()
     {
-        var segmentSize = ImGui.GetWindowSize().X / 2.5f;
+        var segmentSize = ImGui.GetWindowSize().X / 2.85f;
         var buttonSize = new Vector2(segmentSize, ImGui.GetTextLineHeight() * 1.8f);
 
         using(var textGroup = ImRaii.Group())
@@ -65,8 +67,8 @@ internal class InfoWindow : Window
                 ImGui.PopStyleColor();
 
                 ImGui.PushStyleColor(ImGuiCol.Button, new Vector4(110, 84, 148, 255) / 255);
-                if(ImGui.Button("GitHub Repository", buttonSize))
-                    Process.Start(new ProcessStartInfo { FileName = "https://github.com/Etheirys/Brio", UseShellExecute = true });
+                if(ImGui.Button("View the Changelog", buttonSize))
+                    _updateWindow.IsOpen = true;
                 ImGui.PopStyleColor();
 
                 ImGui.PushStyleColor(ImGuiCol.Button, new Vector4(29, 161, 242, 255) / 255);
