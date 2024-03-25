@@ -530,7 +530,7 @@ internal class PosingGraphicalWindow : Window, IDisposable
         Vector2 mousePos = ImGui.GetMousePos() - ImGui.GetWindowPos();
         bool isMouseOverArea = (mousePos.X > 0 && mousePos.Y > 0 && mousePos.X < contentArea.X && mousePos.Y < contentArea.Y);
         if(ImGui.IsMouseClicked(ImGuiMouseButton.Left) && !ImGui.IsAnyItemHovered() && isMouseOverArea && posing.LastHover.IsT2)
-        { 
+        {
             posing.ClearSelection();
         }
     }
@@ -712,7 +712,7 @@ internal class PosingGraphicalWindow : Window, IDisposable
                     selected ? ImGui.GetColorU32(ImGuiCol.CheckMark) : ImGui.GetColorU32(ImGuiCol.TextDisabled));
             }
 
-            if (hovered)
+            if (hovered && ImGui.IsWindowHovered())
             {
                 if(ImGui.IsMouseClicked(ImGuiMouseButton.Left))
                 {
