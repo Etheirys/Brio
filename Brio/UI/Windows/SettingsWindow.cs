@@ -555,6 +555,9 @@ internal class SettingsWindow : Window
                 DrawKeyBind(KeyBindEvents.Posing_ToggleOverlay);
                 DrawKeyBind(KeyBindEvents.Posing_Undo);
                 DrawKeyBind(KeyBindEvents.Posing_Redo);
+                DrawKeyBind(KeyBindEvents.Posing_Translate);
+                DrawKeyBind(KeyBindEvents.Posing_Rotate);
+                DrawKeyBind(KeyBindEvents.Posing_Scale);
             }
         }
     }
