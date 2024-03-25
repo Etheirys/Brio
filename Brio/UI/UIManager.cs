@@ -156,6 +156,8 @@ internal class UIManager : IDisposable
 
     private void ApplySettings()
     {
+        BrioStyle.EnableStyle = _configurationService.Configuration.Appearance.EnableBrioStyle;
+
         _pluginInterface.UiBuilder.DisableGposeUiHide = _configurationService.Configuration.Interface.ShowInGPose;
         _pluginInterface.UiBuilder.DisableAutomaticUiHide = _configurationService.Configuration.Interface.ShowWhenUIHidden;
         _pluginInterface.UiBuilder.DisableUserUiHide = _configurationService.Configuration.Interface.ShowWhenUIHidden;
@@ -164,9 +166,13 @@ internal class UIManager : IDisposable
 
     private void DrawUI()
     {
+        BrioStyle.PushStyle();
+
         _windowSystem.Draw();
         FileDialogManager.Draw();
         _libraryWindow.DrawModal();
+
+        BrioStyle.PopStyle();
     }
 
     public void Dispose()
