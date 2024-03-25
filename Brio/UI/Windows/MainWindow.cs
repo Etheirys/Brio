@@ -16,11 +16,14 @@ internal class MainWindow : Window
 {
     private readonly SettingsWindow _settingsWindow;
     private readonly InfoWindow _infoWindow;
+    private readonly UpdateWindow _updateWindow;
     private readonly LibraryWindow _libraryWindow;
-    private readonly EntityManager _entityManager;
     private readonly ConfigurationService _configurationService;
 
+    private readonly EntityManager _entityManager;
     private readonly EntityHierarchyView _entitySelector;
+
+    private readonly ConfigurationService _configService;
 
     public MainWindow(
         ConfigurationService configService,
@@ -28,17 +31,22 @@ internal class MainWindow : Window
         InfoWindow infoWindow,
         LibraryWindow libraryWindow,
         EntityManager entityManager,
+        UpdateWindow updateWindow,
         InputService input)
         : base($"{Brio.Name} Scene Manager [{configService.Version}]###brio_main_window", ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.AlwaysAutoResize)
-    {
+      {
         Namespace = "brio_main_namespace";
 
         _configurationService = configService;
         _settingsWindow = settingsWindow;
         _libraryWindow = libraryWindow;
         _infoWindow = infoWindow;
+        _updateWindow = updateWindow;
+
         _entityManager = entityManager;
         _entitySelector = new(_entityManager);
+        
+        _configService = configService;
 
         SizeConstraints = new WindowSizeConstraints
         {
@@ -57,7 +65,7 @@ internal class MainWindow : Window
 
         var rootEntity = _entityManager.RootEntity;
 
-        if(rootEntity == null)
+        if(rootEntity is null)
             return;
 
         using(var container = ImRaii.Child("###entity_hierarchy_container", new Vector2(-1, ImGui.GetTextLineHeight() * 15f), true))

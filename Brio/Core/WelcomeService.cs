@@ -5,11 +5,11 @@ namespace Brio.Core;
 
 internal class WelcomeService
 {
-    public WelcomeService(ConfigurationService configService, MainWindow mainWindow, InfoWindow infoWindow)
+    public WelcomeService(ConfigurationService configService, MainWindow mainWindow, InfoWindow infoWindow, UpdateWindow updateWindow)
     {
         if(configService.Configuration.PopupKey != Configuration.CurrentPopupKey)
         {
-            infoWindow.IsOpen = true;
+            updateWindow.IsOpen = true;
             configService.Configuration.PopupKey = Configuration.CurrentPopupKey;
         }
 

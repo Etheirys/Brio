@@ -162,6 +162,7 @@ public class Brio : IDalamudPlugin
         serviceCollection.AddSingleton<MainWindow>();
         serviceCollection.AddSingleton<SettingsWindow>();
         serviceCollection.AddSingleton<InfoWindow>();
+        serviceCollection.AddSingleton<UpdateWindow>();
         serviceCollection.AddSingleton<LibraryWindow>();
         serviceCollection.AddSingleton<ActorAppearanceWindow>();
         serviceCollection.AddSingleton<ActionTimelineWindow>();
