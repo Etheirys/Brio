@@ -5,6 +5,7 @@ using Brio.Library;
 using Brio.Library.Filters;
 using Brio.Library.Sources;
 using Brio.Library.Tags;
+using Brio.UI.Controls.Core;
 using Brio.UI.Controls.Stateless;
 using Dalamud.Interface;
 using Dalamud.Interface.Utility.Raii;
@@ -334,7 +335,7 @@ internal class LibraryWindow : Window
                             var config = ConfigurationService.Instance.Configuration;
                             bool isFavorite = config.Library.Favorites.Contains(ieb.Identifier);
 
-                            ImGui.PushStyleColor(ImGuiCol.Text, ImGui.GetColorU32(isFavorite ? ImGuiCol.CheckMark : ImGuiCol.Text));
+                            ImGui.PushStyleColor(ImGuiCol.Text, isFavorite ? UIConstants.GizmoRed : UIConstants.ToggleButtonInactive);
 
                             if(ImBrio.FontIconButton(FontAwesomeIcon.Heart))
                             {
