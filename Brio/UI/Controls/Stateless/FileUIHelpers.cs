@@ -48,14 +48,12 @@ internal class FileUIHelpers
 
     public static void ShowImportCharacterModal(ActorAppearanceCapability capability, AppearanceImportOptions options)
     {
-        List<Type> types = new();
-        types.Add(typeof(ActorAppearanceUnion));
-        types.Add(typeof(AnamnesisCharaFile));
+        List<Type> types = [typeof(ActorAppearanceUnion), typeof(AnamnesisCharaFile)];
 
         if(capability.CanMcdf)
             types.Add(typeof(MareCharacterDataFile));
 
-        TypeFilter filter = new TypeFilter("Characters", types.ToArray());
+        TypeFilter filter = new TypeFilter("Characters", [.. types]);
 
         LibraryManager.Get(filter, (r) =>
         {
