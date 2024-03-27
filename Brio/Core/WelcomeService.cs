@@ -7,7 +7,12 @@ internal class WelcomeService
 {
     public WelcomeService(ConfigurationService configService, MainWindow mainWindow, InfoWindow infoWindow, UpdateWindow updateWindow)
     {
-        if(configService.Configuration.PopupKey != Configuration.CurrentPopupKey)
+        
+        if(configService.Configuration.PopupKey == -1) // New User
+        {
+            infoWindow.IsOpen = true;
+        }
+        else if(configService.Configuration.PopupKey != Configuration.CurrentPopupKey)
         {
             updateWindow.IsOpen = true;
             configService.Configuration.PopupKey = Configuration.CurrentPopupKey;
