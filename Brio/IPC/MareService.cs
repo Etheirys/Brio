@@ -45,6 +45,12 @@ internal class MareService : IDisposable
 
     public bool LoadMcdf(string fileName, GameObject target)
     {
+        if(IsMareAvailable == false)
+        {
+            Brio.Log.Error($"Failed load MCDF file, Mare is not available");
+            return false;
+        }
+
         try
         {
             return _mareApplyMcdf.InvokeFunc(fileName, target);
@@ -58,6 +64,12 @@ internal class MareService : IDisposable
 
     public Task<bool> LoadMcdfAsync(string fileName, GameObject target)
     {
+        if(IsMareAvailable == false)
+        {
+            Brio.Log.Error($"Failed load MCDF file, Mare is not available");
+            return Task.FromResult(false);
+        }
+
         try
         {
             return _mareApplyMcdfAsync.InvokeFunc(fileName, target);
