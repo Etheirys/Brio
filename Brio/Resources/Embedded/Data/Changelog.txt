@@ -1,65 +1,61 @@
 
-Brio, Version 0.3.0!
+--- Brio, Version 0.3.0 ---
 
- Lorem ipsum dolor sit amet, consectetur adipiscing elit, 
- sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
- Ut tortor pretium viverra suspendisse potenti nullam ac. 
- Iaculis at erat pellentesque adipiscing commodo elit.
- Egestas purus viverra accumsan in. Pharetra magna ac placerat 
- vestibulum lectus mauris ultrices eros in.
+- There a known crash when Mare Synchronos & Brio are enabled, 
+  Check the Known Issues section for more info!
 
-  Lorem ipsum dolor sit amet, consectetur adipiscing elit, 
- sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
- Ut tortor pretium viverra suspendisse potenti nullam ac. 
- Iaculis at erat pellentesque adipiscing commodo elit.
- Egestas purus viverra accumsan in. Pharetra magna ac placerat 
- vestibulum lectus mauris ultrices eros in.
+- [New Feature!] Added this wonderful new changelog Window, 
+	- The `Changelog` will open anytime Brio receives a major update
+	- To open this window again open the `Brio Info` Window > `View the Changelog`
 
-  Lorem ipsum dolor sit amet, consectetur adipiscing elit, 
- sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
- Ut tortor pretium viverra suspendisse potenti nullam ac. 
- Iaculis at erat pellentesque adipiscing commodo elit.
- Egestas purus viverra accumsan in. Pharetra magna ac placerat 
- vestibulum lectus mauris ultrices eros in.
+- [New Feature!] Added the Brio Library!
+	- Manage your pose and character files in a convenient floating Window 
+	- The Library is used when importing pose and character files
+		- To Open the old `File Picker` click "Browse for File", on the import screen
+	- To add a new search source: 
+		- Press the "Add new source" button in the `Library` Window, 
+		- Or go to: `Brio Settings` > Library
 
-  Lorem ipsum dolor sit amet, consectetur adipiscing elit, 
- sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
- Ut tortor pretium viverra suspendisse potenti nullam ac. 
- Iaculis at erat pellentesque adipiscing commodo elit.
- Egestas purus viverra accumsan in. Pharetra magna ac placerat 
- vestibulum lectus mauris ultrices eros in.
+- [New Feature!] Added Keyboard Shortcuts! 
+	- To view and edit them go to: `Brio Settings` > Key Binds, 
 
-  Lorem ipsum dolor sit amet, consectetur adipiscing elit, 
- sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
- Ut tortor pretium viverra suspendisse potenti nullam ac. 
- Iaculis at erat pellentesque adipiscing commodo elit.
- Egestas purus viverra accumsan in. Pharetra magna ac placerat 
- vestibulum lectus mauris ultrices eros in.
+- Improved the visual appearance of:
+	- The `Scene Manager` Window
+	- The `Transform Editor` in the `Advanced Pose` Window
+	- The `Bone Selection Tool` in the `Advanced Pose` Window
+	- The floating `Transform Editor` Window
 
-   Lorem ipsum dolor sit amet, consectetur adipiscing elit, 
- sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
- Ut tortor pretium viverra suspendisse potenti nullam ac. 
- Iaculis at erat pellentesque adipiscing commodo elit.
- Egestas purus viverra accumsan in. Pharetra magna ac placerat 
- vestibulum lectus mauris ultrices eros in.
+- Changed the text of the "Import Character File" button to -> "Import Character"
 
-   Lorem ipsum dolor sit amet, consectetur adipiscing elit, 
- sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
- Ut tortor pretium viverra suspendisse potenti nullam ac. 
- Iaculis at erat pellentesque adipiscing commodo elit.
- Egestas purus viverra accumsan in. Pharetra magna ac placerat 
- vestibulum lectus mauris ultrices eros in.
+- Changed `Inverse Kinematics` button iconography to the text "IK"
 
-   Lorem ipsum dolor sit amet, consectetur adipiscing elit, 
- sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
- Ut tortor pretium viverra suspendisse potenti nullam ac. 
- Iaculis at erat pellentesque adipiscing commodo elit.
- Egestas purus viverra accumsan in. Pharetra magna ac placerat 
- vestibulum lectus mauris ultrices eros in.
+- Reorganized items in the `Settings Window`
 
-   Lorem ipsum dolor sit amet, consectetur adipiscing elit, 
- sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
- Ut tortor pretium viverra suspendisse potenti nullam ac. 
- Iaculis at erat pellentesque adipiscing commodo elit.
- Egestas purus viverra accumsan in. Pharetra magna ac placerat 
- vestibulum lectus mauris ultrices eros in.
+- Attempt to make Third-Party IPC more stable on plugin update
+
+--- Fixed issues ---
+
+- Fixed an issue where when dragging any Rotation in the `Transform Editor` was incrementing slowly
+
+- Fixed an issue where the `Favorite` button was not appearing in the import screen
+
+--- Known issues ---
+
+- On some systems there is a crash in GPose when Mare Synchronos & Brio are enabled
+	- Workaround: If you experience a crash in GPose, try disabling Mare Synchronos when in GPose,
+	- If you still experience a crash with Mare Synchronos disabled, please report it!
+
+- With certain clothing there is an issue with loading certain pose/cmp files, 
+  where the right arm will be messed up
+	- Workaround: Press the "Undo" button once
+
+- When the `Advanced Pose` or `Transform Editor` Window is certain sizes and
+  more than one `Transform Tab` is open, the `Transform Editor` glitches
+	- Workaround:
+		- close all but one `Transform Tab`, or...
+		- change the size of the `Advanced Pose` or `Transform Editor` Window
+
+Thank you, to: (@Yuki-Codes), (@danma3x) & (@WorstAquaPlayer) for their contributions to Brio!
+
+
+
