@@ -9,8 +9,8 @@ internal static class BrioStyle
     public static void PushStyle()
     {
         if(EnableStyle == false)
-        { 
-            return; 
+        {
+            return;
         }
 
         ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Vector2(6, 6));

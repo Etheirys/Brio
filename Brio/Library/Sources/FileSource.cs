@@ -1,11 +1,9 @@
 ﻿using Brio.Config;
 using Brio.Files;
-using Brio.Game.World;
 using Brio.Library.Tags;
 using Brio.Resources;
 using Brio.UI;
 using Brio.UI.Controls.Stateless;
-using Brio.UI.Windows;
 using Dalamud.Interface;
 using Dalamud.Interface.Internal;
 using ImGuiNET;
@@ -33,7 +31,7 @@ internal class FileSource : SourceBase
         {
             DirectoryPath = Environment.GetFolderPath((Environment.SpecialFolder)config.Root) + config.Path;
         }
-        else if (config.Path != null)
+        else if(config.Path != null)
         {
             DirectoryPath = config.Path;
         }
@@ -183,10 +181,10 @@ internal class FileEntry : ItemEntryBase
 
         try
         {
-            if (_fileInfo.IsFileType<IFileMetadata>() == true)
+            if(_fileInfo.IsFileType<IFileMetadata>() == true)
             {
                 IFileMetadata? file = _fileInfo.Load(path) as IFileMetadata;
-                if (file != null)
+                if(file != null)
                 {
                     if(file.Tags != null)
                         Tags.AddRange(file.Tags);
@@ -201,7 +199,7 @@ internal class FileEntry : ItemEntryBase
                 }
             }
         }
-        catch (Exception)
+        catch(Exception)
         {
         }
     }
@@ -235,7 +233,7 @@ internal class FileEntry : ItemEntryBase
         if(preview != null)
             return preview;
 
-        if (_fileInfo == null)
+        if(_fileInfo == null)
             return ResourceProvider.Instance.GetResourceImage("Images.FileIcon_Unknown.png");
 
         return _fileInfo.Icon;
@@ -306,7 +304,7 @@ internal class FileEntry : ItemEntryBase
             }
         }
 
-        if (FileTypeInfo != null)
+        if(FileTypeInfo != null)
         {
             FileTypeInfo.DrawActions(this, isModal);
         }

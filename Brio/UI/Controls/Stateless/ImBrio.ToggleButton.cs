@@ -1,8 +1,5 @@
-﻿using Brio.UI.Windows;
-using ImGuiNET;
-using System;
+﻿using ImGuiNET;
 using System.Numerics;
-using static FFXIVClientStructs.FFXIV.Client.UI.Misc.ConfigModule;
 
 namespace Brio.UI.Controls.Stateless;
 

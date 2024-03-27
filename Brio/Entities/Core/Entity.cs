@@ -77,7 +77,7 @@ internal abstract class Entity : IDisposable
 
     public virtual void OnSelected()
     {
-        foreach (Capability capability in Capabilities)
+        foreach(Capability capability in Capabilities)
         {
             capability.OnEntitySelected();
         }

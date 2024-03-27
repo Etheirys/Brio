@@ -12,9 +12,9 @@ internal class FileService
     {
         _fileInfos = fileInfos;
 
-        foreach (FileTypeInfoBase typeInfo in _fileInfos)
+        foreach(FileTypeInfoBase typeInfo in _fileInfos)
         {
-            if (_typeInfoMap.ContainsKey(typeInfo.Type))
+            if(_typeInfoMap.ContainsKey(typeInfo.Type))
             {
                 Brio.Log.Error($"Multiple file type info objects for file type: {typeInfo.Type}");
                 continue;

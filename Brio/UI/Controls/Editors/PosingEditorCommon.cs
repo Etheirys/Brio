@@ -170,7 +170,7 @@ internal static class PosingEditorCommon
             if(isValid)
             {
                 var bonePose = posing.SkeletonPosing.GetBonePose(boneId);
-               
+
                 var ik = bonePose.DefaultIK;
                 bool enabled = ik.Enabled && BrioStyle.EnableStyle;
 

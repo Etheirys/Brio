@@ -1,5 +1,4 @@
-﻿using Brio.Config;
-using Brio.Game.Camera;
+﻿using Brio.Game.Camera;
 using Brio.Input;
 using FFXIVClientStructs.FFXIV.Client.Game.Control;
 using ImGuiNET;
@@ -79,7 +78,7 @@ internal static partial class ImBrioGizmo
         // recompose the matrix
         if(changed)
         {
-            if (worldSpace)
+            if(worldSpace)
             {
                 matrix = Matrix4x4.CreateScale(scale);
                 matrix = Matrix4x4.Transform(matrix, rotation);
@@ -92,7 +91,7 @@ internal static partial class ImBrioGizmo
                 matrix = Matrix4x4.Transform(matrix, editingRotation);
                 matrix.Translation = translation;
             }
-      
+
         }
 
         return changed;
@@ -125,7 +124,7 @@ internal static partial class ImBrioGizmo
         closestAxisMouseFromPos = null;
         isUsing = false;
 
-   
+
         // create a transform matrix
         transformMatrix = Matrix4x4.CreateFromQuaternion(rotation);
         transformMatrix.Translation = new Vector3(0, -5, 0);

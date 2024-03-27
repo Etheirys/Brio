@@ -1,5 +1,4 @@
 ﻿using Brio.Capabilities.Actor;
-using Brio.Capabilities.Core;
 using Brio.Capabilities.Posing;
 using Brio.Config;
 using Brio.Files;
@@ -57,18 +56,18 @@ internal class FileUIHelpers
             types.Add(typeof(MareCharacterDataFile));
 
         TypeFilter filter = new TypeFilter("Characters", types.ToArray());
-        
-        LibraryManager.Get(filter, (r)=>
+
+        LibraryManager.Get(filter, (r) =>
         {
-            if (r is ActorAppearanceUnion appearance)
+            if(r is ActorAppearanceUnion appearance)
             {
                 _ = capability.SetAppearance(appearance, options);
             }
-            else if (r is AnamnesisCharaFile appearanceFile)
+            else if(r is AnamnesisCharaFile appearanceFile)
             {
                 _ = capability.SetAppearance(appearanceFile, options);
             }
-            else if (r is MareCharacterDataFile mareFile)
+            else if(r is MareCharacterDataFile mareFile)
             {
                 capability.LoadMcdf(mareFile.GetPath());
             }
@@ -101,7 +100,7 @@ internal class FileUIHelpers
                          var path = paths[0];
                          var directory = Path.GetDirectoryName(path);
                          if(directory is not null)
-                            ConfigurationService.Instance.Configuration.LastPath = directory;
+                             ConfigurationService.Instance.Configuration.LastPath = directory;
                          capability.LoadMcdf(path);
                      }
                  }, 1, ConfigurationService.Instance.Configuration.LastPath, true);

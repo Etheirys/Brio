@@ -10,7 +10,6 @@ using Dalamud.Interface;
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Interface.Windowing;
 using ImGuiNET;
-using ImGuizmoNET;
 using OneOf.Types;
 using System.Numerics;
 
@@ -220,11 +219,11 @@ internal class PosingOverlayToolbarWindow : Window
 
         //using(ImRaii.PushFont(UiBuilder.IconFont))
         //{
-            using(ImRaii.Disabled(!(bone?.EligibleForIK == true)))
-            {
-                if(ImGui.Button($"IK###bone_ik", new Vector2(buttonSize)))
-                    ImGui.OpenPopup("overlay_bone_ik");
-            }
+        using(ImRaii.Disabled(!(bone?.EligibleForIK == true)))
+        {
+            if(ImGui.Button($"IK###bone_ik", new Vector2(buttonSize)))
+                ImGui.OpenPopup("overlay_bone_ik");
+        }
         //}
         if(ImGui.IsItemHovered())
             ImGui.SetTooltip("Inverse Kinematics");

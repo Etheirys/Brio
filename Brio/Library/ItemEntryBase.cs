@@ -10,7 +10,6 @@ using Dalamud.Interface;
 using Dalamud.Interface.Internal;
 using Dalamud.Interface.Utility.Raii;
 using ImGuiNET;
-using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Numerics;
 
@@ -112,10 +111,10 @@ internal abstract class ItemEntryBase : EntryBase
         bool isFavorite = config.Library.Favorites.Contains(this.Identifier);
 
         ImGui.PushStyleColor(ImGuiCol.Text, isFavorite ? UIConstants.GizmoRed : UIConstants.ToggleButtonInactive);
-       
+
         //
-        
-        if (ImBrio.FontIconButton(FontAwesomeIcon.Heart))
+
+        if(ImBrio.FontIconButton(FontAwesomeIcon.Heart))
         {
             if(!isFavorite)
             {
@@ -131,7 +130,7 @@ internal abstract class ItemEntryBase : EntryBase
 
         ImGui.PopStyleColor();
 
-        if (ImGui.IsItemHovered())
+        if(ImGui.IsItemHovered())
             ImGui.SetTooltip(isFavorite ? "Remove from favorites" : "Add to favorites");
 
         ImGui.SameLine();

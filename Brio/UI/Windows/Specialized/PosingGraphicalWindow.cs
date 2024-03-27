@@ -8,22 +8,17 @@ using Brio.Game.Camera;
 using Brio.Game.GPose;
 using Brio.Game.Posing;
 using Brio.Resources;
-using Brio.UI.Controls.Core;
 using Brio.UI.Controls.Editors;
-using Brio.UI.Controls.Selectors;
 using Brio.UI.Controls.Stateless;
 using Dalamud.Interface;
-using Dalamud.Interface.Utility;
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Interface.Windowing;
 using ImGuiNET;
-using ImGuizmoNET;
 using OneOf.Types;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
-using static FFXIVClientStructs.FFXIV.Client.UI.Misc.ConfigModule;
 
 namespace Brio.UI.Windows.Specialized;
 
@@ -119,7 +114,7 @@ internal class PosingGraphicalWindow : Window, IDisposable
             if(rightPane.Success)
             {
                 DrawGlobalButtons(posing);
-           
+
                 PosingEditorCommon.DrawSelectionName(posing);
 
                 DrawButtons(posing);
@@ -703,7 +698,7 @@ internal class PosingGraphicalWindow : Window, IDisposable
 
             ImGui.GetWindowDrawList().AddCircle(pos, circleSize, circleColor);
 
-            if (hovered || selected)
+            if(hovered || selected)
             {
                 ImGui.GetWindowDrawList().AddCircleFilled(
                     pos,
@@ -711,7 +706,7 @@ internal class PosingGraphicalWindow : Window, IDisposable
                     selected ? ImGui.GetColorU32(ImGuiCol.CheckMark) : ImGui.GetColorU32(ImGuiCol.TextDisabled));
             }
 
-            if (hovered && ImGui.IsWindowHovered())
+            if(hovered && ImGui.IsWindowHovered())
             {
                 if(ImGui.IsMouseClicked(ImGuiMouseButton.Left))
                 {

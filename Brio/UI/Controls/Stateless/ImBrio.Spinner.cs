@@ -1,8 +1,6 @@
 ﻿using Brio.Resources;
 using Dalamud.Interface.Internal;
 using ImGuiNET;
-using System;
-using System.Numerics;
 
 namespace Brio.UI.Controls.Stateless;
 

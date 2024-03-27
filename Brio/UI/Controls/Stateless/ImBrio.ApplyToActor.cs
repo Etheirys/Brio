@@ -1,5 +1,5 @@
-﻿using Brio.Entities.Actor;
-using Brio.Entities;
+﻿using Brio.Entities;
+using Brio.Entities.Actor;
 using ImGuiNET;
 using System;
 

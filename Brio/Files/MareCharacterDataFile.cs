@@ -42,7 +42,7 @@ internal class MareCharacterDataFile : IFileMetadata
     public string? Version => null;
     public TagCollection? Tags => null;
 
-    public MareCharacterDataFile(string  filePath)
+    public MareCharacterDataFile(string filePath)
     {
         _filePath = filePath;
     }

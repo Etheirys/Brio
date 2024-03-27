@@ -30,7 +30,7 @@ internal class ActorAppearanceWidget(ActorAppearanceCapability capability) : Wid
 
         if(ImBrio.FontIconButton("export_charafile", FontAwesomeIcon.FileExport, "Export Character File"))
             FileUIHelpers.ShowExportCharacterModal(Capability);
-      
+
         ImGui.SameLine();
 
         if(Capability.CanMcdf)

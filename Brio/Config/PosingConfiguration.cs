@@ -1,7 +1,4 @@
-﻿using Brio.Input;
-using Dalamud.Game.ClientState.Keys;
-
-namespace Brio.Config;
+﻿namespace Brio.Config;
 
 internal class PosingConfiguration
 {

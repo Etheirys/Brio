@@ -411,7 +411,7 @@ internal class PosingOverlayWindow : Window, IDisposable
             newTransform = matrix.ToTransform();
             _trackingTransform = newTransform;
         }
-        
+
         if(ImGuizmo.Manipulate(
             ref worldViewMatrix.M11,
             ref projectionMatrix.M11,

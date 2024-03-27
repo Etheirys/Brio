@@ -23,7 +23,7 @@ internal class AnamnesisCharaFileInfo : AppliableActorFileInfoBase<AnamnesisChar
     }
 
     protected override void Apply(AnamnesisCharaFile file, ActorEntity actor)
-    { 
+    {
         ActorAppearanceCapability? capability;
         if(actor.TryGetCapability<ActorAppearanceCapability>(out capability) && capability != null)
         {
@@ -96,7 +96,7 @@ internal class AnamnesisCharaFile : JsonDocumentBase
         tags.Add(this.Gender.ToDisplayName());
         tags.Add(this.Tribe.ToDisplayName());
     }
-    
+
     public static implicit operator ActorAppearance(AnamnesisCharaFile chara)
     {
         var appearance = new ActorAppearance

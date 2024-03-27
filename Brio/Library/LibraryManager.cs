@@ -3,7 +3,6 @@ using Brio.Files;
 using Brio.Library.Filters;
 using Brio.Library.Sources;
 using Brio.Library.Tags;
-using Brio.Resources;
 using Brio.UI;
 using Brio.UI.Windows;
 using Dalamud.Interface;
@@ -11,7 +10,6 @@ using Dalamud.Plugin.Services;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -60,7 +58,7 @@ internal class LibraryManager : IDisposable
         TypeFilter typeFilter = new(label, typeof(T));
         Get(typeFilter, (r) =>
         {
-            if (r is T tr)
+            if(r is T tr)
             {
                 callback.Invoke(tr);
             }
@@ -160,7 +158,7 @@ internal class LibraryManager : IDisposable
         string? lastDirectory = null;
         var lastDirectories = _configurationService.Configuration.Library.LastBrowsePaths;
         lastDirectories.TryGetValue(typesId, out lastDirectory);
-        
+
         // Show the dalamud file picker
         UIManager.Instance.FileDialogManager.OpenFileDialog(
             title,
@@ -188,8 +186,8 @@ internal class LibraryManager : IDisposable
 
                     callback.Invoke(result);
                 }
-            }, 
-            1, 
+            },
+            1,
             lastDirectory,
             true);
     }
@@ -226,7 +224,7 @@ internal class LibraryManager : IDisposable
 
         _rootItem.Clear();
         _sources.Clear();
-        
+
         // Directory configurations
         foreach(var sourceConfig in _configurationService.Configuration.Library.Files)
         {
@@ -241,7 +239,7 @@ internal class LibraryManager : IDisposable
             _rootItem.Add(source);
         }
 
-        foreach (SourceBase source in _sources)
+        foreach(SourceBase source in _sources)
         {
             _rootItem.Add(source);
         }
@@ -281,7 +279,7 @@ internal class LibraryManager : IDisposable
 
             await Task.WhenAll(scanTasks.ToArray());
         }
-        catch (Exception ex)
+        catch(Exception ex)
         {
             Brio.Log.Error(ex, "Error during library scan");
         }

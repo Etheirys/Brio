@@ -47,7 +47,7 @@ internal class GameDataAppearanceEntry : ItemEntryBase
         {
             Tags.Add("Inhuman");
         }
-        
+
     }
 
     public override string Name => _name;

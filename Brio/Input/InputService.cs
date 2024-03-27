@@ -95,7 +95,7 @@ internal class InputService
         {
             _eventsDown.Remove(evt);
         }
-        else if (isDown && !wasDown)
+        else if(isDown && !wasDown)
         {
             _eventsDown.Add(evt);
 
@@ -128,6 +128,6 @@ internal class InputService
             down &= _keyState[VirtualKey.SHIFT] == bind.Shift;
 
         return down;
-        
+
     }
 }

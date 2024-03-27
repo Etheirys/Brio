@@ -1,7 +1,7 @@
 using Brio.Config;
 using Brio.Input;
-using Brio.Core;
 using Brio.IPC;
+using Brio.Resources;
 using Brio.UI.Controls.Editors;
 using Brio.UI.Controls.Stateless;
 using Brio.Web;
@@ -9,13 +9,8 @@ using Dalamud.Interface;
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Interface.Windowing;
 using ImGuiNET;
-using Swan;
 using System;
-using System.Collections.Generic;
-using System.IO;
 using System.Numerics;
-using System.Xml.Linq;
-using Brio.Resources;
 
 namespace Brio.UI.Windows;
 
@@ -540,7 +535,7 @@ internal class SettingsWindow : Window
     {
         LibrarySourcesEditor.Draw(null, _configurationService, _configurationService.Configuration.Library, _libraryPadding);
     }
-    
+
     private void DrawKeysTab()
     {
         using(var tab = ImRaii.TabItem("Key Binds"))

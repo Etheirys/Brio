@@ -3,7 +3,6 @@ using Brio.Files;
 using Brio.Game.Types;
 using Brio.Library;
 using Brio.Library.Filters;
-using Brio.Library.Sources;
 using Brio.Library.Tags;
 using Brio.UI.Controls.Core;
 using Brio.UI.Controls.Stateless;
@@ -17,7 +16,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Numerics;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Brio.UI.Windows;
@@ -89,7 +87,7 @@ internal class LibraryWindow : Window
         _configurationService = configurationService;
         _libraryManager = libraryManager;
         _serviceProvider = serviceProvider;
-        
+
         _settingsWindow = settingsWindow;
 
         _path.Add(_libraryManager.Root);
@@ -114,7 +112,7 @@ internal class LibraryWindow : Window
         _isModal = true;
         _modalCallback = callback;
         _modalFilter = filter;
-       
+
         _selectedFilter = _modalFilter;
 
         Flags = ImGuiWindowFlags.Modal | ImGuiWindowFlags.NoCollapse;
@@ -138,7 +136,7 @@ internal class LibraryWindow : Window
         _modalFilter = null;
 
         Flags = ImGuiWindowFlags.None;
-       
+
         if(_configurationService.Configuration.Library.ReturnLibraryToLastLocation)
         {
             if(_lastFilter is not null)
@@ -171,7 +169,7 @@ internal class LibraryWindow : Window
 
     public new void Toggle()
     {
-        if (IsOpen)
+        if(IsOpen)
         {
             Close();
         }
@@ -231,7 +229,7 @@ internal class LibraryWindow : Window
     {
         using(ImRaii.PushId("brio_library"))
         {
-                
+
             DrawFilters();
 
             if(_selectedFilter == null)
@@ -271,7 +269,7 @@ internal class LibraryWindow : Window
                     ImGui.EndChild();
                 }
 
-                
+
                 Vector2 mousePos = ImGui.GetMousePos() - ImGui.GetWindowPos();
                 bool isMouseOverArea = (mousePos.X > 0 && mousePos.Y > 0 && mousePos.X < entriesPaneWidth && mousePos.Y < entriesPaneHeight);
                 if(isMouseOverArea)
@@ -286,7 +284,7 @@ internal class LibraryWindow : Window
                     float mouseWheel = ImGui.GetIO().MouseWheel * 10;
                     // TODO: replace this ctrl listener with the new key bind system when it is merged
                     // as ImGUI ctrl support is _spotty_
-                    if (ImGui.IsKeyPressed(ImGuiKey.LeftCtrl) && mouseWheel != 0)
+                    if(ImGui.IsKeyPressed(ImGuiKey.LeftCtrl) && mouseWheel != 0)
                     {
                         float val = _configurationService.Configuration.Library.IconSize;
                         val = Math.Clamp(val + mouseWheel, MinEntrySize, MaxEntrySize);
@@ -361,7 +359,7 @@ internal class LibraryWindow : Window
                     }
 
                     ImGui.SetCursorPosX(ImGui.GetCursorPosX() + (ImBrio.GetRemainingWidth() - (200 + ImGui.GetStyle().ItemSpacing.X)));
-                
+
                     if(isIEB == false)
                     {
                         ImGui.BeginDisabled();
@@ -406,7 +404,7 @@ internal class LibraryWindow : Window
 
     private void DoBrowse()
     {
-        if (_modalFilter != null && _modalCallback != null)
+        if(_modalFilter != null && _modalCallback != null)
             _libraryManager.ShowFilePicker(_modalFilter, _modalCallback);
 
         Close();
@@ -507,7 +505,7 @@ internal class LibraryWindow : Window
         if(width == -1)
             width = ImBrio.GetRemainingWidth();
 
-        if (ImGui.BeginChild("library_path_input", new(width, lineHeight), false, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse))
+        if(ImGui.BeginChild("library_path_input", new(width, lineHeight), false, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse))
         {
             ImGui.PushStyleColor(ImGuiCol.Button, 0);
 
@@ -576,7 +574,7 @@ internal class LibraryWindow : Window
                     ReScan();
                 }
 
-                if (ImGui.IsItemHovered())
+                if(ImGui.IsItemHovered())
                 {
                     ImGui.SetTooltip("Scan all library sources and refresh the view");
                 }
@@ -590,7 +588,7 @@ internal class LibraryWindow : Window
             ImGui.PopStyleColor();
 
 
-            
+
             ImGui.SameLine();
             ImGui.EndChild();
         }
@@ -604,7 +602,7 @@ internal class LibraryWindow : Window
         float searchBarWidth = ImBrio.GetRemainingWidth();
         float searchBarHeight = ImBrio.GetLineHeight();
         Vector2 searchbarPosition = ImGui.GetCursorScreenPos();
-        
+
         ImGui.PushStyleColor(ImGuiCol.ChildBg, ImGui.GetColorU32(ImGuiCol.FrameBg));
         ImGui.PushStyleVar(ImGuiStyleVar.ChildRounding, ImGui.GetStyle().FrameRounding);
 
@@ -764,7 +762,7 @@ internal class LibraryWindow : Window
             List<Tag> availableTags = GetAvailableTags(SearchUtility.ToQuery(_searchText));
 
             int trimmedTags = 0;
-            if (availableTags.Count > MaxTagsInSuggest)
+            if(availableTags.Count > MaxTagsInSuggest)
             {
                 trimmedTags = availableTags.Count - MaxTagsInSuggest;
                 availableTags = availableTags.GetRange(0, MaxTagsInSuggest);
@@ -783,7 +781,7 @@ internal class LibraryWindow : Window
                     Refresh(true);
                 }
 
-                if (trimmedTags > 0)
+                if(trimmedTags > 0)
                 {
                     ImBrio.Text($"plus \"{trimmedTags}\" more tags...", 0.75f, 0x88FFFFFF);
                 }
@@ -805,7 +803,7 @@ internal class LibraryWindow : Window
                 }
             }
 
-            if (!hasContent)
+            if(!hasContent)
             {
                 ImBrio.Text($"Start typing to search...", 0x88FFFFFF);
             }
@@ -814,7 +812,7 @@ internal class LibraryWindow : Window
         ImGui.End();
         ImGui.PopStyleVar();
 
-        if (_searchLostFocus > 10 && !_searchNeedsFocus)
+        if(_searchLostFocus > 10 && !_searchNeedsFocus)
         {
             _isSearchSuggestWindowOpen = false;
         }
@@ -876,7 +874,7 @@ internal class LibraryWindow : Window
                 }
             }
         }
-        
+
 
         if(_toOpen != null)
         {
@@ -890,10 +888,10 @@ internal class LibraryWindow : Window
         float height = width + 60;
         Vector2 size = new(width, height);
         Vector2 pos = ImGui.GetCursorPos();
-        
+
 
         bool selected = _selected == entry;
-        if (ImGui.Selectable($"###library_entry_{id}_selectable", ref selected, ImGuiSelectableFlags.AllowDoubleClick, size))
+        if(ImGui.Selectable($"###library_entry_{id}_selectable", ref selected, ImGuiSelectableFlags.AllowDoubleClick, size))
         {
             _selected = entry;
 
@@ -979,7 +977,7 @@ internal class LibraryWindow : Window
 
     private void OnOpen(EntryBase entry)
     {
-        if (entry is GroupEntryBase dir)
+        if(entry is GroupEntryBase dir)
         {
             _path.Add(dir);
             Refresh(false);
@@ -991,7 +989,7 @@ internal class LibraryWindow : Window
                 if(_modalCallback != null)
                 {
                     object? result = itemEntry.Load();
-                    
+
                     if(result != null)
                     {
                         _modalCallback.Invoke(result);
@@ -1002,7 +1000,7 @@ internal class LibraryWindow : Window
             }
             else
             {
-               // YUKI TODO ?
+                // YUKI TODO ?
             }
         }
     }
@@ -1018,7 +1016,7 @@ internal class LibraryWindow : Window
 
             await _libraryManager.ScanAsync();
             Refresh(true);
-           
+
             sw.Stop();
             _lastRefreshTimeMs = sw.ElapsedMilliseconds;
             _isRescanning = false;
@@ -1086,7 +1084,7 @@ internal class LibraryWindow : Window
 
             if(_selectedFilter is LibraryFavoritesFilter)
                 flatten = true;
-           
+
             _currentEntries = currentEntry.GetFilteredEntries(flatten);
             if(_currentEntries != null)
             {

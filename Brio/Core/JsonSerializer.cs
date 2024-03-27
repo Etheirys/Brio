@@ -24,7 +24,7 @@ public static class JsonSerializer
     public static T Deserialize<T>(string json)
     {
         T? obj = System.Text.Json.JsonSerializer.Deserialize<T>(json, _serializeOptions);
-        if (obj == null)
+        if(obj == null)
             throw new Exception($"Failed to deserialize");
 
         return (T)obj;

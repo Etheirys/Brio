@@ -1,5 +1,4 @@
 ﻿using Brio.Config;
-using Brio.Core;
 using Brio.Entities;
 using Brio.Input;
 using Brio.UI.Controls.Stateless;
@@ -34,7 +33,7 @@ internal class MainWindow : Window
         UpdateWindow updateWindow,
         InputService input)
         : base($"{Brio.Name} Scene Manager [{configService.Version}]###brio_main_window", ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.AlwaysAutoResize)
-      {
+    {
         Namespace = "brio_main_namespace";
 
         _configurationService = configService;
@@ -45,7 +44,7 @@ internal class MainWindow : Window
 
         _entityManager = entityManager;
         _entitySelector = new(_entityManager);
-        
+
         _configService = configService;
 
         SizeConstraints = new WindowSizeConstraints

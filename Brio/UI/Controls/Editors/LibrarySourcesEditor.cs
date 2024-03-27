@@ -201,11 +201,11 @@ internal static class LibrarySourcesEditor
                     }
 
                     ImGui.SetCursorPosY(ImGui.GetCursorPosY() + ImBrio.GetRemainingHeight() - ImBrio.GetLineHeight());
-             
+
                     if(isNewItem)
                     {
                         ImGui.SetCursorPosX(ImGui.GetCursorPosX() + ImBrio.GetRemainingWidth() - 210);
-               
+
                         if(string.IsNullOrEmpty(fileSource.Path))
                             ImGui.BeginDisabled();
 

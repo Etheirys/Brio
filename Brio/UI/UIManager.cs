@@ -1,5 +1,4 @@
 ﻿using Brio.Config;
-using Brio.Core;
 using Brio.Game.GPose;
 using Brio.IPC;
 using Brio.UI.Windows;
@@ -9,7 +8,6 @@ using Dalamud.Interface.Internal;
 using Dalamud.Interface.Windowing;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
-using FFXIVClientStructs.FFXIV.Client.System.Framework;
 using ImGuiNET;
 using System;
 
@@ -37,9 +35,9 @@ internal class UIManager : IDisposable
 
     private readonly ITextureProvider _textureProvider;
     private readonly IToastGui _toastGui;
-  
+
     private readonly IFramework _framework;
-    
+
     PenumbraService _penumbraService;
     GlamourerService _glamourerService;
     MareService _mareService;
@@ -131,7 +129,7 @@ internal class UIManager : IDisposable
 
         _gPoseService.OnGPoseStateChange += OnGPoseStateChange;
         _configurationService.OnConfigurationChanged += ApplySettings;
-    
+
         _pluginInterface.UiBuilder.Draw += DrawUI;
         _pluginInterface.UiBuilder.OpenConfigUi += ShowSettingsWindow;
         _pluginInterface.ActivePluginsChanged += ActivePluginsChanged;

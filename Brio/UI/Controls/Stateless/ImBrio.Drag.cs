@@ -1,11 +1,9 @@
-﻿using Brio.Config;
+﻿using Brio.Input;
 using Brio.UI.Controls.Core;
 using Dalamud.Interface;
-using Dalamud.Interface.Utility.Raii;
 using ImGuiNET;
 using System.Collections.Generic;
 using System.Numerics;
-using Brio.Input;
 
 namespace Brio.UI.Controls.Stateless;
 internal static partial class ImBrio
@@ -104,7 +102,7 @@ internal static partial class ImBrio
         bool changed = false;
         bool active = false;
 
-        if(InputService.IsKeyBindDown(KeyBindEvents.Interface_IncrementSmallModifier)) 
+        if(InputService.IsKeyBindDown(KeyBindEvents.Interface_IncrementSmallModifier))
             step /= 10;
 
         if(InputService.IsKeyBindDown(KeyBindEvents.Interface_IncrementLargeModifier))

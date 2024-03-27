@@ -1,10 +1,10 @@
-﻿using Dalamud.Interface.Internal;
+﻿using Brio.Core;
+using Dalamud.Interface.Internal;
 using Dalamud.Plugin;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
-using Brio.Core;
 
 namespace Brio.Resources;
 
@@ -16,7 +16,7 @@ internal class ResourceProvider : IDisposable
     private readonly Dictionary<string, IDalamudTextureWrap> _cachedImages = [];
 
     private readonly DalamudPluginInterface _pluginInterface;
-   
+
     public ResourceProvider(DalamudPluginInterface pluginInterface)
     {
         Instance = this;

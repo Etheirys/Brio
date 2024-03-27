@@ -1,5 +1,4 @@
-﻿using Brio.Capabilities.Core;
-using Brio.Capabilities.Posing;
+﻿using Brio.Capabilities.Posing;
 using Brio.Core;
 using Brio.Game.Posing;
 using Brio.UI.Controls.Stateless;
@@ -71,14 +70,14 @@ internal class PosingTransformEditor
         (var rdidChange, var ranyActive) = ImBrio.DragFloat3($"###_transformRotation_0", ref realEuler, 1f, FontAwesomeIcon.ArrowsSpin, "Rotation");
         (var sdidChange, var sanyActive) = ImBrio.DragFloat3($"###_transformScale_0", ref realTransform.Scale, 0.1f, FontAwesomeIcon.ExpandAlt, "Scale");
 
-        didChange |= pdidChange |= rdidChange |= sdidChange; 
+        didChange |= pdidChange |= rdidChange |= sdidChange;
         anyActive |= panyActive |= ranyActive |= sanyActive;
-     
+
         ImGui.Spacing();
 
         if(ImBrio.FontIconButton("propagate", FontAwesomeIcon.Compress, "Propagate", bone?.EligibleForIK == true))
             ImGui.OpenPopup("transform_propagate_popup");
-    
+
         if(_compactMode)
         {
             ImGui.SameLine();
@@ -114,7 +113,7 @@ internal class PosingTransformEditor
             {
                 posingCapability.Snapshot(false, false);
             }
-           
+
             _trackingTransform = null;
             _trackingEuler = null;
         }

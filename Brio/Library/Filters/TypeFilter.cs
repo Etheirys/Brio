@@ -25,7 +25,7 @@ internal class TypeFilter : FilterBase
 
     public override bool Filter(EntryBase entry)
     {
-        if (entry is ItemEntryBase file)
+        if(entry is ItemEntryBase file)
         {
             return _types.Contains(file.LoadsType);
         }

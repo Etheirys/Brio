@@ -1,7 +1,6 @@
 ﻿using Brio.Config;
 using Brio.Resources;
 using Brio.UI.Controls.Stateless;
-using Dalamud.Interface.Utility.Raii;
 using Dalamud.Interface.Windowing;
 using ImGuiNET;
 using System.Numerics;
@@ -15,8 +14,8 @@ internal class UpdateWindow : Window
     private string _changelogTest;
 
     const float _closeButtonWidth = 210f;
-  
-    public UpdateWindow(ConfigurationService configurationService) :  base($" {Brio.Name} Changelog###brio_update_window", 
+
+    public UpdateWindow(ConfigurationService configurationService) : base($" {Brio.Name} Changelog###brio_update_window",
         ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoCollapse)
     {
         Namespace = "brio_update_namespace";
@@ -34,7 +33,7 @@ internal class UpdateWindow : Window
     {
         var segmentSize = ImGui.GetWindowSize().X / 1f;
 
-        if (ImGui.BeginChild("###brio_update_text", new Vector2(ImBrio.GetRemainingWidth(), ImBrio.GetRemainingHeight() - 35f), true))
+        if(ImGui.BeginChild("###brio_update_text", new Vector2(ImBrio.GetRemainingWidth(), ImBrio.GetRemainingHeight() - 35f), true))
         {
             ImGui.PushTextWrapPos(segmentSize);
             ImGui.TextWrapped(_changelogTest);

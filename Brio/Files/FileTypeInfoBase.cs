@@ -1,5 +1,4 @@
 ﻿using Brio.Library.Sources;
-using Brio.UI.Windows;
 using Dalamud.Interface.Internal;
 using System;
 using System.IO;

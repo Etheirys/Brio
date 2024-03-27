@@ -1,7 +1,4 @@
-﻿using Brio.Library.Tags;
-using System.Text;
-
-namespace Brio.Library.Filters;
+﻿namespace Brio.Library.Filters;
 
 internal class SearchQueryFilter : FilterBase
 {

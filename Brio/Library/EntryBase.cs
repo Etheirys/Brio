@@ -3,10 +3,8 @@ using Brio.Library.Sources;
 using Brio.Library.Tags;
 using Brio.UI.Controls.Stateless;
 using Brio.UI.Windows;
-using Dalamud.Interface;
 using Dalamud.Interface.Internal;
 using ImGuiNET;
-using System;
 
 namespace Brio.Library;
 

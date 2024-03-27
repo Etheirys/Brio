@@ -85,7 +85,7 @@ internal abstract class GroupEntryBase : EntryBase
 
         foreach(EntryBase entry in this.FilteredEntries)
         {
-            if (entry is GroupEntryBase dir)
+            if(entry is GroupEntryBase dir)
             {
                 dir.Flatten(ref entries);
             }

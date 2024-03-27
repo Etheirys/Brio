@@ -45,7 +45,7 @@ internal class GameDataNpcSource : GameDataAppearanceSourceBase
             {
                 displayName = ResolveName(name);
             }
-            
+
             var entry = new GameDataAppearanceEntry(this, EntityManager, npc.RowId, displayName ?? name, 0, npc, $"E{npc.RowId}");
             entry.SourceInfo = $"ENpc {npc.RowId}";
             entry.Tags.Add("NPC");

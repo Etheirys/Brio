@@ -49,7 +49,7 @@ internal class KeyBindPromptWindow : Window, IDisposable
 
         ImGui.SetCursorPosY(50);
 
-        foreach (var evt in Enum.GetValues<KeyBindEvents>())
+        foreach(var evt in Enum.GetValues<KeyBindEvents>())
         {
             if(!_inputService.HasListener(evt))
                 continue;
@@ -68,7 +68,7 @@ internal class KeyBindPromptWindow : Window, IDisposable
         this.Size = new(400, height);
 
         float y = ImGui.GetIO().DisplaySize.Y - height;
-        this.Position = new(-10, y+5);
+        this.Position = new(-10, y + 5);
     }
 
     private void OnGPoseStateChanged(bool newState)
@@ -85,11 +85,11 @@ internal class KeyBindPromptWindow : Window, IDisposable
 
     private void OnConfigurationChanged()
     {
-        if (_configurationService.Configuration.Input.ShowPromptsInGPose && _gPoseService.IsGPosing)
+        if(_configurationService.Configuration.Input.ShowPromptsInGPose && _gPoseService.IsGPosing)
         {
             this.IsOpen = true;
         }
-        else if (!_configurationService.Configuration.Input.ShowPromptsInGPose && _gPoseService.IsGPosing)
+        else if(!_configurationService.Configuration.Input.ShowPromptsInGPose && _gPoseService.IsGPosing)
         {
             this.IsOpen = false;
         }

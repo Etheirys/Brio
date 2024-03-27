@@ -26,7 +26,7 @@ internal class GameDataMountSource : GameDataAppearanceSourceBase
             var entry = new GameDataAppearanceEntry(this, EntityManager, mount.RowId, name, mount.Icon, mount, $"{mount.RowId}");
             entry.Tags.Add("Mount");
 
-            if (name != rowName)
+            if(name != rowName)
                 entry.Tags.Add("Named");
 
             entry.SourceInfo = rowName;

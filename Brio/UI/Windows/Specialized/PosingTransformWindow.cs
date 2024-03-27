@@ -20,7 +20,7 @@ internal class PosingTransformWindow : Window
     private readonly PosingService _posingService;
     private readonly CameraService _cameraService;
     private readonly PosingTransformEditor _posingTransformEditor = new();
-   
+
     private Matrix4x4? _trackingMatrix;
 
     public PosingTransformWindow(EntityManager entityManager, CameraService cameraService, PosingService posingService) : base($"{Brio.Name} - Transform###brio_transform_window", ImGuiWindowFlags.AlwaysVerticalScrollbar)
@@ -55,7 +55,7 @@ internal class PosingTransformWindow : Window
         }
 
         WindowName = $"Transform - {posing.Entity.FriendlyName}###brio_transform_window";
-       
+
         DrawButtons(posing);
         ImGui.Separator();
         DrawGizmo();
