@@ -231,18 +231,20 @@ internal static partial class ImBrioGizmo
                             mouseWheel *= 10;
 
                         Quaternion rot = Quaternion.Identity;
-                        if(dragAxis == Axis.X)
+                        if(closestMouseAxis == Axis.X)
                         {
                             rot = Quaternion.CreateFromAxisAngle(Vector3.UnitX, mouseWheel);
                         }
-                        if(dragAxis == Axis.Y)
+                        if(closestMouseAxis == Axis.Y)
                         {
                             rot = Quaternion.CreateFromAxisAngle(Vector3.UnitY, -mouseWheel);
                         }
-                        if(dragAxis == Axis.Z)
+                        if(closestMouseAxis == Axis.Z)
                         {
                             rot = Quaternion.CreateFromAxisAngle(Vector3.UnitZ, mouseWheel);
                         }
+
+                        rotation = rotation * rot;
                         changed = true;
                     }
                 }

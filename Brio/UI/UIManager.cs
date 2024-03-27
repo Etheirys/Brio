@@ -1,5 +1,7 @@
 ﻿using Brio.Config;
+using Brio.Core;
 using Brio.Game.GPose;
+using Brio.IPC;
 using Brio.UI.Windows;
 using Brio.UI.Windows.Specialized;
 using Dalamud.Interface.ImGuiFileDialog;
@@ -7,6 +9,7 @@ using Dalamud.Interface.Internal;
 using Dalamud.Interface.Windowing;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
+using FFXIVClientStructs.FFXIV.Client.System.Framework;
 using ImGuiNET;
 using System;
 
@@ -34,6 +37,12 @@ internal class UIManager : IDisposable
 
     private readonly ITextureProvider _textureProvider;
     private readonly IToastGui _toastGui;
+  
+    private readonly IFramework _framework;
+    
+    PenumbraService _penumbraService;
+    GlamourerService _glamourerService;
+    MareService _mareService;
 
     private readonly WindowSystem _windowSystem;
 
@@ -56,6 +65,7 @@ internal class UIManager : IDisposable
             ConfigurationService configurationService,
             ITextureProvider textureProvider,
             IToastGui toast,
+            IFramework framework,
             MainWindow mainWindow,
             SettingsWindow settingsWindow,
             InfoWindow infoWindow,
@@ -68,7 +78,11 @@ internal class UIManager : IDisposable
             PosingOverlayToolbarWindow overlayToolbarWindow,
             PosingTransformWindow overlayTransformWindow,
             PosingGraphicalWindow graphicalWindow,
-            CameraWindow cameraWindow
+            CameraWindow cameraWindow,
+
+            PenumbraService penumbraService,
+            GlamourerService glamourerService,
+            MareService mareService
         )
     {
         Instance = this;
@@ -93,6 +107,12 @@ internal class UIManager : IDisposable
         _graphicalWindow = graphicalWindow;
         _cameraWindow = cameraWindow;
 
+        _framework = framework;
+
+        _penumbraService = penumbraService;
+        _glamourerService = glamourerService;
+        _mareService = mareService;
+
         _windowSystem = new(Brio.Name);
 
         _windowSystem.AddWindow(_mainWindow);
@@ -111,12 +131,13 @@ internal class UIManager : IDisposable
 
         _gPoseService.OnGPoseStateChange += OnGPoseStateChange;
         _configurationService.OnConfigurationChanged += ApplySettings;
+    
         _pluginInterface.UiBuilder.Draw += DrawUI;
         _pluginInterface.UiBuilder.OpenConfigUi += ShowSettingsWindow;
+        _pluginInterface.ActivePluginsChanged += ActivePluginsChanged;
 
         ApplySettings();
     }
-
 
     public void ShowAppearanceWindow()
     {
@@ -138,6 +159,18 @@ internal class UIManager : IDisposable
         _settingsWindow.IsOpen = true;
     }
 
+    private void ActivePluginsChanged(PluginListInvalidationKind kind, bool affectedThisPlugin)
+    {
+        foreach(var plugin in _pluginInterface.InstalledPlugins)
+        {
+            Brio.Log.Debug($"InstalledPlugins: {plugin}");
+        }
+
+        _penumbraService.RefreshPenumbraStatus();
+        _glamourerService.RefreshGlamourerStatus();
+        _mareService.RefreshMareStatus();
+    }
+
     public void NotifyError(string message)
     {
         _toastGui.ShowError(message);
@@ -156,6 +189,8 @@ internal class UIManager : IDisposable
 
     private void ApplySettings()
     {
+        BrioStyle.EnableStyle = _configurationService.Configuration.Appearance.EnableBrioStyle;
+
         _pluginInterface.UiBuilder.DisableGposeUiHide = _configurationService.Configuration.Interface.ShowInGPose;
         _pluginInterface.UiBuilder.DisableAutomaticUiHide = _configurationService.Configuration.Interface.ShowWhenUIHidden;
         _pluginInterface.UiBuilder.DisableUserUiHide = _configurationService.Configuration.Interface.ShowWhenUIHidden;
@@ -164,9 +199,13 @@ internal class UIManager : IDisposable
 
     private void DrawUI()
     {
+        BrioStyle.PushStyle();
+
         _windowSystem.Draw();
         FileDialogManager.Draw();
         _libraryWindow.DrawModal();
+
+        BrioStyle.PopStyle();
     }
 
     public void Dispose()

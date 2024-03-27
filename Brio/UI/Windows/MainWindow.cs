@@ -24,9 +24,17 @@ internal class MainWindow : Window
     private readonly EntityHierarchyView _entitySelector;
 
     private readonly ConfigurationService _configService;
-  
-    public MainWindow(ConfigurationService configService, SettingsWindow settingsWindow, InfoWindow infoWindow, EntityManager entityManager, UpdateWindow updateWindow,  LibraryWindow libraryWindow, InputService input) : base($"{Brio.Name} Scene Manager [{configService.Version}]###brio_main_window", ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.AlwaysAutoResize)
-    {
+
+    public MainWindow(
+        ConfigurationService configService,
+        SettingsWindow settingsWindow,
+        InfoWindow infoWindow,
+        LibraryWindow libraryWindow,
+        EntityManager entityManager,
+        UpdateWindow updateWindow,
+        InputService input)
+        : base($"{Brio.Name} Scene Manager [{configService.Version}]###brio_main_window", ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.AlwaysAutoResize)
+      {
         Namespace = "brio_main_namespace";
 
         _configurationService = configService;
@@ -48,6 +56,7 @@ internal class MainWindow : Window
 
         input.AddListener(KeyBindEvents.Interface_ToggleBrioWindow, this.OnMainWindowToggle);
         input.AddListener(KeyBindEvents.Interface_ToggleBindPromptWindow, this.OnPromptWindowToggle);
+
     }
 
     public override void Draw()
@@ -69,7 +78,7 @@ internal class MainWindow : Window
 
         EntityHelpers.DrawEntitySection(_entityManager.SelectedEntity);
     }
-  
+
     private void OnMainWindowToggle()
     {
         this.IsOpen = !this.IsOpen;
@@ -84,22 +93,27 @@ internal class MainWindow : Window
 
     private void DrawHeaderButtons()
     {
-        var initialPos = ImGui.GetCursorPos();
-        ImGui.PushClipRect(ImGui.GetWindowPos(), ImGui.GetWindowPos() + ImGui.GetWindowSize(), false);
+        float buttonWidths = 25;
+        float finalWidth = ImBrio.GetRemainingWidth() - ((buttonWidths * 2) + (ImGui.GetStyle().ItemSpacing.X * 2) + ImGui.GetStyle().WindowBorderSize);
 
-        ImGui.SetCursorPosY(0);
-        if(ImBrio.FontIconButtonRight("settings_toggle", FontAwesomeIcon.Cog, 2.3f, "Settings", bordered: false))
+        if(ImBrio.Button("Library", FontAwesomeIcon.Book, new Vector2(finalWidth, 0)))
+            _libraryWindow.Toggle();
+
+        if(ImGui.IsItemHovered())
+            ImGui.SetTooltip("Open the Library");
+
+        ImGui.SameLine();
+        if(ImBrio.FontIconButton(FontAwesomeIcon.InfoCircle, new(buttonWidths, 0)))
+            _infoWindow.Toggle();
+
+        if(ImGui.IsItemHovered())
+            ImGui.SetTooltip("Information");
+
+        ImGui.SameLine();
+        if(ImBrio.FontIconButton(FontAwesomeIcon.Cog, new(buttonWidths, 0)))
             _settingsWindow.Toggle();
 
-        ImGui.SetCursorPosY(0);
-        if(ImBrio.FontIconButtonRight("info_toggle", FontAwesomeIcon.InfoCircle, 3.3f, "Info", bordered: false))
-            _infoWindow.Toggle();
-    
-        //ImGui.SetCursorPosY(0);
-        //if(ImBrio.FontIconButtonRight("library_toggle", FontAwesomeIcon.Book, 4.3f, "Library", bordered: false))
-        //    _libraryWindow.Toggle();
-
-        ImGui.PopClipRect();
-        ImGui.SetCursorPos(initialPos);
+        if(ImGui.IsItemHovered())
+            ImGui.SetTooltip("Settings");
     }
 }

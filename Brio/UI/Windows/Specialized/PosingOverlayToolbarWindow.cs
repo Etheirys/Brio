@@ -218,14 +218,14 @@ internal class PosingOverlayToolbarWindow : Window
             ImGui.SetTooltip("Select Parent");
 
 
-        using(ImRaii.PushFont(UiBuilder.IconFont))
-        {
+        //using(ImRaii.PushFont(UiBuilder.IconFont))
+        //{
             using(ImRaii.Disabled(!(bone?.EligibleForIK == true)))
             {
-                if(ImGui.Button($"{FontAwesomeIcon.Adjust.ToIconString()}###bone_ik", new Vector2(buttonSize)))
+                if(ImGui.Button($"IK###bone_ik", new Vector2(buttonSize)))
                     ImGui.OpenPopup("overlay_bone_ik");
             }
-        }
+        //}
         if(ImGui.IsItemHovered())
             ImGui.SetTooltip("Inverse Kinematics");
 

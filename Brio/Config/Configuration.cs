@@ -1,12 +1,10 @@
-﻿using Brio.Input;
-using Dalamud.Configuration;
-using System.Collections.Generic;
+﻿using Dalamud.Configuration;
 
 namespace Brio.Config;
 
 internal class Configuration : IPluginConfiguration
 {
-    public const int CurrentVersion = 1;
+    public const int CurrentVersion = 2;
     public const int CurrentPopupKey = 3;
 
     public int Version { get; set; } = CurrentVersion;

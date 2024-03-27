@@ -26,7 +26,10 @@ internal class EntityHierarchyView(EntityManager entityManager)
 
         using(ImRaii.PushId($"entity_hierarchy_{root.Id}"))
         {
-            DrawEntity(root, selectedEntityId);
+            foreach(var child in root.Children.ToList())
+            {
+                DrawEntity(child, selectedEntityId);
+            }
         }
     }
 

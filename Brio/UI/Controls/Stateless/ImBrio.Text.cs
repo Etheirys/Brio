@@ -1,4 +1,6 @@
-﻿using ImGuiNET;
+﻿using Dalamud.Interface;
+using Dalamud.Interface.Utility.Raii;
+using ImGuiNET;
 
 namespace Brio.UI.Controls.Stateless;
 internal static partial class ImBrio
@@ -26,5 +28,20 @@ internal static partial class ImBrio
     public static void Text(string text, uint color = 0xFFFFFF)
     {
         ImGui.TextColored(ImGui.ColorConvertU32ToFloat4(color), text);
+    }
+
+    public static void Icon(FontAwesomeIcon icon)
+    {
+        // Use a button here since we can control its width, unlike text.
+        ImGui.PushStyleColor(ImGuiCol.Button, 0);
+        ImGui.PushStyleColor(ImGuiCol.ButtonHovered, 0);
+        ImGui.PushStyleColor(ImGuiCol.ButtonActive, 0);
+        using(ImRaii.PushFont(UiBuilder.IconFont))
+        {
+            ImGui.Button(icon.ToIconString(), new(20, 0));
+        }
+        ImGui.PopStyleColor();
+        ImGui.PopStyleColor();
+        ImGui.PopStyleColor();
     }
 }
