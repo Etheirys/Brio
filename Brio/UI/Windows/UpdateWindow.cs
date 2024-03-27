@@ -23,7 +23,7 @@ internal class UpdateWindow : Window
 
         _configurationService = configurationService;
 
-        Size = new Vector2(430, 535);
+        Size = new Vector2(630, 535);
 
         ShowCloseButton = false;
 
