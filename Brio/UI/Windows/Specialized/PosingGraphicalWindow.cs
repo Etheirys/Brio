@@ -119,6 +119,11 @@ internal class PosingGraphicalWindow : Window, IDisposable
             if(rightPane.Success)
             {
                 DrawGlobalButtons(posing);
+           
+                PosingEditorCommon.DrawSelectionName(posing);
+
+                DrawButtons(posing);
+                ImGui.Separator();
 
                 float height = ImBrio.GetRemainingHeight() - ImBrio.GetLineHeight() - (ImGui.GetStyle().FramePadding.Y * 2);
 
@@ -203,10 +208,6 @@ internal class PosingGraphicalWindow : Window, IDisposable
 
     private void DrawSelection(PosingCapability posing)
     {
-        PosingEditorCommon.DrawSelectionName(posing);
-
-        DrawButtons(posing);
-        ImGui.Separator();
         DrawGizmo();
         ImGui.Separator();
         _transformEditor.Draw("graphical_transform", posing);
