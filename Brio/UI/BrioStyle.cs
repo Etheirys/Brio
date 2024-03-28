@@ -44,6 +44,6 @@ internal static class BrioStyle
             return;
         }
 
-        ImGui.PopStyleVar(18);
+        ImGui.PopStyleVar(19);
     }
 }
