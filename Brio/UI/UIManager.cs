@@ -197,13 +197,17 @@ internal class UIManager : IDisposable
 
     private void DrawUI()
     {
-        BrioStyle.PushStyle();
-
-        _windowSystem.Draw();
-        FileDialogManager.Draw();
-        _libraryWindow.DrawModal();
-
-        BrioStyle.PopStyle();
+        try 
+        {
+            BrioStyle.PushStyle();
+            _windowSystem.Draw();
+            FileDialogManager.Draw();
+            _libraryWindow.DrawModal();
+        }
+        finally
+        {
+            BrioStyle.PopStyle();
+        }
     }
 
     public void Dispose()
