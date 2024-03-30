@@ -15,7 +15,6 @@ internal class MareService : IDisposable
     private readonly DalamudPluginInterface _pluginInterface;
     private readonly ConfigurationService _configurationService;
 
-    private readonly ICallGateSubscriber<string, GameObject, bool> _mareApplyMcdf;
     private readonly ICallGateSubscriber<string, GameObject, Task<bool>> _mareApplyMcdfAsync;
 
     public MareService(DalamudPluginInterface pluginInterface, ConfigurationService configurationService)
@@ -23,7 +22,6 @@ internal class MareService : IDisposable
         _pluginInterface = pluginInterface;
         _configurationService = configurationService;
 
-        _mareApplyMcdf = pluginInterface.GetIpcSubscriber<string, GameObject, bool>("MareSynchronos.LoadMcdf");
         _mareApplyMcdfAsync = pluginInterface.GetIpcSubscriber<string, GameObject, Task<bool>>("MareSynchronos.LoadMcdfAsync");
 
         RefreshMareStatus();
@@ -43,27 +41,10 @@ internal class MareService : IDisposable
         }
     }
 
-    public bool LoadMcdf(string fileName, GameObject target)
-    {
-        if(IsMareAvailable == false)
-        {
-            Brio.Log.Error($"Failed load MCDF file, Mare is not available");
-            return false;
-        }
-
-        try
-        {
-            return _mareApplyMcdf.InvokeFunc(fileName, target);
-        }
-        catch(Exception ex)
-        {
-            Brio.Log.Error(ex, $"Failed to Invoke MareSynchronos.LoadMcdf IPC");
-            return false;
-        }
-    }
-
     public Task<bool> LoadMcdfAsync(string fileName, GameObject target)
     {
+        RefreshMareStatus();
+
         if(IsMareAvailable == false)
         {
             Brio.Log.Error($"Failed load MCDF file, Mare is not available");

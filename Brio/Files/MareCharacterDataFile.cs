@@ -23,12 +23,12 @@ internal class MareCharacterDataFileInfo : AppliableActorFileInfoBase<MareCharac
     // But this class is used for the library tags, so lets just fake it with an empty file. =)
     public override object? Load(string filePath) => new MareCharacterDataFile(filePath);
 
-    protected override void Apply(MareCharacterDataFile file, ActorEntity actor)
+    protected override async void Apply(MareCharacterDataFile file, ActorEntity actor)
     {
         ActorAppearanceCapability? capability;
         if(actor.TryGetCapability<ActorAppearanceCapability>(out capability) && capability != null)
         {
-            capability.LoadMcdf(file.GetPath());
+            await capability.LoadMcdfAsync(file.GetPath());
         }
     }
 }

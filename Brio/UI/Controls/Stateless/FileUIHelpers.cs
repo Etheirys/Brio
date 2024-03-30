@@ -55,7 +55,7 @@ internal class FileUIHelpers
 
         TypeFilter filter = new TypeFilter("Characters", [.. types]);
 
-        LibraryManager.Get(filter, (r) =>
+        LibraryManager.Get(filter, async (r) =>
         {
             if(r is ActorAppearanceUnion appearance)
             {
@@ -67,7 +67,7 @@ internal class FileUIHelpers
             }
             else if(r is MareCharacterDataFile mareFile)
             {
-                capability.LoadMcdf(mareFile.GetPath());
+                await capability.LoadMcdfAsync(mareFile.GetPath());
             }
         });
     }
@@ -91,7 +91,7 @@ internal class FileUIHelpers
     public static void ShowImportMcdfModal(ActorAppearanceCapability capability)
     {
         UIManager.Instance.FileDialogManager.OpenFileDialog("Import MCDF File###import_character_window", "Mare Character Data File (*.mcdf){.mcdf}",
-                 (success, paths) =>
+                 async (success, paths) =>
                  {
                      if(success && paths.Count == 1)
                      {
@@ -99,7 +99,7 @@ internal class FileUIHelpers
                          var directory = Path.GetDirectoryName(path);
                          if(directory is not null)
                              ConfigurationService.Instance.Configuration.LastPath = directory;
-                         capability.LoadMcdf(path);
+                         await capability.LoadMcdfAsync(path);
                      }
                  }, 1, ConfigurationService.Instance.Configuration.LastPath, true);
     }
