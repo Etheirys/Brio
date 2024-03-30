@@ -37,8 +37,6 @@ internal unsafe class ObjectMonitorService : IDisposable
     private delegate nint CharacterBaseCleanupDelegate(BrioCharacterBase* charaBase);
     private readonly Hook<CharacterBaseCleanupDelegate> _characterBaseCleanupHook = null!;
 
-    private readonly Dictionary<nint, Character> _charaBaseToCharacterCache = [];
-
     public ObjectMonitorService(IObjectTable objectTable, ISigScanner scanner, IGameInteropProvider hooking)
     {
         _objectTable = objectTable;
@@ -58,33 +56,6 @@ internal unsafe class ObjectMonitorService : IDisposable
         var charaBaseUpdateMaterialsDetour = "40 53 48 83 EC ?? 48 8B D9 E8 ?? ?? ?? ?? 48 8B 8B ?? ?? ?? ?? 48 85 C9 74 ?? 4C 8B 83";
         _characterBaseUpdateMaterialsHook = hooking.HookFromAddress<CharacterBaseUpdateMaterialsDelegate>(scanner.ScanText(charaBaseUpdateMaterialsDetour), CharacterBaseUpdateMaterialsDetour);
         _characterBaseUpdateMaterialsHook.Enable();
-    }
-
-    public bool TryGetCharacterFromCharacterBase(BrioCharacterBase* characterBase, [MaybeNullWhen(false)] out Character chara) => TryGetCharacterFromCharacterBase((CharacterBase*)characterBase, out chara);
-
-    public bool TryGetCharacterFromCharacterBase(CharacterBase* characterBase, [MaybeNullWhen(false)] out Character chara)
-    {
-        if(_charaBaseToCharacterCache.TryGetValue((nint)characterBase, out chara))
-            return true;
-
-        foreach(var obj in _objectTable)
-        {
-            if(obj is Character foundChara)
-            {
-                var bases = foundChara.GetCharacterBases();
-                foreach(var searchBase in bases)
-                {
-                    if(searchBase.CharacterBase == characterBase)
-                    {
-                        chara = foundChara;
-                        _charaBaseToCharacterCache[(nint)characterBase] = foundChara;
-                        return true;
-                    }
-                }
-            }
-        }
-        chara = null;
-        return false;
     }
 
     private nint CharacterIntitializeDetour(NativeCharacter* chara)
@@ -112,7 +83,6 @@ internal unsafe class ObjectMonitorService : IDisposable
         if(charaBase != null)
         {
             CharacterBaseDestroyed?.Invoke(charaBase);
-            _charaBaseToCharacterCache.Remove((nint)charaBase);
         }
 
         return _characterBaseCleanupHook.Original(charaBase);
