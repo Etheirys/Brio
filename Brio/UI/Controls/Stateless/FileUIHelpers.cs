@@ -50,8 +50,8 @@ internal class FileUIHelpers
     {
         List<Type> types = [typeof(ActorAppearanceUnion), typeof(AnamnesisCharaFile)];
 
-        if(capability.CanMcdf)
-            types.Add(typeof(MareCharacterDataFile));
+        //if(capability.CanMcdf)
+        //    types.Add(typeof(MareCharacterDataFile));
 
         TypeFilter filter = new TypeFilter("Characters", [.. types]);
 
