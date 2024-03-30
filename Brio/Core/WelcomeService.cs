@@ -11,6 +11,7 @@ internal class WelcomeService
         if(configService.Configuration.PopupKey == -1) // New User
         {
             infoWindow.IsOpen = true;
+            configService.Configuration.PopupKey = Configuration.CurrentPopupKey;
         }
         else if(configService.Configuration.PopupKey != Configuration.CurrentPopupKey)
         {
