@@ -14,19 +14,13 @@ internal class PosingTransformEditor
     private Transform? _trackingTransform;
     private Vector3? _trackingEuler;
 
-    private bool _compactMode = false;
-
     public void Draw(string id, PosingCapability posingCapability, bool compactMode = false)
     {
         var selected = posingCapability.Selected;
 
-        _compactMode = compactMode;
-
-        Vector2 style;
-        if(_compactMode)
+        Vector2 style = new Vector2(4, 5);
+        if(compactMode)
             style = new Vector2(4, 3);
-        else
-            style = new Vector2(4, 5);
 
         using(ImRaii.PushStyle(ImGuiStyleVar.ItemSpacing, style))
         {
@@ -38,7 +32,7 @@ internal class PosingTransformEditor
                         var realBone = posingCapability.SkeletonPosing.GetBone(bone);
                         if(realBone != null && realBone.Skeleton.IsValid)
                         {
-                            DrawBoneTransformEditor(posingCapability, bone);
+                            DrawBoneTransformEditor(posingCapability, bone, compactMode);
                         }
                         else
                         {
@@ -52,7 +46,7 @@ internal class PosingTransformEditor
         }
     }
 
-    private void DrawBoneTransformEditor(PosingCapability posingCapability, BonePoseInfoId boneId)
+    private void DrawBoneTransformEditor(PosingCapability posingCapability, BonePoseInfoId boneId, bool compactMode = false)
     {
         var bone = posingCapability.SkeletonPosing.GetBone(boneId);
         var bonePose = bone is not null ? posingCapability.SkeletonPosing.GetBonePose(boneId) : null;
@@ -79,7 +73,7 @@ internal class PosingTransformEditor
         if(ImBrio.FontIconButton("propagate", FontAwesomeIcon.Compress, "Propagate", bone?.EligibleForIK == true))
             ImGui.OpenPopup("transform_propagate_popup");
 
-        if(_compactMode)
+        if(compactMode)
         {
             ImGui.SameLine();
 
