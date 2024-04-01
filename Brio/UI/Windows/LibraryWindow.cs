@@ -119,7 +119,7 @@ internal class LibraryWindow : Window
 
         if(_configurationService.Configuration.Library.ReturnLibraryToLastLocation)
         {
-            Refresh(true);
+            TryRefresh(true);
         }
         else
         {
@@ -144,7 +144,7 @@ internal class LibraryWindow : Window
                 _selectedFilter = _lastFilter;
             }
 
-            Refresh(true);
+            TryRefresh(true);
         }
         else
         {
@@ -184,17 +184,17 @@ internal class LibraryWindow : Window
         if(_path.Count > 1)
             _path.RemoveRange(1, _path.Count - 1);
 
-        Refresh(true);
+        TryRefresh(true);
     }
 
     private void OnLibraryScanFinished()
     {
-        Refresh(true);
+        TryRefresh(true);
     }
 
     private void OnConfigurationChanged()
     {
-        Refresh(true);
+        TryRefresh(true);
     }
 
     public override void Draw()
@@ -439,7 +439,7 @@ internal class LibraryWindow : Window
                 if(_path.Count > 1)
                     _path.RemoveRange(1, _path.Count - 1);
 
-                Refresh(true);
+                TryRefresh(true);
             }
         }
         else
@@ -478,7 +478,7 @@ internal class LibraryWindow : Window
                 if(_path.Count > 1)
                     _path.RemoveRange(1, _path.Count - 1);
 
-                Refresh(true);
+                TryRefresh(true);
             }
         }
     }
@@ -492,7 +492,7 @@ internal class LibraryWindow : Window
         // cant clear type filter.
         ////_typeFilter.Clear();
 
-        Refresh(true);
+        TryRefresh(true);
     }
 
     private void DrawPath(float width = -1)
@@ -620,7 +620,7 @@ internal class LibraryWindow : Window
                         _searchFilter.Clear();
                         TagFilter.Clear();
                         _searchNeedsFocus = true;
-                        Refresh(true);
+                        TryRefresh(true);
                     }
 
                     ImGui.PopStyleColor();
@@ -654,7 +654,7 @@ internal class LibraryWindow : Window
                     {
                         TagFilter.Tags.Remove(toRemove);
                         _searchNeedsFocus = true;
-                        Refresh(true);
+                        TryRefresh(true);
                     }
                 }
 
@@ -684,7 +684,7 @@ internal class LibraryWindow : Window
                         _searchFilter.Query = SearchUtility.ToQuery(_searchText);
                     }
 
-                    Refresh(true);
+                    TryRefresh(true);
                 }
 
                 ImGui.PopStyleColor();
@@ -778,7 +778,7 @@ internal class LibraryWindow : Window
                     _searchNeedsFocus = true;
 
                     ClearSearchText();
-                    Refresh(true);
+                    TryRefresh(true);
                 }
 
                 if(trimmedTags > 0)
@@ -799,7 +799,7 @@ internal class LibraryWindow : Window
                 {
                     TagFilter.Add(availableTags[0]);
                     ClearSearchText();
-                    Refresh(true);
+                    TryRefresh(true);
                 }
             }
 
@@ -853,11 +853,11 @@ internal class LibraryWindow : Window
         {
             if(_currentEntries == null)
             {
-                Refresh(true);
+                TryRefresh(true);
             }
             else
             {
-                foreach(var entry in _currentEntries.ToList())
+                foreach(var entry in _currentEntries)
                 {
                     DrawEntry(entry, fileWidth, index);
                     index++;
@@ -980,19 +980,26 @@ internal class LibraryWindow : Window
         if(entry is GroupEntryBase dir)
         {
             _path.Add(dir);
-            Refresh(false);
+            TryRefresh(false);
         }
         else
         {
             if(_isModal && entry is ItemEntryBase itemEntry)
             {
-                if(_modalCallback != null)
+                if(_modalCallback is not null)
                 {
-                    object? result = itemEntry.Load();
-
-                    if(result != null)
+                    try
                     {
-                        _modalCallback.Invoke(result);
+                        object? result = itemEntry.Load();
+
+                        if(result is not null)
+                        {
+                            _modalCallback.Invoke(result);
+                        }
+                    }
+                    catch(Exception ex)
+                    {
+                        Brio.Log.Error(ex, "Exception while invoking library modal Callback!");
                     }
                 }
 
@@ -1005,22 +1012,31 @@ internal class LibraryWindow : Window
         }
     }
 
-    public void ReScan()
+    public async void ReScan()
     {
-        Task.Run(async () =>
+        _isRescanning = true;
+
+        Stopwatch sw = new();
+        sw.Start();
+
+        await _libraryManager.ScanAsync();
+        TryRefresh(true);
+
+        sw.Stop();
+        _lastRefreshTimeMs = sw.ElapsedMilliseconds;
+        _isRescanning = false;
+    }
+
+    public void TryRefresh(bool filter)
+    {
+        try
         {
-            _isRescanning = true;
-
-            Stopwatch sw = new();
-            sw.Start();
-
-            await _libraryManager.ScanAsync();
-            Refresh(true);
-
-            sw.Stop();
-            _lastRefreshTimeMs = sw.ElapsedMilliseconds;
-            _isRescanning = false;
-        });
+            Refresh(filter);            
+        }
+        catch(Exception ex)
+        {
+            Brio.Log.Error(ex, "Exception while Refreshing!");
+        }
     }
 
     public void Refresh(bool filter)
@@ -1033,70 +1049,67 @@ internal class LibraryWindow : Window
         if(_libraryManager.IsScanning || _isRefreshing)
             return;
 
-        Task.Run(() =>
+        if(_libraryManager.IsScanning || _isRefreshing)
+            return;
+
+        _isRefreshing = true;
+
+        Stopwatch sw = new();
+        sw.Start();
+
+        _selected = null;
+
+        if(_currentEntries != null)
         {
-            if(_libraryManager.IsScanning || _isRefreshing)
-                return;
-
-            _isRefreshing = true;
-
-            Stopwatch sw = new();
-            sw.Start();
-
-            _selected = null;
-
-            if(_currentEntries != null)
+            foreach(EntryBase entry in _currentEntries)
             {
-                foreach(EntryBase entry in _currentEntries)
-                {
-                    entry.IsVisible = false;
-                }
+                entry.IsVisible = false;
             }
+        }
 
-            GroupEntryBase currentEntry = _path[_path.Count - 1];
+        GroupEntryBase currentEntry = _path[_path.Count - 1];
 
-            if(filter)
+        if(filter)
+        {
+            List<FilterBase> filters = new();
+            filters.Add(_selectedFilter);
+
+            if(_modalFilter != null)
+                filters.Add(_modalFilter);
+
+            if(TagFilter.Tags != null && TagFilter.Tags.Count > 0)
+                filters.Add(TagFilter);
+
+            _libraryManager.Root.FilterEntries(filters.ToArray());
+
+            _allTags.Clear();
+            currentEntry.GetAllTags(ref _allTags);
+
+            // Add the search filter last, and re-filter the entries now that we have all the
+            // tags
+            if(!string.IsNullOrEmpty(_searchText))
             {
-                List<FilterBase> filters = new();
-                filters.Add(_selectedFilter);
-
-                if(_modalFilter != null)
-                    filters.Add(_modalFilter);
-
-                if(TagFilter.Tags != null && TagFilter.Tags.Count > 0)
-                    filters.Add(TagFilter);
-
+                filters.Add(_searchFilter);
                 _libraryManager.Root.FilterEntries(filters.ToArray());
-
-                _allTags.Clear();
-                currentEntry.GetAllTags(ref _allTags);
-
-                // Add the search filter last, and re-filter the entries now that we have all the
-                // tags
-                if(!string.IsNullOrEmpty(_searchText))
-                {
-                    filters.Add(_searchFilter);
-                    _libraryManager.Root.FilterEntries(filters.ToArray());
-                }
             }
+        }
 
-            bool flatten = IsSearching;
+        bool flatten = IsSearching;
 
-            if(_selectedFilter is LibraryFavoritesFilter)
-                flatten = true;
+        if(_selectedFilter is LibraryFavoritesFilter)
+            flatten = true;
 
-            _currentEntries = currentEntry.GetFilteredEntries(flatten);
-            if(_currentEntries != null)
+        _currentEntries = currentEntry.GetFilteredEntries(flatten);
+        if(_currentEntries != null)
+        {
+            foreach(EntryBase entry in _currentEntries)
             {
-                foreach(EntryBase entry in _currentEntries)
-                {
-                    entry.IsVisible = true;
-                }
+                entry.IsVisible = true;
             }
+        }
 
-            sw.Stop();
-            _lastRefreshTimeMs = sw.ElapsedMilliseconds;
-            _isRefreshing = false;
-        });
+        sw.Stop();
+        _lastRefreshTimeMs = sw.ElapsedMilliseconds;
+        _isRefreshing = false;
     }
 }

@@ -98,7 +98,7 @@ internal abstract class ItemEntryBase : EntryBase
         if(selected != null)
         {
             window.TagFilter.Add(selected);
-            window.Refresh(true);
+            window.TryRefresh(true);
         }
     }
 
