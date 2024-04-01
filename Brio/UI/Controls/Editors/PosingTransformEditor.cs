@@ -22,33 +22,34 @@ internal class PosingTransformEditor
 
         _compactMode = compactMode;
 
+        Vector2 style;
         if(_compactMode)
-            ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, new Vector2(4, 3));
+            style = new Vector2(4, 3);
         else
-            ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, new Vector2(4, 5));
+            style = new Vector2(4, 5);
 
-        using(ImRaii.PushId(id))
+        using(ImRaii.PushStyle(ImGuiStyleVar.ItemSpacing, style))
         {
-            selected.Switch(
-                bone =>
-                {
-                    var realBone = posingCapability.SkeletonPosing.GetBone(bone);
-                    if(realBone != null && realBone.Skeleton.IsValid)
+            using(ImRaii.PushId(id))
+            {
+                selected.Switch(
+                    bone =>
                     {
-                        DrawBoneTransformEditor(posingCapability, bone);
-                    }
-                    else
-                    {
-                        DrawModelTransformEditor(posingCapability);
-                    }
-                },
-                _ => DrawModelTransformEditor(posingCapability),
-                _ => DrawModelTransformEditor(posingCapability)
-            );
+                        var realBone = posingCapability.SkeletonPosing.GetBone(bone);
+                        if(realBone != null && realBone.Skeleton.IsValid)
+                        {
+                            DrawBoneTransformEditor(posingCapability, bone);
+                        }
+                        else
+                        {
+                            DrawModelTransformEditor(posingCapability);
+                        }
+                    },
+                    _ => DrawModelTransformEditor(posingCapability),
+                    _ => DrawModelTransformEditor(posingCapability)
+                );
+            }
         }
-
-        ImGui.PopStyleVar();
-
     }
 
     private void DrawBoneTransformEditor(PosingCapability posingCapability, BonePoseInfoId boneId)
