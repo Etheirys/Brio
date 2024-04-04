@@ -17,14 +17,14 @@ internal class ActorLifetimeWidget(ActorLifetimeCapability capability) : Widget<
     {
         if(ImBrio.FontIconButton("lifetimewidget_spawnnew", FontAwesomeIcon.Plus, "Spawn New Actor"))
         {
-            Capability.SpawnNewActor(false, true);
+            Capability.SpawnNewActor(false, false, true);
         }
 
         ImGui.SameLine();
 
         if(ImBrio.FontIconButton("lifetimewidget_spawnnewwithcompanionslot", FontAwesomeIcon.PlusSquare, "Spawn New Actor with Companion slot"))
         {
-            Capability.SpawnNewActor(false, false);
+            Capability.SpawnNewActor(false, true, false);
         }
 
         ImGui.SameLine();
