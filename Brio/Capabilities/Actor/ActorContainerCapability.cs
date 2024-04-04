@@ -32,13 +32,13 @@ internal class ActorContainerCapability : Capability
         _entityManager.SetSelectedEntity(entity);
     }
 
-    public void CreateCharacter(bool enableAttachments, bool targetNewInHierarchy)
+    public void CreateCharacter(bool enableAttachments, bool targetNewInHierarchy, bool forceSpawnActorWithoutCompanion = false)
     {
         SpawnFlags flags = SpawnFlags.Default;
         if(enableAttachments)
             flags |= SpawnFlags.ReserveCompanionSlot;
 
-        if(_actorSpawnService.CreateCharacter(out var chara, flags))
+        if(_actorSpawnService.CreateCharacter(out var chara, flags, disableSpawnCompanion: forceSpawnActorWithoutCompanion))
         {
             if(targetNewInHierarchy)
             {

@@ -12,13 +12,16 @@ internal class BrioIPCService : IDisposable
 {
     public bool IsIPCEnabled { get; private set; } = false;
 
-    public static readonly (int, int) CurrentApiVersion = (1, 0);
+    public static readonly (int, int) CurrentApiVersion = (1, 1);
 
     public const string ApiVersionIpcName = "Brio.ApiVersion";
     private ICallGateProvider<(int, int)>? ApiVersionIpc;
 
     public const string SpawnActorIpcName = "Brio.SpawnActor";
     private ICallGateProvider<GameObject?>? SpawnActorIpc;
+ 
+    public const string SpawnActorWithoutCompanionIpcName = "Brio.SpawnActorWithoutCompanion";
+    private ICallGateProvider<GameObject?>? SpawnActorWithoutCompanionIpc;
 
     public const string DespawnActorIpcName = "Brio.DespawnActor";
     private ICallGateProvider<GameObject, bool>? DespawnActorIpc;
@@ -59,6 +62,14 @@ internal class BrioIPCService : IDisposable
         return null;
     }
 
+    private GameObject? SpawnActorWithoutCompanionImpl()
+    {
+        if(_actorSpawnService.CreateCharacter(out var character, disableSpawnCompanion: true))
+            return character;
+
+        return null;
+    }
+
     private Task<bool> DespawnActorAsyncImpl(GameObject gameObject) => _framework.RunOnTick(() => DespawnActorImpl(gameObject));
     private bool DespawnActorImpl(GameObject gameObject) => _actorSpawnService.DestroyObject(gameObject);
 
@@ -72,6 +83,9 @@ internal class BrioIPCService : IDisposable
 
         SpawnActorIpc = _pluginInterface.GetIpcProvider<GameObject?>(SpawnActorIpcName);
         SpawnActorIpc.RegisterFunc(SpawnActorImpl);
+
+        SpawnActorWithoutCompanionIpc = _pluginInterface.GetIpcProvider<GameObject?>(SpawnActorWithoutCompanionIpcName);
+        SpawnActorWithoutCompanionIpc.RegisterFunc(SpawnActorWithoutCompanionImpl);
 
         DespawnActorIpc = _pluginInterface.GetIpcProvider<GameObject, bool>(DespawnActorIpcName);
         DespawnActorIpc.RegisterFunc(DespawnActorImpl);
