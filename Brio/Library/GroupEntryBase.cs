@@ -42,29 +42,38 @@ internal abstract class GroupEntryBase : EntryBase
         if(_allEntries.Count <= 0)
             return;
 
-        _filteredEntries.Clear();
+        try
+        {
+            _filteredEntries.Clear();
 
-        if(filters.Length <= 0)
-        {
-            _filteredEntries.AddRange(_allEntries);
-        }
-        else
-        {
-            foreach(EntryBase entry in _allEntries)
+            if(filters.Length <= 0)
             {
-                if(entry == null)
-                    continue;
-
-                if(entry is GroupEntryBase dir)
+                _filteredEntries.AddRange(_allEntries);
+            }
+            else
+            {
+                foreach(EntryBase entry in _allEntries)
                 {
-                    dir.FilterEntries(filters);
-                }
+                    if(entry == null)
+                        continue;
 
-                if(entry.PassesFilters(filters))
-                {
-                    _filteredEntries.Add(entry);
+                    if(entry is GroupEntryBase dir)
+                    {
+                        dir.FilterEntries(filters);
+                    }
+
+                    if(entry.PassesFilters(filters))
+                    {
+                        _filteredEntries.Add(entry);
+                    }
                 }
             }
+        }
+        catch(System.Exception ex)
+        {
+#if DEBUG
+            Brio.Log.Error(ex, "Exception while filtering entries");
+#endif
         }
     }
 

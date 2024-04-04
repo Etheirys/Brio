@@ -1,5 +1,6 @@
 ﻿using Brio.Config;
 using Brio.Files;
+using Brio.Game.GPose;
 using Brio.Game.Types;
 using Brio.Library;
 using Brio.Library.Filters;
@@ -40,6 +41,7 @@ internal class LibraryWindow : Window
     private readonly LibraryManager _libraryManager;
     private readonly IPluginLog _log;
     private readonly IServiceProvider _serviceProvider;
+    private readonly GPoseService _gPoseService;
 
     private readonly LibraryFavoritesFilter _favoritesFilter;
     private readonly TypeFilter _charactersFilter;
@@ -70,6 +72,7 @@ internal class LibraryWindow : Window
 
     public LibraryWindow(
         IPluginLog log,
+        GPoseService gPoseService,
         ConfigurationService configurationService,
         LibraryManager libraryManager,
         SettingsWindow settingsWindow,
@@ -87,6 +90,7 @@ internal class LibraryWindow : Window
         _configurationService = configurationService;
         _libraryManager = libraryManager;
         _serviceProvider = serviceProvider;
+        _gPoseService = gPoseService;
 
         _settingsWindow = settingsWindow;
 
@@ -96,10 +100,24 @@ internal class LibraryWindow : Window
         _libraryManager.OnScanFinished += OnLibraryScanFinished;
         configurationService.OnConfigurationChanged += OnConfigurationChanged;
 
+        _gPoseService.OnGPoseStateChange += _gPoseService_OnGPoseStateChange;
+
         _favoritesFilter = new LibraryFavoritesFilter(configurationService);
         _charactersFilter = new TypeFilter("Characters", typeof(AnamnesisCharaFile), typeof(ActorAppearanceUnion), typeof(MareCharacterDataFile));
         _posesFilter = new TypeFilter("Poses", typeof(PoseFile), typeof(CMToolPoseFile));
         _selectedFilter = _favoritesFilter;
+    }
+
+    private void _gPoseService_OnGPoseStateChange(bool newState)
+    {
+        if(newState)
+        {
+
+        }
+        else
+        {
+            IsOpen = false;
+        }
     }
 
     private float WindowContentWidth => ImGui.GetWindowContentRegionMax().X - ImGui.GetWindowContentRegionMin().X;
@@ -194,7 +212,10 @@ internal class LibraryWindow : Window
 
     private void OnConfigurationChanged()
     {
-        TryRefresh(true);
+        if(_gPoseService.IsGPosing)
+        {
+            TryRefresh(true);
+        }
     }
 
     public override void Draw()
@@ -1031,7 +1052,7 @@ internal class LibraryWindow : Window
     {
         try
         {
-            Refresh(filter);            
+            Refresh(true);            
         }
         catch(Exception ex)
         {
@@ -1067,12 +1088,11 @@ internal class LibraryWindow : Window
             }
         }
 
-        GroupEntryBase currentEntry = _path[_path.Count - 1];
+        GroupEntryBase currentEntry = _path[^1];
 
         if(filter)
         {
-            List<FilterBase> filters = new();
-            filters.Add(_selectedFilter);
+            List<FilterBase> filters = [_selectedFilter];
 
             if(_modalFilter != null)
                 filters.Add(_modalFilter);
