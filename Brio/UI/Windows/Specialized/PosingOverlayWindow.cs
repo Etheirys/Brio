@@ -36,7 +36,8 @@ internal class PosingOverlayWindow : Window, IDisposable
     private const int _gizmoId = 142857;
     private const string _boneSelectPopupName = "brio_bone_select_popup";
 
-    public PosingOverlayWindow(EntityManager entityManager, CameraService cameraService, ConfigurationService configService, PosingService posingService, GPoseService gPoseService) : base("##brio_posing_overlay_window", ImGuiWindowFlags.NoInputs | ImGuiWindowFlags.NoBackground | ImGuiWindowFlags.NoDecoration, true)
+    public PosingOverlayWindow(EntityManager entityManager, CameraService cameraService, ConfigurationService configService, PosingService posingService, GPoseService gPoseService) 
+        : base("##brio_posing_overlay_window", ImGuiWindowFlags.NoInputs | ImGuiWindowFlags.NoBackground | ImGuiWindowFlags.NoDecoration, true)
     {
         Namespace = "brio_posing_overlay_namespace";
 
@@ -56,7 +57,7 @@ internal class PosingOverlayWindow : Window, IDisposable
         ImGuiHelpers.SetNextWindowPosRelativeMainViewport(new Vector2(0, 0), ImGuiCond.Always);
         SizeCondition = ImGuiCond.Always;
         var io = ImGui.GetIO();
-        Size = io.DisplaySize;
+        Size = io.DisplaySize * ImGui.GetFontSize();
 
         Flags = ImGuiWindowFlags.NoInputs | ImGuiWindowFlags.NoBackground | ImGuiWindowFlags.NoDecoration;
 
