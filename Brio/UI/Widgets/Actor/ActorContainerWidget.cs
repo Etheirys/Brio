@@ -46,22 +46,20 @@ internal class ActorContainerWidget(ActorContainerCapability capability) : Widge
             ImGui.EndListBox();
         }
 
-
-
         using(ImRaii.Disabled(!Capability.CanControlCharacters))
         {
             bool hasSelection = _selectedActor != null;
 
             if(ImBrio.FontIconButton("containerwidget_spawnbasic", FontAwesomeIcon.Plus, "Spawn"))
             {
-                Capability.CreateCharacter(false, false);
+                Capability.CreateCharacter(false, true, forceSpawnActorWithoutCompanion: true);
             }
 
             ImGui.SameLine();
 
             if(ImBrio.FontIconButton("containerwidget_spawnattachments", FontAwesomeIcon.PlusSquare, "Spawn with Companion slot"))
             {
-                Capability.CreateCharacter(true, false);
+                Capability.CreateCharacter(true, true);
             }
 
             ImGui.SameLine();
@@ -105,7 +103,7 @@ internal class ActorContainerWidget(ActorContainerCapability capability) : Widge
     {
         if(ImGui.MenuItem("Spawn###containerwidgetpopup_spawnbasic"))
         {
-            Capability.CreateCharacter(false, true);
+            Capability.CreateCharacter(false, true, forceSpawnActorWithoutCompanion: true);
         }
 
         if(ImGui.MenuItem("Spawn with Companion###containerwidgetpopup_spawncompanion"))

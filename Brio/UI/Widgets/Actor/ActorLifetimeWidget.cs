@@ -15,6 +15,20 @@ internal class ActorLifetimeWidget(ActorLifetimeCapability capability) : Widget<
 
     public override void DrawQuickIcons()
     {
+        if(ImBrio.FontIconButton("lifetimewidget_spawnnew", FontAwesomeIcon.Plus, "Spawn New Actor"))
+        {
+            Capability.SpawnNewActor(false, true);
+        }
+
+        ImGui.SameLine();
+
+        if(ImBrio.FontIconButton("lifetimewidget_spawnnewwithcompanionslot", FontAwesomeIcon.PlusSquare, "Spawn New Actor with Companion slot"))
+        {
+            Capability.SpawnNewActor(false, false);
+        }
+
+        ImGui.SameLine();
+
         if(ImBrio.FontIconButton("lifetimewidget_clone", FontAwesomeIcon.Clone, "Clone", Capability.CanClone))
         {
             Capability.Clone(false);
@@ -65,7 +79,7 @@ internal class ActorLifetimeWidget(ActorLifetimeCapability capability) : Widget<
             Capability.Target();
         }
 
-        if(ImGui.MenuItem($"Rename {Capability.Actor.FriendlyName}###containerwidgetpopup_rename"))
+        if(ImGui.MenuItem($"Rename {Capability.Actor.FriendlyName}###actorlifetime_rename"))
         {
             ImGui.CloseCurrentPopup();
 
