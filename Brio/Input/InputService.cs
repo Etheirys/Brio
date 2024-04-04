@@ -37,7 +37,7 @@ internal class InputService
 
     public static bool IsKeyBindDown(KeyBindEvents evt)
     {
-        if(Instance._configService.Configuration.Input.EnableKeybinds)
+        if(Instance._configService.Configuration.Input.EnableKeybinds == false)
             return false;
 
         return Instance._eventsDown.Contains(evt);
