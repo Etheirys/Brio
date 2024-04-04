@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Xml.Linq;
 
 namespace Brio.Entities.Core;
 
@@ -17,7 +18,24 @@ internal abstract class Entity : IDisposable
 
     public IReadOnlyList<Capability> Capabilities => _capabilities.Values.ToList().AsReadOnly();
 
-    public virtual string FriendlyName => Id.Unique;
+    string name = "";
+    public virtual string FriendlyName
+    {
+        get
+        {
+            if(string.IsNullOrEmpty(name))
+            {
+                return Id.Unique;
+            }
+
+            return name;
+        }
+        set
+        {
+            name = value;
+        }
+    }
+
 
     public virtual FontAwesomeIcon Icon => FontAwesomeIcon.Question;
     public virtual bool IsVisible => true;
@@ -34,6 +52,7 @@ internal abstract class Entity : IDisposable
     public Entity(EntityId id, IServiceProvider serviceProvider, IEnumerable<Entity>? children = null)
     {
         Id = id;
+
         _serviceProvider = serviceProvider;
 
         if(children != null)

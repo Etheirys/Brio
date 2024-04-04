@@ -1,4 +1,5 @@
 ﻿using Brio.Capabilities.Actor;
+using Brio.UI.Controls;
 using Brio.UI.Controls.Stateless;
 using Brio.UI.Widgets.Core;
 using Dalamud.Interface;
@@ -32,6 +33,13 @@ internal class ActorLifetimeWidget(ActorLifetimeCapability capability) : Widget<
         {
             Capability.Target();
         }
+
+        ImGui.SameLine();
+
+        if(ImBrio.FontIconButton("lifetimewidget_rename", FontAwesomeIcon.Signature, "Rename"))
+        {
+            RenameActorModal.Open(Capability.Actor);
+        }
     }
 
     public override void DrawPopup()
@@ -55,6 +63,13 @@ internal class ActorLifetimeWidget(ActorLifetimeCapability capability) : Widget<
         if(ImGui.MenuItem("Target###actorlifetime_target"))
         {
             Capability.Target();
+        }
+
+        if(ImGui.MenuItem($"Rename {Capability.Actor.FriendlyName}###containerwidgetpopup_rename"))
+        {
+            ImGui.CloseCurrentPopup();
+
+            RenameActorModal.Open(Capability.Actor);
         }
     }
 }

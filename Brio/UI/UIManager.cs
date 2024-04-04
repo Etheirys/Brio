@@ -1,6 +1,7 @@
 ﻿using Brio.Config;
 using Brio.Game.GPose;
 using Brio.IPC;
+using Brio.UI.Controls;
 using Brio.UI.Windows;
 using Brio.UI.Windows.Specialized;
 using Dalamud.Interface.ImGuiFileDialog;
@@ -203,6 +204,7 @@ internal class UIManager : IDisposable
             _windowSystem.Draw();
             FileDialogManager.Draw();
             _libraryWindow.DrawModal();
+            RenameActorModal.DrawModal();
         }
         finally
         {
