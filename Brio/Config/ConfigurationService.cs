@@ -34,6 +34,13 @@ internal class ConfigurationService : IDisposable
         OnConfigurationChanged?.Invoke();
     }
 
+    public void Reset()
+    {
+        Configuration = new Configuration();
+
+        ApplyChange();
+    }
+
     public void Dispose()
     {
         Save();

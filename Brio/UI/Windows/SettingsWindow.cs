@@ -88,9 +88,9 @@ internal class SettingsWindow : Window
                         DrawGeneralTab();
                         DrawIPCTab();
                         DrawPosingTab();
-                        DrawWorldTab();
                         DrawLibraryTab();
                         DrawKeysTab();
+                        DrawAdvancedTab();
                     }
                 }
             }
@@ -482,15 +482,39 @@ internal class SettingsWindow : Window
         }
     }
 
-    private void DrawWorldTab()
+    bool resetSettings = false;
+    private void DrawAdvancedTab()
     {
-        using(var tab = ImRaii.TabItem("World"))
+        using(var tab = ImRaii.TabItem("Advanced"))
         {
             if(tab.Success)
             {
                 DrawEnvironmentSection();
+
+                if(ImGui.CollapsingHeader("Brio", ImGuiTreeNodeFlags.DefaultOpen))
+                {
+                    ImGui.Checkbox("Enable [ Reset Settings to Default ] Button", ref resetSettings);
+                        
+                    if(resetSettings == false)
+                    {
+                        ImGui.BeginDisabled();
+                    }
+
+                    if(ImGui.Button("Reset Settings to Default", new(170,0)))
+                    {
+                        _configurationService.Reset();
+                        resetSettings = false;
+                    }
+
+                    if(resetSettings == false)
+                    {
+                        ImGui.EndDisabled();
+                    }
+                }
+
             }
         }
+
     }
 
     private void DrawEnvironmentSection()
