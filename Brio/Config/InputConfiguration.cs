@@ -26,4 +26,6 @@ internal class InputConfiguration
     };
 
     public bool ShowPromptsInGPose { get; set; } = false;
+
+    public bool EnableKeybinds { get; set; } = true;
 }

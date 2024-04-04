@@ -37,6 +37,9 @@ internal class InputService
 
     public static bool IsKeyBindDown(KeyBindEvents evt)
     {
+        if(Instance._configService.Configuration.Input.EnableKeybinds)
+            return false;
+
         return Instance._eventsDown.Contains(evt);
     }
 
@@ -73,7 +76,7 @@ internal class InputService
 
     private void OnFrameworkUpdate(IFramework framework)
     {
-        if(_gPoseService.IsGPosing)
+        if(_gPoseService.IsGPosing && _configService.Configuration.Input.EnableKeybinds)
         {
             foreach(var evt in Enum.GetValues<KeyBindEvents>())
             {

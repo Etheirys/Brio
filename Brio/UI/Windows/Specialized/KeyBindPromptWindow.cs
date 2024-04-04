@@ -75,6 +75,12 @@ internal class KeyBindPromptWindow : Window, IDisposable
     {
         if(newState)
         {
+            if(_configurationService.Configuration.Input.EnableKeybinds == false)
+            {
+                IsOpen = false;
+                return;
+            }
+
             IsOpen = _configurationService.Configuration.Input.ShowPromptsInGPose;
         }
         else
@@ -85,14 +91,13 @@ internal class KeyBindPromptWindow : Window, IDisposable
 
     private void OnConfigurationChanged()
     {
-        if(_configurationService.Configuration.Input.ShowPromptsInGPose && _gPoseService.IsGPosing)
+        if(_configurationService.Configuration.Input.EnableKeybinds == false || _gPoseService.IsGPosing == false)
         {
-            this.IsOpen = true;
+            IsOpen = false;
+            return;
         }
-        else if(!_configurationService.Configuration.Input.ShowPromptsInGPose && _gPoseService.IsGPosing)
-        {
-            this.IsOpen = false;
-        }
+
+        this.IsOpen = _configurationService.Configuration.Input.ShowPromptsInGPose;
     }
 
     public void Dispose()

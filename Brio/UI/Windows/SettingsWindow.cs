@@ -543,6 +543,18 @@ internal class SettingsWindow : Window
             if(!tab.Success)
                 return;
 
+            bool enableKeybinds = _configurationService.Configuration.Input.EnableKeybinds;
+            if(ImGui.Checkbox("Enable keyboard shortcuts", ref enableKeybinds))
+            {
+                _configurationService.Configuration.Input.EnableKeybinds = enableKeybinds;
+                _configurationService.ApplyChange();
+            }
+
+            if(enableKeybinds == false)
+            {
+                ImGui.BeginDisabled();
+            }
+
             bool showPrompts = _configurationService.Configuration.Input.ShowPromptsInGPose;
             if(ImGui.Checkbox("Show prompts in GPose", ref showPrompts))
             {
@@ -569,6 +581,12 @@ internal class SettingsWindow : Window
                 DrawKeyBind(KeyBindEvents.Posing_Rotate);
                 DrawKeyBind(KeyBindEvents.Posing_Scale);
             }
+
+            if(enableKeybinds == false)
+            {
+                ImGui.EndDisabled();
+            }
+
         }
     }
 
