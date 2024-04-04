@@ -1,5 +1,31 @@
 
---- Brio, Version 0.3.0 ---
+---> Brio, Version 0.3.0.7 <--- 
+
+- Added the ability to disable keyboard shortcuts
+
+---> Brio, Version 0.3.0.6 <--- 
+
+- Update for Patch 6.58 Hotfix 1
+
+Thanks to (@WorstAquaPlayer) for their contributions to Brio!
+
+---> Brio, Version 0.3.0.4-0.3.0.5 <--- 
+
+- Fixed an issue with Brio loading MCDFs
+
+- Attempt to fix crashing
+
+Thanks to (@AsgardXIV) for their contributions to Brio!
+
+---> Brio, Version 0.3.0.3 <--- 
+
+- Fixed new users always seeing the Welcome Window
+
+---> Brio, Version 0.3.0.1-0.3.0.2 <--- 
+
+- Fixed an crash with BrioStyle (Thanks Cazzar)
+
+---> Brio, Version 0.3.0 <---
 
 - There a known crash when Mare Synchronos & Brio are enabled, 
   Check the Known Issues section for more info!
