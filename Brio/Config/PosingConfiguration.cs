@@ -18,6 +18,9 @@ internal class PosingConfiguration
     public bool HideToolbarWhenAdvandedPosingOpen { get; set; } = false;
     public bool HideSkeletonWhenGizmoActive { get; set; } = false;
 
+    public bool ModelTransformStandout { get; set; } = true;
+    public uint ModelTransformCircleStandOutColor { get; set; } = 0x_FFE02B70;
+
     // Graphical Posing
     public bool GraphicalSidesSwapped { get; set; } = false;
     public bool ShowGenitaliaInAdvancedPoseWindow { get; set; } = false;

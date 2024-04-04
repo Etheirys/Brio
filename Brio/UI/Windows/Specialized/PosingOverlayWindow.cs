@@ -135,7 +135,7 @@ internal class PosingOverlayWindow : Window, IDisposable
 
             foreach(var bone in skeleton.Bones)
             {
-                if(!_posingService.OverlayFilter.IsBoneValid(bone, poseSlot))
+                if(!_posingService.OverlayFilter.IsBoneValid(bone, poseSlot) || bone.Name == "n_throw")
                     continue;
 
                 var boneWorldPosition = Vector3.Transform(bone.LastTransform.Position, modelMatrix);
@@ -324,6 +324,12 @@ internal class PosingOverlayWindow : Window, IDisposable
 
             if(!uiState.SkeletonDotsEnabled)
                 color = config.BoneCircleInactiveColor;
+
+            if(clickable.Item == PosingSelectionType.ModelTransform && _configurationService.Configuration.Posing.ModelTransformStandout)
+            {
+                ImGui.GetWindowDrawList().AddCircleFilled(clickable.ScreenPosition, clickable.Size + 3, config.ModelTransformCircleStandOutColor);
+                continue;
+            }
 
             if(isFilled)
                 ImGui.GetWindowDrawList().AddCircleFilled(clickable.ScreenPosition, clickable.Size, color);
