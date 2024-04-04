@@ -29,12 +29,23 @@ internal class UpdateWindow : Window
         _changelogTest = ResourceProvider.Instance.GetRawResourceString("Data.Changelog.txt");
     }
 
+    bool _scrollToTop = false;
+    public override void OnOpen()
+    {
+        _scrollToTop = true;
+    }
+
     public override void Draw()
     {
         var segmentSize = ImGui.GetWindowSize().X / 1f;
 
-        if(ImGui.BeginChild("###brio_update_text", new Vector2(ImBrio.GetRemainingWidth(), ImBrio.GetRemainingHeight() - 35f), true))
+        if(ImGui.BeginChild("###brio_update_text", new Vector2(ImBrio.GetRemainingWidth(), ImBrio.GetRemainingHeight() - 35f), true, Flags = ImGuiWindowFlags.NoSavedSettings))
         {
+            if(_scrollToTop)
+            {
+                _scrollToTop = false;
+                ImGui.SetScrollHereY(0);
+            }
             ImGui.PushTextWrapPos(segmentSize);
             ImGui.TextWrapped(_changelogTest);
             ImGui.PopTextWrapPos();
