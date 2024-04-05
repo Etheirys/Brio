@@ -4,6 +4,7 @@ using Brio.Library.Filters;
 using Brio.Library.Sources;
 using Brio.Library.Tags;
 using Brio.UI;
+using Brio.UI.Controls.Editors;
 using Brio.UI.Windows;
 using Dalamud.Interface;
 using Dalamud.Plugin.Services;
@@ -197,8 +198,13 @@ internal class LibraryManager : IDisposable
         if(IsLoadingSources || IsScanning)
             return;
 
-        LoadSources();
-        Scan();
+        if(LibrarySourcesEditor.HasSourcesChanged)
+        {
+            LibrarySourcesEditor.HasSourcesChanged = false;
+
+            LoadSources();
+            Scan();
+        }
     }
 
     public GroupEntryBase Root => _rootItem;

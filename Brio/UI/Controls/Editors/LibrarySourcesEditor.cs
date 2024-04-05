@@ -9,6 +9,7 @@ using static Brio.Config.LibraryConfiguration;
 namespace Brio.UI.Controls.Editors;
 internal static class LibrarySourcesEditor
 {
+    public static bool HasSourcesChanged = true;
 
     static SourceConfigBase? selectedItem;
 
@@ -68,6 +69,9 @@ internal static class LibrarySourcesEditor
                 if(selectedItem is not null)
                 {
                     config.RemoveSource(selectedItem);
+
+                    HasSourcesChanged = true;
+
                     service.ApplyChange();
 
                     selectedItem = null;
@@ -88,6 +92,9 @@ internal static class LibrarySourcesEditor
                 if(selectedItem != null)
                 {
                     selectedItem.Enabled = !selectedItem.Enabled;
+
+                    HasSourcesChanged = true;
+
                     service.ApplyChange();
                 }
             }
@@ -212,6 +219,9 @@ internal static class LibrarySourcesEditor
                         if(ImGui.Button("Save", new(100, 0)))
                         {
                             config.AddSource(selectedItem);
+                         
+                            HasSourcesChanged = true;
+                          
                             service.ApplyChange();
 
                             ClosePopUp();
@@ -233,6 +243,8 @@ internal static class LibrarySourcesEditor
 
                         if(ImGui.Button("OK", new(100, 0)))
                         {
+                            HasSourcesChanged = true;
+
                             service.ApplyChange();
 
                             ClosePopUp();
