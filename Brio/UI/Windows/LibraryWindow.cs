@@ -1,11 +1,13 @@
 ﻿using Brio.Config;
 using Brio.Files;
 using Brio.Game.GPose;
+using Brio.Game.Posing;
 using Brio.Game.Types;
 using Brio.Library;
 using Brio.Library.Filters;
 using Brio.Library.Tags;
 using Brio.UI.Controls.Core;
+using Brio.UI.Controls.Editors;
 using Brio.UI.Controls.Stateless;
 using Dalamud.Interface;
 using Dalamud.Interface.Utility.Raii;
@@ -15,14 +17,17 @@ using ImGuiNET;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Numerics;
-using System.Threading.Tasks;
 
 namespace Brio.UI.Windows;
 
 internal class LibraryWindow : Window
 {
+    private static float WindowContentWidth => ImGui.GetWindowContentRegionMax().X - ImGui.GetWindowContentRegionMin().X;
+    private static float WindowContentHeight => ImGui.GetWindowContentRegionMax().Y - ImGui.GetWindowContentRegionMin().Y;
+
     private static Vector2 MinimumSize = new(850, 500);
 
     private const float InfoPaneWidth = 350;
@@ -42,32 +47,48 @@ internal class LibraryWindow : Window
     private readonly IPluginLog _log;
     private readonly IServiceProvider _serviceProvider;
     private readonly GPoseService _gPoseService;
+    private readonly PosingService _posingService;
+    private readonly IFramework _frameworkService;
 
+    private readonly SearchQueryFilter _searchFilter = new();
     private readonly LibraryFavoritesFilter _favoritesFilter;
     private readonly TypeFilter _charactersFilter;
     private readonly TypeFilter _posesFilter;
-    private readonly SearchQueryFilter _searchFilter = new();
-    private readonly List<GroupEntryBase> _path = new();
+
+    private List<GroupEntryBase> _lastPathModalPose = [];
+    private List<GroupEntryBase> _lastPathModalChar = [];
+    private List<GroupEntryBase> _lastPath = [];
+
+    private List<GroupEntryBase> _path = [];
+
+    private FilterBase? _lastFilter;
     private FilterBase? _modalFilter;
     private FilterBase _selectedFilter;
-    FilterBase? _lastFilter;
+
     private string _searchText = string.Empty;
+
     private IEnumerable<EntryBase>? _currentEntries;
-    private TagCollection _allTags = new();
+
+    private TagCollection _allTags = [];
     private EntryBase? _toOpen = null;
     private EntryBase? _selected = null;
+
     private float spinnerAngle = 0;
     private bool _searchNeedsFocus = false;
     private int _searchLostFocus = 0;
     private bool _isSearchSuggestWindowOpen = false;
     private bool _isSearchFocused = false;
     private bool _searchTextNeedsClear = false;
+
     private Vector2? _searchSuggestPos;
     private Vector2? _searchSuggestSize;
+
     private bool _isRescanning;
     private bool _isRefreshing;
     private long _lastRefreshTimeMs = 0;
+
     private bool _isModal = false;
+    private bool _wasOpenBeforeModal = false;
     private Action<object>? _modalCallback;
 
     public LibraryWindow(
@@ -75,15 +96,19 @@ internal class LibraryWindow : Window
         GPoseService gPoseService,
         ConfigurationService configurationService,
         LibraryManager libraryManager,
+        PosingService posingService,
+        IFramework frameworkService,
         SettingsWindow settingsWindow,
         IServiceProvider serviceProvider)
         : base($"{Brio.Name} Library###brio_library_window")
     {
         this.Namespace = "brio_library_namespace";
 
-        WindowSizeConstraints constraints = new();
-        constraints.MinimumSize = MinimumSize;
-        constraints.MaximumSize = ImGui.GetIO().DisplaySize;
+        WindowSizeConstraints constraints = new()
+        {
+            MinimumSize = MinimumSize,
+            MaximumSize = ImGui.GetIO().DisplaySize
+        };
         this.SizeConstraints = constraints;
 
         _log = log;
@@ -91,16 +116,19 @@ internal class LibraryWindow : Window
         _libraryManager = libraryManager;
         _serviceProvider = serviceProvider;
         _gPoseService = gPoseService;
-
+        _frameworkService = frameworkService;
+        _posingService = posingService;
         _settingsWindow = settingsWindow;
 
         _path.Add(_libraryManager.Root);
+        _lastPath.Add(_libraryManager.Root);
+        _lastPathModalPose.Add(_libraryManager.Root);
+        _lastPathModalChar.Add(_libraryManager.Root);
 
         _libraryManager.RegisterWindow(this);
         _libraryManager.OnScanFinished += OnLibraryScanFinished;
-        configurationService.OnConfigurationChanged += OnConfigurationChanged;
-
-        _gPoseService.OnGPoseStateChange += _gPoseService_OnGPoseStateChange;
+        _configurationService.OnConfigurationChanged += OnConfigurationChanged;
+        _gPoseService.OnGPoseStateChange += OnGPoseStateChange;
 
         _favoritesFilter = new LibraryFavoritesFilter(configurationService);
         _charactersFilter = new TypeFilter("Characters", typeof(AnamnesisCharaFile), typeof(ActorAppearanceUnion), typeof(MareCharacterDataFile));
@@ -108,25 +136,24 @@ internal class LibraryWindow : Window
         _selectedFilter = _favoritesFilter;
     }
 
-    private void _gPoseService_OnGPoseStateChange(bool newState)
+    private void OnGPoseStateChange(bool newState)
     {
-        if(newState)
-        {
-
-        }
-        else
-        {
+        if(newState == false)
             IsOpen = false;
-        }
     }
 
-    private float WindowContentWidth => ImGui.GetWindowContentRegionMax().X - ImGui.GetWindowContentRegionMin().X;
-    private float WindowContentHeight => ImGui.GetWindowContentRegionMax().Y - ImGui.GetWindowContentRegionMin().Y;
     public bool IsSearching => (_searchFilter.Query != null && _searchFilter.Query.Length > 0) || (TagFilter.Tags != null && TagFilter.Tags.Count > 0);
     public bool IsModal => _isModal;
 
     public void OpenModal(FilterBase filter, Action<object> callback)
     {
+        if(IsOpen)
+        {
+            _wasOpenBeforeModal = true;
+
+            Close();
+        }
+
         _isModal = true;
         _modalCallback = callback;
         _modalFilter = filter;
@@ -136,7 +163,16 @@ internal class LibraryWindow : Window
         Flags = ImGuiWindowFlags.Modal | ImGuiWindowFlags.NoCollapse;
 
         if(_configurationService.Configuration.Library.ReturnLibraryToLastLocation)
-        {
+        {        
+            if(_modalFilter?.Name == "Poses" && _lastPathModalPose is not null)
+            {
+                _path = _lastPathModalPose;
+            }
+            else if(_modalFilter?.Name == "Characters" && _lastPathModalChar is not null)
+            {
+                _path = _lastPathModalChar;
+            }
+
             TryRefresh(true);
         }
         else
@@ -149,6 +185,8 @@ internal class LibraryWindow : Window
 
     public void Open()
     {
+        bool wasModal = _isModal;
+
         _isModal = false;
         _modalCallback = null;
         _modalFilter = null;
@@ -157,6 +195,11 @@ internal class LibraryWindow : Window
 
         if(_configurationService.Configuration.Library.ReturnLibraryToLastLocation)
         {
+            if(wasModal && _lastPath is not null)
+            {
+                _path = _lastPath;
+            }
+
             if(_lastFilter is not null)
             {
                 _selectedFilter = _lastFilter;
@@ -178,11 +221,28 @@ internal class LibraryWindow : Window
     {
         if(_isModal == false)
         {
+            _lastPath = _path;
             _lastFilter = _selectedFilter;
+        
+        }
+        else if (_modalFilter?.Name == "Poses")
+        {
+            _lastPathModalPose = _path;
+        }
+        else if(_modalFilter?.Name == "Characters")
+        {
+            _lastPathModalChar = _path;
         }
 
         IsOpen = false;
-        _isModal = false;
+
+        if(_isModal && _wasOpenBeforeModal)
+        {
+            _frameworkService.RunOnTick(() => {
+                _wasOpenBeforeModal = false;
+                Open();
+            }, delay: TimeSpan.FromSeconds(0.1));
+        }
     }
 
     public new void Toggle()
@@ -199,8 +259,15 @@ internal class LibraryWindow : Window
 
     public void Reset()
     {
-        if(_path.Count > 1)
-            _path.RemoveRange(1, _path.Count - 1);
+        _path.Clear();
+        _lastPath.Clear();
+        _lastPathModalPose.Clear();
+        _lastPathModalChar.Clear();
+
+        _path.Add(_libraryManager.Root);
+        _lastPath.Add(_libraryManager.Root);
+        _lastPathModalPose.Add(_libraryManager.Root);
+        _lastPathModalChar.Add(_libraryManager.Root);
 
         TryRefresh(true);
     }
@@ -290,7 +357,6 @@ internal class LibraryWindow : Window
                     ImGui.EndChild();
                 }
 
-
                 Vector2 mousePos = ImGui.GetMousePos() - ImGui.GetWindowPos();
                 bool isMouseOverArea = (mousePos.X > 0 && mousePos.Y > 0 && mousePos.X < entriesPaneWidth && mousePos.Y < entriesPaneHeight);
                 if(isMouseOverArea)
@@ -379,14 +445,37 @@ internal class LibraryWindow : Window
                         }
                     }
 
-                    ImGui.SetCursorPosX(ImGui.GetCursorPosX() + (ImBrio.GetRemainingWidth() - (200 + ImGui.GetStyle().ItemSpacing.X)));
+                    bool isPoseModal = _modalFilter?.Name == "Poses";
 
-                    if(isIEB == false)
+                    int offset = 200;
+                    if(isPoseModal)
+                        offset += 30;
+                  
+                    ImGui.SetCursorPosX(ImGui.GetCursorPosX() + (ImBrio.GetRemainingWidth() - (offset + ImGui.GetStyle().ItemSpacing.X)));
+
+
+                    if(isPoseModal)
                     {
-                        ImGui.BeginDisabled();
+                        if(ImBrio.Button("", FontAwesomeIcon.Cog, new Vector2(25, 0), hoverText: "Import Options"))
+                        {
+                            ImGui.OpenPopup("import_options_popup_lib");
+                        }
+                 
+                        using(var popup = ImRaii.Popup("import_options_popup_lib"))
+                        {
+                            if(popup.Success)
+                            {
+                                PosingEditorCommon.DrawImportOptionEditor(_posingService.DefaultImporterOptions);
+                            }
+                        }
+
+                        ImGui.SameLine();
                     }
 
-                    if(ImBrio.Button("Select", FontAwesomeIcon.Check, new Vector2(100, 0)))
+                    if(isIEB == false)
+                        ImGui.BeginDisabled();
+
+                    if(ImBrio.Button("Import", FontAwesomeIcon.Check, new Vector2(100, 0)))
                     {
                         if(_selected != null)
                         {
@@ -395,9 +484,7 @@ internal class LibraryWindow : Window
                     }
 
                     if(isIEB == false)
-                    {
                         ImGui.EndDisabled();
-                    }
 
                     ImGui.SameLine();
 
@@ -433,10 +520,12 @@ internal class LibraryWindow : Window
 
     private void DrawFilters()
     {
+        List<string> ops = [];
+        int selected = 0;
+
         if(_isModal && _modalFilter != null)
         {
-            List<string> ops = new();
-            int selected = 0;
+
 
             ops.Add(_favoritesFilter.Name);
             if(_favoritesFilter == _selectedFilter)
@@ -465,9 +554,6 @@ internal class LibraryWindow : Window
         }
         else
         {
-            List<string> ops = new();
-            int selected = 0;
-
             ops.Add(_favoritesFilter.Name);
             if(_favoritesFilter == _selectedFilter)
                 selected = 0;
@@ -1100,7 +1186,7 @@ internal class LibraryWindow : Window
             if(TagFilter.Tags != null && TagFilter.Tags.Count > 0)
                 filters.Add(TagFilter);
 
-            _libraryManager.Root.FilterEntries(filters.ToArray());
+            _libraryManager.Root.FilterEntries([.. filters]);
 
             _allTags.Clear();
             currentEntry.GetAllTags(ref _allTags);
@@ -1110,7 +1196,7 @@ internal class LibraryWindow : Window
             if(!string.IsNullOrEmpty(_searchText))
             {
                 filters.Add(_searchFilter);
-                _libraryManager.Root.FilterEntries(filters.ToArray());
+                _libraryManager.Root.FilterEntries([.. filters]);
             }
         }
 
