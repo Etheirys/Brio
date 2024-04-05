@@ -371,18 +371,24 @@ internal class SettingsWindow : Window
             }
 
             bool standout = _configurationService.Configuration.Posing.ModelTransformStandout;
-            if(ImGui.Checkbox("Make the ModelTransform Standout", ref standout))
+            if(ImGui.Checkbox("Make the [Model Transform] Bone Standout", ref standout))
             {
                 _configurationService.Configuration.Posing.ModelTransformStandout = standout;
                 _configurationService.ApplyChange();
             }
 
+            if(standout == false)
+                ImGui.BeginDisabled();
+
             Vector4 modelTransformCircleStandOut = ImGui.ColorConvertU32ToFloat4(_configurationService.Configuration.Posing.ModelTransformCircleStandOutColor);
-            if(ImGui.ColorEdit4("ModelTransform Standout Color", ref modelTransformCircleStandOut, ImGuiColorEditFlags.NoInputs))
+            if(ImGui.ColorEdit4("[Model Transform] Bone Standout Color", ref modelTransformCircleStandOut, ImGuiColorEditFlags.NoInputs))
             {
                 _configurationService.Configuration.Posing.ModelTransformCircleStandOutColor = ImGui.ColorConvertFloat4ToU32(modelTransformCircleStandOut);
                 _configurationService.ApplyChange();
             }
+
+            if(standout == false)
+                ImGui.EndDisabled();
 
             bool allowGizmoAxisFlip = _configurationService.Configuration.Posing.AllowGizmoAxisFlip;
             if(ImGui.Checkbox("Allow Gizmo Axis Flip", ref allowGizmoAxisFlip))
