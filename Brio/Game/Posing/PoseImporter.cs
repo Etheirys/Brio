@@ -1,10 +1,11 @@
 ﻿using Brio.Core;
 using Brio.Files;
 using Brio.Game.Posing.Skeletons;
+//using FFXIVClientStructs.FFXIV.Client.Graphics;
 
 namespace Brio.Game.Posing;
 
-internal class PoseImporter(PoseFile poseFile, PoseImporterOptions options)
+internal class PoseImporter(PoseFile poseFile, PoseImporterOptions options, bool asExpression = false)
 {
     public void ApplyBone(Bone bone, BonePoseInfo poseInfo)
     {

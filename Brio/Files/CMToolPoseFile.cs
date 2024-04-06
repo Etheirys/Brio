@@ -52,12 +52,12 @@ internal class CMToolPoseFileInfo : AppliableActorFileInfoBase<CMToolPoseFile>
     {
     }
 
-    protected override void Apply(CMToolPoseFile file, ActorEntity actor)
+    protected override void Apply(CMToolPoseFile file, ActorEntity actor, bool asExpression)
     {
         PosingCapability? capability;
         if(actor.TryGetCapability<PosingCapability>(out capability) && capability != null)
         {
-            capability.ImportPose(file);
+            capability.ImportPose(file, asExpression: asExpression);
         }
     }
 }

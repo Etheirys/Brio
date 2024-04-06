@@ -22,12 +22,12 @@ internal class PoseFileInfo : AppliableActorFileInfoBase<PoseFile>
     {
     }
 
-    protected override void Apply(PoseFile file, ActorEntity actor)
+    protected override void Apply(PoseFile file, ActorEntity actor, bool asExpression)
     {
         PosingCapability? capability;
         if(actor.TryGetCapability<PosingCapability>(out capability) && capability != null)
         {
-            capability.ImportPose(file);
+            capability.ImportPose(file, asExpression: asExpression);
         }
     }
 }

@@ -33,12 +33,14 @@ public class Brio : IDalamudPlugin
     private ServiceProvider? _services = null;
 
     public static IPluginLog Log { get; private set; } = null!;
+    public static IFramework Framework { get; private set; } = null!;
 
     public Brio(DalamudPluginInterface pluginInterface)
     {
         // Setup dalamud services
         var dalamudServices = new DalamudServices(pluginInterface);
         Log = dalamudServices.Log;
+        Framework = dalamudServices.Framework;
 
         dalamudServices.Framework.RunOnTick(() =>
         {
@@ -84,7 +86,7 @@ public class Brio : IDalamudPlugin
     }
 
     private IServiceCollection SetupServices(DalamudServices dalamudServices)
-    {
+    {      
         ServiceCollection serviceCollection = new();
 
         // Dalamud
@@ -174,6 +176,11 @@ public class Brio : IDalamudPlugin
         serviceCollection.AddSingleton<PosingGraphicalWindow>();
 
         return serviceCollection;
+    }
+
+    public static void NotifyError(string message)
+    {
+        EventBus.Instance.NotifyError(message);
     }
 
     public void Dispose()

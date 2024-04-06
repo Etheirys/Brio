@@ -21,13 +21,12 @@ internal abstract class AppliableActorFileInfoBase<T> : JsonDocumentBaseFileInfo
 
         ImBrio.DrawApplyToActor(_entityManager, (actor) =>
         {
-            T? file = Load(fileEntry.FilePath) as T;
-            if(file != null)
+            if(Load(fileEntry.FilePath) is T file)
             {
-                Apply(file, actor);
+                Apply(file, actor, false);
             }
         });
     }
 
-    protected abstract void Apply(T file, ActorEntity actor);
+    protected abstract void Apply(T file, ActorEntity actor, bool asExpression);
 }

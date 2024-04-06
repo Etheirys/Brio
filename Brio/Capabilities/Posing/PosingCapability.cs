@@ -112,11 +112,16 @@ internal class PosingCapability : ActorCharacterCapability
         }
         catch
         {
-            EventBus.Instance.NotifyError("Invalid pose file.");
+            Brio.NotifyError("Invalid pose file.");
         }
     }
 
-    public void ImportPose(OneOf<PoseFile, CMToolPoseFile> rawPoseFile, PoseImporterOptions? options = null, bool generateSnapshot = true, bool reset = true, bool reconcile = true)
+    public void ImportPose(OneOf<PoseFile, CMToolPoseFile> rawPoseFile,  PoseImporterOptions? options = null, bool asExpression = false)
+    {
+        ImportPose(rawPoseFile, options, reset: false, reconcile: false, asExpression: asExpression);
+    }
+
+    private void ImportPose(OneOf<PoseFile, CMToolPoseFile> rawPoseFile, PoseImporterOptions? options = null, bool generateSnapshot = true, bool reset = true, bool reconcile = true, bool asExpression = false)
     {
         var poseFile = rawPoseFile.Match(
                 poseFile => poseFile,
@@ -125,19 +130,23 @@ internal class PosingCapability : ActorCharacterCapability
 
         if(!poseFile.Bones.Any() && !poseFile.MainHand.Any() && !poseFile.OffHand.Any())
         {
-            EventBus.Instance.NotifyError("Invalid pose file.");
+            Brio.NotifyError("Invalid pose file.");
             return;
         }
 
         poseFile.SanitizeBoneNames();
 
-        options ??= _posingService.DefaultImporterOptions;
+        if(asExpression)
+            options ??= _posingService.DefaultExpressionOptions;
+        else
+            options ??= _posingService.DefaultImporterOptions;
 
         if(options.ApplyModelTransform && reset)
             ModelPosing.ResetTransform();
 
-        SkeletonPosing.ImportSkeletonPose(poseFile, options);
-        ModelPosing.ImportModelPose(poseFile, options);
+        SkeletonPosing.ImportSkeletonPose(poseFile, options, asExpression: asExpression);
+        if(asExpression == false)
+            ModelPosing.ImportModelPose(poseFile, options);
 
         if(generateSnapshot)
             _framework.RunOnTick(() => Snapshot(reset, reconcile), delayTicks: 2);

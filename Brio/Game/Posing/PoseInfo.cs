@@ -79,17 +79,17 @@ internal class BonePoseInfo(BonePoseInfoId id, PoseInfo parent)
 
     public bool HasStacks => _stacks.Any();
 
-    public void Apply(Transform transform, Transform? original = null, TransformComponents? propagation = null, TransformComponents applyTo = TransformComponents.All, BoneIKInfo? ikInfo = null, PoseMirrorMode? mirrorMode = null, bool forceNewStack = false)
+    public Transform? Apply(Transform transform, Transform? original = null, TransformComponents? propagation = null, TransformComponents applyTo = TransformComponents.All, BoneIKInfo? ikInfo = null, PoseMirrorMode? mirrorMode = null, bool forceNewStack = false)
     {
         var prop = propagation ?? DefaultPropagation;
         ikInfo ??= DefaultIK;
         var calc = original.HasValue ? transform.CalculateDiff(original.Value) : transform;
 
         if(calc.ContainsNaN())
-            return;
+            return null;
 
         if(calc.IsApproximatelySame(Transform.Identity))
-            return;
+            return null;
 
         var transformIndex = GetTransformIndex(prop, ikInfo.Value, forceNewStack);
         mirrorMode ??= MirrorMode;
@@ -99,7 +99,7 @@ internal class BonePoseInfo(BonePoseInfoId id, PoseInfo parent)
         calc.Filter(applyTo);
 
         if(Transform.Identity.IsApproximatelySame(calc + existing))
-            return;
+            return null;
 
         if(mirrorMode == PoseMirrorMode.Copy)
         {
@@ -110,8 +110,12 @@ internal class BonePoseInfo(BonePoseInfoId id, PoseInfo parent)
             var inverted = calc.Inverted();
             GetMirrorBone()?.Apply(inverted, null, prop, applyTo, ikInfo.Value, PoseMirrorMode.None, forceNewStack);
         }
+       
+        var finaleTransform = _stacks[transformIndex].Transform + calc;
 
-        _stacks[transformIndex] = new(prop, ikInfo.Value, _stacks[transformIndex].Transform + calc);
+        _stacks[transformIndex] = new(prop, ikInfo.Value, finaleTransform);
+
+        return finaleTransform;
     }
 
     public void ClearStacks()

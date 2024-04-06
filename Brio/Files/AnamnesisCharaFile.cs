@@ -22,7 +22,7 @@ internal class AnamnesisCharaFileInfo : AppliableActorFileInfoBase<AnamnesisChar
     {
     }
 
-    protected override void Apply(AnamnesisCharaFile file, ActorEntity actor)
+    protected override void Apply(AnamnesisCharaFile file, ActorEntity actor, bool asExpression = false)
     {
         ActorAppearanceCapability? capability;
         if(actor.TryGetCapability<ActorAppearanceCapability>(out capability) && capability != null)
