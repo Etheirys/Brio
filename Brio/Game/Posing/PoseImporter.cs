@@ -1,7 +1,6 @@
 ﻿using Brio.Core;
 using Brio.Files;
 using Brio.Game.Posing.Skeletons;
-//using FFXIVClientStructs.FFXIV.Client.Graphics;
 
 namespace Brio.Game.Posing;
 
