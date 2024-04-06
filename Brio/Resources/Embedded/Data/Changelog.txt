@@ -1,34 +1,87 @@
 
----> Brio, Version 0.3.0.7 <--- 
+To open this window again click `Infomation` on the Scene Manager then -> `View the Changelog`
+
+--------------------------------------------------------------------------------
+	 ---> Brio, Version 0.3.1 <--- 
+--------------------------------------------------------------------------------
+
+- [New Feature!] Added Actor renaming!
+
+- Added `Spawn New Actor` & `Spawn New Actor with Companion slot` to the Scene Manager.
+
+- The Library will now remember the last location you were when importing a Pose or
+  Character file, if `Open Library to Last Location I was previously` is Enabled.
+
+- The Library will now reopen after you import a Pose or Character file using the Import Screen.
+
+- Added the `Import Options` button to the Import Screen.
+
+- Reorganized & Added New items to `Settings`.
+
+- Added a new setting `Make the [ModelTransform] Bone Standout`.
+	- With this setting Enabled the `Model Transform` bone will be more obvious.
+	- You can change the Color with the setting: `[Model Transform] Bone Standout Color`
+
+- Added `Advanced` Tab to settings.
+	- Added a new button in `Advanced` Tab to reset setting to default.
+	- Moved `World` tab settings to `Advanced`.
+
+- Renamed Action Timelines -> Animation Control.
+
+- Changed the default color settings.
+
+- Added new IPC `Brio.SpawnActorWithoutCompanion`.
+
+--- Fixed issues ---
+
+- Fixed an issue when importing pose files with certain clothing on.
+
+- Fixed an issue where keyboard shortcuts would not work.
+
+- Fixed an issue where Spawning a new actor would always spawn with a Companion.
+
+- Fix an issue where the Posing Overlay would not display fully if the text scale was less then 100%.
+
+- Fixed a bug in the Library where it would rescan every time that a setting was changed.
+
+- Fixed a rare crash with the Library.
+
+--- Known issues ---
+
+- On some systems there is a known crash in GPose when Brio is enabled.
+	- I am unable to reproduce this if you experience this:
+	- Be sure to check your Penumbra mod-lists to make sure no Penumbra mods are broken.
+	- If you still experience a crash after checking your Penumbra mods, please report it!
+
+- After using IK, there will be lingering effects to other bones after Disabling IK.
+
+- When the `Advanced Pose` or `Transform Editor` Window is certain sizes and
+  more than one `Transform Tab` is open, the `Transform Editor` glitches.
+	- Workaround:
+		- close all but one `Transform Tab`, or...
+		- change the size of the `Advanced Pose` or `Transform Editor` Window.
+
+--------------------------------------------------------------------------------
+---> Brio, Versions 0.3.0.1-0.3.0.7 <--- 
+--------------------------------------------------------------------------------
 
 - Added the ability to disable keyboard shortcuts
 
----> Brio, Version 0.3.0.6 <--- 
-
 - Update for Patch 6.58 Hotfix 1
-
-Thanks to (@WorstAquaPlayer) for their contributions to Brio!
-
----> Brio, Version 0.3.0.4-0.3.0.5 <--- 
 
 - Fixed an issue with Brio loading MCDFs
 
 - Attempt to fix crashing
 
-Thanks to (@AsgardXIV) for their contributions to Brio!
-
----> Brio, Version 0.3.0.3 <--- 
-
 - Fixed new users always seeing the Welcome Window
-
----> Brio, Version 0.3.0.1-0.3.0.2 <--- 
 
 - Fixed an crash with BrioStyle (Thanks Cazzar)
 
----> Brio, Version 0.3.0 <---
+Thanks to (@AsgardXIV) & (@WorstAquaPlayer) for their contributions to Brio!
 
-- There a known crash when Mare Synchronos & Brio are enabled, 
-  Check the Known Issues section for more info!
+--------------------------------------------------------------------------------
+	 ---> Brio, Version 0.3.0 <---
+--------------------------------------------------------------------------------
 
 - [New Feature!] Added this wonderful new changelog Window, 
 	- The `Changelog` will open anytime Brio receives a major update
