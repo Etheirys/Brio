@@ -1,5 +1,7 @@
 ﻿using Brio.Config;
 using Brio.UI.Windows;
+using ImGuiNET;
+using System.Numerics;
 
 namespace Brio.Core;
 
@@ -15,6 +17,8 @@ internal class WelcomeService
         }
         else if(configService.Configuration.PopupKey != Configuration.CurrentPopupKey)
         {
+            ImGui.SetNextWindowPos(new Vector2((ImGui.GetIO().DisplaySize.X / 2) - 630, (ImGui.GetIO().DisplaySize.Y / 2) - 535));
+
             updateWindow.IsOpen = true;
             configService.Configuration.PopupKey = Configuration.CurrentPopupKey;
         }

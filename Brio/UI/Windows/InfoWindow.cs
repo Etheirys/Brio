@@ -68,7 +68,10 @@ internal class InfoWindow : Window
 
                 ImGui.PushStyleColor(ImGuiCol.Button, new Vector4(110, 84, 148, 255) / 255);
                 if(ImGui.Button("View the Changelog", buttonSize))
+                {
+                    ImGui.SetNextWindowPos(new Vector2((ImGui.GetIO().DisplaySize.X - 630) / 2, (ImGui.GetIO().DisplaySize.Y  - 535) / 2));
                     _updateWindow.IsOpen = true;
+                }
                 ImGui.PopStyleColor();
 
                 ImGui.PushStyleColor(ImGuiCol.Button, new Vector4(29, 161, 242, 255) / 255);
