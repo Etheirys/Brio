@@ -15,14 +15,11 @@ internal class MainWindow : Window
 {
     private readonly SettingsWindow _settingsWindow;
     private readonly InfoWindow _infoWindow;
-    private readonly UpdateWindow _updateWindow;
     private readonly LibraryWindow _libraryWindow;
     private readonly ConfigurationService _configurationService;
 
     private readonly EntityManager _entityManager;
     private readonly EntityHierarchyView _entitySelector;
-
-    private readonly ConfigurationService _configService;
 
     public MainWindow(
         ConfigurationService configService,
@@ -30,7 +27,6 @@ internal class MainWindow : Window
         InfoWindow infoWindow,
         LibraryWindow libraryWindow,
         EntityManager entityManager,
-        UpdateWindow updateWindow,
         InputService input)
         : base($"{Brio.Name} Scene Manager [{configService.Version}]###brio_main_window", ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.AlwaysAutoResize)
     {
@@ -40,12 +36,9 @@ internal class MainWindow : Window
         _settingsWindow = settingsWindow;
         _libraryWindow = libraryWindow;
         _infoWindow = infoWindow;
-        _updateWindow = updateWindow;
 
         _entityManager = entityManager;
         _entitySelector = new(_entityManager);
-
-        _configService = configService;
 
         SizeConstraints = new WindowSizeConstraints
         {

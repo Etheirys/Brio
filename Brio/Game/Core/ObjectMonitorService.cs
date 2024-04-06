@@ -1,13 +1,9 @@
-﻿using Brio.Game.Actor.Extensions;
-using Brio.Game.Actor.Interop;
+﻿using Brio.Game.Actor.Interop;
 using Dalamud.Game;
-using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Hooking;
 using Dalamud.Plugin.Services;
 using FFXIVClientStructs.FFXIV.Client.Graphics.Scene;
 using System;
-using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Runtime.InteropServices;
 using NativeCharacter = FFXIVClientStructs.FFXIV.Client.Game.Character.Character;
 

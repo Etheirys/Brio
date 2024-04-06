@@ -86,7 +86,7 @@ public class Brio : IDalamudPlugin
     }
 
     private IServiceCollection SetupServices(DalamudServices dalamudServices)
-    {      
+    {
         ServiceCollection serviceCollection = new();
 
         // Dalamud

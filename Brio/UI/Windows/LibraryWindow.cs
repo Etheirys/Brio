@@ -17,7 +17,6 @@ using ImGuiNET;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
 using System.Linq;
 using System.Numerics;
 
@@ -163,7 +162,7 @@ internal class LibraryWindow : Window
         Flags = ImGuiWindowFlags.Modal | ImGuiWindowFlags.NoCollapse;
 
         if(_configurationService.Configuration.Library.ReturnLibraryToLastLocation)
-        {        
+        {
             if(_modalFilter?.Name == "Poses" && _lastPathModalPose is not null)
             {
                 _path = _lastPathModalPose;
@@ -223,9 +222,9 @@ internal class LibraryWindow : Window
         {
             _lastPath = _path;
             _lastFilter = _selectedFilter;
-        
+
         }
-        else if (_modalFilter?.Name == "Poses")
+        else if(_modalFilter?.Name == "Poses")
         {
             _lastPathModalPose = _path;
         }
@@ -238,7 +237,8 @@ internal class LibraryWindow : Window
 
         if(_isModal && _wasOpenBeforeModal)
         {
-            _frameworkService.RunOnTick(() => {
+            _frameworkService.RunOnTick(() =>
+            {
                 _wasOpenBeforeModal = false;
                 Open();
             }, delay: TimeSpan.FromSeconds(0.1));
@@ -450,7 +450,7 @@ internal class LibraryWindow : Window
                     int offset = 200;
                     if(isPoseModal)
                         offset += 30;
-                  
+
                     ImGui.SetCursorPosX(ImGui.GetCursorPosX() + (ImBrio.GetRemainingWidth() - (offset + ImGui.GetStyle().ItemSpacing.X)));
 
 
@@ -460,7 +460,7 @@ internal class LibraryWindow : Window
                         {
                             ImGui.OpenPopup("import_options_popup_lib");
                         }
-                 
+
                         using(var popup = ImRaii.Popup("import_options_popup_lib"))
                         {
                             if(popup.Success)
@@ -1138,7 +1138,7 @@ internal class LibraryWindow : Window
     {
         try
         {
-            Refresh(true);            
+            Refresh(true);
         }
         catch(Exception ex)
         {

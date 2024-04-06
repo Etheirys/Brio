@@ -19,7 +19,7 @@ internal class BrioIPCService : IDisposable
 
     public const string SpawnActorIpcName = "Brio.SpawnActor";
     private ICallGateProvider<GameObject?>? SpawnActorIpc;
- 
+
     public const string SpawnActorWithoutCompanionIpcName = "Brio.SpawnActorWithoutCompanion";
     private ICallGateProvider<GameObject?>? SpawnActorWithoutCompanionIpc;
 

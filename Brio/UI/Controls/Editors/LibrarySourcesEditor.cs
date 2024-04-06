@@ -219,9 +219,9 @@ internal static class LibrarySourcesEditor
                         if(ImGui.Button("Save", new(100, 0)))
                         {
                             config.AddSource(selectedItem);
-                         
+
                             HasSourcesChanged = true;
-                          
+
                             service.ApplyChange();
 
                             ClosePopUp();

@@ -17,7 +17,7 @@ internal class WidgetHelpers
                 break;
 
             DrawBody(w);
-        }            
+        }
     }
 
     public static void DrawBody(Capability capability) => DrawBody(capability.Widget);

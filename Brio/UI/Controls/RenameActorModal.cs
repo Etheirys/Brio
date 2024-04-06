@@ -53,7 +53,7 @@ internal class RenameActorModal
         if(currentActorEntity is not null && currentActorEntity.IsAttached == true)
         {
             ImGui.Text($"Renaming:  [ {currentActorEntity.FriendlyName} ]");
-          
+
             ImGui.InputText("Actor Name###brio_renamemodal_popup_name", ref currentActorName, 20);
 
             if(string.IsNullOrEmpty(currentActorName))

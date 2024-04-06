@@ -1,5 +1,4 @@
-﻿using Brio.Config;
-using Brio.Resources;
+﻿using Brio.Resources;
 using Brio.UI.Controls.Stateless;
 using Dalamud.Interface.Windowing;
 using ImGuiNET;
@@ -9,20 +8,15 @@ namespace Brio.UI.Windows;
 
 internal class UpdateWindow : Window
 {
+    private readonly string _changelogTest;
+    private const float _closeButtonWidth = 210f;
 
-    private readonly ConfigurationService _configurationService;
-    private string _changelogTest;
-
-    const float _closeButtonWidth = 210f;
-
-    public UpdateWindow(ConfigurationService configurationService) : base($" {Brio.Name} Changelog###brio_update_window",
-        ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoCollapse)
+    public UpdateWindow() : base($" {Brio.Name} Changelog###brio_update_window")
     {
         Namespace = "brio_update_namespace";
 
-        _configurationService = configurationService;
-
         Size = new Vector2(630, 535);
+        Flags = ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoCollapse;
 
         ShowCloseButton = false;
 

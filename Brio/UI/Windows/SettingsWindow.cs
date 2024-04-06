@@ -514,13 +514,13 @@ internal class SettingsWindow : Window
                 if(ImGui.CollapsingHeader("Brio", ImGuiTreeNodeFlags.DefaultOpen))
                 {
                     ImGui.Checkbox("Enable [ Reset Settings to Default ] Button", ref resetSettings);
-                        
+
                     if(resetSettings == false)
                     {
                         ImGui.BeginDisabled();
                     }
 
-                    if(ImGui.Button("Reset Settings to Default", new(170,0)))
+                    if(ImGui.Button("Reset Settings to Default", new(170, 0)))
                     {
                         _configurationService.Reset();
                         resetSettings = false;

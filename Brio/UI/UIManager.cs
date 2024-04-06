@@ -198,7 +198,7 @@ internal class UIManager : IDisposable
 
     private void DrawUI()
     {
-        try 
+        try
         {
             BrioStyle.PushStyle();
             _windowSystem.Draw();

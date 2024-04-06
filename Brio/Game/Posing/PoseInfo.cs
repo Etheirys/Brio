@@ -110,7 +110,7 @@ internal class BonePoseInfo(BonePoseInfoId id, PoseInfo parent)
             var inverted = calc.Inverted();
             GetMirrorBone()?.Apply(inverted, null, prop, applyTo, ikInfo.Value, PoseMirrorMode.None, forceNewStack);
         }
-       
+
         var finaleTransform = _stacks[transformIndex].Transform + calc;
 
         _stacks[transformIndex] = new(prop, ikInfo.Value, finaleTransform);

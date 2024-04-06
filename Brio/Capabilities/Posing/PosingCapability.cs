@@ -116,7 +116,7 @@ internal class PosingCapability : ActorCharacterCapability
         }
     }
 
-    public void ImportPose(OneOf<PoseFile, CMToolPoseFile> rawPoseFile,  PoseImporterOptions? options = null, bool asExpression = false)
+    public void ImportPose(OneOf<PoseFile, CMToolPoseFile> rawPoseFile, PoseImporterOptions? options = null, bool asExpression = false)
     {
         ImportPose(rawPoseFile, options, reset: false, reconcile: false, asExpression: asExpression);
     }
