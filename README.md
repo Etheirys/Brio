@@ -26,17 +26,18 @@ or
 
 - Add Brio's custom Dalamud repo,
 
-1. Open Dalamud settings with `/xlsettings` then go to the 'Experimental' tab
-2. Under the `Custom Plugin Repositories` section add the custom Dalamud repo `https://raw.githubusercontent.com/Etheirys/Brio/main/repo.json`
+1. Open Dalamud's Settings by typing `/xlsettings` in chat and then go to the 'Experimental' tab.
+2. Under the Custom Plugin Repositories section, add the following Dalamud repo: `https://raw.githubusercontent.com/Etheirys/Brio/main/repo.json`
 3. Make sure to click on the "Save and Close" button.
-4. Now search for `Brio` in the Dalamud Plugin Installer.
-5. Enable the `Brio` plugin
+4. Now open the `Dalamud Plugin Installer` and search for Brio
+5. Click `Brio` and then `Install`, after Dalamud has finshed Installing Brio, make sure the `Brio` plugin is Enabled in the Plugin Installer.
 6. You now have Brio Installed, you can run the `/brio` command to open the Brio Window at anytime.
 
 ## Support
 Brio is still early in development so issues are to be expected.
 
-Please either open an [issue](https://github.com/Etheirys/Brio/issues) or visit us on [Discord](https://discord.gg/KvGJCCnG8t) if you need help!
+If you encounter an issue, please either open an [issue](https://github.com/Etheirys/Brio/issues) or visit us on [Discord](https://discord.gg/KvGJCCnG8t) if you need help!
+We also have a [Help Page](https://etheirys-tools.gitbook.io/brio/) that is coming soon!
 
 ## Authors
 * [Minmoose](https://github.com/Minmoose) - Maintainer.
