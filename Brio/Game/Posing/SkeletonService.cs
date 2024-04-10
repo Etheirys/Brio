@@ -52,13 +52,13 @@ internal unsafe class SkeletonService : IDisposable
         _gPoseService = gPoseService;
         _ikService = ikService;
         _framework = framework;
-
+        
 
         var updateBonePhysicsAddress = "40 53 48 83 EC ?? 80 B9 ?? ?? ?? ?? ?? 48 8B D9 75 ?? 48 83 C1";
         _updateBonePhysicsHook = hooking.HookFromAddress<UpdateBonePhysicsDelegate>(scanner.ScanText(updateBonePhysicsAddress), UpdateBonePhysicsDetour);
         _updateBonePhysicsHook.Enable();
 
-        var finalizeSkeletonsHook = "48 8B 0D B1 73 10 02 E9 44 7D 32"; // Framework.TaskRenderGraphicsRender
+        var finalizeSkeletonsHook = "48 8B 0D B1 ?? ?? 02 E9 ?? ?? 32 00"; // Framework.TaskRenderGraphicsRender
         _finalizeSkeletonsHook = hooking.HookFromAddress<FinalizeSkeletonsDelegate>(scanner.ScanText(finalizeSkeletonsHook), FinalizeSkeletonsHook);
         _finalizeSkeletonsHook.Enable();
 

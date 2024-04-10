@@ -1,10 +1,10 @@
 ﻿{
   "Author": "Asgard, Minmoose and Contributors",
-  "Name": "Brio",
+  "Name": "Brio-CrashTest-0.2.X",
   "Punchline": "Enhanced GPosing.",
   "Description": "Control actors during GPose sessions.",
-  "AssemblyVersion": "0.0.0.1",
-  "InternalName": "Brio",
+  "AssemblyVersion": "0.2.3.1",
+  "InternalName": "Brio02",
   "ApplicableVersion": "any",
   "IconUrl": "https://raw.githubusercontent.com/Etheirys/Brio/main/Resources/Images/BrioIcon.png",
   "Tags": [
