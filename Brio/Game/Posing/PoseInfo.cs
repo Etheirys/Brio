@@ -85,9 +85,6 @@ internal class BonePoseInfo(BonePoseInfoId id, PoseInfo parent)
         ikInfo ??= DefaultIK;
         var calc = original.HasValue ? transform.CalculateDiff(original.Value) : transform;
 
-        if(calc.ContainsNaN())
-            return null;
-
         if(calc.IsApproximatelySame(Transform.Identity))
             return null;
 
@@ -112,6 +109,24 @@ internal class BonePoseInfo(BonePoseInfoId id, PoseInfo parent)
         }
 
         var finaleTransform = _stacks[transformIndex].Transform + calc;
+       
+        if(finaleTransform.IsRotationNaN())
+        {
+            finaleTransform.Rotation = Quaternion.Identity;
+            Brio.Log.Fatal($"IsRotationNaN!!!!!!!!!");
+        }
+        else if(finaleTransform.IsPositionNaN())
+        {
+            finaleTransform.Position = Vector3.Zero;
+            Brio.Log.Fatal($"IsPositionNaN!!!!!!!!!");
+        }
+        else if(finaleTransform.IsScaleNaN())
+        {
+            finaleTransform.Scale = Vector3.Zero;
+            Brio.Log.Fatal($"IsScaleNaN!!!!!!!!!");
+        }
+
+        Brio.Log.Fatal($"{finaleTransform.Position} {finaleTransform.Rotation} {finaleTransform.Scale}");
 
         _stacks[transformIndex] = new(prop, ikInfo.Value, finaleTransform);
 

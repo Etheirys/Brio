@@ -145,6 +145,7 @@ internal class PosingCapability : ActorCharacterCapability
             ModelPosing.ResetTransform();
 
         SkeletonPosing.ImportSkeletonPose(poseFile, options, asExpression: asExpression);
+       
         if(asExpression == false)
             ModelPosing.ImportModelPose(poseFile, options);
 
