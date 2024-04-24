@@ -113,20 +113,18 @@ internal class BonePoseInfo(BonePoseInfoId id, PoseInfo parent)
         if(finaleTransform.IsRotationNaN())
         {
             finaleTransform.Rotation = Quaternion.Identity;
-            Brio.Log.Fatal($"IsRotationNaN!!!!!!!!!");
+            Brio.Log.Warning($"IsRotationNaN !!!!!!!!!");
         }
         else if(finaleTransform.IsPositionNaN())
         {
             finaleTransform.Position = Vector3.Zero;
-            Brio.Log.Fatal($"IsPositionNaN!!!!!!!!!");
+            Brio.Log.Warning($"IsPositionNaN !!!!!!!!!");
         }
         else if(finaleTransform.IsScaleNaN())
         {
             finaleTransform.Scale = Vector3.Zero;
-            Brio.Log.Fatal($"IsScaleNaN!!!!!!!!!");
+            Brio.Log.Warning($"IsScaleNaN !!!!!!!!!");
         }
-
-        Brio.Log.Fatal($"{finaleTransform.Position} {finaleTransform.Rotation} {finaleTransform.Scale}");
 
         _stacks[transformIndex] = new(prop, ikInfo.Value, finaleTransform);
 
