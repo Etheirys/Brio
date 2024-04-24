@@ -38,14 +38,14 @@ internal class KeyBindPromptWindow : Window, IDisposable
         if(Position == null)
             return;
 
-        IDalamudTextureWrap? bgTex = ResourceProvider.Instance.GetResourceImage("Images.CornerShadow.png");
-        ImGui.GetWindowDrawList().AddImage(
-           bgTex.ImGuiHandle,
-           (Vector2)this.Position + ImGui.GetWindowContentRegionMin(),
-           (Vector2)this.Position + ImGui.GetWindowContentRegionMax() + new Vector2(10, 10),
-           new(0.5f, 0),
-           new(1, 0.5f),
-           0xDDFFFFFF);
+        //IDalamudTextureWrap? bgTex = ResourceProvider.Instance.GetResourceImage("Images.CornerShadow.png");
+        //ImGui.GetWindowDrawList().AddImage(
+        //   bgTex.ImGuiHandle,
+        //   (Vector2)this.Position + ImGui.GetWindowContentRegionMin(),
+        //   (Vector2)this.Position + ImGui.GetWindowContentRegionMax() + new Vector2(10, 10),
+        //   new(0.5f, 0),
+        //   new(1, 0.5f),
+        //   0xDDFFFFFF);
 
         ImGui.SetCursorPosY(50);
 
