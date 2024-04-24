@@ -2,6 +2,14 @@
 To open this window again click `Infomation` on the Scene Manager then -> `View the Changelog`
 
 --------------------------------------------------------------------------------
+	 ---> Brio, Version 0.3.1.1 <--- 
+--------------------------------------------------------------------------------
+
+- Fixed an issue where when loading certain poses some Transform values would be NAN
+- Fix an issue where the Welcome screen would always display for new users
+- Fixed a rare crash with the key-bind overlay open.
+
+--------------------------------------------------------------------------------
 	 ---> Brio, Version 0.3.1 <--- 
 --------------------------------------------------------------------------------
 
@@ -60,6 +68,26 @@ To open this window again click `Infomation` on the Scene Manager then -> `View 
 	- Workaround:
 		- close all but one `Transform Tab`, or...
 		- change the size of the `Advanced Pose` or `Transform Editor` Window.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 --------------------------------------------------------------------------------
 ---> Brio, Versions 0.3.0.1-0.3.0.7 <--- 
