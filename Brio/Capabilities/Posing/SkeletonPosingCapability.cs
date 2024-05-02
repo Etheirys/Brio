@@ -57,9 +57,9 @@ namespace Brio.Capabilities.Posing
             _transitiveActions.ForEach(a => a(bone, poseInfo));
         }
 
-        public void ImportSkeletonPose(PoseFile poseFile, PoseImporterOptions options)
+        public void ImportSkeletonPose(PoseFile poseFile, PoseImporterOptions options, bool asExpression = false)
         {
-            var importer = new PoseImporter(poseFile, options);
+            var importer = new PoseImporter(poseFile, options, asExpression);
             RegisterTransitiveAction(importer.ApplyBone);
         }
 

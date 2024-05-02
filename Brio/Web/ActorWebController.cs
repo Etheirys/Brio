@@ -19,7 +19,7 @@ internal class ActorWebController(IFramework framework, ActorSpawnService actorS
         Brio.Log.Debug("Received redraw request on WebAPI");
         try
         {
-            var result = await _framework.RunOnFrameworkThread(async () => await _redrawService.RedrawActor(data.ObjectIndex));
+            var result = await _framework.RunOnTick(async () => await _redrawService.RedrawActor(data.ObjectIndex));
             return result.ToString();
         }
         catch

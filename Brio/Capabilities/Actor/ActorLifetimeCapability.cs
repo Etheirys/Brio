@@ -30,6 +30,23 @@ internal class ActorLifetimeCapability : ActorCapability
 
     public bool CanClone => Actor.Parent is ActorContainerEntity && GameObject is Character;
 
+    public void SpawnNewActor(bool selectInHierarchy, bool spawnCompanion, bool disableSpawnCompanion)
+    {
+        SpawnFlags flags = SpawnFlags.Default;
+        if(spawnCompanion)
+        {
+            flags |= SpawnFlags.ReserveCompanionSlot;
+        }
+
+        if(_actorSpawnService.CreateCharacter(out Character? chara, flags, disableSpawnCompanion))
+        {
+            if(selectInHierarchy)
+            {
+                _entityManager.SetSelectedEntity(chara);
+            }
+        }
+    }
+
     public void Clone(bool selectInHierarchy)
     {
         if(!CanClone)

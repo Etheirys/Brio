@@ -1,8 +1,11 @@
 ﻿using Brio.Config;
 using Brio.Game.GPose;
+using Brio.IPC;
+using Brio.UI.Controls;
 using Brio.UI.Windows;
 using Brio.UI.Windows.Specialized;
 using Dalamud.Interface.ImGuiFileDialog;
+using Dalamud.Interface.Internal;
 using Dalamud.Interface.Windowing;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
@@ -20,9 +23,11 @@ internal class UIManager : IDisposable
     private readonly MainWindow _mainWindow;
     private readonly SettingsWindow _settingsWindow;
     private readonly InfoWindow _infoWindow;
+    private readonly UpdateWindow _updateWindow;
     private readonly ActorAppearanceWindow _actorAppearanceWindow;
     private readonly ActionTimelineWindow _actionTimelineWindow;
     private readonly PosingOverlayWindow _overlayWindow;
+    private readonly KeyBindPromptWindow _keyBindPromptWindow;
     private readonly PosingOverlayToolbarWindow _overlayToolbarWindow;
     private readonly PosingTransformWindow _overlayTransformWindow;
     private readonly PosingGraphicalWindow _graphicalWindow;
@@ -30,6 +35,12 @@ internal class UIManager : IDisposable
 
     private readonly ITextureProvider _textureProvider;
     private readonly IToastGui _toastGui;
+
+    private readonly IFramework _framework;
+
+    PenumbraService _penumbraService;
+    GlamourerService _glamourerService;
+    MareService _mareService;
 
     private readonly WindowSystem _windowSystem;
 
@@ -52,16 +63,23 @@ internal class UIManager : IDisposable
             ConfigurationService configurationService,
             ITextureProvider textureProvider,
             IToastGui toast,
+            IFramework framework,
             MainWindow mainWindow,
             SettingsWindow settingsWindow,
             InfoWindow infoWindow,
+            UpdateWindow updateWindow,
             ActorAppearanceWindow appearanceWindow,
             ActionTimelineWindow actionTimelineWindow,
             PosingOverlayWindow overlayWindow,
+            KeyBindPromptWindow keyBindPromptWindow,
             PosingOverlayToolbarWindow overlayToolbarWindow,
             PosingTransformWindow overlayTransformWindow,
             PosingGraphicalWindow graphicalWindow,
-            CameraWindow cameraWindow
+            CameraWindow cameraWindow,
+
+            PenumbraService penumbraService,
+            GlamourerService glamourerService,
+            MareService mareService
         )
     {
         Instance = this;
@@ -75,22 +93,32 @@ internal class UIManager : IDisposable
         _mainWindow = mainWindow;
         _settingsWindow = settingsWindow;
         _infoWindow = infoWindow;
+        _updateWindow = updateWindow;
         _actorAppearanceWindow = appearanceWindow;
         _actionTimelineWindow = actionTimelineWindow;
         _overlayWindow = overlayWindow;
+        _keyBindPromptWindow = keyBindPromptWindow;
         _overlayToolbarWindow = overlayToolbarWindow;
         _overlayTransformWindow = overlayTransformWindow;
         _graphicalWindow = graphicalWindow;
         _cameraWindow = cameraWindow;
+
+        _framework = framework;
+
+        _penumbraService = penumbraService;
+        _glamourerService = glamourerService;
+        _mareService = mareService;
 
         _windowSystem = new(Brio.Name);
 
         _windowSystem.AddWindow(_mainWindow);
         _windowSystem.AddWindow(_settingsWindow);
         _windowSystem.AddWindow(_infoWindow);
+        _windowSystem.AddWindow(_updateWindow);
         _windowSystem.AddWindow(_actorAppearanceWindow);
         _windowSystem.AddWindow(_actionTimelineWindow);
         _windowSystem.AddWindow(_overlayWindow);
+        _windowSystem.AddWindow(_keyBindPromptWindow);
         _windowSystem.AddWindow(_overlayToolbarWindow);
         _windowSystem.AddWindow(_overlayTransformWindow);
         _windowSystem.AddWindow(_graphicalWindow);
@@ -98,12 +126,13 @@ internal class UIManager : IDisposable
 
         _gPoseService.OnGPoseStateChange += OnGPoseStateChange;
         _configurationService.OnConfigurationChanged += ApplySettings;
+
         _pluginInterface.UiBuilder.Draw += DrawUI;
         _pluginInterface.UiBuilder.OpenConfigUi += ShowSettingsWindow;
+        _pluginInterface.ActivePluginsChanged += ActivePluginsChanged;
 
         ApplySettings();
     }
-
 
     public void ShowAppearanceWindow()
     {
@@ -125,6 +154,18 @@ internal class UIManager : IDisposable
         _settingsWindow.IsOpen = true;
     }
 
+    private void ActivePluginsChanged(PluginListInvalidationKind kind, bool affectedThisPlugin)
+    {
+        foreach(var plugin in _pluginInterface.InstalledPlugins)
+        {
+            Brio.Log.Debug($"InstalledPlugins: {plugin}");
+        }
+
+        _penumbraService.RefreshPenumbraStatus();
+        _glamourerService.RefreshGlamourerStatus();
+        _mareService.RefreshMareStatus();
+    }
+
     public void NotifyError(string message)
     {
         _toastGui.ShowError(message);
@@ -143,6 +184,8 @@ internal class UIManager : IDisposable
 
     private void ApplySettings()
     {
+        BrioStyle.EnableStyle = _configurationService.Configuration.Appearance.EnableBrioStyle;
+
         _pluginInterface.UiBuilder.DisableGposeUiHide = _configurationService.Configuration.Interface.ShowInGPose;
         _pluginInterface.UiBuilder.DisableAutomaticUiHide = _configurationService.Configuration.Interface.ShowWhenUIHidden;
         _pluginInterface.UiBuilder.DisableUserUiHide = _configurationService.Configuration.Interface.ShowWhenUIHidden;
@@ -151,8 +194,18 @@ internal class UIManager : IDisposable
 
     private void DrawUI()
     {
-        _windowSystem.Draw();
-        FileDialogManager.Draw();
+        BrioStyle.PushStyle();
+
+        try
+        {
+            _windowSystem.Draw();
+            FileDialogManager.Draw();
+            RenameActorModal.DrawModal();
+        }
+        finally
+        {
+            BrioStyle.PopStyle();
+        }
     }
 
     public void Dispose()
@@ -166,4 +219,6 @@ internal class UIManager : IDisposable
 
         Instance = null!;
     }
+
+    public IDalamudTextureWrap LoadImage(byte[] data) => _pluginInterface.UiBuilder.LoadImage(data);
 }

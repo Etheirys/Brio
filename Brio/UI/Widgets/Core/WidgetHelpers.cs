@@ -12,7 +12,12 @@ internal class WidgetHelpers
     public static void DrawBodies(IEnumerable<Capability> capabilities)
     {
         foreach(var w in capabilities)
+        {
+            if(!w.Entity.IsAttached)
+                break;
+
             DrawBody(w);
+        }
     }
 
     public static void DrawBody(Capability capability) => DrawBody(capability.Widget);
@@ -50,6 +55,9 @@ internal class WidgetHelpers
         bool drewAny = false;
         foreach(var w in capabilities)
         {
+            if(!w.Entity.IsAttached)
+                break;
+
             drewAny = true;
             DrawQuickIconSection(w);
             ImGui.SameLine();

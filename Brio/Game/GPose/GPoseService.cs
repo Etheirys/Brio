@@ -106,7 +106,7 @@ internal unsafe class GPoseService : IDisposable
         bool didEnter = _enterGPoseHook.Original.Invoke(uiModule);
 
         HandleGPoseStateChange(didEnter);
-        
+
         return didEnter;
     }
 

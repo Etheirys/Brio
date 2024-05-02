@@ -52,7 +52,7 @@ internal unsafe class SkeletonService : IDisposable
         _gPoseService = gPoseService;
         _ikService = ikService;
         _framework = framework;
-        
+
 
         var updateBonePhysicsAddress = "40 53 48 83 EC ?? 80 B9 ?? ?? ?? ?? ?? 48 8B D9 75 ?? 48 83 C1";
         _updateBonePhysicsHook = hooking.HookFromAddress<UpdateBonePhysicsDelegate>(scanner.ScanText(updateBonePhysicsAddress), UpdateBonePhysicsDetour);

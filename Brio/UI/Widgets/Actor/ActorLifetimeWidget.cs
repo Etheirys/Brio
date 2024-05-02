@@ -1,4 +1,5 @@
 ﻿using Brio.Capabilities.Actor;
+using Brio.UI.Controls;
 using Brio.UI.Controls.Stateless;
 using Brio.UI.Widgets.Core;
 using Dalamud.Interface;
@@ -14,6 +15,20 @@ internal class ActorLifetimeWidget(ActorLifetimeCapability capability) : Widget<
 
     public override void DrawQuickIcons()
     {
+        if(ImBrio.FontIconButton("lifetimewidget_spawnnew", FontAwesomeIcon.Plus, "Spawn New Actor"))
+        {
+            Capability.SpawnNewActor(false, false, true);
+        }
+
+        ImGui.SameLine();
+
+        if(ImBrio.FontIconButton("lifetimewidget_spawnnewwithcompanionslot", FontAwesomeIcon.PlusSquare, "Spawn New Actor with Companion slot"))
+        {
+            Capability.SpawnNewActor(false, true, false);
+        }
+
+        ImGui.SameLine();
+
         if(ImBrio.FontIconButton("lifetimewidget_clone", FontAwesomeIcon.Clone, "Clone", Capability.CanClone))
         {
             Capability.Clone(false);
@@ -31,6 +46,13 @@ internal class ActorLifetimeWidget(ActorLifetimeCapability capability) : Widget<
         if(ImBrio.FontIconButton("lifetimewidget_target", FontAwesomeIcon.Bullseye, "Target"))
         {
             Capability.Target();
+        }
+
+        ImGui.SameLine();
+
+        if(ImBrio.FontIconButton("lifetimewidget_rename", FontAwesomeIcon.Signature, "Rename"))
+        {
+            RenameActorModal.Open(Capability.Actor);
         }
     }
 
@@ -55,6 +77,13 @@ internal class ActorLifetimeWidget(ActorLifetimeCapability capability) : Widget<
         if(ImGui.MenuItem("Target###actorlifetime_target"))
         {
             Capability.Target();
+        }
+
+        if(ImGui.MenuItem($"Rename {Capability.Actor.FriendlyName}###actorlifetime_rename"))
+        {
+            ImGui.CloseCurrentPopup();
+
+            RenameActorModal.Open(Capability.Actor);
         }
     }
 }

@@ -1,6 +1,6 @@
 ﻿using Brio.Config;
-using Brio.Core;
 using Brio.Entities;
+using Brio.Input;
 using Brio.UI.Controls.Stateless;
 using Brio.UI.Entitites;
 using Dalamud.Interface;
@@ -15,16 +15,25 @@ internal class MainWindow : Window
 {
     private readonly SettingsWindow _settingsWindow;
     private readonly InfoWindow _infoWindow;
-    private readonly EntityManager _entityManager;
+    private readonly ConfigurationService _configurationService;
 
+    private readonly EntityManager _entityManager;
     private readonly EntityHierarchyView _entitySelector;
 
-    public MainWindow(ConfigurationService configService, SettingsWindow settingsWindow, InfoWindow infoWindow, EntityManager entityManager) : base($"{Brio.Name} Scene Manager [{configService.Version}]###brio_main_window", ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.AlwaysAutoResize)
+    public MainWindow(
+        ConfigurationService configService,
+        SettingsWindow settingsWindow,
+        InfoWindow infoWindow,
+        EntityManager entityManager,
+        InputService input)
+        : base($"{Brio.Name} Scene Manager [{configService.Version}]###brio_main_window", ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.AlwaysAutoResize)
     {
         Namespace = "brio_main_namespace";
 
+        _configurationService = configService;
         _settingsWindow = settingsWindow;
         _infoWindow = infoWindow;
+
         _entityManager = entityManager;
         _entitySelector = new(_entityManager);
 
@@ -33,6 +42,10 @@ internal class MainWindow : Window
             MaximumSize = new Vector2(270, 5000),
             MinimumSize = new Vector2(270, 200)
         };
+
+        input.AddListener(KeyBindEvents.Interface_ToggleBrioWindow, this.OnMainWindowToggle);
+        input.AddListener(KeyBindEvents.Interface_ToggleBindPromptWindow, this.OnPromptWindowToggle);
+
     }
 
     public override void Draw()
@@ -41,7 +54,7 @@ internal class MainWindow : Window
 
         var rootEntity = _entityManager.RootEntity;
 
-        if(rootEntity == null)
+        if(rootEntity is null)
             return;
 
         using(var container = ImRaii.Child("###entity_hierarchy_container", new Vector2(-1, ImGui.GetTextLineHeight() * 15f), true))
@@ -55,20 +68,45 @@ internal class MainWindow : Window
         EntityHelpers.DrawEntitySection(_entityManager.SelectedEntity);
     }
 
+    private void OnMainWindowToggle()
+    {
+        this.IsOpen = !this.IsOpen;
+    }
+
+    private void OnPromptWindowToggle()
+    {
+        _configurationService.Configuration.Input.ShowPromptsInGPose = !_configurationService.Configuration.Input.ShowPromptsInGPose;
+
+        _configurationService.ApplyChange();
+    }
+
     private void DrawHeaderButtons()
     {
-        var initialPos = ImGui.GetCursorPos();
-        ImGui.PushClipRect(ImGui.GetWindowPos(), ImGui.GetWindowPos() + ImGui.GetWindowSize(), false);
+        float buttonWidths = 25;
+        float finalWidth = ImBrio.GetRemainingWidth() - ((buttonWidths * 2) + (ImGui.GetStyle().ItemSpacing.X * 2) + ImGui.GetStyle().WindowBorderSize);
+     
+        ImGui.BeginDisabled();
+        if(ImBrio.Button("Library", FontAwesomeIcon.Book, new Vector2(finalWidth, 0)))
+        {
+            // KENTODO
+        }     
+        ImGui.EndDisabled();
 
-        ImGui.SetCursorPosY(0);
-        if(ImBrio.FontIconButtonRight("settings_toggle", FontAwesomeIcon.Cog, 2.3f, "Settings", bordered: false))
-            _settingsWindow.Toggle();
+        if(ImGui.IsItemHovered())
+            ImGui.SetTooltip("Open the Library");
 
-        ImGui.SetCursorPosY(0);
-        if(ImBrio.FontIconButtonRight("info_toggle", FontAwesomeIcon.InfoCircle, 3.3f, "Info", bordered: false))
+        ImGui.SameLine();
+        if(ImBrio.FontIconButton(FontAwesomeIcon.InfoCircle, new(buttonWidths, 0)))
             _infoWindow.Toggle();
 
-        ImGui.PopClipRect();
-        ImGui.SetCursorPos(initialPos);
+        if(ImGui.IsItemHovered())
+            ImGui.SetTooltip("Information");
+
+        ImGui.SameLine();
+        if(ImBrio.FontIconButton(FontAwesomeIcon.Cog, new(buttonWidths, 0)))
+            _settingsWindow.Toggle();
+
+        if(ImGui.IsItemHovered())
+            ImGui.SetTooltip("Settings");
     }
 }

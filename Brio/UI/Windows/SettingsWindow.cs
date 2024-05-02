@@ -1,6 +1,8 @@
-﻿using Brio.Config;
-using Brio.Core;
+using Brio.Config;
+using Brio.Input;
 using Brio.IPC;
+using Brio.Resources;
+using Brio.UI.Controls.Editors;
 using Brio.UI.Controls.Stateless;
 using Brio.Web;
 using Dalamud.Interface;
@@ -21,7 +23,13 @@ internal class SettingsWindow : Window
     private readonly BrioIPCService _brioIPCService;
     private readonly MareService _mareService;
 
-    public SettingsWindow(ConfigurationService configurationService, PenumbraService penumbraService, GlamourerService glamourerService, WebService webService, BrioIPCService brioIPCService, MareService mareService) : base($"{Brio.Name} Settings###brio_settings_window", ImGuiWindowFlags.NoResize)
+    public SettingsWindow(
+        ConfigurationService configurationService,
+        PenumbraService penumbraService,
+        GlamourerService glamourerService,
+        WebService webService,
+        BrioIPCService brioIPCService,
+        MareService mareService) : base($"{Brio.Name} Settings###brio_settings_window", ImGuiWindowFlags.NoResize)
     {
         Namespace = "brio_settings_namespace";
 
@@ -35,27 +43,62 @@ internal class SettingsWindow : Window
         Size = new Vector2(400, 450);
     }
 
+    private bool _isModal = false;
+    private float? _libraryPadding = null;
+    public void OpenAsLibraryTab()
+    {
+        _libraryPadding = 35;
+
+        Flags = ImGuiWindowFlags.Modal | ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoResize;
+        IsOpen = true;
+
+        BringToFront();
+
+        _isModal = true;
+    }
+
+    public override void OnClose()
+    {
+        Flags = ImGuiWindowFlags.NoResize;
+        _isModal = false;
+
+        _libraryPadding = null;
+    }
+
     public override void Draw()
     {
         using(ImRaii.PushId("brio_settings"))
         {
-            using(var tab = ImRaii.TabBar("###brio_settings_tabs"))
+            if(_isModal)
             {
-                if(tab.Success)
+                DrawLibrarySection();
+
+                if(ImBrio.Button("Close", FontAwesomeIcon.Times, new Vector2(100, 0)))
                 {
-                    DrawInterfaceTab();
-                    DrawIPCTab();
-                    DrawAppearanceTab();
-                    DrawPosingTab();
-                    DrawWorldTab();
+                    IsOpen = false;
+                }
+
+            }
+            else
+            {
+                using(var tab = ImRaii.TabBar("###brio_settings_tabs"))
+                {
+                    if(tab.Success)
+                    {
+                        DrawGeneralTab();
+                        DrawIPCTab();
+                        DrawPosingTab();
+                        DrawKeysTab();
+                        DrawAdvancedTab();
+                    }
                 }
             }
         }
     }
 
-    private void DrawInterfaceTab()
+    private void DrawGeneralTab()
     {
-        using(var tab = ImRaii.TabItem("Interface"))
+        using(var tab = ImRaii.TabItem("General"))
         {
             if(tab.Success)
             {
@@ -64,6 +107,8 @@ internal class SettingsWindow : Window
                     DrawOpenBrioSetting();
                     DrawHideSettings();
                 }
+
+                DrawNPCAppearanceHack();
 
                 if(ImGui.CollapsingHeader("Display", ImGuiTreeNodeFlags.DefaultOpen))
                 {
@@ -155,7 +200,7 @@ internal class SettingsWindow : Window
             {
                 ImGui.Text($"Penumbra Status: {(_penumbraService.IsPenumbraAvailable ? "Active" : "Inactive")}");
                 ImGui.SameLine();
-                if (ImBrio.FontIconButton("refresh_penumbra", FontAwesomeIcon.Sync, "Refresh Penumbra Status"))
+                if(ImBrio.FontIconButton("refresh_penumbra", FontAwesomeIcon.Sync, "Refresh Penumbra Status"))
                 {
                     _penumbraService.RefreshPenumbraStatus();
                 }
@@ -172,7 +217,7 @@ internal class SettingsWindow : Window
             {
                 ImGui.Text($"Glamourer Status: {(_glamourerService.IsGlamourerAvailable ? "Active" : "Inactive")}");
                 ImGui.SameLine();
-                if (ImBrio.FontIconButton("refresh_glamourer", FontAwesomeIcon.Sync, "Refresh Glamourer Status"))
+                if(ImBrio.FontIconButton("refresh_glamourer", FontAwesomeIcon.Sync, "Refresh Glamourer Status"))
                 {
                     _glamourerService.RefreshGlamourerStatus();
                 }
@@ -189,7 +234,7 @@ internal class SettingsWindow : Window
             {
                 ImGui.Text($"Mare Synchronos Status: {(_mareService.IsMareAvailable ? "Active" : "Inactive")}");
                 ImGui.SameLine();
-                if (ImBrio.FontIconButton("refresh_mare", FontAwesomeIcon.Sync, "Refresh Mare Synchronos Status"))
+                if(ImBrio.FontIconButton("refresh_mare", FontAwesomeIcon.Sync, "Refresh Mare Synchronos Status"))
                 {
                     _mareService.RefreshMareStatus();
                 }
@@ -220,17 +265,6 @@ internal class SettingsWindow : Window
             ImGui.Text($"Web API Status: {(_webService.IsRunning ? "Active" : "Inactive")}");
         }
 
-    }
-
-    private void DrawAppearanceTab()
-    {
-        using(var tab = ImRaii.TabItem("Appearance"))
-        {
-            if(tab.Success)
-            {
-                DrawNPCAppearanceHack();
-            }
-        }
     }
 
     private void DrawNPCAppearanceHack()
@@ -315,6 +349,26 @@ internal class SettingsWindow : Window
                 _configurationService.ApplyChange();
             }
 
+            bool standout = _configurationService.Configuration.Posing.ModelTransformStandout;
+            if(ImGui.Checkbox("Make the [Model Transform] Bone Standout", ref standout))
+            {
+                _configurationService.Configuration.Posing.ModelTransformStandout = standout;
+                _configurationService.ApplyChange();
+            }
+
+            if(standout == false)
+                ImGui.BeginDisabled();
+
+            Vector4 modelTransformCircleStandOut = ImGui.ColorConvertU32ToFloat4(_configurationService.Configuration.Posing.ModelTransformCircleStandOutColor);
+            if(ImGui.ColorEdit4("[Model Transform] Bone Standout Color", ref modelTransformCircleStandOut, ImGuiColorEditFlags.NoInputs))
+            {
+                _configurationService.Configuration.Posing.ModelTransformCircleStandOutColor = ImGui.ColorConvertFloat4ToU32(modelTransformCircleStandOut);
+                _configurationService.ApplyChange();
+            }
+
+            if(standout == false)
+                ImGui.EndDisabled();
+
             bool allowGizmoAxisFlip = _configurationService.Configuration.Posing.AllowGizmoAxisFlip;
             if(ImGui.Checkbox("Allow Gizmo Axis Flip", ref allowGizmoAxisFlip))
             {
@@ -397,9 +451,9 @@ internal class SettingsWindow : Window
             }
 
             Vector4 skeletonLineActive = ImGui.ColorConvertU32ToFloat4(_configurationService.Configuration.Posing.SkeletonLineActiveColor);
-            if (ImGui.ColorEdit4("Skeleton Active Color", ref skeletonLineActive, ImGuiColorEditFlags.NoInputs))
+            if(ImGui.ColorEdit4("Skeleton Active Color", ref skeletonLineActive, ImGuiColorEditFlags.NoInputs))
             {
-                
+
                 _configurationService.Configuration.Posing.SkeletonLineActiveColor = ImGui.ColorConvertFloat4ToU32(skeletonLineActive);
                 _configurationService.ApplyChange();
             }
@@ -427,15 +481,39 @@ internal class SettingsWindow : Window
         }
     }
 
-    private void DrawWorldTab()
+    bool resetSettings = false;
+    private void DrawAdvancedTab()
     {
-        using(var tab = ImRaii.TabItem("World"))
+        using(var tab = ImRaii.TabItem("Advanced"))
         {
             if(tab.Success)
             {
                 DrawEnvironmentSection();
+
+                if(ImGui.CollapsingHeader("Brio", ImGuiTreeNodeFlags.DefaultOpen))
+                {
+                    ImGui.Checkbox("Enable [ Reset Settings to Default ] Button", ref resetSettings);
+
+                    if(resetSettings == false)
+                    {
+                        ImGui.BeginDisabled();
+                    }
+
+                    if(ImGui.Button("Reset Settings to Default", new(170, 0)))
+                    {
+                        _configurationService.Reset();
+                        resetSettings = false;
+                    }
+
+                    if(resetSettings == false)
+                    {
+                        ImGui.EndDisabled();
+                    }
+                }
+
             }
         }
+
     }
 
     private void DrawEnvironmentSection()
@@ -463,5 +541,89 @@ internal class SettingsWindow : Window
                 _configurationService.ApplyChange();
             }
         }
+    }
+
+    private void DrawLibraryTab()
+    {
+        using(var tab = ImRaii.TabItem("Library"))
+        {
+            if(tab.Success)
+            {
+                DrawLibrarySection();
+            }
+        }
+    }
+
+    private void DrawLibrarySection()
+    {
+        //
+        //// KENTODO FIX
+        //
+
+    }
+
+    private void DrawKeysTab()
+    {
+        using(var tab = ImRaii.TabItem("Key Binds"))
+        {
+            if(!tab.Success)
+                return;
+
+            bool enableKeybinds = _configurationService.Configuration.Input.EnableKeybinds;
+            if(ImGui.Checkbox("Enable keyboard shortcuts", ref enableKeybinds))
+            {
+                _configurationService.Configuration.Input.EnableKeybinds = enableKeybinds;
+                _configurationService.ApplyChange();
+            }
+
+            if(enableKeybinds == false)
+            {
+                ImGui.BeginDisabled();
+            }
+
+            bool showPrompts = _configurationService.Configuration.Input.ShowPromptsInGPose;
+            if(ImGui.Checkbox("Show prompts in GPose", ref showPrompts))
+            {
+                _configurationService.Configuration.Input.ShowPromptsInGPose = showPrompts;
+                _configurationService.ApplyChange();
+            }
+
+            if(ImGui.CollapsingHeader("Interface", ImGuiTreeNodeFlags.DefaultOpen))
+            {
+                DrawKeyBind(KeyBindEvents.Interface_ToggleBrioWindow);
+                DrawKeyBind(KeyBindEvents.Interface_IncrementSmallModifier);
+                DrawKeyBind(KeyBindEvents.Interface_IncrementLargeModifier);
+            }
+
+            if(ImGui.CollapsingHeader("Posing", ImGuiTreeNodeFlags.DefaultOpen))
+            {
+                DrawKeyBind(KeyBindEvents.Posing_DisableGizmo);
+                DrawKeyBind(KeyBindEvents.Posing_DisableSkeleton);
+                DrawKeyBind(KeyBindEvents.Posing_HideOverlay);
+                DrawKeyBind(KeyBindEvents.Posing_ToggleOverlay);
+                DrawKeyBind(KeyBindEvents.Posing_Undo);
+                DrawKeyBind(KeyBindEvents.Posing_Redo);
+                DrawKeyBind(KeyBindEvents.Posing_Translate);
+                DrawKeyBind(KeyBindEvents.Posing_Rotate);
+                DrawKeyBind(KeyBindEvents.Posing_Scale);
+            }
+
+            if(enableKeybinds == false)
+            {
+                ImGui.EndDisabled();
+            }
+
+        }
+    }
+
+    private void DrawKeyBind(KeyBindEvents evt)
+    {
+        string evtText = Localize.Get($"keys.{evt}") ?? evt.ToString();
+
+        if(KeybindEditor.KeySelector(evtText, evt, _configurationService.Configuration.Input))
+        {
+            _configurationService.ApplyChange();
+        }
+
     }
 }

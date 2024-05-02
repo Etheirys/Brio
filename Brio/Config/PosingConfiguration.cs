@@ -1,6 +1,4 @@
-﻿using ImGuiNET;
-
-namespace Brio.Config;
+﻿namespace Brio.Config;
 
 internal class PosingConfiguration
 {
@@ -10,8 +8,8 @@ internal class PosingConfiguration
     public float BoneCircleSize { get; set; } = 7f;
     public uint BoneCircleNormalColor { get; set; } = 0xFFFFFFFF;
     public uint BoneCircleInactiveColor { get; set; } = 0x55555555;
-    public uint BoneCircleHoveredColor { get; set; } = 0xFF00FFFF;
-    public uint BoneCircleSelectedColor { get; set; } = 0xFF0050FF;
+    public uint BoneCircleHoveredColor { get; set; } = 0xFFFF0073;
+    public uint BoneCircleSelectedColor { get; set; } = 0xFFF82B56;
     public float SkeletonLineThickness { get; set; } = 3f;
     public uint SkeletonLineActiveColor { get; set; } = 0xFFFFFFFF;
     public uint SkeletonLineInactiveColor { get; set; } = 0x55555555;
@@ -19,9 +17,9 @@ internal class PosingConfiguration
     public bool HideGizmoWhenAdvancedPosingOpen { get; set; } = false;
     public bool HideToolbarWhenAdvandedPosingOpen { get; set; } = false;
     public bool HideSkeletonWhenGizmoActive { get; set; } = false;
-    public ImGuiKey DisableGizmoHotkey { get; set; } = ImGuiKey.LeftShift;
-    public ImGuiKey DisableSkeletonHotkey { get; set; } = ImGuiKey.LeftCtrl;
-    public ImGuiKey HideOverlayHotkey { get; set; } = ImGuiKey.LeftAlt;
+
+    public bool ModelTransformStandout { get; set; } = true;
+    public uint ModelTransformCircleStandOutColor { get; set; } = 0xFFE02B70;
 
     // Graphical Posing
     public bool GraphicalSidesSwapped { get; set; } = false;

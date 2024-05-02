@@ -23,6 +23,11 @@ internal static class GameObjectExtensions
         };
     }
 
+    public static string GetAsCustomName(this GameObject go, string name)
+    {
+        return $"{name} ({go.ObjectIndex})";
+    }
+
     public static string GetFriendlyName(this GameObject go)
     {
         switch(go.ObjectKind)

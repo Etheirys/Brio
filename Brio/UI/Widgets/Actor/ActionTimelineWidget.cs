@@ -6,7 +6,7 @@ namespace Brio.UI.Widgets.Actor;
 
 internal class ActionTimelineWidget(ActionTimelineCapability capability) : Widget<ActionTimelineCapability>(capability)
 {
-    public override string HeaderName => "Action Timelines";
+    public override string HeaderName => "Animation Control";
 
     public override WidgetFlags Flags => WidgetFlags.DrawBody | WidgetFlags.HasAdvanced;
 

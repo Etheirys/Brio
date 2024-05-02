@@ -45,14 +45,14 @@ internal class ActorSpawnService : IDisposable
         _clientState.TerritoryChanged += OnTerritoryChanged;
     }
 
-    public bool CreateCharacter([MaybeNullWhen(false)] out Character outCharacter, SpawnFlags flags = SpawnFlags.Default)
+    public bool CreateCharacter([MaybeNullWhen(false)] out Character outCharacter, SpawnFlags flags = SpawnFlags.Default, bool disableSpawnCompanion = false)
     {
         outCharacter = null;
 
         var localPlayer = _clientState.LocalPlayer;
         if(localPlayer != null)
         {
-            if(CloneCharacter(localPlayer, out outCharacter, flags))
+            if(CloneCharacter(localPlayer, out outCharacter, flags, disableSpawnCompanion: disableSpawnCompanion))
             {
                 return true;
             }
@@ -61,14 +61,14 @@ internal class ActorSpawnService : IDisposable
         return false;
     }
 
-    public unsafe bool CloneCharacter(Character sourceCharacter, [MaybeNullWhen(false)] out Character outCharacter, SpawnFlags flags = SpawnFlags.Default)
+    public unsafe bool CloneCharacter(Character sourceCharacter, [MaybeNullWhen(false)] out Character outCharacter, SpawnFlags flags = SpawnFlags.Default, bool disableSpawnCompanion = false)
     {
         outCharacter = null;
 
         CharacterCopyFlags copyFlags = CharacterCopyFlags.WeaponHiding;
 
         bool hasCompanion = sourceCharacter.HasSpawnedCompanion();
-        if(hasCompanion)
+        if(disableSpawnCompanion == false && hasCompanion)
         {
             flags |= SpawnFlags.ReserveCompanionSlot;
             copyFlags |= CharacterCopyFlags.Companion | CharacterCopyFlags.Ornament | CharacterCopyFlags.Mount;
@@ -111,13 +111,12 @@ internal class ActorSpawnService : IDisposable
             // Start drawing
             _actorRedrawService.DrawWhenReady(outCharacter);
 
-            if(hasCompanion)
+            if(disableSpawnCompanion == false && hasCompanion)
             {
                 // We need to wait for the companion to be ready before we can draw it.
                 var companion = _objectTable.CreateObjectReference((nint)(targetNative->CompanionObject));
                 if(companion != null)
                     _actorRedrawService.DrawWhenReady(companion);
-
             }
 
 

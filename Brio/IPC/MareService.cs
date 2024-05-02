@@ -40,15 +40,23 @@ internal class MareService : IDisposable
         }
     }
 
-    public bool LoadMcdf(string fileName, GameObject target)
+    public bool LoadMcdfAsync(string fileName, GameObject target)
     {
+        RefreshMareStatus();
+
+        if(IsMareAvailable == false)
+        {
+            Brio.Log.Error($"Failed load MCDF file, Mare is not available");
+            return false;
+        }
+
         try
         {
             return _mareApplyMcdf.InvokeFunc(fileName, target);
         }
         catch(Exception ex)
         {
-            Brio.Log.Error(ex, $"Failed to Invoke MareSynchronos.LoadMcdf IPC");
+            Brio.Log.Error(ex, $"Failed to Invoke MareSynchronos.LoadMcdfAsync IPC");
             return false;
         }
     }
@@ -57,7 +65,8 @@ internal class MareService : IDisposable
     {
         try
         {
-            bool mareInstalled = _pluginInterface.InstalledPlugins.Any(x => x.Name == "Mare Synchronos");
+            bool mareInstalled = _pluginInterface.InstalledPlugins.Any(x => x.Name == "Mare Synchronos" && x.IsLoaded == true);
+
             if(!mareInstalled)
             {
                 Brio.Log.Debug("Mare Synchronos not present");

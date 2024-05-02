@@ -1,5 +1,5 @@
-﻿using Brio.Config;
-using Brio.Game.Camera;
+﻿using Brio.Game.Camera;
+using Brio.Input;
 using FFXIVClientStructs.FFXIV.Client.Game.Control;
 using ImGuiNET;
 using System;
@@ -78,7 +78,7 @@ internal static partial class ImBrioGizmo
         // recompose the matrix
         if(changed)
         {
-            if (worldSpace)
+            if(worldSpace)
             {
                 matrix = Matrix4x4.CreateScale(scale);
                 matrix = Matrix4x4.Transform(matrix, rotation);
@@ -91,7 +91,7 @@ internal static partial class ImBrioGizmo
                 matrix = Matrix4x4.Transform(matrix, editingRotation);
                 matrix.Translation = translation;
             }
-      
+
         }
 
         return changed;
@@ -124,7 +124,7 @@ internal static partial class ImBrioGizmo
         closestAxisMouseFromPos = null;
         isUsing = false;
 
-   
+
         // create a transform matrix
         transformMatrix = Matrix4x4.CreateFromQuaternion(rotation);
         transformMatrix.Translation = new Vector3(0, -5, 0);
@@ -172,12 +172,10 @@ internal static partial class ImBrioGizmo
 
                     float angleChange = dragDelta / 200;
 
-                    bool smallIncrement = ImGui.IsKeyDown(ConfigurationService.Instance.Configuration.Interface.IncrementSmall);
-                    if(smallIncrement)
+                    if(InputService.IsKeyBindDown(KeyBindEvents.Interface_IncrementSmallModifier))
                         angleChange /= 10;
 
-                    bool largeIncrement = ImGui.IsKeyDown(ConfigurationService.Instance.Configuration.Interface.IncrementLarge);
-                    if(largeIncrement)
+                    if(InputService.IsKeyBindDown(KeyBindEvents.Interface_IncrementLargeModifier))
                         angleChange *= 10;
 
                     Quaternion rot = Quaternion.Identity;
@@ -225,27 +223,27 @@ internal static partial class ImBrioGizmo
 
                     if(mouseWheel != 0)
                     {
-                        bool smallIncrement = ImGui.IsKeyDown(ConfigurationService.Instance.Configuration.Interface.IncrementSmall);
-                        if(smallIncrement)
+                        if(InputService.IsKeyBindDown(KeyBindEvents.Interface_IncrementSmallModifier))
                             mouseWheel /= 10;
 
-                        bool largeIncrement = ImGui.IsKeyDown(ConfigurationService.Instance.Configuration.Interface.IncrementLarge);
-                        if(largeIncrement)
+                        if(InputService.IsKeyBindDown(KeyBindEvents.Interface_IncrementLargeModifier))
                             mouseWheel *= 10;
 
                         Quaternion rot = Quaternion.Identity;
-                        if(dragAxis == Axis.X)
+                        if(closestMouseAxis == Axis.X)
                         {
                             rot = Quaternion.CreateFromAxisAngle(Vector3.UnitX, mouseWheel);
                         }
-                        if(dragAxis == Axis.Y)
+                        if(closestMouseAxis == Axis.Y)
                         {
                             rot = Quaternion.CreateFromAxisAngle(Vector3.UnitY, -mouseWheel);
                         }
-                        if(dragAxis == Axis.Z)
+                        if(closestMouseAxis == Axis.Z)
                         {
                             rot = Quaternion.CreateFromAxisAngle(Vector3.UnitZ, mouseWheel);
                         }
+
+                        rotation = rotation * rot;
                         changed = true;
                     }
                 }

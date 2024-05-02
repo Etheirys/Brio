@@ -5,6 +5,7 @@ using Brio.Entities.Actor;
 using Brio.Entities.Core;
 using Brio.Files;
 using Brio.Game.Posing;
+using Brio.Input;
 using Brio.Resources;
 using Brio.UI.Widgets.Posing;
 using Brio.UI.Windows.Specialized;
@@ -19,6 +20,8 @@ namespace Brio.Capabilities.Posing;
 internal class PosingCapability : ActorCharacterCapability
 {
     public PosingSelectionType Selected { get; set; } = new None();
+    public PosingSelectionType Hover { get; set; } = new None();
+    public PosingSelectionType LastHover { get; set; } = new None();
 
     public SkeletonPosingCapability SkeletonPosing => Entity.GetCapability<SkeletonPosingCapability>();
     public ModelPosingCapability ModelPosing => Entity.GetCapability<ModelPosingCapability>();
@@ -56,14 +59,41 @@ internal class PosingCapability : ActorCharacterCapability
     private readonly PosingService _posingService;
     private readonly ConfigurationService _configurationService;
     private readonly IFramework _framework;
+    private readonly InputService _input;
 
-    public PosingCapability(ActorEntity parent, PosingOverlayWindow window, PosingService posingService, ConfigurationService configurationService, IFramework framework) : base(parent)
+    public PosingCapability(
+        ActorEntity parent,
+        PosingOverlayWindow window,
+        PosingService posingService,
+        ConfigurationService configurationService,
+        IFramework framework,
+        InputService input)
+        : base(parent)
     {
         Widget = new PosingWidget(this);
         _overlayWindow = window;
         _posingService = posingService;
         _configurationService = configurationService;
         _framework = framework;
+        _input = input;
+    }
+
+    public override void OnEntitySelected()
+    {
+        base.OnEntitySelected();
+
+        _input.AddListener(KeyBindEvents.Posing_ToggleOverlay, ToggleOverlay);
+        _input.AddListener(KeyBindEvents.Posing_Undo, Undo);
+        _input.AddListener(KeyBindEvents.Posing_Redo, Redo);
+    }
+
+    public override void OnEntityDeselected()
+    {
+        base.OnEntityDeselected();
+
+        _input.RemoveListener(KeyBindEvents.Posing_ToggleOverlay, ToggleOverlay);
+        _input.RemoveListener(KeyBindEvents.Posing_Undo, Undo);
+        _input.RemoveListener(KeyBindEvents.Posing_Redo, Redo);
     }
 
     public void ClearSelection() => Selected = PosingSelectionType.None;
@@ -82,11 +112,16 @@ internal class PosingCapability : ActorCharacterCapability
         }
         catch
         {
-            EventBus.Instance.NotifyError("Invalid pose file.");
+            Brio.NotifyError("Invalid pose file.");
         }
     }
 
-    public void ImportPose(OneOf<PoseFile, CMToolPoseFile> rawPoseFile, PoseImporterOptions? options = null, bool generateSnapshot = true, bool reset = true, bool reconcile = true)
+    public void ImportPose(OneOf<PoseFile, CMToolPoseFile> rawPoseFile, PoseImporterOptions? options = null, bool asExpression = false)
+    {
+        ImportPose(rawPoseFile, options, reset: false, reconcile: false, asExpression: asExpression);
+    }
+
+    private void ImportPose(OneOf<PoseFile, CMToolPoseFile> rawPoseFile, PoseImporterOptions? options = null, bool generateSnapshot = true, bool reset = true, bool reconcile = true, bool asExpression = false)
     {
         var poseFile = rawPoseFile.Match(
                 poseFile => poseFile,
@@ -95,16 +130,24 @@ internal class PosingCapability : ActorCharacterCapability
 
         if(!poseFile.Bones.Any() && !poseFile.MainHand.Any() && !poseFile.OffHand.Any())
         {
-            EventBus.Instance.NotifyError("Invalid pose file.");
+            Brio.NotifyError("Invalid pose file.");
             return;
         }
 
         poseFile.SanitizeBoneNames();
 
-        options ??= _posingService.DefaultImporterOptions;
+        if(asExpression)
+            options ??= _posingService.DefaultExpressionOptions;
+        else
+            options ??= _posingService.DefaultImporterOptions;
 
-        SkeletonPosing.ImportSkeletonPose(poseFile, options);
-        ModelPosing.ImportModelPose(poseFile, options);
+        if(options.ApplyModelTransform && reset)
+            ModelPosing.ResetTransform();
+
+        SkeletonPosing.ImportSkeletonPose(poseFile, options, asExpression: asExpression);
+       
+        if(asExpression == false)
+            ModelPosing.ImportModelPose(poseFile, options);
 
         if(generateSnapshot)
             _framework.RunOnTick(() => Snapshot(reset, reconcile), delayTicks: 2);
@@ -166,6 +209,11 @@ internal class PosingCapability : ActorCharacterCapability
 
         if(generateSnapshot)
             Snapshot(reset);
+    }
+
+    public void ToggleOverlay()
+    {
+        OverlayOpen = !OverlayOpen;
     }
 
     private void Reconcile(bool reset = true, bool generateSnapshot = true)

@@ -16,7 +16,23 @@ namespace Brio.Entities.Actor
 
         private readonly ConfigurationService _configService = provider.GetRequiredService<ConfigurationService>();
 
-        public override string FriendlyName => _configService.Configuration.Interface.CensorActorNames ? GameObject.GetCensoredName() : GameObject.GetFriendlyName();
+        string name = "";
+        public override string FriendlyName
+        {
+            get
+            {
+                if(string.IsNullOrEmpty(name))
+                {
+                    return _configService.Configuration.Interface.CensorActorNames ? GameObject.GetCensoredName() : GameObject.GetFriendlyName();
+                }
+
+                return GameObject.GetAsCustomName(name);
+            }
+            set
+            {
+                name = value;
+            }
+        }
         public override FontAwesomeIcon Icon => GameObject.GetFriendlyIcon();
 
         public unsafe override bool IsVisible => true;

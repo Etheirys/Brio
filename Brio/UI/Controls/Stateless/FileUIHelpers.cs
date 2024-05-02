@@ -9,24 +9,6 @@ namespace Brio.UI.Controls.Stateless;
 
 internal class FileUIHelpers
 {
-    public static void ShowExportPoseModal(PosingCapability capability)
-    {
-        UIManager.Instance.FileDialogManager.SaveFileDialog("Export Pose###export_pose", "Pose File (*.pose){.pose}", "brio", ".pose",
-                (success, path) =>
-                {
-                    if(success)
-                    {
-                        if(!path.EndsWith(".pose"))
-                            path += ".pose";
-
-                        var directory = Path.GetDirectoryName(path);
-                        ConfigurationService.Instance.Configuration.Paths.LastPosePath = directory;
-
-                        capability.ExportPose(path);
-                    }
-                }, ConfigurationService.Instance.Configuration.Paths.LastPosePath, true);
-    }
-
     public static void ShowImportPoseModal(PosingCapability capability, PoseImporterOptions? options = null)
     {
         UIManager.Instance.FileDialogManager.OpenFileDialog("Import Pose###import_pose", "Pose File (*.pose | *.cmp){.pose,.cmp}",
@@ -43,20 +25,35 @@ internal class FileUIHelpers
                  }, 1, ConfigurationService.Instance.Configuration.Paths.LastPosePath, true);
     }
 
+    public static void ShowExportPoseModal(PosingCapability capability)
+    {
+        UIManager.Instance.FileDialogManager.SaveFileDialog("Export Pose###export_pose", "Pose File (*.pose){.pose}", "brio", ".pose",
+                (success, path) =>
+                {
+                    if(success)
+                    {
+                        if(!path.EndsWith(".pose"))
+                            path += ".pose";
+
+                        capability.ExportPose(path);
+                    }
+                }, null, true);
+    }
+
     public static void ShowImportCharacterModal(ActorAppearanceCapability capability, AppearanceImportOptions options)
     {
-        UIManager.Instance.FileDialogManager.OpenFileDialog("Import Character File###import_character_window", "Character File (*.chara){.chara}",
+        UIManager.Instance.FileDialogManager.OpenFileDialog("Import MCDF File###import_character_window", "Mare Character Data File (*.mcdf){.mcdf}",
                  (success, paths) =>
                  {
                      if(success && paths.Count == 1)
                      {
                          var path = paths[0];
                          var directory = Path.GetDirectoryName(path);
-                         ConfigurationService.Instance.Configuration.Paths.LastCharacterPath = directory;
+                         ConfigurationService.Instance.Configuration.Paths.LastMcdfPath = directory;
 
-                         capability.ImportAppearance(path, options);
+                         capability.LoadMcdf(path);
                      }
-                 }, 1, ConfigurationService.Instance.Configuration.Paths.LastCharacterPath, true);
+                 }, 1, ConfigurationService.Instance.Configuration.Paths.LastMcdfPath, true);
     }
 
     public static void ShowExportCharacterModal(ActorAppearanceCapability capability)
@@ -68,9 +65,6 @@ internal class FileUIHelpers
                     {
                         if(!path.EndsWith(".chara"))
                             path += ".chara";
-
-                        var directory = Path.GetDirectoryName(path);
-                        ConfigurationService.Instance.Configuration.Paths.LastCharacterPath = directory;
 
                         capability.ExportAppearance(path);
                     }
@@ -87,8 +81,8 @@ internal class FileUIHelpers
                      {
                          var path = paths[0];
                          var directory = Path.GetDirectoryName(path);
-                         ConfigurationService.Instance.Configuration.Paths.LastMcdfPath = directory;
-
+                         if(directory is not null)
+                             ConfigurationService.Instance.Configuration.Paths.LastMcdfPath = directory;
                          capability.LoadMcdf(path);
                      }
                  }, 1, ConfigurationService.Instance.Configuration.Paths.LastMcdfPath, true);

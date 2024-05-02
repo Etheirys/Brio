@@ -2,6 +2,7 @@
 using Brio.Config;
 using Brio.Entities;
 using Brio.Game.Posing;
+using Brio.Input;
 using Brio.UI.Controls.Core;
 using Brio.UI.Controls.Editors;
 using Brio.UI.Controls.Stateless;
@@ -9,7 +10,6 @@ using Dalamud.Interface;
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Interface.Windowing;
 using ImGuiNET;
-using ImGuizmoNET;
 using OneOf.Types;
 using System.Numerics;
 
@@ -140,12 +140,12 @@ internal class PosingOverlayToolbarWindow : Window
 
         ImGui.Separator();
 
-        using(ImRaii.PushColor(ImGuiCol.Text, _overlayWindow.Operation == OPERATION.TRANSLATE ? UIConstants.ToggleButtonActive : UIConstants.ToggleButtonInactive))
+        using(ImRaii.PushColor(ImGuiCol.Text, _posingService.Operation == PosingOperation.Translate ? UIConstants.ToggleButtonActive : UIConstants.ToggleButtonInactive))
         {
             using(ImRaii.PushFont(UiBuilder.IconFont))
             {
-                if(ImGui.Button($"{FontAwesomeIcon.ArrowsUpDownLeftRight.ToIconString()}###select_position", new Vector2(buttonSize)))
-                    _overlayWindow.Operation = OPERATION.TRANSLATE;
+                if(ImGui.Button($"{FontAwesomeIcon.ArrowsUpDownLeftRight.ToIconString()}###select_position", new Vector2(buttonSize)) || InputService.IsKeyBindDown(KeyBindEvents.Posing_Translate))
+                    _posingService.Operation = PosingOperation.Translate;
             }
         }
         if(ImGui.IsItemHovered())
@@ -154,12 +154,12 @@ internal class PosingOverlayToolbarWindow : Window
         ImGui.SameLine();
 
 
-        using(ImRaii.PushColor(ImGuiCol.Text, _overlayWindow.Operation == OPERATION.ROTATE ? UIConstants.ToggleButtonActive : UIConstants.ToggleButtonInactive))
+        using(ImRaii.PushColor(ImGuiCol.Text, _posingService.Operation == PosingOperation.Rotate ? UIConstants.ToggleButtonActive : UIConstants.ToggleButtonInactive))
         {
             using(ImRaii.PushFont(UiBuilder.IconFont))
             {
-                if(ImGui.Button($"{FontAwesomeIcon.ArrowsSpin.ToIconString()}###select_rotate", new Vector2(buttonSize)))
-                    _overlayWindow.Operation = OPERATION.ROTATE;
+                if(ImGui.Button($"{FontAwesomeIcon.ArrowsSpin.ToIconString()}###select_rotate", new Vector2(buttonSize)) || InputService.IsKeyBindDown(KeyBindEvents.Posing_Rotate))
+                    _posingService.Operation = PosingOperation.Rotate;
             }
         }
         if(ImGui.IsItemHovered())
@@ -168,12 +168,12 @@ internal class PosingOverlayToolbarWindow : Window
         ImGui.SameLine();
 
 
-        using(ImRaii.PushColor(ImGuiCol.Text, _overlayWindow.Operation == OPERATION.SCALE ? UIConstants.ToggleButtonActive : UIConstants.ToggleButtonInactive))
+        using(ImRaii.PushColor(ImGuiCol.Text, _posingService.Operation == PosingOperation.Scale ? UIConstants.ToggleButtonActive : UIConstants.ToggleButtonInactive))
         {
             using(ImRaii.PushFont(UiBuilder.IconFont))
             {
-                if(ImGui.Button($"{FontAwesomeIcon.ExpandAlt.ToIconString()}###select_scale", new Vector2(buttonSize)))
-                    _overlayWindow.Operation = OPERATION.SCALE;
+                if(ImGui.Button($"{FontAwesomeIcon.ExpandAlt.ToIconString()}###select_scale", new Vector2(buttonSize)) || InputService.IsKeyBindDown(KeyBindEvents.Posing_Scale))
+                    _posingService.Operation = PosingOperation.Scale;
             }
         }
         if(ImGui.IsItemHovered())
@@ -217,14 +217,14 @@ internal class PosingOverlayToolbarWindow : Window
             ImGui.SetTooltip("Select Parent");
 
 
-        using(ImRaii.PushFont(UiBuilder.IconFont))
+        //using(ImRaii.PushFont(UiBuilder.IconFont))
+        //{
+        using(ImRaii.Disabled(!(bone?.EligibleForIK == true)))
         {
-            using(ImRaii.Disabled(!(bone?.EligibleForIK == true)))
-            {
-                if(ImGui.Button($"{FontAwesomeIcon.Adjust.ToIconString()}###bone_ik", new Vector2(buttonSize)))
-                    ImGui.OpenPopup("overlay_bone_ik");
-            }
+            if(ImGui.Button($"IK###bone_ik", new Vector2(buttonSize)))
+                ImGui.OpenPopup("overlay_bone_ik");
         }
+        //}
         if(ImGui.IsItemHovered())
             ImGui.SetTooltip("Inverse Kinematics");
 

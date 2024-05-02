@@ -23,25 +23,7 @@ internal class ActorAppearanceWidget(ActorAppearanceCapability capability) : Wid
 
     private void DrawLoadAppearance()
     {
-        if(ImBrio.FontIconButton("load_npc", FontAwesomeIcon.PersonArrowDownToLine, "Load NPC Appearance"))
-        {
-            AppearanceEditorCommon.ResetNPCSelector();
-            ImGui.OpenPopup("widget_npc_selector");
-        }
-
-
-        if(Capability.CanMcdf)
-        {
-            ImGui.SameLine();
-            if(ImBrio.FontIconButton("load_mcdf", FontAwesomeIcon.CloudDownloadAlt, "Load Mare Synchronos MCDF"))
-            {
-                FileUIHelpers.ShowImportMcdfModal(Capability);
-            }
-        }
-
-        ImGui.SameLine();
-
-        if(ImBrio.FontIconButton("import_charafile", FontAwesomeIcon.FileImport, "Import Character File"))
+        if(ImBrio.FontIconButton("import_charafile", FontAwesomeIcon.FileImport, "Import Character"))
             FileUIHelpers.ShowImportCharacterModal(Capability, AppearanceImportOptions.Default);
 
         ImGui.SameLine();
@@ -51,11 +33,19 @@ internal class ActorAppearanceWidget(ActorAppearanceCapability capability) : Wid
 
         ImGui.SameLine();
 
+        if(Capability.CanMcdf)
+        {
+            if(ImBrio.FontIconButton("load_mcdf", FontAwesomeIcon.CloudDownloadAlt, "Load Mare Synchronos MCDF"))
+            {
+                FileUIHelpers.ShowImportMcdfModal(Capability);
+            }
+            ImGui.SameLine();
+        }
+
         if(ImBrio.FontIconButton("advanced_appearance", FontAwesomeIcon.UserEdit, "Advanced"))
             ActivateAdvanced();
 
         ImGui.SameLine();
-
 
         if(ImBrio.FontIconButtonRight("reset_appearance", FontAwesomeIcon.Undo, 1, "Reset", Capability.IsAppearanceOverridden))
             _ = Capability.ResetAppearance();

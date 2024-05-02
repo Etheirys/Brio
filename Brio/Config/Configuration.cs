@@ -4,8 +4,8 @@ namespace Brio.Config;
 
 internal class Configuration : IPluginConfiguration
 {
-    public const int CurrentVersion = 1;
-    public const int CurrentPopupKey = 2;
+    public const int CurrentVersion = 2;
+    public const int CurrentPopupKey = 4;
 
     public int Version { get; set; } = CurrentVersion;
 
@@ -27,7 +27,12 @@ internal class Configuration : IPluginConfiguration
     // Environment
     public EnvironmentConfiguration Environment { get; set; } = new EnvironmentConfiguration();
 
-    // Paths
+    // Input
+    public InputConfiguration Input { get; set; } = new InputConfiguration();
+ 
+    //
+    //// KENTODO REMOVE
+    //
     public PathsConfiguration Paths { get; set; } = new PathsConfiguration();
 
     // Developer

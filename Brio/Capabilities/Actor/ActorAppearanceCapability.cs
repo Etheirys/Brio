@@ -59,9 +59,9 @@ internal class ActorAppearanceCapability : ActorCharacterCapability
         _penumbraService.OnPenumbraRedraw += OnPenumbraRedraw;
     }
 
-    public void LoadMcdf(string path)
+    public bool LoadMcdf(string path)
     {
-        this._mareService.LoadMcdf(path, GameObject);
+        return _mareService.LoadMcdfAsync(path, GameObject);
     }
 
     public void SetCollection(string collection)

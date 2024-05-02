@@ -5,6 +5,7 @@ using Brio.Entities;
 using Brio.Game.Camera;
 using Brio.Game.GPose;
 using Brio.Game.Posing;
+using Brio.Input;
 using Brio.UI.Controls.Editors;
 using Dalamud.Interface.Utility;
 using Dalamud.Interface.Utility.Raii;
@@ -21,7 +22,6 @@ namespace Brio.UI.Windows.Specialized;
 
 internal class PosingOverlayWindow : Window, IDisposable
 {
-    public OPERATION Operation = OPERATION.ROTATE;
 
     private readonly EntityManager _entityManager;
     private readonly CameraService _cameraService;
@@ -36,7 +36,8 @@ internal class PosingOverlayWindow : Window, IDisposable
     private const int _gizmoId = 142857;
     private const string _boneSelectPopupName = "brio_bone_select_popup";
 
-    public PosingOverlayWindow(EntityManager entityManager, CameraService cameraService, ConfigurationService configService, PosingService posingService, GPoseService gPoseService) : base("##brio_posing_overlay_window", ImGuiWindowFlags.NoInputs | ImGuiWindowFlags.NoBackground | ImGuiWindowFlags.NoDecoration, true)
+    public PosingOverlayWindow(EntityManager entityManager, CameraService cameraService, ConfigurationService configService, PosingService posingService, GPoseService gPoseService)
+        : base("##brio_posing_overlay_window", ImGuiWindowFlags.NoInputs | ImGuiWindowFlags.NoBackground | ImGuiWindowFlags.NoDecoration, true)
     {
         Namespace = "brio_posing_overlay_namespace";
 
@@ -56,7 +57,7 @@ internal class PosingOverlayWindow : Window, IDisposable
         ImGuiHelpers.SetNextWindowPosRelativeMainViewport(new Vector2(0, 0), ImGuiCond.Always);
         SizeCondition = ImGuiCond.Always;
         var io = ImGui.GetIO();
-        Size = io.DisplaySize;
+        Size = io.DisplaySize * ImGui.GetFontSize();
 
         Flags = ImGuiWindowFlags.NoInputs | ImGuiWindowFlags.NoBackground | ImGuiWindowFlags.NoDecoration;
 
@@ -134,7 +135,7 @@ internal class PosingOverlayWindow : Window, IDisposable
 
             foreach(var bone in skeleton.Bones)
             {
-                if(!_posingService.OverlayFilter.IsBoneValid(bone, poseSlot))
+                if(!_posingService.OverlayFilter.IsBoneValid(bone, poseSlot) || bone.Name == "n_throw")
                     continue;
 
                 var boneWorldPosition = Vector3.Transform(bone.LastTransform.Position, modelMatrix);
@@ -324,6 +325,12 @@ internal class PosingOverlayWindow : Window, IDisposable
             if(!uiState.SkeletonDotsEnabled)
                 color = config.BoneCircleInactiveColor;
 
+            if(clickable.Item == PosingSelectionType.ModelTransform && _configurationService.Configuration.Posing.ModelTransformStandout)
+            {
+                ImGui.GetWindowDrawList().AddCircleFilled(clickable.ScreenPosition, clickable.Size + 3, config.ModelTransformCircleStandOutColor);
+                continue;
+            }
+
             if(isFilled)
                 ImGui.GetWindowDrawList().AddCircleFilled(clickable.ScreenPosition, clickable.Size, color);
             else
@@ -411,11 +418,11 @@ internal class PosingOverlayWindow : Window, IDisposable
             newTransform = matrix.ToTransform();
             _trackingTransform = newTransform;
         }
-        
+
         if(ImGuizmo.Manipulate(
             ref worldViewMatrix.M11,
             ref projectionMatrix.M11,
-            Operation,
+            _posingService.Operation.AsGizmoOperation(),
             _posingService.CoordinateMode.AsGizmoMode(),
             ref matrix.M11
         ))
@@ -470,9 +477,9 @@ internal class PosingOverlayWindow : Window, IDisposable
         public bool HoveringGizmo = ImGuizmo.IsOver();
         public bool AnyActive = ImGui.IsAnyItemActive();
         public bool AnyWindowHovered = ImGui.IsWindowHovered(ImGuiHoveredFlags.AnyWindow);
-        public bool UserDisablingSkeleton = ImGui.IsKeyDown(configuration.DisableSkeletonHotkey);
-        public bool UserDisablingGizmo = ImGui.IsKeyDown(configuration.DisableGizmoHotkey);
-        public bool UserHidingOverlay = ImGui.IsKeyDown(configuration.HideOverlayHotkey);
+        public bool UserDisablingSkeleton = InputService.IsKeyBindDown(KeyBindEvents.Posing_DisableSkeleton);
+        public bool UserDisablingGizmo = InputService.IsKeyBindDown(KeyBindEvents.Posing_DisableGizmo);
+        public bool UserHidingOverlay = InputService.IsKeyBindDown(KeyBindEvents.Posing_HideOverlay);
 
 
         public bool AnythingBusy => PopupOpen || UsingGizmo || AnyActive || AnyWindowHovered;

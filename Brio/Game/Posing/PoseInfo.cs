@@ -79,17 +79,14 @@ internal class BonePoseInfo(BonePoseInfoId id, PoseInfo parent)
 
     public bool HasStacks => _stacks.Any();
 
-    public void Apply(Transform transform, Transform? original = null, TransformComponents? propagation = null, TransformComponents applyTo = TransformComponents.All, BoneIKInfo? ikInfo = null, PoseMirrorMode? mirrorMode = null, bool forceNewStack = false)
+    public Transform? Apply(Transform transform, Transform? original = null, TransformComponents? propagation = null, TransformComponents applyTo = TransformComponents.All, BoneIKInfo? ikInfo = null, PoseMirrorMode? mirrorMode = null, bool forceNewStack = false)
     {
         var prop = propagation ?? DefaultPropagation;
         ikInfo ??= DefaultIK;
         var calc = original.HasValue ? transform.CalculateDiff(original.Value) : transform;
 
-        if(calc.ContainsNaN())
-            return;
-
         if(calc.IsApproximatelySame(Transform.Identity))
-            return;
+            return null;
 
         var transformIndex = GetTransformIndex(prop, ikInfo.Value, forceNewStack);
         mirrorMode ??= MirrorMode;
@@ -99,7 +96,7 @@ internal class BonePoseInfo(BonePoseInfoId id, PoseInfo parent)
         calc.Filter(applyTo);
 
         if(Transform.Identity.IsApproximatelySame(calc + existing))
-            return;
+            return null;
 
         if(mirrorMode == PoseMirrorMode.Copy)
         {
@@ -111,7 +108,27 @@ internal class BonePoseInfo(BonePoseInfoId id, PoseInfo parent)
             GetMirrorBone()?.Apply(inverted, null, prop, applyTo, ikInfo.Value, PoseMirrorMode.None, forceNewStack);
         }
 
-        _stacks[transformIndex] = new(prop, ikInfo.Value, _stacks[transformIndex].Transform + calc);
+        var finaleTransform = _stacks[transformIndex].Transform + calc;
+       
+        if(finaleTransform.IsRotationNaN())
+        {
+            finaleTransform.Rotation = Quaternion.Identity;
+            Brio.Log.Warning($"IsRotationNaN !!!!!!!!!");
+        }
+        else if(finaleTransform.IsPositionNaN())
+        {
+            finaleTransform.Position = Vector3.Zero;
+            Brio.Log.Warning($"IsPositionNaN !!!!!!!!!");
+        }
+        else if(finaleTransform.IsScaleNaN())
+        {
+            finaleTransform.Scale = Vector3.Zero;
+            Brio.Log.Warning($"IsScaleNaN !!!!!!!!!");
+        }
+
+        _stacks[transformIndex] = new(prop, ikInfo.Value, finaleTransform);
+
+        return finaleTransform;
     }
 
     public void ClearStacks()

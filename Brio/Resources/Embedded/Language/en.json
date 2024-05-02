@@ -216,5 +216,21 @@
     "weapon": "Weapons",
     "ivcs": "IVCS",
     "other": "Other"
+  },
+
+  "keys": {
+    "Interface_ToggleBrioWindow": "Toggle Brio Window",
+    "Interface_ToggleBindPromptWindow": "Toggle Bind Prompt Window",
+    "Interface_IncrementSmallModifier": "Increment Small Modifier",
+    "Interface_IncrementLargeModifier": "Increment Large Modifier",
+    "Posing_DisableGizmo": "Disable Gizmo",
+    "Posing_DisableSkeleton": "Disable Skeleton",
+    "Posing_HideOverlay": "Hide Overlay",
+    "Posing_ToggleOverlay": "Toggle Overlay",
+    "Posing_Undo": "Undo",
+    "Posing_Redo": "Redo",
+    "Posing_Translate": "Position",
+    "Posing_Rotate": "Rotation",
+    "Posing_Scale": "Scale"
   }
 }

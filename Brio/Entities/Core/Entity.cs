@@ -17,7 +17,24 @@ internal abstract class Entity : IDisposable
 
     public IReadOnlyList<Capability> Capabilities => _capabilities.Values.ToList().AsReadOnly();
 
-    public virtual string FriendlyName => Id.Unique;
+    string name = "";
+    public virtual string FriendlyName
+    {
+        get
+        {
+            if(string.IsNullOrEmpty(name))
+            {
+                return Id.Unique;
+            }
+
+            return name;
+        }
+        set
+        {
+            name = value;
+        }
+    }
+
 
     public virtual FontAwesomeIcon Icon => FontAwesomeIcon.Question;
     public virtual bool IsVisible => true;
@@ -34,6 +51,7 @@ internal abstract class Entity : IDisposable
     public Entity(EntityId id, IServiceProvider serviceProvider, IEnumerable<Entity>? children = null)
     {
         Id = id;
+
         _serviceProvider = serviceProvider;
 
         if(children != null)
@@ -73,6 +91,22 @@ internal abstract class Entity : IDisposable
     public virtual void OnChildDetached()
     {
 
+    }
+
+    public virtual void OnSelected()
+    {
+        foreach(Capability capability in Capabilities)
+        {
+            capability.OnEntitySelected();
+        }
+    }
+
+    public virtual void OnDeselected()
+    {
+        foreach(Capability capability in Capabilities)
+        {
+            capability.OnEntityDeselected();
+        }
     }
 
     public void AddCapability<T>(T? capability) where T : Capability
