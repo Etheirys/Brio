@@ -52,8 +52,12 @@ internal static partial class ImBrio
         
         if (ImGui.IsItemHovered())
         {
-            value += ImGui.GetIO().MouseWheel / 100 * step;
-            changed = true;
+            float mouseWheel = ImGui.GetIO().MouseWheel / 100;
+            if (mouseWheel != 0) 
+            {
+                value += mouseWheel * step;
+                changed = true;
+            }
         }
 
         float buttonWidth = ImGui.GetCursorPosX();

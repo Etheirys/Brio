@@ -119,6 +119,16 @@ internal static partial class ImBrio
             ImGui.SetTooltip("X");
         active |= ImGui.IsItemActive();
 
+        if (ImGui.IsItemHovered())
+        {
+            float mouseWheel = ImGui.GetIO().MouseWheel / 100;
+            if (mouseWheel != 0) 
+            {
+                value.X += mouseWheel * step;
+                changed = true;
+            }
+        }
+
         ImGui.SameLine();
         ImGui.SetNextItemWidth(entryWidth);
 
@@ -127,6 +137,16 @@ internal static partial class ImBrio
             ImGui.SetTooltip("Y");
         active |= ImGui.IsItemActive();
 
+        if (ImGui.IsItemHovered())
+        {
+            float mouseWheel = ImGui.GetIO().MouseWheel / 100;
+            if (mouseWheel != 0) 
+            {
+                value.Y += mouseWheel * step;
+                changed = true;
+            }
+        }
+
         ImGui.SameLine();
         ImGui.SetNextItemWidth(entryWidth);
 
@@ -134,6 +154,16 @@ internal static partial class ImBrio
         if(ImGui.IsItemHovered())
             ImGui.SetTooltip("Z");
         active |= ImGui.IsItemActive();
+
+        if (ImGui.IsItemHovered())
+        {
+            float mouseWheel = ImGui.GetIO().MouseWheel / 100;
+            if (mouseWheel != 0) 
+            {
+                value.Z += mouseWheel * step;
+                changed = true;
+            }
+        }
 
         ImGui.SameLine();
 
@@ -180,6 +210,16 @@ internal static partial class ImBrio
         if(ImGui.IsItemHovered())
             ImGui.SetTooltip($"{tooltip}");
         active |= ImGui.IsItemActive();
+
+        if (ImGui.IsItemHovered())
+        {
+            float mouseWheel = ImGui.GetIO().MouseWheel / 100;
+            if (mouseWheel != 0) 
+            {
+                value += mouseWheel * step;
+                changed = true;
+            }
+        }
 
 
         ImGui.SameLine();
