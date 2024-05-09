@@ -121,7 +121,7 @@ internal static partial class ImBrio
 
         if (ImGui.IsItemHovered())
         {
-            float mouseWheel = ImGui.GetIO().MouseWheel / 100;
+            float mouseWheel = ImGui.GetIO().MouseWheel / 10;
             if (mouseWheel != 0) 
             {
                 value.X += mouseWheel * step;
@@ -139,7 +139,7 @@ internal static partial class ImBrio
 
         if (ImGui.IsItemHovered())
         {
-            float mouseWheel = ImGui.GetIO().MouseWheel / 100;
+            float mouseWheel = ImGui.GetIO().MouseWheel / 10;
             if (mouseWheel != 0) 
             {
                 value.Y += mouseWheel * step;
@@ -157,7 +157,7 @@ internal static partial class ImBrio
 
         if (ImGui.IsItemHovered())
         {
-            float mouseWheel = ImGui.GetIO().MouseWheel / 100;
+            float mouseWheel = ImGui.GetIO().MouseWheel / 10;
             if (mouseWheel != 0) 
             {
                 value.Z += mouseWheel * step;
@@ -213,7 +213,7 @@ internal static partial class ImBrio
 
         if (ImGui.IsItemHovered())
         {
-            float mouseWheel = ImGui.GetIO().MouseWheel / 100;
+            float mouseWheel = ImGui.GetIO().MouseWheel / 10;
             if (mouseWheel != 0) 
             {
                 value += mouseWheel * step;
