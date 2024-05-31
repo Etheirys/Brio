@@ -5,6 +5,7 @@ using Brio.UI.Controls.Stateless;
 using Dalamud.Interface;
 using Dalamud.Interface.Utility.Raii;
 using ImGuiNET;
+using System;
 using System.Numerics;
 
 namespace Brio.UI.Controls.Editors;
@@ -18,20 +19,43 @@ internal static class AppearanceEditorCommon
         if(!capability.HasPenumbraIntegration)
             return;
 
-        var collections = capability.Collections;
-        var currentCollection = capability.CurrentCollection;
-
-        const string collectionLabel = "Collection";
-        ImGui.SetNextItemWidth(-ImGui.CalcTextSize($"{collectionLabel} XXXX").X);
-        using(var combo = ImRaii.Combo(collectionLabel, currentCollection))
+        if(capability.PenumbraService.PenumbraUseLegacyApi)
         {
-            if(combo.Success)
+            var collections = capability.PenumbraService.LegacyGetCollections();
+            var currentCollection = capability.CurrentCollection;
+
+            const string collectionLabel = "Collection";
+            ImGui.SetNextItemWidth(-ImGui.CalcTextSize($"{collectionLabel} XXXX").X);
+            using(var combo = ImRaii.Combo(collectionLabel, currentCollection))
             {
-                foreach(var collection in collections)
+                if(combo.Success)
                 {
-                    bool isSelected = collection.Value.Equals(currentCollection);
-                    if(ImGui.Selectable(collection.Value, isSelected))
-                        capability.SetCollection(collection.Key);
+                    foreach(var collection in collections)
+                    {
+                        bool isSelected = collection.Equals(currentCollection);
+                        if(ImGui.Selectable(collection, isSelected))
+                            capability.LegacySetCollection(collection);
+                    }
+                }
+            }
+        }
+        else
+        {
+            var collections = capability.PenumbraService.GetCollections();
+            var currentCollection = capability.CurrentCollection;
+
+            const string collectionLabel = "Collection";
+            ImGui.SetNextItemWidth(-ImGui.CalcTextSize($"{collectionLabel} XXXX").X);
+            using(var combo = ImRaii.Combo(collectionLabel, currentCollection))
+            {
+                if(combo.Success)
+                {
+                    foreach(var collection in collections)
+                    {
+                        bool isSelected = collection.Value.Equals(currentCollection);
+                        if(ImGui.Selectable(collection.Value, isSelected))
+                            capability.SetCollection(collection.Key);
+                    }
                 }
             }
         }
