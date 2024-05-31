@@ -10,6 +10,7 @@ using Brio.IPC;
 using Brio.Resources;
 using Brio.UI.Widgets.Actor;
 using Dalamud.Game.ClientState.Objects.Types;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -24,10 +25,10 @@ internal class ActorAppearanceCapability : ActorCharacterCapability
     private readonly GPoseService _gposeService;
 
     public string CurrentCollection => _penumbraService.GetCollectionForObject(Character);
-    public IEnumerable<string> Collections => _penumbraService.GetCollections();
+    public Dictionary<Guid, string> Collections => _penumbraService.GetCollections();
 
     public bool IsCollectionOverridden => _oldCollection != null;
-    private string? _oldCollection = null;
+    private Guid? _oldCollection = null;
 
     private ActorAppearance? _originalAppearance = null;
     public bool IsAppearanceOverridden => _originalAppearance.HasValue;
@@ -64,7 +65,7 @@ internal class ActorAppearanceCapability : ActorCharacterCapability
         return _mareService.LoadMcdfAsync(path, GameObject);
     }
 
-    public void SetCollection(string collection)
+    public void SetCollection(Guid collection)
     {
         if(IsCollectionOverridden && collection.Equals(_oldCollection))
         {
@@ -84,7 +85,7 @@ internal class ActorAppearanceCapability : ActorCharacterCapability
     {
         if(IsCollectionOverridden)
         {
-            _penumbraService.SetCollectionForObject(Character, _oldCollection!);
+            _penumbraService.SetCollectionForObject(Character, _oldCollection!.Value);
             _oldCollection = null;
             _ = _actorAppearanceService.Redraw(Character);
         }

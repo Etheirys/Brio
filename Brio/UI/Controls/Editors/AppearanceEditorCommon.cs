@@ -29,9 +29,9 @@ internal static class AppearanceEditorCommon
             {
                 foreach(var collection in collections)
                 {
-                    bool isSelected = collection.Equals(currentCollection);
-                    if(ImGui.Selectable(collection, isSelected))
-                        capability.SetCollection(collection);
+                    bool isSelected = collection.Value.Equals(currentCollection);
+                    if(ImGui.Selectable(collection.Value, isSelected))
+                        capability.SetCollection(collection.Key);
                 }
             }
         }
