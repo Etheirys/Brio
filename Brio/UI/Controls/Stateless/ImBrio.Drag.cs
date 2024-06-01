@@ -23,11 +23,10 @@ internal static partial class ImBrio
         else
         {
             ImBrio.Icon(icon);
-            ImGui.SameLine();
         }
 
         uint id = ImGui.GetID(label);
-        bool isExpanded = expanded.Contains(id);
+        bool isExpanded = false; //= expanded.Contains(id);
 
         if(isExpanded)
         {
@@ -37,7 +36,8 @@ internal static partial class ImBrio
 
         Vector2 size = new Vector2(0, 0);
         size.X = (ImBrio.GetRemainingWidth() - 32) + ImGui.GetStyle().ItemSpacing.X;
-
+       
+        ImGui.SameLine();
         (var changedf3, var activef3) = DragFloat3Horizontal($"###{id}_drag3", ref vectorValue, step, size);
         changed |= changedf3;
         active |= activef3;
@@ -48,19 +48,19 @@ internal static partial class ImBrio
             ImGui.PopStyleColor();
         }
 
-        ImGui.SameLine();
-        ImGui.SetNextItemWidth(32);
-        if(ImGui.ArrowButton($"###{label}_decrease", isExpanded ? ImGuiDir.Up : ImGuiDir.Down))
-        {
-            if(isExpanded)
-            {
-                expanded.Remove(id);
-            }
-            else
-            {
-                expanded.Add(id);
-            }
-        }
+        //ImGui.SameLine();
+        //ImGui.SetNextItemWidth(32);
+        //if(ImGui.ArrowButton($"###{label}_decrease", isExpanded ? ImGuiDir.Up : ImGuiDir.Down))
+        //{
+        //    if(isExpanded)
+        //    {
+        //        expanded.Remove(id);
+        //    }
+        //    else
+        //    {
+        //        expanded.Add(id);
+        //    }
+        //}
 
         if(isExpanded)
         {
@@ -94,6 +94,7 @@ internal static partial class ImBrio
                 ImGui.EndChild();
             }
         }
+
         return (active, changed);
     }
 
@@ -155,6 +156,7 @@ internal static partial class ImBrio
             ImGui.SetTooltip("Z");
         active |= ImGui.IsItemActive();
 
+<<<<<<< main
         if (ImGui.IsItemHovered())
         {
             float mouseWheel = ImGui.GetIO().MouseWheel / 10;
@@ -167,6 +169,8 @@ internal static partial class ImBrio
 
         ImGui.SameLine();
 
+=======
+>>>>>>> main
         return (active, changed);
     }
 

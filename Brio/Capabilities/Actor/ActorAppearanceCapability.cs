@@ -10,6 +10,7 @@ using Brio.IPC;
 using Brio.Resources;
 using Brio.UI.Widgets.Actor;
 using Dalamud.Game.ClientState.Objects.Types;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -24,7 +25,7 @@ internal class ActorAppearanceCapability : ActorCharacterCapability
     private readonly GPoseService _gposeService;
 
     public string CurrentCollection => _penumbraService.GetCollectionForObject(Character);
-    public IEnumerable<string> Collections => _penumbraService.GetCollections();
+    public PenumbraService PenumbraService => _penumbraService;
 
     public bool IsCollectionOverridden => _oldCollection != null;
     private string? _oldCollection = null;
@@ -64,9 +65,23 @@ internal class ActorAppearanceCapability : ActorCharacterCapability
         return _mareService.LoadMcdfAsync(path, GameObject);
     }
 
-    public void SetCollection(string collection)
+    public void LegacySetCollection(string collection)
     {
         if(IsCollectionOverridden && collection.Equals(_oldCollection))
+        {
+            ResetCollection();
+            return;
+        }
+        var old = _penumbraService.LegacySetCollectionForObject(Character, collection);
+
+        if(!IsCollectionOverridden)
+            _oldCollection = old.ToString();
+
+        _ = _actorAppearanceService.Redraw(Character);
+    }
+    public void SetCollection(Guid collection)
+    {
+        if(IsCollectionOverridden && collection.ToString().Equals(_oldCollection))
         {
             ResetCollection();
             return;
@@ -75,7 +90,7 @@ internal class ActorAppearanceCapability : ActorCharacterCapability
         var old = _penumbraService.SetCollectionForObject(Character, collection);
 
         if(!IsCollectionOverridden)
-            _oldCollection = old;
+            _oldCollection = old.ToString();
 
         _ = _actorAppearanceService.Redraw(Character);
     }
@@ -84,7 +99,14 @@ internal class ActorAppearanceCapability : ActorCharacterCapability
     {
         if(IsCollectionOverridden)
         {
-            _penumbraService.SetCollectionForObject(Character, _oldCollection!);
+            if(_penumbraService.PenumbraUseLegacyApi)
+            {
+                _penumbraService.LegacySetCollectionForObject(Character, _oldCollection!);
+            }
+            else
+            {
+                _penumbraService.SetCollectionForObject(Character, Guid.Parse(_oldCollection!));
+            }
             _oldCollection = null;
             _ = _actorAppearanceService.Redraw(Character);
         }

@@ -27,10 +27,11 @@
 	<ItemGroup>
 		<PackageReference Include="DalamudPackager" Version="2.1.12" />
 		<PackageReference Include="EmbedIO" Version="3.5.2" />
+		<PackageReference Include="Glamourer.Api" Version="2.0.0" />
 		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.0" />
 		<PackageReference Include="OneOf" Version="3.0.263" />
 		<PackageReference Include="OneOf.SourceGenerator" Version="3.0.263" />
-		<PackageReference Include="Penumbra.Api" Version="1.0.15" />
+		<PackageReference Include="Penumbra.Api" Version="5.0.0" />
 		<Reference Include="FFXIVClientStructs">
 			<HintPath>$(DalamudLibPath)FFXIVClientStructs.dll</HintPath>
 			<Private>false</Private>
