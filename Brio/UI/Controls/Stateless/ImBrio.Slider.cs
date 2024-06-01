@@ -49,6 +49,16 @@ internal static partial class ImBrio
         bool largeIncrement = InputService.IsKeyBindDown(KeyBindEvents.Interface_IncrementLargeModifier);
         if(largeIncrement)
             step *= 10;
+        
+        if (ImGui.IsItemHovered())
+        {
+            float mouseWheel = ImGui.GetIO().MouseWheel / 10;
+            if (mouseWheel != 0) 
+            {
+                value += isAngle ? mouseWheel * step * MathHelpers.DegreesToRadians : mouseWheel * step;
+                changed = true;
+            }
+        }
 
         float buttonWidth = ImGui.GetCursorPosX();
         if(ImGui.ArrowButton($"##{label}_decrease", ImGuiDir.Left))
