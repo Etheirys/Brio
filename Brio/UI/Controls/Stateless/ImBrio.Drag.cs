@@ -156,7 +156,6 @@ internal static partial class ImBrio
             ImGui.SetTooltip("Z");
         active |= ImGui.IsItemActive();
 
-<<<<<<< main
         if (ImGui.IsItemHovered())
         {
             float mouseWheel = ImGui.GetIO().MouseWheel / 10;
@@ -167,10 +166,6 @@ internal static partial class ImBrio
             }
         }
 
-        ImGui.SameLine();
-
-=======
->>>>>>> main
         return (active, changed);
     }
 
