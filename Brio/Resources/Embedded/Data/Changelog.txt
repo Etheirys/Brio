@@ -1,5 +1,12 @@
 
 To open this window again click `Infomation` on the Scene Manager then -> `View the Changelog`
+--------------------------------------------------------------------------------
+	 ---> Brio, Version 0.3.1.4 <--- 
+--------------------------------------------------------------------------------
+
+Added support for the new Penumbra & Glamourer API
+Fixed transform sliders not being adjusted by mousewheel (Thanks @gris-fuego!)
+Fixed a crash by removing the Expanded Mode from the transform editor
 
 --------------------------------------------------------------------------------
 	 ---> Brio, Version 0.3.1.1 <--- 
@@ -54,115 +61,7 @@ To open this window again click `Infomation` on the Scene Manager then -> `View 
 
 - Fixed a rare crash with the Library.
 
---- Known issues ---
-
-- On some systems there is a known crash in GPose when Brio is enabled.
-	- I am unable to reproduce this if you experience this:
-	- Be sure to check your Penumbra mod-lists to make sure no Penumbra mods are broken.
-	- If you still experience a crash after checking your Penumbra mods, please report it!
-
-- After using IK, there will be lingering effects to other bones after Disabling IK.
-
-- When the `Advanced Pose` or `Transform Editor` Window is certain sizes and
-  more than one `Transform Tab` is open, the `Transform Editor` glitches.
-	- Workaround:
-		- close all but one `Transform Tab`, or...
-		- change the size of the `Advanced Pose` or `Transform Editor` Window.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
---------------------------------------------------------------------------------
----> Brio, Versions 0.3.0.1-0.3.0.7 <--- 
 --------------------------------------------------------------------------------
 
-- Added the ability to disable keyboard shortcuts
-
-- Update for Patch 6.58 Hotfix 1
-
-- Fixed an issue with Brio loading MCDFs
-
-- Attempt to fix crashing
-
-- Fixed new users always seeing the Welcome Window
-
-- Fixed an crash with BrioStyle (Thanks Cazzar)
-
-Thanks to (@AsgardXIV) & (@WorstAquaPlayer) for their contributions to Brio!
-
---------------------------------------------------------------------------------
-	 ---> Brio, Version 0.3.0 <---
---------------------------------------------------------------------------------
-
-- [New Feature!] Added this wonderful new changelog Window, 
-	- The `Changelog` will open anytime Brio receives a major update
-	- To open this window again open the `Brio Info` Window > `View the Changelog`
-
-- [New Feature!] Added the Brio Library!
-	- Manage your pose and character files in a convenient floating Window 
-	- The Library is used when importing pose and character files
-		- To Open the old `File Picker` click "Browse for File", on the import screen
-	- To add a new search source: 
-		- Press the "Add new source" button in the `Library` Window, 
-		- Or go to: `Brio Settings` > Library
-
-- [New Feature!] Added Keyboard Shortcuts! 
-	- To view and edit them go to: `Brio Settings` > Key Binds, 
-
-- Improved the visual appearance of:
-	- The `Scene Manager` Window
-	- The `Transform Editor` in the `Advanced Pose` Window
-	- The `Bone Selection Tool` in the `Advanced Pose` Window
-	- The floating `Transform Editor` Window
-
-- Changed the text of the "Import Character File" button to -> "Import Character"
-
-- Changed `Inverse Kinematics` button iconography to the text "IK"
-
-- Reorganized items in the `Settings Window`
-
-- Attempt to make Third-Party IPC more stable on plugin update
-
---- Fixed issues ---
-
-- Fixed an issue where when dragging any Rotation in the `Transform Editor` was incrementing slowly
-
-- Fixed an issue where the `Favorite` button was not appearing in the import screen
-
---- Known issues ---
-
-- On some systems there is a crash in GPose when Mare Synchronos & Brio are enabled
-	- Workaround: If you experience a crash in GPose, try disabling Mare Synchronos when in GPose,
-	- If you still experience a crash with Mare Synchronos disabled, please report it!
-
-- With certain clothing there is an issue with loading certain pose/cmp files, 
-  where the right arm will be messed up
-	- Workaround: Press the "Undo" button once
-
-- When the `Advanced Pose` or `Transform Editor` Window is certain sizes and
-  more than one `Transform Tab` is open, the `Transform Editor` glitches
-	- Workaround:
-		- close all but one `Transform Tab`, or...
-		- change the size of the `Advanced Pose` or `Transform Editor` Window
-
-Thank you, to: (@Yuki-Codes), (@danma3x) & (@WorstAquaPlayer) for their contributions to Brio!
-
-
-
+Thank you, to: (@Yuki-Codes), (@danma3x), (@WorstAquaPlayer) & (@gris-fuego);
+For their contributions to Brio!
