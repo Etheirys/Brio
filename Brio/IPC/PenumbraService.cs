@@ -82,7 +82,7 @@ internal class PenumbraService : IDisposable
                     var (major, minor) = _penumbraApiVersion.Invoke();
                     if(major != PenumbraApiMajor || minor < PenumbraApiMinor)
                     {
-                        Brio.Log.Warning("Penumbra API mismatch!");
+                        Brio.Log.Warning($"Penumbra API mismatch!, found v{major}.{minor}");
                         return false;
                     }
                 }
