@@ -7,6 +7,7 @@ using Dalamud.Interface.Utility.Raii;
 using ImGuiNET;
 using System;
 using System.Numerics;
+using System.Linq;
 
 namespace Brio.UI.Controls.Editors;
 
@@ -50,7 +51,7 @@ internal static class AppearanceEditorCommon
             {
                 if(combo.Success)
                 {
-                    foreach(var collection in collections)
+                    foreach(var collection in from col in collections orderby col.Value ascending select col)
                     {
                         bool isSelected = collection.Value.Equals(currentCollection);
                         if(ImGui.Selectable(collection.Value, isSelected))
