@@ -22,7 +22,6 @@ internal static class AppearanceEditorCommon
 
         if(capability.PenumbraService.PenumbraUseLegacyApi)
         {
-            var collections = capability.PenumbraService.LegacyGetCollections();
             var currentCollection = capability.CurrentCollection;
 
             const string collectionLabel = "Collection";
@@ -31,6 +30,8 @@ internal static class AppearanceEditorCommon
             {
                 if(combo.Success)
                 {
+                    var collections = capability.PenumbraService.LegacyGetCollections();
+
                     foreach(var collection in collections)
                     {
                         bool isSelected = collection.Equals(currentCollection);
@@ -42,7 +43,6 @@ internal static class AppearanceEditorCommon
         }
         else
         {
-            var collections = capability.PenumbraService.GetCollections();
             var currentCollection = capability.CurrentCollection;
 
             const string collectionLabel = "Collection";
@@ -51,6 +51,8 @@ internal static class AppearanceEditorCommon
             {
                 if(combo.Success)
                 {
+                    var collections = capability.PenumbraService.GetCollections();
+
                     foreach(var collection in from col in collections orderby col.Value ascending select col)
                     {
                         bool isSelected = collection.Value.Equals(currentCollection);
