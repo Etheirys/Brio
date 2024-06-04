@@ -52,8 +52,6 @@ To open this window again click `Infomation` on the Scene Manager then -> `View 
 
 - Added new IPC `Brio.SpawnActorWithoutCompanion`.
 
---- Fixed issues ---
-
 - Fixed an issue when importing pose files with certain clothing on.
 
 - Fixed an issue where keyboard shortcuts would not work.
@@ -63,8 +61,6 @@ To open this window again click `Infomation` on the Scene Manager then -> `View 
 - Fix an issue where the Posing Overlay would not display fully if the text scale was less then 100%.
 
 - Fixed a bug in the Library where it would rescan every time that a setting was changed.
-
-- Fixed a rare crash with the Library.
 
 --------------------------------------------------------------------------------
 
