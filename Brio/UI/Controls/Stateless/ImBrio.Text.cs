@@ -38,7 +38,7 @@ internal static partial class ImBrio
         ImGui.PushStyleColor(ImGuiCol.ButtonActive, 0);
         using(ImRaii.PushFont(UiBuilder.IconFont))
         {
-            ImGui.Button(icon.ToIconString(), new(20, 0));
+            ImGui.Button(icon.ToIconString(), new(22, 0));
         }
         ImGui.PopStyleColor();
         ImGui.PopStyleColor();

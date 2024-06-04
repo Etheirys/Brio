@@ -23,7 +23,7 @@ internal static partial class ImBrio
 
         Vector2 size = new(0, 0)
         {
-            X = GetRemainingWidth() - 32 + ImGui.GetStyle().ItemSpacing.X
+            X = GetRemainingWidth() + ImGui.GetStyle().ItemSpacing.X
         };
 
         (bool changed, bool active) = DragFloat3Horizontal($"###{id}_drag3", ref vectorValue, step, size);
