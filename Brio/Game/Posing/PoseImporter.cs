@@ -6,6 +6,8 @@ namespace Brio.Game.Posing;
 
 internal class PoseImporter(PoseFile poseFile, PoseImporterOptions options, bool asExpression = false)
 {
+    public bool AsExpression => asExpression;
+
     public void ApplyBone(Bone bone, BonePoseInfo poseInfo)
     {
         if(poseInfo.Slot == PoseInfoSlot.Character)

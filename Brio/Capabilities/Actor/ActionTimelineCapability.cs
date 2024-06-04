@@ -80,7 +80,7 @@ internal class ActionTimelineCapability : ActorCharacterCapability
     public unsafe void ApplyBaseOverride(ushort actionTimeline, bool interrupt)
     {
         if(_originalBaseAnimation == null)
-            _originalBaseAnimation = new(Character.Native()->EventState, Character.Native()->ModeParam, Character.Native()->ActionTimelineManager.BaseOverride);
+            _originalBaseAnimation = new(Character.Native()->Mode, Character.Native()->ModeParam, Character.Native()->ActionTimelineManager.BaseOverride);
 
         var chara = Character.Native();
 
@@ -99,7 +99,7 @@ internal class ActionTimelineCapability : ActorCharacterCapability
         var chara = Character.Native();
 
         chara->ActionTimelineManager.BaseOverride = _originalBaseAnimation.Value.OriginalTimeline;
-        chara->EventState = _originalBaseAnimation.Value.OriginalMode;
+        chara->Mode = _originalBaseAnimation.Value.OriginalMode;
         chara->ModeParam = _originalBaseAnimation.Value.OriginalInput;
 
         _originalBaseAnimation = null;
@@ -131,5 +131,5 @@ internal class ActionTimelineCapability : ActorCharacterCapability
         return null;
     }
 
-    public record struct OriginalBaseAnimation(byte OriginalMode, byte OriginalInput, ushort OriginalTimeline);
+    public record struct OriginalBaseAnimation(CharacterModes OriginalMode, byte OriginalInput, ushort OriginalTimeline);
 }

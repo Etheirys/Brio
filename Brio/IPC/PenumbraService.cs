@@ -32,9 +32,9 @@ internal class PenumbraService : IDisposable
     private readonly SetCollectionForObject _penumbraSetCollectionForObject;
     private readonly GetCollectionForObject _penumbraGetCollectionForObject;
 
-    private Penumbra.Api.IpcSubscribers.Legacy.GetCollectionForObject _pLegacyGetCollectionForObject;
-    private Penumbra.Api.IpcSubscribers.Legacy.SetCollectionForObject _pLegacySetCollectionForObject;
-    private Penumbra.Api.IpcSubscribers.Legacy.GetCollections _pLegacyGetCollections;
+    private Penumbra.Api.IpcSubscribers.Legacy.GetCollectionForObject? _pLegacyGetCollectionForObject;
+    private Penumbra.Api.IpcSubscribers.Legacy.SetCollectionForObject? _pLegacySetCollectionForObject;
+    private Penumbra.Api.IpcSubscribers.Legacy.GetCollections? _pLegacyGetCollections;
 
     public PenumbraService(DalamudPluginInterface pluginInterface, ConfigurationService configurationService)
     {
@@ -117,7 +117,7 @@ internal class PenumbraService : IDisposable
     {
         if(PenumbraUseLegacyApi)
         {
-            var (_, _, name) = _pLegacyGetCollectionForObject.Invoke(gameObject.ObjectIndex);
+            var (_, _, name) = _pLegacyGetCollectionForObject!.Invoke(gameObject.ObjectIndex);
             return name;
         }
 
@@ -128,7 +128,7 @@ internal class PenumbraService : IDisposable
     public string LegacySetCollectionForObject(GameObject gameObject, string collectionName)
     {
         Brio.Log.Debug($"Setting GameObject {gameObject.ObjectIndex} collection to {collectionName}");
-        var (_, name) = _pLegacySetCollectionForObject.Invoke(gameObject.ObjectIndex, collectionName.ToString(), true, true);
+        var (_, name) = _pLegacySetCollectionForObject!.Invoke(gameObject.ObjectIndex, collectionName.ToString(), true, true);
         return name;
     }
     public Guid SetCollectionForObject(GameObject gameObject, Guid collectionName)
@@ -140,7 +140,7 @@ internal class PenumbraService : IDisposable
 
     public IEnumerable<string> LegacyGetCollections()
     {
-        return _pLegacyGetCollections.Invoke();
+        return _pLegacyGetCollections!.Invoke();
     }
     public Dictionary<Guid, string> GetCollections()
     {

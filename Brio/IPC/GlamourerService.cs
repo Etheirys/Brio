@@ -31,7 +31,7 @@ internal class GlamourerService : IDisposable
     private readonly Glamourer.Api.IpcSubscribers.ApiVersion _glamourerApiVersions;
     private readonly Glamourer.Api.IpcSubscribers.RevertState _glamourerRevertCharacter;
 
-    private Glamourer.Api.IpcSubscribers.Legacy.RevertCharacter _gLegacyRevertCharacter;
+    private Glamourer.Api.IpcSubscribers.Legacy.RevertCharacter? _gLegacyRevertCharacter;
 
     public GlamourerService(DalamudPluginInterface pluginInterface, ConfigurationService configurationService, GPoseService gPoseService, IFramework framework, ActorRedrawService redrawService)
     {
@@ -116,7 +116,7 @@ internal class GlamourerService : IDisposable
 
         if(GlamourerUseLegacyApi)
         {
-            _gLegacyRevertCharacter.Invoke(character);
+            _gLegacyRevertCharacter?.Invoke(character);
         }
         else
         {
