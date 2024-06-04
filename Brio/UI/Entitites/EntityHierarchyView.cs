@@ -26,10 +26,7 @@ internal class EntityHierarchyView(EntityManager entityManager)
 
         using(ImRaii.PushId($"entity_hierarchy_{root.Id}"))
         {
-            foreach(var child in root.Children.ToList())
-            {
-                DrawEntity(child, selectedEntityId);
-            }
+            DrawEntity(root, selectedEntityId);
         }
     }
 
@@ -86,7 +83,7 @@ internal class EntityHierarchyView(EntityManager entityManager)
                 {
                     bool didDrawAnything = false;
 
-                    foreach(var v in entity.Capabilities.ToList())
+                    foreach(var v in entity.Capabilities)
                     {
                         if(v.Widget != null)
                         {
@@ -105,7 +102,7 @@ internal class EntityHierarchyView(EntityManager entityManager)
             if(isNodeOpen)
             {
                 if(entity.Children.Count > 0)
-                    foreach(var child in entity.Children.ToList())
+                    foreach(var child in entity.Children)
                         DrawEntity(child, selectedEntityId);
             }
 
