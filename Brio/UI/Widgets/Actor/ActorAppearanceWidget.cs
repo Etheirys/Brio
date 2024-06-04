@@ -23,6 +23,14 @@ internal class ActorAppearanceWidget(ActorAppearanceCapability capability) : Wid
 
     private void DrawLoadAppearance()
     {
+        if(ImBrio.FontIconButton("load_npc", FontAwesomeIcon.PersonArrowDownToLine, "Load NPC Appearance"))
+        {
+            AppearanceEditorCommon.ResetNPCSelector();
+            ImGui.OpenPopup("widget_npc_selector");
+        }
+
+        ImGui.SameLine();
+
         if(ImBrio.FontIconButton("import_charafile", FontAwesomeIcon.FileImport, "Import Character"))
             FileUIHelpers.ShowImportCharacterModal(Capability, AppearanceImportOptions.Default);
 
