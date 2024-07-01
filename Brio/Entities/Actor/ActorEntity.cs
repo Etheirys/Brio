@@ -10,9 +10,9 @@ using System;
 
 namespace Brio.Entities.Actor
 {
-    internal class ActorEntity(GameObject gameObject, IServiceProvider provider) : Entity(gameObject, provider)
+    internal class ActorEntity(IGameObject gameObject, IServiceProvider provider) : Entity(gameObject, provider)
     {
-        public readonly GameObject GameObject = gameObject;
+        public readonly IGameObject GameObject = gameObject;
 
         private readonly ConfigurationService _configService = provider.GetRequiredService<ConfigurationService>();
 
@@ -46,7 +46,7 @@ namespace Brio.Entities.Actor
             AddCapability(ActivatorUtilities.CreateInstance<ModelPosingCapability>(_serviceProvider, this));
             AddCapability(ActivatorUtilities.CreateInstance<PosingCapability>(_serviceProvider, this));
 
-            AddCapability(ActionTimelineCapability.CreateIfEligible(_serviceProvider, this));
+            //AddCapability(ActionTimelineCapability.CreateIfEligible(_serviceProvider, this));
             AddCapability(CompanionCapability.CreateIfEligible(_serviceProvider, this));
             AddCapability(StatusEffectCapability.CreateIfEligible(_serviceProvider, this));
 

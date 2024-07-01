@@ -6,6 +6,7 @@ using Penumbra.Api.IpcSubscribers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using static FFXIVClientStructs.FFXIV.Client.UI.Misc.RaptureMacroModule;
 
 namespace Brio.IPC;
 
@@ -17,7 +18,7 @@ internal class PenumbraService : IDisposable
     private const int PenumbraApiMajor = 5;
     private const int PenumbraApiMinor = 0;
 
-    private readonly DalamudPluginInterface _pluginInterface;
+    private readonly IDalamudPluginInterface _pluginInterface;
     private readonly ConfigurationService _configurationService;
 
     public delegate void PenumbraRedrawEvent(int gameObjectId);
@@ -36,23 +37,23 @@ internal class PenumbraService : IDisposable
     private Penumbra.Api.IpcSubscribers.Legacy.SetCollectionForObject? _pLegacySetCollectionForObject;
     private Penumbra.Api.IpcSubscribers.Legacy.GetCollections? _pLegacyGetCollections;
 
-    public PenumbraService(DalamudPluginInterface pluginInterface, ConfigurationService configurationService)
+    public PenumbraService(IDalamudPluginInterface pluginInterface, ConfigurationService configurationService)
     {
-        _pluginInterface = pluginInterface;
-        _configurationService = configurationService;
+        //_pluginInterface = pluginInterface;
+        //_configurationService = configurationService;
 
-        _penumbraInitializedSubscriber = Penumbra.Api.IpcSubscribers.Initialized.Subscriber(pluginInterface, RefreshPenumbraStatus);
-        _penumbraDisposedSubscriber = Penumbra.Api.IpcSubscribers.Disposed.Subscriber(pluginInterface, RefreshPenumbraStatus);
-        _penumbraRedrawEvent = Penumbra.Api.IpcSubscribers.GameObjectRedrawn.Subscriber(pluginInterface, HandlePenumbraRedraw);
+        //_penumbraInitializedSubscriber = Penumbra.Api.IpcSubscribers.Initialized.Subscriber(pluginInterface, RefreshPenumbraStatus);
+        //_penumbraDisposedSubscriber = Penumbra.Api.IpcSubscribers.Disposed.Subscriber(pluginInterface, RefreshPenumbraStatus);
+        //_penumbraRedrawEvent = Penumbra.Api.IpcSubscribers.IGameObjectRedrawn.Subscriber(pluginInterface, HandlePenumbraRedraw);
 
-        _penumbraGetCollectionForObject = new Penumbra.Api.IpcSubscribers.GetCollectionForObject(_pluginInterface);
-        _penumbraSetCollectionForObject = new Penumbra.Api.IpcSubscribers.SetCollectionForObject(_pluginInterface);
-        _penumbraGetCollections = new Penumbra.Api.IpcSubscribers.GetCollections(_pluginInterface);
-        _penumbraApiVersion = new Penumbra.Api.IpcSubscribers.ApiVersion(_pluginInterface);
+        //_penumbraGetCollectionForObject = new Penumbra.Api.IpcSubscribers.GetCollectionForObject(_pluginInterface);
+        //_penumbraSetCollectionForObject = new Penumbra.Api.IpcSubscribers.SetCollectionForObject(_pluginInterface);
+        //_penumbraGetCollections = new Penumbra.Api.IpcSubscribers.GetCollections(_pluginInterface);
+        //_penumbraApiVersion = new Penumbra.Api.IpcSubscribers.ApiVersion(_pluginInterface);
 
-        _configurationService.OnConfigurationChanged += RefreshPenumbraStatus;
+        //_configurationService.OnConfigurationChanged += RefreshPenumbraStatus;
 
-        RefreshPenumbraStatus();
+        //RefreshPenumbraStatus();
     }
 
     public void RefreshPenumbraStatus()
@@ -88,8 +89,8 @@ internal class PenumbraService : IDisposable
                 }
                 catch
                 {
-                    PenumbraUseLegacyApi = true;
-                    LoadLegacy();
+                    Brio.Log.Warning($"Penumbra API Error!");
+                    return false;
                 }
 
                 Brio.Log.Debug("Penumbra integration initialized");
@@ -102,18 +103,9 @@ internal class PenumbraService : IDisposable
                 return false;
             }
         }
-
-        void LoadLegacy()
-        {
-            Brio.Log.Warning("Using Penumbra Legacy API!");
-
-            _pLegacyGetCollectionForObject = new(_pluginInterface);
-            _pLegacySetCollectionForObject = new(_pluginInterface);
-            _pLegacyGetCollections = new(_pluginInterface);
-        }
     }
 
-    public string GetCollectionForObject(GameObject gameObject)
+    public string GetCollectionForObject(IGameObject gameObject)
     {
         if(PenumbraUseLegacyApi)
         {
@@ -125,15 +117,15 @@ internal class PenumbraService : IDisposable
         return collection.Name;
     }
    
-    public string LegacySetCollectionForObject(GameObject gameObject, string collectionName)
+    public string LegacySetCollectionForObject(IGameObject gameObject, string collectionName)
     {
-        Brio.Log.Debug($"Setting GameObject {gameObject.ObjectIndex} collection to {collectionName}");
+        Brio.Log.Debug($"Setting IGameObject {gameObject.ObjectIndex} collection to {collectionName}");
         var (_, name) = _pLegacySetCollectionForObject!.Invoke(gameObject.ObjectIndex, collectionName.ToString(), true, true);
         return name;
     }
-    public Guid SetCollectionForObject(GameObject gameObject, Guid collectionName)
+    public Guid SetCollectionForObject(IGameObject gameObject, Guid collectionName)
     {
-        Brio.Log.Debug($"Setting GameObject {gameObject.ObjectIndex} collection to {collectionName}");
+        Brio.Log.Debug($"Setting IGameObject {gameObject.ObjectIndex} collection to {collectionName}");
         var (_, oldCollection) = _penumbraSetCollectionForObject.Invoke(gameObject.ObjectIndex, collectionName, true, true);
         return oldCollection!.Value.Id; // TODO Fix null reference
     }

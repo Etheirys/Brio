@@ -5,6 +5,7 @@ using Brio.Library.Sources;
 using Brio.Library.Tags;
 using Brio.Resources;
 using Dalamud.Interface.Internal;
+using Dalamud.Interface.Textures.TextureWraps;
 
 namespace Brio.Files;
 

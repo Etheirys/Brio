@@ -6,6 +6,7 @@ using Brio.UI.Windows;
 using Brio.UI.Windows.Specialized;
 using Dalamud.Interface.ImGuiFileDialog;
 using Dalamud.Interface.Internal;
+using Dalamud.Interface.Textures.TextureWraps;
 using Dalamud.Interface.Windowing;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
@@ -16,7 +17,7 @@ namespace Brio.UI;
 
 internal class UIManager : IDisposable
 {
-    private readonly DalamudPluginInterface _pluginInterface;
+    private readonly IDalamudPluginInterface _pluginInterface;
     private readonly GPoseService _gPoseService;
     private readonly ConfigurationService _configurationService;
 
@@ -59,7 +60,7 @@ internal class UIManager : IDisposable
 
     public UIManager
         (
-            DalamudPluginInterface pluginInterface,
+            IDalamudPluginInterface pluginInterface,
             GPoseService gPoseService,
             ConfigurationService configurationService,
             ITextureProvider textureProvider,

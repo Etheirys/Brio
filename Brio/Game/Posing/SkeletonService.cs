@@ -10,11 +10,13 @@ using Dalamud.Game;
 using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Hooking;
 using Dalamud.Plugin.Services;
-using FFXIVClientStructs.Havok;
+using FFXIVClientStructs.Havok.Animation.Rig;
+using FFXIVClientStructs.Havok.Common.Base.Math.Quaternion;
+using FFXIVClientStructs.Havok.Common.Base.Math.Vector;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using static FFXIVClientStructs.Havok.hkaPose;
+using static FFXIVClientStructs.Havok.Animation.Rig.hkaPose;
 using GameSkeleton = FFXIVClientStructs.FFXIV.Client.Graphics.Render.Skeleton;
 
 namespace Brio.Game.Posing;
@@ -52,7 +54,6 @@ internal unsafe class SkeletonService : IDisposable
         _gPoseService = gPoseService;
         _ikService = ikService;
         _framework = framework;
-
 
         var updateBonePhysicsAddress = "40 53 48 83 EC ?? 80 B9 ?? ?? ?? ?? ?? 48 8B D9 75 ?? 48 83 C1";
         _updateBonePhysicsHook = hooking.HookFromAddress<UpdateBonePhysicsDelegate>(scanner.ScanText(updateBonePhysicsAddress), UpdateBonePhysicsDetour);
@@ -263,8 +264,6 @@ internal unsafe class SkeletonService : IDisposable
 
     private void ApplySnapshot(hkaPose* pose, Bone bone, BonePoseTransformInfo info)
     {
-        Transform temp = default;
-
         var boneId = bone.Index;
 
         var trans = info.Transform;
@@ -273,36 +272,51 @@ internal unsafe class SkeletonService : IDisposable
         // Position
         bool prop = info.PropagateComponents.HasFlag(TransformComponents.Position);
         var modelSpace = pose->AccessBoneModelSpace(boneId, prop ? PropagateOrNot.Propagate : PropagateOrNot.DontPropagate);
-        temp = modelSpace;
-        temp.Position += info.Transform.Position;
-        if(info.IKInfo.Enabled)
-        {
-            _ikService.SolveIK(pose, info.IKInfo, bone, temp.Position);
 
-            if(!info.IKInfo.EnforceConstraints)
-            {
-                modelSpace = pose->AccessBoneModelSpace(boneId, prop ? PropagateOrNot.Propagate : PropagateOrNot.DontPropagate);
-                modelSpace->Translation = *(hkVector4f*)(&temp.Position);
-            }
-        }
-        else
+        var translation = modelSpace->Translation;
+        modelSpace->Translation = new hkVector4f 
         {
-            modelSpace->Translation = *(hkVector4f*)(&temp.Position);
-        }
+            X = translation.X + info.Transform.Position.X,
+            Y = translation.X + info.Transform.Position.Y,
+            Z = translation.X + info.Transform.Position.Z
+        };
+
+        //if(info.IKInfo.Enabled)
+        //{
+        //    _ikService.SolveIK(pose, info.IKInfo, bone, temp.Position);
+
+        //    if(!info.IKInfo.EnforceConstraints)
+        //    {
+        //        modelSpace = pose->AccessBoneModelSpace(boneId, prop ? PropagateOrNot.Propagate : PropagateOrNot.DontPropagate);
+        //        modelSpace->Translation = *(hkVector4f*)(&temp.Position);
+        //    }
+        //}
+        //else
 
         // Rotation
         prop = info.PropagateComponents.HasFlag(TransformComponents.Rotation);
         modelSpace = pose->AccessBoneModelSpace(boneId, prop ? PropagateOrNot.Propagate : PropagateOrNot.DontPropagate);
-        temp = modelSpace;
-        temp.Rotation *= info.Transform.Rotation;
-        modelSpace->Rotation = *(hkQuaternionf*)(&temp.Rotation);
+
+        var rotation = modelSpace->Rotation;
+        modelSpace->Rotation = new hkQuaternionf 
+        {
+            X = rotation.X * info.Transform.Rotation.X,
+            Y = rotation.Y * info.Transform.Rotation.Y,
+            Z = rotation.X * info.Transform.Rotation.Z,
+            W = rotation.X * info.Transform.Rotation.W,
+        };
 
         // Scale
         prop = info.PropagateComponents.HasFlag(TransformComponents.Scale);
         modelSpace = pose->AccessBoneModelSpace(boneId, prop ? PropagateOrNot.Propagate : PropagateOrNot.DontPropagate);
-        temp = modelSpace;
-        temp.Scale += info.Transform.Scale;
-        modelSpace->Scale = *(hkVector4f*)(&temp.Scale);
+      
+        var scale = modelSpace->Scale;
+        modelSpace->Scale = new hkVector4f
+        {
+            X = scale.X + info.Transform.Scale.X,
+            Y = scale.X + info.Transform.Scale.Y,
+            Z = scale.X + info.Transform.Scale.Z
+        };
     }
 
     private void RefreshSkeletonCache()
@@ -312,7 +326,7 @@ internal unsafe class SkeletonService : IDisposable
         _skeletons.Clear();
         foreach(var actor in _monitorService.ObjectTable)
         {
-            if(actor is Character chara)
+            if(actor is ICharacter chara)
             {
                 var bases = chara.GetCharacterBases();
                 foreach(var charaBase in bases)

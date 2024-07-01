@@ -35,7 +35,7 @@ public class Brio : IDalamudPlugin
     public static IPluginLog Log { get; private set; } = null!;
     public static IFramework Framework { get; private set; } = null!;
 
-    public Brio(DalamudPluginInterface pluginInterface)
+    public Brio(IDalamudPluginInterface pluginInterface)
     {
         // Setup dalamud services
         var dalamudServices = new DalamudServices(pluginInterface);

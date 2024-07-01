@@ -2,6 +2,7 @@
 using Brio.UI.Controls.Core;
 using Dalamud.Interface;
 using Dalamud.Interface.Internal;
+using Dalamud.Interface.Textures.TextureWraps;
 using Dalamud.Interface.Utility.Raii;
 using ImGuiNET;
 using System.Numerics;
@@ -187,7 +188,7 @@ internal static partial class ImBrio
         IDalamudTextureWrap? iconTex = null;
 
         if(iconId != 0)
-            iconTex = UIManager.Instance.TextureProvider.GetIcon(iconId);
+            iconTex = UIManager.Instance.TextureProvider.Icon.GetIcon(iconId);
 
         iconTex ??= ResourceProvider.Instance.GetResourceImage(fallback);
 

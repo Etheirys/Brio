@@ -10,7 +10,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using CharacterCopyFlags = FFXIVClientStructs.FFXIV.Client.Game.Character.CharacterSetup.CopyFlags;
+using CharacterCopyFlags = FFXIVClientStructs.FFXIV.Client.Game.Character.CharacterSetupContainer.CopyFlags;
 using ClientObjectManager = FFXIVClientStructs.FFXIV.Client.Game.Object.ClientObjectManager;
 using NativeCharacter = FFXIVClientStructs.FFXIV.Client.Game.Character.Character;
 
@@ -45,7 +45,7 @@ internal class ActorSpawnService : IDisposable
         _clientState.TerritoryChanged += OnTerritoryChanged;
     }
 
-    public bool CreateCharacter([MaybeNullWhen(false)] out Character outCharacter, SpawnFlags flags = SpawnFlags.Default, bool disableSpawnCompanion = false)
+    public bool CreateCharacter([MaybeNullWhen(false)] out ICharacter outCharacter, SpawnFlags flags = SpawnFlags.Default, bool disableSpawnCompanion = false)
     {
         outCharacter = null;
 
@@ -61,7 +61,7 @@ internal class ActorSpawnService : IDisposable
         return false;
     }
 
-    public unsafe bool CloneCharacter(Character sourceCharacter, [MaybeNullWhen(false)] out Character outCharacter, SpawnFlags flags = SpawnFlags.Default, bool disableSpawnCompanion = false)
+    public unsafe bool CloneCharacter(ICharacter sourceCharacter, [MaybeNullWhen(false)] out ICharacter outCharacter, SpawnFlags flags = SpawnFlags.Default, bool disableSpawnCompanion = false)
     {
         outCharacter = null;
 
@@ -148,7 +148,7 @@ internal class ActorSpawnService : IDisposable
         return false;
     }
 
-    public unsafe bool DestroyObject(GameObject go)
+    public unsafe bool DestroyObject(IGameObject go)
     {
         Brio.Log.Debug($"Destroying gameobjectobject {go.ObjectIndex}...");
 
@@ -177,36 +177,36 @@ internal class ActorSpawnService : IDisposable
         _createdIndexes.Clear();
     }
 
-    public void DestroyCompanion(Character character)
+    public void DestroyCompanion(ICharacter ICharacter)
     {
-        if(character.CalculateCompanionInfo(out var info))
+        if(ICharacter.CalculateCompanionInfo(out var info))
         {
-            InternalSetCompanion(character, info.Kind, 0);
+            InternalSetCompanion(ICharacter, info.Kind, 0);
         }
     }
 
-    public unsafe void CreateCompanion(Character character, CompanionContainer container)
+    public unsafe void CreateCompanion(ICharacter ICharacter, CompanionContainer container)
     {
-        DestroyCompanion(character);
-        InternalSetCompanion(character, container.Kind, (short)container.Id);
+        DestroyCompanion(ICharacter);
+        InternalSetCompanion(ICharacter, container.Kind, (short)container.Id);
 
         // We need to wait for the companion to be ready before we can draw it.
-        var companionNative = &character.Native()->CompanionObject->Character.GameObject;
+        var companionNative = &ICharacter.Native()->CompanionObject->Character.GameObject;
         _framework.RunUntilSatisfied(
-            () => character.CalculateCompanionInfo(out var info) && info.Kind == container.Kind && info.Id == container.Id && companionNative->IsReadyToDraw(),
+            () => ICharacter.CalculateCompanionInfo(out var info) && info.Kind == container.Kind && info.Id == container.Id && companionNative->IsReadyToDraw(),
             (_) => companionNative->EnableDraw(),
             1000,
             dontStartFor: 1
         );
     }
 
-    private unsafe void InternalSetCompanion(Character character, CompanionKind kind, short id)
+    private unsafe void InternalSetCompanion(ICharacter ICharacter, CompanionKind kind, short id)
     {
-        var native = character.Native();
+        var native = ICharacter.Native();
         switch(kind)
         {
             case CompanionKind.Companion:
-                native->Companion.SetupCompanion(id, 0);
+                native->CompanionData.SetupCompanion(id, 0);
                 break;
 
             case CompanionKind.Mount:
@@ -214,16 +214,16 @@ internal class ActorSpawnService : IDisposable
                 break;
 
             case CompanionKind.Ornament:
-                native->Ornament.SetupOrnament(id, 0);
+                native->OrnamentData.SetupOrnament(id, 0);
                 break;
         }
     }
 
-    private bool CreateEmptyCharacter([MaybeNullWhen(false)] out Character outCharacter, SpawnFlags flags)
+    private bool CreateEmptyCharacter([MaybeNullWhen(false)] out ICharacter outCharacter, SpawnFlags flags)
     {
         outCharacter = null;
 
-        Brio.Log.Debug("Creating Brio character...");
+        Brio.Log.Debug("Creating Brio ICharacter...");
 
         unsafe
         {
@@ -231,8 +231,8 @@ internal class ActorSpawnService : IDisposable
             uint idCheck = com->CreateBattleCharacter(param: (byte)(flags.HasFlag(SpawnFlags.ReserveCompanionSlot) ? 1 : 0));
             if(idCheck == 0xffffffff)
             {
-                Brio.Log.Warning("Failed to create character, invalid ID was returned.");
-                EventBus.Instance.NotifyError("Failed to create character.");
+                Brio.Log.Warning("Failed to create ICharacter, invalid ID was returned.");
+                EventBus.Instance.NotifyError("Failed to create ICharacter.");
                 return false;
             }
             ushort newId = (ushort)idCheck;
@@ -248,11 +248,11 @@ internal class ActorSpawnService : IDisposable
 
             _gPoseService.AddCharacterToGPose(newPlayer);
 
-            var character = _objectTable.CreateObjectReference((nint)newObject);
-            if(character == null || character is not Character)
+            var iCharacter = _objectTable.CreateObjectReference((nint)newObject);
+            if(iCharacter == null || iCharacter is not ICharacter)
                 return false;
 
-            outCharacter = (Character)character;
+            outCharacter = (ICharacter)iCharacter;
         }
 
         if(_gPoseService.IsGPosing && _targetService.GPoseTarget == null)

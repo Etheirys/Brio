@@ -54,9 +54,9 @@ internal class ActorContainerCapability : Capability
 
     public void CloneActor(ActorEntity entity, bool targetNewInHierarchy)
     {
-        if(entity.GameObject is Character character)
+        if(entity.GameObject is ICharacter ICharacter)
         {
-            if(_actorSpawnService.CloneCharacter(character, out var chara))
+            if(_actorSpawnService.CloneCharacter(ICharacter, out var chara))
             {
                 if(targetNewInHierarchy)
                 {

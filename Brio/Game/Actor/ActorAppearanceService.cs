@@ -54,7 +54,7 @@ internal class ActorAppearanceService : IDisposable
         _updateWetnessHook = hooks.HookFromAddress<UpdateWetnessDelegate>(updateWetnessAddress, UpdateWetnessDetour);
         _updateWetnessHook.Enable();
 
-        var updateTintHook = Marshal.ReadInt64((nint)(CharacterBase.StaticAddressPointers.VTable + 0xC0));
+        var updateTintHook = Marshal.ReadInt64((nint)(CharacterBase.StaticVirtualTablePointer + 0xC0));
         _updateTintHook = hooks.HookFromAddress<UpdateTintDelegate>((nint)updateTintHook, UpdateTintDetour);
         _updateTintHook.Enable();
     }
@@ -74,13 +74,13 @@ internal class ActorAppearanceService : IDisposable
         return new HackDisposer(this);
     }
 
-    public async Task<RedrawResult> Redraw(Character character)
+    public async Task<RedrawResult> Redraw(ICharacter character)
     {
         var appearance = GetActorAppearance(character);
         return await SetCharacterAppearance(character, appearance, AppearanceImportOptions.All, true);
     }
 
-    public async Task<RedrawResult> SetCharacterAppearance(Character character, ActorAppearance appearance, AppearanceImportOptions options, bool forceRedraw = false)
+    public async Task<RedrawResult> SetCharacterAppearance(ICharacter character, ActorAppearance appearance, AppearanceImportOptions options, bool forceRedraw = false)
     {
         var existingAppearance = GetActorAppearance(character);
 
@@ -286,7 +286,7 @@ internal class ActorAppearanceService : IDisposable
         return redrawResult;
     }
 
-    public ActorAppearance GetActorAppearance(Character character) => ActorAppearance.FromCharacter(character);
+    public ActorAppearance GetActorAppearance(ICharacter character) => ActorAppearance.FromCharacter(character);
 
     private byte EnforceKindRestrictionsDetour(nint a1, nint a2)
     {

@@ -34,6 +34,7 @@ using Brio.Files.Converters;
 using Brio.Game.Actor.Appearance;
 using Brio.Resources;
 using Dalamud.Interface.Internal;
+using Dalamud.Interface.Textures.TextureWraps;
 using System;
 using System.Globalization;
 using System.Numerics;

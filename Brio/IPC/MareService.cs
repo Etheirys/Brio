@@ -11,21 +11,21 @@ internal class MareService : IDisposable
 {
     public bool IsMareAvailable { get; private set; } = false;
 
-    private readonly DalamudPluginInterface _pluginInterface;
+    private readonly IDalamudPluginInterface _pluginInterface;
     private readonly ConfigurationService _configurationService;
 
-    private readonly ICallGateSubscriber<string, GameObject, bool> _mareApplyMcdf;
+    private readonly ICallGateSubscriber<string, IGameObject, bool> _mareApplyMcdf;
 
-    public MareService(DalamudPluginInterface pluginInterface, ConfigurationService configurationService)
+    public MareService(IDalamudPluginInterface pluginInterface, ConfigurationService configurationService)
     {
-        _pluginInterface = pluginInterface;
-        _configurationService = configurationService;
+        //_pluginInterface = pluginInterface;
+        //_configurationService = configurationService;
 
-        _mareApplyMcdf = pluginInterface.GetIpcSubscriber<string, GameObject, bool>("MareSynchronos.LoadMcdf");
+        //_mareApplyMcdf = pluginInterface.GetIpcSubscriber<string, IGameObject, bool>("MareSynchronos.LoadMcdf");
 
-        RefreshMareStatus();
+        //RefreshMareStatus();
 
-        _configurationService.OnConfigurationChanged += RefreshMareStatus;
+        //_configurationService.OnConfigurationChanged += RefreshMareStatus;
     }
 
     public void RefreshMareStatus()
@@ -40,7 +40,7 @@ internal class MareService : IDisposable
         }
     }
 
-    public bool LoadMcdfAsync(string fileName, GameObject target)
+    public bool LoadMcdfAsync(string fileName, IGameObject target)
     {
         RefreshMareStatus();
 

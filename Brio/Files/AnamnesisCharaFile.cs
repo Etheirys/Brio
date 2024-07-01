@@ -5,6 +5,7 @@ using Brio.Game.Actor.Appearance;
 using Brio.Library.Tags;
 using Brio.Resources;
 using Dalamud.Interface.Internal;
+using Dalamud.Interface.Textures.TextureWraps;
 using FFXIVClientStructs.FFXIV.Client.Game.Character;
 using System;
 using System.Numerics;
@@ -223,14 +224,14 @@ internal class AnamnesisCharaFile : JsonDocumentBase
         {
             Id = save.ModelBase,
             Variant = save.ModelVariant,
-            Stain = save.DyeId,
+            Stain1 = save.DyeId,
         };
 
         public static implicit operator ItemSave(EquipmentModelId modelId) => new()
         {
             ModelBase = modelId.Id,
             ModelVariant = modelId.Variant,
-            DyeId = modelId.Stain,
+            DyeId = modelId.Stain1,
         };
     }
 
@@ -248,7 +249,7 @@ internal class AnamnesisCharaFile : JsonDocumentBase
             Id = save.ModelSet,
             Variant = save.ModelVariant,
             Type = save.ModelBase,
-            Stain = save.DyeId
+            Stain1 = save.DyeId
         };
 
         public static implicit operator WeaponSave(WeaponModelId modelId) => new()
@@ -256,7 +257,7 @@ internal class AnamnesisCharaFile : JsonDocumentBase
             ModelSet = modelId.Id,
             ModelVariant = modelId.Variant,
             ModelBase = modelId.Type,
-            DyeId = modelId.Stain
+            DyeId = modelId.Stain1
         };
     }
 }

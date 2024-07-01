@@ -38,24 +38,24 @@ internal class ActionTimelineWindow : Window, IDisposable
 
     public override bool DrawConditions()
     {
-        if(!_entityManager.SelectedHasCapability<ActionTimelineCapability>())
-        {
-            return false;
-        }
+        //if(!_entityManager.SelectedHasCapability<ActionTimelineCapability>())
+        //{
+        //    return false;
+        //}
 
         return base.DrawConditions();
     }
 
     public override void Draw()
     {
-        if(!_entityManager.TryGetCapabilityFromSelectedEntity<ActionTimelineCapability>(out var capability, considerParents: true))
-        {
-            return;
-        }
+        //if(!_entityManager.TryGetCapabilityFromSelectedEntity<ActionTimelineCapability>(out var capability, considerParents: true))
+        //{
+        //    return;
+        //}
 
-        WindowName = $"{Brio.Name} - Action Timelines - {capability.Entity.FriendlyName}###brio_action_timelines_window";
+        //WindowName = $"{Brio.Name} - Action Timelines - {capability.Entity.FriendlyName}###brio_action_timelines_window";
 
-        _editor.Draw(true, capability);
+        //_editor.Draw(true, capability);
     }
 
     private void OnGPoseStateChange(bool newState)

@@ -199,7 +199,7 @@ internal class ActorAppearanceCapability : ActorCharacterCapability
 
     public unsafe void AttachWeapon()
     {
-        Character.Native()->ActionTimelineManager.Driver.PlayTimeline(5616);
+        Character.Native()->Timeline.TimelineSequencer.PlayTimeline(5616);
     }
 
     private unsafe void ApplyShaderOverride()

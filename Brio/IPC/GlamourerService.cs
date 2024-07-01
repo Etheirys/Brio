@@ -15,12 +15,11 @@ namespace Brio.IPC;
 internal class GlamourerService : IDisposable
 {
     public bool IsGlamourerAvailable { get; private set; } = false;
-    public bool GlamourerUseLegacyApi { get; private set; } = false;
 
     private const int GlamourerApiMajor = 1;
     private const int GlamourerApiMinor = 1;
 
-    private readonly DalamudPluginInterface _pluginInterface;
+    private readonly IDalamudPluginInterface _pluginInterface;
     private readonly ConfigurationService _configurationService;
     private readonly GPoseService _gPoseService;
     private readonly IFramework _framework;
@@ -31,9 +30,7 @@ internal class GlamourerService : IDisposable
     private readonly Glamourer.Api.IpcSubscribers.ApiVersion _glamourerApiVersions;
     private readonly Glamourer.Api.IpcSubscribers.RevertState _glamourerRevertCharacter;
 
-    private Glamourer.Api.IpcSubscribers.Legacy.RevertCharacter? _gLegacyRevertCharacter;
-
-    public GlamourerService(DalamudPluginInterface pluginInterface, ConfigurationService configurationService, GPoseService gPoseService, IFramework framework, ActorRedrawService redrawService)
+    public GlamourerService(IDalamudPluginInterface pluginInterface, ConfigurationService configurationService, GPoseService gPoseService, IFramework framework, ActorRedrawService redrawService)
     {
         _pluginInterface = pluginInterface;
         _configurationService = configurationService;
@@ -41,15 +38,15 @@ internal class GlamourerService : IDisposable
         _framework = framework;
         _redrawService = redrawService;
 
-        _glamourerInitializedSubscriber = Glamourer.Api.IpcSubscribers.Initialized.Subscriber(pluginInterface, RefreshGlamourerStatus);
+        //_glamourerInitializedSubscriber = Glamourer.Api.IpcSubscribers.Initialized.Subscriber(pluginInterface, RefreshGlamourerStatus);
 
-        _glamourerApiVersions = new Glamourer.Api.IpcSubscribers.ApiVersion(pluginInterface);
-        _glamourerRevertCharacter = new Glamourer.Api.IpcSubscribers.RevertState(pluginInterface);
+        //_glamourerApiVersions = new Glamourer.Api.IpcSubscribers.ApiVersion(pluginInterface);
+        //_glamourerRevertCharacter = new Glamourer.Api.IpcSubscribers.RevertState(pluginInterface);
 
-        RefreshGlamourerStatus();
+        //RefreshGlamourerStatus();
 
-        _configurationService.OnConfigurationChanged += RefreshGlamourerStatus;
-        _gPoseService.OnGPoseStateChange += OnGPoseStateChange;
+        //_configurationService.OnConfigurationChanged += RefreshGlamourerStatus;
+        //_gPoseService.OnGPoseStateChange += OnGPoseStateChange;
     }
 
     public void RefreshGlamourerStatus()
@@ -85,8 +82,8 @@ internal class GlamourerService : IDisposable
                 }
                 catch
                 {
-                    GlamourerUseLegacyApi = true;
-                    LoadLegacy();
+                    Brio.Log.Warning($"Penumbra API Error!");
+                    return false;
                 }
 
                 Brio.Log.Debug("Glamourer integration initialized");
@@ -99,29 +96,16 @@ internal class GlamourerService : IDisposable
                 return false;
             }
         }
-        void LoadLegacy()
-        {
-            Brio.Log.Warning("Using Glamourer Legacy API!");
-
-            _gLegacyRevertCharacter = new Glamourer.Api.IpcSubscribers.Legacy.RevertCharacter(_pluginInterface);
-        }
     }
 
-    public Task RevertCharacter(Character? character)
+    public Task RevertCharacter(ICharacter? character)
     {
         if(!IsGlamourerAvailable && character != null)
             return Task.CompletedTask;
 
         Brio.Log.Error("Starting glamourer revert...");
 
-        if(GlamourerUseLegacyApi)
-        {
-            _gLegacyRevertCharacter?.Invoke(character);
-        }
-        else
-        {
-            _glamourerRevertCharacter.Invoke(character!.ObjectIndex, character.DataId);
-        }
+        _glamourerRevertCharacter.Invoke(character!.ObjectIndex, character.DataId);
 
         return _framework.RunOnTick(async () =>
         {

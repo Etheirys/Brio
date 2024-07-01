@@ -1,6 +1,7 @@
 ﻿using Brio.Entities;
 using Brio.Resources;
 using Dalamud.Interface.Internal;
+using Dalamud.Interface.Textures.TextureWraps;
 
 namespace Brio.Library.Sources;
 

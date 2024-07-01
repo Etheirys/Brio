@@ -111,7 +111,7 @@ internal class GearEditor()
 
         int equipId = equip.Id;
         int equipVariant = equip.Variant;
-        DyeUnion dyeUnion = new DyeId(equip.Stain);
+        DyeUnion dyeUnion = new DyeId(equip.Stain1);
 
         var (dyeId, dyeName, dyeColor) = dyeUnion.Match(
             dye => ((byte)dye.RowId, dye.Name.RawString, ImBrio.ARGBToABGR(dye.Color)),
@@ -185,7 +185,7 @@ internal class GearEditor()
                             _dyeSelector.Draw();
                             if(_dyeSelector.SoftSelectionChanged && _dyeSelector.SoftSelected != null)
                             {
-                                equip.Stain = (DyeId)_dyeSelector.SoftSelected;
+                                equip.Stain1 = (DyeId)_dyeSelector.SoftSelected;
                                 didChange |= true;
                             }
                             if(_dyeSelector.SelectionChanged)
@@ -201,7 +201,7 @@ internal class GearEditor()
                             if(_gearSelector.SoftSelectionChanged && _gearSelector.SoftSelected != null)
                             {
                                 equip.Value = (uint)_gearSelector.SoftSelected.ModelId;
-                                equip.Stain = dyeId;
+                                equip.Stain1 = dyeId;
                                 didChange |= true;
                             }
                             if(_gearSelector.SelectionChanged)
@@ -224,7 +224,7 @@ internal class GearEditor()
         int equipId = equip.Id;
         int equipVariant = equip.Variant;
         int equipType = equip.Type;
-        DyeUnion dyeUnion = new DyeId(equip.Stain);
+        DyeUnion dyeUnion = new DyeId(equip.Stain1);
 
         var (dyeId, dyeName, dyeColor) = dyeUnion.Match(
             dye => ((byte)dye.RowId, dye.Name.RawString, ImBrio.ARGBToABGR(dye.Color)),
@@ -316,7 +316,7 @@ internal class GearEditor()
                             _dyeSelector.Draw();
                             if(_dyeSelector.SoftSelectionChanged && _dyeSelector.SoftSelected != null)
                             {
-                                equip.Stain = (DyeId)_dyeSelector.SoftSelected;
+                                equip.Stain1 = (DyeId)_dyeSelector.SoftSelected;
                                 didChange |= true;
                             }
                             if(_dyeSelector.SelectionChanged)
@@ -332,7 +332,7 @@ internal class GearEditor()
                             if(_gearSelector.SoftSelectionChanged && _gearSelector.SoftSelected != null)
                             {
                                 equip.Value = _gearSelector.SoftSelected.ModelId;
-                                equip.Stain = dyeId;
+                                equip.Stain1 = dyeId;
                                 didChange |= true;
                             }
                             if(_gearSelector.SelectionChanged)

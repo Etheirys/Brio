@@ -1,4 +1,5 @@
 ﻿using FFXIVClientStructs.Havok;
+using FFXIVClientStructs.Havok.Animation.Rig;
 using System.Collections.Generic;
 using System.Linq;
 

@@ -1,7 +1,7 @@
 ﻿using Brio.Game.Actor.Extensions;
 using FFXIVClientStructs.FFXIV.Client.Game.Character;
 using Lumina.Excel.GeneratedSheets;
-using DalamudCharacter = Dalamud.Game.ClientState.Objects.Types.Character;
+using DalamudCharacter = Dalamud.Game.ClientState.Objects.Types.ICharacter;
 
 namespace Brio.Game.Actor.Appearance;
 
@@ -163,73 +163,73 @@ internal struct ActorAppearance()
             actorAppearance.Weapons.MainHand.Value = npc.ModelMainHand;
 
         if(npc.DyeMainHand.Row != 0)
-            actorAppearance.Weapons.MainHand.Stain = (byte)npc.DyeMainHand.Row;
+            actorAppearance.Weapons.MainHand.Stain1 = (byte)npc.DyeMainHand.Row;
 
         if(npc.ModelOffHand != 0)
             actorAppearance.Weapons.OffHand.Value = npc.ModelOffHand;
 
         if(npc.DyeOffHand.Row != 0)
-            actorAppearance.Weapons.OffHand.Stain = (byte)npc.DyeOffHand.Row;
+            actorAppearance.Weapons.OffHand.Stain1 = (byte)npc.DyeOffHand.Row;
 
         if(npc.ModelHead != 0)
             actorAppearance.Equipment.Head.Value = npc.ModelHead;
 
         if(npc.DyeHead.Row != 0)
-            actorAppearance.Equipment.Head.Stain = (byte)npc.DyeHead.Row;
+            actorAppearance.Equipment.Head.Stain1 = (byte)npc.DyeHead.Row;
 
         if(npc.ModelBody != 0)
             actorAppearance.Equipment.Top.Value = npc.ModelBody;
 
         if(npc.DyeBody.Row != 0)
-            actorAppearance.Equipment.Top.Stain = (byte)npc.DyeBody.Row;
+            actorAppearance.Equipment.Top.Stain1 = (byte)npc.DyeBody.Row;
 
         if(npc.ModelHands != 0)
             actorAppearance.Equipment.Arms.Value = npc.ModelHands;
 
         if(npc.DyeHands.Row != 0)
-            actorAppearance.Equipment.Arms.Stain = (byte)npc.DyeHands.Row;
+            actorAppearance.Equipment.Arms.Stain1 = (byte)npc.DyeHands.Row;
 
         if(npc.ModelLegs != 0)
             actorAppearance.Equipment.Legs.Value = npc.ModelLegs;
 
         if(npc.DyeLegs.Row != 0)
-            actorAppearance.Equipment.Legs.Stain = (byte)npc.DyeLegs.Row;
+            actorAppearance.Equipment.Legs.Stain1 = (byte)npc.DyeLegs.Row;
 
         if(npc.ModelFeet != 0)
             actorAppearance.Equipment.Feet.Value = npc.ModelFeet;
 
         if(npc.DyeFeet.Row != 0)
-            actorAppearance.Equipment.Feet.Stain = (byte)npc.DyeFeet.Row;
+            actorAppearance.Equipment.Feet.Stain1 = (byte)npc.DyeFeet.Row;
 
         if(npc.ModelEars != 0)
             actorAppearance.Equipment.Ear.Value = npc.ModelEars;
 
         if(npc.DyeEars.Row != 0)
-            actorAppearance.Equipment.Ear.Stain = (byte)npc.DyeEars.Row;
+            actorAppearance.Equipment.Ear.Stain1 = (byte)npc.DyeEars.Row;
 
         if(npc.ModelNeck != 0)
             actorAppearance.Equipment.Neck.Value = npc.ModelNeck;
 
         if(npc.DyeNeck.Row != 0)
-            actorAppearance.Equipment.Neck.Stain = (byte)npc.DyeNeck.Row;
+            actorAppearance.Equipment.Neck.Stain1 = (byte)npc.DyeNeck.Row;
 
         if(npc.ModelWrists != 0)
             actorAppearance.Equipment.Wrist.Value = npc.ModelWrists;
 
         if(npc.DyeWrists.Row != 0)
-            actorAppearance.Equipment.Wrist.Stain = (byte)npc.DyeWrists.Row;
+            actorAppearance.Equipment.Wrist.Stain1 = (byte)npc.DyeWrists.Row;
 
         if(npc.ModelRightRing != 0)
             actorAppearance.Equipment.RFinger.Value = npc.ModelRightRing;
 
         if(npc.DyeRightRing.Row != 0)
-            actorAppearance.Equipment.RFinger.Stain = (byte)npc.DyeRightRing.Row;
+            actorAppearance.Equipment.RFinger.Stain1 = (byte)npc.DyeRightRing.Row;
 
         if(npc.ModelLeftRing != 0)
             actorAppearance.Equipment.LFinger.Value = npc.ModelLeftRing;
 
         if(npc.DyeLeftRing.Row != 0)
-            actorAppearance.Equipment.LFinger.Stain = (byte)npc.DyeLeftRing.Row;
+            actorAppearance.Equipment.LFinger.Stain1 = (byte)npc.DyeLeftRing.Row;
 
 
         return actorAppearance;
@@ -242,30 +242,30 @@ internal struct ActorAppearance()
         var offHand = new WeaponModelId();
 
         equipment.Head.Value = npcEquip.ModelHead;
-        equipment.Head.Stain = (byte)npcEquip.DyeHead.Row;
+        equipment.Head.Stain1 = (byte)npcEquip.DyeHead.Row;
         equipment.Top.Value = npcEquip.ModelBody;
-        equipment.Top.Stain = (byte)npcEquip.DyeBody.Row;
+        equipment.Top.Stain1 = (byte)npcEquip.DyeBody.Row;
         equipment.Arms.Value = npcEquip.ModelHands;
-        equipment.Arms.Stain = (byte)npcEquip.DyeHands.Row;
+        equipment.Arms.Stain1 = (byte)npcEquip.DyeHands.Row;
         equipment.Legs.Value = npcEquip.ModelLegs;
-        equipment.Legs.Stain = (byte)npcEquip.DyeLegs.Row;
+        equipment.Legs.Stain1 = (byte)npcEquip.DyeLegs.Row;
         equipment.Feet.Value = npcEquip.ModelFeet;
-        equipment.Feet.Stain = (byte)npcEquip.DyeFeet.Row;
+        equipment.Feet.Stain1 = (byte)npcEquip.DyeFeet.Row;
         equipment.Ear.Value = npcEquip.ModelEars;
-        equipment.Ear.Stain = (byte)npcEquip.DyeEars.Row;
+        equipment.Ear.Stain1 = (byte)npcEquip.DyeEars.Row;
         equipment.Neck.Value = npcEquip.ModelNeck;
-        equipment.Neck.Stain = (byte)npcEquip.DyeNeck.Row;
+        equipment.Neck.Stain1 = (byte)npcEquip.DyeNeck.Row;
         equipment.Wrist.Value = npcEquip.ModelWrists;
-        equipment.Wrist.Stain = (byte)npcEquip.DyeWrists.Row;
+        equipment.Wrist.Stain1 = (byte)npcEquip.DyeWrists.Row;
         equipment.RFinger.Value = npcEquip.ModelRightRing;
-        equipment.RFinger.Stain = (byte)npcEquip.DyeRightRing.Row;
+        equipment.RFinger.Stain1 = (byte)npcEquip.DyeRightRing.Row;
         equipment.LFinger.Value = npcEquip.ModelLeftRing;
-        equipment.LFinger.Stain = (byte)npcEquip.DyeLeftRing.Row;
+        equipment.LFinger.Stain1 = (byte)npcEquip.DyeLeftRing.Row;
 
         mainHand.Value = npcEquip.ModelMainHand;
-        mainHand.Stain = (byte)npcEquip.DyeMainHand.Row;
+        mainHand.Stain1 = (byte)npcEquip.DyeMainHand.Row;
         offHand.Value = npcEquip.ModelOffHand;
-        offHand.Stain = (byte)npcEquip.DyeOffHand.Row;
+        offHand.Stain1 = (byte)npcEquip.DyeOffHand.Row;
 
         return (mainHand, offHand, equipment);
     }

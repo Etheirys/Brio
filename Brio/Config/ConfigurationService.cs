@@ -7,14 +7,14 @@ internal class ConfigurationService : IDisposable
 {
     public Configuration Configuration { get; private set; } = null!;
 
-    private readonly DalamudPluginInterface _pluginInterface;
+    private readonly IDalamudPluginInterface _pluginInterface;
 
     public delegate void OnConfigurationChangedDelegate();
     public event OnConfigurationChangedDelegate? OnConfigurationChanged;
 
     public static ConfigurationService Instance { get; private set; } = null!;
 
-    public ConfigurationService(DalamudPluginInterface pluginInterface)
+    public ConfigurationService(IDalamudPluginInterface pluginInterface)
     {
         Instance = this;
         _pluginInterface = pluginInterface;

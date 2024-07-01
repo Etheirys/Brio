@@ -12,30 +12,30 @@ namespace Brio.Capabilities.Actor;
 
 internal class StatusEffectCapability : ActorCapability
 {
-    public BattleChara Character { get; }
+    public IBattleChara ICharacter { get; }
 
-    public StatusEffectCapability(ActorEntity parent, BattleChara chara) : base(parent)
+    public StatusEffectCapability(ActorEntity parent, IBattleChara chara) : base(parent)
     {
-        Character = chara;
+        ICharacter = chara;
 
         Widget = new StatusEffectsWidget(this);
     }
 
     public static StatusEffectCapability? CreateIfEligible(IServiceProvider provider, ActorEntity entity)
     {
-        if(entity.GameObject is BattleChara character)
-            return ActivatorUtilities.CreateInstance<StatusEffectCapability>(provider, entity, character);
+        if(entity.GameObject is IBattleChara ICharacter)
+            return ActivatorUtilities.CreateInstance<StatusEffectCapability>(provider, entity, ICharacter);
 
         return null;
     }
 
-    public unsafe IEnumerable<Status> ActiveStatuses => Character.GetStatusManager()->GetAllStatuses();
+    public unsafe IEnumerable<Status> ActiveStatuses => ICharacter.GetStatusManager()->GetAllStatuses();
 
     public unsafe void RemoveStatus(Status status) => RemoveStatus((ushort)status.RowId);
 
     public unsafe void RemoveStatus(ushort status)
     {
-        var statusManager = Character.GetStatusManager();
+        var statusManager = ICharacter.GetStatusManager();
         var idx = statusManager->GetStatusIndex(status);
         if(idx != -1)
             statusManager->RemoveStatus(idx);
@@ -45,7 +45,7 @@ internal class StatusEffectCapability : ActorCapability
 
     public unsafe void AddStatus(ushort status)
     {
-        Character.GetStatusManager()->AddStatus(status);
+        ICharacter.GetStatusManager()->AddStatus(status);
     }
 
     public Status? GetStatus(uint rowId)

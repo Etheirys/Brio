@@ -4,6 +4,7 @@ using Brio.Entities.Camera;
 using Brio.Entities.Core;
 using Brio.Entities.Debug;
 using Brio.Entities.World;
+using Dalamud.Game.ClientState.Objects.Types;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
@@ -99,6 +100,10 @@ internal unsafe partial class EntityManager : IDisposable
     public bool TryGetEntity(EntityId id, [MaybeNullWhen(false)] out Entity entity)
     {
         return _entityMap.TryGetValue(id, out entity);
+    }
+    public bool TryGetEntity(IGameObject id, [MaybeNullWhen(false)] out Entity entity)
+    {
+        return _entityMap.TryGetValue(new IGameObjectHolder(id), out entity);
     }
 
     public bool TryGetEntity<T>(EntityId id, [MaybeNullWhen(false)] out T entity) where T : Entity

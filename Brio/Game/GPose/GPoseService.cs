@@ -55,9 +55,9 @@ internal unsafe class GPoseService : IDisposable
 
         _isInGPose = _clientState.IsGPosing;
 
-        UIModule* uiModule = Framework.Instance()->GetUiModule();
-        var enterGPoseAddress = (nint)uiModule->VTable->EnterGPose;
-        var exitGPoseAddress = (nint)uiModule->VTable->ExitGPose;
+        UIModule* uiModule = Framework.Instance()->UIModule;
+        var enterGPoseAddress = (nint)uiModule->VirtualTable->EnterGPose;
+        var exitGPoseAddress = (nint)uiModule->VirtualTable->ExitGPose;
 
         _enterGPoseHook = interopProvider.HookFromAddress<GPoseEnterExitDelegate>(enterGPoseAddress, EnteringGPoseDetour);
         _enterGPoseHook.Enable();
@@ -80,7 +80,7 @@ internal unsafe class GPoseService : IDisposable
         OnGPoseStateChange?.Invoke(gposing);
     }
 
-    public void AddCharacterToGPose(Character chara) => AddCharacterToGPose((NativeCharacter*)chara.Address);
+    public void AddCharacterToGPose(ICharacter chara) => AddCharacterToGPose((NativeCharacter*)chara.Address);
 
     public void AddCharacterToGPose(NativeCharacter* chara)
     {

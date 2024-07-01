@@ -1,5 +1,6 @@
 ﻿using Brio.UI.Windows;
 using Dalamud.Interface.Internal;
+using Dalamud.Interface.Textures.TextureWraps;
 
 namespace Brio.Library;
 

@@ -1,5 +1,6 @@
 ﻿using Brio.Resources;
 using Dalamud.Interface.Internal;
+using Dalamud.Interface.Textures.TextureWraps;
 using ImGuiNET;
 
 namespace Brio.UI.Controls.Stateless;

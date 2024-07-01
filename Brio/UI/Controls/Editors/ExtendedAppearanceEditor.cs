@@ -98,7 +98,7 @@ internal class ExtendedAppearanceEditor
 
         using(ImRaii.Disabled(!canTint))
         {
-            didChange |= DrawTint(ref appearance.ExtendedAppearance.CharacterTint, "character", "Character");
+            didChange |= DrawTint(ref appearance.ExtendedAppearance.CharacterTint, "ICharacter", "ICharacter");
             ImGui.SameLine();
             didChange |= DrawTint(ref appearance.ExtendedAppearance.MainHandTint, "mainhand", "Main Hand");
             ImGui.SameLine();

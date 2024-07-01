@@ -1,9 +1,10 @@
 ﻿using Brio.Core;
 using Brio.Game.Actor.Interop;
 using FFXIVClientStructs.Havok;
+using FFXIVClientStructs.Havok.Animation.Rig;
 using System;
 using System.Collections.Generic;
-using static FFXIVClientStructs.Havok.hkaPose;
+using static FFXIVClientStructs.Havok.Animation.Rig.hkaPose;
 using GameSkeleton = FFXIVClientStructs.FFXIV.Client.Graphics.Render.Skeleton;
 
 namespace Brio.Game.Posing.Skeletons;

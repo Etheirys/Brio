@@ -6,6 +6,7 @@ using Brio.Resources;
 using Brio.UI;
 using Brio.UI.Controls.Stateless;
 using Dalamud.Interface.Internal;
+using Dalamud.Interface.Textures.TextureWraps;
 using System;
 
 namespace Brio.Library.Sources;

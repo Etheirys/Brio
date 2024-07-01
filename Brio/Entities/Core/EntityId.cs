@@ -1,7 +1,7 @@
 ﻿using Dalamud.Game.ClientState.Objects.Types;
 
 using NativeCharacter = FFXIVClientStructs.FFXIV.Client.Game.Character.Character;
-using NativeGameObject = FFXIVClientStructs.FFXIV.Client.Game.Object.GameObject;
+using NativeIGameObject = FFXIVClientStructs.FFXIV.Client.Game.Object.GameObject;
 
 namespace Brio.Entities.Core;
 
@@ -17,9 +17,9 @@ internal record struct EntityId(string Unique)
         return new EntityId(id);
     }
 
-    public static implicit operator EntityId(GameObject go)
+    public static implicit operator EntityId(IGameObjectHolder go)
     {
-        return new EntityId($"actor_{go.Address}");
+        return new EntityId($"actor_{go.IGameObject.Address}");
     }
 
     public unsafe static implicit operator EntityId(NativeCharacter* chara)
@@ -27,8 +27,10 @@ internal record struct EntityId(string Unique)
         return new EntityId($"actor_{(nint)chara}");
     }
 
-    public unsafe static implicit operator EntityId(NativeGameObject* go)
+    public unsafe static implicit operator EntityId(NativeIGameObject* go)
     {
         return new EntityId($"actor_{(nint)go}");
     }
 }
+
+internal record IGameObjectHolder(IGameObject IGameObject);
