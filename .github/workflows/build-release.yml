@@ -2,10 +2,13 @@ name: Build Brio - Dalamud Release
 
 on:
   push:
-    branches: '*'
+    branches: 
+    - main
     tags-ignore: '*'
   pull_request:
-
+    branches:
+    - main
+    
 jobs:
   build:
     runs-on: windows-latest
