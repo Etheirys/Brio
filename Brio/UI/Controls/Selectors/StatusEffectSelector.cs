@@ -1,5 +1,5 @@
 ﻿using Brio.Resources;
-using Dalamud.Interface.Internal;
+using Dalamud.Interface.Textures.TextureWraps;
 using ImGuiNET;
 using Lumina.Excel.GeneratedSheets;
 using System;
@@ -24,7 +24,7 @@ internal class StatusEffectSelector(string id) : Selector<Status>(id)
     {
         IDalamudTextureWrap? tex = null;
         if(item.Icon != 0)
-            tex = UIManager.Instance.TextureProvider.GetIcon(item.Icon);
+            tex = UIManager.Instance.TextureProvider.GetFromGameIcon(item.Icon).GetWrapOrEmpty();
         if(tex == null)
             tex = ResourceProvider.Instance.GetResourceImage("Images.StatusEffect.png");
 

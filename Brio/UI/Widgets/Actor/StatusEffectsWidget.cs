@@ -4,7 +4,7 @@ using Brio.UI.Controls.Selectors;
 using Brio.UI.Controls.Stateless;
 using Brio.UI.Widgets.Core;
 using Dalamud.Interface;
-using Dalamud.Interface.Internal;
+using Dalamud.Interface.Textures.TextureWraps;
 using Dalamud.Interface.Utility.Raii;
 using ImGuiNET;
 using System.Linq;
@@ -37,7 +37,7 @@ internal class StatusEffectsWidget(StatusEffectCapability capability) : Widget<S
 
                     IDalamudTextureWrap? tex = null;
                     if(status.Icon != 0)
-                        tex = UIManager.Instance.TextureProvider.GetIcon(status.Icon);
+                        tex = UIManager.Instance.TextureProvider.GetFromGameIcon(status.Icon).GetWrapOrEmpty();
                     if(tex == null)
                         tex = ResourceProvider.Instance.GetResourceImage("Images.StatusEffect.png");
 

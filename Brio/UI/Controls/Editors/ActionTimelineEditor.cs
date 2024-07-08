@@ -5,10 +5,10 @@ using Brio.UI.Controls.Selectors;
 using Brio.UI.Controls.Stateless;
 using Dalamud.Interface;
 using Dalamud.Interface.Utility.Raii;
-using FFXIVClientStructs.FFXIV.Client.Game;
 using FFXIVClientStructs.FFXIV.Client.Graphics.Scene;
 using ImGuiNET;
 using System;
+using static Brio.Game.Actor.ActionTimelineService;
 
 namespace Brio.UI.Controls.Editors;
 

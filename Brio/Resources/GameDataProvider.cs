@@ -5,6 +5,7 @@ using Dalamud.Plugin.Services;
 using Lumina.Excel.GeneratedSheets;
 using System.Collections.Generic;
 using System.Linq;
+using Glasses = Lumina.Excel.GeneratedSheets2.Glasses;
 
 namespace Brio.Resources;
 
@@ -34,6 +35,8 @@ internal class GameDataProvider
     public readonly IReadOnlyDictionary<uint, BrioCharaMakeType> CharaMakeTypes;
     public readonly IReadOnlyDictionary<uint, BrioHairMakeType> HairMakeTypes;
     public readonly IReadOnlyDictionary<uint, Item> Items;
+    public readonly IReadOnlyDictionary<uint, Glasses> Glasses;
+
     public readonly ModelDatabase ModelDatabase;
 
     public readonly HumanData HumanData;
@@ -85,6 +88,8 @@ internal class GameDataProvider
         HairMakeTypes = dataManager.GetExcelSheet<BrioHairMakeType>()!.ToDictionary(x => x.RowId, x => x).AsReadOnly();
 
         Items = dataManager.GetExcelSheet<Item>()!.ToDictionary(x => x.RowId, x => x).AsReadOnly();
+
+        Glasses = dataManager.GetExcelSheet<Glasses>()!.ToDictionary(x => x.RowId, x => x).AsReadOnly();
 
         HumanData = new HumanData(dataManager.GetFile("chara/xls/charamake/human.cmp")!.Data);
 

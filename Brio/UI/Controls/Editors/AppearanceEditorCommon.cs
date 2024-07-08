@@ -5,9 +5,8 @@ using Brio.UI.Controls.Stateless;
 using Dalamud.Interface;
 using Dalamud.Interface.Utility.Raii;
 using ImGuiNET;
-using System;
-using System.Numerics;
 using System.Linq;
+using System.Numerics;
 
 namespace Brio.UI.Controls.Editors;
 

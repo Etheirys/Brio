@@ -4,7 +4,6 @@ using Brio.UI.Widgets.Core;
 using Dalamud.Interface;
 using Dalamud.Interface.Utility.Raii;
 using ImGuiNET;
-using System.Linq;
 
 namespace Brio.UI.Entitites;
 

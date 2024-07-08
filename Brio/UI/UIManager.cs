@@ -5,18 +5,20 @@ using Brio.UI.Controls;
 using Brio.UI.Windows;
 using Brio.UI.Windows.Specialized;
 using Dalamud.Interface.ImGuiFileDialog;
-using Dalamud.Interface.Internal;
+using Dalamud.Interface.Textures.TextureWraps;
 using Dalamud.Interface.Windowing;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
 using ImGuiNET;
 using System;
+using System.IO;
+using System.Xml.Linq;
 
 namespace Brio.UI;
 
 internal class UIManager : IDisposable
 {
-    private readonly DalamudPluginInterface _pluginInterface;
+    private readonly IDalamudPluginInterface _pluginInterface;
     private readonly GPoseService _gPoseService;
     private readonly ConfigurationService _configurationService;
 
@@ -59,7 +61,7 @@ internal class UIManager : IDisposable
 
     public UIManager
         (
-            DalamudPluginInterface pluginInterface,
+            IDalamudPluginInterface pluginInterface,
             GPoseService gPoseService,
             ConfigurationService configurationService,
             ITextureProvider textureProvider,
@@ -224,5 +226,11 @@ internal class UIManager : IDisposable
         Instance = null!;
     }
 
-    public IDalamudTextureWrap LoadImage(byte[] data) => _pluginInterface.UiBuilder.LoadImage(data);
+    public IDalamudTextureWrap LoadImage(byte[] data)
+    {
+        var imgTask = _textureProvider.CreateFromImageAsync(data);
+        imgTask.Wait(); // TODO: Don't block
+        var img = imgTask.Result;
+        return img;
+    }
 }

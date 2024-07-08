@@ -55,9 +55,9 @@ internal unsafe class GPoseService : IDisposable
 
         _isInGPose = _clientState.IsGPosing;
 
-        UIModule* uiModule = Framework.Instance()->GetUiModule();
-        var enterGPoseAddress = (nint)uiModule->VTable->EnterGPose;
-        var exitGPoseAddress = (nint)uiModule->VTable->ExitGPose;
+        UIModule* uiModule = Framework.Instance()->UIModule;
+        var enterGPoseAddress = (nint)uiModule->VirtualTable->EnterGPose;
+        var exitGPoseAddress = (nint)uiModule->VirtualTable->ExitGPose;
 
         _enterGPoseHook = interopProvider.HookFromAddress<GPoseEnterExitDelegate>(enterGPoseAddress, EnteringGPoseDetour);
         _enterGPoseHook.Enable();
@@ -65,7 +65,7 @@ internal unsafe class GPoseService : IDisposable
         _exitGPoseHook = interopProvider.HookFromAddress<ExitGPoseDelegate>(exitGPoseAddress, ExitingGPoseDetour);
         _exitGPoseHook.Enable();
 
-        var mouseHoverAddr = "40 57 48 83 EC ?? 48 89 6C 24 ?? 48 8B F9 48 89 74 24 ?? 49 8B E8 4C 89 74 24";
+        var mouseHoverAddr = "40 57 48 83 EC ?? 48 89 5C 24 ?? 48 8B F9 48 89 6C 24 ?? 48 89 74 24 ?? 49 8B F0";
         _mouseHoverHook = interopProvider.HookFromAddress<MouseHoverDelegate>(scanner.ScanText(mouseHoverAddr), GPoseMouseEventDetour);
 
         _framework.Update += OnFrameworkUpdate;
@@ -80,7 +80,7 @@ internal unsafe class GPoseService : IDisposable
         OnGPoseStateChange?.Invoke(gposing);
     }
 
-    public void AddCharacterToGPose(Character chara) => AddCharacterToGPose((NativeCharacter*)chara.Address);
+    public void AddCharacterToGPose(ICharacter chara) => AddCharacterToGPose((NativeCharacter*)chara.Address);
 
     public void AddCharacterToGPose(NativeCharacter* chara)
     {

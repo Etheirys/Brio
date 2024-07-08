@@ -1,10 +1,9 @@
-﻿
-using Brio.Resources;
+﻿using Brio.Resources;
 using Brio.UI.Controls.Stateless;
-using FFXIVClientStructs.FFXIV.Client.Game;
 using ImGuiNET;
 using System;
 using System.Numerics;
+using static Brio.Game.Actor.ActionTimelineService;
 
 namespace Brio.UI.Controls.Selectors;
 
@@ -175,7 +174,7 @@ internal class ActionTimelineSelector(string id) : Selector<ActionTimelineSelect
     }
 }
 
-public record class ActionTimelineSelectorEntry(string Name, ushort TimelineId, uint SecondaryId, string Key, ActionTimelineSelectorEntry.OriginalType TimelineType, ActionTimelineSelectorEntry.AnimationPurpose Purpose, ActionTimelineSlots Slot, uint Icon)
+internal record class ActionTimelineSelectorEntry(string Name, ushort TimelineId, uint SecondaryId, string Key, ActionTimelineSelectorEntry.OriginalType TimelineType, ActionTimelineSelectorEntry.AnimationPurpose Purpose, ActionTimelineSlots Slot, uint Icon)
 {
     public enum AnimationPurpose
     {

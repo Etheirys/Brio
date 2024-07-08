@@ -12,7 +12,7 @@ internal static class StatusManagerExtensions
     {
         List<Status> list = [];
 
-        for(var i = 0; i < sm.StatusSpan.Length; i++)
+        for(var i = 0; i < sm.Status.Length; i++)
         {
             var effect = (ushort)sm.GetStatusId(i);
             if(effect != 0)
@@ -24,5 +24,5 @@ internal static class StatusManagerExtensions
         return list;
     }
 
-    public unsafe static StatusManager* GetStatusManager(this BattleChara battleChara) => battleChara.Native()->Character.GetStatusManager();
+    public unsafe static StatusManager* GetStatusManager(this IBattleChara battleChara) => battleChara.Native()->Character.GetStatusManager();
 }

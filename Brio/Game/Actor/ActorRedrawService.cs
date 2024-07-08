@@ -9,7 +9,7 @@ namespace Brio.Game.Actor;
 
 internal class ActorRedrawService(IFramework framework, IObjectTable objectTable)
 {
-    public delegate void ActorRedrawEventDelegate(GameObject go, RedrawStage stage);
+    public delegate void ActorRedrawEventDelegate(IGameObject go, RedrawStage stage);
 
     public event ActorRedrawEventDelegate? ActorRedrawEvent;
 
@@ -26,7 +26,7 @@ internal class ActorRedrawService(IFramework framework, IObjectTable objectTable
         return RedrawActor(actor);
     }
 
-    public async Task<RedrawResult> RedrawActor(GameObject go)
+    public async Task<RedrawResult> RedrawActor(IGameObject go)
     {
         Brio.Log.Debug($"Beginning Brio redraw on gameobject {go.ObjectIndex}...");
         DisableDraw(go);
@@ -46,19 +46,19 @@ internal class ActorRedrawService(IFramework framework, IObjectTable objectTable
         }
     }
 
-    public unsafe void DisableDraw(GameObject go)
+    public unsafe void DisableDraw(IGameObject go)
     {
         var native = go.Native();
         native->DisableDraw();
     }
 
-    public unsafe void EnableDraw(GameObject go)
+    public unsafe void EnableDraw(IGameObject go)
     {
         var native = go.Native();
         native->EnableDraw();
     }
 
-    public unsafe Task DrawWhenReady(GameObject go)
+    public unsafe Task DrawWhenReady(IGameObject go)
     {
         return _framework.RunUntilSatisfied(
            () => go.Native()->IsReadyToDraw(),
@@ -68,7 +68,7 @@ internal class ActorRedrawService(IFramework framework, IObjectTable objectTable
        );
     }
 
-    public unsafe Task WaitForDrawing(GameObject go)
+    public unsafe Task WaitForDrawing(IGameObject go)
     {
         return _framework.RunUntilSatisfied(
            () =>

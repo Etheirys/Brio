@@ -9,9 +9,7 @@ using Brio.Game.Types;
 using Brio.IPC;
 using Brio.Resources;
 using Brio.UI.Widgets.Actor;
-using Dalamud.Game.ClientState.Objects.Types;
 using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Brio.Capabilities.Actor;
@@ -199,7 +197,7 @@ internal class ActorAppearanceCapability : ActorCharacterCapability
 
     public unsafe void AttachWeapon()
     {
-        Character.Native()->ActionTimelineManager.Driver.PlayTimeline(5616);
+        Character.Native()->Timeline.TimelineSequencer.PlayTimeline(5616);
     }
 
     private unsafe void ApplyShaderOverride()

@@ -109,7 +109,7 @@ internal class BonePoseInfo(BonePoseInfoId id, PoseInfo parent)
         }
 
         var finaleTransform = _stacks[transformIndex].Transform + calc;
-       
+
         if(finaleTransform.IsRotationNaN())
         {
             finaleTransform.Rotation = Quaternion.Identity;

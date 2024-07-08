@@ -31,6 +31,8 @@ internal unsafe class FestivalService : IDisposable
     private readonly Queue<uint[]> _pendingChanges = new();
     private uint[]? _originalState;
 
+    // TODO: Handle festival subid properly
+
     public uint[] EngineActiveFestivals
     {
         get
@@ -39,7 +41,8 @@ internal unsafe class FestivalService : IDisposable
             var engineFestivals = GameMain.Instance()->ActiveFestivals;
             for(int i = 0; i < MaxFestivals; i++)
             {
-                activeFestivals[i] = engineFestivals[i];
+                fixed(GameMain.Festival* festival = &engineFestivals[i])
+                    activeFestivals[i] = *((uint*)festival);
 
             }
 

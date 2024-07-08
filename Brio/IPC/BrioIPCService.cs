@@ -18,26 +18,26 @@ internal class BrioIPCService : IDisposable
     private ICallGateProvider<(int, int)>? ApiVersionIpc;
 
     public const string SpawnActorIpcName = "Brio.SpawnActor";
-    private ICallGateProvider<GameObject?>? SpawnActorIpc;
+    private ICallGateProvider<IGameObject?>? SpawnActorIpc;
 
     public const string SpawnActorWithoutCompanionIpcName = "Brio.SpawnActorWithoutCompanion";
-    private ICallGateProvider<GameObject?>? SpawnActorWithoutCompanionIpc;
+    private ICallGateProvider<IGameObject?>? SpawnActorWithoutCompanionIpc;
 
     public const string DespawnActorIpcName = "Brio.DespawnActor";
-    private ICallGateProvider<GameObject, bool>? DespawnActorIpc;
+    private ICallGateProvider<IGameObject, bool>? DespawnActorIpc;
 
     public const string SpawnActorAsyncIpcName = "Brio.SpawnActorAsync";
-    private ICallGateProvider<Task<GameObject?>>? SpawnActorAsyncIpc;
+    private ICallGateProvider<Task<IGameObject?>>? SpawnActorAsyncIpc;
 
     public const string DespawnActorAsyncIpcName = "Brio.DespawnActorAsync";
-    private ICallGateProvider<GameObject, Task<bool>>? DespawnActorAsyncIpc;
+    private ICallGateProvider<IGameObject, Task<bool>>? DespawnActorAsyncIpc;
 
     private readonly ActorSpawnService _actorSpawnService;
     private readonly ConfigurationService _configurationService;
-    private readonly DalamudPluginInterface _pluginInterface;
+    private readonly IDalamudPluginInterface _pluginInterface;
     private readonly IFramework _framework;
 
-    public BrioIPCService(ActorSpawnService actorSpawnService, ConfigurationService configurationService, DalamudPluginInterface pluginInterface, IFramework framework)
+    public BrioIPCService(ActorSpawnService actorSpawnService, ConfigurationService configurationService, IDalamudPluginInterface pluginInterface, IFramework framework)
     {
         _actorSpawnService = actorSpawnService;
         _configurationService = configurationService;
@@ -52,9 +52,9 @@ internal class BrioIPCService : IDisposable
 
     private (int, int) ApiVersionImpl() => CurrentApiVersion;
 
-    private Task<GameObject?> SpawnActorAsyncImpl() => _framework.RunOnTick(SpawnActorImpl);
+    private Task<IGameObject?> SpawnActorAsyncImpl() => _framework.RunOnTick(SpawnActorImpl);
 
-    private GameObject? SpawnActorImpl()
+    private IGameObject? SpawnActorImpl()
     {
         if(_actorSpawnService.CreateCharacter(out var character))
             return character;
@@ -62,7 +62,7 @@ internal class BrioIPCService : IDisposable
         return null;
     }
 
-    private GameObject? SpawnActorWithoutCompanionImpl()
+    private IGameObject? SpawnActorWithoutCompanionImpl()
     {
         if(_actorSpawnService.CreateCharacter(out var character, disableSpawnCompanion: true))
             return character;
@@ -70,27 +70,27 @@ internal class BrioIPCService : IDisposable
         return null;
     }
 
-    private Task<bool> DespawnActorAsyncImpl(GameObject gameObject) => _framework.RunOnTick(() => DespawnActorImpl(gameObject));
-    private bool DespawnActorImpl(GameObject gameObject) => _actorSpawnService.DestroyObject(gameObject);
+    private Task<bool> DespawnActorAsyncImpl(IGameObject gameObject) => _framework.RunOnTick(() => DespawnActorImpl(gameObject));
+    private bool DespawnActorImpl(IGameObject gameObject) => _actorSpawnService.DestroyObject(gameObject);
 
     private void CreateIPC()
     {
         ApiVersionIpc = _pluginInterface.GetIpcProvider<(int, int)>(ApiVersionIpcName);
         ApiVersionIpc.RegisterFunc(ApiVersionImpl);
 
-        SpawnActorAsyncIpc = _pluginInterface.GetIpcProvider<Task<GameObject?>>(SpawnActorAsyncIpcName);
+        SpawnActorAsyncIpc = _pluginInterface.GetIpcProvider<Task<IGameObject?>>(SpawnActorAsyncIpcName);
         SpawnActorAsyncIpc.RegisterFunc(SpawnActorAsyncImpl);
 
-        SpawnActorIpc = _pluginInterface.GetIpcProvider<GameObject?>(SpawnActorIpcName);
+        SpawnActorIpc = _pluginInterface.GetIpcProvider<IGameObject?>(SpawnActorIpcName);
         SpawnActorIpc.RegisterFunc(SpawnActorImpl);
 
-        SpawnActorWithoutCompanionIpc = _pluginInterface.GetIpcProvider<GameObject?>(SpawnActorWithoutCompanionIpcName);
+        SpawnActorWithoutCompanionIpc = _pluginInterface.GetIpcProvider<IGameObject?>(SpawnActorWithoutCompanionIpcName);
         SpawnActorWithoutCompanionIpc.RegisterFunc(SpawnActorWithoutCompanionImpl);
 
-        DespawnActorIpc = _pluginInterface.GetIpcProvider<GameObject, bool>(DespawnActorIpcName);
+        DespawnActorIpc = _pluginInterface.GetIpcProvider<IGameObject, bool>(DespawnActorIpcName);
         DespawnActorIpc.RegisterFunc(DespawnActorImpl);
 
-        DespawnActorAsyncIpc = _pluginInterface.GetIpcProvider<GameObject, Task<bool>>(DespawnActorAsyncIpcName);
+        DespawnActorAsyncIpc = _pluginInterface.GetIpcProvider<IGameObject, Task<bool>>(DespawnActorAsyncIpcName);
         DespawnActorAsyncIpc.RegisterFunc(DespawnActorAsyncImpl);
 
         IsIPCEnabled = true;

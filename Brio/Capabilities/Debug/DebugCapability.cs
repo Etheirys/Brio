@@ -24,12 +24,12 @@ internal unsafe class DebugCapability : Capability
 
     public void EnterGPose()
     {
-        Framework.Instance()->GetUiModule()->EnterGPose();
+        Framework.Instance()->UIModule->EnterGPose();
     }
 
     public void ExitGPose()
     {
-        Framework.Instance()->GetUiModule()->ExitGPose();
+        Framework.Instance()->UIModule->ExitGPose();
     }
 
     public bool FakeGPose

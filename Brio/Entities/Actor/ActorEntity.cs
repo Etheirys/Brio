@@ -10,9 +10,9 @@ using System;
 
 namespace Brio.Entities.Actor
 {
-    internal class ActorEntity(GameObject gameObject, IServiceProvider provider) : Entity(gameObject, provider)
+    internal class ActorEntity(IGameObject gameObject, IServiceProvider provider) : Entity(new EntityId(gameObject), provider)
     {
-        public readonly GameObject GameObject = gameObject;
+        public readonly IGameObject GameObject = gameObject;
 
         private readonly ConfigurationService _configService = provider.GetRequiredService<ConfigurationService>();
 

@@ -3,17 +3,33 @@ using Brio.Entities;
 using Dalamud.Game;
 using Dalamud.Hooking;
 using Dalamud.Plugin.Services;
-using FFXIVClientStructs.FFXIV.Client.Game;
+using FFXIVClientStructs.FFXIV.Client.Game.Character;
+using FFXIVClientStructs.FFXIV.Client.Game.Control;
 using System;
 
 namespace Brio.Game.Actor;
 
 internal unsafe class ActionTimelineService : IDisposable
 {
-    private delegate bool CalculateAndApplyOverallSpeedDelegate(ActionTimelineManager* a1);
+    public enum ActionTimelineSlots : int
+    {
+        Base = 0,
+        UpperBody = 1,
+        Facial = 2,
+        Add = 3,
+        // 4-6 unknown purpose
+        Lips = 7,
+        Parts1 = 8,
+        Parts2 = 9,
+        Parts3 = 10,
+        Parts4 = 11,
+        Overlay = 12
+    }
+
+    private delegate bool CalculateAndApplyOverallSpeedDelegate(TimelineContainer* a1);
     private readonly Hook<CalculateAndApplyOverallSpeedDelegate> _calculateAndApplyOverallSpeedHook = null!;
 
-    private delegate void SetSlotSpeedDelegate(ActionTimelineDriver* a1, ActionTimelineSlots slot, float speed);
+    private delegate void SetSlotSpeedDelegate(ActionTimelineSequencer* a1, ActionTimelineSlots slot, float speed);
     private readonly Hook<SetSlotSpeedDelegate> _setSpeedSlotHook = null!;
 
     private readonly EntityManager _entityManager;
@@ -22,17 +38,18 @@ internal unsafe class ActionTimelineService : IDisposable
     {
         _entityManager = entityManager;
 
-        _calculateAndApplyOverallSpeedHook = hooking.HookFromAddress<CalculateAndApplyOverallSpeedDelegate>((nint)ActionTimelineManager.Addresses.CalculateAndApplyOverallSpeed.Value, CalculateAndApplyOverallSpeedDetour);
+        var calculateAndApplyAddress = scanner.ScanText("E8 ?? ?? ?? ?? 48 8D 8B ?? ?? ?? ?? 48 8B 01 FF 50 ?? 48 8D 8B ?? ?? ?? ?? 48 8B 01 FF 50 ?? F6 83");
+        _calculateAndApplyOverallSpeedHook = hooking.HookFromAddress<CalculateAndApplyOverallSpeedDelegate>(calculateAndApplyAddress, CalculateAndApplyOverallSpeedDetour);
         _calculateAndApplyOverallSpeedHook.Enable();
 
-        _setSpeedSlotHook = hooking.HookFromAddress<SetSlotSpeedDelegate>((nint)ActionTimelineDriver.Addresses.SetSlotSpeed.Value, SetSlotSpeedDetour);
+        _setSpeedSlotHook = hooking.HookFromAddress<SetSlotSpeedDelegate>(ActionTimelineSequencer.Addresses.SetSlotSpeed.Value, SetSlotSpeedDetour);
         _setSpeedSlotHook.Enable();
     }
 
-    private bool CalculateAndApplyOverallSpeedDetour(ActionTimelineManager* a1)
+    private bool CalculateAndApplyOverallSpeedDetour(TimelineContainer* a1)
     {
         bool result = _calculateAndApplyOverallSpeedHook.Original(a1);
-        if(_entityManager.TryGetEntity(a1->Parent, out var entity))
+        if(_entityManager.TryGetEntity(a1->OwnerObject, out var entity))
         {
             if(entity.TryGetCapability<ActionTimelineCapability>(out var atc))
             {
@@ -51,7 +68,7 @@ internal unsafe class ActionTimelineService : IDisposable
         return result;
     }
 
-    private unsafe void SetSlotSpeedDetour(ActionTimelineDriver* a1, ActionTimelineSlots slot, float speed)
+    private unsafe void SetSlotSpeedDetour(ActionTimelineSequencer* a1, ActionTimelineSlots slot, float speed)
     {
         float finalSpeed = speed;
 

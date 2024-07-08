@@ -12,9 +12,9 @@ namespace Brio.Capabilities.Actor;
 
 internal class StatusEffectCapability : ActorCapability
 {
-    public BattleChara Character { get; }
+    public IBattleChara Character { get; }
 
-    public StatusEffectCapability(ActorEntity parent, BattleChara chara) : base(parent)
+    public StatusEffectCapability(ActorEntity parent, IBattleChara chara) : base(parent)
     {
         Character = chara;
 
@@ -23,7 +23,7 @@ internal class StatusEffectCapability : ActorCapability
 
     public static StatusEffectCapability? CreateIfEligible(IServiceProvider provider, ActorEntity entity)
     {
-        if(entity.GameObject is BattleChara character)
+        if(entity.GameObject is IBattleChara character)
             return ActivatorUtilities.CreateInstance<StatusEffectCapability>(provider, entity, character);
 
         return null;

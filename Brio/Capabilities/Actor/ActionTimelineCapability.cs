@@ -3,17 +3,17 @@ using Brio.Game.Actor.Extensions;
 using Brio.Game.Types;
 using Brio.UI.Widgets.Actor;
 using Dalamud.Game.ClientState.Objects.Types;
-using FFXIVClientStructs.FFXIV.Client.Game;
+using FFXIVClientStructs.FFXIV.Client.Game.Character;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
-using static FFXIVClientStructs.FFXIV.Client.Game.Character.Character;
+using static Brio.Game.Actor.ActionTimelineService;
 
 namespace Brio.Capabilities.Actor;
 
 internal class ActionTimelineCapability : ActorCharacterCapability
 {
-    public unsafe float SpeedMultiplier => SpeedMultiplierOverride ?? Character.Native()->ActionTimelineManager.OverallSpeed;
+    public unsafe float SpeedMultiplier => SpeedMultiplierOverride ?? Character.Native()->Timeline.OverallSpeed;
     public bool HasSpeedMultiplierOverride => SpeedMultiplierOverride.HasValue;
     public float? SpeedMultiplierOverride { get; private set; }
 
@@ -21,8 +21,8 @@ internal class ActionTimelineCapability : ActorCharacterCapability
 
     public unsafe ushort LipsOverride
     {
-        get => Character.Native()->ActionTimelineManager.LipsOverride;
-        set => Character.Native()->ActionTimelineManager.SetLipsOverrideTimeline(value);
+        get => Character.Native()->Timeline.LipsOverride;
+        set => Character.Native()->Timeline.SetLipsOverrideTimeline(value);
     }
 
     private bool _slotsDirty = false;
@@ -34,9 +34,11 @@ internal class ActionTimelineCapability : ActorCharacterCapability
         Widget = new ActionTimelineWidget(this);
     }
 
-    public void SetOverallSpeedOverride(float speed)
+    public unsafe void SetOverallSpeedOverride(float speed)
     {
         SpeedMultiplierOverride = speed;
+        Character.Native()->Timeline.OverallSpeed = speed;
+
     }
 
     public void ResetOverallSpeedOverride()
@@ -46,7 +48,7 @@ internal class ActionTimelineCapability : ActorCharacterCapability
 
     public unsafe ActionTimelineUnion GetSlotAction(ActionTimelineSlots slot)
     {
-        var timeline = Character.Native()->ActionTimelineManager.Driver.TimelineIds[(int)slot];
+        var timeline = Character.Native()->Timeline.TimelineSequencer.TimelineIds[(int)slot];
         return new ActionTimelineId(timeline);
     }
 
@@ -55,12 +57,13 @@ internal class ActionTimelineCapability : ActorCharacterCapability
         if(_actionTimelineSlotSpeedOverrides.TryGetValue(slot, out float speed))
             return speed;
 
-        return Character.Native()->ActionTimelineManager.Driver.TimelineSpeeds[(int)slot];
+        return Character.Native()->Timeline.TimelineSequencer.TimelineSpeeds[(int)slot];
     }
 
-    public void SetSlotSpeedOverride(ActionTimelineSlots slot, float speed)
+    public unsafe void SetSlotSpeedOverride(ActionTimelineSlots slot, float speed)
     {
         _actionTimelineSlotSpeedOverrides[slot] = speed;
+        Character.Native()->Timeline.TimelineSequencer.SetSlotSpeed((uint)slot, speed);
         _slotsDirty = true;
     }
 
@@ -80,12 +83,12 @@ internal class ActionTimelineCapability : ActorCharacterCapability
     public unsafe void ApplyBaseOverride(ushort actionTimeline, bool interrupt)
     {
         if(_originalBaseAnimation == null)
-            _originalBaseAnimation = new(Character.Native()->Mode, Character.Native()->ModeParam, Character.Native()->ActionTimelineManager.BaseOverride);
+            _originalBaseAnimation = new(Character.Native()->Mode, Character.Native()->ModeParam, Character.Native()->Timeline.BaseOverride);
 
         var chara = Character.Native();
 
         chara->SetMode(CharacterModes.AnimLock, 0);
-        chara->ActionTimelineManager.BaseOverride = actionTimeline;
+        chara->Timeline.BaseOverride = actionTimeline;
 
         if(interrupt)
             BlendTimeline(actionTimeline);
@@ -98,7 +101,7 @@ internal class ActionTimelineCapability : ActorCharacterCapability
 
         var chara = Character.Native();
 
-        chara->ActionTimelineManager.BaseOverride = _originalBaseAnimation.Value.OriginalTimeline;
+        chara->Timeline.BaseOverride = _originalBaseAnimation.Value.OriginalTimeline;
         chara->Mode = _originalBaseAnimation.Value.OriginalMode;
         chara->ModeParam = _originalBaseAnimation.Value.OriginalInput;
 
@@ -111,7 +114,7 @@ internal class ActionTimelineCapability : ActorCharacterCapability
 
     public unsafe void BlendTimeline(ushort actionTimeline)
     {
-        Character.Native()->ActionTimelineManager.Driver.PlayTimeline(actionTimeline);
+        Character.Native()->Timeline.TimelineSequencer.PlayTimeline(actionTimeline);
     }
 
     public override void Dispose()
@@ -125,7 +128,7 @@ internal class ActionTimelineCapability : ActorCharacterCapability
 
     public static ActionTimelineCapability? CreateIfEligible(IServiceProvider provider, ActorEntity entity)
     {
-        if(entity.GameObject is Character)
+        if(entity.GameObject is ICharacter)
             return ActivatorUtilities.CreateInstance<ActionTimelineCapability>(provider, entity);
 
         return null;

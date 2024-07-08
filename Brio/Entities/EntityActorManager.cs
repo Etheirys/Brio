@@ -49,9 +49,9 @@ internal unsafe class EntityActorManager : IDisposable
         }
     }
 
-    private void AttachActor(GameObject go, Entity parent)
+    private void AttachActor(IGameObject go, Entity parent)
     {
-        if(_entityManager.TryGetEntity(go, out var entity))
+        if(_entityManager.TryGetEntity(new EntityId(go), out var entity))
         {
             // Already attached to the correct parent
             if(parent.Equals(entity.Parent))
@@ -78,9 +78,9 @@ internal unsafe class EntityActorManager : IDisposable
         HandleCompanions(entity, true);
     }
 
-    private void DetachActor(GameObject actor)
+    private void DetachActor(IGameObject actor)
     {
-        if(_entityManager.TryGetEntity(actor, out var entity))
+        if(_entityManager.TryGetEntity(new EntityId(actor), out var entity))
         {
             _entityManager.DetachEntity(entity, true);
         }
@@ -92,7 +92,7 @@ internal unsafe class EntityActorManager : IDisposable
         {
             var currentActor = actorEntity.GameObject;
 
-            if(currentActor is Character character)
+            if(currentActor is ICharacter character)
             {
                 if(character.HasSpawnedCompanion())
                 {
@@ -118,7 +118,7 @@ internal unsafe class EntityActorManager : IDisposable
                     if(maybeParent == null)
                         return;
 
-                    _entityManager.TryGetEntity(maybeParent, out var maybeParentEntity);
+                    _entityManager.TryGetEntity(new EntityId(maybeParent), out var maybeParentEntity);
 
                     if(maybeParentEntity == null)
                         return;

@@ -27,11 +27,12 @@ internal unsafe class CameraService : IDisposable
         _entityManager = entityManager;
         _gPoseService = gPoseService;
 
-        var cameraCollisionAddr = "E8 ?? ?? ?? ?? 4C 8D 45 C7 89 83";
+        var cameraCollisionAddr = "E8 ?? ?? ?? ?? 4C 8D 45 ?? 89 83";
         _cameraCollisionHook = hooking.HookFromAddress<CameraCollisionDelegate>(scanner.ScanText(cameraCollisionAddr), CameraCollisionDetour);
         _cameraCollisionHook.Enable();
 
-        var cameraUpdateAddr = "40 55 53 48 8D 6C 24 B1 48 81 EC ?? ?? ?? ?? 48 8B D9"; // Camera.vf3
+        // TODO: Real sig?
+        var cameraUpdateAddr = "40 55 53 57 48 8d 6c 24 a0 48 81 ec 60 01 00 00 48 8b 1d 09 3a 0a 01 48 8b f9 48 85 db 0f 84 e6 09 00 00 48 8b cb e8 d5 5f 20 ff 84 c0 0f 84 d6 09 00 00"; // Camera.vf3
         _cameraUpdateHook = hooking.HookFromAddress<CameraUpdateDelegate>(scanner.ScanText(cameraUpdateAddr), CameraUpdateDetour);
         _cameraUpdateHook.Enable();
     }
@@ -53,6 +54,8 @@ internal unsafe class CameraService : IDisposable
                 {
                     if(camera == cameraCapability.Camera)
                     {
+                        var ptr = &camera->Camera.CameraBase.SceneCamera;
+                        //Brio.Log.Fatal(((nint)ptr).ToString("X"));
                         Vector3 currentPos = camera->Camera.CameraBase.SceneCamera.Object.Position;
                         var newPos = cameraCapability.PositionOffset + currentPos;
                         camera->Camera.CameraBase.SceneCamera.Object.Position = newPos;

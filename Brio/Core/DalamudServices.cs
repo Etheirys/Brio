@@ -8,7 +8,7 @@ namespace Brio.Core;
 
 internal class DalamudServices
 {
-    [PluginService] public DalamudPluginInterface PluginInterface { get; private set; } = null!;
+    [PluginService] public IDalamudPluginInterface PluginInterface { get; private set; } = null!;
     [PluginService] public IFramework Framework { get; private set; } = null!;
     [PluginService] public IGameInteropProvider GameInteropProvider { get; private set; } = null!;
     [PluginService] public IClientState ClientState { get; private set; } = null!;
@@ -24,7 +24,7 @@ internal class DalamudServices
     [PluginService] public IKeyState KeyState { get; private set; } = null!;
 
 
-    public DalamudServices(DalamudPluginInterface pluginInterface)
+    public DalamudServices(IDalamudPluginInterface pluginInterface)
     {
         pluginInterface.Inject(this);
     }

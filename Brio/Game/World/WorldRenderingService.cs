@@ -40,7 +40,7 @@ internal class WorldRenderingService : IDisposable
         _gPoseService = gPoseService;
         _configurationService = configurationService;
 
-        var uwrAddress = scanner.ScanText("48 8B C4 48 89 58 18 57 48 81 EC ?? ?? ?? ?? 0F 29 70 E8 48 8B D9");
+        var uwrAddress = scanner.ScanText("48 8B C4 48 89 58 ?? 57 48 81 EC ?? ?? ?? ?? 0F B6 B9");
         _updateWaterRendererHook = hooking.HookFromAddress<UpdateWaterRendererDelegate>(uwrAddress, UpdateWaterRenderer);
 
 

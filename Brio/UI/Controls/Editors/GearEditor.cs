@@ -18,7 +18,8 @@ internal class GearEditor()
 
     private ActorAppearanceCapability _capability = null!;
 
-    private static readonly DyeSelector _dyeSelector = new("dye_selector");
+    private static readonly DyeSelector _dye0Selector = new("dye_0_selector");
+    private static readonly DyeSelector _dye1Selector = new("dye_1_selector");
     private static readonly GearSelector _gearSelector = new("gear_selector");
 
     private const ActorEquipSlot _weaponSlots = ActorEquipSlot.MainHand | ActorEquipSlot.OffHand;
@@ -111,9 +112,15 @@ internal class GearEditor()
 
         int equipId = equip.Id;
         int equipVariant = equip.Variant;
-        DyeUnion dyeUnion = new DyeId(equip.Stain);
+        DyeUnion dye0Union = new DyeId(equip.Stain0);
+        DyeUnion dye1Union = new DyeId(equip.Stain1);
 
-        var (dyeId, dyeName, dyeColor) = dyeUnion.Match(
+        var (dye0Id, dye0Name, dye0Color) = dye0Union.Match(
+            dye => ((byte)dye.RowId, dye.Name.RawString, ImBrio.ARGBToABGR(dye.Color)),
+            none => ((byte)0, "None", (uint)0x0)
+        );
+
+        var (dye1Id, dye1Name, dye1Color) = dye1Union.Match(
             dye => ((byte)dye.RowId, dye.Name.RawString, ImBrio.ARGBToABGR(dye.Color)),
             none => ((byte)0, "None", (uint)0x0)
         );
@@ -152,10 +159,18 @@ internal class GearEditor()
                         didChange |= true;
                     }
 
-                    if(ImBrio.DrawLabeledColor("dye", dyeColor, dyeId.ToString(), $"{dyeName} ({dyeId})"))
+                    if(ImBrio.DrawLabeledColor("dye0", dye0Color, dye0Id.ToString(), $"{dye0Name} ({dye0Id})"))
                     {
-                        _dyeSelector.Select(dyeUnion, true);
-                        ImGui.OpenPopup("gear_dye_popup");
+                        _dye0Selector.Select(dye0Union, true);
+                        ImGui.OpenPopup("gear_dye_0_popup");
+                    }
+
+                    ImGui.SameLine();
+
+                    if(ImBrio.DrawLabeledColor("dye1", dye1Color, dye1Id.ToString(), $"{dye1Name} ({dye1Id})"))
+                    {
+                        _dye1Selector.Select(dye1Union, true);
+                        ImGui.OpenPopup("gear_dye_1_popup");
                     }
 
                     if(slot == ActorEquipSlot.Head)
@@ -178,17 +193,32 @@ internal class GearEditor()
                         }
                     }
 
-                    using(var dyePopup = ImRaii.Popup("gear_dye_popup"))
+                    using(var dyePopup = ImRaii.Popup("gear_dye_0_popup"))
                     {
                         if(dyePopup.Success)
                         {
-                            _dyeSelector.Draw();
-                            if(_dyeSelector.SoftSelectionChanged && _dyeSelector.SoftSelected != null)
+                            _dye0Selector.Draw();
+                            if(_dye0Selector.SoftSelectionChanged && _dye0Selector.SoftSelected != null)
                             {
-                                equip.Stain = (DyeId)_dyeSelector.SoftSelected;
+                                equip.Stain0 = (DyeId)_dye0Selector.SoftSelected;
                                 didChange |= true;
                             }
-                            if(_dyeSelector.SelectionChanged)
+                            if(_dye0Selector.SelectionChanged)
+                                ImGui.CloseCurrentPopup();
+                        }
+                    }
+
+                    using(var dyePopup = ImRaii.Popup("gear_dye_1_popup"))
+                    {
+                        if(dyePopup.Success)
+                        {
+                            _dye1Selector.Draw();
+                            if(_dye1Selector.SoftSelectionChanged && _dye1Selector.SoftSelected != null)
+                            {
+                                equip.Stain1 = (DyeId)_dye1Selector.SoftSelected;
+                                didChange |= true;
+                            }
+                            if(_dye1Selector.SelectionChanged)
                                 ImGui.CloseCurrentPopup();
                         }
                     }
@@ -201,7 +231,8 @@ internal class GearEditor()
                             if(_gearSelector.SoftSelectionChanged && _gearSelector.SoftSelected != null)
                             {
                                 equip.Value = (uint)_gearSelector.SoftSelected.ModelId;
-                                equip.Stain = dyeId;
+                                equip.Stain0 = dye0Id;
+                                equip.Stain1 = dye1Id;
                                 didChange |= true;
                             }
                             if(_gearSelector.SelectionChanged)
@@ -224,9 +255,16 @@ internal class GearEditor()
         int equipId = equip.Id;
         int equipVariant = equip.Variant;
         int equipType = equip.Type;
-        DyeUnion dyeUnion = new DyeId(equip.Stain);
+        DyeUnion dye0Union = new DyeId(equip.Stain0);
+        DyeUnion dye1Union = new DyeId(equip.Stain1);
 
-        var (dyeId, dyeName, dyeColor) = dyeUnion.Match(
+
+        var (dye0Id, dye0Name, dye0Color) = dye0Union.Match(
+            dye => ((byte)dye.RowId, dye.Name.RawString, ImBrio.ARGBToABGR(dye.Color)),
+            none => ((byte)0, "None", (uint)0x0)
+        );
+
+        var (dye1Id, dye1Name, dye1Color) = dye1Union.Match(
             dye => ((byte)dye.RowId, dye.Name.RawString, ImBrio.ARGBToABGR(dye.Color)),
             none => ((byte)0, "None", (uint)0x0)
         );
@@ -278,10 +316,18 @@ internal class GearEditor()
 
 
 
-                    if(ImBrio.DrawLabeledColor("dye", dyeColor, dyeId.ToString(), $"{dyeName} ({dyeId})"))
+                    if(ImBrio.DrawLabeledColor("dye0", dye0Color, dye0Id.ToString(), $"{dye0Name} ({dye0Id})"))
                     {
-                        _dyeSelector.Select(dyeUnion, true);
-                        ImGui.OpenPopup("gear_dye_popup");
+                        _dye0Selector.Select(dye0Union, true);
+                        ImGui.OpenPopup("gear_dye_0_popup");
+                    }
+
+                    ImGui.SameLine();
+
+                    if(ImBrio.DrawLabeledColor("dye1", dye1Color, dye1Id.ToString(), $"{dye1Name} ({dye1Id})"))
+                    {
+                        _dye1Selector.Select(dye1Union, true);
+                        ImGui.OpenPopup("gear_dye_1_popup");
                     }
 
                     ImGui.SameLine();
@@ -309,17 +355,32 @@ internal class GearEditor()
                         }
                     }
 
-                    using(var dyePopup = ImRaii.Popup("gear_dye_popup"))
+                    using(var dyePopup = ImRaii.Popup("gear_dye_0_popup"))
                     {
                         if(dyePopup.Success)
                         {
-                            _dyeSelector.Draw();
-                            if(_dyeSelector.SoftSelectionChanged && _dyeSelector.SoftSelected != null)
+                            _dye0Selector.Draw();
+                            if(_dye0Selector.SoftSelectionChanged && _dye0Selector.SoftSelected != null)
                             {
-                                equip.Stain = (DyeId)_dyeSelector.SoftSelected;
+                                equip.Stain0 = (DyeId)_dye0Selector.SoftSelected;
                                 didChange |= true;
                             }
-                            if(_dyeSelector.SelectionChanged)
+                            if(_dye0Selector.SelectionChanged)
+                                ImGui.CloseCurrentPopup();
+                        }
+                    }
+
+                    using(var dyePopup = ImRaii.Popup("gear_dye_1_popup"))
+                    {
+                        if(dyePopup.Success)
+                        {
+                            _dye1Selector.Draw();
+                            if(_dye1Selector.SoftSelectionChanged && _dye1Selector.SoftSelected != null)
+                            {
+                                equip.Stain1 = (DyeId)_dye1Selector.SoftSelected;
+                                didChange |= true;
+                            }
+                            if(_dye1Selector.SelectionChanged)
                                 ImGui.CloseCurrentPopup();
                         }
                     }
@@ -332,7 +393,8 @@ internal class GearEditor()
                             if(_gearSelector.SoftSelectionChanged && _gearSelector.SoftSelected != null)
                             {
                                 equip.Value = _gearSelector.SoftSelected.ModelId;
-                                equip.Stain = dyeId;
+                                equip.Stain0 = dye0Id;
+                                equip.Stain1 = dye1Id;
                                 didChange |= true;
                             }
                             if(_gearSelector.SelectionChanged)

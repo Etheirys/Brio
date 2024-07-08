@@ -1,6 +1,7 @@
 ﻿using Brio.Core;
-using Dalamud.Interface.Internal;
+using Dalamud.Interface.Textures.TextureWraps;
 using Dalamud.Plugin;
+using Dalamud.Plugin.Services;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -15,12 +16,14 @@ internal class ResourceProvider : IDisposable
     private readonly Dictionary<string, object> _cachedDocuments = [];
     private readonly Dictionary<string, IDalamudTextureWrap> _cachedImages = [];
 
-    private readonly DalamudPluginInterface _pluginInterface;
+    private readonly IDalamudPluginInterface _pluginInterface;
+    private readonly ITextureProvider _textureProvider;
 
-    public ResourceProvider(DalamudPluginInterface pluginInterface)
+    public ResourceProvider(IDalamudPluginInterface pluginInterface, ITextureProvider textureProvider)
     {
         Instance = this;
         _pluginInterface = pluginInterface;
+        _textureProvider = textureProvider;
 
         Localize.Load(this);
     }
@@ -46,7 +49,9 @@ internal class ResourceProvider : IDisposable
         using var stream = GetRawResourceStream(name);
         using var reader = new BinaryReader(stream);
         var imgBin = reader.ReadBytes((int)stream.Length);
-        var img = _pluginInterface.UiBuilder.LoadImage(imgBin);
+        var imgTask = _textureProvider.CreateFromImageAsync(imgBin);
+        imgTask.Wait(); // TODO: Don't block
+        var img = imgTask.Result;
         _cachedImages[name] = img;
         return img;
     }

@@ -5,7 +5,7 @@ using Brio.Resources;
 using Brio.UI;
 using Brio.UI.Controls.Stateless;
 using Dalamud.Interface;
-using Dalamud.Interface.Internal;
+using Dalamud.Interface.Textures.TextureWraps;
 using ImGuiNET;
 using System;
 using System.Diagnostics;

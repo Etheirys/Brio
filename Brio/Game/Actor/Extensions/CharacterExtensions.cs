@@ -18,62 +18,62 @@ using StructsDrawDataContainer = FFXIVClientStructs.FFXIV.Client.Game.Character.
 
 internal static class CharacterExtensions
 {
-    public unsafe static StructsCharacter* Native(this Character go)
+    public unsafe static StructsCharacter* Native(this ICharacter go)
     {
         return (StructsCharacter*)go.Address;
     }
 
-    public unsafe static bool HasCompanionSlot(this Character go)
+    public unsafe static bool HasCompanionSlot(this ICharacter go)
     {
         var native = go.Native();
         return native->CompanionObject != null;
     }
 
-    public unsafe static bool HasSpawnedCompanion(this Character go)
+    public unsafe static bool HasSpawnedCompanion(this ICharacter go)
     {
         var native = go.Native();
         return native->CompanionObject != null &&
             (
-            native->Ornament.OrnamentObject != null ||
+            native->OrnamentData.OrnamentObject != null ||
             native->Mount.MountObject != null ||
-            native->Companion.CompanionObject != null
+            native->CompanionData.CompanionObject != null
             );
     }
 
-    public unsafe static bool CalculateCompanionInfo(this Character go, out CompanionContainer container)
+    public unsafe static bool CalculateCompanionInfo(this ICharacter go, out CompanionContainer container)
     {
         container = GetCompanionInfo(go);
         return container.Kind != CompanionKind.None;
     }
 
-    public unsafe static CompanionContainer GetCompanionInfo(this Character go)
+    public unsafe static CompanionContainer GetCompanionInfo(this ICharacter go)
     {
         var native = go.Native();
         if(native->CompanionObject != null)
         {
-            if(native->Ornament.OrnamentObject != null)
+            if(native->OrnamentData.OrnamentObject != null)
             {
-                return new(CompanionKind.Ornament, native->Ornament.OrnamentId);
+                return new(CompanionKind.Ornament, native->OrnamentData.OrnamentId);
             }
             else if(native->Mount.MountObject != null)
             {
                 return new(CompanionKind.Mount, native->Mount.MountId);
             }
-            else if(native->Companion.CompanionObject != null)
+            else if(native->CompanionData.CompanionObject != null)
             {
-                return new(CompanionKind.Companion, (ushort)native->Companion.CompanionObject->Character.GameObject.DataID);
+                return new(CompanionKind.Companion, (ushort)native->CompanionData.CompanionObject->Character.GameObject.BaseId);
             }
         }
 
         return new(CompanionKind.None, 0);
     }
 
-    public unsafe static StructsBattleCharacter* Native(this BattleChara go)
+    public unsafe static StructsBattleCharacter* Native(this IBattleChara go)
     {
         return (StructsBattleCharacter*)go.Address;
     }
 
-    public static unsafe StrictsDrawObjectData* GetWeaponDrawObjectData(this Character go, ActorEquipSlot slot)
+    public static unsafe StrictsDrawObjectData* GetWeaponDrawObjectData(this ICharacter go, ActorEquipSlot slot)
     {
         StructsDrawDataContainer.WeaponSlot? weaponSlot = slot switch
         {
@@ -95,7 +95,7 @@ internal static class CharacterExtensions
         }
     }
 
-    public static unsafe BrioCharacterBase* GetCharacterBase(this Character go) => go.GetDrawObject<BrioCharacterBase>();
+    public static unsafe BrioCharacterBase* GetCharacterBase(this ICharacter go) => go.GetDrawObject<BrioCharacterBase>();
 
     public unsafe class CharacterBaseInfo
     {
@@ -103,7 +103,7 @@ internal static class CharacterExtensions
         public PoseInfoSlot Slot;
     }
 
-    public static unsafe IReadOnlyList<CharacterBaseInfo> GetCharacterBases(this Character go)
+    public static unsafe IReadOnlyList<CharacterBaseInfo> GetCharacterBases(this ICharacter go)
     {
         var list = new List<CharacterBaseInfo>();
         var charaBase = go.GetCharacterBase();
@@ -126,7 +126,7 @@ internal static class CharacterExtensions
         return list;
     }
 
-    public static unsafe BrioCharacterBase* GetWeaponCharacterBase(this Character go, ActorEquipSlot slot)
+    public static unsafe BrioCharacterBase* GetWeaponCharacterBase(this ICharacter go, ActorEquipSlot slot)
     {
         var weaponDrawData = go.GetWeaponDrawObjectData(slot);
         if(weaponDrawData != null)
@@ -137,7 +137,7 @@ internal static class CharacterExtensions
         return null;
     }
 
-    public static unsafe BrioHuman* GetHuman(this Character go)
+    public static unsafe BrioHuman* GetHuman(this ICharacter go)
     {
         var charaBase = go.GetCharacterBase();
         if(charaBase == null)
@@ -149,17 +149,18 @@ internal static class CharacterExtensions
         return (BrioHuman*)charaBase;
     }
 
-    public static unsafe BrioHuman.ShaderParams* GetShaderParams(this Character go)
+    public static unsafe BrioHuman.ShaderParams* GetShaderParams(this ICharacter go)
     {
         var human = go.GetHuman();
         if(human != null && human->Shaders != null && human->Shaders->Params != null)
         {
+
             return human->Shaders->Params;
         }
         return null;
     }
 
-    public static unsafe BrioCharaMakeType? GetCharaMakeType(this Character go)
+    public static unsafe BrioCharaMakeType? GetCharaMakeType(this ICharacter go)
     {
         var drawData = go.Native()->DrawData;
         return GameDataProvider.Instance.CharaMakeTypes.Select(x => x.Value).FirstOrDefault(x => x.Race.Row == (uint)drawData.CustomizeData.Race && x.Tribe.Row == (uint)drawData.CustomizeData.Tribe && x.Gender == (Genders)drawData.CustomizeData.Sex);

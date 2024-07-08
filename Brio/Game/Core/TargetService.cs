@@ -15,7 +15,7 @@ internal class TargetService : IDisposable
     private readonly IFramework _framework;
     private readonly ConfigurationService _configService;
 
-    public GameObject? BrioTarget
+    public IGameObject? BrioTarget
     {
         get
         {
@@ -30,7 +30,7 @@ internal class TargetService : IDisposable
         }
     }
 
-    public GameObject? GPoseTarget
+    public IGameObject? GPoseTarget
     {
         get => _targetManager.GPoseTarget;
         set => _targetManager.GPoseTarget = value;

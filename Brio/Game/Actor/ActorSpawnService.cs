@@ -10,7 +10,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using CharacterCopyFlags = FFXIVClientStructs.FFXIV.Client.Game.Character.CharacterSetup.CopyFlags;
+using CharacterCopyFlags = FFXIVClientStructs.FFXIV.Client.Game.Character.CharacterSetupContainer.CopyFlags;
 using ClientObjectManager = FFXIVClientStructs.FFXIV.Client.Game.Object.ClientObjectManager;
 using NativeCharacter = FFXIVClientStructs.FFXIV.Client.Game.Character.Character;
 
@@ -45,7 +45,7 @@ internal class ActorSpawnService : IDisposable
         _clientState.TerritoryChanged += OnTerritoryChanged;
     }
 
-    public bool CreateCharacter([MaybeNullWhen(false)] out Character outCharacter, SpawnFlags flags = SpawnFlags.Default, bool disableSpawnCompanion = false)
+    public bool CreateCharacter([MaybeNullWhen(false)] out ICharacter outCharacter, SpawnFlags flags = SpawnFlags.Default, bool disableSpawnCompanion = false)
     {
         outCharacter = null;
 
@@ -61,7 +61,7 @@ internal class ActorSpawnService : IDisposable
         return false;
     }
 
-    public unsafe bool CloneCharacter(Character sourceCharacter, [MaybeNullWhen(false)] out Character outCharacter, SpawnFlags flags = SpawnFlags.Default, bool disableSpawnCompanion = false)
+    public unsafe bool CloneCharacter(ICharacter sourceCharacter, [MaybeNullWhen(false)] out ICharacter outCharacter, SpawnFlags flags = SpawnFlags.Default, bool disableSpawnCompanion = false)
     {
         outCharacter = null;
 
@@ -148,7 +148,7 @@ internal class ActorSpawnService : IDisposable
         return false;
     }
 
-    public unsafe bool DestroyObject(GameObject go)
+    public unsafe bool DestroyObject(IGameObject go)
     {
         Brio.Log.Debug($"Destroying gameobjectobject {go.ObjectIndex}...");
 
@@ -177,7 +177,7 @@ internal class ActorSpawnService : IDisposable
         _createdIndexes.Clear();
     }
 
-    public void DestroyCompanion(Character character)
+    public void DestroyCompanion(ICharacter character)
     {
         if(character.CalculateCompanionInfo(out var info))
         {
@@ -185,7 +185,7 @@ internal class ActorSpawnService : IDisposable
         }
     }
 
-    public unsafe void CreateCompanion(Character character, CompanionContainer container)
+    public unsafe void CreateCompanion(ICharacter character, CompanionContainer container)
     {
         DestroyCompanion(character);
         InternalSetCompanion(character, container.Kind, (short)container.Id);
@@ -200,13 +200,13 @@ internal class ActorSpawnService : IDisposable
         );
     }
 
-    private unsafe void InternalSetCompanion(Character character, CompanionKind kind, short id)
+    private unsafe void InternalSetCompanion(ICharacter character, CompanionKind kind, short id)
     {
         var native = character.Native();
         switch(kind)
         {
             case CompanionKind.Companion:
-                native->Companion.SetupCompanion(id, 0);
+                native->CompanionData.SetupCompanion(id, 0);
                 break;
 
             case CompanionKind.Mount:
@@ -214,12 +214,12 @@ internal class ActorSpawnService : IDisposable
                 break;
 
             case CompanionKind.Ornament:
-                native->Ornament.SetupOrnament(id, 0);
+                native->OrnamentData.SetupOrnament(id, 0);
                 break;
         }
     }
 
-    private bool CreateEmptyCharacter([MaybeNullWhen(false)] out Character outCharacter, SpawnFlags flags)
+    private bool CreateEmptyCharacter([MaybeNullWhen(false)] out ICharacter outCharacter, SpawnFlags flags)
     {
         outCharacter = null;
 
@@ -249,10 +249,10 @@ internal class ActorSpawnService : IDisposable
             _gPoseService.AddCharacterToGPose(newPlayer);
 
             var character = _objectTable.CreateObjectReference((nint)newObject);
-            if(character == null || character is not Character)
+            if(character == null || character is not ICharacter)
                 return false;
 
-            outCharacter = (Character)character;
+            outCharacter = (ICharacter)character;
         }
 
         if(_gPoseService.IsGPosing && _targetService.GPoseTarget == null)

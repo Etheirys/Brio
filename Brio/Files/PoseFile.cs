@@ -4,7 +4,7 @@ using Brio.Entities;
 using Brio.Entities.Actor;
 using Brio.Files.Converters;
 using Brio.Resources;
-using Dalamud.Interface.Internal;
+using Dalamud.Interface.Textures.TextureWraps;
 using System;
 using System.Collections.Generic;
 using System.Numerics;
