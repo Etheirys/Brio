@@ -1,7 +1,7 @@
 ﻿using Brio.Resources;
 using Brio.UI.Controls.Core;
 using Dalamud.Interface;
-using Dalamud.Interface.Internal;
+using Dalamud.Interface.Textures.TextureWraps;
 using Dalamud.Interface.Utility.Raii;
 using ImGuiNET;
 using System.Numerics;
@@ -185,9 +185,15 @@ internal static partial class ImBrio
     public static bool BorderedGameIcon(string id, uint iconId, string fallback, string? description = null, ImGuiButtonFlags flags = ImGuiButtonFlags.MouseButtonLeft, Vector2? size = null)
     {
         IDalamudTextureWrap? iconTex = null;
-
-        if(iconId != 0)
-            iconTex = UIManager.Instance.TextureProvider.GetIcon(iconId);
+        try
+        {
+            if(iconId != 0)
+                iconTex = UIManager.Instance.TextureProvider.GetFromGameIcon(iconId).GetWrapOrEmpty();
+        }
+        catch
+        {
+            // ignored
+        }
 
         iconTex ??= ResourceProvider.Instance.GetResourceImage(fallback);
 

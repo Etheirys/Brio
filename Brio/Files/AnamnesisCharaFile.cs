@@ -4,7 +4,7 @@ using Brio.Entities.Actor;
 using Brio.Game.Actor.Appearance;
 using Brio.Library.Tags;
 using Brio.Resources;
-using Dalamud.Interface.Internal;
+using Dalamud.Interface.Textures.TextureWraps;
 using FFXIVClientStructs.FFXIV.Client.Game.Character;
 using System;
 using System.Numerics;
@@ -218,19 +218,23 @@ internal class AnamnesisCharaFile : JsonDocumentBase
         public ushort ModelBase { get; set; }
         public byte ModelVariant { get; set; }
         public byte DyeId { get; set; }
+        public byte DyeId2 { get; set; }
+
 
         public static implicit operator EquipmentModelId(ItemSave save) => new()
         {
             Id = save.ModelBase,
             Variant = save.ModelVariant,
-            Stain = save.DyeId,
+            Stain0 = save.DyeId,
+            Stain1 = save.DyeId2
         };
 
         public static implicit operator ItemSave(EquipmentModelId modelId) => new()
         {
             ModelBase = modelId.Id,
             ModelVariant = modelId.Variant,
-            DyeId = modelId.Stain,
+            DyeId = modelId.Stain0,
+            DyeId2 = modelId.Stain1
         };
     }
 
@@ -242,13 +246,15 @@ internal class AnamnesisCharaFile : JsonDocumentBase
         public ushort ModelBase { get; set; }
         public ushort ModelVariant { get; set; }
         public byte DyeId { get; set; }
+        public byte DyeId2 { get; set; }
 
         public static implicit operator WeaponModelId(WeaponSave save) => new()
         {
             Id = save.ModelSet,
             Variant = save.ModelVariant,
             Type = save.ModelBase,
-            Stain = save.DyeId
+            Stain0 = save.DyeId,
+            Stain1 = save.DyeId2
         };
 
         public static implicit operator WeaponSave(WeaponModelId modelId) => new()
@@ -256,7 +262,8 @@ internal class AnamnesisCharaFile : JsonDocumentBase
             ModelSet = modelId.Id,
             ModelVariant = modelId.Variant,
             ModelBase = modelId.Type,
-            DyeId = modelId.Stain
+            DyeId = modelId.Stain0,
+            DyeId2 = modelId.Stain1
         };
     }
 }

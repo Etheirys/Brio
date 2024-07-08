@@ -8,6 +8,7 @@ using Dalamud.Game;
 using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Hooking;
 using Dalamud.Plugin.Services;
+using FFXIVClientStructs.FFXIV.Client.Game.Character;
 using FFXIVClientStructs.FFXIV.Client.Graphics.Scene;
 using System;
 using System.Runtime.InteropServices;
@@ -46,15 +47,15 @@ internal class ActorAppearanceService : IDisposable
         _glamourerService = glamourerService;
         _entityManager = entityManager;
 
-        var enforceKindRestrictionsAddress = sigScanner.ScanText("E8 ?? ?? ?? ?? 41 B0 ?? 48 8B D3 48 8B CD");
+        var enforceKindRestrictionsAddress = sigScanner.ScanText("E8 ?? ?? ?? ?? 41 B0 ?? 48 8B D6");
         _enforceKindRestrictionsHook = hooks.HookFromAddress<EnforceKindRestrictionsDelegate>(enforceKindRestrictionsAddress, EnforceKindRestrictionsDetour);
         _enforceKindRestrictionsHook.Enable();
 
-        var updateWetnessAddress = sigScanner.ScanText("E8 ?? ?? ?? ?? 8B 83 ?? ?? ?? ?? C1 E8 ?? A8 ?? 74 ?? 48 8B 8B ?? ?? ?? ?? 48 85 C9");
+        var updateWetnessAddress = sigScanner.ScanText("40 53 48 83 EC ?? 48 8B 01 48 8B D9 FF 90 ?? ?? ?? ?? 48 85 C0 74 ?? 48 8B 03 48 8B CB 48 83 C4");
         _updateWetnessHook = hooks.HookFromAddress<UpdateWetnessDelegate>(updateWetnessAddress, UpdateWetnessDetour);
         _updateWetnessHook.Enable();
 
-        var updateTintHook = Marshal.ReadInt64((nint)(CharacterBase.StaticAddressPointers.VTable + 0xC0));
+        var updateTintHook = Marshal.ReadInt64((nint)(CharacterBase.StaticVirtualTablePointer) + 0xC0);
         _updateTintHook = hooks.HookFromAddress<UpdateTintDelegate>((nint)updateTintHook, UpdateTintDetour);
         _updateTintHook.Enable();
     }
@@ -74,13 +75,13 @@ internal class ActorAppearanceService : IDisposable
         return new HackDisposer(this);
     }
 
-    public async Task<RedrawResult> Redraw(Character character)
+    public async Task<RedrawResult> Redraw(ICharacter character)
     {
         var appearance = GetActorAppearance(character);
         return await SetCharacterAppearance(character, appearance, AppearanceImportOptions.All, true);
     }
 
-    public async Task<RedrawResult> SetCharacterAppearance(Character character, ActorAppearance appearance, AppearanceImportOptions options, bool forceRedraw = false)
+    public async Task<RedrawResult> SetCharacterAppearance(ICharacter character, ActorAppearance appearance, AppearanceImportOptions options, bool forceRedraw = false)
     {
         var existingAppearance = GetActorAppearance(character);
 
@@ -136,12 +137,12 @@ internal class ActorAppearanceService : IDisposable
                         if(human != null)
                         {
 
-                            byte[] data = new byte[68];
+                            byte[] data = new byte[108];
                             fixed(byte* ptr = data)
                             {
                                 if(options.HasFlag(AppearanceImportOptions.Customize))
                                 {
-                                    Buffer.MemoryCopy(appearance.Customize.Data, ptr, 28, 28);
+                                    Buffer.MemoryCopy(appearance.Customize.Data, ptr, 32, 32);
                                 }
                                 else
                                 {
@@ -150,11 +151,11 @@ internal class ActorAppearanceService : IDisposable
 
                                 if(options.HasFlag(AppearanceImportOptions.Equipment))
                                 {
-                                    Buffer.MemoryCopy(appearance.Equipment.Data, ptr + 28, 40, 40);
+                                    Buffer.MemoryCopy(appearance.Equipment.Data, ptr + 32, 80, 80);
                                 }
                                 else
                                 {
-                                    Buffer.MemoryCopy(existingAppearance.Equipment.Data, ptr + 28, 40, 40);
+                                    Buffer.MemoryCopy(existingAppearance.Equipment.Data, ptr + 32, 80, 80);
                                 }
 
                                 var didUpdate = human->Human.UpdateDrawData(ptr, false);
@@ -175,7 +176,10 @@ internal class ActorAppearanceService : IDisposable
 
                     if(options.HasFlag(AppearanceImportOptions.Equipment))
                     {
-                        *(ActorEquipment*)&native->DrawData.Head = appearance.Equipment;
+                        fixed(EquipmentModelId* ptr = native->DrawData.EquipmentModelIds)
+                        {
+                            *(ActorEquipment*)ptr = appearance.Equipment;
+                        }
                     }
                 }
             }
@@ -226,7 +230,6 @@ internal class ActorAppearanceService : IDisposable
 
             existingAppearance = GetActorAppearance(character);
 
-
             if(options.HasFlag(AppearanceImportOptions.ExtendedAppearance))
             {
                 // Hat
@@ -247,12 +250,12 @@ internal class ActorAppearanceService : IDisposable
                 if(existingAppearance.ExtendedAppearance.Wetness != appearance.ExtendedAppearance.Wetness)
                 {
                     var charaBase = character.GetCharacterBase();
-                    charaBase->CharacterBase.SwimmingWetness = appearance.ExtendedAppearance.Wetness;
+                    charaBase->Wetness = appearance.ExtendedAppearance.Wetness;
                 }
                 if(existingAppearance.ExtendedAppearance.WetnessDepth != appearance.ExtendedAppearance.WetnessDepth)
                 {
                     var charaBase = character.GetCharacterBase();
-                    charaBase->CharacterBase.WetnessDepth = appearance.ExtendedAppearance.WetnessDepth;
+                    charaBase->WetnessDepth = appearance.ExtendedAppearance.WetnessDepth;
                 }
 
                 // Tints
@@ -286,7 +289,7 @@ internal class ActorAppearanceService : IDisposable
         return redrawResult;
     }
 
-    public ActorAppearance GetActorAppearance(Character character) => ActorAppearance.FromCharacter(character);
+    public ActorAppearance GetActorAppearance(ICharacter character) => ActorAppearance.FromCharacter(character);
 
     private byte EnforceKindRestrictionsDetour(nint a1, nint a2)
     {

@@ -36,9 +36,6 @@ internal static class AppearanceExtensions
 
     public static Genders[] GetAllowedGenders(this Races race)
     {
-        if(race == Races.Hrothgar)
-            return [Genders.Masculine];
-
         return [Genders.Masculine, Genders.Feminine];
     }
 

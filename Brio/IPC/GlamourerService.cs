@@ -5,6 +5,7 @@ using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Ipc;
 using Dalamud.Plugin.Services;
+using FFXIVClientStructs.FFXIV.Client.Game.Character;
 using Glamourer.Api.IpcSubscribers;
 using System;
 using System.Linq;
@@ -15,12 +16,11 @@ namespace Brio.IPC;
 internal class GlamourerService : IDisposable
 {
     public bool IsGlamourerAvailable { get; private set; } = false;
-    public bool GlamourerUseLegacyApi { get; private set; } = false;
 
     private const int GlamourerApiMajor = 1;
     private const int GlamourerApiMinor = 1;
 
-    private readonly DalamudPluginInterface _pluginInterface;
+    private readonly IDalamudPluginInterface _pluginInterface;
     private readonly ConfigurationService _configurationService;
     private readonly GPoseService _gPoseService;
     private readonly IFramework _framework;
@@ -31,9 +31,8 @@ internal class GlamourerService : IDisposable
     private readonly Glamourer.Api.IpcSubscribers.ApiVersion _glamourerApiVersions;
     private readonly Glamourer.Api.IpcSubscribers.RevertState _glamourerRevertCharacter;
 
-    private Glamourer.Api.IpcSubscribers.Legacy.RevertCharacter? _gLegacyRevertCharacter;
 
-    public GlamourerService(DalamudPluginInterface pluginInterface, ConfigurationService configurationService, GPoseService gPoseService, IFramework framework, ActorRedrawService redrawService)
+    public GlamourerService(IDalamudPluginInterface pluginInterface, ConfigurationService configurationService, GPoseService gPoseService, IFramework framework, ActorRedrawService redrawService)
     {
         _pluginInterface = pluginInterface;
         _configurationService = configurationService;
@@ -74,20 +73,13 @@ internal class GlamourerService : IDisposable
                     return false;
                 }
 
-                try
-                {
                     var (major, minor) = _glamourerApiVersions.Invoke();
                     if(major != GlamourerApiMajor || minor < GlamourerApiMinor)
                     {
                         Brio.Log.Warning($"Glamourer API mismatch, found v{major}.{minor}");
                         return false;
                     }
-                }
-                catch
-                {
-                    GlamourerUseLegacyApi = true;
-                    LoadLegacy();
-                }
+
 
                 Brio.Log.Debug("Glamourer integration initialized");
 
@@ -99,29 +91,17 @@ internal class GlamourerService : IDisposable
                 return false;
             }
         }
-        void LoadLegacy()
-        {
-            Brio.Log.Warning("Using Glamourer Legacy API!");
-
-            _gLegacyRevertCharacter = new Glamourer.Api.IpcSubscribers.Legacy.RevertCharacter(_pluginInterface);
-        }
     }
 
-    public Task RevertCharacter(Character? character)
+    public Task RevertCharacter(ICharacter? character)
     {
         if(!IsGlamourerAvailable && character != null)
             return Task.CompletedTask;
 
         Brio.Log.Error("Starting glamourer revert...");
 
-        if(GlamourerUseLegacyApi)
-        {
-            _gLegacyRevertCharacter?.Invoke(character);
-        }
-        else
-        {
+
             _glamourerRevertCharacter.Invoke(character!.ObjectIndex, character.DataId);
-        }
 
         return _framework.RunOnTick(async () =>
         {

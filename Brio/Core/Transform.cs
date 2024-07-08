@@ -1,4 +1,4 @@
-﻿using FFXIVClientStructs.Havok;
+﻿using FFXIVClientStructs.Havok.Common.Base.Math.QsTransform;
 using System;
 using System.Numerics;
 using System.Runtime.InteropServices;

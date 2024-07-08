@@ -1,5 +1,5 @@
 ﻿using Brio.Library.Sources;
-using Dalamud.Interface.Internal;
+using Dalamud.Interface.Textures.TextureWraps;
 using System;
 using System.IO;
 

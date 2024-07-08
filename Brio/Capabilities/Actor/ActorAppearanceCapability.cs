@@ -9,9 +9,7 @@ using Brio.Game.Types;
 using Brio.IPC;
 using Brio.Resources;
 using Brio.UI.Widgets.Actor;
-using Dalamud.Game.ClientState.Objects.Types;
 using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Brio.Capabilities.Actor;
@@ -65,20 +63,6 @@ internal class ActorAppearanceCapability : ActorCharacterCapability
         return _mareService.LoadMcdfAsync(path, GameObject);
     }
 
-    public void LegacySetCollection(string collection)
-    {
-        if(IsCollectionOverridden && collection.Equals(_oldCollection))
-        {
-            ResetCollection();
-            return;
-        }
-        var old = _penumbraService.LegacySetCollectionForObject(Character, collection);
-
-        if(!IsCollectionOverridden)
-            _oldCollection = old.ToString();
-
-        _ = _actorAppearanceService.Redraw(Character);
-    }
     public void SetCollection(Guid collection)
     {
         if(IsCollectionOverridden && collection.ToString().Equals(_oldCollection))
@@ -99,14 +83,7 @@ internal class ActorAppearanceCapability : ActorCharacterCapability
     {
         if(IsCollectionOverridden)
         {
-            if(_penumbraService.PenumbraUseLegacyApi)
-            {
-                _penumbraService.LegacySetCollectionForObject(Character, _oldCollection!);
-            }
-            else
-            {
-                _penumbraService.SetCollectionForObject(Character, Guid.Parse(_oldCollection!));
-            }
+            _penumbraService.SetCollectionForObject(Character, Guid.Parse(_oldCollection!));
             _oldCollection = null;
             _ = _actorAppearanceService.Redraw(Character);
         }
@@ -199,7 +176,7 @@ internal class ActorAppearanceCapability : ActorCharacterCapability
 
     public unsafe void AttachWeapon()
     {
-        Character.Native()->ActionTimelineManager.Driver.PlayTimeline(5616);
+        Character.Native()->Timeline.TimelineSequencer.PlayTimeline(5616);
     }
 
     private unsafe void ApplyShaderOverride()

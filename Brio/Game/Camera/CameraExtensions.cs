@@ -6,7 +6,12 @@ internal static class CameraExtensions
 {
     public unsafe static Matrix4x4 GetProjectionMatrix(this BrioCamera camera)
     {
-        return camera.Camera.CameraBase.SceneCamera.RenderCamera->ProjectionMatrix;
+        var cam = camera.Camera.CameraBase.SceneCamera.RenderCamera;
+        var proj = cam->ProjectionMatrix;
+        proj.M33 = -(cam->FarPlane + cam->NearPlane) / (cam->FarPlane - cam->NearPlane);
+        proj.M43 = -(2f * cam->FarPlane * cam->NearPlane) / (cam->FarPlane - cam->NearPlane);
+
+        return proj;
     }
 
     public unsafe static Matrix4x4 GetViewMatrix(this BrioCamera camera)

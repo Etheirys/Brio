@@ -8,7 +8,7 @@ namespace Brio.Game.Actor.Extensions;
 
 internal static class GameObjectExtensions
 {
-    public static FontAwesomeIcon GetFriendlyIcon(this GameObject go)
+    public static FontAwesomeIcon GetFriendlyIcon(this IGameObject go)
     {
         return go.ObjectKind switch
         {
@@ -23,12 +23,12 @@ internal static class GameObjectExtensions
         };
     }
 
-    public static string GetAsCustomName(this GameObject go, string name)
+    public static string GetAsCustomName(this IGameObject go, string name)
     {
         return $"{name} ({go.ObjectIndex})";
     }
 
-    public static string GetFriendlyName(this GameObject go)
+    public static string GetFriendlyName(this IGameObject go)
     {
         switch(go.ObjectKind)
         {
@@ -41,7 +41,7 @@ internal static class GameObjectExtensions
         }
     }
 
-    public static string GetCensoredName(this GameObject go)
+    public static string GetCensoredName(this IGameObject go)
     {
         if(go.ObjectIndex >= ActorTableHelpers.GPoseStart)
             return $"{(go.ObjectIndex - ActorTableHelpers.GPoseStart + 1).ToBrioName()} ({go.ObjectIndex})";
@@ -49,17 +49,17 @@ internal static class GameObjectExtensions
         return $"{((int)go.ObjectIndex).ToBrioName()} ({go.ObjectIndex})";
     }
 
-    public static bool IsGPose(this GameObject go)
+    public static bool IsGPose(this IGameObject go)
     {
         return go.ObjectIndex >= ActorTableHelpers.GPoseStart && go.ObjectIndex <= ActorTableHelpers.GPoseEnd;
     }
 
-    public static bool IsOverworld(this GameObject go)
+    public static bool IsOverworld(this IGameObject go)
     {
         return go.ObjectIndex >= ActorTableHelpers.OverworldStart && go.ObjectIndex <= ActorTableHelpers.OverworldEnd;
     }
 
-    public unsafe static StructsObject* Native(this GameObject go)
+    public unsafe static StructsObject* Native(this IGameObject go)
     {
         return (StructsObject*)go.Address;
     }
@@ -73,13 +73,13 @@ internal static class GameObjectExtensions
         gameObject.Name[name.Length] = 0;
     }
 
-    public unsafe static void SetName(this GameObject gameObject, string name) => gameObject.Native()->SetName(name);
+    public unsafe static void SetName(this IGameObject gameObject, string name) => gameObject.Native()->SetName(name);
 
     public unsafe static void CalculateAndSetName(this ref StructsObject gameObject, int index) => gameObject.SetName(index.ToBrioName());
 
-    public unsafe static void CalculateAndSetName(this GameObject gameObject, int index) => gameObject.Native()->CalculateAndSetName(index);
+    public unsafe static void CalculateAndSetName(this IGameObject gameObject, int index) => gameObject.Native()->CalculateAndSetName(index);
 
-    public static unsafe T* GetDrawObject<T>(this GameObject go) where T : unmanaged
+    public static unsafe T* GetDrawObject<T>(this IGameObject go) where T : unmanaged
     {
         return (T*)go.Native()->DrawObject;
     }

@@ -7,6 +7,10 @@ namespace Brio.Entities.Core;
 
 internal record struct EntityId(string Unique)
 {
+    public EntityId(IGameObject go) : this($"actor_{go.Address}")
+    {
+    }
+
     public static implicit operator EntityId(Entity entity)
     {
         return entity.Id;
@@ -15,11 +19,6 @@ internal record struct EntityId(string Unique)
     public static implicit operator EntityId(string id)
     {
         return new EntityId(id);
-    }
-
-    public static implicit operator EntityId(GameObject go)
-    {
-        return new EntityId($"actor_{go.Address}");
     }
 
     public unsafe static implicit operator EntityId(NativeCharacter* chara)

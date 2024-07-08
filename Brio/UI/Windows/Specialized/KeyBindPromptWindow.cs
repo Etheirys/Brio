@@ -2,11 +2,9 @@
 using Brio.Game.GPose;
 using Brio.Input;
 using Brio.Resources;
-using Dalamud.Interface.Internal;
 using Dalamud.Interface.Windowing;
 using ImGuiNET;
 using System;
-using System.Numerics;
 
 namespace Brio.UI.Windows.Specialized;
 

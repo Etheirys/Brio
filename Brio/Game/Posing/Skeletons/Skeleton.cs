@@ -1,9 +1,9 @@
 ﻿using Brio.Core;
 using Brio.Game.Actor.Interop;
-using FFXIVClientStructs.Havok;
+using FFXIVClientStructs.Havok.Animation.Rig;
 using System;
 using System.Collections.Generic;
-using static FFXIVClientStructs.Havok.hkaPose;
+using static FFXIVClientStructs.Havok.Animation.Rig.hkaPose;
 using GameSkeleton = FFXIVClientStructs.FFXIV.Client.Graphics.Render.Skeleton;
 
 namespace Brio.Game.Posing.Skeletons;
@@ -142,11 +142,17 @@ internal class Skeleton : IDisposable
                 continue;
 
             hkaPose* pose = (hkaPose*)partial.Poses[0];
+
+            if(pose == null || pose->Skeleton == null || pose->Skeleton->Bones.Data == null)
+                continue;
+
             var boneCount = pose->Skeleton->Bones.Length;
-            for(int boneIdx = 0; boneIdx < boneCount; boneIdx++)
+            foreach(var (id, bone) in partial.Bones)
             {
-                var bone = partial.Bones[boneIdx];
-                Transform pos = pose->AccessBoneModelSpace(boneIdx, PropagateOrNot.DontPropagate);
+                if(boneCount <= bone.Index)
+                    continue;
+
+                Transform pos = pose->AccessBoneModelSpace(id, PropagateOrNot.DontPropagate);
 
                 if(cacheTypes.HasFlag(CacheTypes.LastRawTransform))
                     bone.LastRawTransform = pos;
@@ -154,6 +160,7 @@ internal class Skeleton : IDisposable
                 if(cacheTypes.HasFlag(CacheTypes.LastTransform))
                     bone.LastTransform = pos;
             }
+
         }
     }
 

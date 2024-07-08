@@ -5,7 +5,7 @@ using Brio.Resources;
 using Brio.UI;
 using Brio.UI.Controls.Stateless;
 using Dalamud.Interface;
-using Dalamud.Interface.Internal;
+using Dalamud.Interface.Textures.TextureWraps;
 using ImGuiNET;
 using System;
 using System.Diagnostics;
@@ -161,6 +161,7 @@ internal class FileEntry : ItemEntryBase
     private string _name;
     private FileTypeInfoBase _fileInfo;
     private IDalamudTextureWrap? _previewImage;
+    private bool _isPreviewImageDisposed;
     private string? _description;
     private string? _author;
     private string? _version;
@@ -222,6 +223,7 @@ internal class FileEntry : ItemEntryBase
 
             if(!value)
             {
+                _isPreviewImageDisposed = true;
                 _previewImage?.Dispose();
             }
         }
@@ -241,6 +243,9 @@ internal class FileEntry : ItemEntryBase
 
     private IDalamudTextureWrap? GetPreviewImage()
     {
+        if(_isPreviewImageDisposed) 
+            return null;
+
         if(_previewImage == null || _previewImage.ImGuiHandle == 0)
         {
             try
@@ -267,6 +272,7 @@ internal class FileEntry : ItemEntryBase
     public override void Dispose()
     {
         base.Dispose();
+        _isPreviewImageDisposed = true;
         _previewImage?.Dispose();
     }
 

@@ -6,19 +6,20 @@ namespace Brio.Game.Actor.Appearance;
 [StructLayout(LayoutKind.Explicit, Size = Count)]
 internal unsafe struct ActorEquipment
 {
-    public const int Count = 0x28;
+    public const int Count = 0x50;
 
     [FieldOffset(0x00)] public fixed byte Data[Count];
     [FieldOffset(0x00)] public EquipmentModelId Head;
-    [FieldOffset(0x04)] public EquipmentModelId Top;
-    [FieldOffset(0x08)] public EquipmentModelId Arms;
-    [FieldOffset(0x0C)] public EquipmentModelId Legs;
-    [FieldOffset(0x10)] public EquipmentModelId Feet;
-    [FieldOffset(0x14)] public EquipmentModelId Ear;
-    [FieldOffset(0x18)] public EquipmentModelId Neck;
-    [FieldOffset(0x1C)] public EquipmentModelId Wrist;
-    [FieldOffset(0x20)] public EquipmentModelId RFinger;
-    [FieldOffset(0x24)] public EquipmentModelId LFinger;
+    [FieldOffset(0x08)] public EquipmentModelId Top;
+    [FieldOffset(0x10)] public EquipmentModelId Arms;
+    [FieldOffset(0x18)] public EquipmentModelId Legs;
+    [FieldOffset(0x20)] public EquipmentModelId Feet;
+    [FieldOffset(0x28)] public EquipmentModelId Ear;
+    [FieldOffset(0x30)] public EquipmentModelId Neck;
+    [FieldOffset(0x38)] public EquipmentModelId Wrist;
+    [FieldOffset(0x40)] public EquipmentModelId RFinger;
+    [FieldOffset(0x48)] public EquipmentModelId LFinger;
+
 
     public static ActorEquipment Smallclothes()
     {

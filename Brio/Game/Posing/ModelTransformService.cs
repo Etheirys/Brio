@@ -34,7 +34,7 @@ internal unsafe class ModelTransformService : IDisposable
         _actorRedrawService.ActorRedrawEvent += OnActorRedraw;
     }
 
-    public unsafe Transform GetTransform(GameObject go)
+    public unsafe Transform GetTransform(IGameObject go)
     {
         var native = go.Native();
         var drawObject = native->DrawObject;
@@ -51,7 +51,7 @@ internal unsafe class ModelTransformService : IDisposable
         };
     }
 
-    public unsafe void SetTransform(GameObject go, Transform transform) => SetTransform(go.Native(), transform);
+    public unsafe void SetTransform(IGameObject go, Transform transform) => SetTransform(go.Native(), transform);
 
     public unsafe void SetTransform(StructsGameObject* native, Transform transform)
     {
@@ -83,7 +83,7 @@ internal unsafe class ModelTransformService : IDisposable
         _setPositionHook.Original(gameObject, x, y, z);
     }
 
-    private void OnActorRedraw(GameObject go, RedrawStage stage)
+    private void OnActorRedraw(IGameObject go, RedrawStage stage)
     {
         if(stage == RedrawStage.After)
             UpdatePositionDetour((StructsGameObject*)go.Address, go.Position.X, go.Position.Y, go.Position.Z);

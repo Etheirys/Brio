@@ -10,11 +10,13 @@ using Dalamud.Game;
 using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Hooking;
 using Dalamud.Plugin.Services;
-using FFXIVClientStructs.Havok;
+using FFXIVClientStructs.Havok.Animation.Rig;
+using FFXIVClientStructs.Havok.Common.Base.Math.Quaternion;
+using FFXIVClientStructs.Havok.Common.Base.Math.Vector;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using static FFXIVClientStructs.Havok.hkaPose;
+using static FFXIVClientStructs.Havok.Animation.Rig.hkaPose;
 using GameSkeleton = FFXIVClientStructs.FFXIV.Client.Graphics.Render.Skeleton;
 
 namespace Brio.Game.Posing;
@@ -54,11 +56,11 @@ internal unsafe class SkeletonService : IDisposable
         _framework = framework;
 
 
-        var updateBonePhysicsAddress = "40 53 48 83 EC ?? 80 B9 ?? ?? ?? ?? ?? 48 8B D9 75 ?? 48 83 C1";
+        var updateBonePhysicsAddress = "48 89 5C 24 ?? 48 89 6C 24 ?? 48 89 74 24 ?? 57 41 56 41 57 48 83 EC ?? 48 8B 79 ?? 45 33 FF";
         _updateBonePhysicsHook = hooking.HookFromAddress<UpdateBonePhysicsDelegate>(scanner.ScanText(updateBonePhysicsAddress), UpdateBonePhysicsDetour);
         _updateBonePhysicsHook.Enable();
 
-        var finalizeSkeletonsHook = "48 8B 0D C1 94 11 02 E9 64 7E 32 00"; // Framework.TaskRenderGraphicsRender
+        var finalizeSkeletonsHook = "48 8B 0D F1 68 4E 02 E9 84 D9 3D"; // Framework.TaskRenderGraphicsRender
         _finalizeSkeletonsHook = hooking.HookFromAddress<FinalizeSkeletonsDelegate>(scanner.ScanText(finalizeSkeletonsHook), FinalizeSkeletonsHook);
         _finalizeSkeletonsHook.Enable();
 
@@ -312,7 +314,7 @@ internal unsafe class SkeletonService : IDisposable
         _skeletons.Clear();
         foreach(var actor in _monitorService.ObjectTable)
         {
-            if(actor is Character chara)
+            if(actor is ICharacter chara)
             {
                 var bases = chara.GetCharacterBases();
                 foreach(var charaBase in bases)

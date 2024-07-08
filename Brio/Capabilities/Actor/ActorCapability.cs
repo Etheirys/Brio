@@ -8,10 +8,10 @@ internal abstract class ActorCapability(ActorEntity parent) : Capability(parent)
 {
     public ActorEntity Actor => (ActorEntity)Entity;
 
-    public GameObject GameObject => Actor.GameObject;
+    public IGameObject GameObject => Actor.GameObject;
 }
 
 internal abstract class ActorCharacterCapability(ActorEntity parent) : ActorCapability(parent)
 {
-    public Character Character => (Character)GameObject;
+    public ICharacter Character => (ICharacter)GameObject;
 }

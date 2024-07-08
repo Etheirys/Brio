@@ -28,7 +28,7 @@ internal class ActorLifetimeCapability : ActorCapability
         _targetService.GPoseTarget = GameObject;
     }
 
-    public bool CanClone => Actor.Parent is ActorContainerEntity && GameObject is Character;
+    public bool CanClone => Actor.Parent is ActorContainerEntity && GameObject is ICharacter;
 
     public void SpawnNewActor(bool selectInHierarchy, bool spawnCompanion, bool disableSpawnCompanion)
     {
@@ -38,7 +38,7 @@ internal class ActorLifetimeCapability : ActorCapability
             flags |= SpawnFlags.ReserveCompanionSlot;
         }
 
-        if(_actorSpawnService.CreateCharacter(out Character? chara, flags, disableSpawnCompanion))
+        if(_actorSpawnService.CreateCharacter(out ICharacter? chara, flags, disableSpawnCompanion))
         {
             if(selectInHierarchy)
             {
@@ -52,7 +52,7 @@ internal class ActorLifetimeCapability : ActorCapability
         if(!CanClone)
             return;
 
-        if(_actorSpawnService.CloneCharacter((Character)GameObject, out var chara))
+        if(_actorSpawnService.CloneCharacter((ICharacter)GameObject, out var chara))
         {
             if(selectInHierarchy)
             {
@@ -63,7 +63,7 @@ internal class ActorLifetimeCapability : ActorCapability
 
     public bool CanDestroy =>
         Actor.Parent is ActorContainerEntity ||
-        (Actor.Parent is ActorEntity parentEntity && parentEntity.GameObject is Character character && character.HasSpawnedCompanion());
+        (Actor.Parent is ActorEntity parentEntity && parentEntity.GameObject is ICharacter character && character.HasSpawnedCompanion());
 
     public void Destroy()
     {
@@ -73,7 +73,7 @@ internal class ActorLifetimeCapability : ActorCapability
         if(Actor.Parent is ActorContainerEntity)
             _actorSpawnService.DestroyObject(GameObject);
         else if(Actor.Parent is ActorEntity actorEntity)
-            _actorSpawnService.DestroyCompanion((Character)((ActorEntity)Actor.Parent).GameObject);
+            _actorSpawnService.DestroyCompanion((ICharacter)((ActorEntity)Actor.Parent).GameObject);
     }
 
 }

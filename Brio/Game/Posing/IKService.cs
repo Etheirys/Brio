@@ -1,7 +1,9 @@
 ﻿using Brio.Core;
 using Brio.Game.Posing.Skeletons;
 using Dalamud.Game;
-using FFXIVClientStructs.Havok;
+using FFXIVClientStructs.Havok.Animation.Rig;
+using FFXIVClientStructs.Havok.Common.Base.Container.Array;
+using FFXIVClientStructs.Havok.Common.Base.Math.Vector;
 using System;
 using System.Linq;
 using System.Numerics;
@@ -20,8 +22,8 @@ internal unsafe class IKService : IDisposable
 
     public IKService(ISigScanner scanner)
     {
-        _ccdSolverCtr = (delegate* unmanaged<hkaCCDSolver*, int, float, void>)scanner.ScanText("E8 ?? ?? ?? ?? BA ?? ?? ?? ?? 48 C7 43");
-        _ccdSolverSolve = (delegate* unmanaged<hkaCCDSolver*, byte*, hkArray<CCDIKConstraint>*, hkaPose*, byte*>)scanner.ScanText("E8 ?? ?? ?? ?? 8B 45 ?? 48 8B 75");
+        _ccdSolverCtr = (delegate* unmanaged<hkaCCDSolver*, int, float, void>)scanner.ScanText("E8 ?? ?? ?? ?? 48 C7 43 ?? ?? ?? ?? ?? 0F 57 C0");
+        _ccdSolverSolve = (delegate* unmanaged<hkaCCDSolver*, byte*, hkArray<CCDIKConstraint>*, hkaPose*, byte*>)scanner.ScanText("48 8B C4 4C 89 40 ?? 48 89 50 ?? 48 89 48 ?? 41 54");
         _twoJointSolverSolve = (delegate* unmanaged<byte*, TwoJointIKSetup*, hkaPose*, byte*>)scanner.ScanText("E8 ?? ?? ?? ?? 0F 28 55 ?? 41 0F 28 D8");
 
         _solverAddr = NativeHelpers.AllocateAlignedMemory(sizeof(hkaCCDSolver), 16);

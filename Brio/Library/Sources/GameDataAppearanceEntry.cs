@@ -5,7 +5,7 @@ using Brio.Game.Types;
 using Brio.Resources;
 using Brio.UI;
 using Brio.UI.Controls.Stateless;
-using Dalamud.Interface.Internal;
+using Dalamud.Interface.Textures.TextureWraps;
 using System;
 
 namespace Brio.Library.Sources;
@@ -63,7 +63,7 @@ internal class GameDataAppearanceEntry : ItemEntryBase
             if(_icon <= 0)
                 return ResourceProvider.Instance.GetResourceImage("Images.FileIcon_Chara.png");
 
-            return UIManager.Instance.TextureProvider.GetIcon(_icon);
+            return UIManager.Instance.TextureProvider.GetFromGameIcon(_icon).GetWrapOrEmpty();
         }
     }
 
@@ -74,7 +74,7 @@ internal class GameDataAppearanceEntry : ItemEntryBase
             if(_icon <= 0)
                 return null;
 
-            return UIManager.Instance.TextureProvider.GetIcon(_icon);
+            return UIManager.Instance.TextureProvider.GetFromGameIcon(_icon).GetWrapOrEmpty();
         }
     }
 

@@ -6,17 +6,21 @@ using System.Runtime.InteropServices;
 
 namespace Brio.Game.Actor.Interop;
 
-[StructLayout(LayoutKind.Explicit, Size = 0x8E8)]
+[StructLayout(LayoutKind.Explicit, Size = 0x9D0)]
 internal struct BrioCharacterBase
 {
     [FieldOffset(0x0)] public CharacterBase CharacterBase;
 
     [FieldOffset(0x0D0)] public Attach Attach;
 
-    [FieldOffset(0x260)] public Vector4 Tint;
+    [FieldOffset(0x290)] public Vector4 Tint;
 
-    [FieldOffset(0x270)] public float ScaleFactor1;
-    [FieldOffset(0x274)] public float ScaleFactor2;
+    [FieldOffset(0x2A0)] public float ScaleFactor1;
+    [FieldOffset(0x2A4)] public float ScaleFactor2;
+
+    [FieldOffset(0x2E4)] public float Wetness;
+    [FieldOffset(0x2E8)] public float WetnessDepth;
+
 
     public readonly float ScaleFactor => ScaleFactor1 * ScaleFactor2;
 }

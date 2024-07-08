@@ -12,12 +12,11 @@ namespace Brio.IPC;
 internal class PenumbraService : IDisposable
 {
     public bool IsPenumbraAvailable { get; private set; } = false;
-    public bool PenumbraUseLegacyApi { get; private set; } = false;
 
     private const int PenumbraApiMajor = 5;
     private const int PenumbraApiMinor = 0;
 
-    private readonly DalamudPluginInterface _pluginInterface;
+    private readonly IDalamudPluginInterface _pluginInterface;
     private readonly ConfigurationService _configurationService;
 
     public delegate void PenumbraRedrawEvent(int gameObjectId);
@@ -32,11 +31,7 @@ internal class PenumbraService : IDisposable
     private readonly SetCollectionForObject _penumbraSetCollectionForObject;
     private readonly GetCollectionForObject _penumbraGetCollectionForObject;
 
-    private Penumbra.Api.IpcSubscribers.Legacy.GetCollectionForObject? _pLegacyGetCollectionForObject;
-    private Penumbra.Api.IpcSubscribers.Legacy.SetCollectionForObject? _pLegacySetCollectionForObject;
-    private Penumbra.Api.IpcSubscribers.Legacy.GetCollections? _pLegacyGetCollections;
-
-    public PenumbraService(DalamudPluginInterface pluginInterface, ConfigurationService configurationService)
+    public PenumbraService(IDalamudPluginInterface pluginInterface, ConfigurationService configurationService)
     {
         _pluginInterface = pluginInterface;
         _configurationService = configurationService;
@@ -77,20 +72,15 @@ internal class PenumbraService : IDisposable
                     return false;
                 }
 
-                try
+
+                var (major, minor) = _penumbraApiVersion.Invoke();
+                if(major != PenumbraApiMajor || minor < PenumbraApiMinor)
                 {
-                    var (major, minor) = _penumbraApiVersion.Invoke();
-                    if(major != PenumbraApiMajor || minor < PenumbraApiMinor)
-                    {
-                        Brio.Log.Warning($"Penumbra API mismatch!, found v{major}.{minor}");
-                        return false;
-                    }
+                    Brio.Log.Warning($"Penumbra API mismatch!, found v{major}.{minor}");
+                    return false;
                 }
-                catch
-                {
-                    PenumbraUseLegacyApi = true;
-                    LoadLegacy();
-                }
+
+
 
                 Brio.Log.Debug("Penumbra integration initialized");
 
@@ -103,45 +93,21 @@ internal class PenumbraService : IDisposable
             }
         }
 
-        void LoadLegacy()
-        {
-            Brio.Log.Warning("Using Penumbra Legacy API!");
-
-            _pLegacyGetCollectionForObject = new(_pluginInterface);
-            _pLegacySetCollectionForObject = new(_pluginInterface);
-            _pLegacyGetCollections = new(_pluginInterface);
-        }
     }
 
-    public string GetCollectionForObject(GameObject gameObject)
+    public string GetCollectionForObject(IGameObject gameObject)
     {
-        if(PenumbraUseLegacyApi)
-        {
-            var (_, _, name) = _pLegacyGetCollectionForObject!.Invoke(gameObject.ObjectIndex);
-            return name;
-        }
-
         var (_, _, collection) = _penumbraGetCollectionForObject.Invoke(gameObject.ObjectIndex);
         return collection.Name;
     }
-   
-    public string LegacySetCollectionForObject(GameObject gameObject, string collectionName)
-    {
-        Brio.Log.Debug($"Setting GameObject {gameObject.ObjectIndex} collection to {collectionName}");
-        var (_, name) = _pLegacySetCollectionForObject!.Invoke(gameObject.ObjectIndex, collectionName.ToString(), true, true);
-        return name;
-    }
-    public Guid SetCollectionForObject(GameObject gameObject, Guid collectionName)
+
+    public Guid SetCollectionForObject(IGameObject gameObject, Guid collectionName)
     {
         Brio.Log.Debug($"Setting GameObject {gameObject.ObjectIndex} collection to {collectionName}");
         var (_, oldCollection) = _penumbraSetCollectionForObject.Invoke(gameObject.ObjectIndex, collectionName, true, true);
         return oldCollection!.Value.Id; // TODO Fix null reference
     }
 
-    public IEnumerable<string> LegacyGetCollections()
-    {
-        return _pLegacyGetCollections!.Invoke();
-    }
     public Dictionary<Guid, string> GetCollections()
     {
         return _penumbraGetCollections.Invoke();

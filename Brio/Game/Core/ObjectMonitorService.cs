@@ -45,11 +45,11 @@ internal unsafe class ObjectMonitorService : IDisposable
         _characterFinalizeHook = hooking.HookFromAddress<NativeCharacterEventDelegate>(charFinalizeAddress, CharacterFinalizeDetour);
         _characterFinalizeHook.Enable();
 
-        var charaBaseCleanupAddr = Marshal.ReadInt64((nint)(CharacterBase.StaticAddressPointers.VTable + 0x8));
+        var charaBaseCleanupAddr = Marshal.ReadInt64((nint)(CharacterBase.StaticVirtualTablePointer) + 8);
         _characterBaseCleanupHook = hooking.HookFromAddress<CharacterBaseCleanupDelegate>((nint)charaBaseCleanupAddr, CharacterBaseCleanupDetour);
         _characterBaseCleanupHook.Enable();
 
-        var charaBaseUpdateMaterialsDetour = "40 53 48 83 EC ?? 48 8B D9 E8 ?? ?? ?? ?? 48 8B 8B ?? ?? ?? ?? 48 85 C9 74 ?? 4C 8B 83";
+        var charaBaseUpdateMaterialsDetour = "48 89 5C 24 ?? 48 89 6C 24 ?? 56 57 41 56 48 83 EC ?? 4C 89 7C 24";
         _characterBaseUpdateMaterialsHook = hooking.HookFromAddress<CharacterBaseUpdateMaterialsDelegate>(scanner.ScanText(charaBaseUpdateMaterialsDetour), CharacterBaseUpdateMaterialsDetour);
         _characterBaseUpdateMaterialsHook.Enable();
     }
