@@ -7,7 +7,13 @@ To open this window again click `Infomation` on the Scene Manager then -> `View 
 - Update Brio for Dawntrail (Thanks Asgard!)
 - Added support for the second dye channel 
 - Renamed some of the bones for better consistency
+- Made the default size of the Skeleton's LineThickness & Bone's CircleSize smaller
 
+ --  Known Issues -- 
+
+ - Facewear is not changeable in the Advanced Appearance Window
+ - There is a exception thrown in the log when using the Library, This can be safely ignored
+ - Not all of the new bones are named yet
 
 --------------------------------------------------------------------------------
 	 --- Brio, Version 0.3.1.6 --- 
@@ -32,5 +38,7 @@ To open this window again click `Infomation` on the Scene Manager then -> `View 
 
 --------------------------------------------------------------------------------
 
-Thank you, to: (@Yuki-Codes), (@danma3x), (@WorstAquaPlayer) & (@gris-fuego);
+A Big Thank you to (Night Song) & (Alvar Valo) for their support on Kofi!
+
+Also, Thank you, to: (@Yuki-Codes), (@danma3x), (@WorstAquaPlayer) & (@gris-fuego);
 For their contributions to Brio!
