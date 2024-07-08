@@ -217,24 +217,24 @@ internal class AnamnesisCharaFile : JsonDocumentBase
     {
         public ushort ModelBase { get; set; }
         public byte ModelVariant { get; set; }
-        public byte DyeId0 { get; set; }
-        public byte DyeId1 { get; set; }
+        public byte DyeId { get; set; }
+        public byte DyeId2 { get; set; }
 
 
         public static implicit operator EquipmentModelId(ItemSave save) => new()
         {
             Id = save.ModelBase,
             Variant = save.ModelVariant,
-            Stain0 = save.DyeId0,
-            Stain1 = save.DyeId1
+            Stain0 = save.DyeId,
+            Stain1 = save.DyeId2
         };
 
         public static implicit operator ItemSave(EquipmentModelId modelId) => new()
         {
             ModelBase = modelId.Id,
             ModelVariant = modelId.Variant,
-            DyeId0 = modelId.Stain0,
-            DyeId1 = modelId.Stain1
+            DyeId = modelId.Stain0,
+            DyeId2 = modelId.Stain1
         };
     }
 
@@ -245,16 +245,16 @@ internal class AnamnesisCharaFile : JsonDocumentBase
         public ushort ModelSet { get; set; }
         public ushort ModelBase { get; set; }
         public ushort ModelVariant { get; set; }
-        public byte DyeId0 { get; set; }
-        public byte DyeId1 { get; set; }
+        public byte DyeId { get; set; }
+        public byte DyeId2 { get; set; }
 
         public static implicit operator WeaponModelId(WeaponSave save) => new()
         {
             Id = save.ModelSet,
             Variant = save.ModelVariant,
             Type = save.ModelBase,
-            Stain0 = save.DyeId0,
-            Stain1 = save.DyeId1
+            Stain0 = save.DyeId,
+            Stain1 = save.DyeId2
         };
 
         public static implicit operator WeaponSave(WeaponModelId modelId) => new()
@@ -262,8 +262,8 @@ internal class AnamnesisCharaFile : JsonDocumentBase
             ModelSet = modelId.Id,
             ModelVariant = modelId.Variant,
             ModelBase = modelId.Type,
-            DyeId0 = modelId.Stain0,
-            DyeId1 = modelId.Stain1
+            DyeId = modelId.Stain0,
+            DyeId2 = modelId.Stain1
         };
     }
 }
