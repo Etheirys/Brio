@@ -135,6 +135,7 @@ internal class UIManager : IDisposable
 
         _pluginInterface.UiBuilder.Draw += DrawUI;
         _pluginInterface.UiBuilder.OpenConfigUi += ShowSettingsWindow;
+        _pluginInterface.UiBuilder.OpenMainUi += ShowMainWindow;
         _pluginInterface.ActivePluginsChanged += ActivePluginsChanged;
 
         ApplySettings();
@@ -158,6 +159,11 @@ internal class UIManager : IDisposable
     public void ShowSettingsWindow()
     {
         _settingsWindow.IsOpen = true;
+    }
+
+    public void ShowMainWindow()
+    {
+        _mainWindow.IsOpen = true;
     }
 
     private void ActivePluginsChanged(PluginListInvalidationKind kind, bool affectedThisPlugin)
@@ -220,6 +226,8 @@ internal class UIManager : IDisposable
         _configurationService.OnConfigurationChanged -= ApplySettings;
         _pluginInterface.UiBuilder.Draw -= _windowSystem.Draw;
         _pluginInterface.UiBuilder.OpenConfigUi -= ShowSettingsWindow;
+        _pluginInterface.UiBuilder.OpenMainUi -= ShowMainWindow;
+
 
         _windowSystem.RemoveAllWindows();
 
