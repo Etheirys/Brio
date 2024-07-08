@@ -32,8 +32,15 @@ using Brio.Entities;
 using Brio.Entities.Actor;
 using Brio.Files.Converters;
 using Brio.Game.Actor.Appearance;
+using Brio.Game.Posing;
+using Brio.Library.Sources;
 using Brio.Resources;
+using Brio.UI.Controls.Editors;
+using Brio.UI.Controls.Stateless;
+using Dalamud.Interface;
 using Dalamud.Interface.Textures.TextureWraps;
+using Dalamud.Interface.Utility.Raii;
+using ImGuiNET;
 using System;
 using System.Globalization;
 using System.Numerics;
@@ -43,13 +50,36 @@ namespace Brio.Files;
 
 internal class CMToolPoseFileInfo : AppliableActorFileInfoBase<CMToolPoseFile>
 {
+    private PosingService _posingService;
+
     public override string Name => "CMTool Pose File";
     public override IDalamudTextureWrap Icon => ResourceProvider.Instance.GetResourceImage("Images.FileIcon_Pose.png");
     public override string Extension => ".cmp";
 
-    public CMToolPoseFileInfo(EntityManager entityManager)
+    public CMToolPoseFileInfo(EntityManager entityManager, PosingService posingService)
          : base(entityManager)
     {
+        _posingService = posingService;
+    }
+
+    public override void DrawActions(FileEntry fileEntry, bool isModal)
+    {
+        if(ImBrio.Button("", FontAwesomeIcon.Cog, new Vector2(25, 0), hoverText: "Import Options"))
+        {
+            ImGui.OpenPopup("import_options_popup_lib");
+        }
+
+        using(var popup = ImRaii.Popup("import_options_popup_lib"))
+        {
+            if(popup.Success)
+            {
+                PosingEditorCommon.DrawImportOptionEditor(_posingService.DefaultImporterOptions);
+            }
+        }
+
+        ImGui.SameLine();
+
+        base.DrawActions(fileEntry, isModal);
     }
 
     protected override void Apply(CMToolPoseFile file, ActorEntity actor, bool asExpression)

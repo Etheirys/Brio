@@ -3,8 +3,15 @@ using Brio.Core;
 using Brio.Entities;
 using Brio.Entities.Actor;
 using Brio.Files.Converters;
+using Brio.Game.Posing;
+using Brio.Library.Sources;
 using Brio.Resources;
+using Brio.UI.Controls.Editors;
+using Brio.UI.Controls.Stateless;
+using Dalamud.Interface;
 using Dalamud.Interface.Textures.TextureWraps;
+using Dalamud.Interface.Utility.Raii;
+using ImGuiNET;
 using System;
 using System.Collections.Generic;
 using System.Numerics;
@@ -13,13 +20,36 @@ namespace Brio.Files;
 
 internal class PoseFileInfo : AppliableActorFileInfoBase<PoseFile>
 {
+    private PosingService _posingService;
+
     public override string Name => "Pose File";
     public override IDalamudTextureWrap Icon => ResourceProvider.Instance.GetResourceImage("Images.FileIcon_Pose.png");
     public override string Extension => ".pose";
 
-    public PoseFileInfo(EntityManager entityManager)
+    public PoseFileInfo(EntityManager entityManager, PosingService posingService)
     : base(entityManager)
     {
+        _posingService = posingService;
+    }
+
+    public override void DrawActions(FileEntry fileEntry, bool isModal)
+    {
+        if(ImBrio.Button("", FontAwesomeIcon.Cog, new Vector2(25, 0), hoverText: "Import Options"))
+        {
+            ImGui.OpenPopup("import_options_popup_lib");
+        }
+
+        using(var popup = ImRaii.Popup("import_options_popup_lib"))
+        {
+            if(popup.Success)
+            {
+                PosingEditorCommon.DrawImportOptionEditor(_posingService.DefaultImporterOptions);
+            }
+        }
+
+        ImGui.SameLine();
+
+        base.DrawActions(fileEntry, isModal);
     }
 
     protected override void Apply(PoseFile file, ActorEntity actor, bool asExpression)
