@@ -1,7 +1,16 @@
 
 To open this window again click `Infomation` on the Scene Manager then -> `View the Changelog`
 --------------------------------------------------------------------------------
-	 ---> Brio, Version 0.3.1.6 <--- 
+	 ---> Brio, Version 0.3.2.0 <--- 
+--------------------------------------------------------------------------------
+
+- Update Brio for Dawntrail (Thanks Asgard!)
+- Added support for the second dye channel 
+- Renamed some of the bones for better consistency
+
+
+--------------------------------------------------------------------------------
+	 --- Brio, Version 0.3.1.6 --- 
 --------------------------------------------------------------------------------
 
 - Readded the "Load NPC Appearance" button to the Appearance Widget
@@ -20,47 +29,6 @@ To open this window again click `Infomation` on the Scene Manager then -> `View 
 - Fixed an issue where when loading certain poses some Transform values would be NAN
 - Fix an issue where the Welcome screen would always display for new users
 - Fixed a rare crash with the key-bind overlay open.
-
---------------------------------------------------------------------------------
-	 --- Brio, Version 0.3.1.0 --- 
---------------------------------------------------------------------------------
-
-- [New Feature!] Added Actor renaming!
-
-- Added `Spawn New Actor` & `Spawn New Actor with Companion slot` to the Scene Manager.
-
-- The Library will now remember the last location you were when importing a Pose or
-  Character file, if `Open Library to Last Location I was previously` is Enabled.
-
-- The Library will now reopen after you import a Pose or Character file using the Import Screen.
-
-- Added the `Import Options` button to the Import Screen.
-
-- Reorganized & Added New items to `Settings`.
-
-- Added a new setting `Make the [ModelTransform] Bone Standout`.
-	- With this setting Enabled the `Model Transform` bone will be more obvious.
-	- You can change the Color with the setting: `[Model Transform] Bone Standout Color`
-
-- Added `Advanced` Tab to settings.
-	- Added a new button in `Advanced` Tab to reset setting to default.
-	- Moved `World` tab settings to `Advanced`.
-
-- Renamed Action Timelines -> Animation Control.
-
-- Changed the default color settings.
-
-- Added new IPC `Brio.SpawnActorWithoutCompanion`.
-
-- Fixed an issue when importing pose files with certain clothing on.
-
-- Fixed an issue where keyboard shortcuts would not work.
-
-- Fixed an issue where Spawning a new actor would always spawn with a Companion.
-
-- Fix an issue where the Posing Overlay would not display fully if the text scale was less then 100%.
-
-- Fixed a bug in the Library where it would rescan every time that a setting was changed.
 
 --------------------------------------------------------------------------------
 
