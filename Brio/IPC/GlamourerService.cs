@@ -12,7 +12,6 @@ namespace Brio.IPC;
 internal class GlamourerService : IDisposable
 {
     public bool IsGlamourerAvailable { get; private set; } = false;
-    public bool GlamourerUseLegacyApi { get; private set; } = false;
 
     //private const int GlamourerApiMajor = 1;
     //private const int GlamourerApiMinor = 1;
@@ -27,8 +26,6 @@ internal class GlamourerService : IDisposable
 
     //private readonly Glamourer.Api.IpcSubscribers.ApiVersion _glamourerApiVersions;
     //private readonly Glamourer.Api.IpcSubscribers.RevertState _glamourerRevertCharacter;
-
-    //private Glamourer.Api.IpcSubscribers.Legacy.RevertCharacter? _gLegacyRevertCharacter;
 
     public GlamourerService(IDalamudPluginInterface pluginInterface, ConfigurationService configurationService, GPoseService gPoseService, IFramework framework, ActorRedrawService redrawService)
     {
@@ -71,19 +68,11 @@ internal class GlamourerService : IDisposable
         //            return false;
         //        }
 
-        //        try
+        //        var (major, minor) = _glamourerApiVersions.Invoke();
+        //        if(major != GlamourerApiMajor || minor < GlamourerApiMinor)
         //        {
-        //            var (major, minor) = _glamourerApiVersions.Invoke();
-        //            if(major != GlamourerApiMajor || minor < GlamourerApiMinor)
-        //            {
-        //                Brio.Log.Warning($"Glamourer API mismatch, found v{major}.{minor}");
-        //                return false;
-        //            }
-        //        }
-        //        catch
-        //        {
-        //            GlamourerUseLegacyApi = true;
-        //            LoadLegacy();
+        //            Brio.Log.Warning($"Glamourer API mismatch, found v{major}.{minor}");
+        //            return false;
         //        }
 
         //        Brio.Log.Debug("Glamourer integration initialized");
@@ -95,12 +84,6 @@ internal class GlamourerService : IDisposable
         //        Brio.Log.Debug(ex, "Glamourer initialize error");
         //        return false;
         //    }
-        //}
-        //void LoadLegacy()
-        //{
-        //    Brio.Log.Warning("Using Glamourer Legacy API!");
-
-        //    _gLegacyRevertCharacter = new Glamourer.Api.IpcSubscribers.Legacy.RevertCharacter(_pluginInterface);
         //}
     }
 
@@ -126,7 +109,6 @@ internal class GlamourerService : IDisposable
         //    Brio.Log.Debug("Glamourer revert complete");
         //}, delayTicks: 5);
         return Task.CompletedTask;
-
     }
 
     private void OnGPoseStateChange(bool newState)

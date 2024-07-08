@@ -19,45 +19,21 @@ internal static class AppearanceEditorCommon
         if(!capability.HasPenumbraIntegration)
             return;
 
-        if(capability.PenumbraService.PenumbraUseLegacyApi)
+        var currentCollection = capability.CurrentCollection;
+
+        const string collectionLabel = "Collection";
+        ImGui.SetNextItemWidth(-ImGui.CalcTextSize($"{collectionLabel} XXXX").X);
+        using(var combo = ImRaii.Combo(collectionLabel, currentCollection))
         {
-            var currentCollection = capability.CurrentCollection;
-
-            const string collectionLabel = "Collection";
-            ImGui.SetNextItemWidth(-ImGui.CalcTextSize($"{collectionLabel} XXXX").X);
-            using(var combo = ImRaii.Combo(collectionLabel, currentCollection))
+            if(combo.Success)
             {
-                if(combo.Success)
+                var collections = capability.PenumbraService.GetCollections();
+
+                foreach(var collection in from col in collections orderby col.Value ascending select col)
                 {
-                    var collections = capability.PenumbraService.LegacyGetCollections();
-
-                    foreach(var collection in collections)
-                    {
-                        bool isSelected = collection.Equals(currentCollection);
-                        if(ImGui.Selectable(collection, isSelected))
-                            capability.LegacySetCollection(collection);
-                    }
-                }
-            }
-        }
-        else
-        {
-            var currentCollection = capability.CurrentCollection;
-
-            const string collectionLabel = "Collection";
-            ImGui.SetNextItemWidth(-ImGui.CalcTextSize($"{collectionLabel} XXXX").X);
-            using(var combo = ImRaii.Combo(collectionLabel, currentCollection))
-            {
-                if(combo.Success)
-                {
-                    var collections = capability.PenumbraService.GetCollections();
-
-                    foreach(var collection in from col in collections orderby col.Value ascending select col)
-                    {
-                        bool isSelected = collection.Value.Equals(currentCollection);
-                        if(ImGui.Selectable(collection.Value, isSelected))
-                            capability.SetCollection(collection.Key);
-                    }
+                    bool isSelected = collection.Value.Equals(currentCollection);
+                    if(ImGui.Selectable(collection.Value, isSelected))
+                        capability.SetCollection(collection.Key);
                 }
             }
         }

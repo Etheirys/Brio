@@ -10,7 +10,6 @@ namespace Brio.IPC;
 internal class PenumbraService : IDisposable
 {
     public bool IsPenumbraAvailable { get; private set; } = false;
-    public bool PenumbraUseLegacyApi { get; private set; } = false;
 
     //private const int PenumbraApiMajor = 5;
     //private const int PenumbraApiMinor = 0;
@@ -29,10 +28,6 @@ internal class PenumbraService : IDisposable
     //private readonly GetCollections _penumbraGetCollections;
     //private readonly SetCollectionForObject _penumbraSetCollectionForObject;
     //private readonly GetCollectionForObject _penumbraGetCollectionForObject;
-
-    //private Penumbra.Api.IpcSubscribers.Legacy.GetCollectionForObject? _pLegacyGetCollectionForObject;
-    //private Penumbra.Api.IpcSubscribers.Legacy.SetCollectionForObject? _pLegacySetCollectionForObject;
-    //private Penumbra.Api.IpcSubscribers.Legacy.GetCollections? _pLegacyGetCollections;
 
     public PenumbraService(IDalamudPluginInterface pluginInterface, ConfigurationService configurationService)
     {
@@ -75,19 +70,11 @@ internal class PenumbraService : IDisposable
         //            return false;
         //        }
 
-        //        try
+        //        var (major, minor) = _penumbraApiVersion.Invoke();
+        //        if(major != PenumbraApiMajor || minor < PenumbraApiMinor)
         //        {
-        //            var (major, minor) = _penumbraApiVersion.Invoke();
-        //            if(major != PenumbraApiMajor || minor < PenumbraApiMinor)
-        //            {
-        //                Brio.Log.Warning($"Penumbra API mismatch!, found v{major}.{minor}");
-        //                return false;
-        //            }
-        //        }
-        //        catch
-        //        {
-        //            PenumbraUseLegacyApi = true;
-        //            LoadLegacy();
+        //            Brio.Log.Warning($"Penumbra API mismatch!, found v{major}.{minor}");
+        //            return false;
         //        }
 
         //        Brio.Log.Debug("Penumbra integration initialized");
@@ -99,37 +86,16 @@ internal class PenumbraService : IDisposable
         //        Brio.Log.Debug(ex, "Penumbra initialize error");
         //        return false;
         //    }
+        //}
     }
-
-    void LoadLegacy()
-    {
-        //Brio.Log.Warning("Using Penumbra Legacy API!");
-
-        //_pLegacyGetCollectionForObject = new(_pluginInterface);
-        //_pLegacySetCollectionForObject = new(_pluginInterface);
-        //_pLegacyGetCollections = new(_pluginInterface);
-    }
-
 
     public string GetCollectionForObject(IGameObject gameObject)
     {
-        //if(PenumbraUseLegacyApi)
-        //{
-        //    var (_, _, name) = _pLegacyGetCollectionForObject!.Invoke(gameObject.ObjectIndex);
-        //    return name;
-        //}
-
         //var (_, _, collection) = _penumbraGetCollectionForObject.Invoke(gameObject.ObjectIndex);
         //return collection.Name;
         return "";
     }
 
-    public string LegacySetCollectionForObject(IGameObject gameObject, string collectionName)
-    {
-        //Brio.Log.Debug($"Setting GameObject {gameObject.ObjectIndex} collection to {collectionName}");
-        //var (_, name) = _pLegacySetCollectionForObject!.Invoke(gameObject.ObjectIndex, collectionName.ToString(), true, true);
-        return "";
-    }
     public Guid SetCollectionForObject(IGameObject gameObject, Guid collectionName)
     {
         //Brio.Log.Debug($"Setting GameObject {gameObject.ObjectIndex} collection to {collectionName}");
@@ -138,10 +104,6 @@ internal class PenumbraService : IDisposable
         return Guid.NewGuid();
     }
 
-    public IEnumerable<string> LegacyGetCollections()
-    {
-        return Enumerable.Empty<string>();
-    }
     public Dictionary<Guid, string> GetCollections()
     {
         return new Dictionary<Guid, string>();
