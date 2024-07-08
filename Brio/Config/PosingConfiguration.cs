@@ -5,12 +5,12 @@ internal class PosingConfiguration
     // Overlay
     public bool OverlayDefaultsOn { get; set; } = false;
     public bool AllowGizmoAxisFlip { get; set; } = true;
-    public float BoneCircleSize { get; set; } = 7f;
+    public float BoneCircleSize { get; set; } = 6.300f;
     public uint BoneCircleNormalColor { get; set; } = 0xFFFFFFFF;
     public uint BoneCircleInactiveColor { get; set; } = 0x55555555;
     public uint BoneCircleHoveredColor { get; set; } = 0xFFFF0073;
     public uint BoneCircleSelectedColor { get; set; } = 0xFFF82B56;
-    public float SkeletonLineThickness { get; set; } = 3f;
+    public float SkeletonLineThickness { get; set; } = 0.010f;
     public uint SkeletonLineActiveColor { get; set; } = 0xFFFFFFFF;
     public uint SkeletonLineInactiveColor { get; set; } = 0x55555555;
     public bool ShowSkeletonLines { get; set; } = true;
