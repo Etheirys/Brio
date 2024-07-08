@@ -54,8 +54,6 @@ internal unsafe class CameraService : IDisposable
                 {
                     if(camera == cameraCapability.Camera)
                     {
-                        var ptr = &camera->Camera.CameraBase.SceneCamera;
-                        //Brio.Log.Fatal(((nint)ptr).ToString("X"));
                         Vector3 currentPos = camera->Camera.CameraBase.SceneCamera.Object.Position;
                         var newPos = cameraCapability.PositionOffset + currentPos;
                         camera->Camera.CameraBase.SceneCamera.Object.Position = newPos;
