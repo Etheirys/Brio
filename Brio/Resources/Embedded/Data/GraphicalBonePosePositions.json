@@ -292,6 +292,14 @@
           "Position": "310, 400"
         },
         {
+          "Name": "j_f_dhoho_l",
+          "Position": "310, 480"
+        },
+        {
+          "Name": "j_f_shoho_l",
+          "Position": "310, 560"
+        },
+        {
           "Name": "j_f_uhana",
           "Position": "458.5, 294"
         },
@@ -354,7 +362,15 @@
         },
         {
           "Name": "j_f_hoho_l",
-          "Position": "395, 690"
+          "Position": "395, 700"
+        },
+        {
+          "Name": "j_f_dhoho_l",
+          "Position": "395, 780"
+        },
+        {
+          "Name": "j_f_shoho_l",
+          "Position": "395, 860"
         },
         {
           "Name": "j_f_uhana",
@@ -411,7 +427,15 @@
         },
         {
           "Name": "j_f_hoho_l",
-          "Position": "400, 827"
+          "Position": "400, 800"
+        },
+        {
+          "Name": "j_f_dhoho_l",
+          "Position": "400, 850"
+        },
+        {
+          "Name": "j_f_shoho_l",
+          "Position": "400, 900"
         },
         {
           "Name": "j_f_uhana",
@@ -524,7 +548,19 @@
         },
         {
           "Name": "j_f_hige_l",
-          "Position": "450, 930"
+          "Position": "450, 910"
+        },
+        {
+          "Name": "j_f_hoho_l",
+          "Position": "450, 980"
+        },
+        {
+          "Name": "j_f_dhoho_l",
+          "Position": "450, 1050"
+        },
+        {
+          "Name": "j_f_shoho_l",
+          "Position": "450, 1110"
         },
         {
           "Name": "n_f_ulip_l",
