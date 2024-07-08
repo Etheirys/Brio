@@ -1,18 +1,21 @@
 
-To open this window again click `Infomation` on the Scene Manager then -> `View the Changelog`
+To open this window again click `Information` on the Scene Manager then -> `View the Changelog`
 --------------------------------------------------------------------------------
 	 ---> Brio, Version 0.3.2.0 <--- 
 --------------------------------------------------------------------------------
 
 - Update Brio for Dawntrail (Thanks Asgard!)
 - Added support for the second dye channel 
+- Added the Import Options button to the Library when importing a pose
 - Renamed some of the bones for better consistency
 - Made the default size of the Skeleton's LineThickness & Bone's CircleSize smaller
 
  --  Known Issues -- 
 
+ - Old pose files do not load faces correctly,
+   As a mitigation, make sure to unselect "Head" under import options when loading old poses
+
  - Facewear is not changeable in the Advanced Appearance Window
- - There is a exception thrown in the log when using the Library, This can be safely ignored
  - Not all of the new bones are named yet
 
 --------------------------------------------------------------------------------
