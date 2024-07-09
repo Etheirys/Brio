@@ -1,6 +1,20 @@
 
 To open this window again click `Information` on the Scene Manager then -> `View the Changelog`
 --------------------------------------------------------------------------------
+	 ---> Brio, Version 0.3.2.1 <--- 
+--------------------------------------------------------------------------------
+- More facial bones added to advanced posing
+- More facial bones named
+
+ --  Known Issues -- 
+
+ - Old pose files do not load faces correctly,
+   As a mitigation, make sure to unselect "Head" under import options when loading old poses
+
+ - Facewear is not changeable in the Advanced Appearance Window
+ - Not all of the new bones are named yet
+
+--------------------------------------------------------------------------------
 	 ---> Brio, Version 0.3.2.0 <--- 
 --------------------------------------------------------------------------------
 
