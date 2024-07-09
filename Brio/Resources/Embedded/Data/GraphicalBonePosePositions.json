@@ -289,15 +289,15 @@
         },
         {
           "Name": "j_f_hoho_l",
-          "Position": "310, 400"
+          "Position": "310, 390"
         },
         {
           "Name": "j_f_dhoho_l",
-          "Position": "310, 480"
+          "Position": "310, 450"
         },
         {
           "Name": "j_f_shoho_l",
-          "Position": "310, 560"
+          "Position": "310, 510"
         },
         {
           "Name": "j_f_uhana",
@@ -307,17 +307,47 @@
           "Name": "j_f_hana_l",
           "Position": "420.5, 420"
         },
+
+        {
+          "Name": "j_f_umlip_01_l",
+          "Position": "390, 490"
+        },
+        {
+          "Name": "j_f_umlip_02_l",
+          "Position": "390, 520"
+        },
         {
           "Name": "j_f_ulip_01_l",
-          "Position": "428.5, 520"
+          "Position": "438, 490"
+        },
+        {
+          "Name": "j_f_ulip_02_l",
+          "Position": "438, 520"
         },
         {
           "Name": "j_f_dlip_01_l",
-          "Position": "428.5, 600"
+          "Position": "435, 610"
         },
         {
-          "Name": "j_f_lip_l",
-          "Position": "350, 550"
+          "Name": "j_f_dlip_02_l",
+          "Position": "435, 580"
+        },
+        {
+          "Name": "j_f_dmlip_01_l",
+          "Position": "390, 610"
+        },
+        {
+          "Name": "j_f_dmlip_02_l",
+          "Position": "390, 580"
+        },
+
+        {
+          "Name": "j_f_dslip_l",
+          "Position": "360, 570"
+        },
+        {
+          "Name": "j_f_uslip_l",
+          "Position": "360, 540"
         },
         {
           "Name": "j_f_ago",
@@ -381,16 +411,48 @@
           "Position": "540, 740"
         },
         {
+          "Name": "j_f_umlip_01_l",
+          "Position": "500, 820"
+        },
+        {
+          "Name": "j_f_umlip_02_l",
+          "Position": "500, 860"
+        },
+        {
           "Name": "j_f_ulip_01_l",
-          "Position": "540, 843"
+          "Position": "545, 820"
+        },
+        {
+          "Name": "j_f_ulip_02_l",
+          "Position": "545, 863"
         },
         {
           "Name": "j_f_dlip_01_l",
-          "Position": "540, 943"
+          "Position": "545, 963"
+        },
+        {
+          "Name": "j_f_dlip_02_l",
+          "Position": "545, 920"
+        },
+        {
+          "Name": "j_f_dmlip_01_l",
+          "Position": "500, 963"
+        },
+        {
+          "Name": "j_f_dmlip_02_l",
+          "Position": "500, 920"
         },
         {
           "Name": "j_f_ago",
           "Position": "571, 1043"
+        },
+        {
+          "Name": "j_f_uslip_l",
+          "Position": "460, 863"
+        },
+        {
+          "Name": "j_f_dslip_l",
+          "Position": "460, 893"
         }
       ]
     },
@@ -447,11 +509,43 @@
         },
         {
           "Name": "j_f_ulip_01_l",
-          "Position": "497, 894"
+          "Position": "512, 864"
+        },
+        {
+          "Name": "j_f_ulip_02_l",
+          "Position": "512, 894"
+        },
+        {
+          "Name": "j_f_umlip_01_l",
+          "Position": "472, 864"
+        },
+        {
+          "Name": "j_f_umlip_02_l",
+          "Position": "472, 894"
         },
         {
           "Name": "j_f_dlip_01_l",
-          "Position": "497, 945"
+          "Position": "512, 975"
+        },
+        {
+          "Name": "j_f_dlip_02_l",
+          "Position": "512, 945"
+        },
+        {
+          "Name": "j_f_dmlip_01_l",
+          "Position": "472, 975"
+        },
+        {
+          "Name": "j_f_dmlip_02_l",
+          "Position": "472, 945"
+        },
+        {
+          "Name": "j_f_dslip_l",
+          "Position": "442, 925"
+        },
+        {
+          "Name": "j_f_uslip_l",
+          "Position": "442, 885"
         },
         {
           "Name": "j_f_ago",
@@ -584,11 +678,43 @@
         },
         {
           "Name": "j_f_ulip_01_l",
-          "Position": "656.5, 1116"
+          "Position": "670, 1066"
+        },
+        {
+          "Name": "j_f_ulip_02_l",
+          "Position": "670, 1116"
+        },
+        {
+          "Name": "j_f_umlip_01_l",
+          "Position": "620, 1066"
+        },
+        {
+          "Name": "j_f_umlip_02_l",
+          "Position": "620, 1116"
         },
         {
           "Name": "j_f_dlip_01_l",
-          "Position": "656.5, 1201"
+          "Position": "670, 1261"
+        },
+        {
+          "Name": "j_f_dlip_02_l",
+          "Position": "670, 1201"
+        },
+        {
+          "Name": "j_f_dmlip_01_l",
+          "Position": "620, 1261"
+        },
+        {
+          "Name": "j_f_dmlip_02_l",
+          "Position": "620, 1201"
+        },
+        {
+          "Name": "j_f_uslip_l",
+          "Position": "570, 1126"
+        },
+        {
+          "Name": "j_f_dslip_l",
+          "Position": "570, 1176"
         },
         {
           "Name": "j_f_ago",
