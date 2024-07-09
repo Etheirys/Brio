@@ -4,7 +4,7 @@ To open this window again click `Information` on the Scene Manager then -> `View
 	 ---> Brio, Version 0.3.2.1 <--- 
 --------------------------------------------------------------------------------
 - More facial bones added to advanced posing
-- More facian bones named
+- More facial bones named
 
  --  Known Issues -- 
 
