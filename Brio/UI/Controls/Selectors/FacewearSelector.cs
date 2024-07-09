@@ -36,7 +36,7 @@ internal class FacewearSelector(string id) : Selector<FacewearUnion>(id)
           none => ((byte)0, "None", (uint)0x0)
       );
 
-        ImBrio.BorderedGameIcon("icon", facewearIcon, "Images.Head.png", description: $"{facewearName}\n{facewearId}", flags: ImGuiButtonFlags.None, size: IconSize);
+        ImBrio.BorderedGameIcon("icon", facewearIcon, "Images.Facewear.png", description: $"{facewearName}\n{facewearId}", flags: ImGuiButtonFlags.None, size: IconSize);
     }
 
     protected override bool Filter(FacewearUnion item, string search)

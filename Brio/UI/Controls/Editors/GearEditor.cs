@@ -426,7 +426,7 @@ internal class GearEditor()
 
         using(ImRaii.PushId("facewear"))
         {
-            if(ImBrio.BorderedGameIcon("##icon", facewearIcon, "Images.Head.png", size: faceIconSize))
+            if(ImBrio.BorderedGameIcon("##icon", facewearIcon, "Images.Facewear.png", size: faceIconSize))
             {
                 _facewearSelector.Select(facewearUnion, true);
                 ImGui.OpenPopup("facewear_popup");
