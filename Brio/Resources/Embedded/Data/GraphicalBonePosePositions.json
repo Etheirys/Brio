@@ -269,11 +269,19 @@
         },
         {
           "Name": "j_f_mayu_l",
-          "Position": "257, 150"
+          "Position": "250, 160"
         },
         {
-          "Name": "j_f_miken_l",
-          "Position": "375, 180"
+          "Name": "j_f_mmayu_l",
+          "Position": "326, 175"
+        },
+        {
+          "Name": "j_f_miken_01_l",
+          "Position": "380, 197"
+        },
+        {
+          "Name": "j_f_miken_02_l",
+          "Position": "407, 211"
         },
         {
           "Name": "j_f_mabup_01_l",
@@ -388,11 +396,19 @@
         },
         {
           "Name": "j_f_mayu_l",
-          "Position": "337, 438"
+          "Position": "311, 427"
         },
         {
-          "Name": "j_f_miken_l",
-          "Position": "468, 483"
+          "Name": "j_f_mmayu_l",
+          "Position": "400, 457"
+        },
+        {
+          "Name": "j_f_miken_01_l",
+          "Position": "467, 482"
+        },
+        {
+          "Name": "j_f_miken_02_l",
+          "Position": "509, 501"
         },
         {
           "Name": "j_f_mabup_01_l",
@@ -501,11 +517,19 @@
         },
         {
           "Name": "j_f_mayu_l",
-          "Position": "346, 585"
+          "Position": "320, 590"
         },
         {
-          "Name": "j_f_miken_l",
-          "Position": "460, 620"
+          "Name": "j_f_mmayu_l",
+          "Position": "395, 600"
+        },
+        {
+          "Name": "j_f_miken_01_l",
+          "Position": "441, 610"
+        },
+        {
+          "Name": "j_f_miken_02_l",
+          "Position": "485, 640"
         },
         {
           "Name": "j_f_mabup_01_l",
@@ -670,11 +694,19 @@
         },
         {
           "Name": "j_f_mayu_l",
-          "Position": "400, 480"
+          "Position": "340, 453"
         },
         {
-          "Name": "j_f_miken_l",
-          "Position": "550, 560"
+          "Name": "j_f_mmayu_l",
+          "Position": "445, 480"
+        },
+        {
+          "Name": "j_f_miken_01_l",
+          "Position": "535, 520"
+        },
+        {
+          "Name": "j_f_miken_02_l",
+          "Position": "587, 547"
         },
         {
           "Name": "j_f_mabup_01_l",
