@@ -1,7 +1,7 @@
 ﻿using Brio.Resources;
-using OneOf.Types;
-using OneOf;
 using Lumina.Excel.GeneratedSheets2;
+using OneOf;
+using OneOf.Types;
 
 namespace Brio.Game.Types;
 

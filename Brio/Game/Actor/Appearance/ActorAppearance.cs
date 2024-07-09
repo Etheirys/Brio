@@ -1,5 +1,4 @@
 ﻿using Brio.Game.Actor.Extensions;
-using Brio.Game.Actor.Interop;
 using FFXIVClientStructs.FFXIV.Client.Game.Character;
 using Lumina.Excel.GeneratedSheets;
 using DalamudCharacter = Dalamud.Game.ClientState.Objects.Types.ICharacter;

@@ -2,7 +2,6 @@
 using Brio.Entities;
 using Brio.Game.Actor.Appearance;
 using Brio.Game.Actor.Extensions;
-using Brio.Game.Actor.Interop;
 using Brio.Game.GPose;
 using Brio.IPC;
 using Dalamud.Game;
@@ -196,12 +195,12 @@ internal class ActorAppearanceService : IDisposable
                     {
                         character.BrioDrawData()->Facewear = appearance.Facewear;
                     }
-                    else 
-                    { 
+                    else
+                    {
                         _setFacewear(&native->DrawData, 0, appearance.Facewear);
                     }
                 }
-            }      
+            }
 
             if(options.HasFlag(AppearanceImportOptions.Weapon))
             {

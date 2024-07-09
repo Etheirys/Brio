@@ -11,8 +11,6 @@ using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
 using ImGuiNET;
 using System;
-using System.IO;
-using System.Xml.Linq;
 
 namespace Brio.UI;
 
