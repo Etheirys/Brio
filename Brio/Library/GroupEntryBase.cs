@@ -73,6 +73,8 @@ internal abstract class GroupEntryBase : EntryBase
         {
 #if DEBUG
             Brio.Log.Error(ex, "Exception while filtering entries");
+#else
+            _ = ex;
 #endif
         }
     }
