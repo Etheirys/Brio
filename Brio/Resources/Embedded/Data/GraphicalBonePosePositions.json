@@ -288,6 +288,18 @@
           "Position": "310, 300"
         },
         {
+          "Name": "j_f_bero_01",
+          "Position": "750, 540"
+        },
+        {
+          "Name": "j_f_bero_02",
+          "Position": "750, 580"
+        },
+        {
+          "Name": "j_f_bero_03",
+          "Position": "750, 620"
+        },
+        {
           "Name": "j_f_dmemoto_l",
           "Position": "350, 450"
         },
@@ -395,6 +407,18 @@
           "Position": "395, 613"
         },
         {
+          "Name": "j_f_bero_01",
+          "Position": "880, 870"
+        },
+        {
+          "Name": "j_f_bero_02",
+          "Position": "880, 920"
+        },
+        {
+          "Name": "j_f_bero_03",
+          "Position": "880, 970"
+        },
+        {
           "Name": "j_f_dmemoto_l",
           "Position": "440, 780"
         },
@@ -494,6 +518,18 @@
         {
           "Name": "j_f_mabdn_01_l",
           "Position": "400, 727"
+        },
+        {
+          "Name": "j_f_bero_01",
+          "Position": "750, 900"
+        },
+        {
+          "Name": "j_f_bero_02",
+          "Position": "750, 930"
+        },
+        {
+          "Name": "j_f_bero_03",
+          "Position": "750, 960"
         },
         {
           "Name": "j_f_dmemoto_l",
@@ -655,6 +691,18 @@
         {
           "Name": "j_f_hige_l",
           "Position": "450, 910"
+        },
+        {
+          "Name": "j_f_bero_01",
+          "Position": "1100, 1130"
+        },
+        {
+          "Name": "j_f_bero_02",
+          "Position": "1100, 1180"
+        },
+        {
+          "Name": "j_f_bero_03",
+          "Position": "1100, 1230"
         },
         {
           "Name": "j_f_dmemoto_l",
