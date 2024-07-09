@@ -1,4 +1,5 @@
 ﻿using Brio.Game.Actor.Extensions;
+using Brio.Game.Actor.Interop;
 using FFXIVClientStructs.FFXIV.Client.Game.Character;
 using Lumina.Excel.GeneratedSheets;
 using DalamudCharacter = Dalamud.Game.ClientState.Objects.Types.ICharacter;
@@ -8,6 +9,7 @@ namespace Brio.Game.Actor.Appearance;
 internal struct ActorAppearance()
 {
     public int ModelCharaId;
+    public byte Facewear;
     public ActorWeapons Weapons = new();
     public ActorEquipment Equipment = new();
     public ActorCustomize Customize = new();
@@ -29,6 +31,8 @@ internal struct ActorAppearance()
         {
             actorAppearance.Equipment = *(ActorEquipment*)slot;
         }
+
+        actorAppearance.Facewear = character.BrioDrawData()->Facewear;
 
         actorAppearance.Customize = *(ActorCustomize*)&native->DrawData.CustomizeData;
 
@@ -115,6 +119,9 @@ internal struct ActorAppearance()
             actorAppearance.Weapons.OffHand = offHand;
             actorAppearance.Equipment = equipment;
         }
+
+        // TODO: Can NPCs have facewear?
+        actorAppearance.Facewear = 0;
 
         return actorAppearance;
     }
@@ -270,6 +277,8 @@ internal struct ActorAppearance()
             actorAppearance.Equipment.LFinger.Stain1 = (byte)npc.Dye2LeftRing.Row;
         }
 
+        // TODO: Can NPCs have facewear?
+        actorAppearance.Facewear = 0;
 
         return actorAppearance;
     }
