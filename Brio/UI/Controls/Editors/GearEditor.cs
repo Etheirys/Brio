@@ -14,13 +14,14 @@ namespace Brio.UI.Controls.Editors;
 
 internal class GearEditor()
 {
-    private Vector2 IconSize => new(ImGui.GetTextLineHeight() * 4f);
+    private Vector2 IconSize => new(ImGui.GetTextLineHeight() * 3.9f);
 
     private ActorAppearanceCapability _capability = null!;
 
     private static readonly DyeSelector _dye0Selector = new("dye_0_selector");
     private static readonly DyeSelector _dye1Selector = new("dye_1_selector");
     private static readonly GearSelector _gearSelector = new("gear_selector");
+    private static readonly FacewearSelector _facewearSelector = new("facewear_selector");
 
     private const ActorEquipSlot _weaponSlots = ActorEquipSlot.MainHand | ActorEquipSlot.OffHand;
 
@@ -63,6 +64,7 @@ internal class GearEditor()
                 didChange |= DrawGearSlot(ref currentAppearance, ref currentAppearance.Equipment.Arms, ActorEquipSlot.Hands);
                 didChange |= DrawGearSlot(ref currentAppearance, ref currentAppearance.Equipment.Legs, ActorEquipSlot.Legs);
                 didChange |= DrawGearSlot(ref currentAppearance, ref currentAppearance.Equipment.Feet, ActorEquipSlot.Feet);
+                didChange |= DrawFacewearSlot(ref currentAppearance);
             }
         }
 
@@ -405,6 +407,68 @@ internal class GearEditor()
                 }
             }
 
+        }
+
+        return didChange;
+    }
+
+    private bool DrawFacewearSlot(ref ActorAppearance appearance)
+    {
+        bool didChange = false;
+
+        Vector2 faceIconSize = new Vector2(ImGui.GetTextLineHeight() * 2.3f);
+
+        FacewearUnion facewearUnion = new FacewearId(appearance.Facewear);
+        var (facewearId, facewearName, facewearIcon) = facewearUnion.Match(
+           glasses => ((byte)glasses.RowId, glasses.Unknown3, (uint)glasses.Unknown11),
+           none => ((byte)0, "None", (uint)0x0)
+       );
+
+        using(ImRaii.PushId("facewear"))
+        {
+            if(ImBrio.BorderedGameIcon("##icon", facewearIcon, "Images.Facewear.png", size: faceIconSize))
+            {
+                _facewearSelector.Select(facewearUnion, true);
+                ImGui.OpenPopup("facewear_popup");
+            }
+
+            ImGui.SameLine();
+
+            ImGui.SetCursorPosX(IconSize.X + (ImGui.GetStyle().FramePadding.X * 2f));
+
+            using(var group = ImRaii.Group())
+            {
+                if(group.Success)
+                {
+                    string description = $"Facewear: {facewearName}";
+
+                    ImGui.Text(description);
+
+                    ImGui.SetNextItemWidth(ImGui.CalcTextSize("XXXXX").X);
+                    int value = facewearId;
+                    if(ImGui.InputInt("##facewearid", ref value, 0, 0, ImGuiInputTextFlags.EnterReturnsTrue))
+                    {
+                        appearance.Facewear = (byte)value;
+                        didChange |= true;
+                    }
+                }
+            }
+
+            using(var facewearPopup = ImRaii.Popup("facewear_popup"))
+            {
+                if(facewearPopup.Success)
+                {
+                    _facewearSelector.Draw();
+                    if(_facewearSelector.SoftSelectionChanged && _facewearSelector.SoftSelected != null)
+                    {
+                        appearance.Facewear = _facewearSelector.SoftSelected.Match(glasses => (byte)glasses.RowId, none => (byte)0);
+                        didChange |= true;
+                    }
+                    if(_gearSelector.SelectionChanged)
+                        ImGui.CloseCurrentPopup();
+
+                }
+            }
         }
 
         return didChange;

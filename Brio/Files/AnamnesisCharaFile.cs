@@ -87,6 +87,7 @@ internal class AnamnesisCharaFile : JsonDocumentBase
     public float Transparency { get; set; }
     public float MuscleTone { get; set; }
     public float HeightMultiplier { get; set; }
+    public byte Glasses { get; set; }
 
     public override void GetAutoTags(ref TagCollection tags)
     {
@@ -149,6 +150,9 @@ internal class AnamnesisCharaFile : JsonDocumentBase
         appearance.Equipment.LFinger = chara.LeftRing;
         appearance.Equipment.RFinger = chara.RightRing;
 
+        // Facewear
+        appearance.Facewear = chara.Glasses;
+
         // Extended Appearance
         appearance.ExtendedAppearance.Transparency = chara.Transparency;
 
@@ -205,6 +209,9 @@ internal class AnamnesisCharaFile : JsonDocumentBase
             Wrists = appearance.Equipment.Wrist,
             LeftRing = appearance.Equipment.LFinger,
             RightRing = appearance.Equipment.RFinger,
+
+            // Facewear
+            Glasses = appearance.Facewear,
 
             // Extended Appearance
             Transparency = appearance.ExtendedAppearance.Transparency

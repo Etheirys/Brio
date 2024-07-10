@@ -35,6 +35,8 @@ internal class ActorAppearanceService : IDisposable
     private unsafe delegate nint UpdateTintDelegate(nint charaBase, nint tint);
     private readonly Hook<UpdateTintDelegate> _updateTintHook = null!;
 
+    private unsafe delegate* unmanaged<DrawDataContainer*, byte, byte, void> _setFacewear;
+
     private uint _forceNpcHackCount = 0;
 
     public bool CanTint => _configurationService.Configuration.Appearance.EnableTinting;
@@ -58,6 +60,9 @@ internal class ActorAppearanceService : IDisposable
         var updateTintHook = Marshal.ReadInt64((nint)(CharacterBase.StaticVirtualTablePointer) + 0xC0);
         _updateTintHook = hooks.HookFromAddress<UpdateTintDelegate>((nint)updateTintHook, UpdateTintDetour);
         _updateTintHook.Enable();
+
+        var setFacewearAddress = sigScanner.ScanText("E8 ?? ?? ?? ?? 41 FF C5 41 83 FD ?? 72");
+        _setFacewear = (delegate* unmanaged<DrawDataContainer*, byte, byte, void>)setFacewearAddress;
     }
 
     public void PushForceNpcHack() => ++_forceNpcHackCount;
@@ -180,6 +185,19 @@ internal class ActorAppearanceService : IDisposable
                         {
                             *(ActorEquipment*)ptr = appearance.Equipment;
                         }
+                    }
+                }
+
+                // Facewear
+                if(existingAppearance.Facewear != appearance.Facewear)
+                {
+                    if(needsRedraw)
+                    {
+                        character.BrioDrawData()->Facewear = appearance.Facewear;
+                    }
+                    else
+                    {
+                        _setFacewear(&native->DrawData, 0, appearance.Facewear);
                     }
                 }
             }

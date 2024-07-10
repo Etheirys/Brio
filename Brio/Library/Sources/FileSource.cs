@@ -243,7 +243,7 @@ internal class FileEntry : ItemEntryBase
 
     private IDalamudTextureWrap? GetPreviewImage()
     {
-        if(_isPreviewImageDisposed) 
+        if(_isPreviewImageDisposed)
             return null;
 
         if(_previewImage == null || _previewImage.ImGuiHandle == 0)

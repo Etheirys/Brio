@@ -49,6 +49,7 @@ internal unsafe class DebugCapability : Capability
             ["CameraManager"] = ((nint)CameraManager.Instance()),
             ["ActiveCamera"] = ((nint)CameraManager.Instance()->GetActiveCamera()),
             ["EventFramework"] = ((nint)EventFramework.Instance()),
+            ["Target"] = ((nint)TargetSystem.Instance()->Target),
         };
 
         return addresses.AsReadOnly();

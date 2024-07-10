@@ -3,10 +3,7 @@ using Brio.Game.Actor;
 using Brio.Game.GPose;
 using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Plugin;
-using Dalamud.Plugin.Ipc;
 using Dalamud.Plugin.Services;
-using FFXIVClientStructs.FFXIV.Client.Game.Character;
-using Glamourer.Api.IpcSubscribers;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -73,12 +70,12 @@ internal class GlamourerService : IDisposable
                     return false;
                 }
 
-                    var (major, minor) = _glamourerApiVersions.Invoke();
-                    if(major != GlamourerApiMajor || minor < GlamourerApiMinor)
-                    {
-                        Brio.Log.Warning($"Glamourer API mismatch, found v{major}.{minor}");
-                        return false;
-                    }
+                var (major, minor) = _glamourerApiVersions.Invoke();
+                if(major != GlamourerApiMajor || minor < GlamourerApiMinor)
+                {
+                    Brio.Log.Warning($"Glamourer API mismatch, found v{major}.{minor}");
+                    return false;
+                }
 
 
                 Brio.Log.Debug("Glamourer integration initialized");
@@ -101,7 +98,7 @@ internal class GlamourerService : IDisposable
         Brio.Log.Error("Starting glamourer revert...");
 
 
-            _glamourerRevertCharacter.Invoke(character!.ObjectIndex, character.DataId);
+        _glamourerRevertCharacter.Invoke(character!.ObjectIndex, character.DataId);
 
         return _framework.RunOnTick(async () =>
         {
