@@ -31,8 +31,8 @@ internal unsafe class CameraService : IDisposable
         _cameraCollisionHook = hooking.HookFromAddress<CameraCollisionDelegate>(scanner.ScanText(cameraCollisionAddr), CameraCollisionDetour);
         _cameraCollisionHook.Enable();
 
-        // TODO: Real sig?
-        var cameraUpdateAddr = "40 55 53 57 48 8d 6c 24 a0 48 81 ec 60 01 00 00 48 8b 1d 09 3a 0a 01 48 8b f9 48 85 db 0f 84 e6 09 00 00 48 8b cb e8 d5 5f 20 ff 84 c0 0f 84 d6 09 00 00"; // Camera.vf3
+        // TODO: Real sig? 
+        var cameraUpdateAddr = "40 55 53 57 48 8D 6C 24 A0 48 81 EC 60 01 00 00 48 8B 1D ?? ?? 0A 01 48 8B F9 48 85 DB 0F 84 E6 09 00 00 48 8B CB ?? ?? ?? 20 FF 84 C0 0F 84 D6 09 00 00"; // Camera.vf3
         _cameraUpdateHook = hooking.HookFromAddress<CameraUpdateDelegate>(scanner.ScanText(cameraUpdateAddr), CameraUpdateDetour);
         _cameraUpdateHook.Enable();
     }

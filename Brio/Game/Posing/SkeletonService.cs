@@ -60,7 +60,7 @@ internal unsafe class SkeletonService : IDisposable
         _updateBonePhysicsHook = hooking.HookFromAddress<UpdateBonePhysicsDelegate>(scanner.ScanText(updateBonePhysicsAddress), UpdateBonePhysicsDetour);
         _updateBonePhysicsHook.Enable();
 
-        var finalizeSkeletonsHook = "48 8B 0D F1 68 4E 02 E9 84 D9 3D"; // Framework.TaskRenderGraphicsRender
+        var finalizeSkeletonsHook = "48 8B 0D F1 85 4E 02 E9 E4 D8 3D 00"; // Framework.TaskRenderGraphicsRender
         _finalizeSkeletonsHook = hooking.HookFromAddress<FinalizeSkeletonsDelegate>(scanner.ScanText(finalizeSkeletonsHook), FinalizeSkeletonsHook);
         _finalizeSkeletonsHook.Enable();
 
