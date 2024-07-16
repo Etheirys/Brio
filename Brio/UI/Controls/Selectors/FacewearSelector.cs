@@ -32,7 +32,7 @@ internal class FacewearSelector(string id) : Selector<FacewearUnion>(id)
     protected override void DrawItem(FacewearUnion union, bool isHovered)
     {
         var (facewearId, facewearName, facewearIcon) = union.Match(
-          glasses => ((byte)glasses.RowId, glasses.Unknown3, (uint)glasses.Unknown11),
+          glasses => ((byte)glasses.RowId, glasses.Name, (uint)glasses.Icon),
           none => ((byte)0, "None", (uint)0x0)
       );
 
@@ -45,10 +45,10 @@ internal class FacewearSelector(string id) : Selector<FacewearUnion>(id)
         return item.Match(
             (glasses) =>
             {
-                if(string.IsNullOrEmpty(glasses.Unknown3))
+                if(string.IsNullOrEmpty(glasses.Name))
                     return false;
 
-                var searchText = $"{glasses.Unknown3} {glasses.RowId}";
+                var searchText = $"{glasses.Name} {glasses.RowId}";
 
                 if(searchText.Contains(search, System.StringComparison.InvariantCultureIgnoreCase))
                     return true;
@@ -70,12 +70,12 @@ internal class FacewearSelector(string id) : Selector<FacewearUnion>(id)
 
         // Get name
         var textA = itemA.Match(
-            glasses => glasses.Unknown3,
+            glasses => glasses.Name,
             none => ""
         );
 
         var textB = itemB.Match(
-            glasses => glasses.Unknown3,
+            glasses => glasses.Name,
             none => ""
         );
 

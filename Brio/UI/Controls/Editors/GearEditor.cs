@@ -420,7 +420,7 @@ internal class GearEditor()
 
         FacewearUnion facewearUnion = new FacewearId(appearance.Facewear);
         var (facewearId, facewearName, facewearIcon) = facewearUnion.Match(
-           glasses => ((byte)glasses.RowId, glasses.Unknown3, (uint)glasses.Unknown11),
+           glasses => ((byte)glasses.RowId, glasses.Name, (uint)glasses.Icon),
            none => ((byte)0, "None", (uint)0x0)
        );
 
