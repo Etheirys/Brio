@@ -1,21 +1,28 @@
 
 To open this window again click `Information` on the Scene Manager then -> `View the Changelog`
 --------------------------------------------------------------------------------
-	 ---> Brio, Version 0.3.2.1 <--- 
+	 ---> Brio, Version 0.3.2.2 <--- 
 --------------------------------------------------------------------------------
-- More facial bones added to advanced posing
-- More facial bones named
+
+- Update Brio for Dawntrail 7.01 
+- Add support for Facewear
 
  --  Known Issues -- 
 
  - Old pose files do not load faces correctly,
    As a mitigation, make sure to unselect "Head" under import options when loading old poses
 
- - Facewear is not changeable in the Advanced Appearance Window
  - Not all of the new bones are named yet
 
 --------------------------------------------------------------------------------
-	 ---> Brio, Version 0.3.2.0 <--- 
+	 --- Brio, Version 0.3.2.1 --- 
+--------------------------------------------------------------------------------
+
+- More facial bones added to advanced posing
+- More facial bones named
+
+--------------------------------------------------------------------------------
+	 --- Brio, Version 0.3.2.0 --- 
 --------------------------------------------------------------------------------
 
 - Update Brio for Dawntrail (Thanks Asgard!)
@@ -24,38 +31,9 @@ To open this window again click `Information` on the Scene Manager then -> `View
 - Renamed some of the bones for better consistency
 - Made the default size of the Skeleton's LineThickness & Bone's CircleSize smaller
 
- --  Known Issues -- 
-
- - Old pose files do not load faces correctly,
-   As a mitigation, make sure to unselect "Head" under import options when loading old poses
-
- - Facewear is not changeable in the Advanced Appearance Window
- - Not all of the new bones are named yet
-
---------------------------------------------------------------------------------
-	 --- Brio, Version 0.3.1.6 --- 
 --------------------------------------------------------------------------------
 
-- Readded the "Load NPC Appearance" button to the Appearance Widget
-- Penumbra Collections are now sorted alphabetically 
-- Made a small optimization when drawing the Penumbra collection ComboBox
-- Made minor UI improvements
-
---------------------------------------------------------------------------------
-	 --- Brio, Version 0.3.1.1 -> Version 0.3.1.5 --- 
---------------------------------------------------------------------------------
-
-- Added support for the new Penumbra & Glamourer API
-- Fixed transform sliders not being adjusted by mousewheel (Thanks @gris-fuego!)
-- Fixed a crash by removing the Expanded Mode from the transform editor
-
-- Fixed an issue where when loading certain poses some Transform values would be NAN
-- Fix an issue where the Welcome screen would always display for new users
-- Fixed a rare crash with the key-bind overlay open.
-
---------------------------------------------------------------------------------
-
-A Big Thank you to (Night Song) & (Alvar Valo) for their support on Kofi!
+A Big Thank you to (Night Song), (Yasumi) & (Alvar Valo) for their support on Kofi!
 
 Also, Thank you, to: (@Yuki-Codes), (@danma3x), (@WorstAquaPlayer) & (@gris-fuego);
 For their contributions to Brio!
