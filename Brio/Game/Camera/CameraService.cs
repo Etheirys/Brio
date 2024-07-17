@@ -32,7 +32,7 @@ internal unsafe class CameraService : IDisposable
         _cameraCollisionHook.Enable();
 
         // TODO: Real sig? 
-        var cameraUpdateAddr = "40 55 53 57 48 8D 6C 24 A0 48 81 EC 60 01 00 00 48 8B 1D ?? ?? 0A 01 48 8B F9 48 85 DB 0F 84 E6 09 00 00 48 8B CB ?? ?? ?? 20 FF 84 C0 0F 84 D6 09 00 00"; // Camera.vf3
+        var cameraUpdateAddr = "40 55 53 57 48 8D 6C 24 A0 48 81 EC ?? ?? ?? ?? 48 8B 1D"; // Camera.vf3
         _cameraUpdateHook = hooking.HookFromAddress<CameraUpdateDelegate>(scanner.ScanText(cameraUpdateAddr), CameraUpdateDetour);
         _cameraUpdateHook.Enable();
     }
