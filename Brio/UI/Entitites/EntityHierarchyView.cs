@@ -14,6 +14,9 @@ internal class EntityHierarchyView(EntityManager entityManager)
 
     public void Draw(Entity root)
     {
+        if(root.IsVisible is false)
+            return;
+
         var selectedEntityId = entityManager.SelectedEntityId;
 
         if(_lastSelectedId != null && selectedEntityId != null && !_lastSelectedId.Equals(selectedEntityId))
@@ -31,9 +34,6 @@ internal class EntityHierarchyView(EntityManager entityManager)
 
     private void DrawEntity(Entity entity, EntityId? selectedEntityId)
     {
-        if(!entity.IsVisible)
-            return;
-
         bool didRightClick = false;
 
         ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags.SpanAvailWidth | ImGuiTreeNodeFlags.OpenOnDoubleClick;
