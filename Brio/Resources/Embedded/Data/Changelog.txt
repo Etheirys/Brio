@@ -14,6 +14,7 @@ Support for FFXIV 7.05!
 Added more Bone Categories: Face, Eyes, Lips & Jaw
 
 Added a new setting "Use the Library when importing a file"
+`With this disabled you use the Dalamud File Picker when importing files`
 
 Fixed an issue with the Undo Button upon resetting a pose
 
@@ -22,7 +23,7 @@ And finally,
 
  --  Known Issues -- 
 
-When importing a pose the head does not rotate properly,
+When importing a pose as Expression the head does not rotate properly,
 You can fix this by rotating the "Head" bone manually
 
 
