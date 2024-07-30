@@ -1,4 +1,5 @@
 ﻿using Brio.Capabilities.Posing;
+using Brio.Game.Posing;
 using Brio.UI.Controls.Editors;
 using Brio.UI.Controls.Stateless;
 using Brio.UI.Widgets.Core;
@@ -6,6 +7,7 @@ using Dalamud.Interface;
 using Dalamud.Interface.Utility.Raii;
 using ImGuiNET;
 using OneOf.Types;
+using System.Numerics;
 
 namespace Brio.UI.Widgets.Posing;
 
@@ -40,7 +42,24 @@ internal class PosingWidget(PosingCapability capability) : Widget<PosingCapabili
         ImGui.SameLine();
 
         if(ImBrio.FontIconButton("import", FontAwesomeIcon.FileImport, "Import Pose"))
-            FileUIHelpers.ShowImportPoseModal(Capability);
+        {
+            ImGui.OpenPopup("import_type");
+        }
+
+        using(var popup = ImRaii.Popup("import_type"))
+        {
+            if(popup.Success)
+            {
+                if(ImGui.Button("Import as Pose", Vector2.Zero))
+                {
+                    FileUIHelpers.ShowImportPoseModal(Capability);
+                }
+                if(ImGui.Button("Import as Expression", Vector2.Zero))
+                {
+                    FileUIHelpers.ShowImportPoseModal(Capability, asExpression: true);
+                }
+            }
+        }
 
         ImGui.SameLine();
 

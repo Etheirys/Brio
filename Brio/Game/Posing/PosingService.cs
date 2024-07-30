@@ -14,7 +14,8 @@ internal class PosingService
     public BoneFilter OverlayFilter { get; }
 
     public PoseImporterOptions DefaultImporterOptions { get; }
-    public PoseImporterOptions DefaultExpressionOptions { get; }
+    public PoseImporterOptions ExpressionOptions { get; }
+    public PoseImporterOptions ExpressionOptions2 { get; }
 
     public PosingService()
     {
@@ -23,17 +24,18 @@ internal class PosingService
         DefaultImporterOptions = new PoseImporterOptions(new BoneFilter(this), TransformComponents.Rotation, false);
         DefaultImporterOptions.BoneFilter.DisableCategory("weapon");
 
-        DefaultExpressionOptions = new PoseImporterOptions(new BoneFilter(this), TransformComponents.Rotation, false);
-        DefaultExpressionOptions.BoneFilter.DisableCategory("weapon");
-        DefaultExpressionOptions.BoneFilter.DisableCategory("body");
-        DefaultExpressionOptions.BoneFilter.DisableCategory("ears");
-        DefaultExpressionOptions.BoneFilter.DisableCategory("hair");
-        DefaultExpressionOptions.BoneFilter.DisableCategory("legs");
-        DefaultExpressionOptions.BoneFilter.DisableCategory("tail");
-        DefaultExpressionOptions.BoneFilter.DisableCategory("hands");
-        DefaultExpressionOptions.BoneFilter.DisableCategory("clothing");
-        DefaultExpressionOptions.BoneFilter.DisableCategory("ivcs");
-        DefaultExpressionOptions.BoneFilter.DisableCategory("other");
+        ExpressionOptions = new PoseImporterOptions(new BoneFilter(this), TransformComponents.All, false);
+        ExpressionOptions.BoneFilter.DisableAll();
+        ExpressionOptions.BoneFilter.EnableCategory("head");
+        ExpressionOptions.BoneFilter.EnableCategory("face");
+        ExpressionOptions.BoneFilter.EnableCategory("eyes");
+        ExpressionOptions.BoneFilter.EnableCategory("lips");
+        ExpressionOptions.BoneFilter.EnableCategory("jaw");
+
+        ExpressionOptions2 = new PoseImporterOptions(new BoneFilter(this), TransformComponents.All, false);
+        ExpressionOptions2.BoneFilter.DisableAll();
+        ExpressionOptions2.BoneFilter.EnableCategory("head");
+        //ExpressionOptions.BoneFilter.EnableCategory("face");
     }
 }
 

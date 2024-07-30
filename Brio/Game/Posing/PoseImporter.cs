@@ -1,15 +1,33 @@
-﻿using Brio.Core;
+﻿using Brio.Capabilities.Posing;
+using Brio.Core;
 using Brio.Files;
 using Brio.Game.Posing.Skeletons;
 
 namespace Brio.Game.Posing;
 
-internal class PoseImporter(PoseFile poseFile, PoseImporterOptions options, bool asExpression = false)
+internal class PoseImporter(PoseFile poseFile, PoseImporterOptions options, bool expressionPhase = false)
 {
-    public bool AsExpression => asExpression;
-
     public void ApplyBone(Bone bone, BonePoseInfo poseInfo)
     {
+        if(expressionPhase)
+        {
+            if(poseInfo.Name == "j_kao")
+            {
+                Brio.Log.Warning($"j_kao {expressionPhase}");
+
+                if(poseFile.Bones.TryGetValue(bone.Name, out var fileBone))
+                {
+                    poseInfo.Apply(fileBone, bone.LastRawTransform, TransformComponents.All, TransformComponents.Position, BoneIKInfo.Disabled, PoseMirrorMode.None, true);
+                }
+
+                return;
+            }
+            else
+            {
+                return;
+            }
+        }
+
         if(poseInfo.Slot == PoseInfoSlot.Character)
         {
             var isAllowed = options.BoneFilter.IsBoneValid(bone, poseInfo.Slot, true);

@@ -130,7 +130,9 @@ internal class PosingCapability : ActorCharacterCapability
         ImportPose(rawPoseFile, options, reset: false, reconcile: false, asExpression: asExpression);
     }
 
-    private void ImportPose(OneOf<PoseFile, CMToolPoseFile> rawPoseFile, PoseImporterOptions? options = null, bool generateSnapshot = true, bool reset = true, bool reconcile = true, bool asExpression = false)
+    PoseFile? tempPose;
+    private void ImportPose(OneOf<PoseFile, CMToolPoseFile> rawPoseFile, PoseImporterOptions? options = null, bool generateSnapshot = true, bool reset = true, bool reconcile = true,
+        bool asExpression = false, bool expressionPhase = false)
     {
         var poseFile = rawPoseFile.Match(
                 poseFile => poseFile,
@@ -147,8 +149,13 @@ internal class PosingCapability : ActorCharacterCapability
 
         if(asExpression)
         {
-            options = _posingService.DefaultExpressionOptions;
-
+            Brio.Log.Warning("asExpression");
+            options = _posingService.ExpressionOptions;
+            tempPose = GeneratePoseFile();
+        }
+        else if (asExpression)
+        {
+            options = _posingService.ExpressionOptions2;
         }
         else
         {
@@ -158,13 +165,13 @@ internal class PosingCapability : ActorCharacterCapability
         if(options.ApplyModelTransform && reset)
             ModelPosing.ResetTransform();
 
-        SkeletonPosing.ImportSkeletonPose(poseFile, options, asExpression: asExpression);
+        SkeletonPosing.ImportSkeletonPose(poseFile, options, expressionPhase);
 
         if(asExpression == false)
             ModelPosing.ImportModelPose(poseFile, options);
 
         if(generateSnapshot)
-            _framework.RunOnTick(() => Snapshot(reset, reconcile), delayTicks: 2);
+            _framework.RunOnTick(() => Snapshot(reset, reconcile, asExpression: asExpression), delayTicks: 4);
     }
 
     public void ExportPose(string path)
@@ -173,7 +180,7 @@ internal class PosingCapability : ActorCharacterCapability
         ResourceProvider.Instance.SaveFileDocument(path, poseFile);
     }
 
-    public void Snapshot(bool reset = true, bool reconcile = true)
+    public void Snapshot(bool reset = true, bool reconcile = true, bool asExpression = false)
     {
         var undoStackSize = _configurationService.Configuration.Posing.UndoStackSize;
         if(undoStackSize <= 0)
@@ -183,10 +190,21 @@ internal class PosingCapability : ActorCharacterCapability
             return;
         }
 
+        Brio.Log.Warning($"Snapshot {reset} {reconcile} {asExpression}");
+      
+        _redoStack.Clear();
+
+        if(asExpression == true)
+        {
+            ImportPose(tempPose, new PoseImporterOptions(new BoneFilter(_posingService), TransformComponents.All, false),
+            generateSnapshot: true, expressionPhase: true);
+
+            return;
+        }
+
         if(!_undoStack.Any())
             _undoStack.Push(new PoseStack(new PoseInfo(), ModelPosing.OriginalTransform));
 
-        _redoStack.Clear();
         _undoStack.Push(new PoseStack(SkeletonPosing.PoseInfo.Clone(), ModelPosing.Transform));
         _undoStack = _undoStack.Trim(undoStackSize + 1);
 
@@ -253,4 +271,9 @@ internal class PosingCapability : ActorCharacterCapability
     }
 
     internal record struct PoseStack(PoseInfo Info, Transform ModelTransform);
+}
+
+public enum ExpressionPhase
+{
+    None, One, Two, Three
 }

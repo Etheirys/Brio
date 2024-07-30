@@ -1,4 +1,5 @@
 ﻿using Brio.Capabilities.Actor;
+using Brio.Capabilities.Core;
 using Brio.Capabilities.Posing;
 using Brio.Config;
 using Brio.Core;
@@ -323,7 +324,22 @@ internal class PosingGraphicalWindow : Window, IDisposable
         var buttonSize = new Vector2(((ImGui.GetContentRegionAvail().X - settingsSize) / 2.0f) - (ImGui.GetStyle().FramePadding.X * 2), 0);
 
         if(ImBrio.Button("Import##import_pose", FontAwesomeIcon.FileImport, buttonSize))
-            FileUIHelpers.ShowImportPoseModal(posing);
+            ImGui.OpenPopup("import_type");
+
+        using(var popup = ImRaii.Popup("import_type"))
+        {
+            if(popup.Success)
+            {
+                if(ImGui.Button("Import as Pose", Vector2.Zero))
+                {
+                    FileUIHelpers.ShowImportPoseModal(posing);
+                }
+                if(ImGui.Button("Import as Expression", Vector2.Zero))
+                {
+                    FileUIHelpers.ShowImportPoseModal(posing, asExpression: true);
+                }
+            }
+        }
 
         ImGui.SameLine();
 

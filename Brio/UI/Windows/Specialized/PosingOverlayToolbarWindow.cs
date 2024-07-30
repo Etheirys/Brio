@@ -1,4 +1,5 @@
-﻿using Brio.Capabilities.Posing;
+﻿using Brio.Capabilities.Core;
+using Brio.Capabilities.Posing;
 using Brio.Config;
 using Brio.Entities;
 using Brio.Game.Posing;
@@ -295,10 +296,25 @@ internal class PosingOverlayToolbarWindow : Window
         using(ImRaii.PushFont(UiBuilder.IconFont))
         {
             if(ImGui.Button($"{FontAwesomeIcon.FileImport.ToIconString()}###import_pose", new Vector2(buttonSize)))
-                FileUIHelpers.ShowImportPoseModal(posing);
+                ImGui.OpenPopup("import_type");
         }
         if(ImGui.IsItemHovered())
             ImGui.SetTooltip("Import Pose");
+
+        using(var popup = ImRaii.Popup("import_type"))
+        {
+            if(popup.Success)
+            {
+                if(ImGui.Button("Import as Pose", Vector2.Zero))
+                {
+                    FileUIHelpers.ShowImportPoseModal(posing);
+                }
+                if(ImGui.Button("Import as Expression", Vector2.Zero))
+                {
+                    FileUIHelpers.ShowImportPoseModal(posing, asExpression: true);
+                }
+            }
+        }
 
         ImGui.SameLine();
 

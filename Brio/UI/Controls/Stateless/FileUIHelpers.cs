@@ -7,6 +7,8 @@ using Brio.Game.Posing;
 using Brio.Game.Types;
 using Brio.Library;
 using Brio.Library.Filters;
+using Brio.UI.Controls.Editors;
+using Dalamud.Interface.Utility.Raii;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -15,7 +17,7 @@ namespace Brio.UI.Controls.Stateless;
 
 internal class FileUIHelpers
 {
-    public static void ShowImportPoseModal(PosingCapability capability, PoseImporterOptions? options = null)
+    public static void ShowImportPoseModal(PosingCapability capability, PoseImporterOptions? options = null, bool asExpression = false)
     {
         TypeFilter filter = new TypeFilter("Poses", typeof(CMToolPoseFile), typeof(PoseFile));
 
@@ -25,11 +27,11 @@ internal class FileUIHelpers
             {
                 if(r is CMToolPoseFile cmPose)
                 {
-                    capability.ImportPose(cmPose, options);
+                    capability.ImportPose(cmPose, options, asExpression: asExpression);
                 }
                 else if(r is PoseFile pose)
                 {
-                    capability.ImportPose(pose, options);
+                    capability.ImportPose(pose, options, asExpression: asExpression);
                 }
             });
         }
@@ -39,11 +41,11 @@ internal class FileUIHelpers
             {
                 if(r is CMToolPoseFile cmPose)
                 {
-                    capability.ImportPose(cmPose, options);
+                    capability.ImportPose(cmPose, options, asExpression: asExpression);
                 }
                 else if(r is PoseFile pose)
                 {
-                    capability.ImportPose(pose, options);
+                    capability.ImportPose(pose, options, asExpression: asExpression);
                 }
             });
         }
