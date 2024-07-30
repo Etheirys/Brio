@@ -239,6 +239,8 @@ internal class PosingCapability : ActorCharacterCapability
         SkeletonPosing.ResetPose();
         ModelPosing.ResetTransform();
 
+        _redoStack.Clear();
+
         if(generateSnapshot)
             Snapshot(reset);
     }
