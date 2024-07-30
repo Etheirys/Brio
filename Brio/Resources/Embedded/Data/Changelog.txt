@@ -1,29 +1,40 @@
 
 To open this window again click `Information` on the Scene Manager then -> `View the Changelog`
 --------------------------------------------------------------------------------
-	 ---> Brio, Version 0.3.2.2 <--- 
+	 ---> Brio, Version 0.3.3 <--- 
+--------------------------------------------------------------------------------
+
+Support for FFXIV 7.05!
+
+-Updated the Advanced Pose Window.
+  - Added a new separate page for Face Bones
+  - You can now undock the Transform Control Pane
+  - You can now Hide the Transform Control Pane
+
+Added more Bone Categories: Face, Eyes, Lips & Jaw
+
+Added a new setting "Use the Library when importing a file"
+
+Fixed an issue with the Undo Button upon resetting a pose
+
+And finally,
+- Added 'Import as Expression"
+
+ --  Known Issues -- 
+
+When importing a pose the head does not rotate properly,
+You can fix this by rotating the "Head" bone manually
+
+
+--------------------------------------------------------------------------------
+	 --- Brio, Version 0.3.2.0  -> Brio, Version 0.3.2.2  --- 
 --------------------------------------------------------------------------------
 
 - Update Brio for Dawntrail 7.01 
 - Add support for Facewear
 
- --  Known Issues -- 
-
- - Old pose files do not load faces correctly,
-   As a mitigation, make sure to unselect "Head" under import options when loading old poses
-
- - Not all of the new bones are named yet
-
---------------------------------------------------------------------------------
-	 --- Brio, Version 0.3.2.1 --- 
---------------------------------------------------------------------------------
-
 - More facial bones added to advanced posing
 - More facial bones named
-
---------------------------------------------------------------------------------
-	 --- Brio, Version 0.3.2.0 --- 
---------------------------------------------------------------------------------
 
 - Update Brio for Dawntrail (Thanks Asgard!)
 - Added support for the second dye channel 
