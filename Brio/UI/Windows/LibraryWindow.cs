@@ -513,7 +513,7 @@ internal class LibraryWindow : Window
     private void DoBrowse()
     {
         if(_modalFilter != null && _modalCallback != null)
-            _libraryManager.ShowFilePicker(_modalFilter, _modalCallback);
+            LibraryManager.GetWithFilePicker(_modalFilter, _modalCallback);
 
         Close();
     }

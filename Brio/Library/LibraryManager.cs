@@ -84,7 +84,14 @@ internal class LibraryManager : IDisposable
         _window = window;
     }
 
-    public void ShowFilePicker(FilterBase filter, Action<object> callback)
+    public static void GetWithFilePicker(FilterBase filter, Action<object> callback)
+    {
+        if(_instance == null || _instance._window == null)
+            return;
+
+        _instance.ShowFilePicker(filter, callback);
+    }
+    private void ShowFilePicker(FilterBase filter, Action<object> callback)
     {
         string title = $"Import {filter.Name}###import_browse";
 
@@ -171,16 +178,14 @@ internal class LibraryManager : IDisposable
                     var path = paths[0];
                     object? result = _fileService.Load(path);
 
-                    if(result == null)
+                    if(result is null)
                         return;
 
                     string? dir = Path.GetDirectoryName(path);
 
-                    if(dir != null)
+                    if(dir is not null)
                     {
-                        if(!lastDirectories.ContainsKey(typesId))
-                            lastDirectories.Add(typesId, dir);
-
+                        lastDirectories.TryAdd(typesId, dir);
                         lastDirectories[typesId] = dir;
                         _configurationService.Save();
                     }

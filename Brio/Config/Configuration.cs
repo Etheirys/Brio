@@ -30,7 +30,10 @@ internal class Configuration : IPluginConfiguration
     // Library
     public LibraryConfiguration Library { get; set; } = new LibraryConfiguration();
 
-    public string LastPath { get; set; } = string.Empty;
+    public string LastMCDFPath { get; set; } = string.Empty;
+    public string LastExportPath { get; set; } = string.Empty;
+
+    public bool UseLibraryWhenImporting { get; set; } = true;
 
     // Input
     public InputConfiguration Input { get; set; } = new InputConfiguration();

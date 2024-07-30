@@ -111,6 +111,13 @@ internal class SettingsWindow : Window
 
                 if(ImGui.CollapsingHeader("Library", ImGuiTreeNodeFlags.DefaultOpen))
                 {
+                    bool useLibraryWhenImporting = _configurationService.Configuration.UseLibraryWhenImporting;
+                    if(ImGui.Checkbox("Use the Library when importing a file", ref useLibraryWhenImporting))
+                    {
+                        _configurationService.Configuration.UseLibraryWhenImporting = useLibraryWhenImporting;
+                        _configurationService.ApplyChange();
+                    }
+               
                     bool returnToLastLocation = _configurationService.Configuration.Library.ReturnLibraryToLastLocation;
                     if(ImGui.Checkbox("Open Library to the last Location I was previously", ref returnToLastLocation))
                     {
@@ -118,16 +125,6 @@ internal class SettingsWindow : Window
                         _configurationService.ApplyChange();
                     }
                 }
-
-                //if(ImGui.CollapsingHeader("Pose & Character Import", ImGuiTreeNodeFlags.DefaultOpen))
-                //{
-                //    bool returnToLastLocation = _configurationService.Configuration.Library.ReturnLibraryToLastLocation;
-                //    if(ImGui.Checkbox("Open Importer to: The Location I was previously", ref returnToLastLocation))
-                //    {
-                //        _configurationService.Configuration.Library.ReturnLibraryToLastLocation = returnToLastLocation;
-                //        _configurationService.ApplyChange();
-                //    }
-                //}
 
                 DrawNPCAppearanceHack();
 

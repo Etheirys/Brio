@@ -45,7 +45,7 @@ internal class ActorAppearanceWidget(ActorAppearanceCapability capability) : Wid
         {
             if(ImBrio.FontIconButton("load_mcdf", FontAwesomeIcon.CloudDownloadAlt, "Load Mare Synchronos MCDF"))
             {
-                FileUIHelpers.ShowImportMcdfModal(Capability);
+                FileUIHelpers.ShowImportMCDFModal(Capability);
             }
             ImGui.SameLine();
         }
