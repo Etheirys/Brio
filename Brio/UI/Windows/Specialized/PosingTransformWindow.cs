@@ -56,6 +56,8 @@ internal class PosingTransformWindow : Window
 
         WindowName = $"Transform - {posing.Entity.FriendlyName}###brio_transform_window";
 
+        PosingEditorCommon.DrawSelectionName(posing);
+
         DrawButtons(posing);
         ImGui.Separator();
         DrawGizmo();
