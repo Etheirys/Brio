@@ -55,9 +55,16 @@ internal class PosingCapability : ActorCharacterCapability
         set => _overlayWindow.IsOpen = value;
     }
 
+    public bool TransformWindowOpen
+    {
+        get => _overlayTransformWindow.IsOpen;
+        set => _overlayTransformWindow.IsOpen = value;
+    }
+
     private readonly PosingOverlayWindow _overlayWindow;
     private readonly PosingService _posingService;
     private readonly ConfigurationService _configurationService;
+    private readonly PosingTransformWindow _overlayTransformWindow;
     private readonly IFramework _framework;
     private readonly InputService _input;
 
@@ -66,6 +73,7 @@ internal class PosingCapability : ActorCharacterCapability
         PosingOverlayWindow window,
         PosingService posingService,
         ConfigurationService configurationService,
+        PosingTransformWindow overlayTransformWindow,
         IFramework framework,
         InputService input)
         : base(parent)
@@ -74,6 +82,7 @@ internal class PosingCapability : ActorCharacterCapability
         _overlayWindow = window;
         _posingService = posingService;
         _configurationService = configurationService;
+        _overlayTransformWindow = overlayTransformWindow;
         _framework = framework;
         _input = input;
     }
@@ -137,9 +146,14 @@ internal class PosingCapability : ActorCharacterCapability
         poseFile.SanitizeBoneNames();
 
         if(asExpression)
-            options ??= _posingService.DefaultExpressionOptions;
+        {
+            options = _posingService.DefaultExpressionOptions;
+
+        }
         else
+        {
             options ??= _posingService.DefaultImporterOptions;
+        }
 
         if(options.ApplyModelTransform && reset)
             ModelPosing.ResetTransform();

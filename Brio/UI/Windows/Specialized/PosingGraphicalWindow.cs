@@ -8,6 +8,7 @@ using Brio.Game.Camera;
 using Brio.Game.GPose;
 using Brio.Game.Posing;
 using Brio.Resources;
+using Brio.UI.Controls.Core;
 using Brio.UI.Controls.Editors;
 using Brio.UI.Controls.Stateless;
 using Dalamud.Interface;
@@ -37,6 +38,10 @@ internal class PosingGraphicalWindow : Window, IDisposable
     private float _closestHover = float.MaxValue;
 
     private Matrix4x4? _trackingMatrix;
+
+    private bool _hideControlPane = false;
+    private bool _bodyPaneEnabled = true;
+    private bool _facePaneEnabled = false;
 
     public PosingGraphicalWindow(EntityManager entityManager, CameraService cameraService, ConfigurationService configurationService, PosingService posingService, GPoseService gPoseService) : base($"{Brio.Name} - Posing###brio_posing_graphical_window")
     {
@@ -95,7 +100,15 @@ internal class PosingGraphicalWindow : Window, IDisposable
 
         WindowName = $"{Brio.Name} - Posing - {posing.Entity.FriendlyName}###brio_posing_graphical_window";
 
-        float leftPanelWidth = ImBrio.GetRemainingWidth() - RightPanelWidth - ImGui.GetStyle().ItemSpacing.X;
+        DrawGlobalButtons(posing);
+
+        //
+
+        float leftPanelWidth;
+        if(posing.TransformWindowOpen || _hideControlPane)
+            leftPanelWidth = ImBrio.GetRemainingWidth() - ImGui.GetStyle().ItemSpacing.X;
+        else
+            leftPanelWidth = ImBrio.GetRemainingWidth() - RightPanelWidth - ImGui.GetStyle().ItemSpacing.X;
 
         using(var child = ImRaii.Child("###left_pane", new Vector2(leftPanelWidth, -1), true,
             ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse))
@@ -111,10 +124,8 @@ internal class PosingGraphicalWindow : Window, IDisposable
         using(var rightPane = ImRaii.Child("###right_pane", new Vector2(RightPanelWidth, -1), false,
             ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse | ImGuiWindowFlags.NoBackground))
         {
-            if(rightPane.Success)
+            if(rightPane.Success && posing.TransformWindowOpen is false && _hideControlPane is false)
             {
-                DrawGlobalButtons(posing);
-
                 PosingEditorCommon.DrawSelectionName(posing);
 
                 DrawButtons(posing);
@@ -140,12 +151,58 @@ internal class PosingGraphicalWindow : Window, IDisposable
     private void DrawGlobalButtons(PosingCapability posing)
     {
         float buttonWidth = 28;
+        float openingY = ImGui.GetCursorPos().Y;
+
+        using(ImRaii.PushColor(ImGuiCol.Button, UIConstants.GizmoRed, _bodyPaneEnabled))
+        {
+            if(ImGui.Button("Body Page", Vector2.Zero))
+            {
+                if(_facePaneEnabled)
+                {
+                    _facePaneEnabled = false;
+                    _bodyPaneEnabled = true;
+                }
+            }
+        }
+        if(ImGui.IsItemHovered())
+            ImGui.SetTooltip("Open Body Page");
+
+        ImGui.SameLine();
+
+        using(ImRaii.PushColor(ImGuiCol.Button, UIConstants.GizmoRed, _facePaneEnabled))
+        {
+            if(ImGui.Button("Face Page", Vector2.Zero))
+            {
+                if(_bodyPaneEnabled)
+                {
+                    _bodyPaneEnabled = false;
+                    _facePaneEnabled = true;
+                }
+            }
+        }
+        if(ImGui.IsItemHovered())
+            ImGui.SetTooltip("Open Face Page");
+
+        ImGui.SameLine();
+
+        ImBrio.RightAlign(buttonWidth, 8);
 
         if(ImBrio.FontIconButton((posing.OverlayOpen ? FontAwesomeIcon.EyeSlash : FontAwesomeIcon.Eye), new(buttonWidth, 0)))
             posing.OverlayOpen = !posing.OverlayOpen;
 
         if(ImGui.IsItemHovered())
             ImGui.SetTooltip(posing.OverlayOpen ? "Close Overlay" : "Show Overlay");
+
+        ImGui.SameLine();
+
+        using(ImRaii.PushColor(ImGuiCol.Text, posing.TransformWindowOpen ? UIConstants.ToggleButtonActive : UIConstants.ToggleButtonInactive))
+        {
+            if(ImBrio.FontIconButton(FontAwesomeIcon.LocationCrosshairs, new(buttonWidth, 0)))
+                posing.TransformWindowOpen = !posing.TransformWindowOpen;
+        }
+
+        if(ImGui.IsItemHovered())
+            ImGui.SetTooltip(posing.TransformWindowOpen ? "Close Transform Window" : "Show Transform Window");
 
         ImGui.SameLine();
 
@@ -166,7 +223,7 @@ internal class PosingGraphicalWindow : Window, IDisposable
         ImGui.SameLine();
 
 
-        ImBrio.RightAlign(buttonWidth, 3);
+        ImBrio.RightAlign(buttonWidth, 4);
 
         using(ImRaii.Disabled(!posing.HasUndoStack))
         {
@@ -199,6 +256,17 @@ internal class PosingGraphicalWindow : Window, IDisposable
 
         if(ImGui.IsItemHovered())
             ImGui.SetTooltip("Reset Pose");
+
+        ImGui.SameLine();
+
+        using(ImRaii.PushColor(ImGuiCol.Text, _hideControlPane ? UIConstants.ToggleButtonActive : UIConstants.ToggleButtonInactive))
+        {
+            if(ImBrio.FontIconButton(_hideControlPane ? FontAwesomeIcon.SlidersH : FontAwesomeIcon.SlidersH, new(buttonWidth, 0)))
+                _hideControlPane = !_hideControlPane;
+        }
+
+        if(ImGui.IsItemHovered())
+            ImGui.SetTooltip(_hideControlPane ? "Show Control Pane" : "Hide Control Pane");
     }
 
     private void DrawSelection(PosingCapability posing)
@@ -379,11 +447,15 @@ internal class PosingGraphicalWindow : Window, IDisposable
 
         var contentArea = ImGui.GetContentRegionAvail();
         var contentWidth = contentArea.X / 3f;
+
+        float headerYOffset = 0;
+
         using(var child = ImRaii.Child("###body_pane", new Vector2(contentWidth, -1), false, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse))
         {
             if(child.Success)
             {
-                var opening = ImGui.GetCursorPos();
+                Vector2 opening = ImGui.GetCursorPos();
+
                 if(posing.SkeletonPosing.CharacterIsIVCS)
                 {
                     showGenitalia = _configurationService.Configuration.Posing.ShowGenitaliaInAdvancedPoseWindow;
@@ -392,30 +464,117 @@ internal class PosingGraphicalWindow : Window, IDisposable
                         _configurationService.Configuration.Posing.ShowGenitaliaInAdvancedPoseWindow = showGenitalia;
                     }
 
-                    opening += new Vector2(0, 5);
+                    headerYOffset += 5;
                 }
                 var swapped = _configurationService.Configuration.Posing.GraphicalSidesSwapped;
                 if(ImGui.Checkbox("Swap", ref swapped))
                 {
                     _configurationService.Configuration.Posing.GraphicalSidesSwapped = swapped;
                 }
-                ImGui.SetCursorPos(opening);
 
-                DrawBoneSection("body", true, posing);
+                //
+
+                if(_bodyPaneEnabled)
+                {
+                    ImGui.SetCursorPos(opening + new Vector2(0, headerYOffset));
+
+                    DrawBoneSection("body", true, posing);
+                }
             }
         }
-        ImGui.SameLine();
-        using(var child = ImRaii.Child("###armor_pane", new Vector2(contentWidth, -1), false, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse))
+
+        if(_bodyPaneEnabled)
         {
-            if(child.Success)
+            ImGui.SameLine();
+
+            using(var child = ImRaii.Child("###armor_pane", new Vector2(contentWidth, -1), false, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse))
             {
-                DrawBoneSection("armor", true, posing);
+                if(child.Success)
+                {
+                    ImGui.SetCursorPos(ImGui.GetCursorPos() + new Vector2(0, headerYOffset));
+
+                    DrawBoneSection("armor", true, posing);
+                }
+            }
+
+            ImGui.SameLine();
+
+            using(var child = ImRaii.Child("###details_pane", new Vector2(contentWidth, -1)))
+            {
+                if(child.Success)
+                {
+                    ImGui.SetCursorPos(ImGui.GetCursorPos() + new Vector2(0, headerYOffset));
+
+                    if(posing.SkeletonPosing.CharacterHasTail || posing.SkeletonPosing.CharacterIsIVCS)
+                    {
+                        using(var splitChild = ImRaii.Child("###split_details_hands", new Vector2(contentWidth * 0.7f - (ImGui.GetStyle().FramePadding.X * 2), -1), false, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse))
+                        {
+                            if(splitChild.Success)
+                            {
+                                DrawBoneSection("hands", true, posing);
+
+                                if(posing.SkeletonPosing.CharacterIsIVCS)
+                                {
+                                    DrawBoneSection("ivcs_toes", true, posing);
+                                }
+                            }
+                        }
+                        ImGui.SameLine();
+
+                        float tailWidth = contentWidth * 0.3f - (ImGui.GetStyle().FramePadding.X * 2);
+                        using(var splitChild = ImRaii.Child("###split_details_more", new Vector2(tailWidth, -1), false, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse))
+                        {
+                            if(splitChild.Success)
+                            {
+                                if(posing.SkeletonPosing.CharacterIsIVCS)
+                                {
+                                    using(var splitTailChild = ImRaii.Child("###split_details_more_ivcs", new Vector2(tailWidth, -1), false, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse))
+                                    {
+                                        if(splitTailChild.Success)
+                                        {
+                                            using(var splitTailChildTail = ImRaii.Child("###split_details_more_ivcs_tail", new Vector2(tailWidth, 75), false, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse))
+                                            {
+                                                if(splitTailChildTail.Success && posing.SkeletonPosing.CharacterHasTail)
+                                                {
+                                                    DrawBoneSection("tail", false, posing);
+                                                }
+                                            }
+
+                                            if(showGenitalia)
+                                            {
+                                                using(var splitTailChildIvcs = ImRaii.Child("###split_details_more_ivcs_genitalia", new Vector2(tailWidth, 150), false, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse))
+                                                {
+                                                    if(splitTailChildIvcs.Success)
+                                                    {
+                                                        DrawBoneSection("ivcs", false, posing);
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                                else if(posing.SkeletonPosing.CharacterHasTail)
+                                {
+                                    DrawBoneSection("tail", false, posing);
+                                }
+                            }
+                        }
+                    }
+                    else
+                    {
+                        DrawBoneSection("hands", true, posing);
+                    }
+                }
             }
         }
-        ImGui.SameLine();
-        using(var child = ImRaii.Child("###details_pane", new Vector2(contentWidth, -1)))
+
+        if(_facePaneEnabled)
         {
-            if(child.Success)
+            ImGui.SetCursorPos(ImGui.GetCursorPos() + new Vector2(0, headerYOffset));
+
+            ImGui.SameLine();
+
+            using(var child = ImRaii.Child("###face_pane", new Vector2(contentArea.X - 35, -1), false, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse))
             {
                 switch(currentAppearance.Customize.Race)
                 {
@@ -455,67 +614,6 @@ internal class PosingGraphicalWindow : Window, IDisposable
                                 break;
                         }
                         break;
-                }
-
-
-                if(posing.SkeletonPosing.CharacterHasTail || posing.SkeletonPosing.CharacterIsIVCS)
-                {
-                    using(var splitChild = ImRaii.Child("###split_details_hands", new Vector2(contentWidth * 0.7f - (ImGui.GetStyle().FramePadding.X * 2), -1), false, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse))
-                    {
-                        if(splitChild.Success)
-                        {
-                            DrawBoneSection("hands", true, posing);
-
-                            if(posing.SkeletonPosing.CharacterIsIVCS)
-                            {
-                                DrawBoneSection("ivcs_toes", true, posing);
-                            }
-                        }
-                    }
-                    ImGui.SameLine();
-
-                    float tailWidth = contentWidth * 0.3f - (ImGui.GetStyle().FramePadding.X * 2);
-                    using(var splitChild = ImRaii.Child("###split_details_more", new Vector2(tailWidth, -1), false, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse))
-                    {
-                        if(splitChild.Success)
-                        {
-                            if(posing.SkeletonPosing.CharacterIsIVCS)
-                            {
-                                using(var splitTailChild = ImRaii.Child("###split_details_more_ivcs", new Vector2(tailWidth, -1), false, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse))
-                                {
-                                    if(splitTailChild.Success)
-                                    {
-                                        using(var splitTailChildTail = ImRaii.Child("###split_details_more_ivcs_tail", new Vector2(tailWidth, 75), false, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse))
-                                        {
-                                            if(splitTailChildTail.Success && posing.SkeletonPosing.CharacterHasTail)
-                                            {
-                                                DrawBoneSection("tail", false, posing);
-                                            }
-                                        }
-
-                                        if(showGenitalia)
-                                        {
-                                            using(var splitTailChildIvcs = ImRaii.Child("###split_details_more_ivcs_genitalia", new Vector2(tailWidth, 150), false, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse))
-                                            {
-                                                if(splitTailChildIvcs.Success)
-                                                {
-                                                    DrawBoneSection("ivcs", false, posing);
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                            else if(posing.SkeletonPosing.CharacterHasTail)
-                            {
-                                DrawBoneSection("tail", false, posing);
-                            }
-                        }
-                    }
-                }
-                else
-                {
-                    DrawBoneSection("hands", true, posing);
                 }
             }
         }
@@ -648,7 +746,7 @@ internal class PosingGraphicalWindow : Window, IDisposable
             _ => { }
         );
 
-        float circleSize = 8;
+        float circleSize = 6;
         float hitSize = circleSize + 12;
 
         using(ImRaii.Disabled(!enabled))

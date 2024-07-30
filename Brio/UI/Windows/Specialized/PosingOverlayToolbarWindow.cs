@@ -33,7 +33,6 @@ internal class PosingOverlayToolbarWindow : Window
     {
         Namespace = "brio_posing_overlay_toolbar_namespace";
 
-
         _overlayWindow = overlayWindow;
         _entityManager = entityManager;
         _overlayTransformWindow = overlayTransformWindow;
@@ -361,12 +360,6 @@ internal class PosingOverlayToolbarWindow : Window
                 PosingEditorCommon.DrawBoneFilterEditor(_posingService.OverlayFilter);
             }
         }
-    }
-
-    public override void OnClose()
-    {
-        _overlayTransformWindow.IsOpen = false;
-        base.OnClose();
     }
 
     private void DrawHeaderButtons()
