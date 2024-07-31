@@ -8,6 +8,34 @@ namespace Brio.UI.Controls.Editors;
 
 internal static class CameraEditor
 {
+    struct CameraPresetProperties
+    {
+        public bool isSet = false;
+        public Vector3 offset;
+        public float rotation;
+        public float zoom;
+        public float fov;
+        public Vector2 pan;
+        public Vector2 angle;
+        public bool disableCollision;
+        public bool delimitCamera;
+
+        public CameraPresetProperties(Vector3 offset, float rotation, float zoom, float fov, Vector2 pan, Vector2 angle, bool disableCollision, bool delimitCamera)
+        {
+            this.offset = offset;
+            this.rotation = rotation;
+            this.zoom = zoom;
+            this.fov = fov;
+            this.pan = pan;
+            this.angle = angle;
+            this.disableCollision = disableCollision;
+            this.delimitCamera = delimitCamera;
+
+            this.isSet = true;
+        }
+    }
+    private static CameraPresetProperties[] presets = new CameraPresetProperties[3];
+
     public unsafe static void Draw(string id, CameraCapability capability)
     {
         var camera = capability.Camera;
@@ -70,6 +98,34 @@ internal static class CameraEditor
                     var delimit = capability.DelimitCamera;
                     if(ImGui.Checkbox("Delimit Camera", ref delimit))
                         capability.DelimitCamera = delimit;
+
+                    ImGui.Separator();
+                    if(ImGui.CollapsingHeader("Camera Presets"))
+                    {
+                        for(int i = 0; i < 3; i++)
+                        {
+                            ImGui.Text("Preset " + (i + 1).ToString() + ": ");
+                            ImGui.SameLine();
+                            if(ImGui.Button("Save##" + i.ToString()))
+                                presets[i] = new CameraPresetProperties(capability.PositionOffset, camera->Rotation, camera->Camera.Distance, camera->FoV, camera->Pan, camera->Angle, capability.DisableCollision, capability.DelimitCamera);
+                            if(presets[i].isSet)
+                            {
+                                ImGui.SameLine();
+                                if(ImGui.Button("Load##" + i.ToString()))
+                                {
+                                    capability.PositionOffset = presets[i].offset;
+                                    camera->Rotation = presets[i].rotation;
+                                    camera->Camera.Distance = presets[i].zoom;
+                                    camera->FoV = presets[i].fov;
+                                    camera->Pan = presets[i].pan;
+                                    camera->Angle = presets[i].angle;
+                                    capability.DisableCollision = presets[i].disableCollision;
+                                    capability.DelimitCamera = presets[i].delimitCamera;
+                                }
+                            }
+                        }
+                    }
+
                 }
             }
         }
