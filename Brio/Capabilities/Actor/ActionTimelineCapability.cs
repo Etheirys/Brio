@@ -1,5 +1,7 @@
-﻿using Brio.Entities.Actor;
+﻿using Brio.Config;
+using Brio.Entities.Actor;
 using Brio.Game.Actor.Extensions;
+using Brio.Game.Posing;
 using Brio.Game.Types;
 using Brio.UI.Widgets.Actor;
 using Dalamud.Game.ClientState.Objects.Types;
@@ -29,9 +31,9 @@ internal class ActionTimelineCapability : ActorCharacterCapability
 
     private OriginalBaseAnimation? _originalBaseAnimation = null;
 
-    public ActionTimelineCapability(ActorEntity parent) : base(parent)
+    public ActionTimelineCapability(ActorEntity parent, PhysicsService physicsService, ConfigurationService configService) : base(parent)
     {
-        Widget = new ActionTimelineWidget(this);
+        Widget = new ActionTimelineWidget(this, physicsService, configService);
     }
 
     public unsafe void SetOverallSpeedOverride(float speed)

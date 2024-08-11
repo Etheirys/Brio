@@ -32,6 +32,7 @@ internal class Configuration : IPluginConfiguration
 
     public string LastMCDFPath { get; set; } = string.Empty;
     public string LastExportPath { get; set; } = string.Empty;
+    public string LastXATPath { get; set; } = string.Empty;
 
     public bool UseLibraryWhenImporting { get; set; } = true;
 

@@ -11,6 +11,7 @@ using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
 using ImGuiNET;
 using System;
+using System.Collections.Generic;
 
 namespace Brio.UI;
 
@@ -39,9 +40,9 @@ internal class UIManager : IDisposable
 
     private readonly IFramework _framework;
 
-    PenumbraService _penumbraService;
-    GlamourerService _glamourerService;
-    MareService _mareService;
+    private readonly PenumbraService _penumbraService;
+    private readonly GlamourerService _glamourerService;
+    private readonly MareService _mareService;
 
     private readonly WindowSystem _windowSystem;
 
@@ -50,6 +51,7 @@ internal class UIManager : IDisposable
         AddedWindowFlags = ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoDocking
     };
 
+    private readonly List<Window> _hiddenWindows = [];
 
     public ITextureProvider TextureProvider => _textureProvider;
 
@@ -216,6 +218,27 @@ internal class UIManager : IDisposable
         {
             BrioStyle.PopStyle();
         }
+    }
+
+    public void TemporarilyHideAllOpenWindows()
+    {
+        foreach(var window in _windowSystem.Windows)
+        {
+            if(window.IsOpen == true)
+            {
+                _hiddenWindows.Add(window);
+                window.IsOpen = false;
+            }
+        }
+    }
+
+    public void ReopenAllTemporarilyHiddenWindows()
+    {
+        foreach (var window in _hiddenWindows)
+        {
+            window.IsOpen = true;
+        }
+        _hiddenWindows.Clear();
     }
 
     public void Dispose()

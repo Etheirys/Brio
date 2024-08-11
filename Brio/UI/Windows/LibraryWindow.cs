@@ -335,7 +335,7 @@ internal class LibraryWindow : Window
             {
                 ImGui.SameLine();
 
-                if(ImBrio.Button("Browse for File", FontAwesomeIcon.FolderOpen, new Vector2(155, 0), 0.9f))
+                if(ImBrio.Button("Browse for File", FontAwesomeIcon.FolderOpen, new Vector2(155, 0)))
                     DoBrowse();
 
                 if(ImGui.IsItemHovered())

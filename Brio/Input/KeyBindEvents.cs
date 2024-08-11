@@ -7,6 +7,8 @@ internal enum KeyBindEvents
     Interface_IncrementSmallModifier,
     Interface_IncrementLargeModifier,
 
+    Interface_StopCutscene,
+
     Posing_DisableGizmo,
     Posing_DisableSkeleton,
     Posing_HideOverlay,

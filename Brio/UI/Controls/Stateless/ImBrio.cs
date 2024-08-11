@@ -1,4 +1,5 @@
-﻿using Brio.Resources;
+﻿using Brio.Game.Posing;
+using Brio.Resources;
 using Brio.UI.Controls.Core;
 using Dalamud.Interface;
 using Dalamud.Interface.Textures.TextureWraps;
@@ -123,12 +124,12 @@ internal static partial class ImBrio
         return wasClicked;
     }
 
-    public static bool Button(string label, FontAwesomeIcon icon, float iconScale = 1.0f)
+    public static bool Button(string label, FontAwesomeIcon icon)
     {
-        return Button(label, icon, Vector2.Zero, iconScale);
+        return Button(label, icon, Vector2.Zero);
     }
 
-    public static bool Button(string label, FontAwesomeIcon icon, Vector2 size, float iconScale = 1.0f, string hoverText = "")
+    public static bool Button(string label, FontAwesomeIcon icon, Vector2 size, string hoverText = "")
     {
         bool clicked = false;
 
@@ -145,7 +146,6 @@ internal static partial class ImBrio
         }
         else
         {
-            neededWidth = size.X;
             innerWidth = size.X - (ImGui.GetStyle().FramePadding.X * 2);
         }
 
@@ -164,18 +164,42 @@ internal static partial class ImBrio
         }
 
         ImGui.SetCursorPos(startPos + ImGui.GetStyle().FramePadding);
-        ImGui.SetWindowFontScale(iconScale);
         using(ImRaii.PushFont(UiBuilder.IconFont))
         {
             ImGui.Text(icon.ToIconString());
         }
-        ImGui.SetWindowFontScale(1.0f);
 
         ImGui.SetCursorPos(startPos);
         ImGui.InvisibleButton("##dummy", size);
         ImGui.SetCursorPos(endPos);
 
         ImGui.PopStyleVar();
+
+        return clicked;
+    }
+
+    public static bool ToggelButton(string lable, bool isToggled, uint toggledColor = UIConstants.GizmoRed, string hoverText = "")
+    {
+        return ToggelButton(lable, Vector2.Zero, isToggled, toggledColor, hoverText);
+    }
+
+    public static bool ToggelButton(string lable, Vector2 size, bool isToggled, uint toggledColor = UIConstants.GizmoRed, string hoverText = "")
+    {
+        bool clicked = false;
+
+        if(isToggled)
+            ImGui.PushStyleColor(ImGuiCol.Button, toggledColor);
+
+        clicked = ImGui.Button(lable, size);
+
+        if(isToggled)
+            ImGui.PopStyleColor();
+
+        if(string.IsNullOrEmpty(hoverText) == false)
+        {
+            if(ImGui.IsItemHovered())
+                ImGui.SetTooltip(hoverText);
+        }
 
         return clicked;
     }

@@ -23,6 +23,7 @@ internal class InputConfiguration
         { KeyBindEvents.Posing_Translate, new(VirtualKey.NO_KEY) },
         { KeyBindEvents.Posing_Rotate, new(VirtualKey.NO_KEY) },
         { KeyBindEvents.Posing_Scale, new(VirtualKey.NO_KEY) },
+        { KeyBindEvents.Interface_StopCutscene, new (VirtualKey.B, shift: true) }
     };
 
     public bool ShowPromptsInGPose { get; set; } = false;

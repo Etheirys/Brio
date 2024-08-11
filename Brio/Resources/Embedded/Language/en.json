@@ -283,6 +283,7 @@
     "Interface_ToggleBindPromptWindow": "Toggle Bind Prompt Window",
     "Interface_IncrementSmallModifier": "Increment Small Modifier",
     "Interface_IncrementLargeModifier": "Increment Large Modifier",
+    "Interface_StopCutscene": "Stop Cutscene",
     "Posing_DisableGizmo": "Disable Gizmo",
     "Posing_DisableSkeleton": "Disable Skeleton",
     "Posing_HideOverlay": "Hide Overlay",

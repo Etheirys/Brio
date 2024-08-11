@@ -6,6 +6,7 @@ using Brio.Game.Actor;
 using Brio.Game.Camera;
 using Brio.Game.Chat;
 using Brio.Game.Core;
+using Brio.Game.Cutscene;
 using Brio.Game.GPose;
 using Brio.Game.Posing;
 using Brio.Game.World;
@@ -144,6 +145,10 @@ public class Brio : IDalamudPlugin
         serviceCollection.AddSingleton<IKService>();
         serviceCollection.AddSingleton<CameraService>();
         serviceCollection.AddSingleton<ObjectMonitorService>();
+        serviceCollection.AddSingleton<PhysicsService>();
+
+        serviceCollection.AddSingleton<VirtualCamera>();
+        serviceCollection.AddSingleton<CutsceneManager>();
 
         // Library
         serviceCollection.AddSingleton<FileTypeInfoBase, AnamnesisCharaFileInfo>();
