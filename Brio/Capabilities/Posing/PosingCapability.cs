@@ -132,14 +132,14 @@ internal class PosingCapability : ActorCharacterCapability
 
     PoseFile? tempPose;
     private void ImportPose(OneOf<PoseFile, CMToolPoseFile> rawPoseFile, PoseImporterOptions? options = null, bool generateSnapshot = true, bool reset = true, bool reconcile = true,
-        bool asExpression = false, bool expressionPhase = false)
+        bool asExpression = false, bool expressionPhase2 = false)
     {
         var poseFile = rawPoseFile.Match(
                 poseFile => poseFile,
                 cmToolPoseFile => cmToolPoseFile.Upgrade()
             );
 
-        if(!poseFile.Bones.Any() && !poseFile.MainHand.Any() && !poseFile.OffHand.Any())
+        if(poseFile.Bones.Count == 0 && poseFile.MainHand.Count == 0 && poseFile.OffHand.Count == 0)
         {
             Brio.NotifyError("Invalid pose file.");
             return;
@@ -149,13 +149,10 @@ internal class PosingCapability : ActorCharacterCapability
 
         if(asExpression)
         {
-            Brio.Log.Warning("asExpression");
+            Brio.Log.Info("Loading as Expression");
+
             options = _posingService.ExpressionOptions;
             tempPose = GeneratePoseFile();
-        }
-        else if (asExpression)
-        {
-            options = _posingService.ExpressionOptions2;
         }
         else
         {
@@ -165,7 +162,7 @@ internal class PosingCapability : ActorCharacterCapability
         if(options.ApplyModelTransform && reset)
             ModelPosing.ResetTransform();
 
-        SkeletonPosing.ImportSkeletonPose(poseFile, options, expressionPhase);
+        SkeletonPosing.ImportSkeletonPose(poseFile, options, expressionPhase2);
 
         if(asExpression == false)
             ModelPosing.ImportModelPose(poseFile, options);
@@ -189,20 +186,18 @@ internal class PosingCapability : ActorCharacterCapability
             _redoStack.Clear();
             return;
         }
-
-        Brio.Log.Warning($"Snapshot {reset} {reconcile} {asExpression}");
       
         _redoStack.Clear();
 
         if(asExpression == true)
         {
-            ImportPose(tempPose, new PoseImporterOptions(new BoneFilter(_posingService), TransformComponents.All, false),
-            generateSnapshot: true, expressionPhase: true);
+            ImportPose(tempPose!, new PoseImporterOptions(new BoneFilter(_posingService), TransformComponents.All, false),
+            generateSnapshot: true, expressionPhase2: true);
 
             return;
         }
 
-        if(!_undoStack.Any())
+        if(_undoStack.Count == 0)
             _undoStack.Push(new PoseStack(new PoseInfo(), ModelPosing.OriginalTransform));
 
         _undoStack.Push(new PoseStack(SkeletonPosing.PoseInfo.Clone(), ModelPosing.Transform));

@@ -13,8 +13,6 @@ internal class PoseImporter(PoseFile poseFile, PoseImporterOptions options, bool
         {
             if(poseInfo.Name == "j_kao")
             {
-                Brio.Log.Warning($"j_kao {expressionPhase}");
-
                 if(poseFile.Bones.TryGetValue(bone.Name, out var fileBone))
                 {
                     poseInfo.Apply(fileBone, bone.LastRawTransform, TransformComponents.All, TransformComponents.Position, BoneIKInfo.Disabled, PoseMirrorMode.None, true);
