@@ -98,8 +98,7 @@ internal class GameDataAppearanceEntry : ItemEntryBase
 
         ImBrio.DrawApplyToActor(_entityManager, (actor) =>
         {
-            ActorAppearanceCapability? capability;
-            if(actor.TryGetCapability<ActorAppearanceCapability>(out capability) && capability != null)
+            if(actor.TryGetCapability<ActorAppearanceCapability>(out var capability) && capability != null)
             {
                 _ = capability.SetAppearance(Appearance, AppearanceImportOptions.All);
             }

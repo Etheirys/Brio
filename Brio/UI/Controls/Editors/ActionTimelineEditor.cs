@@ -558,8 +558,8 @@ internal class ActionTimelineEditor(CutsceneManager cutsceneManager, GPoseServic
 
             ImGui.Separator();
 
-            ImGui.Text("The 'Start Delay' & 'Animation Delay' time-scale is in Milliseconds!");
-            ImGui.Text("1000 Milliseconds = 1 second");
+            ImGui.Text("The time-scale for the delay functions are in Milliseconds!");
+            ImGui.Text("1000 Milliseconds = 1 Second");
 
             ImGui.Separator();
 
