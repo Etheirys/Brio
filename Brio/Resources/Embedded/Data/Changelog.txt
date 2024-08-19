@@ -1,9 +1,10 @@
 
 To open this window again click `Information` on the Scene Manager then -> `View the Changelog`
 --------------------------------------------------------------------------------
-	 ---> Brio, Version 0.4.0.1 <--- 
+	 ---> Brio, Version 0.4.0.2 <--- 
 --------------------------------------------------------------------------------
 
+- Fixed the Camera Window from moving endlessly to the right
 - Fix a crash when leaving GPose with Freeze Physics Enabled
 
 --------------------------------------------------------------------------------
