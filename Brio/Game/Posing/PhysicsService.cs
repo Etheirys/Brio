@@ -27,6 +27,7 @@
 
 using Brio.Game.GPose;
 using Dalamud.Game;
+using Dalamud.Plugin.Services;
 using System;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
@@ -35,7 +36,9 @@ namespace Brio.Game.Posing;
 
 internal unsafe partial class PhysicsService : IDisposable
 {
-    GPoseService _gPoseService;
+    private readonly GPoseService _gPoseService;
+    private readonly IFramework _framework;
+
     //
 
     const byte NOP = 0x90;
@@ -52,9 +55,10 @@ internal unsafe partial class PhysicsService : IDisposable
     private readonly byte[] nopFreezeBytes1;
     private readonly byte[] nopFreezeBytes2;
 
-    public PhysicsService(ISigScanner scanner, GPoseService gPoseService)
+    public PhysicsService(ISigScanner scanner, IFramework framework, GPoseService gPoseService)
     {
         _gPoseService = gPoseService;
+        _framework = framework;
 
         // This signature is from Anamnesis (https://github.com/imchillin/Anamnesis)
         // Found in AddressService.cs on line 159 - SkeletonFreezePhysics (1/2/3)
@@ -65,7 +69,7 @@ internal unsafe partial class PhysicsService : IDisposable
         freezeSkeletonPhysics1 = freezePhysics;
         freezeSkeletonPhysics2 = freezePhysics - 0x9;
 
-        _gPoseService.OnGPoseStateChange += OnGPoseStateChange;
+        _framework.Update += OnFrameworkUpdate;
 
         (originalFreezeBytes1, originalFreezeBytes2) = FreezeReadBytes();
 
@@ -103,11 +107,18 @@ internal unsafe partial class PhysicsService : IDisposable
     {
         IsFreezeEnabled = false;
 
-        using Process currentProcess = Process.GetCurrentProcess();
+        try
+        {
+            using Process currentProcess = Process.GetCurrentProcess();
 
-        WriteProcessMemory(currentProcess.Handle, freezeSkeletonPhysics1, originalFreezeBytes1, originalFreezeBytes1.Length, out _);
+            WriteProcessMemory(currentProcess.Handle, freezeSkeletonPhysics1, originalFreezeBytes1, originalFreezeBytes1.Length, out _);
 
-        WriteProcessMemory(currentProcess.Handle, freezeSkeletonPhysics2, originalFreezeBytes2, originalFreezeBytes2.Length, out _);
+            WriteProcessMemory(currentProcess.Handle, freezeSkeletonPhysics2, originalFreezeBytes2, originalFreezeBytes2.Length, out _);
+        }
+        catch(Exception ex)
+        {
+            Brio.Log.Fatal($"Brio encountered Fatal Error, FreezeRevert faild: {ex}");
+        }
        
         return IsFreezeEnabled;
     }
@@ -128,12 +139,12 @@ internal unsafe partial class PhysicsService : IDisposable
         if(IsFreezeEnabled)
             FreezeRevert();
 
-        _gPoseService.OnGPoseStateChange -= OnGPoseStateChange;
+        _framework.Update -= OnFrameworkUpdate;
     }
 
-    private void OnGPoseStateChange(bool newState)
+    private void OnFrameworkUpdate(IFramework framework)
     {
-        if(IsFreezeEnabled)
+        if(IsFreezeEnabled && _gPoseService.IsGPosing == false)
             FreezeRevert();
     }
 
