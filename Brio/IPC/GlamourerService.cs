@@ -22,20 +22,23 @@ internal class GlamourerService : IDisposable
     private readonly GPoseService _gPoseService;
     private readonly IFramework _framework;
     private readonly ActorRedrawService _redrawService;
+    private readonly PenumbraService _penumbraService; 
 
     private readonly Glamourer.Api.Helpers.EventSubscriber _glamourerInitializedSubscriber;
 
     private readonly Glamourer.Api.IpcSubscribers.ApiVersion _glamourerApiVersions;
     private readonly Glamourer.Api.IpcSubscribers.RevertState _glamourerRevertCharacter;
 
+    private readonly uint UnLockCode = 0x6D617265; // From MareSynchronos's IpcCallerGlamourer.cs
 
-    public GlamourerService(IDalamudPluginInterface pluginInterface, ConfigurationService configurationService, GPoseService gPoseService, IFramework framework, ActorRedrawService redrawService)
+    public GlamourerService(IDalamudPluginInterface pluginInterface, ConfigurationService configurationService, GPoseService gPoseService, IFramework framework, PenumbraService penumbraService,  ActorRedrawService redrawService)
     {
         _pluginInterface = pluginInterface;
         _configurationService = configurationService;
         _gPoseService = gPoseService;
         _framework = framework;
         _redrawService = redrawService;
+        _penumbraService = penumbraService;
 
         _glamourerInitializedSubscriber = Glamourer.Api.IpcSubscribers.Initialized.Subscriber(pluginInterface, RefreshGlamourerStatus);
 
@@ -92,13 +95,18 @@ internal class GlamourerService : IDisposable
 
     public Task RevertCharacter(ICharacter? character)
     {
-        if(!IsGlamourerAvailable && character != null)
+        if(IsGlamourerAvailable == false && character is null)
             return Task.CompletedTask;
 
-        Brio.Log.Error("Starting glamourer revert...");
+        Brio.Log.Warning("Starting glamourer revert...");
 
-
-        _glamourerRevertCharacter.Invoke(character!.ObjectIndex, character.DataId);
+        var success = _glamourerRevertCharacter.Invoke(character!.ObjectIndex, UnLockCode);
+        
+        if(success == Glamourer.Api.Enums.GlamourerApiEc.InvalidKey)
+        {
+            Brio.Log.Fatal("Glamourer revert failed! Please report this to the Brio Devs!");
+            return Task.CompletedTask;
+        }
 
         return _framework.RunOnTick(async () =>
         {

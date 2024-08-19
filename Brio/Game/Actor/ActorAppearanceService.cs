@@ -122,7 +122,7 @@ internal class ActorAppearanceService : IDisposable
                 {
                     forceHeadToggles = true;
 
-                    if(!existingAppearance.Customize.Equals(appearance.Customize))
+                    if(!existingAppearance.Customize.Equals(appearance.Customize) || !existingAppearance.Equipment.Equals(appearance.Equipment))
                         glamourerReset |= true;
 
                     if
@@ -233,13 +233,18 @@ internal class ActorAppearanceService : IDisposable
             }
         }
 
+       
+        if(glamourerReset)
+        {
+            await _glamourerService.RevertCharacter(character);
+
+            needsRedraw = true;
+        }
+     
         RedrawResult redrawResult = RedrawResult.Optmized;
 
         if(needsRedraw)
             redrawResult = await _redrawService.RedrawActor(character);
-
-        if(glamourerReset)
-            await _glamourerService.RevertCharacter(character);
 
         unsafe
         {
