@@ -1,6 +1,8 @@
 ﻿using Brio.Config;
+using Brio.UI.Controls.Selectors;
 using Brio.UI.Controls.Stateless;
 using Dalamud.Interface;
+using Dalamud.Interface.Utility.Raii;
 using ImGuiNET;
 using System;
 using System.IO;
@@ -56,75 +58,70 @@ internal static class LibrarySourcesEditor
             ImGui.EndChild();
         }
 
-        if(selectedItem is null || selectedItem.CanEdit == false)
+      
+        using(ImRaii.Disabled(selectedItem is null || selectedItem.CanEdit == false))
         {
-            ImGui.BeginDisabled();
-        }
-
-        // Remove Item
-        {
-            if(ImBrio.FontIconButton(FontAwesomeIcon.Minus, new(buttonWidth, 0)))
+            // Remove Item
             {
-                // TODO: confirm?
-                if(selectedItem is not null)
+                if(ImBrio.FontIconButton(FontAwesomeIcon.Minus, new(buttonWidth, 0)))
                 {
-                    config.RemoveSource(selectedItem);
+                    // TODO: confirm?
+                    if(selectedItem is not null)
+                    {
+                        config.RemoveSource(selectedItem);
 
-                    HasSourcesChanged = true;
+                        HasSourcesChanged = true;
 
-                    service.ApplyChange();
+                        service.ApplyChange();
 
-                    selectedItem = null;
+                        selectedItem = null;
+                    }
                 }
+
+                if(ImGui.IsItemHovered())
+                    ImGui.SetTooltip("Remove the selected source");
             }
 
-            if(ImGui.IsItemHovered())
-                ImGui.SetTooltip("Remove the selected source");
-        }
+            ImGui.SameLine();
 
-        ImGui.SameLine();
-
-        // Toggle Item
-        {
-            ImGui.SetCursorPosX(ImGui.GetCursorPosX() + (ImBrio.GetRemainingWidth() - (buttonWidth * 3) - (ImGui.GetStyle().ItemSpacing.X * 2)));
-            if(ImBrio.FontIconButton(FontAwesomeIcon.ToggleOff, new(buttonWidth, 0)))
+            // Toggle Item
             {
-                if(selectedItem != null)
+                ImGui.SetCursorPosX(ImGui.GetCursorPosX() + (ImBrio.GetRemainingWidth() - (buttonWidth * 3) - (ImGui.GetStyle().ItemSpacing.X * 2)));
+                if(ImBrio.FontIconButton(FontAwesomeIcon.ToggleOff, new(buttonWidth, 0)))
                 {
-                    selectedItem.Enabled = !selectedItem.Enabled;
+                    if(selectedItem != null)
+                    {
+                        selectedItem.Enabled = !selectedItem.Enabled;
 
-                    HasSourcesChanged = true;
+                        HasSourcesChanged = true;
 
-                    service.ApplyChange();
+                        service.ApplyChange();
+                    }
                 }
+
+                if(ImGui.IsItemHovered())
+                    ImGui.SetTooltip("Toggle the selected source on or off");
             }
 
-            if(ImGui.IsItemHovered())
-                ImGui.SetTooltip("Toggle the selected source on or off");
-        }
+            ImGui.SameLine();
 
-        ImGui.SameLine();
-
-        // Edit Item
-        {
-            if(ImBrio.FontIconButton(FontAwesomeIcon.Edit, new(buttonWidth, 0)))
+            // Edit Item
             {
-                isEditing = true;
-                isItemEditorOpen = true;
-                isNewItem = false;
+                if(ImBrio.FontIconButton(FontAwesomeIcon.Edit, new(buttonWidth, 0)))
+                {
+                    isEditing = true;
+                    isItemEditorOpen = true;
+                    isNewItem = false;
 
-                ImGui.OpenPopup("###settings_edit_source");
-            }
+                    ImGui.OpenPopup("###settings_edit_source");
+                }
 
-            if(ImGui.IsItemHovered())
-                ImGui.SetTooltip("Edit the selected source");
+                if(ImGui.IsItemHovered())
+                    ImGui.SetTooltip("Edit the selected source");
 
+            }     
         }
 
-        if(selectedItem is null || selectedItem.CanEdit == false)
-        {
-            ImGui.EndDisabled();
-        }
 
         ImGui.SameLine();
         ImGui.SetCursorPosX(ImGui.GetCursorPosX() + (ImBrio.GetRemainingWidth() - buttonWidth));
@@ -297,7 +294,7 @@ internal static class LibrarySourcesEditor
 
     private static void DrawSource(FileSourceConfig config)
     {
-        if(config.Root != null && config.Root != Environment.SpecialFolder.MyComputer)
+        if(config.Root is not null and not Environment.SpecialFolder.MyComputer)
         {
             string currentPath = Environment.GetFolderPath((Environment.SpecialFolder)config.Root) + config.Path;
             bool valid = Directory.Exists(currentPath);
@@ -314,7 +311,7 @@ internal static class LibrarySourcesEditor
 
             ImGui.TextDisabled($"{config.Root}{config.Path}");
         }
-        else if(config.Path != null)
+        else if(config.Path is not null)
         {
             ImGui.TextDisabled(config.Path);
         }
