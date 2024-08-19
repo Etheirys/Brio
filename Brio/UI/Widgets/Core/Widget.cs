@@ -14,7 +14,7 @@ internal interface IWidget
 
     public void DrawQuickIcons();
 
-    public void ActivateAdvanced();
+    public void ToggleAdvancedWindow();
 }
 
 internal abstract class Widget<T>(T capability) : IWidget where T : Capability
@@ -29,7 +29,7 @@ internal abstract class Widget<T>(T capability) : IWidget where T : Capability
 
     public virtual void DrawQuickIcons() { }
 
-    public virtual void ActivateAdvanced() { }
+    public virtual void ToggleAdvancedWindow() { }
 }
 
 [Flags]

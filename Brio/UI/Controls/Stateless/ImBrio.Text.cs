@@ -18,13 +18,6 @@ internal static partial class ImBrio
         ImGui.TextWrapped(text);
     }
 
-    public static void Text(string text, float scale = 1.0f, uint color = 0xFFFFFF)
-    {
-        ImGui.SetWindowFontScale(scale);
-        ImGui.TextColored(ImGui.ColorConvertU32ToFloat4(color), text);
-        ImGui.SetWindowFontScale(1.0f);
-    }
-
     public static void Text(string text, uint color = 0xFFFFFF)
     {
         ImGui.TextColored(ImGui.ColorConvertU32ToFloat4(color), text);

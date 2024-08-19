@@ -7,7 +7,8 @@ namespace Brio.Game.Chat;
 
 internal class CommandHandlerService : IDisposable
 {
-    private const string CommandName = "/brio";
+    private const string BrioCommandName = "/brio";
+    private const string XATCommandName = "/xat";
 
     private readonly ICommandManager _commandManager;
     private readonly IChatGui _chatGui;
@@ -19,10 +20,15 @@ internal class CommandHandlerService : IDisposable
         _chatGui = chatGui;
         _uiManager = uiManager;
 
-        _commandManager.AddHandler(CommandName, new CommandInfo(OnCommand)
+        _commandManager.AddHandler(BrioCommandName, new CommandInfo(OnCommand)
         {
             HelpMessage = "Toggles the Brio window.",
             ShowInHelp = true,
+        });
+        _commandManager.AddHandler(XATCommandName, new CommandInfo(OnCommand)
+        {
+            HelpMessage = "Toggles the Brio window.",
+            ShowInHelp = false,
         });
     }
 
@@ -32,7 +38,6 @@ internal class CommandHandlerService : IDisposable
             arguments = "window";
 
         var argumentList = arguments.Split(' ', 2);
-        arguments = argumentList.Length == 2 ? argumentList[1] : string.Empty;
 
         switch(argumentList[0].ToLowerInvariant())
         {
@@ -68,6 +73,7 @@ internal class CommandHandlerService : IDisposable
 
     public void Dispose()
     {
-        _commandManager.RemoveHandler(CommandName);
+        _commandManager.RemoveHandler(BrioCommandName);
+        _commandManager.RemoveHandler(XATCommandName);
     }
 }

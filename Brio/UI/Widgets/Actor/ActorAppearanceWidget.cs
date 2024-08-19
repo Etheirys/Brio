@@ -51,7 +51,7 @@ internal class ActorAppearanceWidget(ActorAppearanceCapability capability) : Wid
         }
 
         if(ImBrio.FontIconButton("advanced_appearance", FontAwesomeIcon.UserEdit, "Advanced"))
-            ActivateAdvanced();
+            ToggleAdvancedWindow();
 
         ImGui.SameLine();
 
@@ -76,8 +76,8 @@ internal class ActorAppearanceWidget(ActorAppearanceCapability capability) : Wid
         }
     }
 
-    public override void ActivateAdvanced()
+    public override void ToggleAdvancedWindow()
     {
-        UIManager.Instance.ShowAppearanceWindow();
+        UIManager.Instance.ToggleAppearanceWindow();
     }
 }

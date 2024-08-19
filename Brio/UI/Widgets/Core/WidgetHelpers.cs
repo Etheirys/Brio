@@ -40,7 +40,7 @@ internal class WidgetHelpers
                 string tool = $"Advanced {widget.HeaderName}";
 
                 if(ImBrio.FontIconButtonRight("advanced", FontAwesomeIcon.SquareArrowUpRight, 1, tool, bordered: false))
-                    widget.ActivateAdvanced();
+                    widget.ToggleAdvancedWindow();
 
                 ImGui.SetCursorPos(startPos);
             }

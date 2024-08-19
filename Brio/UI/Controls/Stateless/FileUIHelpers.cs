@@ -7,16 +7,60 @@ using Brio.Game.Posing;
 using Brio.Game.Types;
 using Brio.Library;
 using Brio.Library.Filters;
+using Brio.UI.Controls.Core;
 using Brio.UI.Controls.Editors;
+using Dalamud.Interface;
 using Dalamud.Interface.Utility.Raii;
+using ImGuiNET;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Numerics;
 
 namespace Brio.UI.Controls.Stateless;
 
 internal class FileUIHelpers
 {
+    public static void DrawImportPoseMenuPopup(PosingCapability capability, bool showImportOptions = true)
+    {
+        using var popup = ImRaii.Popup("DrawImportPoseMenuPopup");
+
+        if(popup.Success)
+        {
+            using(ImRaii.PushColor(ImGuiCol.Button, UIConstants.Transparent))
+            {
+                if(showImportOptions)
+                {
+                    if(ImBrio.FontIconButton(FontAwesomeIcon.Cog))
+                        ImGui.OpenPopup("import_optionsImportPoseMenuPopup");
+
+                    if(ImGui.IsItemHovered())
+                        ImGui.SetTooltip("Import Options");
+           
+                    ImGui.SameLine();
+                }
+
+                if(ImGui.Button("Import as Pose", Vector2.Zero))
+                {
+                    ShowImportPoseModal(capability);
+                }
+
+                if(ImGui.Button("Import as Expression", Vector2.Zero))
+                {
+                    ShowImportPoseModal(capability, asExpression: true);
+                }
+            }
+
+            using(var popup2 = ImRaii.Popup("import_optionsImportPoseMenuPopup"))
+            {
+                if(popup2.Success && showImportOptions && Brio.TryGetService<PosingService>(out var service))
+                {
+                    PosingEditorCommon.DrawImportOptionEditor(service.DefaultImporterOptions);
+                }
+            }
+        }
+    }
+
     public static void ShowImportPoseModal(PosingCapability capability, PoseImporterOptions? options = null, bool asExpression = false)
     {
         TypeFilter filter = new TypeFilter("Poses", typeof(CMToolPoseFile), typeof(PoseFile));

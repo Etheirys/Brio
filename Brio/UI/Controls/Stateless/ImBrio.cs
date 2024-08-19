@@ -10,44 +10,26 @@ using System.Numerics;
 namespace Brio.UI.Controls.Stateless;
 internal static partial class ImBrio
 {
-    public static void FontIcon(FontAwesomeIcon icon, float scale = 1.0f)
+    public static void FontIcon(FontAwesomeIcon icon)
     {
-        ImGui.SetWindowFontScale(scale);
         using(ImRaii.PushFont(UiBuilder.IconFont))
         {
             ImGui.Text(icon.ToIconString());
         }
-        ImGui.SetWindowFontScale(1.0f);
     }
 
     public static bool FontIconButton(FontAwesomeIcon icon)
     {
-        bool clicked = false;
-        using(ImRaii.PushFont(UiBuilder.IconFont))
-        {
-            clicked = ImGui.Button(icon.ToIconString());
-        }
-
-        return clicked;
+        return FontIconButton(icon, new());
     }
 
     public static bool FontIconButton(FontAwesomeIcon icon, Vector2 size)
     {
         bool clicked = false;
+        
         using(ImRaii.PushFont(UiBuilder.IconFont))
         {
             clicked = ImGui.Button(icon.ToIconString(), size);
-        }
-
-        return clicked;
-    }
-
-    public static bool FontIconButton(string id, FontAwesomeIcon icon, Vector2 size)
-    {
-        bool clicked = false;
-        using(ImRaii.PushFont(UiBuilder.IconFont))
-        {
-            clicked = ImGui.Button($"{icon.ToIconString()}###{id}", size);
         }
 
         return clicked;
@@ -90,14 +72,14 @@ internal static partial class ImBrio
     {
         bool wasClicked = false;
 
-        if(!enabled)
+        if(enabled is false)
             ImGui.BeginDisabled();
 
         var pixelPos = ImGui.GetWindowSize().X - ((ImGui.CalcTextSize("XXX").X + (ImGui.GetStyle().FramePadding.X * 2)) * position);
 
         ImGui.SetCursorPosX(pixelPos);
 
-        if(!bordered)
+        if(bordered is false)
             ImGui.PushStyleColor(ImGuiCol.Button, UIConstants.Transparent);
 
         if(textColor.HasValue)
@@ -112,13 +94,13 @@ internal static partial class ImBrio
         if(textColor.HasValue)
             ImGui.PopStyleColor();
 
-        if(!bordered)
+        if(bordered is false)
             ImGui.PopStyleColor();
 
-        if(tooltip != null && ImGui.IsItemHovered())
+        if(tooltip is not null && ImGui.IsItemHovered())
             ImGui.SetTooltip(tooltip);
 
-        if(!enabled)
+        if(enabled is false)
             ImGui.EndDisabled();
 
         return wasClicked;
@@ -131,8 +113,6 @@ internal static partial class ImBrio
 
     public static bool Button(string label, FontAwesomeIcon icon, Vector2 size, string hoverText = "")
     {
-        bool clicked = false;
-
         // for consistency, hard-code this
         float iconWidth = 40;
 
@@ -154,10 +134,10 @@ internal static partial class ImBrio
         ImGui.PushStyleVar(ImGuiStyleVar.ButtonTextAlign, new Vector2(textOffset, 0.5f));
 
         Vector2 startPos = ImGui.GetCursorPos();
-        clicked = ImGui.Button(label, size);
+        bool clicked = ImGui.Button(label, size);
         Vector2 endPos = ImGui.GetCursorPos();
 
-        if(string.IsNullOrEmpty(hoverText) == false)
+        if(string.IsNullOrEmpty(hoverText) is false)
         {
             if(ImGui.IsItemHovered())
                 ImGui.SetTooltip(hoverText);
@@ -185,12 +165,10 @@ internal static partial class ImBrio
 
     public static bool ToggelButton(string lable, Vector2 size, bool isToggled, uint toggledColor = UIConstants.GizmoRed, string hoverText = "")
     {
-        bool clicked = false;
-
         if(isToggled)
             ImGui.PushStyleColor(ImGuiCol.Button, toggledColor);
 
-        clicked = ImGui.Button(lable, size);
+        bool clicked = ImGui.Button(lable, size);
 
         if(isToggled)
             ImGui.PopStyleColor();

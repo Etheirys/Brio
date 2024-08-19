@@ -28,12 +28,12 @@ internal class ActionTimelineWindow : Window, IDisposable
         _gPoseService = gPoseService;
         _cutsceneManager = cutsceneManager;
 
-        _editor = new(_cutsceneManager, gPoseService, physicsService, configurationService);
+        _editor = new(_cutsceneManager, gPoseService, entityManager, physicsService, configurationService);
 
         SizeConstraints = new WindowSizeConstraints
         {
             MaximumSize = new Vector2(270, 5000),
-            MinimumSize = new Vector2(350, 200)
+            MinimumSize = new Vector2(430, 350)
         };
 
         _gPoseService.OnGPoseStateChange += OnGPoseStateChange;

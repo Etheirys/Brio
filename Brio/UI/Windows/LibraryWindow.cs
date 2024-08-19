@@ -3,6 +3,7 @@ using Brio.Files;
 using Brio.Game.GPose;
 using Brio.Game.Posing;
 using Brio.Game.Types;
+using Brio.Input;
 using Brio.Library;
 using Brio.Library.Filters;
 using Brio.Library.Tags;
@@ -307,10 +308,13 @@ internal class LibraryWindow : Window
 
         ImGui.SetNextWindowSizeConstraints(MinimumSize, ImGui.GetIO().DisplaySize);
 
-        ImGui.BeginPopupModal($"Import {_modalFilter.Name}##brio_library_popup");
-
-        DrawInternal();
-        ImGui.EndPopup();
+        using(var popup = ImRaii.PopupModal($"Import {_modalFilter.Name}##brio_library_popup"))
+        {
+            if(popup.Success)
+            {
+                DrawInternal();
+            }
+        }
     }
 
     private void DrawInternal()
@@ -323,12 +327,12 @@ internal class LibraryWindow : Window
             if(_selectedFilter == null)
                 return;
 
-
             float pathWidth = WindowContentWidth - SearchWidth;
             if(_isModal)
                 pathWidth -= 155;
 
             ImGui.Spacing();
+
             DrawPath(pathWidth);
 
             if(_isModal)
@@ -346,15 +350,17 @@ internal class LibraryWindow : Window
             DrawSearch();
 
             var windowSize = ImGui.GetWindowSize();
-            if(ImGui.BeginChild("###left_pane", new Vector2(windowSize.X - InfoPaneWidth, -1), false,
+            using(var child = ImRaii.Child("###left_pane", new Vector2(windowSize.X - InfoPaneWidth, -1), false,
                 ImGuiWindowFlags.NoBackground | ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse))
             {
+                if(child.Success == false)
+                    return;
+
                 float entriesPaneHeight = ImBrio.GetRemainingHeight() - ImBrio.GetLineHeight() - ImGui.GetStyle().ItemSpacing.Y;
                 float entriesPaneWidth = ImBrio.GetRemainingWidth();
-                if(ImGui.BeginChild("###library_entries_pane", new Vector2(entriesPaneWidth, entriesPaneHeight), true))
+                using(ImRaii.Child("###library_entries_pane", new Vector2(entriesPaneWidth, entriesPaneHeight), true))
                 {
                     DrawFiles();
-                    ImGui.EndChild();
                 }
 
                 Vector2 mousePos = ImGui.GetMousePos() - ImGui.GetWindowPos();
@@ -371,7 +377,7 @@ internal class LibraryWindow : Window
                     float mouseWheel = ImGui.GetIO().MouseWheel * 10;
                     // TODO: replace this ctrl listener with the new key bind system when it is merged
                     // as ImGUI ctrl support is _spotty_
-                    if(ImGui.IsKeyPressed(ImGuiKey.LeftCtrl) && mouseWheel != 0)
+                    if(InputService.IsKeyBindDown(KeyBindEvents.Interface_IncrementSmallModifier) && mouseWheel != 0)
                     {
                         float val = _configurationService.Configuration.Library.IconSize;
                         val = Math.Clamp(val + mouseWheel, MinEntrySize, MaxEntrySize);
@@ -381,29 +387,33 @@ internal class LibraryWindow : Window
                 }
 
                 DrawFooter();
-
-                ImGui.EndChild();
             }
+
             ImGui.SameLine();
 
-            if(ImGui.BeginChild("###right_pane", new Vector2(ImBrio.GetRemainingWidth(), -1), false,
+
+            using(var child = ImRaii.Child("###right_pane", new Vector2(ImBrio.GetRemainingWidth(), -1), false,
                 ImGuiWindowFlags.NoBackground | ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse))
             {
+                if(child.Success == false)
+                    return;
+
                 float paneHeight = ImBrio.GetRemainingHeight() - (ImBrio.GetLineHeight() + ImGui.GetStyle().ItemSpacing.Y);
 
-                if(ImGui.BeginChild("###library_info_pane", new Vector2(ImBrio.GetRemainingWidth(), paneHeight), true,
+                using(var child2 = ImRaii.Child("###library_info_pane", new Vector2(ImBrio.GetRemainingWidth(), paneHeight), true,
                     ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse))
                 {
+                    if(child2.Success == false)
+                        return;
+
                     if(_selected != null)
                     {
                         DrawInfo(_selected);
                     }
                     else
                     {
-                        DrawInfo(_path[_path.Count - 1]);
+                        DrawInfo(_path[^1]);
                     }
-
-                    ImGui.EndChild();
                 }
 
                 // Actions
@@ -420,23 +430,18 @@ internal class LibraryWindow : Window
                             var config = ConfigurationService.Instance.Configuration;
                             bool isFavorite = config.Library.Favorites.Contains(ieb.Identifier);
 
-                            ImGui.PushStyleColor(ImGuiCol.Text, isFavorite ? UIConstants.GizmoRed : UIConstants.ToggleButtonInactive);
-
-                            if(ImBrio.FontIconButton(FontAwesomeIcon.Heart))
+                            using(ImRaii.PushColor(ImGuiCol.Text, isFavorite ? UIConstants.GizmoRed : UIConstants.ToggleButtonInactive))
                             {
-                                if(!isFavorite)
+                                if(ImBrio.FontIconButton(FontAwesomeIcon.Heart))
                                 {
-                                    config.Library.Favorites.Add(ieb.Identifier);
-                                }
-                                else
-                                {
-                                    config.Library.Favorites.Remove(ieb.Identifier);
-                                }
+                                    if(isFavorite)
+                                        config.Library.Favorites.Remove(ieb.Identifier);
+                                    else
+                                        config.Library.Favorites.Add(ieb.Identifier);
 
-                                ConfigurationService.Instance.Save();
+                                    ConfigurationService.Instance.Save();
+                                }
                             }
-
-                            ImGui.PopStyleColor();
 
                             if(ImGui.IsItemHovered())
                                 ImGui.SetTooltip(isFavorite ? "Remove from favorites" : "Add to favorites");
@@ -452,7 +457,6 @@ internal class LibraryWindow : Window
                         offset += 30;
 
                     ImGui.SetCursorPosX(ImGui.GetCursorPosX() + (ImBrio.GetRemainingWidth() - (offset + ImGui.GetStyle().ItemSpacing.X)));
-
 
                     if(isPoseModal)
                     {
@@ -472,7 +476,8 @@ internal class LibraryWindow : Window
                         ImGui.SameLine();
                     }
 
-                    if(isIEB == false)
+                    var doDisable = isIEB == false;
+                    if(doDisable)
                         ImGui.BeginDisabled();
 
                     if(ImBrio.Button("Import", FontAwesomeIcon.Check, new Vector2(100, 0)))
@@ -483,7 +488,7 @@ internal class LibraryWindow : Window
                         }
                     }
 
-                    if(isIEB == false)
+                    if(doDisable)
                         ImGui.EndDisabled();
 
                     ImGui.SameLine();
@@ -495,13 +500,13 @@ internal class LibraryWindow : Window
                 }
                 else
                 {
-                    if(_selected != null)
+                    if(_selected is not null)
                     {
                         _selected.DrawActions(_isModal);
                     }
                     else
                     {
-                        _path[_path.Count - 1].DrawActions(_isModal);
+                        _path[^1].DrawActions(_isModal);
                     }
                 }
             }
@@ -525,8 +530,6 @@ internal class LibraryWindow : Window
 
         if(_isModal && _modalFilter != null)
         {
-
-
             ops.Add(_favoritesFilter.Name);
             if(_favoritesFilter == _selectedFilter)
                 selected = 0;
@@ -535,7 +538,7 @@ internal class LibraryWindow : Window
             if(_modalFilter == _selectedFilter)
                 selected = 1;
 
-            if(ImBrio.ToggleButtonStrip("library_filters_selector", new(ImBrio.GetRemainingWidth(), ImBrio.GetLineHeight()), ref selected, ops.ToArray()))
+            if(ImBrio.ToggleButtonStrip("library_filters_selector", new(ImBrio.GetRemainingWidth(), ImBrio.GetLineHeight()), ref selected, [.. ops]))
             {
                 if(selected == 0)
                 {
@@ -567,7 +570,7 @@ internal class LibraryWindow : Window
                 selected = 2;
 
 
-            if(ImBrio.ToggleButtonStrip("library_filters_selector", new(ImBrio.GetRemainingWidth(), ImBrio.GetLineHeight()), ref selected, ops.ToArray()))
+            if(ImBrio.ToggleButtonStrip("library_filters_selector", new(ImBrio.GetRemainingWidth(), ImBrio.GetLineHeight()), ref selected, [.. ops]))
             {
                 if(selected == 0)
                 {
@@ -596,9 +599,6 @@ internal class LibraryWindow : Window
         _searchFilter.Clear();
         TagFilter.Clear();
 
-        // cant clear type filter.
-        ////_typeFilter.Clear();
-
         TryRefresh(true);
     }
 
@@ -612,93 +612,76 @@ internal class LibraryWindow : Window
         if(width == -1)
             width = ImBrio.GetRemainingWidth();
 
-        if(ImGui.BeginChild("library_path_input", new(width, lineHeight), false, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse))
+        using(var child = ImRaii.Child("library_path_input", new(width, lineHeight), false, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse))
         {
-            ImGui.PushStyleColor(ImGuiCol.Button, 0);
+            if(child.Success == false)
+                return;
 
-            // Go Up Button
+            using(ImRaii.PushColor(ImGuiCol.Button, 0))
             {
-                if(_path.Count <= 1)
-                    ImGui.BeginDisabled();
-
-                if(ImBrio.FontIconButton(FontAwesomeIcon.CaretUp, new(PathBarButtonWidth, lineHeight)))
+                // Go Up Button
+                using(ImRaii.Disabled(_path.Count <= 1))
                 {
-                    _path.RemoveAt(_path.Count - 1);
-                    ClearFilters();
-                }
-
-                if(_path.Count <= 1)
-                {
-                    ImGui.EndDisabled();
-                }
-            }
-
-            ImGui.SameLine();
-
-            // Path segments
-            for(int i = 0; i < _path.Count; i++)
-            {
-                if(i > 0)
-                {
-                    ImGui.SetCursorPosY(ImGui.GetCursorPosY() + 5);
-                    ImBrio.FontIcon(FontAwesomeIcon.CaretRight, 0.5f);
-                    ImGui.SameLine();
-                }
-
-                if(ImGui.Button(_path[i].Name))
-                {
-                    if((i + 1) < _path.Count)
+                    if(ImBrio.FontIconButton(FontAwesomeIcon.CaretUp, new(PathBarButtonWidth, lineHeight)))
                     {
-                        _path.RemoveRange((i + 1), _path.Count - (i + 1));
+                        _path.RemoveAt(_path.Count - 1);
                         ClearFilters();
-                        break;
                     }
                 }
 
                 ImGui.SameLine();
-            }
 
-            ImGui.SameLine();
+                // Path segments
+                for(int i = 0; i < _path.Count; i++)
+                {
+                    if(i > 0)
+                    {
+                        ImGui.SetCursorPosY(ImGui.GetCursorPosY());
+                        ImBrio.FontIcon(FontAwesomeIcon.CaretRight);
+                        ImGui.SameLine();
+                    }
 
-            // Blank area
-            {
+                    if(ImGui.Button(_path[i].Name))
+                    {
+                        if((i + 1) < _path.Count)
+                        {
+                            _path.RemoveRange((i + 1), _path.Count - (i + 1));
+                            ClearFilters();
+                            break;
+                        }
+                    }
+
+                    ImGui.SameLine();
+                }
+
+                ImGui.SameLine();
+
+                // Blank area
                 float blankWidth = ImBrio.GetRemainingWidth() - PathBarButtonWidth - ImGui.GetStyle().ItemSpacing.X;
                 if(ImGui.InvisibleButton("###library_path_input_blank", new(blankWidth, lineHeight)))
                 {
                     // consider: clicking here swaps to an InputText for pasting paths?
                 }
-            }
 
-            ImGui.SameLine();
+                ImGui.SameLine();
 
-            // Refresh Button
-            {
-                if(_isRescanning)
-                    ImGui.BeginDisabled();
-
-                if(ImBrio.FontIconButton(FontAwesomeIcon.Repeat, new(PathBarButtonWidth, lineHeight)))
+                // Refresh Button
+                using(ImRaii.Disabled(_isRescanning))
                 {
-                    ReScan();
-                }
+                    if(ImBrio.FontIconButton(FontAwesomeIcon.Repeat, new(PathBarButtonWidth, lineHeight)))
+                    {
+                        ReScan();
+                    }
 
-                if(ImGui.IsItemHovered())
-                {
-                    ImGui.SetTooltip("Scan all library sources and refresh the view");
-                }
-
-                if(_isRescanning)
-                {
-                    ImGui.EndDisabled();
+                    if(ImGui.IsItemHovered())
+                    {
+                        ImGui.SetTooltip("Scan all library sources and refresh the view");
+                    }
                 }
             }
-
-            ImGui.PopStyleColor();
-
-
-
-            ImGui.SameLine();
-            ImGui.EndChild();
         }
+
+        ImGui.SameLine();
 
         ImGui.PopStyleVar();
         ImGui.PopStyleColor();
@@ -721,6 +704,7 @@ internal class LibraryWindow : Window
                 if(IsSearching)
                 {
                     ImGui.PushStyleColor(ImGuiCol.Button, 0x000000);
+
                     if(ImBrio.FontIconButton(FontAwesomeIcon.TimesCircle))
                     {
                         ClearSearchText();
@@ -734,7 +718,6 @@ internal class LibraryWindow : Window
                 }
                 else
                 {
-
                     ImGui.BeginDisabled();
                     ImGui.PushStyleColor(ImGuiCol.Button, 0x000000);
                     ImBrio.FontIconButton(FontAwesomeIcon.Search);
@@ -777,6 +760,7 @@ internal class LibraryWindow : Window
                 }
 
                 ImGui.PushStyleColor(ImGuiCol.FrameBg, 0x000000);
+            
                 if(ImGui.InputText("###library_search_input", ref _searchText, 256,
                     ImGuiInputTextFlags.NoHorizontalScroll | ImGuiInputTextFlags.NoUndoRedo
                     | ImGuiInputTextFlags.CallbackAlways,
@@ -798,7 +782,7 @@ internal class LibraryWindow : Window
 
                 _isSearchFocused = ImGui.IsItemActive();
 
-                // TODO: Try to capture backspace keys to remove tags. possibly with the new key bind input system?
+                // TODO: Try to capture backspace keys to remove tags.
                 // ImGui.IsKeyPressed(ImGuiKey.Backspace) doesn't work, as expected.
 
                 if(!_isSearchFocused)
@@ -890,7 +874,7 @@ internal class LibraryWindow : Window
 
                 if(trimmedTags > 0)
                 {
-                    ImBrio.Text($"plus \"{trimmedTags}\" more tags...", 0.75f, 0x88FFFFFF);
+                    ImBrio.Text($"plus {trimmedTags} more tags...", 0x88FFFFFF);
                 }
 
                 hasContent = true;
@@ -914,9 +898,10 @@ internal class LibraryWindow : Window
             {
                 ImBrio.Text($"Start typing to search...", 0x88FFFFFF);
             }
+
+            ImGui.End();
         }
 
-        ImGui.End();
         ImGui.PopStyleVar();
 
         if(_searchLostFocus > 10 && !_searchNeedsFocus)
@@ -927,7 +912,7 @@ internal class LibraryWindow : Window
 
     private List<Tag> GetAvailableTags(string[] query)
     {
-        List<Tag> results = new();
+        List<Tag> results = [];
         foreach(var tag in _allTags)
         {
             if(TagFilter.Tags?.Contains(tag) == true)
@@ -1015,7 +1000,7 @@ internal class LibraryWindow : Window
             using(var child = ImRaii.Child($"library_entry_{id}", size, true,
                 ImGuiWindowFlags.NoBackground | ImGuiWindowFlags.NoInputs | ImGuiWindowFlags.NoScrollbar))
             {
-                if(!child.Success)
+                if(child.Success == false)
                     return;
 
                 Vector2 iconSize = new(ImGui.GetContentRegionAvail().X, ImGui.GetContentRegionAvail().X);
@@ -1071,8 +1056,8 @@ internal class LibraryWindow : Window
     {
         ImGui.Text(entry.Name);
 
-        // internal info
-        ImGui.PushStyleColor(ImGuiCol.ChildBg, 0x000000);
+        ImGui.PushStyleColor(ImGuiCol.ChildBg, 0);
+
         if(ImGui.BeginChild("###library_info_pane", new Vector2(ImBrio.GetRemainingWidth(), ImBrio.GetRemainingHeight()), false))
         {
             entry.DrawInfo(this);
@@ -1111,10 +1096,6 @@ internal class LibraryWindow : Window
                 }
 
                 Close();
-            }
-            else
-            {
-                // YUKI TODO ?
             }
         }
     }

@@ -43,23 +43,10 @@ internal class PosingWidget(PosingCapability capability) : Widget<PosingCapabili
 
         if(ImBrio.FontIconButton("import", FontAwesomeIcon.FileImport, "Import Pose"))
         {
-            ImGui.OpenPopup("import_type");
+            ImGui.OpenPopup("DrawImportPoseMenuPopup");
         }
 
-        using(var popup = ImRaii.Popup("import_type"))
-        {
-            if(popup.Success)
-            {
-                if(ImGui.Button("Import as Pose", Vector2.Zero))
-                {
-                    FileUIHelpers.ShowImportPoseModal(Capability);
-                }
-                if(ImGui.Button("Import as Expression", Vector2.Zero))
-                {
-                    FileUIHelpers.ShowImportPoseModal(Capability, asExpression: true);
-                }
-            }
-        }
+        FileUIHelpers.DrawImportPoseMenuPopup(Capability);
 
         ImGui.SameLine();
 
@@ -118,9 +105,8 @@ internal class PosingWidget(PosingCapability capability) : Widget<PosingCapabili
         _posingTransformEditor.Draw("posing_widget_transform", Capability, true);
     }
 
-    public override void ActivateAdvanced()
+    public override void ToggleAdvancedWindow()
     {
-        UIManager.Instance.ShowGraphicalPosingWindow();
+        UIManager.Instance.ToggleGraphicalPosingWindow();
     }
-
 }

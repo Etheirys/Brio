@@ -141,19 +141,19 @@ internal class UIManager : IDisposable
         ApplySettings();
     }
 
-    public void ShowAppearanceWindow()
+    public void ToggleAppearanceWindow()
     {
-        _actorAppearanceWindow.IsOpen = true;
+        _actorAppearanceWindow.IsOpen = !_actorAppearanceWindow.IsOpen;
     }
 
-    public void ShowActionTimelineWindow()
+    public void ToggleActionTimelineWindow()
     {
-        _actionTimelineWindow.IsOpen = true;
+        _actionTimelineWindow.IsOpen = !_actionTimelineWindow.IsOpen;
     }
 
-    public void ShowGraphicalPosingWindow()
+    public void ToggleGraphicalPosingWindow()
     {
-        _graphicalWindow.IsOpen = true;
+        _graphicalWindow.IsOpen = !_graphicalWindow.IsOpen;
     }
 
     public void ShowSettingsWindow()
@@ -249,6 +249,7 @@ internal class UIManager : IDisposable
         _pluginInterface.UiBuilder.OpenConfigUi -= ShowSettingsWindow;
         _pluginInterface.UiBuilder.OpenMainUi -= ShowMainWindow;
 
+        _mainWindow.Dispose();
 
         _windowSystem.RemoveAllWindows();
 

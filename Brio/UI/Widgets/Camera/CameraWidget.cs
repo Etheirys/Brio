@@ -19,5 +19,5 @@ internal class CameraWidget : Widget<CameraCapability>
         CameraEditor.Draw("camera_widget_editor", Capability);
     }
 
-    public override void ActivateAdvanced() => Capability.ShowCameraWindow();
+    public override void ToggleAdvancedWindow() => Capability.ShowCameraWindow();
 }

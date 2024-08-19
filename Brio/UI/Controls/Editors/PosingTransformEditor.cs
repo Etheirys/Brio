@@ -114,43 +114,6 @@ internal class PosingTransformEditor
         }
     }
 
-    private bool DrawPropagateCheckboxes(ref TransformComponents propagate)
-    {
-        var didChange = false;
-
-        bool propBool = propagate.HasFlag(TransformComponents.Position);
-        if(ImGui.Checkbox("P###propagate_position", ref propBool))
-        {
-            didChange |= true;
-            propagate = propBool ? propagate | TransformComponents.Position : propagate & ~TransformComponents.Position;
-        }
-        if(ImGui.IsItemHovered())
-            ImGui.SetTooltip("Propagate Positions");
-
-        ImGui.SameLine();
-        propBool = propagate.HasFlag(TransformComponents.Rotation);
-        if(ImGui.Checkbox("R###propagate_rotation", ref propBool))
-        {
-            didChange |= true;
-            propagate = propBool ? propagate | TransformComponents.Rotation : propagate & ~TransformComponents.Rotation;
-        }
-        if(ImGui.IsItemHovered())
-            ImGui.SetTooltip("Propagate Rotations");
-
-        ImGui.SameLine();
-
-        propBool = propagate.HasFlag(TransformComponents.Scale);
-        if(ImGui.Checkbox("S###propagate_scale", ref propBool))
-        {
-            didChange |= true;
-            propagate = propBool ? propagate | TransformComponents.Scale : propagate & ~TransformComponents.Scale;
-        }
-        if(ImGui.IsItemHovered())
-            ImGui.SetTooltip("Propagate Scales");
-
-        return didChange;
-    }
-
     private void DrawModelTransformEditor(PosingCapability posingCapability)
     {
         var before = posingCapability.ModelPosing.Transform;
@@ -189,5 +152,42 @@ internal class PosingTransformEditor
             _trackingTransform = null;
             _trackingEuler = null;
         }
+    }
+
+    private static bool DrawPropagateCheckboxes(ref TransformComponents propagate)
+    {
+        var didChange = false;
+
+        bool propBool = propagate.HasFlag(TransformComponents.Position);
+        if(ImGui.Checkbox("P###propagate_position", ref propBool))
+        {
+            didChange |= true;
+            propagate = propBool ? propagate | TransformComponents.Position : propagate & ~TransformComponents.Position;
+        }
+        if(ImGui.IsItemHovered())
+            ImGui.SetTooltip("Propagate Positions");
+
+        ImGui.SameLine();
+        propBool = propagate.HasFlag(TransformComponents.Rotation);
+        if(ImGui.Checkbox("R###propagate_rotation", ref propBool))
+        {
+            didChange |= true;
+            propagate = propBool ? propagate | TransformComponents.Rotation : propagate & ~TransformComponents.Rotation;
+        }
+        if(ImGui.IsItemHovered())
+            ImGui.SetTooltip("Propagate Rotations");
+
+        ImGui.SameLine();
+
+        propBool = propagate.HasFlag(TransformComponents.Scale);
+        if(ImGui.Checkbox("S###propagate_scale", ref propBool))
+        {
+            didChange |= true;
+            propagate = propBool ? propagate | TransformComponents.Scale : propagate & ~TransformComponents.Scale;
+        }
+        if(ImGui.IsItemHovered())
+            ImGui.SetTooltip("Propagate Scales");
+
+        return didChange;
     }
 }

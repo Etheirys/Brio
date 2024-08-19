@@ -217,14 +217,11 @@ internal class PosingOverlayToolbarWindow : Window
             ImGui.SetTooltip("Select Parent");
 
 
-        //using(ImRaii.PushFont(UiBuilder.IconFont))
-        //{
         using(ImRaii.Disabled(!(bone?.EligibleForIK == true)))
         {
             if(ImGui.Button($"IK###bone_ik", new Vector2(buttonSize)))
                 ImGui.OpenPopup("overlay_bone_ik");
         }
-        //}
         if(ImGui.IsItemHovered())
             ImGui.SetTooltip("Inverse Kinematics");
 
@@ -296,25 +293,12 @@ internal class PosingOverlayToolbarWindow : Window
         using(ImRaii.PushFont(UiBuilder.IconFont))
         {
             if(ImGui.Button($"{FontAwesomeIcon.FileImport.ToIconString()}###import_pose", new Vector2(buttonSize)))
-                ImGui.OpenPopup("import_type");
+                ImGui.OpenPopup("DrawImportPoseMenuPopup");
         }
         if(ImGui.IsItemHovered())
             ImGui.SetTooltip("Import Pose");
-
-        using(var popup = ImRaii.Popup("import_type"))
-        {
-            if(popup.Success)
-            {
-                if(ImGui.Button("Import as Pose", Vector2.Zero))
-                {
-                    FileUIHelpers.ShowImportPoseModal(posing);
-                }
-                if(ImGui.Button("Import as Expression", Vector2.Zero))
-                {
-                    FileUIHelpers.ShowImportPoseModal(posing, asExpression: true);
-                }
-            }
-        }
+       
+        FileUIHelpers.DrawImportPoseMenuPopup(posing, false);
 
         ImGui.SameLine();
 
