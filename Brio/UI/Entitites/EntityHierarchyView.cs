@@ -1,16 +1,20 @@
 ﻿using Brio.Entities;
 using Brio.Entities.Core;
+using Brio.UI.Controls.Core;
 using Brio.UI.Widgets.Core;
 using Dalamud.Interface;
 using Dalamud.Interface.Utility.Raii;
 using ImGuiNET;
+using System.Numerics;
 
 namespace Brio.UI.Entitites;
 
 internal class EntityHierarchyView(EntityManager entityManager)
 {
+    private readonly float buttonWidth = ImGui.GetTextLineHeight() * 14f;
+    private readonly float offsetWidth = 16f;
+
     private EntityId? _lastSelectedId;
-    private bool _scrollToSelected;
 
     public void Draw(Entity root)
     {
@@ -21,108 +25,109 @@ internal class EntityHierarchyView(EntityManager entityManager)
 
         if(_lastSelectedId != null && selectedEntityId != null && !_lastSelectedId.Equals(selectedEntityId))
         {
-            // The change must have come from outside of this control, so we need to scroll to the new selection
-            _scrollToSelected = true;
+            // The change must have come from outside of this control
             _lastSelectedId = selectedEntityId;
         }
 
         using(ImRaii.PushId($"entity_hierarchy_{root.Id}"))
         {
-            DrawEntity(root, selectedEntityId);
+            foreach(var item in root.Children)
+            {
+                DrawEntity(item, selectedEntityId);
+            }
         }
     }
 
-    private void DrawEntity(Entity entity, EntityId? selectedEntityId)
+    private void DrawEntity(Entity entity, EntityId? selectedEntityId, float lastOffset = 0)
     {
-        bool didRightClick = false;
-
-        ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags.SpanAvailWidth | ImGuiTreeNodeFlags.OpenOnDoubleClick;
-
-        if(entity.Flags.HasFlag(EntityFlags.DefaultOpen))
-            flags |= ImGuiTreeNodeFlags.DefaultOpen;
-
-        if(entity.Children.Count == 0)
-            flags |= ImGuiTreeNodeFlags.Leaf;
-
+        bool isSelected = false;
+        bool hasChildren = false;
+    
+        if(entity.Children.Count > 0)
+            hasChildren = true;
         if(selectedEntityId != null && entity.Id.Equals(selectedEntityId))
+            isSelected = true;
+
+        using(ImRaii.PushColor(ImGuiCol.ButtonActive, 0))
         {
-            if(_scrollToSelected)
+            using(ImRaii.PushColor(ImGuiCol.Button, 0))
             {
-                ImGui.SetScrollHereY();
-                _scrollToSelected = false;
-            }
-            flags |= ImGuiTreeNodeFlags.Selected;
-        }
-
-        using(var treeNode = ImRaii.TreeNode($"###treenode_{entity.Id}", flags))
-        {
-            bool isNodeOpen = treeNode.Success;
-
-            if(ImGui.IsItemClicked(ImGuiMouseButton.Left))
-            {
-                Select(entity);
-            }
-
-            if(ImGui.IsItemClicked(ImGuiMouseButton.Right))
-            {
-                Select(entity);
-                didRightClick = true;
-            }
-
-            DrawNode(entity);
-
-            if(didRightClick)
-            {
-                ImGui.OpenPopup($"context_popup");
-            }
-
-            using(var popup = ImRaii.Popup("context_popup"))
-            {
-                if(popup.Success)
                 {
-                    bool didDrawAnything = false;
+                    var invsButtonPos = ImGui.GetCursorPos();
 
-                    foreach(var v in entity.Capabilities)
+                    if(ImGui.Button($"###{entity.Id}_invs_button", new(buttonWidth, 0)))
                     {
-                        if(v.Widget != null)
-                        {
-                            bool hasPopup = v.Widget.Flags.HasFlag(WidgetFlags.DrawPopup);
-                            didDrawAnything |= hasPopup;
-                            if(hasPopup)
-                                v.Widget.DrawPopup();
-                        }
+                        Select(entity);
+                    }
+                    if(ImGui.IsItemClicked(ImGuiMouseButton.Right))
+                    {
+                        ImGui.OpenPopup($"context_popup");
                     }
 
-                    if(!didDrawAnything)
-                        ImGui.CloseCurrentPopup();
+                    ImGui.SetCursorPos(invsButtonPos);
                 }
             }
 
-            if(isNodeOpen)
+            if(lastOffset > 0)
             {
-                if(entity.Children.Count > 0)
-                    foreach(var child in entity.Children)
-                        DrawEntity(child, selectedEntityId);
+                var curPos = ImGui.GetCursorPos();
+
+                ImGui.SetCursorPos(new Vector2(curPos.X + (lastOffset), curPos.Y));
+                lastOffset += offsetWidth;
             }
 
+            using(ImRaii.PushColor(ImGuiCol.Button, UIConstants.GizmoRed, isSelected))
+            {
+                using(ImRaii.Disabled(true))
+                {
+                    ImGui.Button($"###{entity.Id}");
+                }
+            }
+        }
+
+        DrawNode(entity);
+
+        if(hasChildren)
+        {
+            foreach(var child in entity.Children)
+                DrawEntity(child, selectedEntityId, lastOffset == 0 ? 3 : lastOffset);
+        }
+
+        using var popup = ImRaii.Popup("context_popup");
+        if(popup.Success)
+        {
+            foreach(var v in entity.Capabilities)
+            {
+                if(v.Widget is not null && v.Widget.Flags.HasFlag(WidgetFlags.DrawPopup))
+                {
+                    v.Widget.DrawPopup();
+                }
+            }
         }
     }
 
-    private void DrawNode(Entity entity)
+    private static void DrawNode(Entity entity)
     {
+        var nodeStartPos = ImGui.GetCursorPos();
+
+        ImGui.SameLine();
+        ImGui.Text(" ");
+
         ImGui.SameLine();
         using(ImRaii.PushFont(UiBuilder.IconFont))
         {
-            ImGui.Text(entity.Icon.ToIconString());
+            ImGui.Text($"{entity.Icon.ToIconString()}");
         }
+
         ImGui.SameLine();
         ImGui.Text(entity.FriendlyName);
 
+        ImGui.SetCursorPos(nodeStartPos);
     }
 
     private void Select(Entity entity)
     {
-        _lastSelectedId = entity.Id; // Make sure we don't scroll if it was set inside this control
+        _lastSelectedId = entity.Id;
         entityManager.SetSelectedEntity(entity);
     }
 }
