@@ -9,7 +9,7 @@ internal partial class ImBrio
 {
     public static void DrawApplyToActor(EntityManager entityManager, Action<ActorEntity> callback)
     {
-        if(entityManager.SelectedEntity == null || entityManager.SelectedEntity is not ActorEntity selectedActor)
+        if(entityManager.SelectedEntity is null || entityManager.SelectedEntity is not ActorEntity selectedActor)
         {
             ImGui.BeginDisabled();
             ImGui.Button($"Select an Actor");
@@ -19,7 +19,7 @@ internal partial class ImBrio
         {
             if(ImGui.Button($"Apply To {selectedActor.FriendlyName}"))
             {
-                callback.Invoke(selectedActor);
+                callback?.Invoke(selectedActor);
             }
         }
     }

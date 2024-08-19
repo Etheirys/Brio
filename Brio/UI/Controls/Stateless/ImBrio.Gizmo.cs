@@ -12,66 +12,25 @@ internal static partial class ImBrioGizmo
     const int numPoints = 144;
     const int axisHoverMouseDist = 10;
 
-    private static Style style = new();
-    private static ImDrawListPtr drawList;
-    private static Matrix4x4 viewMatrix;
-    private static Matrix4x4 transformMatrix;
-    private static float closestAxisPointToMouseDistance;
-    private static Vector2? closestAxisMousePos = null;
-    private static Vector2? closestAxisMouseFromPos = null;
-    private static Axis closestMouseAxis = Axis.X;
-    private static Axis dragAxis = Axis.X;
-    private static Vector2? dragStartToPos = null;
-    private static Vector2? dragStartFromPos = null;
-    private static float dragDistance = 0;
-    private static Vector2 mousePos;
-    private static Axis? lockedAxis = null;
     private static bool isUsing = false;
 
-    public enum Axis
-    {
-        X,
-        Y,
-        Z,
-    }
+    private static Style style = new();
+    private static Axis closestMouseAxis = Axis.X;
+    private static Axis dragAxis = Axis.X;
+    private static Axis? lockedAxis = null;
+    private static Vector2? dragStartToPos = null;
+    private static Vector2? dragStartFromPos = null;
 
-    public struct Style
-    {
-        public uint LockedAxisForegroundColor = 0xFFFFFFFF;
-        public uint LockedAxisBackgroundColor = 0x10FFFFFF;
-
-        public uint[] AxisForegroundColors = new uint[3]
-        {
-            0xFF3333FF,
-            0xFF33FF33,
-            0xFFFF3333,
-        };
-
-        public uint[] AxisBackgroundColors = new uint[3]
-        {
-            0x103333FF,
-            0x1033FF33,
-            0x10FF3333,
-        };
-
-        public Style()
-        {
-        }
-    }
+    private static float dragDistance = 0;
 
     public static bool IsUsing() => isUsing;
 
     public unsafe static bool DrawRotation(ref Matrix4x4 matrix, Vector2 size, bool worldSpace = false)
     {
         // decompose the matrix
-        Vector3 scale;
-        Quaternion rotation;
-        Vector3 translation;
-        Matrix4x4.Decompose(matrix, out scale, out rotation, out translation);
+        Matrix4x4.Decompose(matrix, out Vector3 scale, out Quaternion rotation, out Vector3 translation);
 
-        Quaternion editingRotation = rotation;
-        if(worldSpace)
-            editingRotation = Quaternion.Identity;
+        Quaternion editingRotation = worldSpace ? Quaternion.Identity : rotation;
 
         bool changed = DrawRotation(ref editingRotation, size);
 
@@ -91,19 +50,20 @@ internal static partial class ImBrioGizmo
                 matrix = Matrix4x4.Transform(matrix, editingRotation);
                 matrix.Translation = translation;
             }
-
         }
 
         return changed;
     }
 
-    public unsafe static bool DrawRotation(ref Quaternion rotation, Vector2 size)
+    private unsafe static bool DrawRotation(ref Quaternion rotation, Vector2 size)
     {
         bool changed = false;
-        drawList = ImGui.GetWindowDrawList();
+        MouseData mouseData = new();
+
+        var drawList = ImGui.GetWindowDrawList();
 
         BrioCamera* camera = (BrioCamera*)CameraManager.Instance()->GetActiveCamera();
-        viewMatrix = camera->GetViewMatrix();
+        var viewMatrix = camera->GetViewMatrix();
 
         // extract just rotation from camera view
         {
@@ -112,28 +72,27 @@ internal static partial class ImBrioGizmo
         }
 
         Matrix4x4 mat = Matrix4x4.CreateScale(-1, 1, 1);
-        viewMatrix = viewMatrix * mat;
+        viewMatrix *= mat;
 
         float radius = Math.Min(size.X / 2, size.Y / 2) - 20;
         int lineThickness = 2;
 
         // reset context
-        mousePos = ImGui.GetMousePos();
-        closestAxisPointToMouseDistance = float.MaxValue;
-        closestAxisMousePos = null;
-        closestAxisMouseFromPos = null;
+        mouseData.mousePos = ImGui.GetMousePos();
+        mouseData.closestAxisPointToMouseDistance = float.MaxValue;
+        mouseData.closestAxisMousePos = null;
+        mouseData.closestAxisMouseFromPos = null;
         isUsing = false;
 
-
         // create a transform matrix
-        transformMatrix = Matrix4x4.CreateFromQuaternion(rotation);
+        var transformMatrix = Matrix4x4.CreateFromQuaternion(rotation);
         transformMatrix.Translation = new Vector3(0, -5, 0);
 
         if(ImGui.BeginChild("##imbriozmo", size))
         {
             Vector2 topPos = ImGui.GetWindowPos() + ImGui.GetWindowContentRegionMin();
             Vector2 botPos = ImGui.GetWindowPos() + ImGui.GetWindowContentRegionMax();
-            bool isMouseOverArea = (mousePos.X > topPos.X && mousePos.Y > topPos.Y && mousePos.X < botPos.X && mousePos.Y < botPos.Y);
+            bool isMouseOverArea = (mouseData.mousePos.X > topPos.X && mouseData.mousePos.Y > topPos.Y && mouseData.mousePos.X < botPos.X && mouseData.mousePos.Y < botPos.Y);
 
             if(isMouseOverArea)
                 isUsing = true;
@@ -142,10 +101,9 @@ internal static partial class ImBrioGizmo
 
             drawList.AddCircleFilled(center, radius, 0x50000000);
 
-            DrawAxis(center, lineThickness, radius, Axis.X);
-            DrawAxis(center, lineThickness, radius, Axis.Y);
-            DrawAxis(center, lineThickness, radius, Axis.Z);
-
+            DrawAxis(ref drawList, ref viewMatrix, ref transformMatrix, mouseData, center, lineThickness, radius, Axis.X);
+            DrawAxis(ref drawList, ref viewMatrix, ref transformMatrix, mouseData, center, lineThickness, radius, Axis.Y);
+            DrawAxis(ref drawList, ref viewMatrix, ref transformMatrix, mouseData, center, lineThickness, radius, Axis.Z);
 
             // Mouse drag
             if(dragStartToPos != null && dragStartFromPos != null)
@@ -165,7 +123,7 @@ internal static partial class ImBrioGizmo
                 {
                     isUsing = true;
 
-                    Vector2 lhs = mousePos - (Vector2)dragStartToPos;
+                    Vector2 lhs = mouseData.mousePos - (Vector2)dragStartToPos;
                     float newDragDistance = Vector2.Dot(lhs, normal);
                     float dragDelta = newDragDistance - dragDistance;
                     dragDistance = newDragDistance;
@@ -192,18 +150,18 @@ internal static partial class ImBrioGizmo
                         rot = Quaternion.CreateFromAxisAngle(Vector3.UnitZ, angleChange);
                     }
 
-                    rotation = rotation * rot;
+                    rotation *= rot;
                     changed = true;
                 }
             }
 
             // Mouse Hover
-            else if(isMouseOverArea && closestAxisMousePos != null && (closestAxisPointToMouseDistance < axisHoverMouseDist || lockedAxis != null))
+            else if(isMouseOverArea && mouseData.closestAxisMousePos != null && (mouseData.closestAxisPointToMouseDistance < axisHoverMouseDist || lockedAxis != null))
             {
                 if(ImGui.IsMouseDown(ImGuiMouseButton.Left))
                 {
-                    dragStartToPos = closestAxisMousePos;
-                    dragStartFromPos = closestAxisMouseFromPos;
+                    dragStartToPos = mouseData.closestAxisMousePos;
+                    dragStartFromPos = mouseData.closestAxisMouseFromPos;
                     dragAxis = closestMouseAxis;
                 }
                 if(ImGui.IsMouseClicked(ImGuiMouseButton.Right))
@@ -243,12 +201,12 @@ internal static partial class ImBrioGizmo
                             rot = Quaternion.CreateFromAxisAngle(Vector3.UnitZ, mouseWheel);
                         }
 
-                        rotation = rotation * rot;
+                        rotation *= rot;
                         changed = true;
                     }
                 }
 
-                drawList.AddCircle((Vector2)closestAxisMousePos, axisHoverMouseDist, style.AxisForegroundColors[(int)closestMouseAxis]);
+                drawList.AddCircle((Vector2)mouseData.closestAxisMousePos, axisHoverMouseDist, style.AxisForegroundColors[(int)closestMouseAxis]);
             }
 
             ImGui.InvisibleButton("##imbriozmo_cover", size);
@@ -259,6 +217,10 @@ internal static partial class ImBrioGizmo
     }
 
     private unsafe static void DrawAxis(
+        ref ImDrawListPtr drawList,
+        ref Matrix4x4 viewMatrix,
+        ref Matrix4x4 transformMatrix,
+        MouseData mouseData,
         Vector2 center,
         int thickness,
         float radius,
@@ -306,17 +268,54 @@ internal static partial class ImBrioGizmo
             // check mouse
             if(isVisible && (lockedAxis == null || lockedAxis == axis))
             {
-                float distToMouse = Vector2.Distance(toPos, mousePos);
-                if(distToMouse <= closestAxisPointToMouseDistance)
+                float distToMouse = Vector2.Distance(toPos, mouseData.mousePos);
+                if(distToMouse <= mouseData.closestAxisPointToMouseDistance)
                 {
-                    closestAxisPointToMouseDistance = distToMouse;
-                    closestAxisMousePos = toPos;
-                    closestAxisMouseFromPos = fromPos;
+                    mouseData.closestAxisPointToMouseDistance = distToMouse;
+                    mouseData.closestAxisMousePos = toPos;
+                    mouseData.closestAxisMouseFromPos = fromPos;
                     closestMouseAxis = axis;
                 }
             }
 
             drawList.AddLine(fromPos, toPos, segmentColor, thickness);
         }
+    }
+
+    public enum Axis
+    {
+        X,
+        Y,
+        Z,
+    }
+    public struct Style
+    {
+        public uint LockedAxisForegroundColor = 0xFFFFFFFF;
+        public uint LockedAxisBackgroundColor = 0x10FFFFFF;
+
+        public uint[] AxisForegroundColors = new uint[3]
+        {
+            0xFF3333FF,
+            0xFF33FF33,
+            0xFFFF3333,
+        };
+
+        public uint[] AxisBackgroundColors = new uint[3]
+        {
+            0x103333FF,
+            0x1033FF33,
+            0x10FF3333,
+        };
+
+        public Style()
+        {
+        }
+    }
+    public class MouseData
+    {
+        public Vector2 mousePos;
+        public Vector2? closestAxisMousePos;
+        public Vector2? closestAxisMouseFromPos;
+        public float closestAxisPointToMouseDistance;
     }
 }

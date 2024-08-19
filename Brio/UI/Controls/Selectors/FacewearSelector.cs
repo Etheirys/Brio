@@ -2,9 +2,7 @@
 using Brio.Resources;
 using Brio.UI.Controls.Stateless;
 using ImGuiNET;
-using Lumina.Excel.GeneratedSheets2;
 using OneOf.Types;
-using System.Collections.Generic;
 using System.Numerics;
 
 namespace Brio.UI.Controls.Selectors;
@@ -17,9 +15,6 @@ internal class FacewearSelector(string id) : Selector<FacewearUnion>(id)
     protected virtual Vector2 IconSize => new(ImGui.GetTextLineHeight() * 3f);
 
     protected override SelectorFlags Flags { get; } = SelectorFlags.AllowSearch | SelectorFlags.ShowOptions | SelectorFlags.AdaptiveSizing;
-
-
-    private readonly List<Glasses> _validWeathers = [];
 
     protected override void PopulateList()
     {
@@ -41,7 +36,6 @@ internal class FacewearSelector(string id) : Selector<FacewearUnion>(id)
 
     protected override bool Filter(FacewearUnion item, string search)
     {
-
         return item.Match(
             (glasses) =>
             {

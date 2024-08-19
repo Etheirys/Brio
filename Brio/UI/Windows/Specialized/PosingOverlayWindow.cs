@@ -202,7 +202,7 @@ internal class PosingOverlayWindow : Window, IDisposable
             }
         }
 
-        if(clicked.Any())
+        if(clicked.Count != 0)
         {
             posing.Selected = clicked[0].Item;
 
@@ -213,7 +213,7 @@ internal class PosingOverlayWindow : Window, IDisposable
             }
         }
 
-        if(hovered.Any() && !clicked.Any())
+        if(hovered.Count != 0 && clicked.Count == 0)
         {
             ImGui.SetNextWindowPos(ImGui.GetMousePos() + new Vector2(15, 10), ImGuiCond.Always);
             if(ImGui.Begin("gizmo_bone_select_preview", ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoDecoration | ImGuiWindowFlags.NoInputs | ImGuiWindowFlags.NoMove))

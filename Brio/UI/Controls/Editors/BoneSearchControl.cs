@@ -5,7 +5,6 @@ using Dalamud.Interface.Utility.Raii;
 using ImGuiNET;
 using OneOf.Types;
 using System;
-using System.Linq;
 using System.Numerics;
 
 namespace Brio.UI.Controls.Editors;
@@ -87,7 +86,7 @@ internal class BoneSearchControl
 
         bool selected = posing.Selected.Value is BonePoseInfoId selectedBonePoseInfoid && selectedBonePoseInfoid == bonePoseInfoId;
 
-        bool leaf = !bone.Children.Any();
+        bool leaf = bone.Children.Count == 0;
 
         ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags.DefaultOpen | ImGuiTreeNodeFlags.OpenOnDoubleClick;
 

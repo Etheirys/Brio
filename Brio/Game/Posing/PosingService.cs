@@ -35,7 +35,6 @@ internal class PosingService
         ExpressionOptions2 = new PoseImporterOptions(new BoneFilter(this), TransformComponents.All, false);
         ExpressionOptions2.BoneFilter.DisableAll();
         ExpressionOptions2.BoneFilter.EnableCategory("head");
-        //ExpressionOptions.BoneFilter.EnableCategory("face");
     }
 }
 

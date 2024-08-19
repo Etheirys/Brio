@@ -12,6 +12,9 @@ namespace Brio.UI.Controls.Editors;
 
 internal static class AppearanceEditorCommon
 {
+    private const string _collectionLabel = "Collection";
+    private static float _lableWidth { get; } = ImGui.CalcTextSize($"{_collectionLabel} XXXXXXXXX").X;
+
     private static readonly NpcSelector _globalNpcSelector = new("global_npc_selector");
 
     public static void DrawPenumbraCollectionSwitcher(ActorAppearanceCapability capability)
@@ -21,9 +24,9 @@ internal static class AppearanceEditorCommon
 
         var currentCollection = capability.CurrentCollection;
 
-        const string collectionLabel = "Collection";
-        ImGui.SetNextItemWidth(-ImGui.CalcTextSize($"{collectionLabel} XXXX").X);
-        using(var combo = ImRaii.Combo(collectionLabel, currentCollection))
+        ImGui.SetNextItemWidth(_lableWidth);
+
+        using(var combo = ImRaii.Combo(_collectionLabel, currentCollection))
         {
             if(combo.Success)
             {

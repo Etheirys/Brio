@@ -24,7 +24,7 @@ internal static partial class ImBrio
                 ImGui.NewLine();
             }
 
-            if(ImBrio.DrawTag(tag))
+            if(DrawTag(tag))
                 clicked = tag;
 
             ImGui.SameLine();

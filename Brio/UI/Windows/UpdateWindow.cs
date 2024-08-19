@@ -2,13 +2,17 @@
 using Brio.UI.Controls.Stateless;
 using Dalamud.Interface.Windowing;
 using ImGuiNET;
+using System.Collections.Generic;
+using System.IO;
+using System.IO.Pipes;
 using System.Numerics;
+using System.Text;
 
 namespace Brio.UI.Windows;
 
 internal class UpdateWindow : Window
 {
-    private readonly string _changelogTest;
+    private readonly List<string> _changelogTest = [];
     private const float _closeButtonWidth = 210f;
 
     public UpdateWindow() : base($" {Brio.Name} Changelog###brio_update_window")
@@ -20,7 +24,16 @@ internal class UpdateWindow : Window
 
         ShowCloseButton = false;
 
-        _changelogTest = ResourceProvider.Instance.GetRawResourceString("Data.Changelog.txt");
+        var logStream = ResourceProvider.Instance.GetRawResourceStream("Data.Changelog.txt");
+
+        using(var streamReader = new StreamReader(logStream, Encoding.UTF8, true, 128))
+        {
+            string? line;
+            while((line = streamReader.ReadLine()) is not null)
+            {
+                _changelogTest.Add(line);
+            }
+        }
     }
 
     bool _scrollToTop = false;
@@ -41,7 +54,10 @@ internal class UpdateWindow : Window
                 ImGui.SetScrollHereY(0);
             }
             ImGui.PushTextWrapPos(segmentSize);
-            ImGui.TextWrapped(_changelogTest);
+            for(int i = 0; i < _changelogTest.Count; i++)
+            {
+                ImGui.TextWrapped(_changelogTest[i]);
+            }
             ImGui.PopTextWrapPos();
 
             ImGui.EndChild();

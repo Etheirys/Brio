@@ -4,6 +4,7 @@ using ImGuiNET;
 using System.Numerics;
 
 namespace Brio.UI.Controls.Stateless;
+
 internal static partial class ImBrio
 {
     public static (bool anyActive, bool didChange) DragFloat3(string label, ref Vector3 vectorValue, float step = 1.0f, FontAwesomeIcon icon = FontAwesomeIcon.None, string tooltip = "")
@@ -14,19 +15,17 @@ internal static partial class ImBrio
         }
         else
         {
-            ImBrio.Icon(icon);
+            Icon(icon);
         }
 
         ImGui.SameLine();
-
-        uint id = ImGui.GetID(label);
 
         Vector2 size = new(0, 0)
         {
             X = GetRemainingWidth() + ImGui.GetStyle().ItemSpacing.X
         };
 
-        (bool changed, bool active) = DragFloat3Horizontal($"###{id}_drag3", ref vectorValue, step, size);
+        (bool changed, bool active) = DragFloat3Horizontal($"###{label}_drag3", ref vectorValue, step, size);
 
         return (active, changed);
     }
@@ -43,7 +42,7 @@ internal static partial class ImBrio
             step *= 10;
 
         if(size.X <= 0)
-            size.X = ImBrio.GetRemainingWidth();
+            size.X = GetRemainingWidth();
 
         float entryWidth = (size.X - (ImGui.GetStyle().ItemSpacing.X * 2)) / 3;
         ImGui.SetNextItemWidth(entryWidth);
@@ -131,14 +130,12 @@ internal static partial class ImBrio
             ImGui.SetNextItemWidth((ImBrio.GetRemainingWidth() - buttonWidth) + ImGui.GetStyle().ItemSpacing.X);
         }
 
-
         changed |= ImGui.DragFloat($"##{label}_drag", ref value, step / 10.0f);
-        if(ImGui.IsItemHovered())
-            ImGui.SetTooltip($"{tooltip}");
         active |= ImGui.IsItemActive();
 
         if(ImGui.IsItemHovered())
         {
+            ImGui.SetTooltip($"{tooltip}");
             float mouseWheel = ImGui.GetIO().MouseWheel / 10;
             if(mouseWheel != 0)
             {
@@ -146,7 +143,6 @@ internal static partial class ImBrio
                 changed = true;
             }
         }
-
 
         ImGui.SameLine();
         ImGui.SetNextItemWidth(buttonWidth);

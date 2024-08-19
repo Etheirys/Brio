@@ -11,15 +11,15 @@ internal static partial class ImBrio
         bool changed = false;
 
         float x = value.X;
-        changed |= ImBrio.SliderFloat($"###{label}_x", ref x, min, max, format, flags, step);
+        changed |= SliderFloat($"###{label}_x", ref x, min, max, format, flags, step);
         value.X = x;
 
         float y = value.Y;
-        changed |= ImBrio.SliderFloat($"###{label}_y", ref y, min, max, format, flags, step);
+        changed |= SliderFloat($"###{label}_y", ref y, min, max, format, flags, step);
         value.Y = y;
 
         float z = value.Z;
-        changed |= ImBrio.SliderFloat($"###{label}_z", ref z, min, max, format, flags, step);
+        changed |= SliderFloat($"###{label}_z", ref z, min, max, format, flags, step);
         value.Z = z;
 
         return changed;
@@ -38,6 +38,7 @@ internal static partial class ImBrio
     private static bool SliderBase(string label, ref float value, float min, float max, string format, ImGuiSliderFlags flags, float step, bool isAngle = false)
     {
         bool changed = false;
+        float buttonWidth = ImGui.GetCursorPosX();
 
         if(max < min)
             step = -step;
@@ -50,17 +51,7 @@ internal static partial class ImBrio
         if(largeIncrement)
             step *= 10;
 
-        if(ImGui.IsItemHovered())
-        {
-            float mouseWheel = ImGui.GetIO().MouseWheel / 10;
-            if(mouseWheel != 0)
-            {
-                value += isAngle ? mouseWheel * step * MathHelpers.DegreesToRadians : mouseWheel * step;
-                changed = true;
-            }
-        }
 
-        float buttonWidth = ImGui.GetCursorPosX();
         if(ImGui.ArrowButton($"##{label}_decrease", ImGuiDir.Left))
         {
             value -= isAngle ? step * MathHelpers.DegreesToRadians : step;
@@ -82,12 +73,18 @@ internal static partial class ImBrio
         }
 
         if(isAngle)
-        {
             changed |= ImGui.SliderAngle($"##{label}_slider", ref value, min, max, format, flags);
-        }
         else
-        {
             changed |= ImGui.SliderFloat($"##{label}_slider", ref value, min, max, format, flags);
+
+        if(ImGui.IsItemHovered())
+        {
+            float mouseWheel = ImGui.GetIO().MouseWheel / 10;
+            if(mouseWheel != 0)
+            {
+                value += isAngle ? mouseWheel * step * MathHelpers.DegreesToRadians : mouseWheel * step;
+                changed = true;
+            }
         }
 
         ImGui.SameLine();

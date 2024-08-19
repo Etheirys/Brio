@@ -6,7 +6,7 @@ using System.Numerics;
 namespace Brio.UI.Controls;
 internal class RenameActorModal
 {
-    static Vector2 MinimumSize = new(450, 200);
+    static Vector2 MinimumSize = new(400, 95);
     static bool IsOpen = false;
 
     static ActorEntity? currentActorEntity;
@@ -44,7 +44,8 @@ internal class RenameActorModal
 
         ImGui.OpenPopup($"Rename##brio_renamemodal_popup");
 
-        ImGui.SetNextWindowSizeConstraints(MinimumSize, ImGui.GetIO().DisplaySize);
+        ImGui.SetNextWindowSizeConstraints(MinimumSize, MinimumSize);
+        ImGui.SetNextWindowPos(new Vector2((ImGui.GetIO().DisplaySize.X / 2) - (MinimumSize.X / 2), (ImGui.GetIO().DisplaySize.Y / 2) - (MinimumSize.Y / 2) ));
 
         ImGui.BeginPopupModal($"Rename##brio_renamemodal_popup", ref IsOpen, ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoDecoration);
 
@@ -60,7 +61,6 @@ internal class RenameActorModal
                 ImGui.BeginDisabled();
 
             float buttonW = (MinimumSize.X / 3) - 7;
-            ImGui.SetCursorPosY(ImGui.GetCursorPosX() + ImBrio.GetRemainingWidth() - MinimumSize.Y - 45);
 
             if(ImGui.Button("Save", new(buttonW, 0)))
             {

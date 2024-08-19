@@ -47,7 +47,7 @@ internal class TargetService : IDisposable
         _framework = framework;
         _configService = configService;
 
-        _framework.Update += OnFrameworkUpdate; ;
+        _framework.Update += OnFrameworkUpdate;
     }
 
     private void OnFrameworkUpdate(IFramework framework)

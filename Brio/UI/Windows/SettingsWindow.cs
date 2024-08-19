@@ -117,7 +117,7 @@ internal class SettingsWindow : Window
                         _configurationService.Configuration.UseLibraryWhenImporting = useLibraryWhenImporting;
                         _configurationService.ApplyChange();
                     }
-               
+
                     bool returnToLastLocation = _configurationService.Configuration.Library.ReturnLibraryToLastLocation;
                     if(ImGui.Checkbox("Open Library to the last Location I was previously", ref returnToLastLocation))
                     {
@@ -512,20 +512,13 @@ internal class SettingsWindow : Window
                 {
                     ImGui.Checkbox("Enable [ Reset Settings to Default ] Button", ref resetSettings);
 
-                    if(resetSettings == false)
+                    using(ImRaii.Disabled(resetSettings))
                     {
-                        ImGui.BeginDisabled();
-                    }
-
-                    if(ImGui.Button("Reset Settings to Default", new(170, 0)))
-                    {
-                        _configurationService.Reset();
-                        resetSettings = false;
-                    }
-
-                    if(resetSettings == false)
-                    {
-                        ImGui.EndDisabled();
+                        if(ImGui.Button("Reset Settings to Default", new(170, 0)))
+                        {
+                            _configurationService.Reset();
+                            resetSettings = false;
+                        }
                     }
                 }
 

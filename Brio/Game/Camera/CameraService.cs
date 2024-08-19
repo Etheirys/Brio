@@ -116,7 +116,7 @@ internal unsafe class CameraService : IDisposable
         if(camMatrix is null)
             return exec;
 
-        gsc->ViewMatrix = _cutsceneManager.VirtualCamera.State.ViewMatrix;
+        gsc->ViewMatrix = camMatrix.Value;
 
         _cameraMatrixLoad(GetCurrentCamera()->Camera.CameraBase.SceneCamera.RenderCamera, (nint)(&gsc->ViewMatrix));
 

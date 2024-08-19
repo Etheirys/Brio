@@ -11,7 +11,7 @@ internal static partial class ImBrio
         angle += ImGui.GetIO().DeltaTime * speed;
 
         IDalamudTextureWrap img = ResourceProvider.Instance.GetResourceImage("Images.Spinner.png");
-        ImBrio.ImageRotated(img, angle);
+        ImageRotated(img, angle);
 
         if(angle > 360)
         {

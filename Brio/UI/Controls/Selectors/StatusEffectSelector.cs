@@ -25,8 +25,8 @@ internal class StatusEffectSelector(string id) : Selector<Status>(id)
         IDalamudTextureWrap? tex = null;
         if(item.Icon != 0)
             tex = UIManager.Instance.TextureProvider.GetFromGameIcon(item.Icon).GetWrapOrEmpty();
-        if(tex == null)
-            tex = ResourceProvider.Instance.GetResourceImage("Images.StatusEffect.png");
+        
+        tex ??= ResourceProvider.Instance.GetResourceImage("Images.StatusEffect.png");
 
         float ratio = tex.Size.X / tex.Size.Y;
         Vector2 iconSize = new(EntrySize * ratio, EntrySize);

@@ -1,6 +1,5 @@
 ﻿using Dalamud.Plugin.Services;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace Brio.Game.Core;
@@ -15,7 +14,7 @@ internal class FrameworkScheduler(IFramework framework, bool alwaysDefer) : Task
     protected override IEnumerable<Task>? GetScheduledTasks()
     {
         lock(_tasks)
-            return _tasks.ToList();
+            return [.. _tasks];
     }
 
     protected override void QueueTask(Task task)
@@ -38,7 +37,7 @@ internal class FrameworkScheduler(IFramework framework, bool alwaysDefer) : Task
     protected override bool TryExecuteTaskInline(Task task, bool taskWasPreviouslyQueued)
     {
         if(!_alwaysDefer && _framework.IsInFrameworkUpdateThread)
-            return base.TryExecuteTask(task);
+            return TryExecuteTask(task);
 
         return false;
     }

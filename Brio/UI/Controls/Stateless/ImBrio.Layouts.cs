@@ -20,8 +20,7 @@ internal static partial class ImBrio
 
     public static void RightAlign(float width, int numItems)
     {
-        float finalWidth = (width * numItems) + (ImGui.GetStyle().ItemSpacing.X * (numItems - 1));
-        ImBrio.RightAlign(finalWidth);
+        RightAlign((width * numItems) + (ImGui.GetStyle().ItemSpacing.X * (numItems - 1)));
     }
 
     public static void RightAlign(float width)
