@@ -28,6 +28,7 @@ internal class GlamourerService : IDisposable
 
     private readonly Glamourer.Api.IpcSubscribers.ApiVersion _glamourerApiVersions;
     private readonly Glamourer.Api.IpcSubscribers.RevertState _glamourerRevertCharacter;
+    private readonly Glamourer.Api.IpcSubscribers.GetState _glamourerGetState;
 
     private readonly uint UnLockCode = 0x6D617265; // From MareSynchronos's IpcCallerGlamourer.cs
 
@@ -44,6 +45,7 @@ internal class GlamourerService : IDisposable
 
         _glamourerApiVersions = new Glamourer.Api.IpcSubscribers.ApiVersion(pluginInterface);
         _glamourerRevertCharacter = new Glamourer.Api.IpcSubscribers.RevertState(pluginInterface);
+        _glamourerGetState = new Glamourer.Api.IpcSubscribers.GetState(pluginInterface);
 
         RefreshGlamourerStatus();
 
@@ -91,6 +93,18 @@ internal class GlamourerService : IDisposable
                 return false;
             }
         }
+    }
+
+    public bool CheckForLock(ICharacter? character)
+    {
+        if(IsGlamourerAvailable == false && character is null)
+            return false;
+
+        var success = _glamourerGetState.Invoke(character!.ObjectIndex);
+       
+        Brio.Log.Warning("Glamourer CheckForLock... " + success.Item1);
+
+        return success.Item1 == Glamourer.Api.Enums.GlamourerApiEc.InvalidKey;
     }
 
     public Task RevertCharacter(ICharacter? character)

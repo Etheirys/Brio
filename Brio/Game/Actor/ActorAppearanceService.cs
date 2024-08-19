@@ -122,8 +122,11 @@ internal class ActorAppearanceService : IDisposable
                 {
                     forceHeadToggles = true;
 
-                    if(!existingAppearance.Customize.Equals(appearance.Customize) || !existingAppearance.Equipment.Equals(appearance.Equipment))
-                        glamourerReset |= true;
+                    if(_glamourerService.CheckForLock(character))
+                    {
+                        if(!existingAppearance.Customize.Equals(appearance.Customize) || !existingAppearance.Equipment.Equals(appearance.Equipment))
+                            glamourerReset |= true;
+                    }
 
                     if
                     (
