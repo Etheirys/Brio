@@ -46,7 +46,7 @@ To open this window again click `Information` on the Scene Manager then -> `View
 
 - When importing a pose as Expression the head does not rotate properly,
    - You can fix this by rotating the "Head" bone manually
-- Brio Actors will always redraw after an appearance edit
+- Not all of the new bones are named yet
 - The Library does not have an option to `Import as Expression`
 - Right clicking on an item in the `Entity Hierarchy` gives a very long list of items
 
