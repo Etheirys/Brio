@@ -42,7 +42,8 @@ internal class InfoWindow : Window
                     for their support on Kofi!
                                         
                     Thank you to the following for their code contributions to Brio!  
-                    (@Yuki-Codes), (@danma3x), (@WorstAquaPlayer), (@Caraxi) & (@gris-fuego);
+                    (@Yuki-Codes), (@danma3x), (@WorstAquaPlayer), 
+                    (@snaeling), (@Caraxi) & (@gris-fuego);
 
                     Maintained & Developed by: Minmoose.
                     Originally Developed by: Asgard.

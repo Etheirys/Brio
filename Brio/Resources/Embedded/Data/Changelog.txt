@@ -1,7 +1,57 @@
 
 To open this window again click `Information` on the Scene Manager then -> `View the Changelog`
 --------------------------------------------------------------------------------
-	 ---> Brio, Version 0.3.3 <--- 
+	 ---> Brio, Version 0.4.0 <--- 
+--------------------------------------------------------------------------------
+
+- Updated the `Advanced Pose` Window
+ - Added a `Freeze Physics` & `Freeze Character` button
+ - Changed the Bone Page selector visual style
+ - Better layout of Bones on Body page
+
+- Refreshed the UI for the `Entity Hierarchy`
+
+- Updated the `Animation Control` Editor
+ - Ported XAT's `Cutscene Control` to the `Advanced Animation Control` Window
+   - Added a new Cutscene setting, `Start All Actors Animations On Play`
+      - `With this enabled all actors will play the animation set in the `Base` slot`
+   - Added `Start Delay` & `Animation Delay`
+     - Note: `The time-scale for the delay functions are in milliseconds!`
+     - `1000 Milliseconds = 1 Second` 
+
+ - Refreshed user experience of the `Animation Control` Editor
+   - Added a `Freeze Physics` button 
+   - Added new `Actors` dropdown list 
+      - `With this menu you can Freeze/Un-Freeze all Actors or Stop/Play All Actors Animations`
+   - Pausing Actors should now be more reliable
+   - Added a new setting when searching for a animation, `Start Animation On Select`
+
+- Added 3 new Key-binds
+  - Stop Playing Cutscene         (Shift + B)
+  - Start All Actors Animations (Shift + N)
+  - Stop All Actors Animations  (Shift + M)
+
+- Added simple savable camera presets to the `Camera Editor`
+  - These presets **do not** persist and will be 'forgotten' after ending a Gpose session 
+- The open `Advanced Window` buttons will now toggle their respective Advanced Windows 
+- Updated the `Brio Welcome` Window
+- Brio will now respond to `/xat` in FFXIV chat
+- Made micro optimizations across the codebase
+
+- Fixed a crash with IMGUI
+- Fixed an issue with MCDFs
+- Fixed the margins on the `Rename Actor` Popup 
+
+ --  Known Issues -- 
+
+- When importing a pose as Expression the head does not rotate properly,
+   - You can fix this by rotating the "Head" bone manually
+- Brio Actors will always redraw after an appearance edit
+- The Library does not have an option to `Import as Expression`
+- Right clicking on an item in the `Entity Hierarchy` gives a very long list of items
+
+--------------------------------------------------------------------------------
+	 --- Brio, Version 0.3.3 --- 
 --------------------------------------------------------------------------------
 
 Support for FFXIV 7.05!
@@ -26,7 +76,6 @@ And finally,
 When importing a pose as Expression the head does not rotate properly,
 You can fix this by rotating the "Head" bone manually
 
-
 --------------------------------------------------------------------------------
 	 --- Brio, Version 0.3.2.0  -> Brio, Version 0.3.2.2  --- 
 --------------------------------------------------------------------------------
@@ -47,5 +96,7 @@ You can fix this by rotating the "Head" bone manually
 
 A Big Thank you to (Night Song), (Yasumi) & (Alvar Valo) for their support on Kofi!
 
-Also, Thank you, to: (@Yuki-Codes), (@danma3x), (@WorstAquaPlayer) & (@gris-fuego);
+Also, Thank you, to: (@Yuki-Codes), (@danma3x), (@snaeling), (@WorstAquaPlayer) & (@gris-fuego),
 For their contributions to Brio!
+
+--------------------------------------------------------------------------------

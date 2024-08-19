@@ -44,6 +44,13 @@ internal class WelcomeService
             Brio.Log.Warning($"Library sources have been re-established!");
         }
 
+        if(configService.Configuration.Version <= 2)
+        {
+            infoWindow.IsOpen = true;
+            
+            configService.Configuration.Version = Configuration.CurrentVersion;
+        }
+
         configService.ApplyChange();
 
         #endregion
