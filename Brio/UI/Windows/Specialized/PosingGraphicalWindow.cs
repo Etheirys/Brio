@@ -1,5 +1,4 @@
 ﻿using Brio.Capabilities.Actor;
-using Brio.Capabilities.Core;
 using Brio.Capabilities.Posing;
 using Brio.Config;
 using Brio.Core;
@@ -34,17 +33,17 @@ internal class PosingGraphicalWindow : Window, IDisposable
     private readonly ConfigurationService _configurationService;
     private readonly PosingService _posingService;
     private readonly GPoseService _gPoseService;
+    private readonly PhysicsService _physicsService;
     private readonly PosingTransformEditor _transformEditor = new();
     private readonly BoneSearchControl _boneSearchControl = new();
     private float _closestHover = float.MaxValue;
 
     private Matrix4x4? _trackingMatrix;
 
+    int _selectedPane = 0;
     private bool _hideControlPane = false;
-    private bool _bodyPaneEnabled = true;
-    private bool _facePaneEnabled = false;
 
-    public PosingGraphicalWindow(EntityManager entityManager, CameraService cameraService, ConfigurationService configurationService, PosingService posingService, GPoseService gPoseService) : base($"{Brio.Name} - Posing###brio_posing_graphical_window")
+    public PosingGraphicalWindow(EntityManager entityManager, CameraService cameraService, PhysicsService physicsService, ConfigurationService configurationService, PosingService posingService, GPoseService gPoseService) : base($"{Brio.Name} - Posing###brio_posing_graphical_window")
     {
         Namespace = "brio_posing_graphical_namespace";
 
@@ -53,6 +52,7 @@ internal class PosingGraphicalWindow : Window, IDisposable
         _configurationService = configurationService;
         _posingService = posingService;
         _gPoseService = gPoseService;
+        _physicsService = physicsService;
 
         _posePositions = ResourceProvider.Instance.GetResourceDocument<GraphicalPosePositionFile>("Data.GraphicalBonePosePositions.json");
         _posePositions.Process();
@@ -69,7 +69,6 @@ internal class PosingGraphicalWindow : Window, IDisposable
 
         return base.DrawConditions();
     }
-
 
     public unsafe override void PreDraw()
     {
@@ -149,40 +148,32 @@ internal class PosingGraphicalWindow : Window, IDisposable
         posing.LastHover = posing.Hover;
     }
 
+    private string[] _bonePages = ["Body Page", "Face Page"];
     private void DrawGlobalButtons(PosingCapability posing)
     {
-        float buttonWidth = 28;
-        float openingY = ImGui.GetCursorPos().Y;
+        const float buttonWidth = 28;
 
-        using(ImRaii.PushColor(ImGuiCol.Button, UIConstants.GizmoRed, _bodyPaneEnabled))
+        if(ImBrio.ToggelButton("Freeze Physics", new Vector2(95, 0), _physicsService.IsFreezeEnabled, hoverText: _physicsService.IsFreezeEnabled ? "Un-Freeze Physics" : "Freeze Physics"))
         {
-            if(ImGui.Button("Body Page", Vector2.Zero))
-            {
-                if(_facePaneEnabled)
-                {
-                    _facePaneEnabled = false;
-                    _bodyPaneEnabled = true;
-                }
-            }
+            _physicsService.FreezeToggle();
         }
-        if(ImGui.IsItemHovered())
-            ImGui.SetTooltip("Open Body Page");
 
         ImGui.SameLine();
 
-        using(ImRaii.PushColor(ImGuiCol.Button, UIConstants.GizmoRed, _facePaneEnabled))
+        if(_entityManager.TryGetCapabilityFromSelectedEntity<ActionTimelineCapability>(out var capability, considerParents: true))
         {
-            if(ImGui.Button("Face Page", Vector2.Zero))
+            if(ImBrio.ToggelButton("Freeze Character", new Vector2(110, 0), capability.SpeedMultiplier == 0, hoverText: capability.SpeedMultiplierOverride == 0 ? "Un-Freeze Character" : "Freeze Character"))
             {
-                if(_bodyPaneEnabled)
-                {
-                    _bodyPaneEnabled = false;
-                    _facePaneEnabled = true;
-                }
+                if(capability.SpeedMultiplierOverride == 0)
+                    capability.ResetOverallSpeedOverride();
+                else
+                    capability.SetOverallSpeedOverride(0f);
             }
         }
-        if(ImGui.IsItemHovered())
-            ImGui.SetTooltip("Open Face Page");
+
+        ImGui.SameLine();
+
+        ImBrio.ToggleButtonStrip("posing_page_selector", new(ImBrio.GetRemainingWidth() - RightPanelWidth - 10, ImBrio.GetLineHeight()), ref _selectedPane, _bonePages);
 
         ImGui.SameLine();
 
@@ -277,9 +268,9 @@ internal class PosingGraphicalWindow : Window, IDisposable
         _transformEditor.Draw("graphical_transform", posing);
     }
 
-    private void DrawButtons(PosingCapability posing)
+    private static void DrawButtons(PosingCapability posing)
     {
-        float buttonWidth = ((ImGui.GetContentRegionAvail().X) - (ImGui.GetStyle().ItemSpacing.X * 3f)) / 4f;
+        float buttonWidth = (ImGui.GetContentRegionAvail().X - (ImGui.GetStyle().ItemSpacing.X * 3f)) / 4f;
 
         // Mirror mode
         PosingEditorCommon.DrawMirrorModeSelect(posing, new Vector2(buttonWidth, 0));
@@ -324,22 +315,9 @@ internal class PosingGraphicalWindow : Window, IDisposable
         var buttonSize = new Vector2(((ImGui.GetContentRegionAvail().X - settingsSize) / 2.0f) - (ImGui.GetStyle().FramePadding.X * 2), 0);
 
         if(ImBrio.Button("Import##import_pose", FontAwesomeIcon.FileImport, buttonSize))
-            ImGui.OpenPopup("import_type");
+            ImGui.OpenPopup("DrawImportPoseMenuPopup");
 
-        using(var popup = ImRaii.Popup("import_type"))
-        {
-            if(popup.Success)
-            {
-                if(ImGui.Button("Import as Pose", Vector2.Zero))
-                {
-                    FileUIHelpers.ShowImportPoseModal(posing);
-                }
-                if(ImGui.Button("Import as Expression", Vector2.Zero))
-                {
-                    FileUIHelpers.ShowImportPoseModal(posing, asExpression: true);
-                }
-            }
-        }
+        FileUIHelpers.DrawImportPoseMenuPopup(posing, false);
 
         ImGui.SameLine();
 
@@ -450,7 +428,7 @@ internal class PosingGraphicalWindow : Window, IDisposable
     {
         var currentAppearance = appearance.CurrentAppearance;
 
-        if(!appearance.IsHuman)
+        if(appearance.IsHuman is false)
         {
             ImGui.Text("Graphical posing is only available for humanoid characters.");
             if(ImGui.Button("Make Human"))
@@ -458,8 +436,6 @@ internal class PosingGraphicalWindow : Window, IDisposable
 
             return;
         }
-
-        bool showGenitalia = false;
 
         var contentArea = ImGui.GetContentRegionAvail();
         var contentWidth = contentArea.X / 3f;
@@ -474,13 +450,13 @@ internal class PosingGraphicalWindow : Window, IDisposable
 
                 if(posing.SkeletonPosing.CharacterIsIVCS)
                 {
-                    showGenitalia = _configurationService.Configuration.Posing.ShowGenitaliaInAdvancedPoseWindow;
+                    bool showGenitalia = _configurationService.Configuration.Posing.ShowGenitaliaInAdvancedPoseWindow;
                     if(ImGui.Checkbox("Show Genitalia", ref showGenitalia))
                     {
                         _configurationService.Configuration.Posing.ShowGenitaliaInAdvancedPoseWindow = showGenitalia;
                     }
 
-                    headerYOffset += 5;
+                    headerYOffset += 10;
                 }
                 var swapped = _configurationService.Configuration.Posing.GraphicalSidesSwapped;
                 if(ImGui.Checkbox("Swap", ref swapped))
@@ -490,7 +466,7 @@ internal class PosingGraphicalWindow : Window, IDisposable
 
                 //
 
-                if(_bodyPaneEnabled)
+                if(_selectedPane == 0)
                 {
                     ImGui.SetCursorPos(opening + new Vector2(0, headerYOffset));
 
@@ -499,7 +475,7 @@ internal class PosingGraphicalWindow : Window, IDisposable
             }
         }
 
-        if(_bodyPaneEnabled)
+        if(_selectedPane == 0)
         {
             ImGui.SameLine();
 
@@ -521,70 +497,35 @@ internal class PosingGraphicalWindow : Window, IDisposable
                 {
                     ImGui.SetCursorPos(ImGui.GetCursorPos() + new Vector2(0, headerYOffset));
 
-                    if(posing.SkeletonPosing.CharacterHasTail || posing.SkeletonPosing.CharacterIsIVCS)
+                    using(var splitChild = ImRaii.Child("###split_details_hands", new Vector2(contentWidth - ImGui.GetStyle().FramePadding.X, -1), false, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse))
                     {
-                        using(var splitChild = ImRaii.Child("###split_details_hands", new Vector2(contentWidth * 0.7f - (ImGui.GetStyle().FramePadding.X * 2), -1), false, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse))
+                        if(splitChild.Success)
                         {
-                            if(splitChild.Success)
-                            {
-                                DrawBoneSection("hands", true, posing);
+                            DrawBoneSection("hands", true, posing);
 
-                                if(posing.SkeletonPosing.CharacterIsIVCS)
-                                {
-                                    DrawBoneSection("ivcs_toes", true, posing);
-                                }
+                            if(posing.SkeletonPosing.CharacterIsIVCS)
+                            {
+                                DrawBoneSection("ivcs_toes", true, posing);
+                            }
+
+                            if(posing.SkeletonPosing.CharacterHasTail)
+                            {
+                                DrawBoneSection("tail", false, posing);
+                            }
+
+                            if(posing.SkeletonPosing.CharacterIsIVCS && _configurationService.Configuration.Posing.ShowGenitaliaInAdvancedPoseWindow)
+                            {
+                                ImGui.SameLine();
+
+                                DrawBoneSection("ivcs", false, posing);
                             }
                         }
-                        ImGui.SameLine();
-
-                        float tailWidth = contentWidth * 0.3f - (ImGui.GetStyle().FramePadding.X * 2);
-                        using(var splitChild = ImRaii.Child("###split_details_more", new Vector2(tailWidth, -1), false, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse))
-                        {
-                            if(splitChild.Success)
-                            {
-                                if(posing.SkeletonPosing.CharacterIsIVCS)
-                                {
-                                    using(var splitTailChild = ImRaii.Child("###split_details_more_ivcs", new Vector2(tailWidth, -1), false, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse))
-                                    {
-                                        if(splitTailChild.Success)
-                                        {
-                                            using(var splitTailChildTail = ImRaii.Child("###split_details_more_ivcs_tail", new Vector2(tailWidth, 75), false, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse))
-                                            {
-                                                if(splitTailChildTail.Success && posing.SkeletonPosing.CharacterHasTail)
-                                                {
-                                                    DrawBoneSection("tail", false, posing);
-                                                }
-                                            }
-
-                                            if(showGenitalia)
-                                            {
-                                                using(var splitTailChildIvcs = ImRaii.Child("###split_details_more_ivcs_genitalia", new Vector2(tailWidth, 150), false, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse))
-                                                {
-                                                    if(splitTailChildIvcs.Success)
-                                                    {
-                                                        DrawBoneSection("ivcs", false, posing);
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                                else if(posing.SkeletonPosing.CharacterHasTail)
-                                {
-                                    DrawBoneSection("tail", false, posing);
-                                }
-                            }
-                        }
-                    }
-                    else
-                    {
-                        DrawBoneSection("hands", true, posing);
                     }
                 }
             }
         }
 
-        if(_facePaneEnabled)
+        if(_selectedPane == 1)
         {
             ImGui.SetCursorPos(ImGui.GetCursorPos() + new Vector2(0, headerYOffset));
 
@@ -832,9 +773,13 @@ internal class PosingGraphicalWindow : Window, IDisposable
         }
     }
 
-    private void DrawImage(string image, out Vector2 imageSizeToFit, out Vector2 scalingFactors)
+    private static void DrawImage(string image, out Vector2 imageSizeToFit, out Vector2 scalingFactors)
     {
         var img = ResourceProvider.Instance.GetResourceImage(image);
+
+        if(img is null)
+            throw new NullReferenceException("img can not be null!");
+
         var available = ImGui.GetContentRegionAvail() - (ImGui.GetStyle().FramePadding * 2f);
         var imageSize = new Vector2(img.Width, img.Height);
         var aspectRatio = imageSize.X / imageSize.Y;
@@ -843,6 +788,7 @@ internal class PosingGraphicalWindow : Window, IDisposable
         {
             imageSizeToFit = new Vector2(available.Y * aspectRatio, available.Y);
         }
+
         ImGui.Image(img.ImGuiHandle, imageSizeToFit);
 
         var scaleX = imageSizeToFit.X / imageSize.X;
@@ -853,7 +799,7 @@ internal class PosingGraphicalWindow : Window, IDisposable
 
     private void OnGPoseStateChanged(bool newState)
     {
-        if(!newState)
+        if(newState is false)
             IsOpen = false;
     }
 
