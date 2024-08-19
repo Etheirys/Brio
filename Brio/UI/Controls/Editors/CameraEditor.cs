@@ -8,33 +8,19 @@ namespace Brio.UI.Controls.Editors;
 
 internal static class CameraEditor
 {
-    struct CameraPresetProperties
+    struct CameraPresetProperties(Vector3 offset, float rotation, float zoom, float fov, Vector2 pan, Vector2 angle, bool disableCollision, bool delimitCamera)
     {
-        public bool isSet = false;
-        public Vector3 offset;
-        public float rotation;
-        public float zoom;
-        public float fov;
-        public Vector2 pan;
-        public Vector2 angle;
-        public bool disableCollision;
-        public bool delimitCamera;
-
-        public CameraPresetProperties(Vector3 offset, float rotation, float zoom, float fov, Vector2 pan, Vector2 angle, bool disableCollision, bool delimitCamera)
-        {
-            this.offset = offset;
-            this.rotation = rotation;
-            this.zoom = zoom;
-            this.fov = fov;
-            this.pan = pan;
-            this.angle = angle;
-            this.disableCollision = disableCollision;
-            this.delimitCamera = delimitCamera;
-
-            this.isSet = true;
-        }
+        public bool isSet = true;
+        public Vector3 offset = offset;
+        public float rotation = rotation;
+        public float zoom = zoom;
+        public float fov = fov;
+        public Vector2 pan = pan;
+        public Vector2 angle = angle;
+        public bool disableCollision = disableCollision;
+        public bool delimitCamera = delimitCamera;
     }
-    private static CameraPresetProperties[] presets = new CameraPresetProperties[3];
+    private static readonly CameraPresetProperties[] presets = new CameraPresetProperties[3];
 
     public unsafe static void Draw(string id, CameraCapability capability)
     {
@@ -56,7 +42,7 @@ internal static class CameraEditor
 
                     ImGui.SameLine();
 
-                    if(ImBrio.FontIconButtonRight("reset", Dalamud.Interface.FontAwesomeIcon.Undo, 1.2f, "Reset", capability.IsOveridden))
+                    if(ImBrio.FontIconButtonRight("reset", Dalamud.Interface.FontAwesomeIcon.Undo, 1f, "Reset", capability.IsOveridden))
                         capability.Reset();
 
                     const string rotationText = "Rotation";
@@ -65,11 +51,21 @@ internal static class CameraEditor
                     if(ImBrio.SliderAngle(rotationText, ref rotation, -180, 180, "%.2f"))
                         camera->Rotation = rotation;
 
+                    ImGui.SameLine();
+
+                    if(ImBrio.FontIconButtonRight("resetRotation", Dalamud.Interface.FontAwesomeIcon.Undo, 1f, "Reset", rotation != 0))
+                        camera->Rotation = 0;
+
                     const string zoomText = "Zoom";
                     float zoom = camera->Camera.Distance;
                     ImGui.SetNextItemWidth(width);
                     if(ImBrio.SliderFloat(zoomText, ref zoom, camera->Camera.MaxDistance, camera->Camera.MinDistance, "%.2f", ImGuiSliderFlags.AlwaysClamp))
                         camera->Camera.Distance = zoom;
+
+                    ImGui.SameLine();
+
+                    if(ImBrio.FontIconButtonRight("resetZoom", Dalamud.Interface.FontAwesomeIcon.Undo, 1f, "Reset", zoom != 2.5))
+                        camera->Camera.Distance = 2.5f;
 
                     const string fovText = "FoV";
                     float fov = camera->FoV;
@@ -77,18 +73,28 @@ internal static class CameraEditor
                     if(ImBrio.SliderAngle(fovText, ref fov, -44, 120, "%.2f", ImGuiSliderFlags.AlwaysClamp))
                         camera->FoV = fov;
 
+                    ImGui.SameLine();
+
+                    if(ImBrio.FontIconButtonRight("resetFoV", Dalamud.Interface.FontAwesomeIcon.Undo, 1f, "Reset", fov != 0))
+                        camera->FoV = 0f;
+
                     const string panText = "Pan";
                     Vector2 pan = camera->Pan;
                     ImGui.SetNextItemWidth(width);
                     if(ImGui.DragFloat2(panText, ref pan, 0.001f))
                         camera->Pan = pan;
+            
+                    ImGui.SameLine();
+
+                    if(ImBrio.FontIconButtonRight("resetPan", Dalamud.Interface.FontAwesomeIcon.Undo, 1f, "Reset", pan != Vector2.Zero))
+                        camera->Pan = new Vector2(0, 0);
 
                     const string angleText = "Angle";
                     Vector2 angle = camera->Angle;
                     ImGui.SetNextItemWidth(width);
                     if(ImGui.DragFloat2(angleText, ref angle, 0.001f))
                         camera->Angle = angle;
-
+        
                     var disable = capability.DisableCollision;
                     if(ImGui.Checkbox("Disable Collision", ref disable))
                         capability.DisableCollision = disable;
@@ -100,18 +106,24 @@ internal static class CameraEditor
                         capability.DelimitCamera = delimit;
 
                     ImGui.Separator();
+
                     if(ImGui.CollapsingHeader("Camera Presets"))
                     {
                         for(int i = 0; i < 3; i++)
                         {
-                            ImGui.Text("Preset " + (i + 1).ToString() + ": ");
+                            ImGui.Text($"Preset {i + 1} :");
+
                             ImGui.SameLine();
-                            if(ImGui.Button("Save##" + i.ToString()))
-                                presets[i] = new CameraPresetProperties(capability.PositionOffset, camera->Rotation, camera->Camera.Distance, camera->FoV, camera->Pan, camera->Angle, capability.DisableCollision, capability.DelimitCamera);
+
+                            if(ImGui.Button($"Save##{i}"))
+                                presets[i] = new CameraPresetProperties(capability.PositionOffset, camera->Rotation,
+                                    camera->Camera.Distance, camera->FoV, camera->Pan, camera->Angle,
+                                    capability.DisableCollision, capability.DelimitCamera);
+
                             if(presets[i].isSet)
                             {
                                 ImGui.SameLine();
-                                if(ImGui.Button("Load##" + i.ToString()))
+                                if(ImGui.Button($"Load##{i}"))
                                 {
                                     capability.PositionOffset = presets[i].offset;
                                     camera->Rotation = presets[i].rotation;
@@ -125,7 +137,6 @@ internal static class CameraEditor
                             }
                         }
                     }
-
                 }
             }
         }
