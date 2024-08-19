@@ -97,11 +97,11 @@ internal class GlamourerService : IDisposable
 
     public bool CheckForLock(ICharacter? character)
     {
-        if(IsGlamourerAvailable == false && character is null)
+        if(IsGlamourerAvailable == false || character is null)
             return false;
 
         var success = _glamourerGetState.Invoke(character!.ObjectIndex);
-       
+
         Brio.Log.Warning("Glamourer CheckForLock... " + success.Item1);
 
         return success.Item1 == Glamourer.Api.Enums.GlamourerApiEc.InvalidKey;
@@ -109,13 +109,13 @@ internal class GlamourerService : IDisposable
 
     public Task RevertCharacter(ICharacter? character)
     {
-        if(IsGlamourerAvailable == false && character is null)
+        if(IsGlamourerAvailable == false || character is null)
             return Task.CompletedTask;
 
         Brio.Log.Warning("Starting glamourer revert...");
 
         var success = _glamourerRevertCharacter.Invoke(character!.ObjectIndex, UnLockCode);
-        
+
         if(success == Glamourer.Api.Enums.GlamourerApiEc.InvalidKey)
         {
             Brio.Log.Fatal("Glamourer revert failed! Please report this to the Brio Devs!");
