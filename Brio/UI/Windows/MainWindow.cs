@@ -7,16 +7,18 @@ using Dalamud.Interface;
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Interface.Windowing;
 using ImGuiNET;
+using System;
 using System.Numerics;
 
 namespace Brio.UI.Windows;
 
-internal class MainWindow : Window
+internal class MainWindow : Window, IDisposable
 {
     private readonly SettingsWindow _settingsWindow;
     private readonly InfoWindow _infoWindow;
     private readonly LibraryWindow _libraryWindow;
     private readonly ConfigurationService _configurationService;
+    private readonly InputService _inputService;
 
     private readonly EntityManager _entityManager;
     private readonly EntityHierarchyView _entitySelector;
@@ -36,6 +38,7 @@ internal class MainWindow : Window
         _settingsWindow = settingsWindow;
         _libraryWindow = libraryWindow;
         _infoWindow = infoWindow;
+        _inputService = input;
 
         _entityManager = entityManager;
         _entitySelector = new(_entityManager);
@@ -48,7 +51,6 @@ internal class MainWindow : Window
 
         input.AddListener(KeyBindEvents.Interface_ToggleBrioWindow, this.OnMainWindowToggle);
         input.AddListener(KeyBindEvents.Interface_ToggleBindPromptWindow, this.OnPromptWindowToggle);
-
     }
 
     public override void Draw()
@@ -107,5 +109,11 @@ internal class MainWindow : Window
 
         if(ImGui.IsItemHovered())
             ImGui.SetTooltip("Settings");
+    }
+
+    public void Dispose()
+    {
+        _inputService.RemoveListener(KeyBindEvents.Interface_ToggleBrioWindow, this.OnMainWindowToggle);
+        _inputService.RemoveListener(KeyBindEvents.Interface_ToggleBindPromptWindow, this.OnPromptWindowToggle);
     }
 }

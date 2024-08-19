@@ -1,5 +1,6 @@
 ﻿using Brio.Config;
 using Dalamud.Game.ClientState.Keys;
+using Dalamud.Interface.Utility.Raii;
 using ImGuiNET;
 using System.Collections.Generic;
 
@@ -60,65 +61,55 @@ internal static class KeybindEditor
         bool changed = false;
 
         // Control
-        if(keyBind.Key == VirtualKey.CONTROL)
-            ImGui.BeginDisabled();
-
-        bool control = keyBind.Control;
-        if(ImGui.Checkbox($"##{label}_Control", ref control))
+        using(ImRaii.Disabled(keyBind.Key == VirtualKey.CONTROL))
         {
-            keyBind.Control = control;
-            changed = true;
-        }
+            bool control = keyBind.Control;
+            if(ImGui.Checkbox($"##{label}_Control", ref control))
+            {
+                keyBind.Control = control;
+                changed = true;
+            }
 
-        if(ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled))
-        {
-            ImGui.SetTooltip("Control");
+            if(ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled))
+            {
+                ImGui.SetTooltip("Control");
+            }
         }
-
-        if(keyBind.Key == VirtualKey.CONTROL)
-            ImGui.EndDisabled();
 
         // Alt
         ImGui.SameLine();
 
-        if(keyBind.Key == VirtualKey.MENU)
-            ImGui.BeginDisabled();
-
-        bool alt = keyBind.Alt;
-        if(ImGui.Checkbox($"##{label}_Alt", ref alt))
+        using(ImRaii.Disabled(keyBind.Key == VirtualKey.MENU))
         {
-            keyBind.Alt = alt;
-            changed = true;
-        }
+            bool alt = keyBind.Alt;
+            if(ImGui.Checkbox($"##{label}_Alt", ref alt))
+            {
+                keyBind.Alt = alt;
+                changed = true;
+            }
 
-        if(ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled))
-        {
-            ImGui.SetTooltip("Alt");
+            if(ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled))
+            {
+                ImGui.SetTooltip("Alt");
+            }
         }
-
-        if(keyBind.Key == VirtualKey.MENU)
-            ImGui.EndDisabled();
 
         // Shift
         ImGui.SameLine();
-
-        if(keyBind.Key == VirtualKey.SHIFT)
-            ImGui.BeginDisabled();
-
-        bool shift = keyBind.Shift;
-        if(ImGui.Checkbox($"##{label}_Shift", ref shift))
+        using(ImRaii.Disabled(keyBind.Key == VirtualKey.SHIFT))
         {
-            keyBind.Shift = shift;
-            changed = true;
-        }
+            bool shift = keyBind.Shift;
+            if(ImGui.Checkbox($"##{label}_Shift", ref shift))
+            {
+                keyBind.Shift = shift;
+                changed = true;
+            }
 
-        if(ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled))
-        {
-            ImGui.SetTooltip("Shift");
+            if(ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled))
+            {
+                ImGui.SetTooltip("Shift");
+            }
         }
-
-        if(keyBind.Key == VirtualKey.SHIFT)
-            ImGui.EndDisabled();
 
         // Key
         ImGui.SameLine();
