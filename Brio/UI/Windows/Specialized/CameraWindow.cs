@@ -14,7 +14,7 @@ internal class CameraWindow : Window, IDisposable
     private readonly EntityManager _entityManager;
     private readonly GPoseService _gPoseService;
 
-    public CameraWindow(EntityManager entityManager, GPoseService gPoseService) : base("Brio - Camera###brio_camera_window", ImGuiWindowFlags.AlwaysAutoResize)
+    public CameraWindow(EntityManager entityManager, GPoseService gPoseService) : base("Brio - Camera###brio_camera_window")
     {
         Namespace = "brio_camera_namespace";
 
