@@ -284,6 +284,8 @@
     "Interface_IncrementSmallModifier": "Increment Small Modifier",
     "Interface_IncrementLargeModifier": "Increment Large Modifier",
     "Interface_StopCutscene": "Stop Cutscene",
+    "Interface_StartAllActorsAnimations": "Start All Actors Animations",
+    "Interface_StopAllActorsAnimations": "Stop All Actors Animations",
     "Posing_DisableGizmo": "Disable Gizmo",
     "Posing_DisableSkeleton": "Disable Skeleton",
     "Posing_HideOverlay": "Hide Overlay",

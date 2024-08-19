@@ -1,9 +1,12 @@
-﻿using Brio.Game.Actor.Extensions;
+﻿using Brio.Capabilities.Actor;
+using Brio.Entities;
+using Brio.Game.Actor.Extensions;
 using Brio.Game.Camera;
 using Brio.Game.Cutscene.Files;
 using Brio.Game.GPose;
 using Brio.Input;
 using Brio.UI;
+using Brio.UI.Controls.Editors;
 using Dalamud.Game.ClientState.Objects;
 using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Plugin.Services;
@@ -17,8 +20,11 @@ internal class CutsceneManager : IDisposable
 {
     private const double FRAME_STEP = 33.33333333333333;
 
+    private readonly EntityManager _entityManager;
     private readonly GPoseService _gPoseService;
     private readonly ITargetManager _targetManager;
+
+    private bool _animationStarted = false;
 
     //
 
@@ -30,31 +36,67 @@ internal class CutsceneManager : IDisposable
     //
 
     public bool CloseWindowsOnPlay = false;
-    public bool StartAnimationOnPlay = false;
-  
+    public bool StartAllActorAnimationsOnPlay = false;
+
     public bool IsRunning => Stopwatch.IsRunning;
+
+    public bool DelayStart = false;
+    public int DelayTime = 0;
+
+    public bool DelayAnimationStart = false;
+    public int DelayAnimationTime = 0;
 
     public CutsceneCameraSettings CameraSettings { get; } = new();
     public VirtualCamera VirtualCamera { get; }
 
     public XATCameraPathFile? CameraPath { get; set; }
 
-    public CutsceneManager(GPoseService gPoseService, VirtualCamera virtualCamera, ITargetManager targetManager, IFramework framework)
+    public CutsceneManager(GPoseService gPoseService, VirtualCamera virtualCamera, EntityManager entityManager, ITargetManager targetManager, IFramework framework)
     {
         VirtualCamera = virtualCamera;
 
         _targetManager = targetManager;
         _gPoseService = gPoseService;
+        _entityManager = entityManager;
 
         _gPoseService.OnGPoseStateChange += OnGPoseStateChange;
 
         InputService.Instance.AddListener(KeyBindEvents.Interface_StopCutscene, StopPlayback);
+        InputService.Instance.AddListener(KeyBindEvents.Interface_StartAllActorsAnimations, StartAllActors);
+        InputService.Instance.AddListener(KeyBindEvents.Interface_StopAllActorsAnimations, StopAllActors);
     }
 
     private void OnGPoseStateChange(bool newState)
     {
         if(newState == false && IsRunning)
             StopPlayback();
+    }
+
+    private void StartAllActors()
+    {
+        foreach(var actor in _entityManager.TryGetAllActors())
+        {
+            if(actor.TryGetCapability<ActionTimelineCapability>(out ActionTimelineCapability? atCap))
+            {
+                if(atCap is null)
+                    return;
+            
+                ActionTimelineEditor.ApplyBaseOverride(atCap, true);
+            }
+        }
+    }
+    private void StopAllActors()
+    {
+        foreach(var actor in _entityManager.TryGetAllActors())
+        {
+            if(actor.TryGetCapability<ActionTimelineCapability>(out ActionTimelineCapability? atCap))
+            {
+                if(atCap is null)
+                    return;
+
+                atCap.Stop();
+            }
+        }
     }
 
     public void StartPlayback()
@@ -83,7 +125,6 @@ internal class CutsceneManager : IDisposable
         Stopwatch.Start();
         VirtualCamera.IsActive = true;
     }
-
     public void StopPlayback()
     {
         if(IsRunning)
@@ -94,7 +135,12 @@ internal class CutsceneManager : IDisposable
             }
 
             Stopwatch.Reset();
+            _animationStarted = false;
             VirtualCamera.IsActive = false;
+            if(StartAllActorAnimationsOnPlay)
+            {
+                StopAllActors();
+            }
         }
     }
 
@@ -103,7 +149,38 @@ internal class CutsceneManager : IDisposable
         if(IsRunning is false || CameraPath is null)
             return null;
 
+        if(DelayStart)
+        {
+            if(Stopwatch.ElapsedMilliseconds > DelayTime)
+            {
+                DelayStart = false;
+                Stopwatch.Restart();
+            }
+            else
+            {
+                return null;
+            }
+        }
+
         double totalMillis = Stopwatch.ElapsedMilliseconds;
+
+        if(DelayAnimationStart)
+        {
+            if(totalMillis > DelayAnimationTime)
+            {
+                DelayAnimationStart = false;
+            }
+        }
+
+        if(_animationStarted == false && DelayAnimationStart == false)
+        {
+            _animationStarted = true;
+
+            if(StartAllActorAnimationsOnPlay)
+            {
+                StartAllActors();
+            }
+        }
 
         CameraKeyframe? previousKey = CameraPath.CameraFrames[0];
         CameraKeyframe? nextKey = null;
@@ -176,6 +253,8 @@ internal class CutsceneManager : IDisposable
     public void Dispose()
     {
         InputService.Instance.RemoveListener(KeyBindEvents.Interface_StopCutscene, StopPlayback);
+        InputService.Instance.RemoveListener(KeyBindEvents.Interface_StartAllActorsAnimations, StartAllActors);
+        InputService.Instance.RemoveListener(KeyBindEvents.Interface_StopAllActorsAnimations, StopAllActors);
 
         if(IsRunning)
             StopPlayback();

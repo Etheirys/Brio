@@ -11,8 +11,8 @@ internal class InputConfiguration
         // Default bindings
         { KeyBindEvents.Interface_ToggleBrioWindow, new(VirtualKey.B, true) },
         { KeyBindEvents.Interface_ToggleBindPromptWindow, new(VirtualKey.M, true) },
-        { KeyBindEvents.Interface_IncrementSmallModifier, new(VirtualKey.NO_KEY) },
-        { KeyBindEvents.Interface_IncrementLargeModifier, new(VirtualKey.NO_KEY) },
+        { KeyBindEvents.Interface_IncrementSmallModifier, new(VirtualKey.CONTROL) },
+        { KeyBindEvents.Interface_IncrementLargeModifier, new(VirtualKey.SHIFT) },
         { KeyBindEvents.Posing_ToggleOverlay, new(VirtualKey.O, true) },
         { KeyBindEvents.Posing_Undo, new(VirtualKey.Z, true) },
         { KeyBindEvents.Posing_Redo, new(VirtualKey.Y, true) },
@@ -23,7 +23,9 @@ internal class InputConfiguration
         { KeyBindEvents.Posing_Translate, new(VirtualKey.NO_KEY) },
         { KeyBindEvents.Posing_Rotate, new(VirtualKey.NO_KEY) },
         { KeyBindEvents.Posing_Scale, new(VirtualKey.NO_KEY) },
-        { KeyBindEvents.Interface_StopCutscene, new (VirtualKey.B, shift: true) }
+        { KeyBindEvents.Interface_StopCutscene, new (VirtualKey.B, shift: true) },
+        { KeyBindEvents.Interface_StartAllActorsAnimations, new (VirtualKey.N, shift: true) },
+        { KeyBindEvents.Interface_StopAllActorsAnimations, new (VirtualKey.M, shift: true) }
     };
 
     public bool ShowPromptsInGPose { get; set; } = false;

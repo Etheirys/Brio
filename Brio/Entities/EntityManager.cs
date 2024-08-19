@@ -1,5 +1,6 @@
 ﻿using Brio.Capabilities.Core;
 using Brio.Config;
+using Brio.Entities.Actor;
 using Brio.Entities.Camera;
 using Brio.Entities.Core;
 using Brio.Entities.Debug;
@@ -7,9 +8,10 @@ using Brio.Entities.World;
 using Dalamud.Game.ClientState.Objects.Types;
 using Microsoft.Extensions.DependencyInjection;
 using System;
+using System.Linq;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
+using Brio.Capabilities.Actor;
 
 
 namespace Brio.Entities;
@@ -144,6 +146,21 @@ internal unsafe partial class EntityManager : IDisposable
     public bool SelectedHasCapability<T>(bool considerChildren = false, bool considerParents = true) where T : Capability
     {
         return TryGetCapabilitiesFromSelectedEntity<T>(out _, considerChildren, considerParents);
+    }
+
+    public IEnumerable<ActorEntity> TryGetAllActors()
+    {
+        List<ActorEntity> actorEntities = [];
+
+        foreach(var entity in _entityMap.Values)
+        {
+            if(entity is ActorEntity actor)
+            {
+                actorEntities.Add(actor);
+            }
+        }
+
+        return actorEntities;
     }
 
     public bool TryGetCapabilityFromSelectedEntity<T>([MaybeNullWhen(false)] out T capability, bool considerChildren = false, bool considerParents = true) where T : Capability

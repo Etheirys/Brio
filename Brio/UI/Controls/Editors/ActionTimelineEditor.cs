@@ -1,16 +1,17 @@
 ﻿using Brio.Capabilities.Actor;
-using Brio.Capabilities.Core;
 using Brio.Config;
+using Brio.Entities;
+using Brio.Entities.Core;
 using Brio.Game.Actor.Extensions;
 using Brio.Game.Cutscene;
 using Brio.Game.Cutscene.Files;
 using Brio.Game.GPose;
 using Brio.Game.Posing;
 using Brio.Resources;
+using Brio.UI.Controls.Core;
 using Brio.UI.Controls.Selectors;
 using Brio.UI.Controls.Stateless;
 using Dalamud.Interface;
-using Dalamud.Interface.ImGuiFileDialog;
 using Dalamud.Interface.Utility.Raii;
 using FFXIVClientStructs.FFXIV.Client.Graphics.Scene;
 using ImGuiNET;
@@ -21,32 +22,23 @@ using static Brio.Game.Actor.ActionTimelineService;
 
 namespace Brio.UI.Controls.Editors;
 
-internal class ActionTimelineEditor
+internal class ActionTimelineEditor(CutsceneManager cutsceneManager, GPoseService gPoseService, EntityManager entityManager, PhysicsService physicsService, ConfigurationService configService)
 {
-    private readonly CutsceneManager _cutsceneManager;
-    private readonly GPoseService _gPoseService;
-    private readonly PhysicsService _physicsService;
-    private readonly ConfigurationService _configService;
-
-    private static float MaxItemWidth => ImGui.GetContentRegionAvail().X - ImGui.CalcTextSize("XXXXXXXXXXXXXXXXXX").X;
-    private static float LabelStart => MaxItemWidth + ImGui.GetCursorPosX() + ImGui.GetStyle().FramePadding.X * 2f;
-
-    private ActionTimelineCapability _capability = null!;
-
-    private bool _baseInterrupt = true;
-    private int _baseAnimation = 0;
-    private int _blendAnimation = 0;
-    private bool _isPaused = false;
+    private readonly CutsceneManager _cutsceneManager = cutsceneManager;
+    private readonly GPoseService _gPoseService = gPoseService;
+    private readonly PhysicsService _physicsService = physicsService;
+    private readonly ConfigurationService _configService = configService;
+    private readonly EntityManager _entityManager = entityManager;
 
     private static readonly ActionTimelineSelector _globalTimelineSelector = new("global_timeline_selector");
+    private static float MaxItemWidth => ImGui.GetContentRegionAvail().X - ImGui.CalcTextSize("XXXXXXXXXXXXXXXXXX").X;
+    private static float LabelStart => MaxItemWidth + ImGui.GetCursorPosX() + (ImGui.GetStyle().FramePadding.X * 2f);
 
-    public ActionTimelineEditor(CutsceneManager cutsceneManager, GPoseService gPoseService, PhysicsService physicsService, ConfigurationService configService)
-    {
-        _cutsceneManager = cutsceneManager;
-        _gPoseService = gPoseService;
-        _physicsService = physicsService;
-        _configService = configService;
-    }
+    public bool _startAnimationOnSelect = true;
+
+    public string cameraPath = string.Empty;
+    private ActionTimelineCapability _capability = null!;
+    public float hederButtonSize = ImGui.CalcTextSize("#########").X + 28;
 
     public void Draw(bool drawAdvanced, ActionTimelineCapability capability)
     {
@@ -90,25 +82,97 @@ internal class ActionTimelineEditor
 
         ImGui.SameLine();
 
-        if(ImBrio.FontIconButtonRight("reset", FontAwesomeIcon.Undo, 1, "Reset Animation", 
-            _baseAnimation != 0 && 
-            (_capability.HasBaseOverride || _capability.HasSpeedMultiplierOverride || _baseInterrupt is false || _capability.LipsOverride > 0)))
+        ImBrio.RightAlign(hederButtonSize, 1);
+
+        if(ImGui.Button("Actors       "))
         {
-            _baseInterrupt = true;
+            ImGui.OpenPopup("animation_control");
+        }
+       
+        ImGui.SameLine();
+    
+        using(ImRaii.PushColor(ImGuiCol.Button, 0))
+        {
+            var curPos = ImGui.GetCursorPos();
+            ImGui.SetCursorPos(new Vector2(curPos.X - 28, curPos.Y));
 
-            _baseAnimation = 0;
-            _blendAnimation = 0;
-            _capability.LipsOverride = 0;
-            
-            Pause(true);
+            ImGui.ArrowButton("###animation_control_drop", ImGuiDir.Down);
+        }
 
-            _capability.ResetBaseOverride();
-            _capability.ResetOverallSpeedOverride();
+        ImGui.SameLine();
 
+        if(ImBrio.FontIconButtonRight("reset", FontAwesomeIcon.Undo, 1, "Reset Animation", _capability.HasOverride))
+        {
+            _capability.Reset();
             _cutsceneManager.StopPlayback();
-
-            cameraPath = string.Empty;
             _cutsceneManager.CameraPath = null;
+            cameraPath = string.Empty;
+        }
+
+        using var popup = ImRaii.Popup("animation_control");
+        if(popup.Success)
+        {
+            if(ImGui.Button("Freeze All Actors", Vector2.Zero))
+            {
+                foreach(var actor in _entityManager.TryGetAllActors())
+                {
+                    if(actor.TryGetCapability<ActionTimelineCapability>(out ActionTimelineCapability? atCap))
+                    {
+                        if(atCap is null)
+                            return;
+
+                        if(atCap.SpeedMultiplier > 0f)
+                        {
+                            atCap.SetOverallSpeedOverride(0f);
+                        }
+                    }
+                }
+            }
+
+            if(ImGui.Button("Un-Freeze All Actors", Vector2.Zero))
+            {
+                foreach(var actor in _entityManager.TryGetAllActors())
+                {
+                    if(actor.TryGetCapability<ActionTimelineCapability>(out ActionTimelineCapability? atCap))
+                    {
+                        if(atCap is null)
+                            return;
+
+                        if(atCap.HasSpeedMultiplierOverride)
+                        {
+                            atCap.ResetOverallSpeedOverride();
+                        }
+                    }
+                }
+            }
+
+            if(ImGui.Button("Play all Animations", Vector2.Zero))
+            {
+                foreach(var actor in _entityManager.TryGetAllActors())
+                {
+                    if(actor.TryGetCapability<ActionTimelineCapability>(out ActionTimelineCapability? atCap))
+                    {
+                        if(atCap is null)
+                            return;
+
+                        ApplyBaseOverride(atCap, true);
+                    }
+                }
+            }
+   
+            if(ImGui.Button("Stop all Animations", Vector2.Zero))
+            {
+                foreach(var actor in _entityManager.TryGetAllActors())
+                {
+                    if(actor.TryGetCapability<ActionTimelineCapability>(out ActionTimelineCapability? atCap))
+                    {
+                        if(atCap is null)
+                            return;
+
+                        atCap.Stop();
+                    }
+                }
+            }
         }
     }
 
@@ -116,14 +180,14 @@ internal class ActionTimelineEditor
     {
         const string baseLabel = "Base";
         ImGui.SetNextItemWidth(MaxItemWidth - ImGui.CalcTextSize("XXXX").X);
-        ImGui.InputInt($"###base_animation", ref _baseAnimation, 0, 0);
+        ImGui.InputInt($"###base_animation", ref _capability.SlotedBaseAnimation, 0, 0);
         if(ImBrio.IsItemConfirmed())
         {
-            ApplyBaseOverride(true);
+            ApplyBaseOverride(_capability, true);
         }
 
         ImGui.SameLine();
-        ImGui.Checkbox("###base_interrupt", ref _baseInterrupt);
+        ImGui.Checkbox("###base_interrupt", ref _capability.DoBaseInterrupt);
         if(ImGui.IsItemHovered())
             ImGui.SetTooltip("Interrupt");
 
@@ -133,15 +197,13 @@ internal class ActionTimelineEditor
 
         ImGui.SameLine();
 
-        if(ImBrio.FontIconButtonRight("base_play", FontAwesomeIcon.PlayCircle, 3, "Play", _baseAnimation != 0))
-            ApplyBaseOverride();
+        if(ImBrio.FontIconButtonRight("base_play", FontAwesomeIcon.PlayCircle, 3, "Play", _capability.SlotedBaseAnimation != 0))
+            ApplyBaseOverride(_capability);
 
         ImGui.SameLine();
 
         if(ImBrio.FontIconButtonRight("base_reset", FontAwesomeIcon.StopCircle, 2, "Stop", _capability.HasBaseOverride))
         {
-            Pause(true);
-            
             _capability.ResetBaseOverride();
             _capability.ResetOverallSpeedOverride();
         }
@@ -160,18 +222,23 @@ internal class ActionTimelineEditor
         {
             if(popup.Success)
             {
+                ImGui.Checkbox("Start Animation On Select", ref _startAnimationOnSelect);
+                if(ImGui.IsItemHovered())
+                    ImGui.SetTooltip("Start Animation On Select");
+                
                 _globalTimelineSelector.Draw();
 
                 if(_globalTimelineSelector.SoftSelectionChanged && _globalTimelineSelector.SoftSelected != null)
                 {
-                    _baseAnimation = _globalTimelineSelector.SoftSelected.TimelineId;
+                    _capability.SlotedBaseAnimation = _globalTimelineSelector.SoftSelected.TimelineId;
                 }
 
                 if(_globalTimelineSelector.SelectionChanged && _globalTimelineSelector.Selected != null)
                 {
-                    _baseAnimation = _globalTimelineSelector.Selected.TimelineId;
-                  
-                    ApplyBaseOverride(true);
+                    _capability.SlotedBaseAnimation = _globalTimelineSelector.Selected.TimelineId;
+
+                    if(_startAnimationOnSelect)
+                        ApplyBaseOverride(_capability, true);
 
                     ImGui.CloseCurrentPopup();
                 }
@@ -184,10 +251,10 @@ internal class ActionTimelineEditor
         const string blendLabel = "Blend";
 
         ImGui.SetNextItemWidth(MaxItemWidth);
-        ImGui.InputInt($"###blend_animation", ref _blendAnimation, 0, 0);
+        ImGui.InputInt($"###blend_animation", ref _capability.SlotedBlendAnimation, 0, 0);
         if(ImBrio.IsItemConfirmed())
         {
-            ApplyBlend();
+            ApplyBlend(_capability);
         }
 
         ImGui.SameLine();
@@ -197,8 +264,8 @@ internal class ActionTimelineEditor
 
         ImGui.SameLine();
 
-        if(ImBrio.FontIconButtonRight("blend_play", FontAwesomeIcon.PlayCircle, 2, "Play", _blendAnimation != 0))
-            ApplyBlend();
+        if(ImBrio.FontIconButtonRight("blend_play", FontAwesomeIcon.PlayCircle, 2, "Play", _capability.SlotedBlendAnimation != 0))
+            ApplyBlend(_capability);
 
         ImGui.SameLine();
         if(ImBrio.FontIconButtonRight("blend_search", FontAwesomeIcon.Search, 1, "Search"))
@@ -217,13 +284,13 @@ internal class ActionTimelineEditor
 
                 if(_globalTimelineSelector.SoftSelectionChanged && _globalTimelineSelector.SoftSelected != null)
                 {
-                    _blendAnimation = _globalTimelineSelector.SoftSelected.TimelineId;
+                    _capability.SlotedBlendAnimation = _globalTimelineSelector.SoftSelected.TimelineId;
                 }
 
                 if(_globalTimelineSelector.SelectionChanged && _globalTimelineSelector.Selected != null)
                 {
-                    _blendAnimation = _globalTimelineSelector.Selected.TimelineId;
-                    ApplyBlend();
+                    _capability.SlotedBlendAnimation = _globalTimelineSelector.Selected.TimelineId;
+                    ApplyBlend(_capability);
                     ImGui.CloseCurrentPopup();
                 }
             }
@@ -395,16 +462,12 @@ internal class ActionTimelineEditor
 
         ImGui.SameLine();
 
-        if(ImBrio.FontIconButtonRight("speed_pause", FontAwesomeIcon.PauseCircle, 2, _isPaused ? "Un-Pause" : "Paused", _capability.SpeedMultiplier > 0f))
+        if(ImBrio.FontIconButtonRight("speed_pause", FontAwesomeIcon.PauseCircle, 2, _capability.SpeedMultiplier > 0 ? "Un-Pause" : "Paused", _capability.SpeedMultiplier > 0f))
         {
             _capability.SetOverallSpeedOverride(0f);
-            Pause();
         }
     }
 
-    //
-
-    public string cameraPath = string.Empty;
     private void DrawCutscene()
     {
         ImGui.Text("Camera Path ");
@@ -443,123 +506,102 @@ internal class ActionTimelineEditor
 
         ImGui.Separator();
 
-        if(_cutsceneManager.CameraPath is null) ImGui.BeginDisabled();
-
-        ImGui.InputFloat3("Scale", ref _cutsceneManager.CameraSettings.Scale);
-        ImGui.InputFloat3("Offset", ref _cutsceneManager.CameraSettings.Offset);
-
-        ImGui.Checkbox("Loop", ref _cutsceneManager.CameraSettings.Loop);
-
-        ImGui.Separator();
-
-        ImGui.Checkbox("Hide Brio On Play  (Press 'Ctrl + B' to Stop Cutscene)", ref _cutsceneManager.CloseWindowsOnPlay);
-        ImGui.Checkbox("Start Animation On Play", ref _cutsceneManager.StartAnimationOnPlay);
-
-        ImGui.Separator();
-
-        var enb = _cutsceneManager.IsRunning;
-
-        if(enb) ImGui.BeginDisabled();
-        if(ImGui.Button("Play"))
+        using(ImRaii.Disabled(string.IsNullOrEmpty(cameraPath)))
         {
-            if(_cutsceneManager.StartAnimationOnPlay && _baseAnimation != 0)
+            ImGui.InputFloat3("Camera Scale", ref _cutsceneManager.CameraSettings.Scale);
+            ImGui.InputFloat3("Camera Offset", ref _cutsceneManager.CameraSettings.Offset);
+
+            ImGui.Separator();
+
+            ImGui.Checkbox("Loop", ref _cutsceneManager.CameraSettings.Loop);
+
+            ImGui.Checkbox("Hide Brio On Play  (Press 'Ctrl + B' to Stop Cutscene)", ref _cutsceneManager.CloseWindowsOnPlay);
+        
+            ImGui.Checkbox("###delay_Start", ref _cutsceneManager.DelayStart);
+            if(ImGui.IsItemHovered())
+                ImGui.SetTooltip("Start Delay");
+         
+            ImGui.SameLine();
+            ImGui.SetNextItemWidth(MaxItemWidth);
+    
+            using(ImRaii.Disabled(_cutsceneManager.DelayStart == false))
             {
-                ApplyBaseOverride();
+                ImGui.InputInt($"###delay_Start_Chek", ref _cutsceneManager.DelayTime, 0, 0);
             }
-            _cutsceneManager.StartPlayback();
+
+            ImGui.SameLine();
+            ImGui.SetCursorPosX(LabelStart);
+            ImGui.Text("Start Delay");
+
+            ImGui.Separator();
+          
+            ImGui.Checkbox("Start All Actors Animations On Play", ref _cutsceneManager.StartAllActorAnimationsOnPlay);
+        
+            using(ImRaii.Disabled(_cutsceneManager.StartAllActorAnimationsOnPlay == false))
+            {
+                ImGui.Checkbox("###animation_delay_Start", ref _cutsceneManager.DelayAnimationStart);
+                if(ImGui.IsItemHovered())
+                    ImGui.SetTooltip("Animation Start Delay");
+
+                ImGui.SameLine();
+                ImGui.SetNextItemWidth(MaxItemWidth);
+
+                using(ImRaii.Disabled(_cutsceneManager.DelayAnimationStart == false))
+                {
+                    ImGui.InputInt($"###animation_delay_Start_Chek", ref _cutsceneManager.DelayAnimationTime, 0, 0);
+                }
+
+                ImGui.SameLine();
+                ImGui.SetCursorPosX(LabelStart);
+                ImGui.Text("Animation Delay");
+            }
+
+            ImGui.Separator();
+
+            ImGui.Text("The 'Start Delay' & 'Animation Delay' time-scale is in Milliseconds!");
+            ImGui.Text("1000 Milliseconds = 1 second");
+
+            ImGui.Separator();
+
+            var enb = _cutsceneManager.IsRunning;
+
+            if(enb) ImGui.BeginDisabled();
+            if(ImGui.Button("Play"))
+            {
+                _cutsceneManager.StartPlayback();
+            }
+            if(enb) ImGui.EndDisabled();
+
+            ImGui.SameLine();
+
+            enb = _cutsceneManager.IsRunning;
+
+            if(!enb) ImGui.BeginDisabled();
+            if(ImGui.Button("Stop"))
+            {
+                _cutsceneManager.StopPlayback();
+            }
+            if(!enb) ImGui.EndDisabled();
         }
-        if(enb) ImGui.EndDisabled();
-
-        ImGui.SameLine();
-
-        enb = _cutsceneManager.IsRunning;
-
-        if(!enb) ImGui.BeginDisabled();
-        if(ImGui.Button("Stop"))
-        {
-            _cutsceneManager.StopPlayback();
-        }
-        if(!enb) ImGui.EndDisabled();
-
-        if(_cutsceneManager.CameraPath is null) ImGui.EndDisabled();
-
-        if(!_gPoseService.IsGPosing)
-            ImGui.EndDisabled();
     }
 
     //
 
-    private unsafe void Pause(bool unPauseOverride = false)
+    public static void ApplyBaseOverride(ActionTimelineCapability cap, bool resetSpeed = false)
     {
-        var drawObj = _capability.Character.Native()->GameObject.DrawObject;
-        if(drawObj == null)
+        if(cap.SlotedBaseAnimation == 0 || cap.IsPaused)
             return;
 
-        if(drawObj->Object.GetObjectType() != ObjectType.CharacterBase)
-            return;
+        if(resetSpeed || cap.SpeedMultiplier == 0)
+            cap.ResetOverallSpeedOverride();
 
-        var charaBase = (CharacterBase*)drawObj;
-
-        if(charaBase->Skeleton == null)
-            return;
-
-        var skeleton = charaBase->Skeleton;
-
-        var count = skeleton->PartialSkeletonCount;
-        if(count > 0)
-        {
-            for(var i = 0; count > i; i++)
-            {
-                var partial = &skeleton->PartialSkeletons[i];
-                var animatedSkele = partial->GetHavokAnimatedSkeleton(0);
-
-                if(animatedSkele == null)
-                    return;
-
-                var len = animatedSkele->AnimationControls.Length;
-                if(len > 0)
-                {
-                    for(var j = 0; len >= j; j++)
-                    {
-                        var control = animatedSkele->AnimationControls[j].Value;
-
-                        if(control == null)
-                            return;
-
-                        if(control->PlaybackSpeed == 0 || unPauseOverride)
-                        {
-                            Brio.Log.Warning("UnPaused " + j);
-                            control->PlaybackSpeed = 1;
-                            _isPaused = false;
-                        }
-                        else
-                        {
-                            Brio.Log.Warning("Paused " + j);
-                            control->PlaybackSpeed = 0;
-                            _isPaused = true;
-                        }
-                    }
-                }
-            }
-        }
+        cap.ApplyBaseOverride((ushort)cap.SlotedBaseAnimation, cap.DoBaseInterrupt);
     }
-
-    private void ApplyBaseOverride(bool resetSpeed = false)
+    public static void ApplyBlend(ActionTimelineCapability cap)
     {
-        if(_baseAnimation == 0 || _isPaused)
+        if(cap.SlotedBlendAnimation == 0 || cap.IsPaused)
             return;
 
-        if(resetSpeed || _capability.SpeedMultiplier == 0)
-            _capability.ResetOverallSpeedOverride();
-
-        _capability.ApplyBaseOverride((ushort)_baseAnimation, _baseInterrupt);
-    }
-
-    private void ApplyBlend()
-    {
-        if(_blendAnimation == 0 || _isPaused)
-            return;
-
-        _capability.BlendTimeline((ushort)_blendAnimation);
+        cap.BlendTimeline((ushort)cap.SlotedBlendAnimation);
     }
 }

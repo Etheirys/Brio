@@ -1,4 +1,6 @@
-﻿using Brio.Config;
+﻿using Brio.Capabilities.Core;
+using Brio.Config;
+using Brio.Entities;
 using Brio.Entities.Actor;
 using Brio.Game.Actor.Extensions;
 using Brio.Game.Posing;
@@ -6,6 +8,7 @@ using Brio.Game.Types;
 using Brio.UI.Widgets.Actor;
 using Dalamud.Game.ClientState.Objects.Types;
 using FFXIVClientStructs.FFXIV.Client.Game.Character;
+using FFXIVClientStructs.FFXIV.Client.Graphics.Scene;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
@@ -18,8 +21,13 @@ internal class ActionTimelineCapability : ActorCharacterCapability
     public unsafe float SpeedMultiplier => SpeedMultiplierOverride ?? Character.Native()->Timeline.OverallSpeed;
     public bool HasSpeedMultiplierOverride => SpeedMultiplierOverride.HasValue;
     public float? SpeedMultiplierOverride { get; private set; }
+    public bool IsPaused { get; private set; } = false;
 
-    private readonly Dictionary<ActionTimelineSlots, float> _actionTimelineSlotSpeedOverrides = [];
+    public bool HasOverride => (SlotedBlendAnimation != 0 || SlotedBaseAnimation != 0) && (HasBaseOverride || HasSpeedMultiplierOverride || DoBaseInterrupt is false || LipsOverride > 0);
+
+    public bool DoBaseInterrupt = true;
+    public int SlotedBaseAnimation = 0;
+    public int SlotedBlendAnimation = 0;
 
     public unsafe ushort LipsOverride
     {
@@ -27,20 +35,19 @@ internal class ActionTimelineCapability : ActorCharacterCapability
         set => Character.Native()->Timeline.SetLipsOverrideTimeline(value);
     }
 
+    private readonly Dictionary<ActionTimelineSlots, float> _actionTimelineSlotSpeedOverrides = [];
+    private OriginalBaseAnimation? _originalBaseAnimation = null;
     private bool _slotsDirty = false;
 
-    private OriginalBaseAnimation? _originalBaseAnimation = null;
-
-    public ActionTimelineCapability(ActorEntity parent, PhysicsService physicsService, ConfigurationService configService) : base(parent)
+    public ActionTimelineCapability(ActorEntity parent, EntityManager entityManager, PhysicsService physicsService, ConfigurationService configService) : base(parent)
     {
-        Widget = new ActionTimelineWidget(this, physicsService, configService);
+        Widget = new ActionTimelineWidget(this, entityManager, physicsService, configService);
     }
 
     public unsafe void SetOverallSpeedOverride(float speed)
     {
         SpeedMultiplierOverride = speed;
         Character.Native()->Timeline.OverallSpeed = speed;
-
     }
 
     public void ResetOverallSpeedOverride()
@@ -117,6 +124,29 @@ internal class ActionTimelineCapability : ActorCharacterCapability
     public unsafe void BlendTimeline(ushort actionTimeline)
     {
         Character.Native()->Timeline.TimelineSequencer.PlayTimeline(actionTimeline);
+    }
+
+    public void Stop()
+    {
+        if(HasBaseOverride)
+        {
+            ResetBaseOverride();
+            ResetOverallSpeedOverride();
+        }
+    }
+
+    public void Reset()
+    {
+        DoBaseInterrupt = true;
+
+        SlotedBaseAnimation = 0;
+        SlotedBlendAnimation = 0;
+        LipsOverride = 0;
+
+        IsPaused = false;
+
+        ResetBaseOverride();
+        ResetOverallSpeedOverride();
     }
 
     public override void Dispose()
