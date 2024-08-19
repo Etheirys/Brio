@@ -101,13 +101,15 @@ internal unsafe partial class PhysicsService : IDisposable
 
     public bool FreezeRevert()
     {
+        IsFreezeEnabled = false;
+
         using Process currentProcess = Process.GetCurrentProcess();
 
         WriteProcessMemory(currentProcess.Handle, freezeSkeletonPhysics1, originalFreezeBytes1, originalFreezeBytes1.Length, out _);
 
         WriteProcessMemory(currentProcess.Handle, freezeSkeletonPhysics2, originalFreezeBytes2, originalFreezeBytes2.Length, out _);
        
-        return IsFreezeEnabled = false;
+        return IsFreezeEnabled;
     }
 
     public bool FreezeEnable()
