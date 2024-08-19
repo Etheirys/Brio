@@ -31,7 +31,7 @@ public class Brio : IDalamudPlugin
 {
     public const string Name = "Brio";
 
-    private ServiceProvider? _services = null;
+    private static ServiceProvider? _services = null;
 
     public static IPluginLog Log { get; private set; } = null!;
     public static IFramework Framework { get; private set; } = null!;
@@ -61,18 +61,18 @@ public class Brio : IDalamudPlugin
                 {
                     if(service.Lifetime == ServiceLifetime.Singleton)
                     {
-                        Brio.Log.Debug($"Initializing {service.ServiceType}...");
+                        Log.Debug($"Initializing {service.ServiceType}...");
                         _services.GetRequiredService(service.ServiceType);
                     }
                 }
 
                 // Setup default entities
-                Brio.Log.Debug($"Setting up default entitites...");
+                Log.Debug($"Setting up default entitites...");
                 _services.GetRequiredService<EntityManager>().SetupDefaultEntities();
                 _services.GetRequiredService<EntityActorManager>().AttachContainer();
 
                 // Trigger GPose events to ensure the plugin is in the correct state
-                Brio.Log.Debug($"Triggering initial GPose state...");
+                Log.Debug($"Triggering initial GPose state...");
                 _services.GetRequiredService<GPoseService>().TriggerGPoseChange();
 
                 Log.Info($"Started {Name} in {stopwatch.ElapsedMilliseconds}ms");
@@ -86,7 +86,7 @@ public class Brio : IDalamudPlugin
         }, delayTicks: 2); // TODO: Why do we need to wait several frames for some users?
     }
 
-    private IServiceCollection SetupServices(DalamudServices dalamudServices)
+    private static ServiceCollection SetupServices(DalamudServices dalamudServices)
     {
         ServiceCollection serviceCollection = new();
 
@@ -181,6 +181,24 @@ public class Brio : IDalamudPlugin
         serviceCollection.AddSingleton<PosingGraphicalWindow>();
 
         return serviceCollection;
+    }
+
+    public static bool TryGetService<T>(out T Tvalue) where T : notnull
+    {
+        if(_services is not null)
+        {
+            try
+            {
+                Tvalue = _services.GetRequiredService<T>();
+                return true;
+            }
+            catch
+            {
+            }
+        }
+
+        Tvalue = default!;
+        return false;
     }
 
     public static void NotifyError(string message)
