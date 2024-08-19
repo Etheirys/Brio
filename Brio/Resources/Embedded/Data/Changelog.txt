@@ -1,7 +1,13 @@
 
 To open this window again click `Information` on the Scene Manager then -> `View the Changelog`
 --------------------------------------------------------------------------------
-	 ---> Brio, Version 0.4.0 <--- 
+	 ---> Brio, Version 0.4.0.1 <--- 
+--------------------------------------------------------------------------------
+
+- Fix a crash when leaving GPose with Freeze Physics Enabled
+
+--------------------------------------------------------------------------------
+	 --- Brio, Version 0.4.0 --- 
 --------------------------------------------------------------------------------
 
 - Updated the `Advanced Pose` Window
@@ -94,9 +100,10 @@ You can fix this by rotating the "Head" bone manually
 
 --------------------------------------------------------------------------------
 
-A Big Thank you to (Night Song), (Yasumi) & (Alvar Valo) for their support on Kofi!
+A Big Thank you to (Night Song), (Alvar Valo), (Sufferhymn) & (Yasumi) for their support on Kofi!
 
-Also, Thank you, to: (@Yuki-Codes), (@danma3x), (@snaeling), (@WorstAquaPlayer) & (@gris-fuego),
+Also, Thank you, to: (@Yuki-Codes), (@danma3x), (@snaeling), (@WorstAquaPlayer),
+(@Caraxi) & (@gris-fuego),
 For their contributions to Brio!
 
 --------------------------------------------------------------------------------
