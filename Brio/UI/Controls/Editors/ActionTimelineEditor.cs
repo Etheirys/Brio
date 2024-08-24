@@ -3,6 +3,7 @@ using Brio.Config;
 using Brio.Entities;
 using Brio.Entities.Core;
 using Brio.Game.Actor.Extensions;
+using Brio.Game.Camera;
 using Brio.Game.Cutscene;
 using Brio.Game.Cutscene.Files;
 using Brio.Game.GPose;
@@ -508,6 +509,16 @@ internal class ActionTimelineEditor(CutsceneManager cutsceneManager, GPoseServic
 
         using(ImRaii.Disabled(string.IsNullOrEmpty(cameraPath)))
         {
+            ImGui.Checkbox("Enable FOV", ref _cutsceneManager.CameraSettings.EnableFOV);
+          
+            ImGui.Separator();
+
+            ImGui.Text("Disabling FOV will make for a less accurate Camera, but might");
+            ImGui.Text("provide for an easer way to support more character sizes without");
+            ImGui.Text("changing the Camera's Scale & Offset!");
+
+            ImGui.Separator();
+
             ImGui.InputFloat3("Camera Scale", ref _cutsceneManager.CameraSettings.Scale);
             ImGui.InputFloat3("Camera Offset", ref _cutsceneManager.CameraSettings.Offset);
 
