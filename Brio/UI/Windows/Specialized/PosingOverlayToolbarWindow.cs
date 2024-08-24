@@ -140,11 +140,14 @@ internal class PosingOverlayToolbarWindow : Window
 
         ImGui.Separator();
 
+        float buttonOperationSize = ImGui.GetTextLineHeight() * 2.4f;
+
+
         using(ImRaii.PushColor(ImGuiCol.Text, _posingService.Operation == PosingOperation.Translate ? UIConstants.ToggleButtonActive : UIConstants.ToggleButtonInactive))
         {
             using(ImRaii.PushFont(UiBuilder.IconFont))
             {
-                if(ImGui.Button($"{FontAwesomeIcon.ArrowsUpDownLeftRight.ToIconString()}###select_position", new Vector2(buttonSize)) || InputService.IsKeyBindDown(KeyBindEvents.Posing_Translate))
+                if(ImGui.Button($"{FontAwesomeIcon.ArrowsUpDownLeftRight.ToIconString()}###select_position", new Vector2(buttonOperationSize)) || InputService.IsKeyBindDown(KeyBindEvents.Posing_Translate))
                     _posingService.Operation = PosingOperation.Translate;
             }
         }
@@ -158,7 +161,7 @@ internal class PosingOverlayToolbarWindow : Window
         {
             using(ImRaii.PushFont(UiBuilder.IconFont))
             {
-                if(ImGui.Button($"{FontAwesomeIcon.ArrowsSpin.ToIconString()}###select_rotate", new Vector2(buttonSize)) || InputService.IsKeyBindDown(KeyBindEvents.Posing_Rotate))
+                if(ImGui.Button($"{FontAwesomeIcon.ArrowsSpin.ToIconString()}###select_rotate", new Vector2(buttonOperationSize)) || InputService.IsKeyBindDown(KeyBindEvents.Posing_Rotate))
                     _posingService.Operation = PosingOperation.Rotate;
             }
         }
@@ -167,21 +170,33 @@ internal class PosingOverlayToolbarWindow : Window
 
         ImGui.SameLine();
 
-
         using(ImRaii.PushColor(ImGuiCol.Text, _posingService.Operation == PosingOperation.Scale ? UIConstants.ToggleButtonActive : UIConstants.ToggleButtonInactive))
         {
             using(ImRaii.PushFont(UiBuilder.IconFont))
             {
-                if(ImGui.Button($"{FontAwesomeIcon.ExpandAlt.ToIconString()}###select_scale", new Vector2(buttonSize)) || InputService.IsKeyBindDown(KeyBindEvents.Posing_Scale))
+                if(ImGui.Button($"{FontAwesomeIcon.ExpandAlt.ToIconString()}###select_scale", new Vector2(buttonOperationSize)) || InputService.IsKeyBindDown(KeyBindEvents.Posing_Scale))
                     _posingService.Operation = PosingOperation.Scale;
             }
         }
         if(ImGui.IsItemHovered())
             ImGui.SetTooltip("Scale");
+     
+        ImGui.SameLine();
+
+        using(ImRaii.PushColor(ImGuiCol.Text, _posingService.Operation == PosingOperation.Universal ? UIConstants.ToggleButtonActive : UIConstants.ToggleButtonInactive))
+        {
+            using(ImRaii.PushFont(UiBuilder.IconFont))
+            {
+                if(ImGui.Button($"{FontAwesomeIcon.Cubes.ToIconString()}###select_universal", new Vector2(buttonOperationSize)) || InputService.IsKeyBindDown(KeyBindEvents.Posing_Universal))
+                {
+                    _posingService.Operation = PosingOperation.Universal;
+                }
+            }
+        }
+        if(ImGui.IsItemHovered())
+            ImGui.SetTooltip("Universal");
 
         ImGui.Separator();
-
-
 
         using(ImRaii.PushFont(UiBuilder.IconFont))
         {

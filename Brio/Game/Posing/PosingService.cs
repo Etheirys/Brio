@@ -9,6 +9,8 @@ internal class PosingService
 
     public PosingCoordinateMode CoordinateMode { get; set; } = PosingCoordinateMode.Local;
 
+    public bool UniversalGizmoOperation { get; set; } = false;
+
     public BoneCategories BoneCategories { get; } = new();
 
     public BoneFilter OverlayFilter { get; }
@@ -48,7 +50,8 @@ internal enum PosingOperation
 {
     Translate,
     Rotate,
-    Scale
+    Scale,
+    Universal
 }
 
 internal static class PosingExtensions
@@ -65,6 +68,7 @@ internal static class PosingExtensions
         PosingOperation.Translate => OPERATION.TRANSLATE,
         PosingOperation.Rotate => OPERATION.ROTATE,
         PosingOperation.Scale => OPERATION.SCALE,
+        PosingOperation.Universal => OPERATION.TRANSLATE | OPERATION.ROTATE | OPERATION.SCALE,
         _ => OPERATION.ROTATE
     };
 }

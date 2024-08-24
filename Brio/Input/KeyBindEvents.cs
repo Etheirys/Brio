@@ -19,5 +19,6 @@ internal enum KeyBindEvents
     Posing_Redo,
     Posing_Translate,
     Posing_Rotate,
-    Posing_Scale
+    Posing_Scale,
+    Posing_Universal
 }
