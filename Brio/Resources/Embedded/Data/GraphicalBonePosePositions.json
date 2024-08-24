@@ -323,6 +323,16 @@
           "Name": "j_f_shoho_l",
           "Position": "310, 510"
         },
+
+        {
+          "Name": "j_f_hagukiup",
+          "Position": "310, 620"
+        },
+        {
+          "Name": "j_f_hagukidn",
+          "Position": "310, 660"
+        },
+
         {
           "Name": "j_f_uhana",
           "Position": "458.5, 294"
@@ -402,6 +412,15 @@
           "Name": "j_f_mmayu_l",
           "Position": "400, 457"
         },
+        {
+          "Name": "j_f_hagukiup",
+          "Position": "310, 970"
+        },
+        {
+          "Name": "j_f_hagukidn",
+          "Position": "310, 1010"
+        },
+
         {
           "Name": "j_f_miken_01_l",
           "Position": "467, 482"
@@ -539,6 +558,15 @@
           "Name": "j_f_eye_l",
           "Position": "400, 683"
         },
+        {
+          "Name": "j_f_hagukiup",
+          "Position": "310, 960"
+        },
+        {
+          "Name": "j_f_hagukidn",
+          "Position": "310, 1000"
+        },
+
         {
           "Name": "j_f_mabdn_01_l",
           "Position": "400, 727"
@@ -712,6 +740,15 @@
           "Name": "j_f_mabup_01_l",
           "Position": "469, 543"
         },
+        {
+          "Name": "j_f_hagukiup",
+          "Position": "310, 1230"
+        },
+        {
+          "Name": "j_f_hagukidn",
+          "Position": "310, 1270"
+        },
+
         {
           "Name": "j_f_eye_l",
           "Position": "469, 620"
