@@ -42,7 +42,7 @@ internal class EntityHierarchyView(EntityManager entityManager)
     {
         bool isSelected = false;
         bool hasChildren = false;
-    
+
         if(entity.Children.Count > 0)
             hasChildren = true;
         if(selectedEntityId != null && entity.Id.Equals(selectedEntityId))
@@ -52,20 +52,18 @@ internal class EntityHierarchyView(EntityManager entityManager)
         {
             using(ImRaii.PushColor(ImGuiCol.Button, 0))
             {
+                var invsButtonPos = ImGui.GetCursorPos();
+
+                if(ImGui.Button($"###{entity.Id}_invs_button", new(buttonWidth, 0)))
                 {
-                    var invsButtonPos = ImGui.GetCursorPos();
-
-                    if(ImGui.Button($"###{entity.Id}_invs_button", new(buttonWidth, 0)))
-                    {
-                        Select(entity);
-                    }
-                    if(ImGui.IsItemClicked(ImGuiMouseButton.Right))
-                    {
-                        ImGui.OpenPopup($"context_popup");
-                    }
-
-                    ImGui.SetCursorPos(invsButtonPos);
+                    Select(entity);
                 }
+                if(ImGui.IsItemClicked(ImGuiMouseButton.Right))
+                {
+                    ImGui.OpenPopup($"context_popup{entity.Id}");
+                }
+
+                ImGui.SetCursorPos(invsButtonPos);
             }
 
             if(lastOffset > 0)
@@ -80,29 +78,31 @@ internal class EntityHierarchyView(EntityManager entityManager)
             {
                 using(ImRaii.Disabled(true))
                 {
-                    ImGui.Button($"###{entity.Id}");
+                    ImGui.Button($"###tab_{entity.Id}");
                 }
             }
         }
 
         DrawNode(entity);
 
+        using(var popup = ImRaii.Popup($"context_popup{entity.Id}"))
+        {
+            if(popup.Success)
+            {
+                foreach(var v in entity.Capabilities)
+                {
+                    if(v.Widget is not null && v.Widget.Flags.HasFlag(WidgetFlags.DrawPopup))
+                    {
+                        v.Widget.DrawPopup();
+                    }
+                }
+            }
+        }
+
         if(hasChildren)
         {
             foreach(var child in entity.Children)
                 DrawEntity(child, selectedEntityId, lastOffset == 0 ? 3 : lastOffset);
-        }
-
-        using var popup = ImRaii.Popup("context_popup");
-        if(popup.Success)
-        {
-            foreach(var v in entity.Capabilities)
-            {
-                if(v.Widget is not null && v.Widget.Flags.HasFlag(WidgetFlags.DrawPopup))
-                {
-                    v.Widget.DrawPopup();
-                }
-            }
         }
     }
 
