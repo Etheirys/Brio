@@ -95,6 +95,7 @@ internal class ActorAppearanceService : IDisposable
         bool needsRedraw = forceRedraw;
         bool forceHeadToggles = false;
         bool glamourerReset = false;
+        bool glamourerUnlocked = false;
 
         unsafe
         {
@@ -122,10 +123,13 @@ internal class ActorAppearanceService : IDisposable
                 {
                     forceHeadToggles = true;
 
+                    if(!existingAppearance.Customize.Equals(appearance.Customize))
+                        glamourerReset |= true;
+
                     if(_glamourerService.CheckForLock(character))
                     {
                         if(!existingAppearance.Customize.Equals(appearance.Customize) || !existingAppearance.Equipment.Equals(appearance.Equipment))
-                            glamourerReset |= true;
+                            glamourerUnlocked |= true;
                     }
 
                     if
@@ -237,9 +241,9 @@ internal class ActorAppearanceService : IDisposable
         }
 
        
-        if(glamourerReset)
+        if(glamourerUnlocked)
         {
-            await _glamourerService.RevertCharacter(character);
+            await _glamourerService.UnlockAndRevertCharacter(character);
 
             needsRedraw = true;
         }
@@ -249,8 +253,11 @@ internal class ActorAppearanceService : IDisposable
         if(needsRedraw)
             redrawResult = await _redrawService.RedrawActor(character);
 
+        if(glamourerReset)
+            await _glamourerService.RevertCharacter(character);
+
         unsafe
-        {
+            {
 
             var native = character.Native();
 

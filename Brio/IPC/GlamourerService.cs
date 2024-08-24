@@ -107,18 +107,41 @@ internal class GlamourerService : IDisposable
         return success.Item1 == Glamourer.Api.Enums.GlamourerApiEc.InvalidKey;
     }
 
-    public Task RevertCharacter(ICharacter? character)
+    public Task UnlockAndRevertCharacter(ICharacter? character)
     {
         if(IsGlamourerAvailable == false || character is null)
             return Task.CompletedTask;
 
-        Brio.Log.Warning("Starting glamourer revert...");
+        Brio.Log.Warning("Starting glamourer UnlockAndRevert...");
 
         var success = _glamourerRevertCharacter.Invoke(character!.ObjectIndex, UnLockCode);
 
         if(success == Glamourer.Api.Enums.GlamourerApiEc.InvalidKey)
         {
             Brio.Log.Fatal("Glamourer revert failed! Please report this to the Brio Devs!");
+            return Task.CompletedTask;
+        }
+
+        return _framework.RunOnTick(async () =>
+        {
+            await _redrawService.WaitForDrawing(character!);
+            Brio.Log.Debug("Glamourer revert complete");
+        }, delayTicks: 5);
+
+    }
+
+    public Task RevertCharacter(ICharacter? character)
+    {
+        if(IsGlamourerAvailable == false || character is null)
+            return Task.CompletedTask;
+
+        Brio.Log.Warning("Starting glamourer Revert...");
+
+        var success = _glamourerRevertCharacter.Invoke(character!.ObjectIndex);
+
+        if(success == Glamourer.Api.Enums.GlamourerApiEc.InvalidKey)
+        {
+            UnlockAndRevertCharacter(character);
             return Task.CompletedTask;
         }
 
