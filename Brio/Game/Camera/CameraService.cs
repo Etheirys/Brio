@@ -64,8 +64,6 @@ internal unsafe class CameraService : IDisposable
         _cameraMatrixLoad = Marshal.GetDelegateForFunctionPointer<CameraMatrixLoadDelegate>(cameraMatrixLoadAddr);
     }
 
-    private bool _cutsceneEnded = false;
-    private bool _firstCutsceneFrame = true;
     private nint CameraUpdateDetour(BrioCamera* camera)
     {
         var result = _cameraUpdateHook.Original(camera);
