@@ -1,7 +1,32 @@
 
 To open this window again click `Information` on the Scene Manager then -> `View the Changelog`
 --------------------------------------------------------------------------------
-	 ---> Brio, Version 0.4.0.3 <--- 
+	 ---> Brio, Version 0.4.1. <--- 
+--------------------------------------------------------------------------------
+
+- Added a `Universal Gizmo` mode to the `Brio Overlay` Gizmo!
+- Added `Upper & Lower Teeth` bones to `Advanced Pose` window
+- Added `IVCS Buttock` bones to `Advanced Pose` window
+
+- Added a `Enable FOV` setting to the `Cutscene Control`
+- Added a `Delimit Speed` setting to the `Advanced Animation` Window
+   - With this enabled you can make the animation speed go in reverse or very very fast! 
+
+- Fixed an issue that caused incorrect items to show up when you right-clicked an item in the `Entity Hierarchy`
+- Fixed `Glamourer` desync issues
+- Fixed FOV being high when playing a XAT Cutscene(`.xcp`) file
+
+- Made more micro-optimizations & more stability improvements
+
+ --  Known Issues -- 
+
+- When importing a pose as Expression the head does not rotate properly,
+   - You can fix this by rotating the "Head" bone manually
+- Not all of the new bones are named yet
+- The Library does not have an option to `Import as Expression`
+
+--------------------------------------------------------------------------------
+	 --- Brio, Version 0.4.0.3 --- 
 --------------------------------------------------------------------------------
 
 - Fixed being unable to change an Actor's Appearance if you don't have Glamourer installed
@@ -50,14 +75,6 @@ To open this window again click `Information` on the Scene Manager then -> `View
 - Fixed an issue with MCDFs
 - Fixed the margins on the `Rename Actor` Popup 
 
- --  Known Issues -- 
-
-- When importing a pose as Expression the head does not rotate properly,
-   - You can fix this by rotating the "Head" bone manually
-- Not all of the new bones are named yet
-- The Library does not have an option to `Import as Expression`
-- Right clicking on an item in the `Entity Hierarchy` gives a very long list of items
-
 --------------------------------------------------------------------------------
 	 --- Brio, Version 0.3.3 --- 
 --------------------------------------------------------------------------------
@@ -102,10 +119,10 @@ You can fix this by rotating the "Head" bone manually
 
 --------------------------------------------------------------------------------
 
-A Big Thank you to (Night Song), (Alvar Valo), (Sufferhymn) & (Yasumi) for their support on Kofi!
+A Big Thank you to (Sufferhymn), (Night Song), (Alvar Valo), (YikesXD), (Yasumi) & (Selitha), for their 
+support on Kofi!
 
-Also, Thank you, to: (@Yuki-Codes), (@danma3x), (@snaeling), (@WorstAquaPlayer),
-(@Caraxi) & (@gris-fuego),
-For their contributions to Brio!
+Also, Thank you, to: (@Yuki-Codes), (@danma3x), (@snaeling), (@WorstAquaPlayer), (@Caraxi) 
+& (@gris-fuego), for their contributions to Brio!
 
 --------------------------------------------------------------------------------
