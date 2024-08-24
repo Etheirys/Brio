@@ -31,15 +31,16 @@ internal class ActionTimelineEditor(CutsceneManager cutsceneManager, GPoseServic
     private readonly ConfigurationService _configService = configService;
     private readonly EntityManager _entityManager = entityManager;
 
-    private static readonly ActionTimelineSelector _globalTimelineSelector = new("global_timeline_selector");
     private static float MaxItemWidth => ImGui.GetContentRegionAvail().X - ImGui.CalcTextSize("XXXXXXXXXXXXXXXXXX").X;
     private static float LabelStart => MaxItemWidth + ImGui.GetCursorPosX() + (ImGui.GetStyle().FramePadding.X * 2f);
 
-    public bool _startAnimationOnSelect = true;
+    private static readonly float _hederButtonSize = ImGui.CalcTextSize("#########").X + 28;
+    private static readonly ActionTimelineSelector _globalTimelineSelector = new("global_timeline_selector");
 
-    public string cameraPath = string.Empty;
+    private string _cameraPath = string.Empty;
     private ActionTimelineCapability _capability = null!;
-    public float hederButtonSize = ImGui.CalcTextSize("#########").X + 28;
+    private bool _startAnimationOnSelect = true;
+    private bool _delimitSpeed = false;
 
     public void Draw(bool drawAdvanced, ActionTimelineCapability capability)
     {
@@ -51,7 +52,7 @@ internal class ActionTimelineEditor(CutsceneManager cutsceneManager, GPoseServic
 
         DrawBaseOverride();
         DrawBlend();
-        DrawOverallSpeed();
+        DrawOverallSpeed(drawAdvanced);
 
         if(drawAdvanced)
         {
@@ -83,7 +84,7 @@ internal class ActionTimelineEditor(CutsceneManager cutsceneManager, GPoseServic
 
         ImGui.SameLine();
 
-        ImBrio.RightAlign(hederButtonSize, 1);
+        ImBrio.RightAlign(_hederButtonSize, 1);
 
         if(ImGui.Button("Actors       "))
         {
@@ -107,7 +108,7 @@ internal class ActionTimelineEditor(CutsceneManager cutsceneManager, GPoseServic
             _capability.Reset();
             _cutsceneManager.StopPlayback();
             _cutsceneManager.CameraPath = null;
-            cameraPath = string.Empty;
+            _cameraPath = string.Empty;
         }
 
         using var popup = ImRaii.Popup("animation_control");
@@ -441,18 +442,29 @@ internal class ActionTimelineEditor(CutsceneManager cutsceneManager, GPoseServic
         }
     }
 
-    private void DrawOverallSpeed()
+    private void DrawOverallSpeed(bool drawAdvanced)
     {
         float existingSpeed = _capability.SpeedMultiplier;
         float newSpeed = existingSpeed;
-
+      
         const string speedLabel = "Speed";
-        ImGui.SetNextItemWidth(MaxItemWidth);
-        if(ImGui.SliderFloat($"###speed_slider", ref newSpeed, 0f, 5f))
+        ImGui.SetNextItemWidth(drawAdvanced ? MaxItemWidth - ImGui.CalcTextSize("XXXX").X : MaxItemWidth);
+        if(ImGui.SliderFloat($"###speed_slider", ref newSpeed, _delimitSpeed ? -5f : 0f, _delimitSpeed ? 10f : 5f))
             _capability.SetOverallSpeedOverride(newSpeed);
+    
+        if(drawAdvanced)
+        {
+            ImGui.SameLine();
+            if(ImGui.Checkbox("###delimit_speed", ref _delimitSpeed))
+                if(_delimitSpeed == false)
+                {
+                    _capability.ResetOverallSpeedOverride();
+                }
+            if(ImGui.IsItemHovered())
+                ImGui.SetTooltip("Delimit Speed");
+        }
 
         ImGui.SameLine();
-
         ImGui.SetCursorPosX(LabelStart);
         ImGui.Text(speedLabel);
 
@@ -463,7 +475,7 @@ internal class ActionTimelineEditor(CutsceneManager cutsceneManager, GPoseServic
 
         ImGui.SameLine();
 
-        if(ImBrio.FontIconButtonRight("speed_pause", FontAwesomeIcon.PauseCircle, 2, _capability.SpeedMultiplier > 0 ? "Un-Pause" : "Paused", _capability.SpeedMultiplier > 0f))
+        if(ImBrio.FontIconButtonRight("speed_pause", FontAwesomeIcon.PauseCircle, 2, "Pause", _capability.SpeedMultiplier != 0f))
         {
             _capability.SetOverallSpeedOverride(0f);
         }
@@ -475,7 +487,7 @@ internal class ActionTimelineEditor(CutsceneManager cutsceneManager, GPoseServic
 
         ImGui.SameLine();
 
-        ImGui.InputText(string.Empty, ref cameraPath, 260, ImGuiInputTextFlags.ReadOnly);
+        ImGui.InputText(string.Empty, ref _cameraPath, 260, ImGuiInputTextFlags.ReadOnly);
 
         ImGui.SameLine();
 
@@ -486,20 +498,20 @@ internal class ActionTimelineEditor(CutsceneManager cutsceneManager, GPoseServic
                 {
                     if(success)
                     {
-                        cameraPath = path[0];
+                        _cameraPath = path[0];
 
-                        string? folderPath = Path.GetDirectoryName(cameraPath);
+                        string? folderPath = Path.GetDirectoryName(_cameraPath);
                         if(folderPath is not null)
                         {
                             _configService.Configuration.LastXATPath = folderPath;
                             _configService.Save();
 
-                            _cutsceneManager.CameraPath = new XATCameraPathFile(new BinaryReader(File.OpenRead(cameraPath)));
+                            _cutsceneManager.CameraPath = new XATCameraPathFile(new BinaryReader(File.OpenRead(_cameraPath)));
                         }
                     }
                     else
                     {
-                        cameraPath = string.Empty;
+                        _cameraPath = string.Empty;
                         _cutsceneManager.CameraPath = null;
                     }
                 }, 1, _configService.Configuration.LastXATPath, false);
@@ -507,7 +519,7 @@ internal class ActionTimelineEditor(CutsceneManager cutsceneManager, GPoseServic
 
         ImGui.Separator();
 
-        using(ImRaii.Disabled(string.IsNullOrEmpty(cameraPath)))
+        using(ImRaii.Disabled(string.IsNullOrEmpty(_cameraPath)))
         {
             ImGui.Checkbox("Enable FOV", ref _cutsceneManager.CameraSettings.EnableFOV);
           
