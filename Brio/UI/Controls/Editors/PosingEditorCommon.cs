@@ -174,27 +174,21 @@ internal static class PosingEditorCommon
                 var ik = bonePose.DefaultIK;
                 bool enabled = ik.Enabled && BrioStyle.EnableStyle;
 
-                if(enabled)
+                using(ImRaii.PushColor(ImGuiCol.Button, UIConstants.GizmoRed, enabled))
                 {
-                    ImGui.PushStyleColor(ImGuiCol.Button, UIConstants.GizmoRed);
-                }
+                    if(ImGui.Button("IK", buttonSize))
+                        ImGui.OpenPopup("transform_ik_popup");
 
-                if(ImGui.Button("IK", buttonSize))
-                    ImGui.OpenPopup("transform_ik_popup");
-
-                if(ImGui.IsItemHovered())
-                    ImGui.SetTooltip("Inverse Kinematics");
-
-                if(enabled)
-                {
-                    ImGui.PopStyleColor();
+                    if(ImGui.IsItemHovered())
+                        ImGui.SetTooltip("Inverse Kinematics");
                 }
 
                 using var popup = ImRaii.Popup("transform_ik_popup");
-
-                if(popup.Success && bonePose != null)
                 {
-                    BoneIKEditor.Draw(bonePose, posing);
+                    if(popup.Success && bonePose != null)
+                    {
+                        BoneIKEditor.Draw(bonePose, posing);
+                    }
                 }
 
                 return;

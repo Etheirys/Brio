@@ -362,7 +362,7 @@ internal class PosingOverlayToolbarWindow : Window
         }
     }
 
-    private void DrawHeaderButtons()
+    private static void DrawHeaderButtons()
     {
         var initialPos = ImGui.GetCursorPos();
         ImGui.PushClipRect(ImGui.GetWindowPos(), ImGui.GetWindowPos() + ImGui.GetWindowSize(), false);

@@ -1,16 +1,18 @@
 ﻿using Brio.Config;
-using Brio.UI.Controls.Selectors;
 using Brio.UI.Controls.Stateless;
 using Dalamud.Interface;
 using Dalamud.Interface.Utility.Raii;
 using ImGuiNET;
 using System;
 using System.IO;
+using System.Numerics;
 using static Brio.Config.LibraryConfiguration;
 
 namespace Brio.UI.Controls.Editors;
 internal static class LibrarySourcesEditor
 {
+    static Vector2 MinimumSize = new(400, 95);
+
     public static bool HasSourcesChanged = true;
 
     static SourceConfigBase? selectedItem;
@@ -33,32 +35,32 @@ internal static class LibrarySourcesEditor
             paneHeight -= heightPadding.Value;
         }
 
-        if(ImGui.BeginChild("library_sources_pane", new(-1, paneHeight), true))
+        using(var child = ImRaii.Child("library_sources_pane", new(-1, paneHeight), true))
         {
-            if(label is not null)
+            if(child.Success)
             {
-                ImGui.Text(label);
-            }
-
-            int index = 0;
-            foreach(SourceConfigBase sourceConfig in config.GetAll())
-            {
-                bool isItemSelected = selectedItem == sourceConfig;
-
-                DrawSourceItem(index, sourceConfig, ref isItemSelected);
-
-                if(isItemSelected && sourceConfig is not null)
+                if(label is not null)
                 {
-                    selectedItem = sourceConfig;
+                    ImGui.Text(label);
                 }
 
-                index++;
-            }
+                int index = 0;
+                foreach(SourceConfigBase sourceConfig in config.GetAll())
+                {
+                    bool isItemSelected = selectedItem == sourceConfig;
 
-            ImGui.EndChild();
+                    DrawSourceItem(index, sourceConfig, ref isItemSelected);
+
+                    if(isItemSelected && sourceConfig is not null)
+                    {
+                        selectedItem = sourceConfig;
+                    }
+
+                    index++;
+                }
+            }
         }
 
-      
         using(ImRaii.Disabled(selectedItem is null || selectedItem.CanEdit == false))
         {
             // Remove Item
@@ -119,7 +121,7 @@ internal static class LibrarySourcesEditor
                 if(ImGui.IsItemHovered())
                     ImGui.SetTooltip("Edit the selected source");
 
-            }     
+            }
         }
 
 
@@ -159,9 +161,13 @@ internal static class LibrarySourcesEditor
                 ImGui.OpenPopup("###settings_edit_source");
             }
 
-            if(ImGui.BeginPopupModal("###settings_edit_source", ref isItemEditorOpen,
-                ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoTitleBar))
+            ImGui.SetNextWindowSizeConstraints(MinimumSize, MinimumSize);
+            ImGui.SetNextWindowPos(new Vector2((ImGui.GetIO().DisplaySize.X / 2) - (MinimumSize.X / 2), (ImGui.GetIO().DisplaySize.Y / 2) - (MinimumSize.Y / 2)));
+
+            using(var popup = ImRaii.PopupModal("###settings_edit_source", ref isItemEditorOpen, ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoTitleBar))
             {
+                if(popup.Success == false)
+                    return;
 
                 string name = selectedItem.Name ?? string.Empty;
                 if(ImGui.InputText("Name###settings_edit_source_name", ref name, 80))
@@ -201,7 +207,6 @@ internal static class LibrarySourcesEditor
                             },
                             path,
                             true);
-
                     }
 
                     ImGui.SetCursorPosY(ImGui.GetCursorPosY() + ImBrio.GetRemainingHeight() - ImBrio.GetLineHeight());
@@ -252,19 +257,17 @@ internal static class LibrarySourcesEditor
                 {
                     ClosePopUp();
                 }
+            }
 
-                void ClosePopUp()
-                {
-                    isEditing = false;
-                    isItemEditorOpen = false;
-                    isNewItem = false;
+            static void ClosePopUp()
+            {
+                isEditing = false;
+                isItemEditorOpen = false;
+                isNewItem = false;
 
-                    selectedItem = null;
+                selectedItem = null;
 
-                    ImGui.CloseCurrentPopup();
-                }
-
-                ImGui.EndPopup();
+                ImGui.CloseCurrentPopup();
             }
         }
     }

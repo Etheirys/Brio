@@ -113,9 +113,10 @@ internal static partial class ImBrio
 
     public static bool Button(string label, FontAwesomeIcon icon, Vector2 size, string hoverText = "")
     {
+        bool clicked;
+
         // for consistency, hard-code this
         float iconWidth = 40;
-
         float textWidth = ImGui.CalcTextSize(label).X;
         float innerWidth = iconWidth + ImGui.GetStyle().ItemInnerSpacing.X + textWidth;
         float neededWidth = innerWidth + (ImGui.GetStyle().FramePadding.X * 2);
@@ -131,29 +132,28 @@ internal static partial class ImBrio
 
         float iconR = iconWidth + ImGui.GetStyle().ItemInnerSpacing.X;
         float textOffset = iconR / innerWidth;
-        ImGui.PushStyleVar(ImGuiStyleVar.ButtonTextAlign, new Vector2(textOffset, 0.5f));
-
-        Vector2 startPos = ImGui.GetCursorPos();
-        bool clicked = ImGui.Button(label, size);
-        Vector2 endPos = ImGui.GetCursorPos();
-
-        if(string.IsNullOrEmpty(hoverText) is false)
+        using(ImRaii.PushStyle(ImGuiStyleVar.ButtonTextAlign, new Vector2(textOffset, 0.5f)))
         {
-            if(ImGui.IsItemHovered())
-                ImGui.SetTooltip(hoverText);
+            Vector2 startPos = ImGui.GetCursorPos();
+            clicked = ImGui.Button(label, size);
+            Vector2 endPos = ImGui.GetCursorPos();
+
+            if(string.IsNullOrEmpty(hoverText) is false)
+            {
+                if(ImGui.IsItemHovered())
+                    ImGui.SetTooltip(hoverText);
+            }
+
+            ImGui.SetCursorPos(startPos + ImGui.GetStyle().FramePadding);
+            using(ImRaii.PushFont(UiBuilder.IconFont))
+            {
+                ImGui.Text(icon.ToIconString());
+            }
+
+            ImGui.SetCursorPos(startPos);
+            ImGui.InvisibleButton("##dummy", size);
+            ImGui.SetCursorPos(endPos);
         }
-
-        ImGui.SetCursorPos(startPos + ImGui.GetStyle().FramePadding);
-        using(ImRaii.PushFont(UiBuilder.IconFont))
-        {
-            ImGui.Text(icon.ToIconString());
-        }
-
-        ImGui.SetCursorPos(startPos);
-        ImGui.InvisibleButton("##dummy", size);
-        ImGui.SetCursorPos(endPos);
-
-        ImGui.PopStyleVar();
 
         return clicked;
     }

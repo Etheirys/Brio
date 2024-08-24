@@ -224,9 +224,9 @@ internal class PosingOverlayWindow : Window, IDisposable
                     ImGui.Selectable($"{hover.Item.DisplayName}###selectable_{hover.GetHashCode()}", hover.CurrentlySelected);
                     ImGui.EndDisabled();
                 }
-            }
 
-            ImGui.End();
+                ImGui.End();
+            }
 
             var wheel = ImGui.GetIO().MouseWheel;
             if(wheel != 0)
@@ -289,7 +289,7 @@ internal class PosingOverlayWindow : Window, IDisposable
         }
     }
 
-    private void DrawSkeletonLines(OverlayUIState uiState, PosingConfiguration config, List<ClickableItem> clickables)
+    private static void DrawSkeletonLines(OverlayUIState uiState, PosingConfiguration config, List<ClickableItem> clickables)
     {
         if(!uiState.DrawSkeletonLines)
             return;

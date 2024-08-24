@@ -148,7 +148,7 @@ internal class PosingGraphicalWindow : Window, IDisposable
         posing.LastHover = posing.Hover;
     }
 
-    private string[] _bonePages = ["Body Page", "Face Page"];
+    private readonly string[] _bonePages = ["Body Page", "Face Page"];
     private void DrawGlobalButtons(PosingCapability posing)
     {
         const float buttonWidth = 28;
@@ -533,44 +533,47 @@ internal class PosingGraphicalWindow : Window, IDisposable
 
             using(var child = ImRaii.Child("###face_pane", new Vector2(contentArea.X - 35, -1), false, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse))
             {
-                switch(currentAppearance.Customize.Race)
+                if(child.Success)
                 {
-                    case Races.Hyur:
-                    case Races.Elezen:
-                    case Races.Roegadyn:
-                    case Races.Lalafel:
-                    case Races.AuRa:
-                        DrawBoneSection("human_head", true, posing);
-                        break;
+                    switch(currentAppearance.Customize.Race)
+                    {
+                        case Races.Hyur:
+                        case Races.Elezen:
+                        case Races.Roegadyn:
+                        case Races.Lalafel:
+                        case Races.AuRa:
+                            DrawBoneSection("human_head", true, posing);
+                            break;
 
-                    case Races.Miqote:
-                        DrawBoneSection("miqote_head", true, posing);
-                        break;
+                        case Races.Miqote:
+                            DrawBoneSection("miqote_head", true, posing);
+                            break;
 
-                    case Races.Hrothgar:
-                        DrawBoneSection("hrothgar_head", true, posing);
-                        break;
+                        case Races.Hrothgar:
+                            DrawBoneSection("hrothgar_head", true, posing);
+                            break;
 
-                    case Races.Viera:
-                        switch(currentAppearance.Customize.RaceFeatureType)
-                        {
-                            case 1:
-                                DrawBoneSection("viera_head_a", true, posing);
-                                break;
-                            case 2:
-                                DrawBoneSection("viera_head_b", true, posing);
-                                break;
-                            case 3:
-                                DrawBoneSection("viera_head_c", true, posing);
-                                break;
-                            case 4:
-                                DrawBoneSection("viera_head_d", true, posing);
-                                break;
-                            default:
-                                DrawBoneSection("viera_head_a", true, posing);
-                                break;
-                        }
-                        break;
+                        case Races.Viera:
+                            switch(currentAppearance.Customize.RaceFeatureType)
+                            {
+                                case 1:
+                                    DrawBoneSection("viera_head_a", true, posing);
+                                    break;
+                                case 2:
+                                    DrawBoneSection("viera_head_b", true, posing);
+                                    break;
+                                case 3:
+                                    DrawBoneSection("viera_head_c", true, posing);
+                                    break;
+                                case 4:
+                                    DrawBoneSection("viera_head_d", true, posing);
+                                    break;
+                                default:
+                                    DrawBoneSection("viera_head_a", true, posing);
+                                    break;
+                            }
+                            break;
+                    }
                 }
             }
         }

@@ -67,9 +67,9 @@ internal class PosingTransformWindow : Window
 
     }
 
-    private void DrawButtons(PosingCapability posing)
+    private static void DrawButtons(PosingCapability posing)
     {
-        float buttonWidth = ((ImGui.GetContentRegionAvail().X) - (ImGui.GetStyle().ItemSpacing.X * 3f)) / 4f;
+        float buttonWidth = (ImGui.GetContentRegionAvail().X - (ImGui.GetStyle().ItemSpacing.X * 3f)) / 4f;
 
         // Mirror mode
         PosingEditorCommon.DrawMirrorModeSelect(posing, new Vector2(buttonWidth, 0));

@@ -1,5 +1,5 @@
 ﻿using Brio.Entities.Actor;
-using Brio.UI.Controls.Stateless;
+using Dalamud.Interface.Utility.Raii;
 using ImGuiNET;
 using System.Numerics;
 
@@ -45,63 +45,57 @@ internal class RenameActorModal
         ImGui.OpenPopup($"Rename##brio_renamemodal_popup");
 
         ImGui.SetNextWindowSizeConstraints(MinimumSize, MinimumSize);
-        ImGui.SetNextWindowPos(new Vector2((ImGui.GetIO().DisplaySize.X / 2) - (MinimumSize.X / 2), (ImGui.GetIO().DisplaySize.Y / 2) - (MinimumSize.Y / 2) ));
+        ImGui.SetNextWindowPos(new Vector2((ImGui.GetIO().DisplaySize.X / 2) - (MinimumSize.X / 2), (ImGui.GetIO().DisplaySize.Y / 2) - (MinimumSize.Y / 2)));
 
-        ImGui.BeginPopupModal($"Rename##brio_renamemodal_popup", ref IsOpen, ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoDecoration);
-
-        //
-
-        if(currentActorEntity is not null && currentActorEntity.IsAttached == true)
+        using(var popup = ImRaii.PopupModal($"Rename##brio_renamemodal_popup", ref IsOpen, ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoDecoration))
         {
-            ImGui.Text($"Renaming:  [ {currentActorEntity.FriendlyName} ]");
-
-            ImGui.InputText("Actor Name###brio_renamemodal_popup_name", ref currentActorName, 20);
-
-            if(string.IsNullOrEmpty(currentActorName))
-                ImGui.BeginDisabled();
-
-            float buttonW = (MinimumSize.X / 3) - 7;
-
-            if(ImGui.Button("Save", new(buttonW, 0)))
+            if(popup.Success)
             {
-                if(currentActorEntity.IsAttached)
+                if(currentActorEntity is not null && currentActorEntity.IsAttached == true)
                 {
-                    Brio.Log.Info($"Renamed {currentActorEntity.FriendlyName} -> {currentActorName}");
+                    ImGui.Text($"Renaming:  [ {currentActorEntity.FriendlyName} ]");
 
-                    currentActorEntity.FriendlyName = currentActorName;
+                    ImGui.InputText("Actor Name###brio_renamemodal_popup_name", ref currentActorName, 20);
+
+                    float buttonW = (MinimumSize.X / 3) - 7;
+            
+                    using(ImRaii.Disabled(string.IsNullOrEmpty(currentActorName)))
+                    {
+                        if(ImGui.Button("Save", new(buttonW, 0)))
+                        {
+                            if(currentActorEntity.IsAttached)
+                            {
+                                Brio.Log.Info($"Renamed {currentActorEntity.FriendlyName} -> {currentActorName}");
+
+                                currentActorEntity.FriendlyName = currentActorName;
+                            }
+                            Close();
+                        }
+                    }
+
+                    ImGui.SameLine();
+
+                    if(ImGui.Button("Reset Name", new(buttonW, 0)))
+                    {
+                        if(currentActorEntity.IsAttached)
+                        {
+                            Brio.Log.Info($"NameReset {currentActorEntity.FriendlyName} -> {currentActorEntity.FriendlyName = string.Empty}");
+                        }
+                        Close();
+                    }
+
+                    ImGui.SameLine();
+
+                    if(ImGui.Button("Cancel", new(buttonW, 0)))
+                    {
+                        Close();
+                    }
                 }
-                Close();
-            }
-
-            if(string.IsNullOrEmpty(currentActorName))
-                ImGui.EndDisabled();
-
-            ImGui.SameLine();
-
-            if(ImGui.Button("Reset Name", new(buttonW, 0)))
-            {
-                if(currentActorEntity.IsAttached)
+                else
                 {
-                    Brio.Log.Info($"NameReset {currentActorEntity.FriendlyName} -> {currentActorEntity.FriendlyName = string.Empty}");
+                    Close();
                 }
-                Close();
-            }
-
-            ImGui.SameLine();
-
-            if(ImGui.Button("Cancel", new(buttonW, 0)))
-            {
-                Close();
             }
         }
-        else
-        {
-            Close();
-        }
-
-        //
-
-        ImGui.EndPopup();
     }
-
 }

@@ -1,5 +1,6 @@
 ﻿using Brio.Game.Camera;
 using Brio.Input;
+using Dalamud.Interface.Utility.Raii;
 using FFXIVClientStructs.FFXIV.Client.Game.Control;
 using ImGuiNET;
 using System;
@@ -88,117 +89,68 @@ internal static partial class ImBrioGizmo
         var transformMatrix = Matrix4x4.CreateFromQuaternion(rotation);
         transformMatrix.Translation = new Vector3(0, -5, 0);
 
-        if(ImGui.BeginChild("##imbriozmo", size))
+        using(var child = ImRaii.Child("##imbriozmo", size))
         {
-            Vector2 topPos = ImGui.GetWindowPos() + ImGui.GetWindowContentRegionMin();
-            Vector2 botPos = ImGui.GetWindowPos() + ImGui.GetWindowContentRegionMax();
-            bool isMouseOverArea = (mouseData.mousePos.X > topPos.X && mouseData.mousePos.Y > topPos.Y && mouseData.mousePos.X < botPos.X && mouseData.mousePos.Y < botPos.Y);
-
-            if(isMouseOverArea)
-                isUsing = true;
-
-            Vector2 center = topPos + ((botPos - topPos) / 2);
-
-            drawList.AddCircleFilled(center, radius, 0x50000000);
-
-            DrawAxis(ref drawList, ref viewMatrix, ref transformMatrix, mouseData, center, lineThickness, radius, Axis.X);
-            DrawAxis(ref drawList, ref viewMatrix, ref transformMatrix, mouseData, center, lineThickness, radius, Axis.Y);
-            DrawAxis(ref drawList, ref viewMatrix, ref transformMatrix, mouseData, center, lineThickness, radius, Axis.Z);
-
-            // Mouse drag
-            if(dragStartToPos != null && dragStartFromPos != null)
+            if(child.Success)
             {
-                drawList.AddCircleFilled((Vector2)dragStartToPos, lineThickness * 2, style.AxisForegroundColors[(int)dragAxis]);
+                Vector2 topPos = ImGui.GetWindowPos() + ImGui.GetWindowContentRegionMin();
+                Vector2 botPos = ImGui.GetWindowPos() + ImGui.GetWindowContentRegionMax();
+                bool isMouseOverArea = (mouseData.mousePos.X > topPos.X && mouseData.mousePos.Y > topPos.Y && mouseData.mousePos.X < botPos.X && mouseData.mousePos.Y < botPos.Y);
 
-                Vector2 normal = Vector2.Normalize((Vector2)dragStartToPos - (Vector2)dragStartFromPos);
-
-                if(!ImGui.IsMouseDown(ImGuiMouseButton.Left))
-                {
-                    dragStartToPos = null;
-                    dragStartFromPos = null;
-                    dragDistance = 0;
-                    isUsing = false;
-                }
-                else
-                {
+                if(isMouseOverArea)
                     isUsing = true;
 
-                    Vector2 lhs = mouseData.mousePos - (Vector2)dragStartToPos;
-                    float newDragDistance = Vector2.Dot(lhs, normal);
-                    float dragDelta = newDragDistance - dragDistance;
-                    dragDistance = newDragDistance;
+                Vector2 center = topPos + ((botPos - topPos) / 2);
 
-                    float angleChange = dragDelta / 200;
+                drawList.AddCircleFilled(center, radius, 0x50000000);
 
-                    if(InputService.IsKeyBindDown(KeyBindEvents.Interface_IncrementSmallModifier))
-                        angleChange /= 10;
+                DrawAxis(ref drawList, ref viewMatrix, ref transformMatrix, mouseData, center, lineThickness, radius, Axis.X);
+                DrawAxis(ref drawList, ref viewMatrix, ref transformMatrix, mouseData, center, lineThickness, radius, Axis.Y);
+                DrawAxis(ref drawList, ref viewMatrix, ref transformMatrix, mouseData, center, lineThickness, radius, Axis.Z);
 
-                    if(InputService.IsKeyBindDown(KeyBindEvents.Interface_IncrementLargeModifier))
-                        angleChange *= 10;
-
-                    Quaternion rot = Quaternion.Identity;
-                    if(dragAxis == Axis.X)
-                    {
-                        rot = Quaternion.CreateFromAxisAngle(Vector3.UnitX, angleChange);
-                    }
-                    if(dragAxis == Axis.Y)
-                    {
-                        rot = Quaternion.CreateFromAxisAngle(Vector3.UnitY, -angleChange);
-                    }
-                    if(dragAxis == Axis.Z)
-                    {
-                        rot = Quaternion.CreateFromAxisAngle(Vector3.UnitZ, angleChange);
-                    }
-
-                    rotation *= rot;
-                    changed = true;
-                }
-            }
-
-            // Mouse Hover
-            else if(isMouseOverArea && mouseData.closestAxisMousePos != null && (mouseData.closestAxisPointToMouseDistance < axisHoverMouseDist || lockedAxis != null))
-            {
-                if(ImGui.IsMouseDown(ImGuiMouseButton.Left))
+                // Mouse drag
+                if(dragStartToPos != null && dragStartFromPos != null)
                 {
-                    dragStartToPos = mouseData.closestAxisMousePos;
-                    dragStartFromPos = mouseData.closestAxisMouseFromPos;
-                    dragAxis = closestMouseAxis;
-                }
-                if(ImGui.IsMouseClicked(ImGuiMouseButton.Right))
-                {
-                    if(lockedAxis == null)
+                    drawList.AddCircleFilled((Vector2)dragStartToPos, lineThickness * 2, style.AxisForegroundColors[(int)dragAxis]);
+
+                    Vector2 normal = Vector2.Normalize((Vector2)dragStartToPos - (Vector2)dragStartFromPos);
+
+                    if(!ImGui.IsMouseDown(ImGuiMouseButton.Left))
                     {
-                        lockedAxis = closestMouseAxis;
+                        dragStartToPos = null;
+                        dragStartFromPos = null;
+                        dragDistance = 0;
+                        isUsing = false;
                     }
                     else
                     {
-                        lockedAxis = null;
-                    }
-                }
-                else
-                {
-                    float mouseWheel = ImGui.GetIO().MouseWheel / 100;
+                        isUsing = true;
 
-                    if(mouseWheel != 0)
-                    {
+                        Vector2 lhs = mouseData.mousePos - (Vector2)dragStartToPos;
+                        float newDragDistance = Vector2.Dot(lhs, normal);
+                        float dragDelta = newDragDistance - dragDistance;
+                        dragDistance = newDragDistance;
+
+                        float angleChange = dragDelta / 200;
+
                         if(InputService.IsKeyBindDown(KeyBindEvents.Interface_IncrementSmallModifier))
-                            mouseWheel /= 10;
+                            angleChange /= 10;
 
                         if(InputService.IsKeyBindDown(KeyBindEvents.Interface_IncrementLargeModifier))
-                            mouseWheel *= 10;
+                            angleChange *= 10;
 
                         Quaternion rot = Quaternion.Identity;
-                        if(closestMouseAxis == Axis.X)
+                        if(dragAxis == Axis.X)
                         {
-                            rot = Quaternion.CreateFromAxisAngle(Vector3.UnitX, mouseWheel);
+                            rot = Quaternion.CreateFromAxisAngle(Vector3.UnitX, angleChange);
                         }
-                        if(closestMouseAxis == Axis.Y)
+                        if(dragAxis == Axis.Y)
                         {
-                            rot = Quaternion.CreateFromAxisAngle(Vector3.UnitY, -mouseWheel);
+                            rot = Quaternion.CreateFromAxisAngle(Vector3.UnitY, -angleChange);
                         }
-                        if(closestMouseAxis == Axis.Z)
+                        if(dragAxis == Axis.Z)
                         {
-                            rot = Quaternion.CreateFromAxisAngle(Vector3.UnitZ, mouseWheel);
+                            rot = Quaternion.CreateFromAxisAngle(Vector3.UnitZ, angleChange);
                         }
 
                         rotation *= rot;
@@ -206,11 +158,62 @@ internal static partial class ImBrioGizmo
                     }
                 }
 
-                drawList.AddCircle((Vector2)mouseData.closestAxisMousePos, axisHoverMouseDist, style.AxisForegroundColors[(int)closestMouseAxis]);
-            }
+                // Mouse Hover
+                else if(isMouseOverArea && mouseData.closestAxisMousePos != null && (mouseData.closestAxisPointToMouseDistance < axisHoverMouseDist || lockedAxis != null))
+                {
+                    if(ImGui.IsMouseDown(ImGuiMouseButton.Left))
+                    {
+                        dragStartToPos = mouseData.closestAxisMousePos;
+                        dragStartFromPos = mouseData.closestAxisMouseFromPos;
+                        dragAxis = closestMouseAxis;
+                    }
+                    if(ImGui.IsMouseClicked(ImGuiMouseButton.Right))
+                    {
+                        if(lockedAxis == null)
+                        {
+                            lockedAxis = closestMouseAxis;
+                        }
+                        else
+                        {
+                            lockedAxis = null;
+                        }
+                    }
+                    else
+                    {
+                        float mouseWheel = ImGui.GetIO().MouseWheel / 100;
 
-            ImGui.InvisibleButton("##imbriozmo_cover", size);
-            ImGui.EndChild();
+                        if(mouseWheel != 0)
+                        {
+                            if(InputService.IsKeyBindDown(KeyBindEvents.Interface_IncrementSmallModifier))
+                                mouseWheel /= 10;
+
+                            if(InputService.IsKeyBindDown(KeyBindEvents.Interface_IncrementLargeModifier))
+                                mouseWheel *= 10;
+
+                            Quaternion rot = Quaternion.Identity;
+                            if(closestMouseAxis == Axis.X)
+                            {
+                                rot = Quaternion.CreateFromAxisAngle(Vector3.UnitX, mouseWheel);
+                            }
+                            if(closestMouseAxis == Axis.Y)
+                            {
+                                rot = Quaternion.CreateFromAxisAngle(Vector3.UnitY, -mouseWheel);
+                            }
+                            if(closestMouseAxis == Axis.Z)
+                            {
+                                rot = Quaternion.CreateFromAxisAngle(Vector3.UnitZ, mouseWheel);
+                            }
+
+                            rotation *= rot;
+                            changed = true;
+                        }
+                    }
+
+                    drawList.AddCircle((Vector2)mouseData.closestAxisMousePos, axisHoverMouseDist, style.AxisForegroundColors[(int)closestMouseAxis]);
+                }
+
+                ImGui.InvisibleButton("##imbriozmo_cover", size);
+            }
         }
 
         return changed;
