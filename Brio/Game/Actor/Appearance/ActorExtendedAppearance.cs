@@ -12,4 +12,9 @@ internal struct ActorExtendedAppearance()
     public Vector4 MainHandTint = Vector4.One;
     public Vector4 OffHandTint = Vector4.One;
 
+
+    //
+    // TODO, Brio ignores the following filds
+
+    public float HeightMultiplier = 1.0f;
 }

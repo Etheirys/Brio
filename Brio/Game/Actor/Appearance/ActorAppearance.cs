@@ -49,6 +49,8 @@ internal struct ActorAppearance()
             actorAppearance.ExtendedAppearance.CharacterTint = charaBase->Tint;
             actorAppearance.ExtendedAppearance.Wetness = charaBase->Wetness;
             actorAppearance.ExtendedAppearance.WetnessDepth = charaBase->WetnessDepth;
+        
+            actorAppearance.ExtendedAppearance.HeightMultiplier = charaBase->ScaleFactor2;
         }
 
         charaBase = character.GetWeaponCharacterBase(ActorEquipSlot.MainHand);

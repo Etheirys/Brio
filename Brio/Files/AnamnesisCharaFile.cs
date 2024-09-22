@@ -69,21 +69,28 @@ internal class AnamnesisCharaFile : JsonDocumentBase
     public ItemSave Wrists { get; set; }
     public ItemSave LeftRing { get; set; }
     public ItemSave RightRing { get; set; }
-    public Vector3 SkinColor { get; set; }
-    public Vector3 SkinGloss { get; set; }
-    public Vector3 LeftEyeColor { get; set; }
-    public Vector3 RightEyeColor { get; set; }
-    public Vector3 LimbalRingColor { get; set; }
-    public Vector3 HairColor { get; set; }
-    public Vector3 HairGloss { get; set; }
-    public Vector3 HairHighlight { get; set; }
-    public Vector4 MouthColor { get; set; }
-    public Vector3 BustScale { get; set; }
-    public float Transparency { get; set; }
-    public float MuscleTone { get; set; }
-    public float HeightMultiplier { get; set; }
 
     public GlassesSave? Glasses { get; set; }
+
+    public float Transparency { get; set; }
+
+    // Extended Appearance 
+
+    public float HeightMultiplier { get; set; }
+    public float MuscleTone { get; set; } = 1f;
+
+    public Vector3? SkinColor { get; set; } = null;
+    public Vector3? SkinGloss { get; set; } = null;
+    public Vector3? LeftEyeColor { get; set; } = null;
+    public Vector3? RightEyeColor { get; set; } = null;
+    public Vector3? LimbalRingColor { get; set; } = null;
+    public Vector3? HairColor { get; set; } = null;
+    public Vector3? HairGloss { get; set; } = null;
+    public Vector3? HairHighlight { get; set; } = null;
+    public Vector4? MouthColor { get; set; } = null;
+
+    public Vector3? BustScale { get; set; } = null;
+
 
     public override void GetAutoTags(ref TagCollection tags)
     {
@@ -151,6 +158,7 @@ internal class AnamnesisCharaFile : JsonDocumentBase
 
         // Extended Appearance
         appearance.ExtendedAppearance.Transparency = chara.Transparency;
+        appearance.ExtendedAppearance.HeightMultiplier = chara.HeightMultiplier;
 
         return appearance;
     }
@@ -210,7 +218,8 @@ internal class AnamnesisCharaFile : JsonDocumentBase
             Glasses = appearance.Facewear,
 
             // Extended Appearance
-            Transparency = appearance.ExtendedAppearance.Transparency
+            Transparency = appearance.ExtendedAppearance.Transparency,
+            HeightMultiplier = appearance.ExtendedAppearance.HeightMultiplier
         };
 
         return charaFile;
