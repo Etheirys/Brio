@@ -43,7 +43,7 @@ jobs:
         exclusions: '*.pdb* *.xml*'
 
     - name: Upload a Build Artifact
-      uses: actions/upload-artifact@v2.2.1
+      uses: actions/upload-artifact@v4
       with:
         path: |
           ./Brio.zip
