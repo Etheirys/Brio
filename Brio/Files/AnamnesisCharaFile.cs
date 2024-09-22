@@ -8,24 +8,19 @@ using Dalamud.Interface.Textures.TextureWraps;
 using FFXIVClientStructs.FFXIV.Client.Game.Character;
 using System;
 using System.Numerics;
+using System.Text.Json.Serialization;
 
 namespace Brio.Files;
 
-internal class AnamnesisCharaFileInfo : AppliableActorFileInfoBase<AnamnesisCharaFile>
+internal class AnamnesisCharaFileInfo(EntityManager entityManager) : AppliableActorFileInfoBase<AnamnesisCharaFile>(entityManager)
 {
     public override string Name => "Character File";
     public override IDalamudTextureWrap Icon => ResourceProvider.Instance.GetResourceImage("Images.FileIcon_Chara.png");
     public override string Extension => ".chara";
 
-    public AnamnesisCharaFileInfo(EntityManager entityManager)
-        : base(entityManager)
-    {
-    }
-
     protected override void Apply(AnamnesisCharaFile file, ActorEntity actor, bool asExpression = false)
     {
-        ActorAppearanceCapability? capability;
-        if(actor.TryGetCapability<ActorAppearanceCapability>(out capability) && capability != null)
+        if(actor.TryGetCapability<ActorAppearanceCapability>(out ActorAppearanceCapability? capability) && capability != null)
         {
             _ = capability.SetAppearance(file, AppearanceImportOptions.All);
         }
@@ -87,7 +82,8 @@ internal class AnamnesisCharaFile : JsonDocumentBase
     public float Transparency { get; set; }
     public float MuscleTone { get; set; }
     public float HeightMultiplier { get; set; }
-    public byte Glasses { get; set; }
+
+    public GlassesSave? Glasses { get; set; }
 
     public override void GetAutoTags(ref TagCollection tags)
     {
@@ -151,7 +147,7 @@ internal class AnamnesisCharaFile : JsonDocumentBase
         appearance.Equipment.RFinger = chara.RightRing;
 
         // Facewear
-        appearance.Facewear = chara.Glasses;
+        appearance.Facewear = (byte)(chara.Glasses is not null ? chara.Glasses.Value.GlassesId : 0);
 
         // Extended Appearance
         appearance.ExtendedAppearance.Transparency = chara.Transparency;
@@ -242,6 +238,18 @@ internal class AnamnesisCharaFile : JsonDocumentBase
             ModelVariant = modelId.Variant,
             DyeId = modelId.Stain0,
             DyeId2 = modelId.Stain1
+        };
+    }
+
+    internal struct GlassesSave
+    {
+        public ushort GlassesId { get; set; }
+
+        public static implicit operator byte(GlassesSave save) => (byte)save.GlassesId;
+
+        public static implicit operator GlassesSave(byte save) => new()
+        {
+            GlassesId = save
         };
     }
 

@@ -80,15 +80,6 @@ internal class ResourceProvider : IDisposable
         return document;
     }
 
-    public object GetFileDocument(string path, Type type)
-    {
-        using var stream = GetFileStream(path);
-        using var reader = new StreamReader(stream);
-        var txt = reader.ReadToEnd();
-        var document = JsonSerializer.Deserialize(txt, type);
-        return document;
-    }
-
     public void SaveFileDocument<T>(string path, T doc)
         where T : notnull
     {
