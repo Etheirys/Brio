@@ -49,7 +49,7 @@ internal class ActorAppearanceService : IDisposable
         _glamourerService = glamourerService;
         _entityManager = entityManager;
 
-        var enforceKindRestrictionsAddress = sigScanner.ScanText("E8 ?? ?? ?? ?? 41 B0 ?? 48 8B D6");
+        var enforceKindRestrictionsAddress = sigScanner.ScanText("E8 ?? ?? ?? ?? 41 B0 ?? 48 8B D6 48 8B");
         _enforceKindRestrictionsHook = hooks.HookFromAddress<EnforceKindRestrictionsDelegate>(enforceKindRestrictionsAddress, EnforceKindRestrictionsDetour);
         _enforceKindRestrictionsHook.Enable();
 
@@ -61,7 +61,7 @@ internal class ActorAppearanceService : IDisposable
         _updateTintHook = hooks.HookFromAddress<UpdateTintDelegate>((nint)updateTintHook, UpdateTintDetour);
         _updateTintHook.Enable();
 
-        var setFacewearAddress = sigScanner.ScanText("E8 ?? ?? ?? ?? 41 FF C5 41 83 FD ?? 72");
+        var setFacewearAddress = sigScanner.ScanText("E8 ?? ?? ?? ?? 41 FF C7 41 83 FF ?? 72 ?? 48");
         _setFacewear = (delegate* unmanaged<DrawDataContainer*, byte, byte, void>)setFacewearAddress;
     }
 
