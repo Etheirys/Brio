@@ -265,7 +265,7 @@ internal class CustomizeEditor()
     {
         bool madeChange = false;
 
-        var hairStyles = GameDataProvider.Instance.HairMakeTypes[menu.CharaMakeRow].HairStyles.Where(x => x.Row != 0).Select(x => x.Value!)!;
+        var hairStyles = GameDataProvider.Instance.HairMakeTypes[menu.CharaMakeRow].HairStyles.Where(x => x.RowId != 0).Select(x => x.Value!)!;
 
         var hairColors = GameDataProvider.Instance.HumanData.GetHairColors(customize.Tribe, customize.Gender);
         var hairHighlightColors = GameDataProvider.Instance.HumanData.GetHairHighlightColors();
@@ -433,7 +433,7 @@ internal class CustomizeEditor()
     {
         bool madeChange = false;
 
-        var facePaints = GameDataProvider.Instance.HairMakeTypes[menu.CharaMakeRow].FacePaints.Where(x => x.Row != 0).Select(x => x.Value!)!;
+        var facePaints = GameDataProvider.Instance.HairMakeTypes[menu.CharaMakeRow].FacePaints.Where(x => x.RowId != 0).Select(x => x.Value!)!;
 
         var facePaintColors = GameDataProvider.Instance.HumanData.GetFacepaintColors();
 

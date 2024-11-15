@@ -47,6 +47,6 @@ internal static class AppearanceSanitizer
 
     public static unsafe BrioCharaMakeType? GetCharaMakeType(ActorAppearance appearance)
     {
-        return GameDataProvider.Instance.CharaMakeTypes.Select(x => x.Value).FirstOrDefault(x => x.Race.Row == (uint)appearance.Customize.Race && x.Tribe.Row == (uint)appearance.Customize.Tribe && x.Gender == appearance.Customize.Gender);
+        return GameDataProvider.Instance.CharaMakeTypes.Select(x => x.Value).FirstOrDefault(x => x.Race.RowId == (uint)appearance.Customize.Race && x.Tribe.RowId == (uint)appearance.Customize.Tribe && x.Gender == appearance.Customize.Gender);
     }
 }

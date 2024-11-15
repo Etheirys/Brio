@@ -1,6 +1,6 @@
 ﻿using Brio.Game.Actor.Extensions;
 using FFXIVClientStructs.FFXIV.Client.Game.Character;
-using Lumina.Excel.GeneratedSheets;
+using Lumina.Excel.Sheets;
 using DalamudCharacter = Dalamud.Game.ClientState.Objects.Types.ICharacter;
 
 namespace Brio.Game.Actor.Appearance;
@@ -20,7 +20,7 @@ internal struct ActorAppearance()
         var native = character.Native();
         ActorAppearance actorAppearance = new()
         {
-            ModelCharaId = native->CharacterData.ModelCharaId
+            ModelCharaId = native->ModelCharaId
         };
 
         actorAppearance.Weapons.MainHand = native->DrawData.Weapon(DrawDataContainer.WeaponSlot.MainHand).ModelId;
@@ -77,18 +77,18 @@ internal struct ActorAppearance()
     {
         ActorAppearance actorAppearance = new()
         {
-            ModelCharaId = (int)npc.ModelChara.Row
+            ModelCharaId = (int)npc.ModelChara.RowId
         };
 
 
-        if(npc.BNpcCustomize.Row != 0 && npc.BNpcCustomize.Value != null)
+        if(npc.BNpcCustomize.RowId != 0 && npc.BNpcCustomize.ValueNullable is not null)
         {
             var customize = npc.BNpcCustomize.Value!;
 
-            actorAppearance.Customize.Race = (Races)customize.Race.Row;
+            actorAppearance.Customize.Race = (Races)customize.Race.RowId;
             actorAppearance.Customize.Gender = (Genders)customize.Gender;
             actorAppearance.Customize.BodyType = (BodyTypes)customize.BodyType;
-            actorAppearance.Customize.Tribe = (Tribes)customize.Tribe.Row;
+            actorAppearance.Customize.Tribe = (Tribes)customize.Tribe.RowId;
             actorAppearance.Customize.Height = customize.Height;
             actorAppearance.Customize.FaceType = customize.Face;
             actorAppearance.Customize.HairStyle = customize.HairStyle;
@@ -113,7 +113,7 @@ internal struct ActorAppearance()
             actorAppearance.Customize.FacePaintColor = customize.FacePaintColor;
         }
 
-        if(npc.NpcEquip.Row != 0 && npc.NpcEquip.Value != null)
+        if(npc.NpcEquip.RowId != 0 && npc.NpcEquip.ValueNullable is not null)
         {
             var (mainHand, offHand, equipment) = FromNpcEquip(npc.NpcEquip.Value!);
             actorAppearance.Weapons.MainHand = mainHand;
@@ -131,13 +131,13 @@ internal struct ActorAppearance()
     {
         ActorAppearance actorAppearance = new()
         {
-            ModelCharaId = (int)npc.ModelChara.Row
+            ModelCharaId = (int)npc.ModelChara.RowId
         };
 
-        actorAppearance.Customize.Race = (Races)npc.Race.Row;
+        actorAppearance.Customize.Race = (Races)npc.Race.RowId;
         actorAppearance.Customize.Gender = (Genders)npc.Gender;
         actorAppearance.Customize.BodyType = (BodyTypes)npc.BodyType;
-        actorAppearance.Customize.Tribe = (Tribes)npc.Tribe.Row;
+        actorAppearance.Customize.Tribe = (Tribes)npc.Tribe.RowId;
         actorAppearance.Customize.Height = npc.Height;
         actorAppearance.Customize.FaceType = npc.Face;
         actorAppearance.Customize.HairStyle = npc.HairStyle;
@@ -162,7 +162,7 @@ internal struct ActorAppearance()
         actorAppearance.Customize.FacePaintColor = npc.FacePaintColor;
 
 
-        if(npc.NpcEquip.Row != 0 && npc.NpcEquip.Value != null)
+        if(npc.NpcEquip.RowId != 0 && npc.NpcEquip.ValueNullable != null)
         {
             var (mainHand, offHand, equipment) = FromNpcEquip(npc.NpcEquip.Value!);
             actorAppearance.Weapons.MainHand = mainHand;
@@ -173,109 +173,109 @@ internal struct ActorAppearance()
         if(npc.ModelMainHand != 0)
             actorAppearance.Weapons.MainHand.Value = npc.ModelMainHand;
 
-        if(npc.DyeMainHand.Row != 0)
+        if(npc.DyeMainHand.RowId != 0)
         {
-            actorAppearance.Weapons.MainHand.Stain0 = (byte)npc.DyeMainHand.Row;
-            actorAppearance.Weapons.MainHand.Stain1 = (byte)npc.Dye2MainHand.Row;
+            actorAppearance.Weapons.MainHand.Stain0 = (byte)npc.DyeMainHand.RowId;
+            actorAppearance.Weapons.MainHand.Stain1 = (byte)npc.Dye2MainHand.RowId;
         }
 
         if(npc.ModelOffHand != 0)
             actorAppearance.Weapons.OffHand.Value = npc.ModelOffHand;
 
-        if(npc.DyeOffHand.Row != 0)
+        if(npc.DyeOffHand.RowId != 0)
         {
-            actorAppearance.Weapons.OffHand.Stain0 = (byte)npc.DyeOffHand.Row;
-            actorAppearance.Weapons.OffHand.Stain1 = (byte)npc.Dye2OffHand.Row;
+            actorAppearance.Weapons.OffHand.Stain0 = (byte)npc.DyeOffHand.RowId;
+            actorAppearance.Weapons.OffHand.Stain1 = (byte)npc.Dye2OffHand.RowId;
         }
 
         if(npc.ModelHead != 0)
             actorAppearance.Equipment.Head.Value = npc.ModelHead;
 
-        if(npc.DyeHead.Row != 0)
+        if(npc.DyeHead.RowId != 0)
         {
-            actorAppearance.Equipment.Head.Stain0 = (byte)npc.DyeHead.Row;
-            actorAppearance.Equipment.Head.Stain1 = (byte)npc.Dye2Head.Row;
+            actorAppearance.Equipment.Head.Stain0 = (byte)npc.DyeHead.RowId;
+            actorAppearance.Equipment.Head.Stain1 = (byte)npc.Dye2Head.RowId;
         }
 
         if(npc.ModelBody != 0)
             actorAppearance.Equipment.Top.Value = npc.ModelBody;
 
-        if(npc.DyeBody.Row != 0)
+        if(npc.DyeBody.RowId != 0)
         {
-            actorAppearance.Equipment.Top.Stain0 = (byte)npc.DyeBody.Row;
-            actorAppearance.Equipment.Top.Stain1 = (byte)npc.Dye2Body.Row;
+            actorAppearance.Equipment.Top.Stain0 = (byte)npc.DyeBody.RowId;
+            actorAppearance.Equipment.Top.Stain1 = (byte)npc.Dye2Body.RowId;
         }
 
         if(npc.ModelHands != 0)
             actorAppearance.Equipment.Arms.Value = npc.ModelHands;
 
-        if(npc.DyeHands.Row != 0)
+        if(npc.DyeHands.RowId != 0)
         {
-            actorAppearance.Equipment.Arms.Stain0 = (byte)npc.DyeHands.Row;
-            actorAppearance.Equipment.Arms.Stain1 = (byte)npc.Dye2Hands.Row;
+            actorAppearance.Equipment.Arms.Stain0 = (byte)npc.DyeHands.RowId;
+            actorAppearance.Equipment.Arms.Stain1 = (byte)npc.Dye2Hands.RowId;
         }
 
         if(npc.ModelLegs != 0)
             actorAppearance.Equipment.Legs.Value = npc.ModelLegs;
 
-        if(npc.DyeLegs.Row != 0)
+        if(npc.DyeLegs.RowId != 0)
         {
-            actorAppearance.Equipment.Legs.Stain0 = (byte)npc.DyeLegs.Row;
-            actorAppearance.Equipment.Legs.Stain1 = (byte)npc.Dye2Legs.Row;
+            actorAppearance.Equipment.Legs.Stain0 = (byte)npc.DyeLegs.RowId;
+            actorAppearance.Equipment.Legs.Stain1 = (byte)npc.Dye2Legs.RowId;
         }
 
         if(npc.ModelFeet != 0)
             actorAppearance.Equipment.Feet.Value = npc.ModelFeet;
 
-        if(npc.DyeFeet.Row != 0)
+        if(npc.DyeFeet.RowId != 0)
         {
-            actorAppearance.Equipment.Feet.Stain0 = (byte)npc.DyeFeet.Row;
-            actorAppearance.Equipment.Feet.Stain1 = (byte)npc.Dye2Feet.Row;
+            actorAppearance.Equipment.Feet.Stain0 = (byte)npc.DyeFeet.RowId;
+            actorAppearance.Equipment.Feet.Stain1 = (byte)npc.Dye2Feet.RowId;
         }
 
         if(npc.ModelEars != 0)
             actorAppearance.Equipment.Ear.Value = npc.ModelEars;
 
-        if(npc.DyeEars.Row != 0)
+        if(npc.DyeEars.RowId != 0)
         {
-            actorAppearance.Equipment.Ear.Stain0 = (byte)npc.DyeEars.Row;
-            actorAppearance.Equipment.Ear.Stain1 = (byte)npc.Dye2Ears.Row;
+            actorAppearance.Equipment.Ear.Stain0 = (byte)npc.DyeEars.RowId;
+            actorAppearance.Equipment.Ear.Stain1 = (byte)npc.Dye2Ears.RowId;
         }
 
         if(npc.ModelNeck != 0)
             actorAppearance.Equipment.Neck.Value = npc.ModelNeck;
 
-        if(npc.DyeNeck.Row != 0)
+        if(npc.DyeNeck.RowId != 0)
         {
-            actorAppearance.Equipment.Neck.Stain0 = (byte)npc.DyeNeck.Row;
-            actorAppearance.Equipment.Neck.Stain1 = (byte)npc.Dye2Neck.Row;
+            actorAppearance.Equipment.Neck.Stain0 = (byte)npc.DyeNeck.RowId;
+            actorAppearance.Equipment.Neck.Stain1 = (byte)npc.Dye2Neck.RowId;
         }
 
         if(npc.ModelWrists != 0)
             actorAppearance.Equipment.Wrist.Value = npc.ModelWrists;
 
-        if(npc.DyeWrists.Row != 0)
+        if(npc.DyeWrists.RowId != 0)
         {
-            actorAppearance.Equipment.Wrist.Stain0 = (byte)npc.DyeWrists.Row;
-            actorAppearance.Equipment.Wrist.Stain1 = (byte)npc.Dye2Wrists.Row;
+            actorAppearance.Equipment.Wrist.Stain0 = (byte)npc.DyeWrists.RowId;
+            actorAppearance.Equipment.Wrist.Stain1 = (byte)npc.Dye2Wrists.RowId;
         }
 
         if(npc.ModelRightRing != 0)
             actorAppearance.Equipment.RFinger.Value = npc.ModelRightRing;
 
-        if(npc.DyeRightRing.Row != 0)
+        if(npc.DyeRightRing.RowId != 0)
         {
-            actorAppearance.Equipment.RFinger.Stain0 = (byte)npc.DyeRightRing.Row;
-            actorAppearance.Equipment.RFinger.Stain1 = (byte)npc.Dye2RightRing.Row;
+            actorAppearance.Equipment.RFinger.Stain0 = (byte)npc.DyeRightRing.RowId;
+            actorAppearance.Equipment.RFinger.Stain1 = (byte)npc.Dye2RightRing.RowId;
         }
 
         if(npc.ModelLeftRing != 0)
             actorAppearance.Equipment.LFinger.Value = npc.ModelLeftRing;
 
-        if(npc.DyeLeftRing.Row != 0)
+        if(npc.DyeLeftRing.RowId != 0)
         {
-            actorAppearance.Equipment.LFinger.Stain0 = (byte)npc.DyeLeftRing.Row;
-            actorAppearance.Equipment.LFinger.Stain1 = (byte)npc.Dye2LeftRing.Row;
+            actorAppearance.Equipment.LFinger.Stain0 = (byte)npc.DyeLeftRing.RowId;
+            actorAppearance.Equipment.LFinger.Stain1 = (byte)npc.Dye2LeftRing.RowId;
         }
 
         // TODO: Can NPCs have facewear?
@@ -291,42 +291,42 @@ internal struct ActorAppearance()
         var offHand = new WeaponModelId();
 
         equipment.Head.Value = npcEquip.ModelHead;
-        equipment.Head.Stain0 = (byte)npcEquip.DyeHead.Row;
-        equipment.Head.Stain1 = (byte)npcEquip.Dye2Head.Row;
+        equipment.Head.Stain0 = (byte)npcEquip.DyeHead.RowId;
+        equipment.Head.Stain1 = (byte)npcEquip.Dye2Head.RowId;
         equipment.Top.Value = npcEquip.ModelBody;
-        equipment.Top.Stain0 = (byte)npcEquip.DyeBody.Row;
-        equipment.Top.Stain1 = (byte)npcEquip.Dye2Body.Row;
+        equipment.Top.Stain0 = (byte)npcEquip.DyeBody.RowId;
+        equipment.Top.Stain1 = (byte)npcEquip.Dye2Body.RowId;
         equipment.Arms.Value = npcEquip.ModelHands;
-        equipment.Arms.Stain0 = (byte)npcEquip.DyeHands.Row;
-        equipment.Arms.Stain1 = (byte)npcEquip.Dye2Hands.Row;
+        equipment.Arms.Stain0 = (byte)npcEquip.DyeHands.RowId;
+        equipment.Arms.Stain1 = (byte)npcEquip.Dye2Hands.RowId;
         equipment.Legs.Value = npcEquip.ModelLegs;
-        equipment.Legs.Stain0 = (byte)npcEquip.DyeLegs.Row;
-        equipment.Legs.Stain1 = (byte)npcEquip.Dye2Legs.Row;
+        equipment.Legs.Stain0 = (byte)npcEquip.DyeLegs.RowId;
+        equipment.Legs.Stain1 = (byte)npcEquip.Dye2Legs.RowId;
         equipment.Feet.Value = npcEquip.ModelFeet;
-        equipment.Feet.Stain0 = (byte)npcEquip.DyeFeet.Row;
-        equipment.Feet.Stain1 = (byte)npcEquip.Dye2Feet.Row;
+        equipment.Feet.Stain0 = (byte)npcEquip.DyeFeet.RowId;
+        equipment.Feet.Stain1 = (byte)npcEquip.Dye2Feet.RowId;
         equipment.Ear.Value = npcEquip.ModelEars;
-        equipment.Ear.Stain0 = (byte)npcEquip.DyeEars.Row;
-        equipment.Ear.Stain1 = (byte)npcEquip.Dye2Ears.Row;
+        equipment.Ear.Stain0 = (byte)npcEquip.DyeEars.RowId;
+        equipment.Ear.Stain1 = (byte)npcEquip.Dye2Ears.RowId;
         equipment.Neck.Value = npcEquip.ModelNeck;
-        equipment.Neck.Stain0 = (byte)npcEquip.DyeNeck.Row;
-        equipment.Neck.Stain1 = (byte)npcEquip.Dye2Neck.Row;
+        equipment.Neck.Stain0 = (byte)npcEquip.DyeNeck.RowId;
+        equipment.Neck.Stain1 = (byte)npcEquip.Dye2Neck.RowId;
         equipment.Wrist.Value = npcEquip.ModelWrists;
-        equipment.Wrist.Stain0 = (byte)npcEquip.DyeWrists.Row;
-        equipment.Wrist.Stain1 = (byte)npcEquip.Dye2Wrists.Row;
+        equipment.Wrist.Stain0 = (byte)npcEquip.DyeWrists.RowId;
+        equipment.Wrist.Stain1 = (byte)npcEquip.Dye2Wrists.RowId;
         equipment.RFinger.Value = npcEquip.ModelRightRing;
-        equipment.RFinger.Stain0 = (byte)npcEquip.DyeRightRing.Row;
-        equipment.RFinger.Stain1 = (byte)npcEquip.Dye2RightRing.Row;
+        equipment.RFinger.Stain0 = (byte)npcEquip.DyeRightRing.RowId;
+        equipment.RFinger.Stain1 = (byte)npcEquip.Dye2RightRing.RowId;
         equipment.LFinger.Value = npcEquip.ModelLeftRing;
-        equipment.LFinger.Stain0 = (byte)npcEquip.DyeLeftRing.Row;
-        equipment.LFinger.Stain1 = (byte)npcEquip.Dye2LeftRing.Row;
+        equipment.LFinger.Stain0 = (byte)npcEquip.DyeLeftRing.RowId;
+        equipment.LFinger.Stain1 = (byte)npcEquip.Dye2LeftRing.RowId;
 
         mainHand.Value = npcEquip.ModelMainHand;
-        mainHand.Stain0 = (byte)npcEquip.DyeMainHand.Row;
-        mainHand.Stain1 = (byte)npcEquip.Dye2MainHand.Row;
+        mainHand.Stain0 = (byte)npcEquip.DyeMainHand.RowId;
+        mainHand.Stain1 = (byte)npcEquip.Dye2MainHand.RowId;
         offHand.Value = npcEquip.ModelOffHand;
-        offHand.Stain0 = (byte)npcEquip.DyeOffHand.Row;
-        offHand.Stain1 = (byte)npcEquip.Dye2OffHand.Row;
+        offHand.Stain0 = (byte)npcEquip.DyeOffHand.RowId;
+        offHand.Stain1 = (byte)npcEquip.Dye2OffHand.RowId;
 
         return (mainHand, offHand, equipment);
     }

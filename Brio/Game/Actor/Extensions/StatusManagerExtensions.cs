@@ -1,6 +1,6 @@
 ﻿using Brio.Resources;
 using Dalamud.Game.ClientState.Objects.Types;
-using Lumina.Excel.GeneratedSheets;
+using Lumina.Excel.Sheets;
 using System.Collections.Generic;
 using StatusManager = FFXIVClientStructs.FFXIV.Client.Game.StatusManager;
 

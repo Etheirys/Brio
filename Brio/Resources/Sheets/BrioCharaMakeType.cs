@@ -1,14 +1,17 @@
 ﻿using Brio.Game.Actor.Appearance;
 using Dalamud.Game.ClientState.Objects.Enums;
+using EmbedIO.Utilities;
+using FFXIVClientStructs.FFXIV.Component.Excel;
+using Lumina;
 using Lumina.Data;
 using Lumina.Excel;
-using Lumina.Excel.GeneratedSheets;
+using Lumina.Excel.Sheets;
 using System.Linq;
 
 namespace Brio.Resources.Sheets;
 
 [Sheet("CharaMakeType")]
-internal class BrioCharaMakeType : ExcelRow
+internal class BrioCharaMakeType : IExcelRow<BrioCharaMakeType>
 {
     public const int MenuCount = 28;
     public const int SubMenuParamCount = 100;
@@ -17,11 +20,11 @@ internal class BrioCharaMakeType : ExcelRow
     public const int FaceCount = 8;
     public const int FaceFeatureCount = 7;
 
-    public LazyRow<Race> Race { get; private set; } = null!;
-    public LazyRow<Tribe> Tribe { get; private set; } = null!;
+    public RowRef<Race>? Race { get; private set; } = null!;
+    public RowRef<Tribe>? Tribe { get; private set; } = null!;
     public Genders Gender { get; private set; }
 
-    public LazyRow<Lobby>[] Lobbys { get; } = new LazyRow<Lobby>[MenuCount];
+    public RowRef<Lobby>[]? Lobbys { get; } = new RowRef<Lobby>[MenuCount];
 
     public byte[] InitVals { get; } = new byte[MenuCount];
 
@@ -43,20 +46,21 @@ internal class BrioCharaMakeType : ExcelRow
 
     public int[,] FacialFeature { get; } = new int[FaceCount, SubMenuGraphicCount];
 
-
-    public override void PopulateData(RowParser parser, Lumina.GameData gameData, Language language)
+    public uint RowId => throw new System.NotImplementedException(); //
+   
+    public static BrioCharaMakeType Create(ExcelPage page, uint offset, uint row)
     {
-        base.PopulateData(parser, gameData, language);
-
-        Race = new LazyRow<Race>(gameData, parser.ReadColumn<int>(0), language);
-        Tribe = new LazyRow<Tribe>(gameData, parser.ReadColumn<int>(1), language);
-        Gender = (Genders)parser.ReadColumn<sbyte>(2);
+        BrioCharaMakeType brioCharaMake = new BrioCharaMakeType();
+        
+        brioCharaMake.Race = new RowRef<Race>(page.Module, (uint)page.ReadInt32(0));
+        brioCharaMake.Tribe = new RowRef<Tribe>(page.Module, (uint)page.ReadInt32(1));
+        brioCharaMake.Gender = (Genders)page.ReadInt8(2);
+      
+        for(int i = 0; i < MenuCount; i++)
+            brioCharaMake.Lobbys[i] = new RowRef<Lobby>(page.Module, parser.ReadColumn<uint>(3 + i), language);
 
         for(int i = 0; i < MenuCount; i++)
-            Lobbys[i] = new LazyRow<Lobby>(gameData, parser.ReadColumn<uint>(3 + i), language);
-
-        for(int i = 0; i < MenuCount; i++)
-            InitVals[i] = parser.ReadColumn<byte>(31 + i);
+            brioCharaMake.InitVals[i] = parser.ReadColumn<byte>(31 + i);
 
         for(int i = 0; i < MenuCount; i++)
             SubMenuType[i] = (MenuType)parser.ReadColumn<byte>(59 + i);
@@ -87,6 +91,16 @@ internal class BrioCharaMakeType : ExcelRow
         for(int i = 0; i < FaceCount; i++)
             for(int x = 0; x < FaceFeatureCount; x++)
                 FacialFeature[i, x] = parser.ReadColumn<int>(3291 + (x * FaceCount) + i);
+
+
+        return brioCharaMake;
+    }
+
+    public override void PopulateData(RowParser parser, Lumina.GameData gameData, Language language)
+    {
+        base.PopulateData(parser, gameData, language);
+
+
     }
 
     public MenuCollection BuildMenus()
@@ -95,13 +109,13 @@ internal class BrioCharaMakeType : ExcelRow
 
         for(int i = 0; i < MenuCount; ++i)
         {
-            var lobby = Lobbys[i].Value;
+            var lobby = Lobbys[i].ValueNullable;
 
             if(lobby == null)
                 continue;
 
 
-            var title = lobby.Text?.RawString ?? "Unknown";
+            var title = lobby.Value.Text.ToString() ?? "Unknown";
             var menuType = SubMenuType[i];
             var subMenuNum = SubMenuNum[i];
             var subMenuMask = SubMenuMask[i];
@@ -121,11 +135,12 @@ internal class BrioCharaMakeType : ExcelRow
                 subParams[x] = (int)SubMenuParam[i, x];
             }
 
-            menus[i] = new Menu(i, RowId, title, (Races)Race.Row, (Tribes)Tribe.Row, Gender, lobby, menuType, subMenuMask, customizeIndex, initialValue, subParams, subGraphics, Voice, FacialFeature);
+            menus[i] = new Menu(i, RowId, title, (Races)((RowRef?)Race).Value.RowId, (Tribes)Tribe.RowId, Gender, lobby.Value, menuType, subMenuMask, customizeIndex, initialValue, subParams, subGraphics, Voice, FacialFeature);
         }
 
         return new MenuCollection(menus);
     }
+
 
     public class MenuCollection(Menu[] menus)
     {

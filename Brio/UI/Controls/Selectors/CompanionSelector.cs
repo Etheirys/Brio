@@ -64,8 +64,8 @@ internal class CompanionSelector(string id) : Selector<CompanionRowUnion>(id)
             return true;
 
         bool shouldFilter = item.Match(
-            companion => !_showCompanions || companion.Model.Row == 0,
-            mount => !_showMounts || mount.ModelChara.Row == 0,
+            companion => !_showCompanions || companion.Model.RowId == 0,
+            mount => !_showMounts || mount.ModelChara.RowId == 0,
             ornament => !_showOrnaments || ornament.Model == 0,
             none => false
         );
@@ -74,8 +74,8 @@ internal class CompanionSelector(string id) : Selector<CompanionRowUnion>(id)
             return false;
 
         var searchText = item.Match(
-            companion => $"{companion.Singular} {companion.Plural} {companion.RowId} {companion.Model.Row}",
-            mount => $"{mount.Singular} {mount.Plural} {mount.RowId} {mount.ModelChara.Row}",
+            companion => $"{companion.Singular} {companion.Plural} {companion.RowId} {companion.Model.RowId}",
+            mount => $"{mount.Singular} {mount.Plural} {mount.RowId} {mount.ModelChara.RowId}",
             ornament => $"{ornament.Singular} {ornament.Plural} {ornament.RowId} {ornament.Model}",
             none => "none"
         );

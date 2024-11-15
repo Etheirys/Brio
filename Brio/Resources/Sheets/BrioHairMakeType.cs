@@ -1,8 +1,9 @@
 ﻿using Brio.Game.Actor.Appearance;
+using FFXIVClientStructs.FFXIV.Component.Excel;
 using Lumina;
 using Lumina.Data;
 using Lumina.Excel;
-using Lumina.Excel.GeneratedSheets;
+using Lumina.Excel.Sheets;
 
 namespace Brio.Resources.Sheets;
 

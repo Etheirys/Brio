@@ -1,5 +1,5 @@
 ﻿using Brio.Resources;
-using Lumina.Excel.GeneratedSheets2;
+using Lumina.Excel.Sheets;
 using OneOf;
 using OneOf.Types;
 
