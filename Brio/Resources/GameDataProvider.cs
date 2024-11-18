@@ -13,6 +13,8 @@ internal class GameDataProvider
 {
     public static GameDataProvider Instance { get; private set; } = null!;
 
+    public IDataManager DataManager { get; private set; }
+
     public readonly IReadOnlyDictionary<uint, TerritoryType> TerritoryTypes;
     public readonly IReadOnlyDictionary<uint, Weather> Weathers;
     public readonly IReadOnlyDictionary<uint, WeatherRate> WeatherRates;
@@ -94,5 +96,7 @@ internal class GameDataProvider
         HumanData = new HumanData(dataManager.GetFile("chara/xls/charamake/human.cmp")!.Data);
 
         ModelDatabase = new();
+
+        DataManager = dataManager;
     }
 }

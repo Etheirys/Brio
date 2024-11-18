@@ -30,23 +30,16 @@ internal static class AppearanceSanitizer
                     return;
             }
 
-            var charaMake = GetCharaMakeType(appearance);
-            if(charaMake == null)
+            var menu = BrioCharaMakeType.BuildMenus(appearance).GetMenuForCustomize(CustomizeIndex.RaceFeatureType);
+            if(menu is null)
             {
                 appearance.Customize.RaceFeatureType = 1;
             }
             else
             {
-                var menu = charaMake.BuildMenus().GetMenuForCustomize(CustomizeIndex.RaceFeatureType)!;
                 if(appearance.Customize.RaceFeatureType < 1 || appearance.Customize.RaceFeatureType > menu.SubParams.Length)
                     appearance.Customize.RaceFeatureType = 1;
             }
-
         }
-    }
-
-    public static unsafe BrioCharaMakeType? GetCharaMakeType(ActorAppearance appearance)
-    {
-        return GameDataProvider.Instance.CharaMakeTypes.Select(x => x.Value).FirstOrDefault(x => x.Race.RowId == (uint)appearance.Customize.Race && x.Tribe.RowId == (uint)appearance.Customize.Tribe && x.Gender == appearance.Customize.Gender);
     }
 }

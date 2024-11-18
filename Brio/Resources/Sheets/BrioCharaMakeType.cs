@@ -1,17 +1,14 @@
 ﻿using Brio.Game.Actor.Appearance;
 using Dalamud.Game.ClientState.Objects.Enums;
-using EmbedIO.Utilities;
-using FFXIVClientStructs.FFXIV.Component.Excel;
-using Lumina;
-using Lumina.Data;
 using Lumina.Excel;
 using Lumina.Excel.Sheets;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Brio.Resources.Sheets;
 
-[Sheet("CharaMakeType")]
-internal class BrioCharaMakeType : IExcelRow<BrioCharaMakeType>
+[Sheet("CharaMakeType", 0x80D7DB6D)]
+internal unsafe struct BrioCharaMakeType(ExcelPage page, uint offset, uint row) : IExcelRow<BrioCharaMakeType>
 {
     public const int MenuCount = 28;
     public const int SubMenuParamCount = 100;
@@ -20,109 +17,91 @@ internal class BrioCharaMakeType : IExcelRow<BrioCharaMakeType>
     public const int FaceCount = 8;
     public const int FaceFeatureCount = 7;
 
-    public RowRef<Race>? Race { get; private set; } = null!;
-    public RowRef<Tribe>? Tribe { get; private set; } = null!;
-    public Genders Gender { get; private set; }
+    public uint RowId => row;
 
-    public RowRef<Lobby>[]? Lobbys { get; } = new RowRef<Lobby>[MenuCount];
+    public readonly Collection<CharaMakeStructStruct> CharaMakeStruct => new(page, offset, offset, &CharaMakeStructCtor, 28);
+    public readonly Collection<byte> VoiceStruct => new(page, offset, offset, &VoiceStructCtor, 12);
+    public readonly Collection<FacialFeatureOptionStruct> FacialFeatureOption => new(page, offset, offset, &FacialFeatureOptionCtor, 8);
+    public readonly Collection<EquipmentStruct> Equipment => new(page, offset, offset, &EquipmentCtor, 3);
+    public readonly RowRef<Race> Race => new(page.Module, (uint)page.ReadInt32(offset + 12392), page.Language);
+    public readonly RowRef<Tribe> Tribe => new(page.Module, (uint)page.ReadInt32(offset + 12396), page.Language);
+    public readonly sbyte Gender => page.ReadInt8(offset + 12400);
 
-    public byte[] InitVals { get; } = new byte[MenuCount];
+    private static CharaMakeStructStruct CharaMakeStructCtor(ExcelPage page, uint parentOffset, uint offset, uint i) => new(page, parentOffset, offset + i * 428);
+    private static byte VoiceStructCtor(ExcelPage page, uint parentOffset, uint offset, uint i) => page.ReadUInt8(offset + 11984 + i);
+    private static FacialFeatureOptionStruct FacialFeatureOptionCtor(ExcelPage page, uint parentOffset, uint offset, uint i) => new(page, parentOffset, offset + 11996 + i * 28);
+    private static EquipmentStruct EquipmentCtor(ExcelPage page, uint parentOffset, uint offset, uint i) => new(page, parentOffset, offset + 12224 + i * 56);
 
-    public MenuType[] SubMenuType { get; } = new MenuType[MenuCount];
-
-    public byte[] SubMenuNum { get; } = new byte[MenuCount];
-
-    public byte[] LookAt { get; } = new byte[MenuCount];
-
-    public uint[] SubMenuMask { get; } = new uint[MenuCount];
-
-    public CustomizeIndex[] Customize { get; } = new CustomizeIndex[MenuCount];
-
-    public uint[,] SubMenuParam { get; } = new uint[MenuCount, SubMenuParamCount];
-
-    public byte[,] SubMenuGraphic { get; } = new byte[MenuCount, SubMenuGraphicCount];
-
-    public byte[] Voice { get; } = new byte[VoiceCount];
-
-    public int[,] FacialFeature { get; } = new int[FaceCount, SubMenuGraphicCount];
-
-    public uint RowId => throw new System.NotImplementedException(); //
-   
-    public static BrioCharaMakeType Create(ExcelPage page, uint offset, uint row)
+    public readonly struct CharaMakeStructStruct(ExcelPage page, uint parentOffset, uint offset)
     {
-        BrioCharaMakeType brioCharaMake = new BrioCharaMakeType();
+        public readonly RowRef<Lobby> Menu => new(page.Module, page.ReadUInt32(offset), page.Language);
+        public readonly uint SubMenuMask => page.ReadUInt32(offset + 4);
+        public readonly uint Customize => page.ReadUInt32(offset + 8);
+        public readonly Collection<uint> SubMenuParam => new(page, parentOffset, offset, &SubMenuParamCtor, 100);
+        public readonly byte InitVal => page.ReadUInt8(offset + 412);
+        public readonly byte SubMenuType => page.ReadUInt8(offset + 413);
+        public readonly byte SubMenuNum => page.ReadUInt8(offset + 414);
+        public readonly byte LookAt => page.ReadUInt8(offset + 415);
+        public readonly Collection<byte> SubMenuGraphic => new(page, parentOffset, offset, &SubMenuGraphicCtor, 10);
+
+        private static uint SubMenuParamCtor(ExcelPage page, uint parentOffset, uint offset, uint i) => page.ReadUInt32(offset + 12 + i * 4);
+        private static byte SubMenuGraphicCtor(ExcelPage page, uint parentOffset, uint offset, uint i) => page.ReadUInt8(offset + 416 + i);
+    }
+
+    public readonly struct FacialFeatureOptionStruct(ExcelPage page, uint parentOffset, uint offset)
+    {
+        public readonly int Option1 => page.ReadInt32(offset);
+        public readonly int Option2 => page.ReadInt32(offset + 4);
+        public readonly int Option3 => page.ReadInt32(offset + 8);
+        public readonly int Option4 => page.ReadInt32(offset + 12);
+        public readonly int Option5 => page.ReadInt32(offset + 16);
+        public readonly int Option6 => page.ReadInt32(offset + 20);
+        public readonly int Option7 => page.ReadInt32(offset + 24);
+    }
+
+    public readonly struct EquipmentStruct(ExcelPage page, uint parentOffset, uint offset)
+    {
+        public readonly ulong Helmet => page.ReadUInt64(offset);
+        public readonly ulong Top => page.ReadUInt64(offset + 8);
+        public readonly ulong Gloves => page.ReadUInt64(offset + 16);
+        public readonly ulong Legs => page.ReadUInt64(offset + 24);
+        public readonly ulong Shoes => page.ReadUInt64(offset + 32);
+        public readonly ulong Weapon => page.ReadUInt64(offset + 40);
+        public readonly ulong SubWeapon => page.ReadUInt64(offset + 48);
+    }
+
+    static BrioCharaMakeType IExcelRow<BrioCharaMakeType>.Create(ExcelPage page, uint offset, uint row) =>
+        new(page, offset, row);
+
+    public static MenuCollection BuildMenus(ActorAppearance appearance)
+    {
+        var menus = new List<Menu>();
         
-        brioCharaMake.Race = new RowRef<Race>(page.Module, (uint)page.ReadInt32(0));
-        brioCharaMake.Tribe = new RowRef<Tribe>(page.Module, (uint)page.ReadInt32(1));
-        brioCharaMake.Gender = (Genders)page.ReadInt8(2);
-      
-        for(int i = 0; i < MenuCount; i++)
-            brioCharaMake.Lobbys[i] = new RowRef<Lobby>(page.Module, parser.ReadColumn<uint>(3 + i), language);
-
-        for(int i = 0; i < MenuCount; i++)
-            brioCharaMake.InitVals[i] = parser.ReadColumn<byte>(31 + i);
-
-        for(int i = 0; i < MenuCount; i++)
-            SubMenuType[i] = (MenuType)parser.ReadColumn<byte>(59 + i);
-
-        for(int i = 0; i < MenuCount; i++)
-            SubMenuNum[i] = parser.ReadColumn<byte>(87 + i);
-
-        for(int i = 0; i < MenuCount; i++)
-            LookAt[i] = parser.ReadColumn<byte>(115 + i);
-
-        for(int i = 0; i < MenuCount; i++)
-            SubMenuMask[i] = parser.ReadColumn<uint>(143 + i);
-
-        for(int i = 0; i < MenuCount; i++)
-            Customize[i] = (CustomizeIndex)parser.ReadColumn<uint>(171 + i);
-
-        for(int i = 0; i < MenuCount; i++)
-            for(int x = 0; x < SubMenuParamCount; x++)
-                SubMenuParam[i, x] = parser.ReadColumn<uint>(199 + (x * MenuCount) + i);
-
-        for(int i = 0; i < MenuCount; i++)
-            for(int x = 0; x < SubMenuGraphicCount; x++)
-                SubMenuGraphic[i, x] = parser.ReadColumn<byte>(2999 + (x * MenuCount) + i);
-
-        for(int i = 0; i < VoiceCount; i++)
-            Voice[i] = parser.ReadColumn<byte>(3279 + i);
-
-        for(int i = 0; i < FaceCount; i++)
-            for(int x = 0; x < FaceFeatureCount; x++)
-                FacialFeature[i, x] = parser.ReadColumn<int>(3291 + (x * FaceCount) + i);
+        var CharaMakeTypes = GameDataProvider.Instance.DataManager.GetExcelSheet<BrioCharaMakeType>(name: "CharaMakeType").
+            Where(x => x.Gender == (sbyte)appearance.Customize.Gender && x.Race.RowId == (uint)appearance.Customize.Race).
+            First();
 
 
-        return brioCharaMake;
-    }
-
-    public override void PopulateData(RowParser parser, Lumina.GameData gameData, Language language)
-    {
-        base.PopulateData(parser, gameData, language);
-
-
-    }
-
-    public MenuCollection BuildMenus()
-    {
-        var menus = new Menu[MenuCount];
-
-        for(int i = 0; i < MenuCount; ++i)
+        for(uint i = 0; i < CharaMakeTypes.CharaMakeStruct.Count; ++i)
         {
-            var lobby = Lobbys[i].ValueNullable;
+            var firstChar = CharaMakeTypes.CharaMakeStruct[(int)i];
 
-            if(lobby == null)
-                continue;
+            var title = firstChar.Menu.ValueNullable?.Text.ExtractText() ?? "Unknown";
+            var menuType = (MenuType)firstChar.SubMenuType;
+            var subMenuNum = firstChar.SubMenuNum;
+            var subMenuMask = firstChar.SubMenuMask;
+            var customizeIndex = (CustomizeIndex)firstChar.Customize;
+            var initialValue = firstChar.InitVal;
 
-
-            var title = lobby.Value.Text.ToString() ?? "Unknown";
-            var menuType = SubMenuType[i];
-            var subMenuNum = SubMenuNum[i];
-            var subMenuMask = SubMenuMask[i];
-            var customizeIndex = Customize[i];
-            var initialValue = InitVals[i];
             var subParams = new int[subMenuNum];
             var subGraphics = new byte[SubMenuGraphicCount];
+
+            //int[,] FacialFeatures = new int[charaMakeType.FacialFeatureOption.Count, 7];
+
+            //for(int y = 0; y < charaMakeType.FacialFeatureOption.Count; y++)
+            //{
+            //    FacialFeatures[y] = charaMakeType.FacialFeatureOption[y];
+            //}
 
             for(int x = 0; x < subMenuNum; ++x)
             {
@@ -132,15 +111,18 @@ internal class BrioCharaMakeType : IExcelRow<BrioCharaMakeType>
                     continue;
                 }
 
-                subParams[x] = (int)SubMenuParam[i, x];
+                subParams[x] = (int)firstChar.SubMenuParam[x];
             }
 
-            menus[i] = new Menu(i, RowId, title, (Races)((RowRef?)Race).Value.RowId, (Tribes)Tribe.RowId, Gender, lobby.Value, menuType, subMenuMask, customizeIndex, initialValue, subParams, subGraphics, Voice, FacialFeature);
+            menus.Add(new Menu(i, CharaMakeTypes.RowId, title,
+                CharaMakeTypes.Race.IsValid ? (Races)CharaMakeTypes.Race.Value.RowId : 0,
+                CharaMakeTypes.Tribe.IsValid ? (Tribes)CharaMakeTypes.Tribe.Value.RowId : 0,
+                (Genders)CharaMakeTypes.Gender, menuType, subMenuMask, customizeIndex,
+                initialValue, subParams, subGraphics, [.. CharaMakeTypes.VoiceStruct]));
         }
 
-        return new MenuCollection(menus);
+        return new MenuCollection([.. menus]);
     }
-
 
     public class MenuCollection(Menu[] menus)
     {
@@ -162,7 +144,13 @@ internal class BrioCharaMakeType : IExcelRow<BrioCharaMakeType>
         }
     }
 
-    public record class Menu(int MenuId, uint CharaMakeRow, string Title, Races Race, Tribes Tribe, Genders Gender, Lobby Lobby, MenuType Type, uint MenuMask, CustomizeIndex CustomizeIndex, byte InitialValue, int[] SubParams, byte[] SubGraphics, byte[] Voices, int[,] FacialFeatures);
+    public record class Menu(uint MenuId,
+        uint CharaMakeRow, string Title,
+        Races Race, Tribes Tribe, Genders
+        Gender, MenuType Type, uint MenuMask,
+        CustomizeIndex CustomizeIndex, byte InitialValue,
+        int[] SubParams, byte[] SubGraphics, byte[] Voices
+        /*int[,] FacialFeatures*/);
 
     public enum MenuType : byte
     {
