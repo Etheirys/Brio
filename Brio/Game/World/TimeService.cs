@@ -103,7 +103,7 @@ internal class TimeService : IDisposable
         _clientState.Logout += OnLogout;
     }
 
-    private void OnLogout()
+    private void OnLogout(int type, int code)
     {
         IsTimeFrozen = false;
     }

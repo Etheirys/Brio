@@ -305,7 +305,7 @@ internal class ActionTimelineEditor(CutsceneManager cutsceneManager, GPoseServic
 
         string preview = "None";
         if(lipsOverride != 0)
-            preview = GameDataProvider.Instance.ActionTimelines[lipsOverride].Key;
+            preview = GameDataProvider.Instance.ActionTimelines[lipsOverride].Key.ToString();
 
         ImGui.SetNextItemWidth(MaxItemWidth);
         using(var combo = ImRaii.Combo("###lips", preview))

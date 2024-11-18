@@ -98,16 +98,16 @@ internal class CompanionSelector(string id) : Selector<CompanionRowUnion>(id)
 
         // Get name
         var textA = itemA.Match(
-            companion => companion.Singular,
-            mount => mount.Singular,
-            ornament => ornament.Singular,
+            companion => companion.Singular.ToString(),
+            mount => mount.Singular.ToString(),
+            ornament => ornament.Singular.ToString(),
             none => ""
         );
 
         var textB = itemB.Match(
-            companion => companion.Singular,
-            mount => mount.Singular,
-            ornament => ornament.Singular,
+            companion => companion.Singular.ToString(),
+            mount => mount.Singular.ToString(),
+            ornament => ornament.Singular.ToString(),
             none => ""
         );
 
