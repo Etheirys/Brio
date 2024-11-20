@@ -36,17 +36,17 @@ internal struct BrioHairMakeType : IExcelRow<BrioHairMakeType>
         };
 
         for(int i = 0; i < EntryCount; i++)
-            brioHairMakeType.HairStyles[i] = new RowRef<CharaMakeCustomize>(page.Module, (uint)page.ReadUInt32((nuint)(offset + 0 + (i * 4))), page.Language);
+            brioHairMakeType.HairStyles[i] = new RowRef<CharaMakeCustomize>(page.Module, page.ReadUInt32((nuint)(offset + 0xC + (i * 4))), page.Language);
 
         for(int i = 0; i < EntryCount; i++)
-            brioHairMakeType.FacePaints[i] = new RowRef<CharaMakeCustomize>(page.Module, (uint)page.ReadUInt32((nuint)(offset + 412 + (i * 4))), page.Language);
+            brioHairMakeType.FacePaints[i] = new RowRef<CharaMakeCustomize>(page.Module, page.ReadUInt32((nuint)(offset + 0xBC0 + (i * 4))), page.Language);
 
         return brioHairMakeType;
     }
 
     public static IEnumerable<CharaMakeCustomize> GetHairStyles(ActorCustomize customize)
     {
-        var HairMakeType = GameDataProvider.Instance.DataManager.GetExcelSheet<BrioHairMakeType>().Where(x => x.Gender == customize.Gender);
+        var HairMakeType = GameDataProvider.Instance.DataManager.GetExcelSheet<BrioHairMakeType>().Where(x => x.Gender == customize.Gender && x.Race.RowId == (uint) customize.Race && x.Tribe.RowId == (uint) customize.Tribe);
 
         foreach(var item in HairMakeType)
         {
@@ -60,7 +60,7 @@ internal struct BrioHairMakeType : IExcelRow<BrioHairMakeType>
 
     public static IEnumerable<CharaMakeCustomize> GetFacePaints(ActorCustomize customize)
     {
-        var FacePaints = GameDataProvider.Instance.DataManager.GetExcelSheet<BrioHairMakeType>().Where(x => x.Gender == customize.Gender);
+        var FacePaints = GameDataProvider.Instance.DataManager.GetExcelSheet<BrioHairMakeType>().Where(x => x.Gender == customize.Gender && x.Race.RowId == (uint)customize.Race && x.Tribe.RowId == (uint)customize.Tribe);
 
         foreach(var item in FacePaints)
         {

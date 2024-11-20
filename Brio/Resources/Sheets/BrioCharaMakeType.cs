@@ -48,15 +48,18 @@ internal unsafe struct BrioCharaMakeType(ExcelPage page, uint offset, uint row) 
         private static byte SubMenuGraphicCtor(ExcelPage page, uint parentOffset, uint offset, uint i) => page.ReadUInt8(offset + 416 + i);
     }
 
-    public readonly struct FacialFeatureOptionStruct(ExcelPage page, uint parentOffset, uint offset)
+    public readonly struct FacialFeatureOptionStruct
     {
-        public readonly int Option1 => page.ReadInt32(offset);
-        public readonly int Option2 => page.ReadInt32(offset + 4);
-        public readonly int Option3 => page.ReadInt32(offset + 8);
-        public readonly int Option4 => page.ReadInt32(offset + 12);
-        public readonly int Option5 => page.ReadInt32(offset + 16);
-        public readonly int Option6 => page.ReadInt32(offset + 20);
-        public readonly int Option7 => page.ReadInt32(offset + 24);
+        public FacialFeatureOptionStruct(ExcelPage page, uint parentOffset, uint offset)
+        {
+            Options = new int[FaceFeatureCount];
+            for(int i = 0; i < FaceFeatureCount; ++i)
+            {
+                Options[i] = page.ReadInt32((nuint)(offset + i * 4));
+            }
+
+        }
+        public readonly int[] Options;
     }
 
     public readonly struct EquipmentStruct(ExcelPage page, uint parentOffset, uint offset)
@@ -96,12 +99,16 @@ internal unsafe struct BrioCharaMakeType(ExcelPage page, uint offset, uint row) 
             var subParams = new int[subMenuNum];
             var subGraphics = new byte[SubMenuGraphicCount];
 
-            //int[,] FacialFeatures = new int[charaMakeType.FacialFeatureOption.Count, 7];
+            int[,] FacialFeatures = new int[FaceCount, FaceFeatureCount];
 
-            //for(int y = 0; y < charaMakeType.FacialFeatureOption.Count; y++)
-            //{
-            //    FacialFeatures[y] = charaMakeType.FacialFeatureOption[y];
-            //}
+            for(int y = 0; y < FaceCount; ++y)
+            {
+                var faceOption = CharaMakeTypes.FacialFeatureOption[y];
+                for(int x = 0; x < faceOption.Options.Length; ++x)
+                {
+                    FacialFeatures[y, x] = faceOption.Options[x];
+                }
+            }
 
             for(int x = 0; x < subMenuNum; ++x)
             {
@@ -118,7 +125,9 @@ internal unsafe struct BrioCharaMakeType(ExcelPage page, uint offset, uint row) 
                 CharaMakeTypes.Race.IsValid ? (Races)CharaMakeTypes.Race.Value.RowId : 0,
                 CharaMakeTypes.Tribe.IsValid ? (Tribes)CharaMakeTypes.Tribe.Value.RowId : 0,
                 (Genders)CharaMakeTypes.Gender, menuType, subMenuMask, customizeIndex,
-                initialValue, subParams, subGraphics, [.. CharaMakeTypes.VoiceStruct]));
+                initialValue, subParams, subGraphics, [.. CharaMakeTypes.VoiceStruct], FacialFeatures));
+
+            
         }
 
         return new MenuCollection([.. menus]);
@@ -149,8 +158,8 @@ internal unsafe struct BrioCharaMakeType(ExcelPage page, uint offset, uint row) 
         Races Race, Tribes Tribe, Genders
         Gender, MenuType Type, uint MenuMask,
         CustomizeIndex CustomizeIndex, byte InitialValue,
-        int[] SubParams, byte[] SubGraphics, byte[] Voices
-        /*int[,] FacialFeatures*/);
+        int[] SubParams, byte[] SubGraphics, byte[] Voices,
+        int[,] FacialFeatures);
 
     public enum MenuType : byte
     {
