@@ -162,7 +162,7 @@ internal class ActionTimelineSelector(string id) : Selector<ActionTimelineSelect
         if(item.TimelineType == ActionTimelineSelectorEntry.OriginalType.Raw && !_showRaw)
             return false;
 
-        if(item.Slot != ActionTimelineSlots.Base && !_showBlendable)
+        if(item.Slot != ActionTimelineSlots.Base && _showBlendable)
             return false;
 
         var searchText = $"{item.Name} {item.TimelineId} {item.TimelineType} {item.Slot} {item.Purpose} {item.Key}";
