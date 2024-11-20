@@ -38,10 +38,9 @@ internal class InfoWindow : Window
                     Brio is currently in alpha, as such, there may be bugs,
                     if you find any, please report them.
 
-                    A Big Thank you to (Sufferhymn), (Night Song), (Alvar Valo), 
-                    (YikesXD), (Yasumi) & (Selitha)
-                    for their support on Kofi!
-                                        
+                    A Big Thank you to (Sufferhymn), (Night Song), (Alvar Valo), (YikesXD), 
+                    (Yasumi), (Yume) (A.HK), (LotusEcho), & (Selitha), for their support on Kofi!
+                    
                     Thank you to the following for their code contributions to Brio!  
                     (@Yuki-Codes), (@danma3x), (@WorstAquaPlayer), 
                     (@snaeling), (@Caraxi) & (@gris-fuego);
