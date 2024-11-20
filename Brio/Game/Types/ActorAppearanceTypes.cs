@@ -1,9 +1,9 @@
 ﻿using Brio.Game.Actor.Appearance;
-using Lumina.Excel.GeneratedSheets;
+using Lumina.Excel.Sheets;
 using OneOf;
 using OneOf.Types;
-using Companion = Lumina.Excel.GeneratedSheets.Companion;
-using Ornament = Lumina.Excel.GeneratedSheets.Ornament;
+using Companion = Lumina.Excel.Sheets.Companion;
+using Ornament = Lumina.Excel.Sheets.Ornament;
 
 namespace Brio.Game.Types;
 
@@ -13,8 +13,8 @@ internal partial class ActorAppearanceUnion : OneOfBase<BNpcBase, ENpcBase, Moun
     public static implicit operator ActorAppearance(ActorAppearanceUnion union) => union.Match(
         bnpc => ActorAppearance.FromBNpc(bnpc),
         enpc => ActorAppearance.FromENpc(enpc),
-        mount => ActorAppearance.FromModelChara((int)mount.ModelChara.Row),
-        companion => ActorAppearance.FromModelChara((int)companion.Model.Row),
+        mount => ActorAppearance.FromModelChara((int)mount.ModelChara.RowId),
+        companion => ActorAppearance.FromModelChara((int)companion.Model.RowId),
         ornament => ActorAppearance.FromModelChara(ornament.Model),
         none => new ActorAppearance()
     );

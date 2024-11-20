@@ -37,9 +37,9 @@ internal class GameDataNpcSource : GameDataAppearanceSourceBase
             string? displayName = null;
 
             var resident = Lumina.ENpcResidents[npc.RowId];
-            if(resident != null && !string.IsNullOrEmpty(resident.Singular))
+            if(!string.IsNullOrEmpty(resident.Singular.ToString()))
             {
-                displayName = resident.Singular;
+                displayName = resident.Singular.ToString();
             }
             else
             {
@@ -69,9 +69,9 @@ internal class GameDataNpcSource : GameDataAppearanceSourceBase
             var nameId = uint.Parse(name.Substring(2));
             if(GameDataProvider.Instance.BNpcNames.TryGetValue(nameId, out var nameRef))
             {
-                if(nameRef != null && !string.IsNullOrEmpty(nameRef.Singular))
+                if(!string.IsNullOrEmpty(nameRef.Singular.ToString()))
                 {
-                    return nameRef.Singular;
+                    return nameRef.Singular.ToString();
                 }
             }
         }

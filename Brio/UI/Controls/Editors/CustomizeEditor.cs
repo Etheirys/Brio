@@ -37,13 +37,9 @@ internal class CustomizeEditor()
             ImGui.Separator();
             didChange |= DrawRaceSelector(ref currentAppearance.Customize);
             ImGui.Separator();
-
-            var charaMake = _capability.Character.GetCharaMakeType();
-            if(charaMake != null)
-            {
-                var menus = charaMake.BuildMenus();
-                didChange |= DrawMenus(ref currentAppearance, menus);
-            }
+        
+            var menus = BrioCharaMakeType.BuildMenus(currentAppearance);
+            didChange |= DrawMenus(ref currentAppearance, menus);
         }
         else
         {
@@ -265,13 +261,23 @@ internal class CustomizeEditor()
     {
         bool madeChange = false;
 
-        var hairStyles = GameDataProvider.Instance.HairMakeTypes[menu.CharaMakeRow].HairStyles.Where(x => x.Row != 0).Select(x => x.Value!)!;
+        var hairStyles = BrioHairMakeType.GetHairStyles(customize);
 
         var hairColors = GameDataProvider.Instance.HumanData.GetHairColors(customize.Tribe, customize.Gender);
         var hairHighlightColors = GameDataProvider.Instance.HumanData.GetHairHighlightColors();
 
         int currentHairIdx = customize.HairStyle;
-        var currentIcon = hairStyles.FirstOrDefault(f => f?.FeatureID == currentHairIdx, null)?.Icon ?? 0;
+
+        uint currentIcon = 0;
+        try
+        {
+            var hairStyle = hairStyles.First(f => f.FeatureID == currentHairIdx);
+            currentIcon = hairStyle.Icon;
+        }
+        catch(Exception)
+        {
+
+        }
 
         int currentHairColorIdx = customize.HairColor;
         var currentHairColor = hairColors.Length > currentHairColorIdx ? hairColors[currentHairColorIdx] : 0;
@@ -328,7 +334,7 @@ internal class CustomizeEditor()
         ImGui.Text(title);
         ImGui.SetCursorPos(whenDone);
 
-        if(ImBrio.DrawIconSelectorPopup("hair_style_popup", hairStyles.Select(x => new ImBrio.IconSelectorEntry(x.FeatureID, x.Icon)).ToArray(), ref currentHairIdx, columns: 6, iconSize: IconSize))
+        if(ImBrio.DrawIconSelectorPopup("hair_style_popup", hairStyles.Where(x => x.FeatureID > 0).Select(x => new ImBrio.IconSelectorEntry(x.FeatureID, x.Icon)).ToArray(), ref currentHairIdx, columns: 6, iconSize: IconSize))
         {
             customize.HairStyle = (byte)currentHairIdx;
             madeChange |= true;
@@ -433,14 +439,24 @@ internal class CustomizeEditor()
     {
         bool madeChange = false;
 
-        var facePaints = GameDataProvider.Instance.HairMakeTypes[menu.CharaMakeRow].FacePaints.Where(x => x.Row != 0).Select(x => x.Value!)!;
+        var facePaints = BrioHairMakeType.GetFacePaints(customize);
 
         var facePaintColors = GameDataProvider.Instance.HumanData.GetFacepaintColors();
 
         var facepaintFlipped = customize.FacepaintFlipped;
 
         int currentFacepaintIdx = customize.RealFacepaint;
-        var currentIcon = facePaints.FirstOrDefault(f => f?.FeatureID == currentFacepaintIdx, null)?.Icon ?? 0;
+
+        uint currentIcon = 0;
+        try
+        {
+            var facePaint = facePaints.First(f => f.FeatureID == currentFacepaintIdx);
+            currentIcon = facePaint.Icon;
+        }
+        catch(Exception)
+        {
+
+        }
 
         int currentColorIdx = customize.FacePaintColor;
         var currentHairColor = facePaintColors.Length > currentColorIdx ? facePaintColors[currentColorIdx] : 0;
@@ -484,7 +500,7 @@ internal class CustomizeEditor()
         ImGui.Text(title);
         ImGui.SetCursorPos(whenDone);
 
-        if(ImBrio.DrawIconSelectorPopup("face_paint_popup", facePaints.Select(x => new ImBrio.IconSelectorEntry(x.FeatureID, x.Icon)).ToArray(), ref currentFacepaintIdx, columns: 6, iconSize: IconSize, fallbackImage: "Images.Head.png"))
+        if(ImBrio.DrawIconSelectorPopup("face_paint_popup", facePaints.Where(x => x.FeatureID > 0).Select(x => new ImBrio.IconSelectorEntry(x.FeatureID, x.Icon)).ToArray(), ref currentFacepaintIdx, columns: 6, iconSize: IconSize, fallbackImage: "Images.Head.png"))
         {
             customize.RealFacepaint = (byte)currentFacepaintIdx;
             madeChange |= true;

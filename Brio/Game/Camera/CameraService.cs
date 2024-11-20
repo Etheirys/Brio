@@ -151,5 +151,6 @@ internal unsafe class CameraService : IDisposable
         _cameraCollisionHook.Dispose();
         _cameraUpdateHook.Dispose();
         _cameraSceneUpdateHook.Dispose();
+        ProjectionHook.Dispose();
     }
 }

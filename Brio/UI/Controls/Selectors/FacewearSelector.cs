@@ -39,7 +39,7 @@ internal class FacewearSelector(string id) : Selector<FacewearUnion>(id)
         return item.Match(
             (glasses) =>
             {
-                if(string.IsNullOrEmpty(glasses.Name))
+                if(string.IsNullOrEmpty(glasses.Name.ToString()))
                     return false;
 
                 var searchText = $"{glasses.Name} {glasses.RowId}";
@@ -64,12 +64,12 @@ internal class FacewearSelector(string id) : Selector<FacewearUnion>(id)
 
         // Get name
         var textA = itemA.Match(
-            glasses => glasses.Name,
+            glasses => glasses.Name.ToString(),
             none => ""
         );
 
         var textB = itemB.Match(
-            glasses => glasses.Name,
+            glasses => glasses.Name.ToString(),
             none => ""
         );
 

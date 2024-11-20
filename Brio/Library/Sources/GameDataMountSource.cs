@@ -19,7 +19,7 @@ internal class GameDataMountSource : GameDataAppearanceSourceBase
         {
             string rowName = $"Mount {mount.RowId}";
 
-            string name = mount.Singular;
+            string name = mount.Singular.ToString();
             if(string.IsNullOrEmpty(name))
                 name = rowName;
 

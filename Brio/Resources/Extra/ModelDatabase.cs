@@ -1,7 +1,7 @@
 ﻿using Brio.Core;
 using Brio.Game.Actor.Appearance;
 using FFXIVClientStructs.FFXIV.Client.Game.Character;
-using Lumina.Excel.GeneratedSheets;
+using Lumina.Excel.Sheets;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -22,15 +22,15 @@ internal class ModelDatabase
         var items = GameDataProvider.Instance.Items.Values;
         foreach(var item in items)
         {
-            var slots = item.EquipSlotCategory.Value?.GetEquipSlots() ?? ActorEquipSlot.None;
+            var slots = item.EquipSlotCategory.ValueNullable?.GetEquipSlots() ?? ActorEquipSlot.None;
             if(slots != ActorEquipSlot.None)
             {
-                var modelInfo = new ModelInfo(item.ModelMain, item.RowId, item.Name, item.Icon, slots, item);
+                var modelInfo = new ModelInfo(item.ModelMain, item.RowId, item.Name.ToString(), item.Icon, slots, item);
                 AddModel(modelInfo);
 
                 if(item.ModelSub != 0)
                 {
-                    modelInfo = new ModelInfo(item.ModelSub, item.RowId, item.Name, item.Icon, ActorEquipSlot.OffHand, item);
+                    modelInfo = new ModelInfo(item.ModelSub, item.RowId, item.Name.ToString(), item.Icon, ActorEquipSlot.OffHand, item);
                     AddModel(modelInfo);
                 }
             }

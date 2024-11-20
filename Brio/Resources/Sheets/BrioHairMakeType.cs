@@ -1,36 +1,74 @@
 ﻿using Brio.Game.Actor.Appearance;
-using Lumina;
-using Lumina.Data;
 using Lumina.Excel;
-using Lumina.Excel.GeneratedSheets;
+using Lumina.Excel.Sheets;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Brio.Resources.Sheets;
 
 [Sheet("HairMakeType")]
-internal class BrioHairMakeType : ExcelRow
+internal struct BrioHairMakeType : IExcelRow<BrioHairMakeType>
 {
     public const int EntryCount = 100;
 
-    public LazyRow<Race> Race { get; private set; } = null!;
-    public LazyRow<Tribe> Tribe { get; private set; } = null!;
+    public BrioHairMakeType()
+    {
+    }
+
+    public uint RowId { get; private set; }
+
+    public RowRef<Race> Race { get; private set; }
+    public RowRef<Tribe> Tribe { get; private set; }
     public Genders Gender { get; private set; }
 
-    public LazyRow<CharaMakeCustomize>[] HairStyles = new LazyRow<CharaMakeCustomize>[EntryCount];
-    public LazyRow<CharaMakeCustomize>[] FacePaints = new LazyRow<CharaMakeCustomize>[EntryCount];
+    public RowRef<CharaMakeCustomize>[] HairStyles = new RowRef<CharaMakeCustomize>[EntryCount];
+    public RowRef<CharaMakeCustomize>[] FacePaints = new RowRef<CharaMakeCustomize>[EntryCount];
 
-
-    public override void PopulateData(RowParser parser, GameData gameData, Language language)
+    public static BrioHairMakeType Create(ExcelPage page, uint offset, uint row)
     {
-        base.PopulateData(parser, gameData, language);
+        var brioHairMakeType = new BrioHairMakeType
+        {
+            RowId = row,
 
-        Race = new LazyRow<Race>(gameData, parser.ReadColumn<int>(0), language);
-        Tribe = new LazyRow<Tribe>(gameData, parser.ReadColumn<int>(1), language);
-        Gender = (Genders)parser.ReadColumn<sbyte>(2);
+            Race = new RowRef<Race>(page.Module, (uint)page.ReadInt32(offset + 4076), page.Language),
+            Tribe = new RowRef<Tribe>(page.Module, (uint)page.ReadInt32(offset + 4080), page.Language),
+            Gender = (Genders)(uint)page.ReadInt8(offset + 4084)
+        };
 
         for(int i = 0; i < EntryCount; i++)
-            HairStyles[i] = new LazyRow<CharaMakeCustomize>(gameData, parser.ReadColumn<uint>(66 + (i * 9)), language);
+            brioHairMakeType.HairStyles[i] = new RowRef<CharaMakeCustomize>(page.Module, page.ReadUInt32((nuint)(offset + 0xC + (i * 4))), page.Language);
 
         for(int i = 0; i < EntryCount; i++)
-            FacePaints[i] = new LazyRow<CharaMakeCustomize>(gameData, parser.ReadColumn<uint>(73 + (i * 9)), language);
+            brioHairMakeType.FacePaints[i] = new RowRef<CharaMakeCustomize>(page.Module, page.ReadUInt32((nuint)(offset + 0xBC0 + (i * 4))), page.Language);
+
+        return brioHairMakeType;
+    }
+
+    public static IEnumerable<CharaMakeCustomize> GetHairStyles(ActorCustomize customize)
+    {
+        var HairMakeType = GameDataProvider.Instance.DataManager.GetExcelSheet<BrioHairMakeType>().Where(x => x.Gender == customize.Gender && x.Race.RowId == (uint) customize.Race && x.Tribe.RowId == (uint) customize.Tribe);
+
+        foreach(var item in HairMakeType)
+        {
+            foreach(var item2 in item.HairStyles)
+            {
+                if(item2.IsValid)
+                    yield return item2.Value;
+            }
+        }
+    }
+
+    public static IEnumerable<CharaMakeCustomize> GetFacePaints(ActorCustomize customize)
+    {
+        var FacePaints = GameDataProvider.Instance.DataManager.GetExcelSheet<BrioHairMakeType>().Where(x => x.Gender == customize.Gender && x.Race.RowId == (uint)customize.Race && x.Tribe.RowId == (uint)customize.Tribe);
+
+        foreach(var item in FacePaints)
+        {
+            foreach(var item2 in item.FacePaints)
+            {
+                if(item2.IsValid)
+                    yield return item2.Value;
+            }
+        }
     }
 }

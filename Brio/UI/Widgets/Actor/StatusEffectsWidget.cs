@@ -97,12 +97,12 @@ internal class StatusEffectsWidget(StatusEffectCapability capability) : Widget<S
 
                 if(_globalStatusEffectSelector.SoftSelectionChanged && _globalStatusEffectSelector.SoftSelected != null)
                 {
-                    _selectedStatus = (int)_globalStatusEffectSelector.SoftSelected.RowId;
+                    _selectedStatus = (int)_globalStatusEffectSelector.SoftSelected.Status.RowId;
                 }
 
                 if(_globalStatusEffectSelector.SelectionChanged && _globalStatusEffectSelector.Selected != null)
                 {
-                    _selectedStatus = (int)_globalStatusEffectSelector.Selected.RowId;
+                    _selectedStatus = (int)_globalStatusEffectSelector.Selected.Status.RowId;
                     ApplyStatusEffect();
                     ImGui.CloseCurrentPopup();
                 }

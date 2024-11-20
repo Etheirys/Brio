@@ -164,10 +164,4 @@ internal static class CharacterExtensions
         }
         return null;
     }
-
-    public static unsafe BrioCharaMakeType? GetCharaMakeType(this ICharacter go)
-    {
-        var drawData = go.Native()->DrawData;
-        return GameDataProvider.Instance.CharaMakeTypes.Select(x => x.Value).FirstOrDefault(x => x.Race.Row == (uint)drawData.CustomizeData.Race && x.Tribe.Row == (uint)drawData.CustomizeData.Tribe && x.Gender == (Genders)drawData.CustomizeData.Sex);
-    }
 }

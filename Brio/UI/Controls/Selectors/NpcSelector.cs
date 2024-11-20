@@ -2,7 +2,7 @@
 using Brio.Resources;
 using Brio.UI.Controls.Stateless;
 using ImGuiNET;
-using Lumina.Excel.GeneratedSheets;
+using Lumina.Excel.Sheets;
 using System;
 using System.Collections.Generic;
 using System.Numerics;
@@ -39,11 +39,9 @@ internal class NpcSelector(string id) : Selector<NpcSelectorEntry>(id)
             string name = $"E:{npc.RowId:D7}";
 
             var resident = GameDataProvider.Instance.ENpcResidents[npc.RowId];
-            if(resident != null)
-            {
-                if(!string.IsNullOrEmpty(resident.Singular))
-                    name = resident.Singular;
-            }
+
+            if(!string.IsNullOrEmpty(resident.Singular.ToString()))
+                name = resident.Singular.ToString();
 
             name = ResolveName(name);
             AddItem(new NpcSelectorEntry(name, 0, npc));
@@ -51,17 +49,17 @@ internal class NpcSelector(string id) : Selector<NpcSelectorEntry>(id)
 
         foreach(var (_, mount) in GameDataProvider.Instance.Mounts)
         {
-            AddItem(new NpcSelectorEntry(mount.Singular ?? $"Mount {mount.RowId}", mount.Icon, mount));
+            AddItem(new NpcSelectorEntry(mount.Singular.ToString() ?? $"Mount {mount.RowId}", mount.Icon, mount));
         }
 
         foreach(var (_, companion) in GameDataProvider.Instance.Companions)
         {
-            AddItem(new NpcSelectorEntry(companion.Singular ?? $"Companion {companion.RowId}", companion.Icon, companion));
+            AddItem(new NpcSelectorEntry(companion.Singular.ToString() ?? $"Companion {companion.RowId}", companion.Icon, companion));
         }
 
         foreach(var (_, ornament) in GameDataProvider.Instance.Ornaments)
         {
-            AddItem(new NpcSelectorEntry(ornament.Singular ?? $"Ornament {ornament.RowId}", ornament.Icon, ornament));
+            AddItem(new NpcSelectorEntry(ornament.Singular.ToString() ?? $"Ornament {ornament.RowId}", ornament.Icon, ornament));
         }
     }
 
@@ -76,8 +74,8 @@ internal class NpcSelector(string id) : Selector<NpcSelectorEntry>(id)
         {
             var nameId = uint.Parse(name.Substring(2));
             if(GameDataProvider.Instance.BNpcNames.TryGetValue(nameId, out var nameRef))
-                if(nameRef != null && !string.IsNullOrEmpty(nameRef.Singular))
-                    name = nameRef.Singular;
+                if(!string.IsNullOrEmpty(nameRef.Singular.ToString()))
+                    name = nameRef.Singular.ToString();
         }
 
         return name;
@@ -110,10 +108,10 @@ internal class NpcSelector(string id) : Selector<NpcSelectorEntry>(id)
     protected override void DrawItem(NpcSelectorEntry item, bool isHovered)
     {
         var details = item.Appearance.Match(
-            bnpc => $"Battle NPC: {bnpc.RowId}\nModel: {bnpc.ModelChara.Row}",
-            enpc => $"Event NPC: {enpc.RowId}\nModel: {enpc.ModelChara.Row}",
-            mount => $"Mount: {mount.RowId}\nModel: {mount.ModelChara.Row}",
-            companion => $"Companion: {companion.RowId}\nModel: {companion.Model.Row}",
+            bnpc => $"Battle NPC: {bnpc.RowId}\nModel: {bnpc.ModelChara.RowId}",
+            enpc => $"Event NPC: {enpc.RowId}\nModel: {enpc.ModelChara.RowId}",
+            mount => $"Mount: {mount.RowId}\nModel: {mount.ModelChara.RowId}",
+            companion => $"Companion: {companion.RowId}\nModel: {companion.Model.RowId}",
             ornament => $"Ornament: {ornament.RowId}\nModel: {ornament.Model}",
             none => ""
         );
@@ -128,8 +126,8 @@ internal class NpcSelector(string id) : Selector<NpcSelectorEntry>(id)
         bool shouldHide = item.Appearance.Match(
             bnpc => !showBNpcs || bnpc.RowId == 0,
             enpc => !showENpcs || enpc.RowId == 0,
-            mount => !showMounts || mount.ModelChara.Row == 0,
-            companion => !showCompanions || companion.Model.Row == 0,
+            mount => !showMounts || mount.ModelChara.RowId == 0,
+            companion => !showCompanions || companion.Model.RowId == 0,
             ornament => !showOrnaments || ornament.Model == 0,
             none => true
         );
@@ -138,10 +136,10 @@ internal class NpcSelector(string id) : Selector<NpcSelectorEntry>(id)
             return false;
 
         string searchTerm = item.Appearance.Match(
-            bnpc => $"{item.Name} {bnpc.RowId} {bnpc.ModelChara.Row}",
-            enpc => $"{item.Name} {enpc.RowId} {enpc.ModelChara.Row}",
-            mount => $"{item.Name} {mount.RowId} {mount.ModelChara.Row}",
-            companion => $"{item.Name} {companion.RowId} {companion.Model.Row}",
+            bnpc => $"{item.Name} {bnpc.RowId} {bnpc.ModelChara.RowId}",
+            enpc => $"{item.Name} {enpc.RowId} {enpc.ModelChara.RowId}",
+            mount => $"{item.Name} {mount.RowId} {mount.ModelChara.RowId}",
+            companion => $"{item.Name} {companion.RowId} {companion.Model.RowId}",
             ornament => $"{item.Name} {ornament.RowId} {ornament.Model}",
             none => ""
         );

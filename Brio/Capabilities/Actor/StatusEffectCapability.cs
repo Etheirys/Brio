@@ -3,7 +3,7 @@ using Brio.Game.Actor.Extensions;
 using Brio.Resources;
 using Brio.UI.Widgets.Actor;
 using Dalamud.Game.ClientState.Objects.Types;
-using Lumina.Excel.GeneratedSheets;
+using Lumina.Excel.Sheets;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;

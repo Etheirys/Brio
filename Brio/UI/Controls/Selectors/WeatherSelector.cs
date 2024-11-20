@@ -2,7 +2,7 @@
 using Brio.Resources;
 using Brio.UI.Controls.Stateless;
 using ImGuiNET;
-using Lumina.Excel.GeneratedSheets;
+using Lumina.Excel.Sheets;
 using System.Collections.Generic;
 using System.Numerics;
 
@@ -51,7 +51,7 @@ internal class WeatherSelector(string id) : Selector<WeatherUnion>(id)
         return item.Match(
             (weatherRow) =>
             {
-                if(string.IsNullOrEmpty(weatherRow.Name))
+                if(string.IsNullOrEmpty(weatherRow.Name.ToString()))
                     return false;
 
                 if(!_showInvalidWeathers && !_validWeathers.Contains(weatherRow))

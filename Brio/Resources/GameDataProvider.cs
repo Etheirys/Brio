@@ -2,16 +2,18 @@
 using Brio.Resources.Extra;
 using Brio.Resources.Sheets;
 using Dalamud.Plugin.Services;
-using Lumina.Excel.GeneratedSheets;
+using Lumina.Excel.Sheets;
 using System.Collections.Generic;
 using System.Linq;
-using Glasses = Lumina.Excel.GeneratedSheets2.Glasses;
+using Glasses = Lumina.Excel.Sheets.Glasses;
 
 namespace Brio.Resources;
 
 internal class GameDataProvider
 {
     public static GameDataProvider Instance { get; private set; } = null!;
+
+    public IDataManager DataManager { get; private set; }
 
     public readonly IReadOnlyDictionary<uint, TerritoryType> TerritoryTypes;
     public readonly IReadOnlyDictionary<uint, Weather> Weathers;
@@ -21,7 +23,7 @@ internal class GameDataProvider
     public readonly IReadOnlyDictionary<uint, Mount> Mounts;
     public readonly IReadOnlyDictionary<uint, Festival> Festivals;
     public readonly IReadOnlyDictionary<uint, Status> Statuses;
-    public readonly IReadOnlyDictionary<uint, ActionTimeline> ActionTimelines;
+    public readonly IReadOnlyDictionary<uint, BrioActionTimeline> ActionTimelines;
     public readonly IReadOnlyDictionary<uint, Emote> Emotes;
     public readonly IReadOnlyDictionary<uint, Action> Actions;
     public readonly IReadOnlyDictionary<uint, ENpcBase> ENpcBases;
@@ -61,7 +63,7 @@ internal class GameDataProvider
 
         Statuses = dataManager.GetExcelSheet<Status>()!.ToDictionary(x => x.RowId, x => x).AsReadOnly();
 
-        ActionTimelines = dataManager.GetExcelSheet<ActionTimeline>()!.ToDictionary(x => x.RowId, x => x).AsReadOnly();
+        ActionTimelines = dataManager.GetExcelSheet<BrioActionTimeline>()!.ToDictionary(x => x.RowId, x => x).AsReadOnly();
 
         Emotes = dataManager.GetExcelSheet<Emote>()!.ToDictionary(x => x.RowId, x => x).AsReadOnly();
 
@@ -94,5 +96,7 @@ internal class GameDataProvider
         HumanData = new HumanData(dataManager.GetFile("chara/xls/charamake/human.cmp")!.Data);
 
         ModelDatabase = new();
+
+        DataManager = dataManager;
     }
 }
