@@ -1,4 +1,10 @@
-﻿using Brio.Game.Actor.Appearance;
+﻿
+//
+// Some code in this file was generated and is from the Lumina.Excel project (https://github.com/NotAdam/Lumina.Excel)
+// (Lumina.Excel.Sheets.CharaMakeType)
+//
+
+using Brio.Game.Actor.Appearance;
 using Dalamud.Game.ClientState.Objects.Enums;
 using Lumina.Excel;
 using Lumina.Excel.Sheets;

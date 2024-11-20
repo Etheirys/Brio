@@ -1,4 +1,10 @@
-﻿using Lumina.Excel.Sheets;
+﻿
+//
+// Some code in this file was generated and is from the Lumina.Excel project (https://github.com/NotAdam/Lumina.Excel)
+// (Lumina.Excel.Sheets.ActionTimeline)
+//
+
+using Lumina.Excel.Sheets;
 using Lumina.Excel;
 using Lumina.Text.ReadOnly;
 
