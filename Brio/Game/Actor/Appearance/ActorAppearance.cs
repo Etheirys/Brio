@@ -20,7 +20,7 @@ internal struct ActorAppearance()
         var native = character.Native();
         ActorAppearance actorAppearance = new()
         {
-            ModelCharaId = native->ModelCharaId
+            ModelCharaId = native->ModelContainer.ModelCharaId
         };
 
         actorAppearance.Weapons.MainHand = native->DrawData.Weapon(DrawDataContainer.WeaponSlot.MainHand).ModelId;

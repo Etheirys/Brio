@@ -17,7 +17,7 @@ internal unsafe struct BrioCharaMakeType(ExcelPage page, uint offset, uint row) 
     public const int FaceCount = 8;
     public const int FaceFeatureCount = 7;
 
-    public uint RowId => row;
+    public readonly uint RowId => row;
 
     public readonly Collection<CharaMakeStructStruct> CharaMakeStruct => new(page, offset, offset, &CharaMakeStructCtor, 28);
     public readonly Collection<byte> VoiceStruct => new(page, offset, offset, &VoiceStructCtor, 12);
@@ -62,7 +62,9 @@ internal unsafe struct BrioCharaMakeType(ExcelPage page, uint offset, uint row) 
         public readonly int[] Options;
     }
 
+#pragma warning disable CS9113 // Parameter is unread.
     public readonly struct EquipmentStruct(ExcelPage page, uint parentOffset, uint offset)
+#pragma warning restore CS9113 // Parameter is unread.
     {
         public readonly ulong Helmet => page.ReadUInt64(offset);
         public readonly ulong Top => page.ReadUInt64(offset + 8);
@@ -83,7 +85,6 @@ internal unsafe struct BrioCharaMakeType(ExcelPage page, uint offset, uint row) 
         var CharaMakeTypes = GameDataProvider.Instance.DataManager.GetExcelSheet<BrioCharaMakeType>(name: "CharaMakeType").
             Where(x => x.Gender == (sbyte)appearance.Customize.Gender && x.Race.RowId == (uint)appearance.Customize.Race).
             First();
-
 
         for(uint i = 0; i < CharaMakeTypes.CharaMakeStruct.Count; ++i)
         {

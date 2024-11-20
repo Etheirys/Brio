@@ -102,9 +102,9 @@ internal class ActorAppearanceService : IDisposable
             var native = character.Native();
 
             // Model
-            if(native->ModelCharaId != appearance.ModelCharaId)
+            if(native->ModelContainer.ModelCharaId != appearance.ModelCharaId)
             {
-                native->ModelCharaId = appearance.ModelCharaId;
+                native->ModelContainer.ModelCharaId = appearance.ModelCharaId;
                 needsRedraw |= true;
                 glamourerReset |= true;
             }
