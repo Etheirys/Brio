@@ -522,7 +522,7 @@ internal class CustomizeEditor()
 
         for(int i = 0; i < BrioCharaMakeType.FaceFeatureCount; ++i)
         {
-            uint featureIcon = /*validFace ? (uint)menu.FacialFeatures[face, i] :*/ 0;
+            uint featureIcon = validFace ? (uint)menu.FacialFeatures[face, i] : 0;
             entries.Add(new ImBrio.IconSelectorEntry(1 << i, featureIcon));
         }
 
