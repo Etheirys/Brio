@@ -1,59 +1,65 @@
-﻿namespace Brio.Core;
+﻿using static System.Runtime.InteropServices.JavaScript.JSType;
+using System.Numerics;
+using System.Text;
+
+namespace Brio.Core;
 
 internal static class IntExtensions
 {
-    private static readonly string[] _units = ["Zero",
-        "One",
-        "Two",
-        "Three",
-        "Four",
-        "Five",
-        "Six",
-        "Seven",
-        "Eight",
-        "Nine",
-        "Ten",
-        "Eleven",
-        "Twelve",
-        "Thirteen",
-        "Fourteen",
-        "Fifteen",
-        "Sixteen",
-        "Seventeen",
-        "Eighteen",
-        "Nineteen"];
-    private static readonly string[] _tens = ["",
-        "",
-        "Twenty",
-        "Thirty",
-        "Forty",
-        "Fifty",
-        "Sixty",
-        "Seventy",
-        "Eighty",
-        "Ninety"];
-
-    public static string ToWords(this int i, string separator = " ")
+    public static string ToWords(this int number, string separator = " ")
     {
-        string output = i.ToString();
-        if(i < 20)
+        string[] ones = { "", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten", "Eleven", "Twelve", "Thirteen", "Fourteen", "Fifteen", "Sixteen", "Seventeen", "Eighteen", "Nineteen" };
+        string[] tens = { "", "", "Twenty", "Thirty", "Forty", "Fifty", "Sixty", "Seventy", "Eighty", "Ninety" };
+
+        StringBuilder result = new();
+
+        if(number < 100)
         {
-            output = _units[i];
+             if(number < 20)
+            {
+                result.Append(ones[number]);
+            }
+            else
+            {
+                int tenPart = number / 10;
+                int onePart = number % 10;
+                result.Append(tens[tenPart]);
+
+                if(onePart > 0)
+                {
+                    result.Append(separator);
+                    result.Append(ones[onePart]);
+                }
+            }
         }
-        else if(i < 100)
+        else
         {
-            output = _tens[i / 10] + ((i % 10 > 0) ? separator + ToWords(i % 10, separator) : "");
+            result.Append(ones[number / 100]);
+
+            int remainder = number % 100;
+            if(remainder == 0)
+            {
+                result.Append(separator);
+                result.Append("Hundred");
+            }
+            else
+            {
+                result.Append("Hundred");
+                result.Append(separator);
+                result.Append(ToWords(remainder, "")); 
+            }
         }
 
-        return output;
+        return result.ToString();
     }
 
     public static string ToBrioName(this int i)
     {
-        string words = ToWords(i);
-        if(words.Contains(' '))
-            return words;
+        string result = ToWords(i, " ");
 
-        return "Brio " + words;
+        if(!result.Contains(' '))
+            return "Brio " + result;
+
+        return result;
     }
 }
