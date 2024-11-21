@@ -43,9 +43,9 @@ internal class ActionTimelineSelector(string id) : Selector<ActionTimelineSelect
         }
         foreach(var emote in GameDataProvider.Instance.Emotes.Values)
         {
-            // Loop
             BrioActionTimeline timeline;
 
+            // Loop
             if(emote.ActionTimeline[0].RowId != 0 && GameDataProvider.Instance.ActionTimelines.TryGetValue(emote.ActionTimeline[0].RowId, out timeline))
             {
                 AddItem(new ActionTimelineSelectorEntry(emote.Name.ToString(), (ushort)timeline.RowId, emote.RowId, timeline.Key.ToString(), ActionTimelineSelectorEntry.OriginalType.Emote, ActionTimelineSelectorEntry.AnimationPurpose.Standard, (ActionTimelineSlots)timeline.Slot, emote.Icon));
@@ -78,8 +78,8 @@ internal class ActionTimelineSelector(string id) : Selector<ActionTimelineSelect
 
         foreach(var action in GameDataProvider.Instance.Actions.Values)
         {
-            if(action.AnimationEnd.ValueNullable != null && action.AnimationEnd.RowId != 0)
-                AddItem(new ActionTimelineSelectorEntry(action.Name.ToString(), (ushort)action.AnimationEnd.RowId, action.RowId, action.AnimationEnd.Value.Key.ToString(), ActionTimelineSelectorEntry.OriginalType.Action, ActionTimelineSelectorEntry.AnimationPurpose.Action, (ActionTimelineSlots)action.AnimationEnd.Value.Slot, action.Icon));
+            if(action.AnimationEnd.RowId != 0 && GameDataProvider.Instance.ActionTimelines.TryGetValue(action.AnimationEnd.RowId, out BrioActionTimeline timeline))
+                AddItem(new ActionTimelineSelectorEntry(action.Name.ToString(), (ushort)action.AnimationEnd.RowId, action.RowId, action.AnimationEnd.Value.Key.ToString(), ActionTimelineSelectorEntry.OriginalType.Action, ActionTimelineSelectorEntry.AnimationPurpose.Action, (ActionTimelineSlots)timeline.Slot, action.Icon));
 
         }
     }
