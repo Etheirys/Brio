@@ -44,6 +44,7 @@ internal static class IntExtensions
             }
             else
             {
+                result.Append(separator);
                 result.Append("Hundred");
                 result.Append(separator);
                 result.Append(ToWords(remainder, "")); 
