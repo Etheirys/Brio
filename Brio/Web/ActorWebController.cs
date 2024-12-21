@@ -1,4 +1,7 @@
 ﻿using Brio.Game.Actor;
+using Brio.Game.Actor.Extensions;
+using Brio.Game.Core;
+using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Plugin.Services;
 using EmbedIO;
 using EmbedIO.Routing;
@@ -35,18 +38,43 @@ internal class ActorWebController(IFramework framework, ActorSpawnService actorS
         Brio.Log.Debug("Received spawn request on WebAPI");
         try
         {
-            return await _framework.RunOnFrameworkThread(() =>
+            ICharacter? character = null;
+            var res = await _framework.RunOnFrameworkThread(() =>
             {
-                if(_actorSpawnService.CreateCharacter(out var chara, SpawnFlags.Default))
+                if(_actorSpawnService.CreateCharacter(out ICharacter? chara, SpawnFlags.Default))
+                {
+                    character = chara;
+
                     return chara.ObjectIndex;
+                }
                 return -1;
             });
+
+            if(character is not null)
+            {
+                await WaitForReadyToDraw(character);
+            }
+
+            return res;
         }
         catch
         {
             HttpContext.Response.StatusCode = 500;
             return -1;
         }
+    }
+
+    public unsafe Task WaitForReadyToDraw(IGameObject go)
+    {
+        return _framework.RunUntilSatisfied(
+           () => go.Native()->IsReadyToDraw(),
+           (_) =>
+           {
+               Brio.Log.Warning("DrawWhenReady spawn");
+           },
+           100,
+           dontStartFor: 2
+       );
     }
 
     [Route(HttpVerbs.Post, "/despawn")]

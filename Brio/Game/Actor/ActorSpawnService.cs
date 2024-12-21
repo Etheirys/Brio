@@ -249,7 +249,7 @@ internal class ActorSpawnService : IDisposable
             _gPoseService.AddCharacterToGPose(newPlayer);
 
             var character = _objectTable.CreateObjectReference((nint)newObject);
-            if(character == null || character is not ICharacter)
+            if(character is null or not ICharacter)
                 return false;
 
             outCharacter = (ICharacter)character;
