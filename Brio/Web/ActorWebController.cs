@@ -68,10 +68,7 @@ internal class ActorWebController(IFramework framework, ActorSpawnService actorS
     {
         return _framework.RunUntilSatisfied(
            () => go.Native()->IsReadyToDraw(),
-           (_) =>
-           {
-               Brio.Log.Warning("DrawWhenReady spawn");
-           },
+           (_) => { },
            100,
            dontStartFor: 2
        );
