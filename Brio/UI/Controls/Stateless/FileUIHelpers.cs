@@ -112,7 +112,7 @@ internal class FileUIHelpers
                             ConfigurationService.Instance.Save();
                         }
 
-                        capability.ExportPose(path);
+                        capability.ExportSavePose(path);
                     }
                 }, ConfigurationService.Instance.Configuration.LastExportPath, true);
     }
