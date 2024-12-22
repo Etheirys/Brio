@@ -171,9 +171,13 @@ internal class PosingCapability : ActorCharacterCapability
             _framework.RunOnTick(() => Snapshot(reset, reconcile, asExpression: asExpression), delayTicks: 4);
     }
 
-    public void ExportPose(string path)
+    public PoseFile ExportPose()
     {
-        var poseFile = GeneratePoseFile();
+        return GeneratePoseFile();
+    }
+    public void ExportSavePose(string path)
+    {
+        var poseFile = ExportPose();
         ResourceProvider.Instance.SaveFileDocument(path, poseFile);
     }
 
