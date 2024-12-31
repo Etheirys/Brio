@@ -56,7 +56,7 @@ public class BrioTester : IDalamudPlugin
             HelpMessage = "A very useful message!"
         });
 
-        this.Window = new(pluginInterface, this);
+        this.Window = new(pluginInterface);
         this.WindowSystem = new(PluginName);
         this.WindowSystem.AddWindow(Window);
 
