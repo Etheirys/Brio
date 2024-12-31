@@ -5,13 +5,13 @@ using Brio.Entities;
 using Brio.Files;
 using Brio.Game.Actor;
 using Brio.Game.Actor.Extensions;
-using Brio.Resources;
+using Brio.Game.GPose;
 using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Ipc;
 using Dalamud.Plugin.Services;
 using System;
-using System.IO;
+using System.Linq;
 using System.Numerics;
 using System.Threading.Tasks;
 
@@ -39,18 +39,18 @@ internal class BrioIPCService : IDisposable
 
 
     public const string Actor_Despawn_IPCName = "Brio.Actor.Despawn";
-    private ICallGateProvider<IGameObject, bool>? Actor_DespawnActor_Ipc;
+    private ICallGateProvider<IGameObject, bool>? Actor_DespawnActor_IPC;
 
     public const string Actor_DespawnAsync_IPCName = "Brio.Actor.DespawnAsync";
-    private ICallGateProvider<IGameObject, Task<bool>>? Actor_DespawnActorAsync_Ipc;
+    private ICallGateProvider<IGameObject, Task<bool>>? Actor_DespawnActorAsync_IPC;
 
 
     public const string Actor_SetModelTransform_IPCName = "Brio.Actor.SetModelTransform";
-    private ICallGateProvider<IGameObject, Vector3, Quaternion, Vector3, bool>? Actor_SetModelTransform_IPC;
+    private ICallGateProvider<IGameObject, Vector3?, Quaternion?, Vector3?, bool, bool>? Actor_SetModelTransform_IPC;
 
     public const string Actor_GetModelTransform_IPCName = "Brio.Actor.GetModelTransform";
     private ICallGateProvider<IGameObject, (Vector3?, Quaternion?, Vector3?)>? Actor_GetModelTransform_IPC;
-   
+
     public const string Actor_ResetModelTransform_IPCName = "Brio.Actor.ResetModelTransform";
     private ICallGateProvider<IGameObject, bool>? Actor_ResetModelTransform_IPC;
 
@@ -64,17 +64,28 @@ internal class BrioIPCService : IDisposable
     public const string Actor_PoseGetAsJson_IPCName = "Brio.Actor.Pose.GetPoseAsJson";
     private ICallGateProvider<IGameObject, string?>? Actor_Pose_GetFromJson_IPC;
 
+    public const string Actor_Pose_Reset_IPCName = "Brio.Actor.Pose.Reset";
+    private ICallGateProvider<IGameObject, bool, bool>? Actor_Pose_Reset_IPC;
+   
+    public const string Actor_Exists_IPCName = "Brio.Actor.Exists";
+    private ICallGateProvider<IGameObject, bool>? Actor_Exists_IPC;
+  
+    public const string Actor_GetAll_IPCName = "Brio.Actor.GetAll";
+    private ICallGateProvider<IGameObject[]?>? Actor_GetAll_IPC;
+
     //
 
     private readonly ActorSpawnService _actorSpawnService;
+    private readonly GPoseService _gPoseService;
     private readonly ConfigurationService _configurationService;
     private readonly EntityManager _entityManager;
     private readonly IDalamudPluginInterface _pluginInterface;
     private readonly IFramework _framework;
 
-    public BrioIPCService(ActorSpawnService actorSpawnService, ConfigurationService configurationService, EntityManager entityManager, IDalamudPluginInterface pluginInterface, IFramework framework)
+    public BrioIPCService(ActorSpawnService actorSpawnService, GPoseService gPoseService, ConfigurationService configurationService, EntityManager entityManager, IDalamudPluginInterface pluginInterface, IFramework framework)
     {
         _actorSpawnService = actorSpawnService;
+        _gPoseService = gPoseService;
         _configurationService = configurationService;
         _entityManager = entityManager;
         _pluginInterface = pluginInterface;
@@ -105,19 +116,19 @@ internal class BrioIPCService : IDisposable
         Actor_Spawn_IPC = _pluginInterface.GetIpcProvider<IGameObject?>(Actor_Spawn_IPCName);
         Actor_Spawn_IPC.RegisterFunc(SpawnActor);
 
-        Actor_SpawnAsync_IPC = _pluginInterface.GetIpcProvider<Task<IGameObject?>> (Actor_SpawnAsync_IPCName);
+        Actor_SpawnAsync_IPC = _pluginInterface.GetIpcProvider<Task<IGameObject?>>(Actor_SpawnAsync_IPCName);
         Actor_SpawnAsync_IPC.RegisterFunc(SpawnActorAsync_Impl);
 
         Actor_SpawnExAsync_IPC = _pluginInterface.GetIpcProvider<bool, bool, Task<IGameObject?>>(Actor_SpawnExAsync_IPCName);
         Actor_SpawnExAsync_IPC.RegisterFunc(SpawnExAsync_Impl);
 
-        Actor_DespawnActor_Ipc = _pluginInterface.GetIpcProvider<IGameObject, bool>(Actor_Despawn_IPCName);
-        Actor_DespawnActor_Ipc.RegisterFunc(DespawnActor);
+        Actor_DespawnActor_IPC = _pluginInterface.GetIpcProvider<IGameObject, bool>(Actor_Despawn_IPCName);
+        Actor_DespawnActor_IPC.RegisterFunc(DespawnActor);
 
-        Actor_DespawnActorAsync_Ipc = _pluginInterface.GetIpcProvider<IGameObject, Task<bool>>(Actor_DespawnAsync_IPCName);
-        Actor_DespawnActorAsync_Ipc.RegisterFunc(DespawnActorAsync_Impl);
+        Actor_DespawnActorAsync_IPC = _pluginInterface.GetIpcProvider<IGameObject, Task<bool>>(Actor_DespawnAsync_IPCName);
+        Actor_DespawnActorAsync_IPC.RegisterFunc(DespawnActorAsync_Impl);
 
-        Actor_SetModelTransform_IPC = _pluginInterface.GetIpcProvider<IGameObject, Vector3, Quaternion, Vector3, bool>(Actor_SetModelTransform_IPCName);
+        Actor_SetModelTransform_IPC = _pluginInterface.GetIpcProvider<IGameObject, Vector3?, Quaternion?, Vector3?, bool, bool>(Actor_SetModelTransform_IPCName);
         Actor_SetModelTransform_IPC.RegisterFunc(ActorSetModelTransform_Impl);
 
         Actor_GetModelTransform_IPC = _pluginInterface.GetIpcProvider<IGameObject, (Vector3?, Quaternion?, Vector3?)>(Actor_GetModelTransform_IPCName);
@@ -135,6 +146,15 @@ internal class BrioIPCService : IDisposable
         Actor_Pose_GetFromJson_IPC = _pluginInterface.GetIpcProvider<IGameObject, string?>(Actor_PoseGetAsJson_IPCName);
         Actor_Pose_GetFromJson_IPC.RegisterFunc(GetPoseAsJson_Impl);
 
+        Actor_Pose_Reset_IPC = _pluginInterface.GetIpcProvider<IGameObject, bool, bool>(Actor_Pose_Reset_IPCName);
+        Actor_Pose_Reset_IPC.RegisterFunc(ResetPose_Impl);
+
+        Actor_Exists_IPC = _pluginInterface.GetIpcProvider<IGameObject, bool>(Actor_Exists_IPCName);
+        Actor_Exists_IPC.RegisterFunc(ActorExists_Impl);
+
+        Actor_GetAll_IPC = _pluginInterface.GetIpcProvider<IGameObject[]?>(Actor_GetAll_IPCName);
+        Actor_GetAll_IPC.RegisterFunc(ActorGetAll_Impl);
+
         IsIPCEnabled = true;
     }
     private void DisposeIPC()
@@ -145,8 +165,8 @@ internal class BrioIPCService : IDisposable
         Actor_SpawnAsync_IPC?.UnregisterFunc();
         Actor_SpawnExAsync_IPC?.UnregisterFunc();
 
-        Actor_DespawnActor_Ipc?.UnregisterFunc();
-        Actor_DespawnActorAsync_Ipc?.UnregisterFunc();
+        Actor_DespawnActor_IPC?.UnregisterFunc();
+        Actor_DespawnActorAsync_IPC?.UnregisterFunc();
 
         Actor_SetModelTransform_IPC?.UnregisterFunc();
         Actor_GetModelTransform_IPC?.UnregisterFunc();
@@ -161,8 +181,8 @@ internal class BrioIPCService : IDisposable
         Actor_SpawnAsync_IPC = null;
         Actor_SpawnExAsync_IPC = null;
 
-        Actor_DespawnActor_Ipc = null;
-        Actor_DespawnActorAsync_Ipc = null;
+        Actor_DespawnActor_IPC = null;
+        Actor_DespawnActorAsync_IPC = null;
 
         Actor_SetModelTransform_IPC = null;
         Actor_GetModelTransform_IPC = null;
@@ -181,17 +201,21 @@ internal class BrioIPCService : IDisposable
     private Task<IGameObject?> SpawnActorAsync_Impl() => _framework.RunOnTick(SpawnActor);
     private IGameObject? SpawnActor()
     {
-        if(_actorSpawnService.CreateCharacter(out var character))
+        if(_gPoseService.IsGPosing == false) return null;
+
+        if(_actorSpawnService.CreateCharacter(out var character, SpawnFlags.Default, disableSpawnCompanion: true))
             return character;
 
         return null;
     }
 
     private async Task<IGameObject?> SpawnExAsync_Impl(bool spawnCompanion, bool selectInHierarchy) => await _framework.RunOnTick(() => SpawnEx(spawnCompanion, selectInHierarchy));
-    private IGameObject? SpawnEx(bool spawnCompanion, bool selectInHierarchy)
+    private IGameObject? SpawnEx(bool spawnCompanionSlot, bool selectInHierarchy)
     {
+        if(_gPoseService.IsGPosing == false) return null;
+
         SpawnFlags flags = SpawnFlags.Default;
-        if(spawnCompanion)
+        if(spawnCompanionSlot)
         {
             flags |= SpawnFlags.ReserveCompanionSlot;
         }
@@ -211,15 +235,44 @@ internal class BrioIPCService : IDisposable
     }
 
     private Task<bool> DespawnActorAsync_Impl(IGameObject gameObject) => _framework.RunOnTick(() => DespawnActor(gameObject));
-    private bool DespawnActor(IGameObject gameObject) => _actorSpawnService.DestroyObject(gameObject);
-
-    private unsafe bool ActorSetModelTransform_Impl(IGameObject gameObject, Vector3 position, Quaternion rotation, Vector3 scale)
+    private bool DespawnActor(IGameObject gameObject)
     {
+        if(_gPoseService.IsGPosing == false) return false;
+
+        return _actorSpawnService.DestroyObject(gameObject);
+    }
+
+    private unsafe bool ActorSetModelTransform_Impl(IGameObject gameObject, Vector3? position, Quaternion? rotation, Vector3? scale, bool additiveMode)
+    {
+        if(_gPoseService.IsGPosing == false) return false;
+
         if(_entityManager.TryGetEntity(gameObject.Native(), out var entity))
         {
             if(entity.TryGetCapability<ModelPosingCapability>(out var transformCapability))
             {
-                transformCapability.Transform = new Core.Transform { Position = position, Rotation = rotation, Scale = scale };
+                var transform = transformCapability.Transform;
+
+                if(additiveMode)
+                {
+                    if(position.HasValue)
+                        transform.Position += position.Value;
+                    if(rotation.HasValue)
+                        transform.Rotation += rotation.Value;
+                    if(scale.HasValue)
+                        transform.Scale += scale.Value;
+                }
+                else
+                {
+                    if(position.HasValue)
+                        transform.Position = position.Value;
+                    if(rotation.HasValue)
+                        transform.Rotation = rotation.Value;
+                    if(scale.HasValue)
+                        transform.Scale = scale.Value;
+                }
+
+                transformCapability.Transform = transform;
+
                 return true;
             }
         }
@@ -227,6 +280,8 @@ internal class BrioIPCService : IDisposable
     }
     private unsafe (Vector3?, Quaternion?, Vector3?) ActorGetModelTransform_Impl(IGameObject gameObject)
     {
+        if(_gPoseService.IsGPosing == false) return (null, null, null);
+
         if(_entityManager.TryGetEntity(gameObject.Native(), out var entity))
         {
             if(entity.TryGetCapability<ModelPosingCapability>(out var transformCapability))
@@ -240,6 +295,8 @@ internal class BrioIPCService : IDisposable
     }
     private unsafe bool ActorResetModelTransform_Impl(IGameObject gameObject)
     {
+        if(_gPoseService.IsGPosing == false) return false;
+
         if(_entityManager.TryGetEntity(gameObject.Native(), out var entity))
         {
             if(entity.TryGetCapability<ModelPosingCapability>(out var transformCapability))
@@ -253,6 +310,8 @@ internal class BrioIPCService : IDisposable
 
     private unsafe bool LoadFromFile_Impl(IGameObject gameObject, string fileURI)
     {
+        if(_gPoseService.IsGPosing == false) return false;
+
         if(_entityManager.TryGetEntity(gameObject.Native(), out var entity))
         {
             if(entity.TryGetCapability<PosingCapability>(out var posingCapability))
@@ -265,6 +324,8 @@ internal class BrioIPCService : IDisposable
     }
     private unsafe bool LoadFromJson_Impl(IGameObject gameObject, string json, bool isLegacyCMToolPose)
     {
+        if(_gPoseService.IsGPosing == false) return false;
+
         if(_entityManager.TryGetEntity(gameObject.Native(), out var entity))
         {
             if(entity.TryGetCapability<PosingCapability>(out var posingCapability))
@@ -295,6 +356,8 @@ internal class BrioIPCService : IDisposable
     }
     private unsafe string? GetPoseAsJson_Impl(IGameObject gameObject)
     {
+        if(_gPoseService.IsGPosing == false) return null;
+
         if(_entityManager.TryGetEntity(gameObject.Native(), out var entity))
         {
             if(entity.TryGetCapability<PosingCapability>(out var posingCapability))
@@ -305,6 +368,37 @@ internal class BrioIPCService : IDisposable
             }
         }
         return null;
+    }
+
+    private unsafe bool ResetPose_Impl(IGameObject gameObject, bool clearRedoHistory)
+    {
+        if(_gPoseService.IsGPosing == false) return false;
+
+        if(_entityManager.TryGetEntity(gameObject.Native(), out var entity))
+        {
+            if(entity.TryGetCapability<PosingCapability>(out var posingCapability))
+            {
+                posingCapability.Reset(false, false, clearRedoHistory);
+
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private unsafe bool ActorExists_Impl(IGameObject gameObject)
+    {
+        if(_gPoseService.IsGPosing == false) return false;
+
+        return _entityManager.EntityExists(gameObject.Native());
+    }
+
+    private unsafe IGameObject[]? ActorGetAll_Impl()
+    {
+        if(_gPoseService.IsGPosing == false) return null;
+
+        return _entityManager.TryGetAllActorsAsGameObject().ToArray();
     }
 
     public void Dispose()
