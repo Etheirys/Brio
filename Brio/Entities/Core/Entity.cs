@@ -185,7 +185,7 @@ internal abstract class Entity : IDisposable
             }
         }
 
-        return results.Any();
+        return results.Count != 0;
     }
 
     public virtual void Dispose()
