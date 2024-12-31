@@ -212,7 +212,10 @@ internal static partial class ImBrioGizmo
                     drawList.AddCircle((Vector2)mouseData.closestAxisMousePos, axisHoverMouseDist, style.AxisForegroundColors[(int)closestMouseAxis]);
                 }
 
-                ImGui.InvisibleButton("##imbriozmo_cover", size);
+                if(size.X != 0 & size.Y != 0)
+                {
+                    ImGui.InvisibleButton("##imbriozmo_cover", size);
+                }
             }
         }
 
