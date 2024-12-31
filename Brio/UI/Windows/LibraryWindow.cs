@@ -665,12 +665,19 @@ internal class LibraryWindow : Window
 
                     // Blank area
                     float blankWidth = ImBrio.GetRemainingWidth() - PathBarButtonWidth - ImGui.GetStyle().ItemSpacing.X;
-                    if(ImGui.InvisibleButton("###library_path_input_blank", new(blankWidth, lineHeight)))
+                    if(blankWidth != 0 && lineHeight != 0)
                     {
-                        // consider: clicking here swaps to an InputText for pasting paths?
+                        if(ImGui.InvisibleButton("###library_path_input_blank", new(blankWidth, lineHeight)))
+                        {
+                            // consider: clicking here swaps to an InputText for pasting paths?
+                        }
+                    
+                        ImGui.SameLine();
                     }
-
-                    ImGui.SameLine();
+                    else
+                    {
+                        Brio.Log.Warning($"<{blankWidth},{lineHeight}>");
+                    }
 
                     // Refresh Button
                     using(ImRaii.Disabled(_isRescanning))

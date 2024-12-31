@@ -150,6 +150,8 @@ internal static partial class ImBrio
                 ImGui.Text(icon.ToIconString());
             }
 
+            size.Y = 1;
+
             ImGui.SetCursorPos(startPos);
             ImGui.InvisibleButton("##dummy", size);
             ImGui.SetCursorPos(endPos);
@@ -230,7 +232,6 @@ internal static partial class ImBrio
 
             if(flags.HasFlag(ImGuiButtonFlags.MouseButtonLeft) || flags.HasFlag(ImGuiButtonFlags.MouseButtonRight) || flags.HasFlag(ImGuiButtonFlags.MouseButtonMiddle))
             {
-
                 ImGui.SetCursorPos(startPos + scaleOffsetTopLeft);
                 if(ImGui.InvisibleButton($"button", containedSize, flags))
                 {
@@ -241,7 +242,6 @@ internal static partial class ImBrio
                     Vector2 topPos = ImGui.GetItemRectMin();
                     ImGui.GetWindowDrawList().AddRectFilled(topPos, topPos + containedSize, ImGui.GetColorU32(new Vector4(1, 1, 1, 0.2f)));
                 }
-
             }
 
             ImGui.SetCursorPos(startPos);
