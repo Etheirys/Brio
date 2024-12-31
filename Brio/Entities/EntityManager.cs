@@ -12,6 +12,7 @@ using System.Linq;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using Brio.Capabilities.Actor;
+using FFXIVClientStructs.FFXIV.Client.Game.Object;
 
 
 namespace Brio.Entities;
@@ -150,17 +151,24 @@ internal unsafe partial class EntityManager : IDisposable
 
     public IEnumerable<ActorEntity> TryGetAllActors()
     {
-        List<ActorEntity> actorEntities = [];
-
         foreach(var entity in _entityMap.Values)
         {
             if(entity is ActorEntity actor)
             {
-                actorEntities.Add(actor);
+                yield return actor;
             }
         }
+    }
 
-        return actorEntities;
+    public IEnumerable<IGameObject> TryGetAllActorsAsGameObject()
+    {
+        foreach(var entity in _entityMap.Values)
+        {
+            if(entity is ActorEntity actor)
+            {
+                yield return actor.GameObject;
+            }
+        }
     }
 
     public bool TryGetCapabilityFromSelectedEntity<T>([MaybeNullWhen(false)] out T capability, bool considerChildren = false, bool considerParents = true) where T : Capability

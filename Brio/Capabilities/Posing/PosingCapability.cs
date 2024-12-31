@@ -171,9 +171,13 @@ internal class PosingCapability : ActorCharacterCapability
             _framework.RunOnTick(() => Snapshot(reset, reconcile, asExpression: asExpression), delayTicks: 4);
     }
 
-    public void ExportPose(string path)
+    public PoseFile ExportPose()
     {
-        var poseFile = GeneratePoseFile();
+        return GeneratePoseFile();
+    }
+    public void ExportSavePose(string path)
+    {
+        var poseFile = ExportPose();
         ResourceProvider.Instance.SaveFileDocument(path, poseFile);
     }
 
@@ -186,7 +190,7 @@ internal class PosingCapability : ActorCharacterCapability
             _redoStack.Clear();
             return;
         }
-      
+
         _redoStack.Clear();
 
         if(asExpression == true)
@@ -229,12 +233,13 @@ internal class PosingCapability : ActorCharacterCapability
         }
     }
 
-    public void Reset(bool generateSnapshot = true, bool reset = true)
+    public void Reset(bool generateSnapshot = true, bool reset = true, bool clearHistStack = true)
     {
         SkeletonPosing.ResetPose();
         ModelPosing.ResetTransform();
 
-        _redoStack.Clear();
+        if(clearHistStack)
+            _redoStack.Clear();
 
         if(generateSnapshot)
             Snapshot(reset);
