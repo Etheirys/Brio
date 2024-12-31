@@ -586,25 +586,24 @@ internal class ActionTimelineEditor(CutsceneManager cutsceneManager, GPoseServic
 
             ImGui.Separator();
 
-            var enb = _cutsceneManager.IsRunning;
-
-            if(enb) ImGui.BeginDisabled();
-            if(ImGui.Button("Play"))
+            var isrunning = _cutsceneManager.IsRunning;
+            using(ImRaii.Disabled(isrunning))
             {
-                _cutsceneManager.StartPlayback();
+                if(ImGui.Button("Play"))
+                {
+                    _cutsceneManager.StartPlayback();
+                }
             }
-            if(enb) ImGui.EndDisabled();
 
             ImGui.SameLine();
 
-            enb = _cutsceneManager.IsRunning;
-
-            if(!enb) ImGui.BeginDisabled();
-            if(ImGui.Button("Stop"))
+            using(ImRaii.Disabled(!isrunning))
             {
-                _cutsceneManager.StopPlayback();
+                if(ImGui.Button("Stop"))
+                {
+                    _cutsceneManager.StopPlayback();
+                }
             }
-            if(!enb) ImGui.EndDisabled();
         }
     }
 
