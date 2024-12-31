@@ -50,6 +50,9 @@ internal class BrioIPCService : IDisposable
 
     public const string Actor_GetModelTransform_IPCName = "Brio.Actor.GetModelTransform";
     private ICallGateProvider<IGameObject, (Vector3?, Quaternion?, Vector3?)>? Actor_GetModelTransform_IPC;
+   
+    public const string Actor_ResetModelTransform_IPCName = "Brio.Actor.ResetModelTransform";
+    private ICallGateProvider<IGameObject, bool>? Actor_ResetModelTransform_IPC;
 
 
     public const string Actor_PoseLoadFromFile_IPCName = "Brio.Actor.Pose.LoadFromFile";
@@ -119,6 +122,9 @@ internal class BrioIPCService : IDisposable
 
         Actor_GetModelTransform_IPC = _pluginInterface.GetIpcProvider<IGameObject, (Vector3?, Quaternion?, Vector3?)>(Actor_GetModelTransform_IPCName);
         Actor_GetModelTransform_IPC.RegisterFunc(ActorGetModelTransform_Impl);
+
+        Actor_ResetModelTransform_IPC = _pluginInterface.GetIpcProvider<IGameObject, bool>(Actor_ResetModelTransform_IPCName);
+        Actor_ResetModelTransform_IPC.RegisterFunc(ActorResetModelTransform_Impl);
 
         Actor_Pose_LoadFromFile_IPC = _pluginInterface.GetIpcProvider<IGameObject, string, bool>(Actor_PoseLoadFromFile_IPCName);
         Actor_Pose_LoadFromFile_IPC.RegisterFunc(LoadFromFile_Impl);
@@ -207,7 +213,6 @@ internal class BrioIPCService : IDisposable
     private Task<bool> DespawnActorAsync_Impl(IGameObject gameObject) => _framework.RunOnTick(() => DespawnActor(gameObject));
     private bool DespawnActor(IGameObject gameObject) => _actorSpawnService.DestroyObject(gameObject);
 
-
     private unsafe bool ActorSetModelTransform_Impl(IGameObject gameObject, Vector3 position, Quaternion rotation, Vector3 scale)
     {
         if(_entityManager.TryGetEntity(gameObject.Native(), out var entity))
@@ -226,15 +231,24 @@ internal class BrioIPCService : IDisposable
         {
             if(entity.TryGetCapability<ModelPosingCapability>(out var transformCapability))
             {
-                if(transformCapability.OverrideTransform.HasValue)
-                {
-                    var transform = transformCapability.Transform;
+                var transform = transformCapability.Transform;
 
-                    return (transform.Position, transform.Rotation, transform.Scale);
-                }
+                return (transform.Position, transform.Rotation, transform.Scale);
             }
         }
         return (null, null, null);
+    }
+    private unsafe bool ActorResetModelTransform_Impl(IGameObject gameObject)
+    {
+        if(_entityManager.TryGetEntity(gameObject.Native(), out var entity))
+        {
+            if(entity.TryGetCapability<ModelPosingCapability>(out var transformCapability))
+            {
+                transformCapability.ResetTransform();
+                return true;
+            }
+        }
+        return false;
     }
 
     private unsafe bool LoadFromFile_Impl(IGameObject gameObject, string fileURI)
@@ -249,7 +263,6 @@ internal class BrioIPCService : IDisposable
         }
         return false;
     }
- 
     private unsafe bool LoadFromJson_Impl(IGameObject gameObject, string json, bool isLegacyCMToolPose)
     {
         if(_entityManager.TryGetEntity(gameObject.Native(), out var entity))
@@ -280,7 +293,6 @@ internal class BrioIPCService : IDisposable
 
         return false;
     }
-
     private unsafe string? GetPoseAsJson_Impl(IGameObject gameObject)
     {
         if(_entityManager.TryGetEntity(gameObject.Native(), out var entity))
@@ -294,7 +306,6 @@ internal class BrioIPCService : IDisposable
         }
         return null;
     }
-
 
     public void Dispose()
     {

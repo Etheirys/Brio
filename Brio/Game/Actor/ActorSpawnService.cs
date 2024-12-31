@@ -150,6 +150,9 @@ internal class ActorSpawnService : IDisposable
 
     public unsafe bool DestroyObject(IGameObject go)
     {
+        if(go is null)
+            return false;
+
         Brio.Log.Debug($"Destroying gameobjectobject {go.ObjectIndex}...");
 
         var com = ClientObjectManager.Instance();
