@@ -1,6 +1,9 @@
-﻿using Brio.Entities;
+﻿using Brio.Capabilities.Actor;
+using Brio.Entities;
+using Brio.Entities.Actor;
 using Brio.Entities.Core;
 using Brio.UI.Controls.Core;
+using Brio.UI.Controls.Stateless;
 using Brio.UI.Widgets.Core;
 using Dalamud.Interface;
 using Dalamud.Interface.Utility.Raii;
@@ -11,7 +14,7 @@ namespace Brio.UI.Entitites;
 
 internal class EntityHierarchyView(EntityManager entityManager)
 {
-    private readonly float buttonWidth = ImGui.GetTextLineHeight() * 14f;
+    private readonly float buttonWidth = ImGui.GetTextLineHeight() * 13f;
     private readonly float offsetWidth = 16f;
 
     private EntityId? _lastSelectedId;
@@ -84,6 +87,23 @@ internal class EntityHierarchyView(EntityManager entityManager)
         }
 
         DrawNode(entity);
+
+        if(entity is ActorEntity actor)
+        {
+            ImGui.SameLine();
+      
+            var aac = actor.GetCapability<ActorAppearanceCapability>();
+
+            using(ImRaii.PushColor(ImGuiCol.Button, UIConstants.GizmoRed, aac.IsHidden))
+            {
+                string toolTip = aac.IsHidden ? $"Show {aac.Actor.FriendlyName}" : $"Hide {aac.Actor.FriendlyName}";
+                if(ImBrio.FontIconButtonRight($"###{entity.Id}_hideActor", aac.IsHidden ? FontAwesomeIcon.EyeSlash : FontAwesomeIcon.Eye, 1f, toolTip, bordered: false))
+                {
+                    aac.ToggelHide();
+                }
+            }
+
+        }
 
         using(var popup = ImRaii.Popup($"context_popup{entity.Id}"))
         {

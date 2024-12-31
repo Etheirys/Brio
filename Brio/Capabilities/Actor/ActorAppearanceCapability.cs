@@ -1,4 +1,5 @@
-﻿using Brio.Core;
+﻿using Brio.Capabilities.Core;
+using Brio.Core;
 using Brio.Entities.Actor;
 using Brio.Files;
 using Brio.Game.Actor;
@@ -44,6 +45,8 @@ internal class ActorAppearanceCapability : ActorCharacterCapability
     public bool CanTint => _actorAppearanceService.CanTint;
 
     public bool CanMcdf => _mareService.IsMareAvailable;
+
+    public bool IsHidden => CurrentAppearance.ExtendedAppearance.Transparency == 0;
 
     public ActorAppearanceCapability(ActorEntity parent, ActorAppearanceService actorAppearanceService, PenumbraService penumbraService, GlamourerService glamourerService, MareService mareService, GPoseService gPoseService) : base(parent)
     {
@@ -145,6 +148,22 @@ internal class ActorAppearanceCapability : ActorCharacterCapability
         appearance.Weapons.MainHand = SpecialAppearances.EmperorsMainHand;
         appearance.Weapons.OffHand = SpecialAppearances.EmperorsOffHand;
         return SetAppearance(appearance, AppearanceImportOptions.Gear);
+    }
+
+    public Task ToggelHide()
+    {
+        var appearance = _actorAppearanceService.GetActorAppearance(Character);
+
+        if(IsHidden)
+        {
+            appearance.ExtendedAppearance.Transparency = 1f;
+        }
+        else
+        {
+            appearance.ExtendedAppearance.Transparency = 0f;
+        }
+
+        return SetAppearance(appearance, AppearanceImportOptions.ExtendedAppearance);
     }
 
     public Task ApplyEmperors()

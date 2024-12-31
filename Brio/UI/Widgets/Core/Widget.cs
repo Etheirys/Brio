@@ -41,4 +41,5 @@ internal enum WidgetFlags
     DrawPopup = 1 << 2,
     DrawQuickIcons = 1 << 3,
     HasAdvanced = 1 << 4,
+    CanHide = 1 << 5,
 }

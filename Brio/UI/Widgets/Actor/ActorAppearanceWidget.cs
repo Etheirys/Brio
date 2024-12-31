@@ -13,7 +13,7 @@ internal class ActorAppearanceWidget(ActorAppearanceCapability capability) : Wid
 {
     public override string HeaderName => "Appearance";
 
-    public override WidgetFlags Flags => WidgetFlags.DefaultOpen | WidgetFlags.DrawBody | WidgetFlags.DrawQuickIcons | WidgetFlags.HasAdvanced;
+    public override WidgetFlags Flags => WidgetFlags.DefaultOpen | WidgetFlags.DrawBody | WidgetFlags.DrawQuickIcons | WidgetFlags.HasAdvanced | WidgetFlags.CanHide;
 
     public override void DrawBody()
     {
