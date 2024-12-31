@@ -1,0 +1,10 @@
+﻿{
+  "Author": "Brio Contributors",
+  "Name": "Brio Tester",
+  "Punchline": "...",
+  "Description": "...",
+  "AssemblyVersion": "x.x.x.x",
+  "InternalName": "BrioTester",
+  "ApplicableVersion": "any",
+  "Tags": ["brio"]
+}
