@@ -15,6 +15,8 @@ internal static class PosingEditorCommon
 {
     public static void DrawSelectionName(PosingCapability posing)
     {
+        ImGui.Text(posing.Selected.DisplayName);
+
         ImGui.SetWindowFontScale(0.75f);
         ImGui.TextDisabled(posing.Selected.Subtitle);
         ImGui.SetWindowFontScale(1.0f);

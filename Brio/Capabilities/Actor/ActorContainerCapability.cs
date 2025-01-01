@@ -34,7 +34,7 @@ internal class ActorContainerCapability : Capability
         _entityManager.SetSelectedEntity(entity);
     }
 
-    public EntityId CreateCharacter(bool enableAttachments, bool targetNewInHierarchy, bool forceSpawnActorWithoutCompanion = false)
+    public (EntityId, ICharacter) CreateCharacter(bool enableAttachments, bool targetNewInHierarchy, bool forceSpawnActorWithoutCompanion = false)
     {
         SpawnFlags flags = SpawnFlags.Default;
         if(enableAttachments)
@@ -47,7 +47,7 @@ internal class ActorContainerCapability : Capability
             {
                 _entityManager.SetSelectedEntity(characterId);
             }
-            return characterId;
+            return (characterId, chara);
         }
         
         throw new Exception("Failed to create character");

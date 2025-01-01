@@ -27,7 +27,7 @@ internal class Configuration : IPluginConfiguration
     // Environment
     public EnvironmentConfiguration Environment { get; set; } = new EnvironmentConfiguration();
     
-    public ImportConfiguration Import { get; set; } = new ImportConfiguration();
+    public SceneImportConfiguration Import { get; set; } = new SceneImportConfiguration();
 
     // Library
     public LibraryConfiguration Library { get; set; } = new LibraryConfiguration();

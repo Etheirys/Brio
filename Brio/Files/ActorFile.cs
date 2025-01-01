@@ -8,7 +8,7 @@ namespace Brio.Files;
 [Serializable]
 internal class ActorFile
 {
-    public String FriendlyName { get; set; } = "";
+    public string FriendlyName { get; set; } = "";
     
     public required AnamnesisCharaFile AnamnesisCharaFile { get; set; }
     public required PoseFile PoseFile { get; set; }
@@ -23,7 +23,7 @@ internal class ActorFile
         
         var actorFile = new ActorFile
         {
-            FriendlyName = actorEntity.FriendlyName,
+            FriendlyName = actorEntity.RawName,
             AnamnesisCharaFile = appearanceCapability.CurrentAppearance,
             PoseFile = posingCapability.GeneratePoseFile()
         };

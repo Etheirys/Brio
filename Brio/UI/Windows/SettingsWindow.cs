@@ -89,7 +89,7 @@ internal class SettingsWindow : Window
                         DrawIPCTab();
                         DrawPosingTab();
                         DrawLibraryTab();
-                        DrawImportTab();
+                        DrawSceneTab();
                         DrawKeysTab();
                         DrawAdvancedTab();
                     }
@@ -192,9 +192,9 @@ internal class SettingsWindow : Window
         }
     }
 
-    private void DrawImportTab()
+    private void DrawSceneTab()
     {
-        using(var tab = ImRaii.TabItem("Import"))
+        using(var tab = ImRaii.TabItem("Scene"))
         {
             if(tab.Success)
             {
@@ -275,7 +275,7 @@ internal class SettingsWindow : Window
     private void DrawImportScene()
     {
         
-        if(ImGui.CollapsingHeader("Scene", ImGuiTreeNodeFlags.DefaultOpen))
+        if(ImGui.CollapsingHeader("General", ImGuiTreeNodeFlags.DefaultOpen))
         {
             bool destroyActorsBeforeImport = _configurationService.Configuration.SceneDestoryActorsBeforeImport;
             if(ImGui.Checkbox("Destroy Actors before Scene import", ref destroyActorsBeforeImport))
@@ -285,11 +285,11 @@ internal class SettingsWindow : Window
             }
         }
 
-        if(ImGui.CollapsingHeader("Pose", ImGuiTreeNodeFlags.DefaultOpen))
+        if(ImGui.CollapsingHeader("Import", ImGuiTreeNodeFlags.DefaultOpen))
         {
             
             bool applyModelTransform = _configurationService.Configuration.Import.ApplyModelTransform;
-            if(ImGui.Checkbox("Apply Model Transform", ref applyModelTransform))
+            if(ImGui.Checkbox("Apply Model Transform on Import", ref applyModelTransform))
             {
                 _configurationService.Configuration.Import.ApplyModelTransform = applyModelTransform;
                 _configurationService.ApplyChange();
@@ -301,7 +301,7 @@ internal class SettingsWindow : Window
             {
                 if(combo.Success)
                 {
-                    foreach(var poseImportTransformType in Enum.GetValues<PoseImportTransformType>())
+                    foreach(var poseImportTransformType in Enum.GetValues<ScenePoseTransformType>())
                     {
                         if(ImGui.Selectable($"{poseImportTransformType}", poseImportTransformType == positionTransformType))
                         {
@@ -312,14 +312,13 @@ internal class SettingsWindow : Window
                 }
             }
             
-            
             var rotationTransformType = _configurationService.Configuration.Import.RotationTransformType;
             ImGui.SetNextItemWidth(200);
             using(var combo = ImRaii.Combo("Rotation", rotationTransformType.ToString()))
             {
                 if(combo.Success)
                 {
-                    foreach(var poseImportTransformType in Enum.GetValues<PoseImportTransformType>())
+                    foreach(var poseImportTransformType in Enum.GetValues<ScenePoseTransformType>())
                     {
                         if(ImGui.Selectable($"{poseImportTransformType}", poseImportTransformType == rotationTransformType))
                         {
@@ -336,7 +335,7 @@ internal class SettingsWindow : Window
             {
                 if(combo.Success)
                 {
-                    foreach(var poseImportTransformType in Enum.GetValues<PoseImportTransformType>())
+                    foreach(var poseImportTransformType in Enum.GetValues<ScenePoseTransformType>())
                     {
                         if(ImGui.Selectable($"{poseImportTransformType}", poseImportTransformType == scaleTransformType))
                         {

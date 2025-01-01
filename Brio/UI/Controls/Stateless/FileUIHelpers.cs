@@ -209,16 +209,17 @@ internal class FileUIHelpers
                      }
                  }, 1, ConfigurationService.Instance.Configuration.LastMCDFPath, true);
     }
+
     public static void ShowExportSceneModal(EntityManager entityManager)
     {
-        UIManager.Instance.FileDialogManager.SaveFileDialog("Export Scene File###export_scene_window", "Scene File (*.scene){.scene}", "scene", "{.scene}",
+        UIManager.Instance.FileDialogManager.SaveFileDialog("Export Scene File###export_scene_window", "Brio Scene File (*.brioscn){.brioscn}", "brioscn", "{.brioscn}",
             (success, path) =>
             {
                 if(success)
                 {
                     Brio.Log.Info("Exporting scene...");
-                    if(!path.EndsWith(".scene"))
-                        path += ".scene";
+                    if(!path.EndsWith(".brioscn"))
+                        path += ".brioscn";
 
                     var directory = Path.GetDirectoryName(path);
                     if(directory is not null)
@@ -227,7 +228,7 @@ internal class FileUIHelpers
                         ConfigurationService.Instance.Save();
                     }
                     
-                    SceneFile sceneFile = SceneService.BuildSceneFile(entityManager);
+                    SceneFile sceneFile = SceneService.GenerateSceneFile(entityManager);
                     ResourceProvider.Instance.SaveFileDocument(path, sceneFile);
                     Brio.Log.Info("Finished exporting scene");
                 }
@@ -237,15 +238,15 @@ internal class FileUIHelpers
     public static void ShowImportSceneModal(SceneService sceneService)
     {
         List<Type> types = [typeof(SceneFile)];
-        TypeFilter filter = new TypeFilter("Scenes", [.. types]);
+        TypeFilter filter = new("Scenes", [.. types]);
         
         LibraryManager.GetWithFilePicker(filter, r =>
         {
-            Brio.Log.Info("Importing scene...");
+            Brio.Log.Verbose("Importing scene...");
             if(r is SceneFile importedFile)
             {
-                sceneService.BuildScene(importedFile);
-                Brio.Log.Info("Finished imported scene");
+                sceneService.LoadScene(importedFile);
+                Brio.Log.Verbose("Finished imported scene!");
             }
             else
             { 

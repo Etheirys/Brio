@@ -124,14 +124,14 @@ internal class PosingCapability : ActorCharacterCapability
         }
     }
 
-    public void ImportPose(OneOf<PoseFile, CMToolPoseFile> rawPoseFile, PoseImporterOptions? options = null, bool asExpression = false)
+    public void ImportPose(OneOf<PoseFile, CMToolPoseFile> rawPoseFile, PoseImporterOptions? options = null, bool asExpression = false, bool asScene = false)
     {
-        ImportPose(rawPoseFile, options, reset: false, reconcile: false, asExpression: asExpression);
+        ImportPose(rawPoseFile, options, reset: false, reconcile: false, asExpression: asExpression, asScene: asScene);
     }
 
     PoseFile? tempPose;
     private void ImportPose(OneOf<PoseFile, CMToolPoseFile> rawPoseFile, PoseImporterOptions? options = null, bool generateSnapshot = true, bool reset = true, bool reconcile = true,
-        bool asExpression = false, bool expressionPhase2 = false)
+        bool asExpression = false, bool expressionPhase2 = false, bool asScene = false)
     {
         var poseFile = rawPoseFile.Match(
                 poseFile => poseFile,
@@ -153,6 +153,11 @@ internal class PosingCapability : ActorCharacterCapability
             options = _posingService.ExpressionOptions;
             tempPose = GeneratePoseFile();
         }
+        else if (asScene)
+        {
+            options = _posingService.SceneImporterOptions;
+            options.ApplyModelTransform = ConfigurationService.Instance.Configuration.Import.ApplyModelTransform;
+        }
         else
         {
             options ??= _posingService.DefaultImporterOptions;
@@ -164,7 +169,7 @@ internal class PosingCapability : ActorCharacterCapability
         SkeletonPosing.ImportSkeletonPose(poseFile, options, expressionPhase2);
 
         if(asExpression == false)
-            ModelPosing.ImportModelPose(poseFile, options);
+            ModelPosing.ImportModelPose(poseFile, options, asScene);
 
         if(generateSnapshot)
             _framework.RunOnTick(() => Snapshot(reset, reconcile, asExpression: asExpression), delayTicks: 4);

@@ -1,10 +1,10 @@
-﻿using System.Numerics;
-using Brio.Capabilities.Actor;
+﻿using Brio.Capabilities.Actor;
 using Brio.Config;
 using Brio.Core;
 using Brio.Entities.Actor;
 using Brio.Files;
 using Brio.Game.Posing;
+using System.Numerics;
 
 namespace Brio.Capabilities.Posing;
 
@@ -41,7 +41,7 @@ internal class ModelPosingCapability : ActorCharacterCapability
     }
 
     public Transform? OverrideTransform => _transformOverride;
-    
+
     private Transform? _transformOverride = null;
     private Transform? _originalTransform = null;
 
@@ -67,36 +67,39 @@ internal class ModelPosingCapability : ActorCharacterCapability
         ResetTransform();
     }
 
-    public void ImportModelPose(PoseFile poseFile, PoseImporterOptions options)
+    public void ImportModelPose(PoseFile poseFile, PoseImporterOptions options, bool isLoadingAsScene)
     {
-        if(!options.ApplyModelTransform)
+        if(options.ApplyModelTransform)
         {
-            return;
-        }
-        
-        var temp = new Transform
-        {
-            Position = options.PositionTransformType switch
+            if(isLoadingAsScene)
             {
-                PoseImportTransformType.Difference => Transform.Position + poseFile.ModelDifference.Position,
-                PoseImportTransformType.Absolute => poseFile.ModelAbsoluteValues.Position,
-                _ => Transform.Position
-            },
-            Rotation = options.RotationTransformType switch
-            {
-                PoseImportTransformType.Difference => Quaternion.Normalize(Transform.Rotation * poseFile.ModelDifference.Rotation),
-                PoseImportTransformType.Absolute => poseFile.ModelAbsoluteValues.Rotation,
-                _ => Transform.Rotation 
-            },
-            Scale = options.ScaleTransformType switch
-            {
-                PoseImportTransformType.Difference => Transform.Scale + poseFile.ModelDifference.Scale,
-                PoseImportTransformType.Absolute => poseFile.ModelAbsoluteValues.Scale,
-                _ => Transform.Scale
+                Transform = new Transform
+                {
+                    Position = ConfigurationService.Instance.Configuration.Import.PositionTransformType switch
+                    {
+                        ScenePoseTransformType.Difference => Transform.Position + poseFile.ModelDifference.Position,
+                        ScenePoseTransformType.Absolute => poseFile.ModelAbsoluteValues.Position,
+                        _ => Transform.Position
+                    },
+                    Rotation = ConfigurationService.Instance.Configuration.Import.RotationTransformType switch
+                    {
+                        ScenePoseTransformType.Difference => Quaternion.Normalize(Transform.Rotation * poseFile.ModelDifference.Rotation),
+                        ScenePoseTransformType.Absolute => poseFile.ModelAbsoluteValues.Rotation,
+                        _ => Transform.Rotation
+                    },
+                    Scale = ConfigurationService.Instance.Configuration.Import.ScaleTransformType switch
+                    {
+                        ScenePoseTransformType.Difference => Transform.Scale + poseFile.ModelDifference.Scale,
+                        ScenePoseTransformType.Absolute => poseFile.ModelAbsoluteValues.Scale,
+                        _ => Transform.Scale
+                    }
+                };
             }
-        };
-
-        Transform = temp;
+            else
+            {
+                Transform += poseFile.ModelDifference;
+            }
+        }
     }
 
     public void ExportModelPose(PoseFile poseFile)
