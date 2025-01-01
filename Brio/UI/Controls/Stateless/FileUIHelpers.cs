@@ -16,6 +16,9 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Numerics;
+using Brio.Entities;
+using Brio.Game.Scene;
+using Brio.Resources;
 
 namespace Brio.UI.Controls.Stateless;
 
@@ -206,4 +209,50 @@ internal class FileUIHelpers
                      }
                  }, 1, ConfigurationService.Instance.Configuration.LastMCDFPath, true);
     }
+    public static void ShowExportSceneModal(EntityManager entityManager)
+    {
+        UIManager.Instance.FileDialogManager.SaveFileDialog("Export Scene File###export_scene_window", "Scene File (*.scene){.scene}", "scene", "{.scene}",
+            (success, path) =>
+            {
+                if(success)
+                {
+                    Brio.Log.Info("Exporting scene...");
+                    if(!path.EndsWith(".scene"))
+                        path += ".scene";
+
+                    var directory = Path.GetDirectoryName(path);
+                    if(directory is not null)
+                    {
+                        ConfigurationService.Instance.Configuration.LastScenePath = directory;
+                        ConfigurationService.Instance.Save();
+                    }
+                    
+                    SceneFile sceneFile = SceneService.BuildSceneFile(entityManager);
+                    ResourceProvider.Instance.SaveFileDocument(path, sceneFile);
+                    Brio.Log.Info("Finished exporting scene");
+                }
+            }, ConfigurationService.Instance.Configuration.LastScenePath, true);
+    }
+
+    public static void ShowImportSceneModal(SceneService sceneService)
+    {
+        List<Type> types = [typeof(SceneFile)];
+        TypeFilter filter = new TypeFilter("Scenes", [.. types]);
+        
+        LibraryManager.GetWithFilePicker(filter, r =>
+        {
+            Brio.Log.Info("Importing scene...");
+            if(r is SceneFile importedFile)
+            {
+                sceneService.BuildScene(importedFile);
+                Brio.Log.Info("Finished imported scene");
+            }
+            else
+            { 
+                throw new IOException("The file selected is not a valid scene file");
+            }
+        });
+    }
 }
+
+

@@ -40,7 +40,7 @@ internal class SettingsWindow : Window
         _brioIPCService = brioIPCService;
         _mareService = mareService;
 
-        Size = new Vector2(400, 450);
+        Size = new Vector2(450, 450);
     }
 
     private bool _isModal = false;
@@ -89,6 +89,7 @@ internal class SettingsWindow : Window
                         DrawIPCTab();
                         DrawPosingTab();
                         DrawLibraryTab();
+                        DrawImportTab();
                         DrawKeysTab();
                         DrawAdvancedTab();
                     }
@@ -191,6 +192,17 @@ internal class SettingsWindow : Window
         }
     }
 
+    private void DrawImportTab()
+    {
+        using(var tab = ImRaii.TabItem("Import"))
+        {
+            if(tab.Success)
+            {
+                DrawImportScene();
+            }
+        }
+    }
+
     private void DrawIPCTab()
     {
         using(var tab = ImRaii.TabItem("IPC"))
@@ -257,6 +269,84 @@ internal class SettingsWindow : Window
                     _mareService.RefreshMareStatus();
                 }
             }
+        }
+    }
+
+    private void DrawImportScene()
+    {
+        
+        if(ImGui.CollapsingHeader("Scene", ImGuiTreeNodeFlags.DefaultOpen))
+        {
+            bool destroyActorsBeforeImport = _configurationService.Configuration.SceneDestoryActorsBeforeImport;
+            if(ImGui.Checkbox("Destroy Actors before Scene import", ref destroyActorsBeforeImport))
+            {
+                _configurationService.Configuration.SceneDestoryActorsBeforeImport = destroyActorsBeforeImport;
+                _configurationService.ApplyChange();
+            }
+        }
+
+        if(ImGui.CollapsingHeader("Pose", ImGuiTreeNodeFlags.DefaultOpen))
+        {
+            
+            bool applyModelTransform = _configurationService.Configuration.Import.ApplyModelTransform;
+            if(ImGui.Checkbox("Apply Model Transform", ref applyModelTransform))
+            {
+                _configurationService.Configuration.Import.ApplyModelTransform = applyModelTransform;
+                _configurationService.ApplyChange();
+            }
+            
+            var positionTransformType = _configurationService.Configuration.Import.PositionTransformType;
+            ImGui.SetNextItemWidth(200);
+            using(var combo = ImRaii.Combo("Position", positionTransformType.ToString()))
+            {
+                if(combo.Success)
+                {
+                    foreach(var poseImportTransformType in Enum.GetValues<PoseImportTransformType>())
+                    {
+                        if(ImGui.Selectable($"{poseImportTransformType}", poseImportTransformType == positionTransformType))
+                        {
+                            _configurationService.Configuration.Import.PositionTransformType = poseImportTransformType;
+                            _configurationService.ApplyChange();
+                        }
+                    }
+                }
+            }
+            
+            
+            var rotationTransformType = _configurationService.Configuration.Import.RotationTransformType;
+            ImGui.SetNextItemWidth(200);
+            using(var combo = ImRaii.Combo("Rotation", rotationTransformType.ToString()))
+            {
+                if(combo.Success)
+                {
+                    foreach(var poseImportTransformType in Enum.GetValues<PoseImportTransformType>())
+                    {
+                        if(ImGui.Selectable($"{poseImportTransformType}", poseImportTransformType == rotationTransformType))
+                        {
+                            _configurationService.Configuration.Import.RotationTransformType = poseImportTransformType;
+                            _configurationService.ApplyChange();
+                        }
+                    }
+                }
+            }
+            
+            var scaleTransformType = _configurationService.Configuration.Import.ScaleTransformType;
+            ImGui.SetNextItemWidth(200);
+            using(var combo = ImRaii.Combo("Scale", scaleTransformType.ToString()))
+            {
+                if(combo.Success)
+                {
+                    foreach(var poseImportTransformType in Enum.GetValues<PoseImportTransformType>())
+                    {
+                        if(ImGui.Selectable($"{poseImportTransformType}", poseImportTransformType == scaleTransformType))
+                        {
+                            _configurationService.Configuration.Import.ScaleTransformType = poseImportTransformType;
+                            _configurationService.ApplyChange();
+                        }
+                    }
+                }
+            }
+            
         }
     }
 

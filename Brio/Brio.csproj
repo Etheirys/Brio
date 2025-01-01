@@ -76,4 +76,8 @@
 		</None>
 	</ItemGroup>
 
+	<ItemGroup>
+	  <Folder Include="Files\FileHelpers\" />
+	</ItemGroup>
+
 </Project>

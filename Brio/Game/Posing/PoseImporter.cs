@@ -1,4 +1,4 @@
-﻿using Brio.Capabilities.Posing;
+﻿using Brio.Config;
 using Brio.Core;
 using Brio.Files;
 using Brio.Game.Posing.Skeletons;
@@ -69,5 +69,7 @@ internal class PoseImporterOptions(BoneFilter filter, TransformComponents transf
     public BoneFilter BoneFilter { get; set; } = filter;
     public TransformComponents TransformComponents { get; set; } = transformComponents;
     public bool ApplyModelTransform { get; set; } = applyModelTransform;
+    public PoseImportTransformType PositionTransformType { get; set; } = PoseImportTransformType.Difference;
+    public PoseImportTransformType RotationTransformType { get; set; } = PoseImportTransformType.Difference;
+    public PoseImportTransformType ScaleTransformType { get; set; } = PoseImportTransformType.Difference;
 }
-

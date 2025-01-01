@@ -66,6 +66,7 @@ internal class PoseFileInfo : AppliableActorFileInfoBase<PoseFile>
 internal class PoseFile : JsonDocumentBase
 {
     public Bone ModelDifference { get; set; } = Transform.Identity;
+    public Bone ModelAbsoluteValues { get; set; } = Transform.Identity;
 
     public Dictionary<string, Bone> Bones { get; set; } = [];
     public Dictionary<string, Bone> MainHand { get; set; } = [];

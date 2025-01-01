@@ -2,7 +2,6 @@
 using Brio.Config;
 using Brio.Core;
 using Brio.Entities.Actor;
-using Brio.Entities.Core;
 using Brio.Files;
 using Brio.Game.Posing;
 using Brio.Input;
@@ -263,8 +262,7 @@ internal class PosingCapability : ActorCharacterCapability
             ImportPose(poseFile, options: all, generateSnapshot: false);
         }, delayTicks: 2);
     }
-
-    private PoseFile GeneratePoseFile()
+    public PoseFile GeneratePoseFile()
     {
         var poseFile = new PoseFile();
         SkeletonPosing.ExportSkeletonPose(poseFile);
