@@ -37,9 +37,10 @@ internal class ActionTimelineEditor(CutsceneManager cutsceneManager, GPoseServic
     private static readonly float _hederButtonSize = ImGui.CalcTextSize("#########").X + 28;
     private static readonly ActionTimelineSelector _globalTimelineSelector = new("global_timeline_selector");
 
+    private static bool _startAnimationOnSelect = true;
+
     private string _cameraPath = string.Empty;
     private ActionTimelineCapability _capability = null!;
-    private bool _startAnimationOnSelect = true;
     private bool _delimitSpeed = false;
 
     public void Draw(bool drawAdvanced, ActionTimelineCapability capability)
@@ -270,10 +271,12 @@ internal class ActionTimelineEditor(CutsceneManager cutsceneManager, GPoseServic
             ApplyBlend(_capability);
 
         ImGui.SameLine();
+  
         if(ImBrio.FontIconButtonRight("blend_search", FontAwesomeIcon.Search, 1, "Search"))
         {
             _globalTimelineSelector.Select(null, false);
             _globalTimelineSelector.AllowBlending = true;
+
             ImGui.OpenPopup("blend_search_popup");
 
         }
@@ -398,6 +401,7 @@ internal class ActionTimelineEditor(CutsceneManager cutsceneManager, GPoseServic
     {
 
         var slots = Enum.GetValues<ActionTimelineSlots>();
+  
         foreach(var slot in slots)
         {
             using(ImRaii.PushId((int)slot))
