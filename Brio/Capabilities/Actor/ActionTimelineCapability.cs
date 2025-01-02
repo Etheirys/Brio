@@ -1,5 +1,4 @@
-﻿using Brio.Capabilities.Core;
-using Brio.Config;
+﻿using Brio.Config;
 using Brio.Entities;
 using Brio.Entities.Actor;
 using Brio.Game.Actor.Extensions;
@@ -7,6 +6,7 @@ using Brio.Game.Posing;
 using Brio.Game.Types;
 using Brio.UI.Widgets.Actor;
 using Dalamud.Game.ClientState.Objects.Types;
+using Dalamud.Plugin.Services;
 using FFXIVClientStructs.FFXIV.Client.Game.Character;
 using FFXIVClientStructs.FFXIV.Client.Graphics.Scene;
 using Microsoft.Extensions.DependencyInjection;
@@ -18,6 +18,8 @@ namespace Brio.Capabilities.Actor;
 
 internal class ActionTimelineCapability : ActorCharacterCapability
 {
+    private readonly IFramework _framework;
+
     public unsafe float SpeedMultiplier => SpeedMultiplierOverride ?? Character.Native()->Timeline.OverallSpeed;
     public bool HasSpeedMultiplierOverride => SpeedMultiplierOverride.HasValue;
     public float? SpeedMultiplierOverride { get; private set; }
@@ -39,8 +41,10 @@ internal class ActionTimelineCapability : ActorCharacterCapability
     private OriginalBaseAnimation? _originalBaseAnimation = null;
     private bool _slotsDirty = false;
 
-    public ActionTimelineCapability(ActorEntity parent, EntityManager entityManager, PhysicsService physicsService, ConfigurationService configService) : base(parent)
+    public ActionTimelineCapability(IFramework framework, ActorEntity parent, EntityManager entityManager, PhysicsService physicsService, ConfigurationService configService) : base(parent)
     {
+        _framework = framework;
+
         Widget = new ActionTimelineWidget(this, entityManager, physicsService, configService);
     }
 
@@ -101,6 +105,79 @@ internal class ActionTimelineCapability : ActorCharacterCapability
 
         if(interrupt)
             BlendTimeline(actionTimeline);
+    }
+
+    public async void StopSpeedAndResetTimeline(Action? postStopAction = null, bool resetSpeedAfterAction = false)
+    {
+        Brio.Log.Verbose($"StopSpeedAndResetTimeline {postStopAction is not null} {resetSpeedAfterAction}");
+
+        var oldSpeed = SpeedMultiplier;
+
+        SetOverallSpeedOverride(0);
+
+        Brio.Log.Verbose($"SetOverallSpeedOverride {oldSpeed} {SpeedMultiplier}");
+
+        await _framework.RunOnTick(() =>
+        {
+            unsafe
+            {
+                var drawObj = Character.Native()->GameObject.DrawObject;
+                if(drawObj == null)
+                    return;
+
+                if(drawObj->Object.GetObjectType() != ObjectType.CharacterBase)
+                    return;
+
+                var charaBase = (CharacterBase*)drawObj;
+                if(charaBase->Skeleton == null)
+                    return;
+
+                var skeleton = charaBase->Skeleton;
+                for(int p = 0; p < skeleton->PartialSkeletonCount; ++p)
+                {
+                    var partial = &skeleton->PartialSkeletons[p];
+
+                    var animatedSkele = partial->GetHavokAnimatedSkeleton(0);
+                    if(animatedSkele == null)
+                        continue;
+
+                    for(int c = 0; c < animatedSkele->AnimationControls.Length; ++c)
+                    {
+                        var control = animatedSkele->AnimationControls[c].Value;
+                        if(control == null)
+                            continue;
+
+                        var binding = control->hkaAnimationControl.Binding;
+                        if(binding.ptr == null)
+                            continue;
+
+                        var anim = binding.ptr->Animation.ptr;
+                        if(anim == null)
+                            continue;
+
+                        if(control->PlaybackSpeed == 0)
+                        {
+                            control->hkaAnimationControl.LocalTime = 0;
+                            Brio.Log.Verbose($"hkaAnimationControl");
+                        }
+                    }
+                }
+            }
+        }, delayTicks: 4);
+
+        postStopAction?.Invoke();
+
+        Brio.Log.Verbose($"postStopAction Invoke: {postStopAction is not null}");
+
+        if(resetSpeedAfterAction)
+        {
+            await _framework.RunOnTick(() =>
+            {
+                SetOverallSpeedOverride(oldSpeed);
+
+                Brio.Log.Verbose($"SetOverallSpeedOverride {SpeedMultiplier}");
+            }, delayTicks: 2);
+        }
     }
 
     public unsafe void ResetBaseOverride()

@@ -17,7 +17,7 @@ public static class BrioAPI
 
     private static ICallGateSubscriber<IGameObject?> Actor_Spawn_IPC;
     private static ICallGateSubscriber<Task<IGameObject?>> Actor_SpawnAsync_IPC;
-    private static ICallGateSubscriber<bool, bool, Task<IGameObject?>> Actor_SpawnExAsync_IPC;
+    private static ICallGateSubscriber<bool, bool, bool, Task<IGameObject?>> Actor_SpawnExAsync_IPC;
 
     private static ICallGateSubscriber<IGameObject, bool> Actor_DespawnActor_Ipc;
     private static ICallGateSubscriber<IGameObject, Task<bool>> Actor_DespawnActorAsync_Ipc;
@@ -35,6 +35,12 @@ public static class BrioAPI
     private static ICallGateSubscriber<IGameObject, bool> Actor_Exists_IPC;
     private static ICallGateSubscriber<IGameObject[]?> Actor_GetAll_IPC;
 
+    private static ICallGateSubscriber<IGameObject, float, bool> Actor_SetSpeed_IPC;
+    private static ICallGateSubscriber<IGameObject, float> Actor_GetSpeed_IPC;
+
+    private static ICallGateSubscriber<IGameObject, bool> Actor_Freeze_IPC;
+    private static ICallGateSubscriber<IGameObject, bool> Actor_UnFreeze_IPC;
+
     //
     //
 
@@ -50,7 +56,7 @@ public static class BrioAPI
 
         Actor_Spawn_IPC = pluginInterface.GetIpcSubscriber<IGameObject?>("Brio.Actor.Spawn");
         Actor_SpawnAsync_IPC = pluginInterface.GetIpcSubscriber<Task<IGameObject?>>("Brio.Actor.SpawnAsync");
-        Actor_SpawnExAsync_IPC = pluginInterface.GetIpcSubscriber<bool, bool, Task<IGameObject?>>("Brio.Actor.SpawnExAsync");
+        Actor_SpawnExAsync_IPC = pluginInterface.GetIpcSubscriber<bool, bool, bool, Task<IGameObject?>>("Brio.Actor.SpawnExAsync");
 
         Actor_DespawnActor_Ipc = pluginInterface.GetIpcSubscriber<IGameObject, bool>("Brio.Actor.Despawn");
         Actor_DespawnActorAsync_Ipc = pluginInterface.GetIpcSubscriber<IGameObject, Task<bool>>("Brio.Actor.DespawnAsync");
@@ -67,6 +73,12 @@ public static class BrioAPI
 
         Actor_Exists_IPC = pluginInterface.GetIpcSubscriber<IGameObject, bool>("Brio.Actor.Exists");
         Actor_GetAll_IPC = pluginInterface.GetIpcSubscriber<IGameObject[]?>("Brio.Actor.GetAll");
+  
+        Actor_SetSpeed_IPC = pluginInterface.GetIpcSubscriber<IGameObject, float, bool>("Brio.Actor.SetSpeed");
+        Actor_GetSpeed_IPC = pluginInterface.GetIpcSubscriber<IGameObject, float>("Brio.Actor.GetSpeed");
+
+        Actor_Freeze_IPC = pluginInterface.GetIpcSubscriber<IGameObject, bool>("Brio.Actor.Freeze");
+        Actor_UnFreeze_IPC = pluginInterface.GetIpcSubscriber<IGameObject, bool>("Brio.Actor.UnFreeze");
     }
 
     /// <summary>
@@ -107,12 +119,13 @@ public static class BrioAPI
     /// </summary>
     /// <param name="spawnWithCompanionSlot">Whether to spawn with a companion slot.</param>
     /// <param name="selectInHierarchy">Whether to select the actor in the hierarchy.</param>
+    /// <param name="spawnFrozen">Whether to spawn the actor with animation speed of 0f.</param>
     /// <returns>The spawned actor, or null if the spawn failed.</returns>
-    public static Task<IGameObject?> SpawnActorAsync(bool spawnWithCompanionSlot = false, bool selectInHierarchy = false)
+    public static async Task<IGameObject?> SpawnActorAsync(bool spawnWithCompanionSlot = false, bool selectInHierarchy = false, bool spawnFrozen = false)
     {
         if (hasInit is false) throw new Exception("Call BrioAPI.InitBrioAPI first!");
 
-        return Actor_SpawnExAsync_IPC.InvokeFunc(spawnWithCompanionSlot, selectInHierarchy);
+        return await Actor_SpawnExAsync_IPC.InvokeFunc(spawnWithCompanionSlot, selectInHierarchy, spawnFrozen);
     }
 
     /// <summary>
@@ -296,5 +309,54 @@ public static class BrioAPI
         var actors = Actor_GetAll_IPC.InvokeFunc();
 
         return (actors?.Length > 1, actors!);
+    }
+
+    /// <summary>
+    /// Sets the speed of the specified actor.
+    /// </summary>
+    /// <param name="actor">The actor whose speed is to be set.</param>
+    /// <param name="speed">The speed to set for the actor.</param>
+    /// <returns>True if the speed was successfully set, otherwise false.</returns>
+    public static bool SetActorSpeed(IGameObject actor, float speed)
+    {
+        if (hasInit is false) throw new Exception("Call BrioAPI.InitBrioAPI first!");
+
+        return Actor_SetSpeed_IPC.InvokeFunc(actor, speed);
+    }
+
+    /// <summary>
+    /// Gets the speed of the specified actor.
+    /// </summary>
+    /// <param name="actor">The actor whose speed is to be retrieved.</param>
+    /// <returns>The speed of the specified actor.</returns>
+    public static float GetActorSpeed(IGameObject actor)
+    {
+        if (hasInit is false) throw new Exception("Call BrioAPI.InitBrioAPI first!");
+
+        return Actor_GetSpeed_IPC.InvokeFunc(actor);
+    }
+
+    /// <summary>
+    /// Freezes the specified actor.
+    /// </summary>
+    /// <param name="actor">The actor to be frozen.</param>
+    /// <returns>True if the actor was successfully frozen, otherwise false.</returns>
+    public static bool FreezeActor(IGameObject actor)
+    {
+        if (hasInit is false) throw new Exception("Call BrioAPI.InitBrioAPI first!");
+
+        return Actor_Freeze_IPC.InvokeFunc(actor);
+    }
+
+    /// <summary>
+    /// Unfreezes the specified actor.
+    /// </summary>
+    /// <param name="actor">The actor to be unfrozen.</param>
+    /// <returns>True if the actor was successfully unfrozen, otherwise false.</returns>
+    public static bool UnFreezeActor(IGameObject actor)
+    {
+        if (hasInit is false) throw new Exception("Call BrioAPI.InitBrioAPI first!");
+
+        return Actor_UnFreeze_IPC.InvokeFunc(actor);
     }
 }

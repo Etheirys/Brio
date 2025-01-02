@@ -1,19 +1,25 @@
-﻿using Brio.Capabilities.Posing;
+﻿using Brio.Capabilities.Actor;
+using Brio.Capabilities.Posing;
 using Brio.Config;
 using Brio.Core;
 using Brio.Entities;
+using Brio.Entities.Core;
 using Brio.Files;
 using Brio.Game.Actor;
 using Brio.Game.Actor.Extensions;
+using Brio.Game.Core;
 using Brio.Game.GPose;
 using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Ipc;
 using Dalamud.Plugin.Services;
+using FFXIVClientStructs.FFXIV.Client.Game.Object;
+using Swan.Formatters;
 using System;
 using System.Linq;
 using System.Numerics;
 using System.Threading.Tasks;
+using static FFXIVClientStructs.FFXIV.Client.UI.Agent.AgentMJIFarmManagement;
 
 namespace Brio.IPC;
 internal class BrioIPCService : IDisposable
@@ -35,7 +41,7 @@ internal class BrioIPCService : IDisposable
     private ICallGateProvider<Task<IGameObject?>>? Actor_SpawnAsync_IPC;
 
     public const string Actor_SpawnExAsync_IPCName = "Brio.Actor.SpawnExAsync";
-    private ICallGateProvider<bool, bool, Task<IGameObject?>>? Actor_SpawnExAsync_IPC;
+    private ICallGateProvider<bool, bool, bool, Task<IGameObject?>>? Actor_SpawnExAsync_IPC;
 
 
     public const string Actor_Despawn_IPCName = "Brio.Actor.Despawn";
@@ -66,12 +72,25 @@ internal class BrioIPCService : IDisposable
 
     public const string Actor_Pose_Reset_IPCName = "Brio.Actor.Pose.Reset";
     private ICallGateProvider<IGameObject, bool, bool>? Actor_Pose_Reset_IPC;
-   
+
     public const string Actor_Exists_IPCName = "Brio.Actor.Exists";
     private ICallGateProvider<IGameObject, bool>? Actor_Exists_IPC;
-  
+
     public const string Actor_GetAll_IPCName = "Brio.Actor.GetAll";
     private ICallGateProvider<IGameObject[]?>? Actor_GetAll_IPC;
+
+
+    public const string Actor_SetSpeed_IPCName = "Brio.Actor.SetSpeed";
+    private ICallGateProvider<IGameObject, float, bool>? Actor_SetSpeed_IPC;
+
+    public const string Actor_GetSpeed_IPCName = "Brio.Actor.GetSpeed";
+    private ICallGateProvider<IGameObject, float>? Actor_GetSpeed_IPC;
+
+    public const string Actor_Freeze_IPCName = "Brio.Actor.Freeze";
+    private ICallGateProvider<IGameObject, bool>? Actor_Freeze_IPC;
+
+    public const string Actor_UnFreeze_IPCName = "Brio.Actor.UnFreeze";
+    private ICallGateProvider<IGameObject, bool>? Actor_UnFreeze_IPC;
 
     //
 
@@ -119,7 +138,7 @@ internal class BrioIPCService : IDisposable
         Actor_SpawnAsync_IPC = _pluginInterface.GetIpcProvider<Task<IGameObject?>>(Actor_SpawnAsync_IPCName);
         Actor_SpawnAsync_IPC.RegisterFunc(SpawnActorAsync_Impl);
 
-        Actor_SpawnExAsync_IPC = _pluginInterface.GetIpcProvider<bool, bool, Task<IGameObject?>>(Actor_SpawnExAsync_IPCName);
+        Actor_SpawnExAsync_IPC = _pluginInterface.GetIpcProvider<bool, bool, bool, Task<IGameObject?>>(Actor_SpawnExAsync_IPCName);
         Actor_SpawnExAsync_IPC.RegisterFunc(SpawnExAsync_Impl);
 
         Actor_DespawnActor_IPC = _pluginInterface.GetIpcProvider<IGameObject, bool>(Actor_Despawn_IPCName);
@@ -154,6 +173,18 @@ internal class BrioIPCService : IDisposable
 
         Actor_GetAll_IPC = _pluginInterface.GetIpcProvider<IGameObject[]?>(Actor_GetAll_IPCName);
         Actor_GetAll_IPC.RegisterFunc(ActorGetAll_Impl);
+
+        Actor_SetSpeed_IPC = _pluginInterface.GetIpcProvider<IGameObject, float, bool>(Actor_SetSpeed_IPCName);
+        Actor_SetSpeed_IPC.RegisterFunc(SetActorSpeed_Impl);
+
+        Actor_GetSpeed_IPC = _pluginInterface.GetIpcProvider<IGameObject, float>(Actor_GetSpeed_IPCName);
+        Actor_GetSpeed_IPC.RegisterFunc(GetActorSpeed_Impl);
+
+        Actor_Freeze_IPC = _pluginInterface.GetIpcProvider<IGameObject, bool>(Actor_Freeze_IPCName);
+        Actor_Freeze_IPC.RegisterFunc(FreezActor_Impl);
+
+        Actor_UnFreeze_IPC = _pluginInterface.GetIpcProvider<IGameObject, bool>(Actor_UnFreeze_IPCName);
+        Actor_UnFreeze_IPC.RegisterFunc(UnFreezActor_Impl);
 
         IsIPCEnabled = true;
     }
@@ -209,8 +240,8 @@ internal class BrioIPCService : IDisposable
         return null;
     }
 
-    private async Task<IGameObject?> SpawnExAsync_Impl(bool spawnCompanion, bool selectInHierarchy) => await _framework.RunOnTick(() => SpawnEx(spawnCompanion, selectInHierarchy));
-    private IGameObject? SpawnEx(bool spawnCompanionSlot, bool selectInHierarchy)
+    private async Task<IGameObject?> SpawnExAsync_Impl(bool spawnCompanion, bool selectInHierarchy, bool spawnFrozen) => await _framework.RunOnTick(() => SpawnEx(spawnCompanion, selectInHierarchy, spawnFrozen));
+    private IGameObject? SpawnEx(bool spawnCompanionSlot, bool selectInHierarchy, bool spawnFrozen)
     {
         if(_gPoseService.IsGPosing == false) return null;
 
@@ -225,6 +256,26 @@ internal class BrioIPCService : IDisposable
             if(selectInHierarchy)
             {
                 _entityManager.SetSelectedEntity(character);
+            }
+
+            if(spawnFrozen)
+            {
+                unsafe
+                {
+                    _framework.RunUntilSatisfied(
+                        () => character.Native()->IsReadyToDraw(),
+                        (__) =>
+                        {
+                            if(_entityManager.TryGetEntity(character.Native(), out var entity))
+                            {
+                                var actionTimeline = entity.GetCapability<ActionTimelineCapability>();
+                                actionTimeline.SetOverallSpeedOverride(0);
+                            }
+                        },
+                        100,
+                        dontStartFor: 2
+                    );
+                }
             }
 
             return character;
@@ -310,13 +361,17 @@ internal class BrioIPCService : IDisposable
 
     private unsafe bool LoadFromFile_Impl(IGameObject gameObject, string fileURI)
     {
-        if(_gPoseService.IsGPosing == false) return false;
+        if(_gPoseService.IsGPosing == false || string.IsNullOrEmpty(fileURI)) return false;
 
         if(_entityManager.TryGetEntity(gameObject.Native(), out var entity))
         {
             if(entity.TryGetCapability<PosingCapability>(out var posingCapability))
             {
-                posingCapability.ImportPose(fileURI);
+                var actionTimeline = entity.GetCapability<ActionTimelineCapability>();
+                actionTimeline.StopSpeedAndResetTimeline(() => {
+                    posingCapability.ImportPose(fileURI);
+                }, false);
+
                 return true;
             }
         }
@@ -324,31 +379,32 @@ internal class BrioIPCService : IDisposable
     }
     private unsafe bool LoadFromJson_Impl(IGameObject gameObject, string json, bool isLegacyCMToolPose)
     {
-        if(_gPoseService.IsGPosing == false) return false;
+        if(_gPoseService.IsGPosing == false || string.IsNullOrEmpty(json)) return false;
 
-        if(_entityManager.TryGetEntity(gameObject.Native(), out var entity))
+        if(_entityManager.TryGetEntity(gameObject.Native(), out Entity? entity) && entity is not null)
         {
             if(entity.TryGetCapability<PosingCapability>(out var posingCapability))
             {
-                try
-                {
-                    if(isLegacyCMToolPose)
+                var actionTimeline = entity.GetCapability<ActionTimelineCapability>();
+                actionTimeline.StopSpeedAndResetTimeline(() => {
+                    try
                     {
-                        posingCapability.ImportPose(JsonSerializer.Deserialize<CMToolPoseFile>(json), null);
+                        if(isLegacyCMToolPose)
+                        {
+                            posingCapability.ImportPose(JsonSerializer.Deserialize<CMToolPoseFile>(json), null, asIPCpose: true);
+                        }
+                        else
+                        {
+                            posingCapability.ImportPose(JsonSerializer.Deserialize<PoseFile>(json), null, asIPCpose: false);
+                        }
                     }
-                    else
+                    catch
                     {
-                        posingCapability.ImportPose(JsonSerializer.Deserialize<PoseFile>(json), null);
+                        Brio.NotifyError("Invalid pose file loaded from IPC.");
                     }
+                }, false);
 
-                    return true;
-                }
-                catch
-                {
-                    Brio.NotifyError("Invalid pose file loaded from IPC.");
-
-                    return false;
-                }
+                return true;
             }
         }
 
@@ -399,6 +455,67 @@ internal class BrioIPCService : IDisposable
         if(_gPoseService.IsGPosing == false) return null;
 
         return _entityManager.TryGetAllActorsAsGameObject().ToArray();
+    }
+
+    private unsafe bool SetActorSpeed_Impl(IGameObject actor, float speed)
+    {
+        if(_gPoseService.IsGPosing == false) return false;
+
+        if(_entityManager.TryGetEntity(actor.Native(), out var entity))
+        {
+            if(entity.TryGetCapability<ActionTimelineCapability>(out var actionTimeline))
+            {
+                actionTimeline.SetOverallSpeedOverride(speed);
+                return true;
+            }
+        }
+
+        return false;
+    }
+    private unsafe float GetActorSpeed_Impl(IGameObject actor)
+    {
+        if(_gPoseService.IsGPosing == false) return 0;
+    
+        if(_entityManager.TryGetEntity(actor.Native(), out var entity))
+        {
+            if(entity.TryGetCapability<ActionTimelineCapability>(out var actionTimeline))
+            {
+                return actionTimeline.SpeedMultiplier;
+            }
+        }
+
+        return 0;
+    }
+
+    private unsafe bool FreezActor_Impl(IGameObject actor)
+    {
+        if(_gPoseService.IsGPosing == false) return false;
+       
+        if(_entityManager.TryGetEntity(actor.Native(), out var entity))
+        {
+            if(entity.TryGetCapability<ActionTimelineCapability>(out var actionTimeline))
+            {
+                actionTimeline.StopSpeedAndResetTimeline();
+                return true;
+            }
+        }
+     
+        return false;
+    }
+    private unsafe bool UnFreezActor_Impl(IGameObject actor)
+    {
+        if(_gPoseService.IsGPosing == false) return false;
+       
+        if(_entityManager.TryGetEntity(actor.Native(), out var entity))
+        {
+            if(entity.TryGetCapability<ActionTimelineCapability>(out var actionTimeline))
+            {
+                actionTimeline.SetOverallSpeedOverride(1);
+                return true;
+            }
+        }
+
+        return false;
     }
 
     public void Dispose()
