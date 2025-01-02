@@ -157,7 +157,6 @@ internal class PosingCapability : ActorCharacterCapability
         else if (asScene)
         {
             options = _posingService.SceneImporterOptions;
-            options.ApplyModelTransform = ConfigurationService.Instance.Configuration.Import.ApplyModelTransform;
         }
         else if (asIPCpose)
         {
