@@ -34,4 +34,6 @@ internal class PosingConfiguration
 
     // Undo / Redo
     public int UndoStackSize { get; set; } = 50;
+
+    public bool FreezeActorOnPoseImport { get; set; } = false;
 }

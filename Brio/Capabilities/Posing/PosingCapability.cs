@@ -125,14 +125,15 @@ internal class PosingCapability : ActorCharacterCapability
         }
     }
 
-    public void ImportPose(OneOf<PoseFile, CMToolPoseFile> rawPoseFile, PoseImporterOptions? options = null, bool asExpression = false, bool asScene = false, bool asIPCpose = false)
+    public void ImportPose(OneOf<PoseFile, CMToolPoseFile> rawPoseFile, PoseImporterOptions? options = null, bool asExpression = false, bool asScene = false, bool asIPCpose = false, bool asBody = false)
     {
-        ImportPose(rawPoseFile, options, reset: false, reconcile: false, asExpression: asExpression, asScene: asScene, asIPCpose: asIPCpose);
+        ImportPose(rawPoseFile, options, reset: false, reconcile: false, asExpression: asExpression, asScene: asScene, asIPCpose: asIPCpose, asBody: asBody);
     }
 
+    // TODO fix this bool hell after Scenes are added
     PoseFile? tempPose;
     private void ImportPose(OneOf<PoseFile, CMToolPoseFile> rawPoseFile, PoseImporterOptions? options = null, bool generateSnapshot = true, bool reset = true, bool reconcile = true,
-        bool asExpression = false, bool expressionPhase2 = false, bool asScene = false, bool asIPCpose = false)
+        bool asExpression = false, bool expressionPhase2 = false, bool asScene = false, bool asIPCpose = false, bool asBody = false)
     {
         var poseFile = rawPoseFile.Match(
                 poseFile => poseFile,
@@ -153,6 +154,10 @@ internal class PosingCapability : ActorCharacterCapability
 
             options = _posingService.ExpressionOptions;
             tempPose = GeneratePoseFile();
+        }
+        else if (asBody)
+        {
+            options = _posingService.BodyOptions;
         }
         else if (asScene)
         {
