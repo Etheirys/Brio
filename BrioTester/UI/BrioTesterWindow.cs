@@ -3,6 +3,7 @@ using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Interface.Windowing;
 using Dalamud.Plugin;
+using Dalamud.Plugin.Services;
 using ImGuiNET;
 using System.Numerics;
 
@@ -10,6 +11,8 @@ namespace BrioTester.Plugin.UI;
 
 public class BrioTesterWindow : Window
 {
+    IFramework _framework;
+
     private (int, int) ver;
     private IGameObject? gameObject;
 
@@ -17,8 +20,10 @@ public class BrioTesterWindow : Window
 
     //
 
-    public BrioTesterWindow(IDalamudPluginInterface pluginInterface) : base($" {BrioTester.PluginName}")
+    public BrioTesterWindow(IFramework Framework, IDalamudPluginInterface pluginInterface) : base($" {BrioTester.PluginName}")
     {
+        _framework = Framework;
+
         BrioAPI.InitBrioAPI(pluginInterface);
 
         SizeConstraints = new WindowSizeConstraints
@@ -56,6 +61,8 @@ public class BrioTesterWindow : Window
 
                     if (gameObject is not null && string.IsNullOrWhiteSpace(testURI) == false)
                         BrioAPI.SetActorPoseFromFilePath(gameObject, testURI);
+                    else if (gameObject is not null)
+                        BrioAPI.SetActorPoseFromJson(gameObject, null!);
                 }
             }
             ImGui.PopStyleColor();
@@ -64,7 +71,10 @@ public class BrioTesterWindow : Window
             ImGui.PushStyleColor(ImGuiCol.Button, new Vector4(86, 98, 246, 255) / 255);
             if (ImGui.Button("spawn " + gameObject?.Name, buttonSize))
             {
-                gameObject = BrioAPI.SpawnActor();
+                _framework.RunOnTick(async () =>
+                {
+                    gameObject = await BrioAPI.SpawnActorAsync(false, true, false);
+                });
             }
             ImGui.PopStyleColor();
             ImGui.SameLine();
@@ -129,6 +139,25 @@ public class BrioTesterWindow : Window
                     {
                         logText += $"Actor {actor.Name} \n";
                     }
+                }
+            }
+            ImGui.PopStyleColor();
+
+            ImGui.SameLine();
+
+            ImGui.PushStyleColor(ImGuiCol.Button, new Vector4(0, 100, 255, 255) / 255);
+            if (ImGui.Button("Toggle Freeze", buttonSize))
+            {
+                if (gameObject is null)
+                    return;
+
+                if (BrioAPI.GetActorSpeed(gameObject) == 0)
+                {
+                    BrioAPI.UnFreezeActor(gameObject);
+                }
+                else
+                {
+                    BrioAPI.FreezeActor(gameObject);
                 }
             }
             ImGui.PopStyleColor();

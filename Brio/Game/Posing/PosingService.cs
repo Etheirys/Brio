@@ -18,7 +18,11 @@ internal class PosingService
     public BoneFilter OverlayFilter { get; }
 
     public PoseImporterOptions DefaultImporterOptions { get; }
+
+    public PoseImporterOptions DefaultIPCImporterOptions { get; }
+
     public PoseImporterOptions SceneImporterOptions { get; }
+
     public PoseImporterOptions ExpressionOptions { get; }
     public PoseImporterOptions ExpressionOptions2 { get; }
 
@@ -28,6 +32,8 @@ internal class PosingService
 
         DefaultImporterOptions = new PoseImporterOptions(new BoneFilter(this), TransformComponents.Rotation, false);
         DefaultImporterOptions.BoneFilter.DisableCategory("weapon");
+       
+        DefaultIPCImporterOptions = new PoseImporterOptions(new BoneFilter(this), TransformComponents.All, false);
 
         SceneImporterOptions = new PoseImporterOptions(new BoneFilter(this), TransformComponents.All, false);
 
