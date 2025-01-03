@@ -14,7 +14,7 @@ using System.Threading.Tasks;
 
 namespace Brio.Game.Scene;
 
-internal class SceneService(EntityManager _entityManager, PosingService _posingService, IFramework _framework)
+internal class SceneService(EntityManager _entityManager, PosingService _posingService, IClientState _clientState, IFramework _framework)
 {
     internal static SceneFile GenerateSceneFile(EntityManager entityManager)
     {
@@ -26,7 +26,7 @@ internal class SceneService(EntityManager _entityManager, PosingService _posingS
         {
             if(child is ActorEntity actorEntity)
             {
-                sceneFile.AddActor(actorEntity);
+                sceneFile.Actors.Add(actorEntity);
             }
         }
 
@@ -46,7 +46,7 @@ internal class SceneService(EntityManager _entityManager, PosingService _posingS
 
         foreach(ActorFile actorFile in sceneFile.Actors)
         {
-            var (actorId, actor) = actorCapability.CreateCharacter(false, false, forceSpawnActorWithoutCompanion: true);
+            var (actorId, actor) = actorCapability.CreateCharacter(actorFile.HasChild, false, forceSpawnActorWithoutCompanion: !actorFile.HasChild);
 
             _framework.RunUntilSatisfied(
                 () => actor.Native()->IsReadyToDraw(),
@@ -67,7 +67,7 @@ internal class SceneService(EntityManager _entityManager, PosingService _posingS
         var appearanceCapability = attachedActor.GetCapability<ActorAppearanceCapability>();
         var actionTimeline = attachedActor.GetCapability<ActionTimelineCapability>();
 
-        attachedActor.FriendlyName = actorFile.FriendlyName;
+        attachedActor.FriendlyName = actorFile.Name;
 
         actionTimeline.SetOverallSpeedOverride(0);
 
@@ -75,10 +75,38 @@ internal class SceneService(EntityManager _entityManager, PosingService _posingS
         {
             await appearanceCapability.SetAppearance(actorFile.AnamnesisCharaFile, AppearanceImportOptions.Default);
 
-            await _framework.RunOnTick(() =>
+            await _framework.RunOnTick(async () =>
             {
-                posingCapability.ImportPose(actorFile.PoseFile, null, asScene: true);
-            }, delayTicks: 10); // I dont like having to-do this but I dont think I have another way without rework
+                bool mountPose = false;
+                if(actorFile.Child is not null && actorFile.Child.Companion.Kind == Types.CompanionKind.Mount)
+                    mountPose = true;
+
+                if(mountPose == false)
+                    posingCapability.ImportPose(actorFile.PoseFile, null, asScene: true);
+
+                if(attachedActor.HasCapability<CompanionCapability>() == true && actorFile.HasChild && actorFile.Child is not null)
+                {
+                    var companionCapability = attachedActor.GetCapability<CompanionCapability>();
+
+                    companionCapability.SetCompanion(actorFile.Child.Companion);
+
+                    await _framework.RunOnTick(() =>
+                        {
+                            if(actorFile.Child.PoseFile is not null)
+                            {
+                                var companionEntity = companionCapability.GetCompanionAsEntity();
+
+                                if(companionEntity is not null && companionEntity.TryGetCapability<PosingCapability>(out var posingCapability))
+                                {
+                                    posingCapability.ImportPose(actorFile.Child.PoseFile, null, asScene: true, freezeOnLoad: true);
+                                }
+                            }
+
+                            if(mountPose == true)
+                                posingCapability.ImportPose(actorFile.PoseFile, null, asScene: true);
+                        });
+                }
+            }, delayTicks: 10); // I dont like having to-do set delayTicks to this but I dont think I have another way without rework
         });
     }
 }

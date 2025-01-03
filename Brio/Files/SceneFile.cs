@@ -16,12 +16,23 @@ internal class SceneFileInfo : JsonDocumentBaseFileInfo<SceneFile>
 }
 
 [Serializable]
-internal class SceneFile
+internal class SceneFile : JsonDocumentBase
 {
+    public string FileType { get; set; } = "Brio Scene";
+
     public List<ActorFile> Actors { get; set; } = [];
-    
-    public void AddActor(ActorFile actorFile)
-    {
-        Actors.Add(actorFile);
-    }
+
+    public GameCameraFile? GameCamera { get; set; }
+
+    public XATCameraFile? XATCamera { get; set; }
+
+    public SceneMetaData? MetaData { get; set; }
+}
+
+[Serializable]
+internal class SceneMetaData
+{
+    public uint Map { get; set; }
+    public ushort Territory { get; set; }
+    public string World { get; set; }
 }
