@@ -32,7 +32,7 @@ internal class ActorAppearanceWidget(ActorAppearanceCapability capability) : Wid
 
         ImGui.SameLine();
 
-        if(ImBrio.FontIconButton("import_charafile", FontAwesomeIcon.FileImport, "Import Character"))
+        if(ImBrio.FontIconButton("import_charafile", FontAwesomeIcon.Download, "Import Character"))
             FileUIHelpers.ShowImportCharacterModal(Capability, AppearanceImportOptions.Default);
 
         ImGui.SameLine();
