@@ -24,6 +24,7 @@ using Dalamud.Plugin.Services;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Diagnostics;
+using Brio.Game.Scene;
 
 namespace Brio;
 
@@ -113,6 +114,7 @@ public class Brio : IDalamudPlugin
         serviceCollection.AddSingleton<GameDataProvider>();
         serviceCollection.AddSingleton<WelcomeService>();
         serviceCollection.AddSingleton<InputService>();
+        serviceCollection.AddSingleton<SceneService>();
 
         // IPC
         serviceCollection.AddSingleton<BrioIPCService>();
@@ -155,8 +157,9 @@ public class Brio : IDalamudPlugin
         serviceCollection.AddSingleton<FileTypeInfoBase, CMToolPoseFileInfo>();
         serviceCollection.AddSingleton<FileTypeInfoBase, PoseFileInfo>();
         serviceCollection.AddSingleton<FileTypeInfoBase, MareCharacterDataFileInfo>();
+        serviceCollection.AddSingleton<FileTypeInfoBase, SceneFileInfo>();
         serviceCollection.AddSingleton<FileService>();
-
+        
         serviceCollection.AddSingleton<SourceBase, GameDataNpcSource>();
         serviceCollection.AddSingleton<SourceBase, GameDataMountSource>();
         serviceCollection.AddSingleton<SourceBase, GameDataOrnamentSource>();

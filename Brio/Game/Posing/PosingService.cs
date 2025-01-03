@@ -1,5 +1,7 @@
-﻿using Brio.Core;
+﻿using Brio.Config;
+using Brio.Core;
 using ImGuizmoNET;
+using System.IO.Pipes;
 
 namespace Brio.Game.Posing;
 
@@ -16,6 +18,7 @@ internal class PosingService
     public BoneFilter OverlayFilter { get; }
 
     public PoseImporterOptions DefaultImporterOptions { get; }
+
     public PoseImporterOptions DefaultIPCImporterOptions { get; }
 
     public PoseImporterOptions SceneImporterOptions { get; }

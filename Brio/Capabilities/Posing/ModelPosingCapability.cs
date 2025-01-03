@@ -1,8 +1,10 @@
 ﻿using Brio.Capabilities.Actor;
+using Brio.Config;
 using Brio.Core;
 using Brio.Entities.Actor;
 using Brio.Files;
 using Brio.Game.Posing;
+using System.Numerics;
 
 namespace Brio.Capabilities.Posing;
 
@@ -40,7 +42,6 @@ internal class ModelPosingCapability : ActorCharacterCapability
 
     public Transform? OverrideTransform => _transformOverride;
 
-
     private Transform? _transformOverride = null;
     private Transform? _originalTransform = null;
 
@@ -66,15 +67,53 @@ internal class ModelPosingCapability : ActorCharacterCapability
         ResetTransform();
     }
 
-    public void ImportModelPose(PoseFile poseFile, PoseImporterOptions options)
+    public void ImportModelPose(PoseFile poseFile, PoseImporterOptions options, bool isLoadingAsScene)
     {
         if(options.ApplyModelTransform)
-            Transform += poseFile.ModelDifference;
+        {
+            if(isLoadingAsScene)
+            {
+                Transform = new Transform
+                {
+                    Position = ConfigurationService.Instance.Configuration.Import.PositionTransformType switch
+                    {
+                        ScenePoseTransformType.Difference => Transform.Position + poseFile.ModelDifference.Position,
+                        ScenePoseTransformType.Absolute => poseFile.ModelAbsoluteValues.Position,
+                        _ => Transform.Position
+                    },
+                    Rotation = ConfigurationService.Instance.Configuration.Import.RotationTransformType switch
+                    {
+                        ScenePoseTransformType.Difference => Quaternion.Normalize(Transform.Rotation * poseFile.ModelDifference.Rotation),
+                        ScenePoseTransformType.Absolute => poseFile.ModelAbsoluteValues.Rotation,
+                        _ => Transform.Rotation
+                    },
+                    Scale = ConfigurationService.Instance.Configuration.Import.ScaleTransformType switch
+                    {
+                        ScenePoseTransformType.Difference => Transform.Scale + poseFile.ModelDifference.Scale,
+                        ScenePoseTransformType.Absolute => poseFile.ModelAbsoluteValues.Scale,
+                        _ => Transform.Scale
+                    }
+                };
+            }
+            else
+            {
+                Transform += poseFile.ModelDifference;
+            }
+        }
     }
 
     public void ExportModelPose(PoseFile poseFile)
     {
         if(_originalTransform.HasValue)
+        {
             poseFile.ModelDifference = Transform.CalculateDiff(_originalTransform.Value);
+        }
+
+        poseFile.ModelAbsoluteValues = Transform;
+
+        // For better support for other pose tools
+        poseFile.Position = Transform.Position;
+        poseFile.Rotation = Transform.Rotation;
+        poseFile.Scale = Transform.Scale;
     }
 }

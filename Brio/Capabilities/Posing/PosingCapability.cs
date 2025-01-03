@@ -3,7 +3,6 @@ using Brio.Capabilities.Core;
 using Brio.Config;
 using Brio.Core;
 using Brio.Entities.Actor;
-using Brio.Entities.Core;
 using Brio.Files;
 using Brio.Game.Posing;
 using Brio.Input;
@@ -178,6 +177,8 @@ internal class PosingCapability : ActorCharacterCapability
         else if (asScene)
         {
             options = _posingService.SceneImporterOptions;
+
+            options.ApplyModelTransform = ConfigurationService.Instance.Configuration.Import.ApplyModelTransform;
         }
         else if (asIPCpose)
         {
@@ -194,7 +195,7 @@ internal class PosingCapability : ActorCharacterCapability
         SkeletonPosing.ImportSkeletonPose(poseFile, options, expressionPhase2);
 
         if(asExpression == false)
-            ModelPosing.ImportModelPose(poseFile, options);
+            ModelPosing.ImportModelPose(poseFile, options, asScene);
 
         if(generateSnapshot)
             _framework.RunOnTick(() => Snapshot(reset, reconcile, asExpression: asExpression), delayTicks: 4);
@@ -292,8 +293,7 @@ internal class PosingCapability : ActorCharacterCapability
             ImportPose_internal(poseFile, options: all, generateSnapshot: false);
         }, delayTicks: 2);
     }
-
-    private PoseFile GeneratePoseFile()
+    public PoseFile GeneratePoseFile()
     {
         var poseFile = new PoseFile();
         SkeletonPosing.ExportSkeletonPose(poseFile);

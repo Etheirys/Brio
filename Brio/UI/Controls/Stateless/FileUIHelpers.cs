@@ -1,4 +1,4 @@
-﻿using Brio.Capabilities.Actor;
+using Brio.Capabilities.Actor;
 using Brio.Capabilities.Posing;
 using Brio.Config;
 using Brio.Files;
@@ -16,6 +16,10 @@ using OneOf;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Numerics;
+using Brio.Entities;
+using Brio.Game.Scene;
+using Brio.Resources;
 
 namespace Brio.UI.Controls.Stateless;
 
@@ -220,4 +224,51 @@ internal class FileUIHelpers
                      }
                  }, 1, ConfigurationService.Instance.Configuration.LastMCDFPath, true);
     }
+
+    public static void ShowExportSceneModal(EntityManager entityManager)
+    {
+        UIManager.Instance.FileDialogManager.SaveFileDialog("Export Scene File###export_scene_window", "Brio Scene File (*.brioscn){.brioscn}", "brioscn", "{.brioscn}",
+            (success, path) =>
+            {
+                if(success)
+                {
+                    Brio.Log.Info("Exporting scene...");
+                    if(!path.EndsWith(".brioscn"))
+                        path += ".brioscn";
+
+                    var directory = Path.GetDirectoryName(path);
+                    if(directory is not null)
+                    {
+                        ConfigurationService.Instance.Configuration.LastScenePath = directory;
+                        ConfigurationService.Instance.Save();
+                    }
+                    
+                    SceneFile sceneFile = SceneService.GenerateSceneFile(entityManager);
+                    ResourceProvider.Instance.SaveFileDocument(path, sceneFile);
+                    Brio.Log.Info("Finished exporting scene");
+                }
+            }, ConfigurationService.Instance.Configuration.LastScenePath, true);
+    }
+
+    public static void ShowImportSceneModal(SceneService sceneService)
+    {
+        List<Type> types = [typeof(SceneFile)];
+        TypeFilter filter = new("Scenes", [.. types]);
+        
+        LibraryManager.GetWithFilePicker(filter, r =>
+        {
+            Brio.Log.Verbose("Importing scene...");
+            if(r is SceneFile importedFile)
+            {
+                sceneService.LoadScene(importedFile);
+                Brio.Log.Verbose("Finished imported scene!");
+            }
+            else
+            { 
+                throw new IOException("The file selected is not a valid scene file");
+            }
+        });
+    }
 }
+
+

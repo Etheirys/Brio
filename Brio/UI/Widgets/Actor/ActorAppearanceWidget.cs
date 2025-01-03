@@ -1,5 +1,6 @@
 ﻿using Brio.Capabilities.Actor;
 using Brio.Game.Actor.Appearance;
+using Brio.Game.Actor.Extensions;
 using Brio.UI.Controls.Editors;
 using Brio.UI.Controls.Stateless;
 using Brio.UI.Widgets.Core;
@@ -13,7 +14,7 @@ internal class ActorAppearanceWidget(ActorAppearanceCapability capability) : Wid
 {
     public override string HeaderName => "Appearance";
 
-    public override WidgetFlags Flags => WidgetFlags.DefaultOpen | WidgetFlags.DrawBody | WidgetFlags.DrawQuickIcons | WidgetFlags.HasAdvanced | WidgetFlags.CanHide;
+    public override WidgetFlags Flags => WidgetFlags.DefaultOpen | WidgetFlags.DrawBody | WidgetFlags.DrawQuickIcons | WidgetFlags.DrawPopup | WidgetFlags.HasAdvanced | WidgetFlags.CanHide;
 
     public override void DrawBody()
     {
@@ -66,6 +67,13 @@ internal class ActorAppearanceWidget(ActorAppearanceCapability capability) : Wid
                     ImGui.CloseCurrentPopup();
             }
         }
+    }
+
+    public override void DrawPopup()
+    {
+        var toggele = Capability.IsHidden ? "Show" : "Hide";
+        if(ImGui.MenuItem($"{toggele} {Capability.Actor.FriendlyName}###Appearance_popup_toggle"))
+            Capability.ToggelHide();
     }
 
     public override void DrawQuickIcons()

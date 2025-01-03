@@ -9,6 +9,7 @@ using Dalamud.Interface.Windowing;
 using ImGuiNET;
 using System;
 using System.Numerics;
+using Brio.Game.Scene;
 
 namespace Brio.UI.Windows;
 
@@ -19,9 +20,11 @@ internal class MainWindow : Window, IDisposable
     private readonly LibraryWindow _libraryWindow;
     private readonly ConfigurationService _configurationService;
     private readonly InputService _inputService;
-
     private readonly EntityManager _entityManager;
     private readonly EntityHierarchyView _entitySelector;
+    private readonly SceneService _sceneService;
+    
+    private const int NumberOfButtons = 4;
 
     public MainWindow(
         ConfigurationService configService,
@@ -29,7 +32,9 @@ internal class MainWindow : Window, IDisposable
         InfoWindow infoWindow,
         LibraryWindow libraryWindow,
         EntityManager entityManager,
-        InputService input)
+        InputService input,
+        SceneService sceneService
+        )
         : base($"{Brio.Name} Scene Manager [{configService.Version}]###brio_main_window", ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.AlwaysAutoResize)
     {
         Namespace = "brio_main_namespace";
@@ -39,9 +44,9 @@ internal class MainWindow : Window, IDisposable
         _libraryWindow = libraryWindow;
         _infoWindow = infoWindow;
         _inputService = input;
-
         _entityManager = entityManager;
         _entitySelector = new(_entityManager);
+        _sceneService = sceneService;
 
         SizeConstraints = new WindowSizeConstraints
         {
@@ -88,13 +93,25 @@ internal class MainWindow : Window, IDisposable
     private void DrawHeaderButtons()
     {
         float buttonWidths = 25;
-        float finalWidth = ImBrio.GetRemainingWidth() - ((buttonWidths * 2) + (ImGui.GetStyle().ItemSpacing.X * 2) + ImGui.GetStyle().WindowBorderSize);
+        float finalWidth = ImBrio.GetRemainingWidth() - ((buttonWidths * NumberOfButtons) + (ImGui.GetStyle().ItemSpacing.X * NumberOfButtons) + ImGui.GetStyle().WindowBorderSize);
 
         if(ImBrio.Button("Library", FontAwesomeIcon.Book, new Vector2(finalWidth, 0)))
             _libraryWindow.Toggle();
 
         if(ImGui.IsItemHovered())
             ImGui.SetTooltip("Open the Library");
+        
+        ImGui.SameLine();
+        if(ImBrio.FontIconButton("buttonImportScene", FontAwesomeIcon.FileImport, "Import Scene"))
+        {   
+            FileUIHelpers.ShowImportSceneModal(_sceneService);
+        }
+        
+        ImGui.SameLine();
+        if(ImBrio.FontIconButton("buttonExportScene", FontAwesomeIcon.FileExport, "Export Scene"))
+        {
+            FileUIHelpers.ShowExportSceneModal(_entityManager);
+        }
 
         ImGui.SameLine();
         if(ImBrio.FontIconButton(FontAwesomeIcon.InfoCircle, new(buttonWidths, 0)))
