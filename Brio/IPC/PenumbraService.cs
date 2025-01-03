@@ -30,6 +30,7 @@ internal class PenumbraService : IDisposable
     private readonly GetCollections _penumbraGetCollections;
     private readonly SetCollectionForObject _penumbraSetCollectionForObject;
     private readonly GetCollectionForObject _penumbraGetCollectionForObject;
+    private readonly OpenMainWindow _penumbraOpenMainWindow;
 
     public PenumbraService(IDalamudPluginInterface pluginInterface, ConfigurationService configurationService)
     {
@@ -40,6 +41,7 @@ internal class PenumbraService : IDisposable
         _penumbraDisposedSubscriber = Penumbra.Api.IpcSubscribers.Disposed.Subscriber(pluginInterface, RefreshPenumbraStatus);
         _penumbraRedrawEvent = Penumbra.Api.IpcSubscribers.GameObjectRedrawn.Subscriber(pluginInterface, HandlePenumbraRedraw);
 
+        _penumbraOpenMainWindow = new Penumbra.Api.IpcSubscribers.OpenMainWindow(pluginInterface);
         _penumbraGetCollectionForObject = new Penumbra.Api.IpcSubscribers.GetCollectionForObject(_pluginInterface);
         _penumbraSetCollectionForObject = new Penumbra.Api.IpcSubscribers.SetCollectionForObject(_pluginInterface);
         _penumbraGetCollections = new Penumbra.Api.IpcSubscribers.GetCollections(_pluginInterface);
@@ -72,7 +74,6 @@ internal class PenumbraService : IDisposable
                     return false;
                 }
 
-
                 var (major, minor) = _penumbraApiVersion.Invoke();
                 if(major != PenumbraApiMajor || minor < PenumbraApiMinor)
                 {
@@ -80,19 +81,22 @@ internal class PenumbraService : IDisposable
                     return false;
                 }
 
-
-
                 Brio.Log.Debug("Penumbra integration initialized");
 
                 return true;
             }
             catch(Exception ex)
             {
-                Brio.Log.Debug(ex, "Penumbra initialize error");
+                Brio.Log.Error(ex, "Penumbra initialize error");
                 return false;
             }
         }
 
+    }
+
+    public void OpenPenumbra()
+    {
+       _penumbraOpenMainWindow.Invoke(Penumbra.Api.Enums.TabType.Mods);
     }
 
     public string GetCollectionForObject(IGameObject gameObject)
