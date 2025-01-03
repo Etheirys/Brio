@@ -37,6 +37,7 @@ internal class PosingService
         SceneImporterOptions = new PoseImporterOptions(new BoneFilter(this), TransformComponents.All, false);
 
         BodyOptions = new PoseImporterOptions(new BoneFilter(this), TransformComponents.Rotation | TransformComponents.Position, false);
+        BodyOptions.BoneFilter.DisableCategory("weapon");
         BodyOptions.BoneFilter.DisableCategory("head");
         BodyOptions.BoneFilter.DisableCategory("face");
         BodyOptions.BoneFilter.DisableCategory("eyes");
