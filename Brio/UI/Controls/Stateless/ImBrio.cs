@@ -6,6 +6,7 @@ using Dalamud.Interface.Textures.TextureWraps;
 using Dalamud.Interface.Utility.Raii;
 using ImGuiNET;
 using System.Numerics;
+using static Dalamud.Interface.Utility.Raii.ImRaii;
 
 namespace Brio.UI.Controls.Stateless;
 internal static partial class ImBrio
@@ -171,6 +172,31 @@ internal static partial class ImBrio
             ImGui.PushStyleColor(ImGuiCol.Button, toggledColor);
 
         bool clicked = ImGui.Button(lable, size);
+
+        if(isToggled)
+            ImGui.PopStyleColor();
+
+        if(string.IsNullOrEmpty(hoverText) == false)
+        {
+            if(ImGui.IsItemHovered())
+                ImGui.SetTooltip(hoverText);
+        }
+
+        return clicked;
+    }
+
+    public static bool ToggelFontIconButton(string id, FontAwesomeIcon icon, Vector2 size, bool isToggled, uint toggledColor = UIConstants.GizmoRed, string hoverText = "")
+    {
+        var clicked = false;
+
+        if(isToggled)
+            ImGui.PushStyleColor(ImGuiCol.Button, toggledColor);
+
+        using(ImRaii.PushFont(UiBuilder.IconFont))
+        {
+            if(ImGui.Button($"{icon.ToIconString()}###{id}"))
+                clicked = true;
+        }
 
         if(isToggled)
             ImGui.PopStyleColor();
