@@ -1,4 +1,5 @@
-﻿using Brio.Library.Filters;
+﻿using Brio.Capabilities.Core;
+using Brio.Library.Filters;
 using Brio.Library.Sources;
 using Brio.Library.Tags;
 using Brio.UI.Controls.Stateless;
@@ -78,6 +79,11 @@ internal abstract class EntryBase : ITagged
 
     public virtual void DrawActions(bool isModal)
     {
+    }
+
+    public virtual bool InvokeDefaultAction(object? args)
+    {
+        return false;
     }
 
     protected abstract string GetInternalId();

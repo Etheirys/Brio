@@ -289,6 +289,11 @@ internal class FileEntry : ItemEntryBase
         return FileTypeInfo.Load(this.FilePath);
     }
 
+    public override bool InvokeDefaultAction(object? args)
+    {
+        return FileTypeInfo?.InvokeDefaultAction(this, args) ?? false;
+    }
+
     public override void DrawActions(bool isModal)
     {
         base.DrawActions(isModal);
@@ -310,9 +315,6 @@ internal class FileEntry : ItemEntryBase
             }
         }
 
-        if(FileTypeInfo != null)
-        {
-            FileTypeInfo.DrawActions(this, isModal);
-        }
+        FileTypeInfo?.DrawActions(this, isModal);
     }
 }
