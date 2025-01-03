@@ -33,6 +33,11 @@ internal abstract class FileTypeInfoBase
     public virtual void DrawActions(FileEntry fileEntry, bool isModal)
     {
     }
+
+    public virtual bool InvokeDefaultAction(FileEntry fileEntry, object? args)
+    {
+        return false;
+    }
 }
 
 internal abstract class FileTypeInfoBase<T> : FileTypeInfoBase

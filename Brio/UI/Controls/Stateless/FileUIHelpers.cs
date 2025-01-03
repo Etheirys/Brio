@@ -1,4 +1,4 @@
-﻿using Brio.Capabilities.Actor;
+using Brio.Capabilities.Actor;
 using Brio.Capabilities.Posing;
 using Brio.Config;
 using Brio.Files;
@@ -12,6 +12,7 @@ using Brio.UI.Controls.Editors;
 using Dalamud.Interface;
 using Dalamud.Interface.Utility.Raii;
 using ImGuiNET;
+using OneOf;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -24,6 +25,7 @@ namespace Brio.UI.Controls.Stateless;
 
 internal class FileUIHelpers
 {
+    static bool freezeOnLoad = false;
     public static void DrawImportPoseMenuPopup(PosingCapability capability, bool showImportOptions = true)
     {
         using var popup = ImRaii.Popup("DrawImportPoseMenuPopup");
@@ -32,25 +34,37 @@ internal class FileUIHelpers
         {
             using(ImRaii.PushColor(ImGuiCol.Button, UIConstants.Transparent))
             {
-                if(showImportOptions)
-                {
-                    if(ImBrio.FontIconButton(FontAwesomeIcon.Cog))
-                        ImGui.OpenPopup("import_optionsImportPoseMenuPopup");
 
-                    if(ImGui.IsItemHovered())
-                        ImGui.SetTooltip("Import Options");
-           
-                    ImGui.SameLine();
+                var size = ImGui.CalcTextSize("XXXX Freeze Actor on Import");
+                size.Y = 44;
+
+                ImGui.Checkbox("Freeze Actor on Import", ref freezeOnLoad);
+            
+                ImGui.Separator();
+
+                if(ImGui.Button("Import as Body", size))
+                {
+                    ShowImportPoseModal(capability, asBody: true, freezeOnLoad: freezeOnLoad);
                 }
 
-                if(ImGui.Button("Import as Pose", Vector2.Zero))
+                if(ImGui.Button("Import as Expression", size))
                 {
-                    ShowImportPoseModal(capability);
+                    ShowImportPoseModal(capability, asExpression: true, freezeOnLoad: freezeOnLoad);
                 }
 
-                if(ImGui.Button("Import as Expression", Vector2.Zero))
+                ImGui.Separator();
+
+                if(ImBrio.FontIconButton(FontAwesomeIcon.Cog))
+                    ImGui.OpenPopup("import_optionsImportPoseMenuPopup");
+
+                if(ImGui.IsItemHovered())
+                    ImGui.SetTooltip("Import Options");
+
+                ImGui.SameLine();
+
+                if(ImGui.Button("Import with Options", new(size.X - 32, 25)))
                 {
-                    ShowImportPoseModal(capability, asExpression: true);
+                    ShowImportPoseModal(capability, freezeOnLoad: freezeOnLoad);
                 }
             }
 
@@ -64,9 +78,10 @@ internal class FileUIHelpers
         }
     }
 
-    public static void ShowImportPoseModal(PosingCapability capability, PoseImporterOptions? options = null, bool asExpression = false)
+    public static void ShowImportPoseModal(PosingCapability capability, PoseImporterOptions? options = null, bool asExpression = false, bool asBody = false, bool freezeOnLoad = false)
     {
-        TypeFilter filter = new TypeFilter("Poses", typeof(CMToolPoseFile), typeof(PoseFile));
+        TypeFilter filter = new("Poses", typeof(CMToolPoseFile), typeof(PoseFile));
+
 
         if(ConfigurationService.Instance.Configuration.UseLibraryWhenImporting)
         {
@@ -74,11 +89,11 @@ internal class FileUIHelpers
             {
                 if(r is CMToolPoseFile cmPose)
                 {
-                    capability.ImportPose(cmPose, options, asExpression: asExpression);
+                    capability.ImportPose(cmPose, options: options, asExpression: asExpression, asBody: asBody, freezeOnLoad: freezeOnLoad);
                 }
                 else if(r is PoseFile pose)
                 {
-                    capability.ImportPose(pose, options, asExpression: asExpression);
+                    capability.ImportPose(pose, options: options, asExpression: asExpression, asBody: asBody, freezeOnLoad: freezeOnLoad);
                 }
             });
         }
@@ -88,11 +103,11 @@ internal class FileUIHelpers
             {
                 if(r is CMToolPoseFile cmPose)
                 {
-                    capability.ImportPose(cmPose, options, asExpression: asExpression);
+                    capability.ImportPose(cmPose, options: options, asExpression: asExpression, asBody: asBody, freezeOnLoad: freezeOnLoad);
                 }
                 else if(r is PoseFile pose)
                 {
-                    capability.ImportPose(pose, options, asExpression: asExpression);
+                    capability.ImportPose(pose, options: options, asExpression: asExpression, asBody: asBody, freezeOnLoad: freezeOnLoad);
                 }
             });
         }

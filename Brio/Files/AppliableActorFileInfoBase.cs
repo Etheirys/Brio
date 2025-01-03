@@ -15,6 +15,20 @@ internal abstract class AppliableActorFileInfoBase<T> : JsonDocumentBaseFileInfo
         _entityManager = entityManager;
     }
 
+    public override bool InvokeDefaultAction(FileEntry fileEntry, object? args)
+    {
+        if(args is not null and ActorEntity actor)
+        {
+            if(Load(fileEntry.FilePath) is T file)
+            {
+                Apply(file, actor, false);
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     public override void DrawActions(FileEntry fileEntry, bool isModal)
     {
         base.DrawActions(fileEntry, isModal);

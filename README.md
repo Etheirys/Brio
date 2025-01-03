@@ -1,47 +1,69 @@
 # Brio
-Brio is a suite of tools to enhance your GPosing experience.
-Brio is currently in alpha, and as such, there may be bugs. If you find any, please report them.
+
+### Brio is a suite of tools for FFXIV to enhance the GPosing experience. 
+Brio is currently in alpha, and as such, there may be bugs. If you find any, please report them!
 
 ## Features
 * Actor Posing
   * While animating
   * Adjust actor positions without them resetting
   * Overlay and graphical posing modes
-* Creation and Deletion of GPose actors (up to 39)
+* Creation and Deletion of GPose actors (up to 239)
 * Edit Actor Appearances
 * Change the Penumbra collection applied to GPose actors
+* Play XAT's .xcp camera files
 * Add/Remove/Blend animations on GPose actors (and adjust their speed)
-* Change the active festivals and apply up to 4 at once (Moonfire Faire for fireworks etc) 
+* Change the active festivals and apply up to 4 at once (Moonfire Faire for fireworks etc)
 * Add/Remove Status Effects on GPose actors
 * Control Time/Weather in both the Overworld and GPose
 * Redraw control of GPose actors
 * NPC Appearance Hack (Allows you to apply NPC appearances to players without breaking tools like Penumbra)
 
 ## Installation
-You can install Brio in one of two ways, 
+### You can install Brio in one of two ways, 
 
-- With the Sea of Stars Plugin Repository found [here](https://github.com/Ottermandias/SeaOfStars)
+#### 📦 With the [Sea of Stars Plugin Repository](https://github.com/Ottermandias/SeaOfStars) **(Recommended)**
+  - Type `/xlsettings` in the chat window and go to the Experimental tab
+  - Then go to the 'Experimental' tab. Under the Custom Plugin Repositories section, add the following Dalamud repo:
+  ```
+  https://raw.githubusercontent.com/Ottermandias/SeaOfStars/main/repo.json
+  ```
+  - Click on the + button & ensure the ***Enabled*** box is checked on the repo.
+  - ***Click on the save button in the bottom right***
+  - Now open the **Dalamud Plugin Installer** by opening FFXIV's System Menu then pressing ***Dalamud Plugins***
+  - In the Search box type `Brio`, find & click on ***Brio*** and then click `Install` after Dalamud has finshed installing **Brio**, make sure the *Brio* plugin is Enabled in the Plugin Installer.
+  - You now have **Brio** Installed, ***Brio will now open when you are in G-Pose***, you can also type `/brio` in chat to open the Brio Window.
 
-or 
+#### 🏗️ With Brio's custom Dalamud repo 
+<details>
+<summary>Not Recommended!</summary
+                      
+  - Type `/xlsettings` in the chat window and go to the Experimental tab
+  - Then go to the 'Experimental' tab. Under the Custom Plugin Repositories section, add the following Dalamud repo:
+  ```
+  https://raw.githubusercontent.com/Etheirys/Brio/main/repo.json
+  ```
+  - Click on the + button & ensure the ***Enabled*** box is checked on the repo.
+  - ***Click on the save button in the bottom right***
+  - Now open the **Dalamud Plugin Installer** by opening FFXIV's System Menu then pressing ***Dalamud Plugins***
+  - In the Search box type `Brio`, find & click on ***Brio*** and then click `Install` after Dalamud has finshed installing **Brio**, make sure the *Brio* plugin is Enabled in the Plugin Installer.
+  - You now have **Brio** Installed, ***Brio will now open when you are in G-Pose***, you can also type `/brio` in chat to open the Brio Window.
 
-- Add Brio's custom Dalamud repo,
-
-1. Open Dalamud's Settings by typing `/xlsettings` in chat and then go to the 'Experimental' tab.
-2. Under the Custom Plugin Repositories section, add the following Dalamud repo: `https://raw.githubusercontent.com/Etheirys/Brio/main/repo.json`
-3. Make sure to click on the "Save and Close" button.
-4. Now open the `Dalamud Plugin Installer` and search for Brio
-5. Click `Brio` and then `Install`, after Dalamud has finshed Installing Brio, make sure the `Brio` plugin is Enabled in the Plugin Installer.
-6. You now have Brio Installed, you can run the `/brio` command to open the Brio Window at anytime.
+</details>
 
 ## Support
 Brio is still early in development so issues are to be expected.
 
-If you encounter an issue, please either open an [issue](https://github.com/Etheirys/Brio/issues) or visit us on [Discord](https://discord.gg/KvGJCCnG8t) if you need help!
+If you encounter an issue, please either, visit us on the [Aetherworks Discord](https://discord.gg/KvGJCCnG8t) or open an [issue](https://github.com/Etheirys/Brio/issues)!
+
 We also have a [Help Page](https://etheirys-tools.gitbook.io/brio/) that is coming soon!
 
-## Authors
-* [Minmoose](https://github.com/Minmoose) - Maintainer.
-* [Asgard](https://github.com/AsgardXIV) - Original developer.
+## Authors 
+**[Minmoose](https://github.com/Minmoose) - Maintainer & Developer.**
+
+**[Asgard](https://github.com/AsgardXIV) - Original Maintainer & Developer.**
+
+**Thank You, to all of our [Contributors](https://github.com/Etheirys/Brio/graphs/contributors)!**
 
 ## Acknowledgements
 Brio wouldn't be possible without the tireless work of many devs across many projects.
