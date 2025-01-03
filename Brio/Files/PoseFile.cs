@@ -65,12 +65,18 @@ internal class PoseFileInfo : AppliableActorFileInfoBase<PoseFile>
 [Serializable]
 internal class PoseFile : JsonDocumentBase
 {
+    public string TypeName { get; set; } = "Brio Pose";
+
     public Bone ModelDifference { get; set; } = Transform.Identity;
     public Bone ModelAbsoluteValues { get; set; } = Transform.Identity;
 
     public Dictionary<string, Bone> Bones { get; set; } = [];
     public Dictionary<string, Bone> MainHand { get; set; } = [];
     public Dictionary<string, Bone> OffHand { get; set; } = [];
+
+    public Vector3 Position { get; set; }  // legacy & for better support for other pose tools
+    public Quaternion Rotation { get; set; } // legacy & for better support for other pose tools
+    public Vector3 Scale { get; set; } // legacy & for better support for other pose tools
 
     public class Bone
     {

@@ -110,5 +110,10 @@ internal class ModelPosingCapability : ActorCharacterCapability
         }
 
         poseFile.ModelAbsoluteValues = Transform;
+
+        // For better support for other pose tools
+        poseFile.Position = Transform.Position;
+        poseFile.Rotation = Transform.Rotation;
+        poseFile.Scale = Transform.Scale;
     }
 }
