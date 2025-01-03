@@ -367,10 +367,7 @@ internal class BrioIPCService : IDisposable
         {
             if(entity.TryGetCapability<PosingCapability>(out var posingCapability))
             {
-                var actionTimeline = entity.GetCapability<ActionTimelineCapability>();
-                actionTimeline.StopSpeedAndResetTimeline(() => {
-                    posingCapability.ImportPose(fileURI);
-                }, false);
+                posingCapability.ImportPose(fileURI);
 
                 return true;
             }
@@ -385,26 +382,23 @@ internal class BrioIPCService : IDisposable
         {
             if(entity.TryGetCapability<PosingCapability>(out var posingCapability))
             {
-                var actionTimeline = entity.GetCapability<ActionTimelineCapability>();
-                actionTimeline.StopSpeedAndResetTimeline(() => {
-                    try
+                try
+                {
+                    if(isLegacyCMToolPose)
                     {
-                        if(isLegacyCMToolPose)
-                        {
-                            posingCapability.ImportPose(JsonSerializer.Deserialize<CMToolPoseFile>(json), null, asIPCpose: true);
-                        }
-                        else
-                        {
-                            posingCapability.ImportPose(JsonSerializer.Deserialize<PoseFile>(json), null, asIPCpose: false);
-                        }
+                        posingCapability.ImportPose(JsonSerializer.Deserialize<CMToolPoseFile>(json), null, asIPCpose: true);
                     }
-                    catch
+                    else
                     {
-                        Brio.NotifyError("Invalid pose file loaded from IPC.");
+                        posingCapability.ImportPose(JsonSerializer.Deserialize<PoseFile>(json), null, asIPCpose: false);
                     }
-                }, false);
 
-                return true;
+                    return true;
+                }
+                catch
+                {
+                    Brio.NotifyError("Invalid pose file loaded from IPC.");
+                }
             }
         }
 

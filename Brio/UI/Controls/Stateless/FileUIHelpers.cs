@@ -76,7 +76,7 @@ internal class FileUIHelpers
 
     public static void ShowImportPoseModal(PosingCapability capability, PoseImporterOptions? options = null, bool asExpression = false, bool asBody = false, bool freezeOnLoad = false)
     {
-        TypeFilter filter = new TypeFilter("Poses", typeof(CMToolPoseFile), typeof(PoseFile));
+        TypeFilter filter = new("Poses", typeof(CMToolPoseFile), typeof(PoseFile));
 
 
         if(ConfigurationService.Instance.Configuration.UseLibraryWhenImporting)
@@ -85,11 +85,11 @@ internal class FileUIHelpers
             {
                 if(r is CMToolPoseFile cmPose)
                 {
-                    ImportPose(cmPose, options, asExpression, asBody, freezeOnLoad);
+                    capability.ImportPose(cmPose, options: options, asExpression: asExpression, asBody: asBody, freezeOnLoad: freezeOnLoad);
                 }
                 else if(r is PoseFile pose)
                 {
-                    ImportPose(pose, options, asExpression, asBody, freezeOnLoad);
+                    capability.ImportPose(pose, options: options, asExpression: asExpression, asBody: asBody, freezeOnLoad: freezeOnLoad);
                 }
             });
         }
@@ -99,26 +99,13 @@ internal class FileUIHelpers
             {
                 if(r is CMToolPoseFile cmPose)
                 {
-                    ImportPose(cmPose, options, asExpression, asBody, freezeOnLoad);
+                    capability.ImportPose(cmPose, options: options, asExpression: asExpression, asBody: asBody, freezeOnLoad: freezeOnLoad);
                 }
                 else if(r is PoseFile pose)
                 {
-                    ImportPose(pose, options, asExpression, asBody, freezeOnLoad);
+                    capability.ImportPose(pose, options: options, asExpression: asExpression, asBody: asBody, freezeOnLoad: freezeOnLoad);
                 }
             });
-        }
-
-        void ImportPose(OneOf<PoseFile, CMToolPoseFile> rawPoseFile, PoseImporterOptions? options, bool asExpression, bool asBody, bool freezeOnLoad)
-        {
-            if(capability.Actor.TryGetCapability<ActionTimelineCapability>(out var actionTimeline))
-            {
-                Brio.Log.Verbose($"Importing Pose... {asExpression} {asBody} {freezeOnLoad}");
-
-                actionTimeline.StopSpeedAndResetTimeline(() =>
-                {
-                    capability.ImportPose(rawPoseFile, options, asExpression: asExpression, asBody: asBody);
-                }, !(ConfigurationService.Instance.Configuration.Posing.FreezeActorOnPoseImport || freezeOnLoad));
-            }
         }
     }
 
