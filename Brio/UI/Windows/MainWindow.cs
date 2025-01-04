@@ -1,5 +1,6 @@
 ﻿using Brio.Config;
 using Brio.Entities;
+using Brio.Game.Scene;
 using Brio.Input;
 using Brio.UI.Controls.Stateless;
 using Brio.UI.Entitites;
@@ -9,7 +10,6 @@ using Dalamud.Interface.Windowing;
 using ImGuiNET;
 using System;
 using System.Numerics;
-using Brio.Game.Scene;
 
 namespace Brio.UI.Windows;
 
@@ -23,8 +23,6 @@ internal class MainWindow : Window, IDisposable
     private readonly EntityManager _entityManager;
     private readonly EntityHierarchyView _entitySelector;
     private readonly SceneService _sceneService;
-    
-    private const int NumberOfButtons = 4;
 
     public MainWindow(
         ConfigurationService configService,
@@ -90,35 +88,36 @@ internal class MainWindow : Window, IDisposable
         _configurationService.ApplyChange();
     }
 
+    private const int Line1NumberOfButtons = 2;
+    private const int Line2NumberOfButtons = 0;
     private void DrawHeaderButtons()
     {
         float buttonWidths = 25;
-        float finalWidth = ImBrio.GetRemainingWidth() - ((buttonWidths * NumberOfButtons) + (ImGui.GetStyle().ItemSpacing.X * NumberOfButtons) + ImGui.GetStyle().WindowBorderSize);
+        float line1FinalWidth = ImBrio.GetRemainingWidth() - ((buttonWidths * Line1NumberOfButtons) + (ImGui.GetStyle().ItemSpacing.X * Line1NumberOfButtons) + ImGui.GetStyle().WindowBorderSize);
+        float line2FinalWidth = ImBrio.GetRemainingWidth() - ((buttonWidths * Line2NumberOfButtons) + (ImGui.GetStyle().ItemSpacing.X * Line2NumberOfButtons) + ImGui.GetStyle().WindowBorderSize);
 
-        if(ImBrio.Button("Library", FontAwesomeIcon.Book, new Vector2(finalWidth, 0)))
+        float line1Width = (line1FinalWidth / 2) - 3;
+
+        if(ImBrio.Button(" Project", FontAwesomeIcon.FolderOpen, new Vector2(line1Width, 0)))
+        {
+            ImGui.OpenPopup("DrawProjectPopup");
+        }
+
+        FileUIHelpers.DrawProjectPopup(_sceneService, _entityManager);
+
+        ImGui.SameLine();
+        if(ImBrio.Button("Library", FontAwesomeIcon.Book, new Vector2(line1Width, 0)))
             _libraryWindow.Toggle();
 
         if(ImGui.IsItemHovered())
             ImGui.SetTooltip("Open the Library");
-        
-        ImGui.SameLine();
-        if(ImBrio.FontIconButton("buttonImportScene", FontAwesomeIcon.FileImport, "Import Scene"))
-        {   
-            FileUIHelpers.ShowImportSceneModal(_sceneService);
-        }
-        
-        ImGui.SameLine();
-        if(ImBrio.FontIconButton("buttonExportScene", FontAwesomeIcon.FileExport, "Export Scene"))
-        {
-            FileUIHelpers.ShowExportSceneModal(_entityManager);
-        }
 
         ImGui.SameLine();
         if(ImBrio.FontIconButton(FontAwesomeIcon.InfoCircle, new(buttonWidths, 0)))
             _infoWindow.Toggle();
 
         if(ImGui.IsItemHovered())
-            ImGui.SetTooltip("Information");
+            ImGui.SetTooltip("Information & Changelog");
 
         ImGui.SameLine();
         if(ImBrio.FontIconButton(FontAwesomeIcon.Cog, new(buttonWidths, 0)))
@@ -126,6 +125,9 @@ internal class MainWindow : Window, IDisposable
 
         if(ImGui.IsItemHovered())
             ImGui.SetTooltip("Settings");
+
+        //
+        // Line 2
     }
 
     public void Dispose()

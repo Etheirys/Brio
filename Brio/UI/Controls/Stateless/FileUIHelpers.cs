@@ -20,11 +20,48 @@ using System.Numerics;
 using Brio.Entities;
 using Brio.Game.Scene;
 using Brio.Resources;
+using Brio.Capabilities.Core;
+using System.Drawing;
 
 namespace Brio.UI.Controls.Stateless;
 
 internal class FileUIHelpers
 {
+    public static void DrawProjectPopup(SceneService sceneService, EntityManager entityManager)
+    {
+        using var popup = ImRaii.Popup("DrawProjectPopup");
+        if(popup.Success)
+        {
+            using(ImRaii.PushColor(ImGuiCol.Button, UIConstants.Transparent))
+            {
+                if(ImGui.Button("Save Project"))
+                {
+
+                }
+                if(ImGui.Button("Load Project"))
+                {
+
+                }
+
+                if(ImGui.Button("View Auto-Saves"))
+                {
+
+                }
+
+                ImGui.Separator();
+
+                if(ImGui.Button("Export Scene"))
+                {
+                    ShowExportSceneModal(entityManager);
+                }
+                if(ImGui.Button("Import Scene"))
+                {
+                    ShowImportSceneModal(sceneService);
+                }
+            }
+        }
+    }
+
     static bool freezeOnLoad = false;
     public static void DrawImportPoseMenuPopup(PosingCapability capability, bool showImportOptions = true)
     {
