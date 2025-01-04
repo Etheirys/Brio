@@ -267,7 +267,7 @@ internal class BrioIPCService : IDisposable
             flags |= SpawnFlags.ReserveCompanionSlot;
         }
 
-        if(_actorSpawnService.CreateCharacter(out var character, flags, disableSpawnCompanion: false))
+        if(_actorSpawnService.CreateCharacter(out var character, flags, disableSpawnCompanion: !spawnCompanionSlot))
         {
             if(selectInHierarchy)
             {
