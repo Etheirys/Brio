@@ -136,13 +136,10 @@ internal class PosingCapability : ActorCharacterCapability
         {
             Brio.Log.Verbose($"Importing Pose... {asExpression} {asScene} {asIPCpose} {asBody} {freezeOnLoad}");
 
-            _physicsService.FreezeEnable();
-
             actionTimeline.StopSpeedAndResetTimeline(() =>
             {
                 ImportPose_internal(rawPoseFile, options, reset: false, reconcile: false, asExpression: asExpression, asScene: asScene, asIPCpose: asIPCpose, asBody: asBody);
                 
-                _physicsService.FreezeRevert();
             }, !(ConfigurationService.Instance.Configuration.Posing.FreezeActorOnPoseImport || freezeOnLoad));
         }
         else
