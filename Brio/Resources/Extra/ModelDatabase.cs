@@ -2,8 +2,10 @@
 using Brio.Game.Actor.Appearance;
 using FFXIVClientStructs.FFXIV.Client.Game.Character;
 using Lumina.Excel.Sheets;
+using Lumina.Extensions;
 using System.Collections.Generic;
 using System.Linq;
+using static Brio.Game.World.FestivalService;
 
 namespace Brio.Resources.Extra;
 
@@ -12,7 +14,7 @@ internal class ModelDatabase
     private readonly MultiValueDictionary<ulong, ModelInfo> _modelLookupTable;
     private readonly List<ModelInfo> _modelsList;
 
-    public ModelDatabase()
+    public ModelDatabase(ResourceProvider _resourceProvider)
     {
         _modelLookupTable = new();
         _modelsList = [];
@@ -36,8 +38,27 @@ internal class ModelDatabase
             }
         }
 
-        // Special
-        var none = new ModelInfo(0, 0, "None", 0, ActorEquipSlot.All, null);
+		// From JSON
+		var knownEntries = _resourceProvider.GetResourceDocument<List<PropsFileEntry>>("Data.Props.json");
+		foreach(var item in knownEntries)
+		{
+			ushort[] result = item.Id.Split(", ").Select(ushort.Parse).ToArray();
+            if(result.Length > 2)
+			{
+				WeaponModelId weaponItem = new() { Id = result[0], Type = result[1], Variant = (byte)result[2] };
+				var modelInfo = new ModelInfo(weaponItem.Value, 0, $"{item.Name.ToString()}\n{item.Description?.ToString()}", 0, ActorEquipSlot.Prop, null);
+				AddModel(modelInfo);
+			}				
+			else
+			{
+				EquipmentModelId actualItem = new() { Id = result[0], Variant = (byte)result[1] };
+				var modelInfo = new ModelInfo(actualItem.Value, 0, $"{item.Name.ToString()}\n{item.Description?.ToString()}", 0, ActorEquipSlot.Prop, null);
+				AddModel(modelInfo);
+			}
+		}
+
+		// Special
+		var none = new ModelInfo(0, 0, "None", 0, ActorEquipSlot.All, null);
         AddModel(none);
 
         var smallclothes = new ModelInfo(SpecialAppearances.Smallclothes.Value, 0, "Smallclothes", 0, ActorEquipSlot.AllButWeapons, null);
@@ -74,5 +95,13 @@ internal class ModelDatabase
     }
 
     public record class ModelInfo(ulong ModelId, uint ItemId, string Name, uint Icon, ActorEquipSlot Slots, Item? Item);
+
+	private class PropsFileEntry
+	{
+		public string Id { get; set; }
+		public string Name { get; set; } = null!;
+		public string Description { get; set; }
+		public string Slot { get; set; }
+	}
 
 }
