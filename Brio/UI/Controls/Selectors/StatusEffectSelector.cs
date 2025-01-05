@@ -1,4 +1,5 @@
 ﻿using Brio.Resources;
+using Brio.UI.Widgets.Actor;
 using Dalamud.Interface.Textures.TextureWraps;
 using ImGuiNET;
 using Lumina.Excel.Sheets;
@@ -10,11 +11,13 @@ namespace Brio.UI.Controls.Selectors;
 public class StatusEffectSelectorHolder
 {
     public Status Status { get; set; }
+    public bool _VFXLockEnabled { get; set; }
 }
 
 internal class StatusEffectSelector(string id) : Selector<StatusEffectSelectorHolder>(id)
 {
     protected override Vector2 MinimumListSize { get; } = new(300, 300);
+    public bool _VFXLockEnabled = false;
 
     protected override float EntrySize => ImGui.GetTextLineHeight() * 3f;
 
@@ -27,6 +30,17 @@ internal class StatusEffectSelector(string id) : Selector<StatusEffectSelectorHo
             AddItem(new StatusEffectSelectorHolder { Status = item });
         }
     }
+
+	protected override void DrawOptions()
+	{
+		base.DrawOptions();
+
+		if(ImGui.Checkbox("###status_vfx_filter", ref this._VFXLockEnabled))
+		    UpdateList();
+        ImGui.SameLine();
+        ImGui.Text("Filter out any Status whose VFX value is 0.");
+
+	}
 
     protected override void DrawItem(StatusEffectSelectorHolder sesh, bool isHovered)
     {
@@ -63,10 +77,10 @@ internal class StatusEffectSelector(string id) : Selector<StatusEffectSelectorHo
     protected override bool Filter(StatusEffectSelectorHolder sesh, string search)
     {
         var item = sesh.Status;
+		if(_VFXLockEnabled && item.VFX.RowId == 0) return false;
 
         if(item.StatusCategory == 0)
             return false;
-
         var searchTerm = $"{item.Name} {item.RowId} {item.VFX.RowId} {item.HitEffect.RowId}";
 
         if(searchTerm.Contains(search, StringComparison.InvariantCultureIgnoreCase))
