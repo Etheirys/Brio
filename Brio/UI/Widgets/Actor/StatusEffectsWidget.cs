@@ -35,7 +35,8 @@ internal class StatusEffectsWidget(StatusEffectCapability capability) : Widget<S
             {
                 foreach(var status in statuses)
                 {
-                    if(_VFXLockEnabled && status.VFX.RowId == 0) break;
+                    if(_VFXLockEnabled && status.VFX.RowId == 0) continue;
+
                     bool selected = status.RowId == _selectedStatus;
 
                     IDalamudTextureWrap? tex = null;
@@ -85,7 +86,7 @@ internal class StatusEffectsWidget(StatusEffectCapability capability) : Widget<S
 
 		ImGui.Checkbox("###status_vfx_filter", ref _VFXLockEnabled);
 		if(ImGui.IsItemHovered())
-			ImGui.SetTooltip("Filter out any Status whose VFX value is 0.");
+			ImGui.SetTooltip("Hide Status Effects that have no VFX.");
 
         ImGui.SameLine();
 

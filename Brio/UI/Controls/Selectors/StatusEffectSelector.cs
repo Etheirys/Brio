@@ -17,7 +17,7 @@ public class StatusEffectSelectorHolder
 internal class StatusEffectSelector(string id) : Selector<StatusEffectSelectorHolder>(id)
 {
     protected override Vector2 MinimumListSize { get; } = new(300, 300);
-    public bool _VFXLockEnabled = false;
+    public bool _VFXLockEnabled = true;
 
     protected override float EntrySize => ImGui.GetTextLineHeight() * 3f;
 
@@ -38,7 +38,7 @@ internal class StatusEffectSelector(string id) : Selector<StatusEffectSelectorHo
 		if(ImGui.Checkbox("###status_vfx_filter", ref this._VFXLockEnabled))
 		    UpdateList();
         ImGui.SameLine();
-        ImGui.Text("Filter out any Status whose VFX value is 0.");
+        ImGui.Text("Remove Status Effects that do not have a VFX.");
 
 	}
 
