@@ -53,7 +53,7 @@ internal class StatusEffectsWidget(StatusEffectCapability capability) : Widget<S
                     ImGui.SetCursorPos(position);
                     ImGui.Image(tex.ImGuiHandle, iconSize);
                     ImGui.SameLine();
-                    ImGui.Text($"{status.Name}\n{status.RowId}");
+                    ImGui.Text($"{status.Name.ExtractText()}\n{status.RowId}");
 
                     if(wasSelected)
                         _selectedStatus = (int)status.RowId;

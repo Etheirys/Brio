@@ -57,7 +57,7 @@ internal class StatusEffectSelector(string id) : Selector<StatusEffectSelectorHo
 
         ImGui.Image(tex.ImGuiHandle, iconSize);
         ImGui.SameLine();
-        ImGui.Text($"{item.Name}\n{item.RowId}\nVFX: {item.VFX.RowId} / Hit: {item.HitEffect.RowId}");
+        ImGui.Text($"{item.Name.ExtractText()}\n{item.RowId}\nVFX: {item.VFX.RowId} / Hit: {item.HitEffect.RowId}");
     }
 
     protected override int Compare(StatusEffectSelectorHolder sesh1, StatusEffectSelectorHolder sesh2)
