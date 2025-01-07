@@ -16,14 +16,14 @@ internal class ModelPosingCapability : ActorCharacterCapability
         {
             if(_transformOverride.HasValue)
                 return _transformOverride.Value;
-
+            
             return _transformService.GetTransform(GameObject);
         }
         set
         {
             _originalTransform ??= Transform;
             _transformOverride = value;
-            _transformService.SetTransform(GameObject, value);
+            _transformService.SetTransform(GameObject, value, Actor.IsProp);
         }
     }
 
@@ -56,7 +56,7 @@ internal class ModelPosingCapability : ActorCharacterCapability
         _transformOverride = null;
         if(_originalTransform.HasValue)
         {
-            _transformService.SetTransform(GameObject, _originalTransform.Value);
+            _transformService.SetTransform(GameObject, _originalTransform.Value, Actor.IsProp);
             _originalTransform = null;
         }
     }
@@ -64,6 +64,16 @@ internal class ModelPosingCapability : ActorCharacterCapability
     public override void Dispose()
     {
         ResetTransform();
+    }
+
+    public void SetDefaultPropTransform()
+    {
+        Transform = new Transform()
+        {
+            Position = Transform.Position,
+            Rotation = Transform.Rotation,
+            Scale = new FFXIVClientStructs.FFXIV.Common.Math.Vector3 { X = 1, Y = 0.001f, Z = 0.001f }
+        };
     }
 
     public void ImportModelPose(PoseFile poseFile, PoseImporterOptions options)

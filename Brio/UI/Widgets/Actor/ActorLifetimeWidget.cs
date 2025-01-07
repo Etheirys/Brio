@@ -1,4 +1,5 @@
 ﻿using Brio.Capabilities.Actor;
+using Brio.Game.Actor;
 using Brio.UI.Controls;
 using Brio.UI.Controls.Stateless;
 using Brio.UI.Widgets.Core;
@@ -15,6 +16,13 @@ internal class ActorLifetimeWidget(ActorLifetimeCapability capability) : Widget<
 
     public override void DrawQuickIcons()
     {
+        if(ImBrio.FontIconButton("lifetimewidget_spawn_prop", FontAwesomeIcon.Cubes, "Spawn Prop"))
+        {
+            Capability.SpawnNewProp(false);
+        }
+
+        ImGui.SameLine();
+
         if(ImBrio.FontIconButton("lifetimewidget_spawnnew", FontAwesomeIcon.Plus, "Spawn New Actor"))
         {
             Capability.SpawnNewActor(false, false, true);

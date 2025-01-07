@@ -1,5 +1,6 @@
 ﻿using Brio.Entities.Actor;
 using Brio.Entities.Core;
+using Brio.Game.Actor;
 using Brio.Game.Actor.Extensions;
 using Brio.Game.Core;
 using Dalamud.Game.ClientState.Objects.Types;
@@ -19,14 +20,16 @@ internal unsafe class EntityActorManager : IDisposable
     private readonly IFramework _framework;
 
     private readonly ActorContainerEntity _actorContainerEntity;
+    private readonly ActorSpawnService _actorSpawnService;
 
-    public EntityActorManager(EntityManager entityManager, IServiceProvider serviceProvider, ObjectMonitorService monitorService, IObjectTable objects, IFramework framework)
+    public EntityActorManager(EntityManager entityManager, ActorSpawnService actorSpawnService, IServiceProvider serviceProvider, ObjectMonitorService monitorService, IObjectTable objects, IFramework framework)
     {
         _entityManager = entityManager;
         _serviceProvider = serviceProvider;
         _monitorService = monitorService;
         _objects = objects;
         _framework = framework;
+        _actorSpawnService = actorSpawnService;
 
         _monitorService.CharacterInitialized += OnCharacterInitialized;
         _monitorService.CharacterDestroyed += OnCharacterDestroyed;
@@ -69,6 +72,7 @@ internal unsafe class EntityActorManager : IDisposable
 
             entity = ActivatorUtilities.CreateInstance<ActorEntity>(_serviceProvider, go);
         }
+        entity.SetSpawnFlags(_actorSpawnService.GetSpawnFlagsByIndex((ushort)(go.ObjectIndex - 200)));
 
         _entityManager.AttachEntity(entity, parent, true);
 

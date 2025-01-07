@@ -51,11 +51,22 @@ internal unsafe class ModelTransformService : IDisposable
         };
     }
 
-    public unsafe void SetTransform(IGameObject go, Transform transform) => SetTransform(go.Native(), transform);
+    public unsafe void SetTransform(IGameObject go, Transform transform, bool setWithPropRules = false) => SetTransform(go.Native(), transform, setWithPropRules);
 
-    public unsafe void SetTransform(StructsGameObject* native, Transform transform)
+    public unsafe void SetTransform(StructsGameObject* native, Transform transform, bool setWithPropRules = false)
     {
         var drawObject = native->DrawObject;
+
+        if(setWithPropRules)
+        {
+            transform = new Transform()
+            {
+                Position = transform.Position,
+                Rotation = transform.Rotation,
+                Scale = new FFXIVClientStructs.FFXIV.Common.Math.Vector3 { X = transform.Scale.X, Y = 0.001f, Z = 0.001f }
+            };
+        }
+
         if(drawObject != null)
         {
             *(Transform*)(&drawObject->Object.Position) = transform;
@@ -73,7 +84,7 @@ internal unsafe class ModelTransformService : IDisposable
                     if(transformCapability.OverrideTransform.HasValue)
                     {
                         var transform = transformCapability.OverrideTransform.Value;
-                        SetTransform(gameObject, transform);
+                        SetTransform(gameObject, transform, transformCapability.Actor.IsProp);
                         return;
                     }
                 }
