@@ -7,7 +7,6 @@ using Brio.UI.Controls.Stateless;
 using Dalamud.Interface;
 using Dalamud.Interface.Utility.Raii;
 using FFXIVClientStructs.FFXIV.Client.Game.Character;
-using FFXIVClientStructs.FFXIV.Client.Graphics.Kernel;
 using ImGuiNET;
 using System.Numerics;
 
@@ -15,6 +14,8 @@ namespace Brio.UI.Controls.Editors;
 
 internal class GearEditor()
 {
+    private WeaponModelId BlankItem = new() { Id = 0, Type = 0 };
+
     private Vector2 IconSize => new(ImGui.GetTextLineHeight() * 3.9f);
 
     private ActorAppearanceCapability _capability = null!;
@@ -24,11 +25,11 @@ internal class GearEditor()
     private static readonly GearSelector _gearSelector = new("gear_selector");
     private static readonly FacewearSelector _facewearSelector = new("facewear_selector");
 
-	public unsafe bool MainProp = false;
-	public unsafe bool OffHandProp = false;
+    public unsafe bool _mainProp = false;
+    public unsafe bool _offHandProp = false;
 
-	private const ActorEquipSlot _weaponSlots = ActorEquipSlot.MainHand | ActorEquipSlot.OffHand;
-	private const ActorEquipSlot _propSlots = ActorEquipSlot.Prop;
+    private const ActorEquipSlot _weaponSlots = ActorEquipSlot.MainHand | ActorEquipSlot.OffHand;
+    private const ActorEquipSlot _propSlots = ActorEquipSlot.Prop;
 
     public bool DrawGear(ref ActorAppearance currentAppearance, ActorAppearance originalAppearance, ActorAppearanceCapability capability)
     {
@@ -55,19 +56,7 @@ internal class GearEditor()
             _capability.ApplyEmperors();
         }
 
-        ImGui.SameLine();
-
-        ImGui.Checkbox("###weaponsprops", ref this.MainProp);
-			if(ImGui.IsItemHovered())
-				ImGui.SetTooltip("Replaces the main weapon with a prop.");
-
-        ImGui.SameLine();
-
-        ImGui.Checkbox("###offweaponsprops", ref this.OffHandProp);
-			if(ImGui.IsItemHovered())
-				ImGui.SetTooltip("Replaces the off-hand weapon with a prop.");
-
-		ImGui.Spacing();
+        ImGui.Spacing();
 
         var slotSizes = ImGui.GetContentRegionAvail() / new Vector2(2, 1.32f);
 
@@ -75,10 +64,23 @@ internal class GearEditor()
         {
             if(leftGearGroup.Success)
             {
-                if(MainProp) 
-                didChange |= DrawPropSlot(ref currentAppearance, ref currentAppearance.Weapons.MainHand, ActorEquipSlot.Prop);
+                if(ImGui.Checkbox("Replaces Main Hand with a Prop###weaponsprops", ref _mainProp))
+                {
+                    if(_mainProp == false)
+                        currentAppearance.Weapons.MainHand = originalAppearance.Weapons.MainHand;
+                    else
+                        currentAppearance.Weapons.MainHand = BlankItem;
+                    didChange |= true;
+                }
+                if(ImGui.IsItemHovered())
+                    ImGui.SetTooltip("Replace main weapon with a prop.");
+
+                ImGui.Spacing();
+
+                if(_mainProp)
+                    didChange |= DrawPropSlot(ref currentAppearance, ref currentAppearance.Weapons.MainHand, ActorEquipSlot.Prop | ActorEquipSlot.MainHand);
                 else
-                didChange |= DrawWeaponSlot(ref currentAppearance, ref currentAppearance.Weapons.MainHand, ActorEquipSlot.MainHand);
+                    didChange |= DrawWeaponSlot(ref currentAppearance, ref currentAppearance.Weapons.MainHand, ActorEquipSlot.MainHand);
                 didChange |= DrawGearSlot(ref currentAppearance, ref currentAppearance.Equipment.Head, ActorEquipSlot.Head);
                 didChange |= DrawGearSlot(ref currentAppearance, ref currentAppearance.Equipment.Top, ActorEquipSlot.Body);
                 didChange |= DrawGearSlot(ref currentAppearance, ref currentAppearance.Equipment.Arms, ActorEquipSlot.Hands);
@@ -94,10 +96,25 @@ internal class GearEditor()
         {
             if(rightGearGroup.Success)
             {
-                if(OffHandProp)
-                didChange |= DrawPropSlot(ref currentAppearance, ref currentAppearance.Weapons.OffHand, ActorEquipSlot.Prop);
+                if(ImGui.Checkbox("Replaces Off-Hand with a Prop###offweaponsprops", ref _offHandProp))
+                {
+                    if(_offHandProp == false)
+                        currentAppearance.Weapons.OffHand = originalAppearance.Weapons.OffHand;
+                    else
+                        currentAppearance.Weapons.OffHand = BlankItem;
+                    didChange |= true;
+
+                }
+
+                if(ImGui.IsItemHovered())
+                    ImGui.SetTooltip("Replaces the off-hand weapon with a prop.");
+
+                ImGui.Spacing();
+
+                if(_offHandProp)
+                    didChange |= DrawPropSlot(ref currentAppearance, ref currentAppearance.Weapons.OffHand, ActorEquipSlot.Prop | ActorEquipSlot.OffHand);
                 else
-                didChange |= DrawWeaponSlot(ref currentAppearance, ref currentAppearance.Weapons.OffHand, ActorEquipSlot.OffHand);
+                    didChange |= DrawWeaponSlot(ref currentAppearance, ref currentAppearance.Weapons.OffHand, ActorEquipSlot.OffHand);
                 didChange |= DrawGearSlot(ref currentAppearance, ref currentAppearance.Equipment.Ear, ActorEquipSlot.Ears);
                 didChange |= DrawGearSlot(ref currentAppearance, ref currentAppearance.Equipment.Neck, ActorEquipSlot.Neck);
                 didChange |= DrawGearSlot(ref currentAppearance, ref currentAppearance.Equipment.Wrist, ActorEquipSlot.Wrists);
@@ -271,8 +288,8 @@ internal class GearEditor()
         return didChange;
     }
 
-	private bool DrawWeaponSlot(ref ActorAppearance appearance, ref WeaponModelId equip, ActorEquipSlot slot)
-	{
+    private bool DrawWeaponSlot(ref ActorAppearance appearance, ref WeaponModelId equip, ActorEquipSlot slot)
+    {
         bool didChange = false;
 
         var fallback = slot.GetEquipSlotFallback();
@@ -435,107 +452,93 @@ internal class GearEditor()
         return didChange;
     }
 
-	private bool DrawPropSlot(ref ActorAppearance appearance, ref WeaponModelId equip, ActorEquipSlot slot)
-	{
-		bool didChange = false;
+    private bool DrawPropSlot(ref ActorAppearance appearance, ref WeaponModelId equip, ActorEquipSlot slot)
+    {
+        bool didChange = false;
 
-		var fallback = slot.GetEquipSlotFallback();
+        var fallback = slot.GetEquipSlotFallback();
 
-		int equipId = equip.Id;
-		int equipVariant = equip.Variant;
-		int equipType = equip.Type;
+        int equipId = equip.Id;
+        int equipVariant = equip.Variant;
+        int equipType = equip.Type;
 
-		var model = GameDataProvider.Instance.ModelDatabase.GetModelById(equip, _propSlots);
+        var model = GameDataProvider.Instance.ModelDatabase.GetModelById(equip, _propSlots);
 
-		using(ImRaii.PushId(slot.ToString()))
-		{
-			if(ImBrio.BorderedGameIcon("##icon", model?.Icon ?? 0, fallback, size: IconSize))
-			{
-				_gearSelector.SetGearSelect(model, _propSlots);
-				ImGui.OpenPopup("gear_popup");
-			}
+        using(ImRaii.PushId(slot.ToString()))
+        {
+            if(ImBrio.BorderedGameIcon("##icon", model?.Icon ?? 0, fallback, size: IconSize))
+            {
+                _gearSelector.SetGearSelect(model, _propSlots);
+                ImGui.OpenPopup("gear_popup");
+            }
 
-			ImGui.SameLine();
+            ImGui.SameLine();
 
-			using(var group = ImRaii.Group())
-			{
-				if(group.Success)
-				{
-					string description = $"{slot}: {model?.Name ?? "Unknown"}";
+            using(var group = ImRaii.Group())
+            {
+                if(group.Success)
+                {
+                    string description = $"{slot}: {model?.Name ?? "Unknown"}";
 
-					ImGui.Text(description);
+                    ImGui.Text(description);
 
-					ImGui.SetNextItemWidth(ImGui.CalcTextSize("XXXXX").X);
-					if(ImGui.InputInt("##id", ref equipId, 0, 0, ImGuiInputTextFlags.EnterReturnsTrue))
-					{
-						equip.Id = (ushort)equipId;
-						didChange |= true;
-					}
+                    ImGui.SetNextItemWidth(ImGui.CalcTextSize("XXXXX").X);
+                    if(ImGui.InputInt("##id", ref equipId, 0, 0, ImGuiInputTextFlags.EnterReturnsTrue))
+                    {
+                        equip.Id = (ushort)equipId;
+                        didChange |= true;
+                    }
 
-					ImGui.SameLine();
+                    ImGui.SameLine();
 
-					ImGui.SetNextItemWidth(ImGui.CalcTextSize("XXXXX").X);
-					if(ImGui.InputInt("##type", ref equipType, 0, 0, ImGuiInputTextFlags.EnterReturnsTrue))
-					{
-						equip.Type = (ushort)equipType;
-						didChange |= true;
-					}
+                    ImGui.SetNextItemWidth(ImGui.CalcTextSize("XXXXX").X);
+                    if(ImGui.InputInt("##type", ref equipType, 0, 0, ImGuiInputTextFlags.EnterReturnsTrue))
+                    {
+                        equip.Type = (ushort)equipType;
+                        didChange |= true;
+                    }
 
-					ImGui.SameLine();
+                    ImGui.SameLine();
 
-					ImGui.SetNextItemWidth(ImGui.CalcTextSize("XXXXX").X);
-					if(ImGui.InputInt("##variant", ref equipVariant, 0, 0, ImGuiInputTextFlags.EnterReturnsTrue))
-					{
-						equip.Variant = (byte)equipVariant;
-						didChange |= true;
-					}
+                    ImGui.SetNextItemWidth(ImGui.CalcTextSize("XXXXX").X);
+                    if(ImGui.InputInt("##variant", ref equipVariant, 0, 0, ImGuiInputTextFlags.EnterReturnsTrue))
+                    {
+                        equip.Variant = (byte)equipVariant;
+                        didChange |= true;
+                    }
 
-					bool isHidden = slot == ActorEquipSlot.MainHand ? appearance.Runtime.IsMainHandHidden : appearance.Runtime.IsOffHandHidden;
-					if(ImBrio.FontIconButton("hideweap", isHidden ? FontAwesomeIcon.Eye : FontAwesomeIcon.EyeSlash, isHidden ? "Show" : "Hide", bordered: false))
-					{
-						if(slot == ActorEquipSlot.MainHand)
-						{
-							appearance.Runtime.IsMainHandHidden = !isHidden;
-						}
-						else
-						{
-							appearance.Runtime.IsOffHandHidden = !isHidden;
-						}
-						didChange |= true;
-					}
+                    ImGui.SameLine();
+                    if(ImBrio.FontIconButton("attachweapon", FontAwesomeIcon.FistRaised, "Attach Weapon", bordered: false))
+                    {
+                        _capability.AttachWeapon();
+                        didChange |= true;
+                    }
 
-					ImGui.SameLine();
-					if(ImBrio.FontIconButton("attachweapon", FontAwesomeIcon.FistRaised, "Attach Weapon", bordered: false))
-					{
-						_capability.AttachWeapon();
-					}
+                    using(var gearPopup = ImRaii.Popup("gear_popup"))
+                    {
+                        if(gearPopup.Success)
+                        {
+                            _gearSelector.Draw();
+                            if(_gearSelector.SoftSelectionChanged && _gearSelector.SoftSelected != null)
+                            {
+                                equip.Value = _gearSelector.SoftSelected.ModelId;
+                                didChange |= true;
+                            }
+                            if(_gearSelector.SelectionChanged)
+                                ImGui.CloseCurrentPopup();
 
+                        }
+                    }
+                }
+            }
 
-					using(var gearPopup = ImRaii.Popup("gear_popup"))
-					{
-						if(gearPopup.Success)
-						{
-							_gearSelector.Draw();
-							if(_gearSelector.SoftSelectionChanged && _gearSelector.SoftSelected != null)
-							{
-								equip.Value = _gearSelector.SoftSelected.ModelId;
-								didChange |= true;
-							}
-							if(_gearSelector.SelectionChanged)
-								ImGui.CloseCurrentPopup();
+        }
 
-						}
-					}
-				}
-			}
-
-		}
-
-		return didChange;
-	}
+        return didChange;
+    }
 
 
-	private bool DrawFacewearSlot(ref ActorAppearance appearance)
+    private bool DrawFacewearSlot(ref ActorAppearance appearance)
     {
         bool didChange = false;
 
