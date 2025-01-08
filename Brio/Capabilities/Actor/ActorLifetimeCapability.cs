@@ -1,12 +1,17 @@
 ﻿using Brio.Capabilities.Posing;
+using Brio.Core;
 using Brio.Entities;
 using Brio.Entities.Actor;
+using Brio.Files;
 using Brio.Game.Actor;
 using Brio.Game.Actor.Extensions;
 using Brio.Game.Core;
+using Brio.Game.Posing;
+using Brio.Resources;
 using Brio.UI.Widgets.Actor;
 using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Plugin.Services;
+using Swan.Formatters;
 
 namespace Brio.Capabilities.Actor;
 
@@ -17,13 +22,15 @@ internal class ActorLifetimeCapability : ActorCapability
     private readonly ActorSpawnService _actorSpawnService;
     private readonly EntityManager _entityManager;
     private readonly IFramework _framework;
-
-    public ActorLifetimeCapability(ActorEntity parent, TargetService targetService, ActorSpawnService actorSpawnService, EntityManager entityManager, IFramework framework) : base(parent)
+    private readonly PosingService _posingService;
+    public ActorLifetimeCapability(ActorEntity parent, PosingService posingService, TargetService targetService, ActorSpawnService actorSpawnService, EntityManager entityManager, IFramework framework) : base(parent)
     {
         _targetService = targetService;
         _actorSpawnService = actorSpawnService;
         _entityManager = entityManager;
         _framework = framework;
+        _posingService = posingService;
+
         Widget = new ActorLifetimeWidget(this);
     }
 
@@ -68,7 +75,8 @@ internal class ActorLifetimeCapability : ActorCapability
                 if(entity is not null)
                 {
                     entity.GetCapability<ActionTimelineCapability>().SetOverallSpeedOverride(0);
-                    entity.GetCapability<ModelPosingCapability>().SetDefaultPropTransform();
+                    entity.GetCapability<PosingCapability>().ImportPose(JsonSerializer.Deserialize<PoseFile>(ResourceProvider.Instance.GetRawResourceString("Data.BrioPropPose.pose")), _posingService.SceneImporterOptions);
+                    entity.GetCapability<ActorAppearanceCapability>().AttachWeapon();
                 }
             },
                 100,

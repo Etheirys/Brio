@@ -90,7 +90,7 @@ internal class PosingWidget(PosingCapability capability) : Widget<PosingCapabili
 
         if(ImBrio.FontIconButtonRight("reset", FontAwesomeIcon.Undo, 1, "Reset Pose", Capability.HasOverride))
         {
-            Capability.Reset(false, false);
+            Capability.Reset(false, false, true);
         }
 
         using(var popup = ImRaii.Popup("widget_bone_search_popup", ImGuiWindowFlags.AlwaysAutoResize))
