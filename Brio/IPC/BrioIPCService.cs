@@ -406,7 +406,7 @@ internal class BrioIPCService : IDisposable
                     }
                     else
                     {
-                        posingCapability.ImportPose(JsonSerializer.Deserialize<PoseFile>(json), null, asIPCpose: false);
+                        posingCapability.ImportPose(JsonSerializer.Deserialize<PoseFile>(json), null, asIPCpose: true);
                     }
 
                     return true;
