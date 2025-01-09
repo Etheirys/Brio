@@ -324,7 +324,7 @@ internal class LibraryWindow : Window
 
     private void DrawInternal()
     {
-        using(ImRaii.PushId("brio_library"))
+        using(ImRaii.PushId("##brio_library"))
         {
 
             DrawFilters();
@@ -470,7 +470,7 @@ internal class LibraryWindow : Window
 
                     if(isPoseModal)
                     {
-                        if(ImBrio.Button("", FontAwesomeIcon.Cog, new Vector2(25, 0), hoverText: "Import Options"))
+                        if(ImBrio.Button("##importPoseOptionButton", FontAwesomeIcon.Cog, new Vector2(25, 0), hoverText: "Import Options"))
                         {
                             ImGui.OpenPopup("import_options_popup_lib");
                         }

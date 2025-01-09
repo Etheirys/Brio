@@ -68,6 +68,7 @@ internal class PosingCapability : ActorCharacterCapability
     private readonly PosingTransformWindow _overlayTransformWindow;
     private readonly IFramework _framework;
     private readonly InputService _input;
+    private readonly PhysicsService _physicsService;
 
     public PosingCapability(
         ActorEntity parent,
@@ -75,6 +76,7 @@ internal class PosingCapability : ActorCharacterCapability
         PosingService posingService,
         ConfigurationService configurationService,
         PosingTransformWindow overlayTransformWindow,
+        PhysicsService physicsService,
         IFramework framework,
         InputService input)
         : base(parent)
@@ -86,6 +88,7 @@ internal class PosingCapability : ActorCharacterCapability
         _overlayTransformWindow = overlayTransformWindow;
         _framework = framework;
         _input = input;
+        _physicsService = physicsService;
     }
 
     public override void OnEntitySelected()
@@ -135,7 +138,7 @@ internal class PosingCapability : ActorCharacterCapability
             actionTimeline.StopSpeedAndResetTimeline(() =>
             {
                 ImportPose_internal(rawPoseFile, options, reset: false, reconcile: false, asExpression: asExpression, asScene: asScene, asIPCpose: asIPCpose, asBody: asBody);
-
+                
             }, !(ConfigurationService.Instance.Configuration.Posing.FreezeActorOnPoseImport || freezeOnLoad));
         }
         else

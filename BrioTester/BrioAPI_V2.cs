@@ -41,6 +41,9 @@ public static class BrioAPI
     private static ICallGateSubscriber<IGameObject, bool> Actor_Freeze_IPC;
     private static ICallGateSubscriber<IGameObject, bool> Actor_UnFreeze_IPC;
 
+    private static ICallGateSubscriber<bool> FreezePhysics_IPC;
+    private static ICallGateSubscriber<bool> UnFreezePhysics_IPC;
+
     //
     //
 
@@ -79,6 +82,9 @@ public static class BrioAPI
 
         Actor_Freeze_IPC = pluginInterface.GetIpcSubscriber<IGameObject, bool>("Brio.Actor.Freeze");
         Actor_UnFreeze_IPC = pluginInterface.GetIpcSubscriber<IGameObject, bool>("Brio.Actor.UnFreeze");
+
+        FreezePhysics_IPC = pluginInterface.GetIpcSubscriber<bool>("Brio.FreezePhysics");
+        UnFreezePhysics_IPC = pluginInterface.GetIpcSubscriber<bool>("Brio.UnFreezePhysics");
     }
 
     /// <summary>
@@ -359,4 +365,19 @@ public static class BrioAPI
 
         return Actor_UnFreeze_IPC.InvokeFunc(actor);
     }
+
+    public static bool FreezePhysics()
+    {
+        if (hasInit is false) throw new Exception("Call BrioAPI.InitBrioAPI first!");
+
+        return FreezePhysics_IPC.InvokeFunc();
+    }
+
+    public static bool UnFreezePhysics()
+    {
+        if (hasInit is false) throw new Exception("Call BrioAPI.InitBrioAPI first!");
+
+        return UnFreezePhysics_IPC.InvokeFunc();
+    }
+
 }

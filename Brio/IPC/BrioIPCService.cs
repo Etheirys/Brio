@@ -9,6 +9,7 @@ using Brio.Game.Actor;
 using Brio.Game.Actor.Extensions;
 using Brio.Game.Core;
 using Brio.Game.GPose;
+using Brio.Game.Posing;
 using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Ipc;
@@ -91,6 +92,12 @@ internal class BrioIPCService : IDisposable
 
     public const string Actor_UnFreeze_IPCName = "Brio.Actor.UnFreeze";
     private ICallGateProvider<IGameObject, bool>? Actor_UnFreeze_IPC;
+ 
+    public const string FreezePhysics_IPCName = "Brio.FreezePhysics";
+    private ICallGateProvider<bool>? FreezePhysics_IPC;
+
+    public const string UnFreezePhysics_IPCName = "Brio.UnFreezePhysics";
+    private ICallGateProvider<bool>? UnFreezePhysics_IPC;
 
     //
 
@@ -100,8 +107,10 @@ internal class BrioIPCService : IDisposable
     private readonly EntityManager _entityManager;
     private readonly IDalamudPluginInterface _pluginInterface;
     private readonly IFramework _framework;
+    private readonly PhysicsService _physicsService;
 
-    public BrioIPCService(ActorSpawnService actorSpawnService, GPoseService gPoseService, ConfigurationService configurationService, EntityManager entityManager, IDalamudPluginInterface pluginInterface, IFramework framework)
+    public BrioIPCService(ActorSpawnService actorSpawnService, GPoseService gPoseService, ConfigurationService configurationService, EntityManager entityManager, 
+        IDalamudPluginInterface pluginInterface, IFramework framework, PhysicsService physicsService)
     {
         _actorSpawnService = actorSpawnService;
         _gPoseService = gPoseService;
@@ -109,6 +118,7 @@ internal class BrioIPCService : IDisposable
         _entityManager = entityManager;
         _pluginInterface = pluginInterface;
         _framework = framework;
+        _physicsService = physicsService;
 
         if(_configurationService.Configuration.IPC.EnableBrioIPC)
             CreateIPC();
@@ -186,6 +196,12 @@ internal class BrioIPCService : IDisposable
         Actor_UnFreeze_IPC = _pluginInterface.GetIpcProvider<IGameObject, bool>(Actor_UnFreeze_IPCName);
         Actor_UnFreeze_IPC.RegisterFunc(UnFreezActor_Impl);
 
+        FreezePhysics_IPC = _pluginInterface.GetIpcProvider <bool> (FreezePhysics_IPCName);
+        FreezePhysics_IPC.RegisterFunc(FreezePhysics_Impl);
+       
+        UnFreezePhysics_IPC = _pluginInterface.GetIpcProvider <bool> (UnFreezePhysics_IPCName);
+        UnFreezePhysics_IPC.RegisterFunc(UnFreezePhysics_Impl);
+
         IsIPCEnabled = true;
     }
     private void DisposeIPC()
@@ -251,7 +267,7 @@ internal class BrioIPCService : IDisposable
             flags |= SpawnFlags.ReserveCompanionSlot;
         }
 
-        if(_actorSpawnService.CreateCharacter(out var character, flags, disableSpawnCompanion: false))
+        if(_actorSpawnService.CreateCharacter(out var character, flags, disableSpawnCompanion: !spawnCompanionSlot))
         {
             if(selectInHierarchy)
             {
@@ -390,7 +406,7 @@ internal class BrioIPCService : IDisposable
                     }
                     else
                     {
-                        posingCapability.ImportPose(JsonSerializer.Deserialize<PoseFile>(json), null, asIPCpose: false);
+                        posingCapability.ImportPose(JsonSerializer.Deserialize<PoseFile>(json), null, asIPCpose: true);
                     }
 
                     return true;
@@ -510,6 +526,20 @@ internal class BrioIPCService : IDisposable
         }
 
         return false;
+    }
+
+    public bool FreezePhysics_Impl()
+    {
+        if(_gPoseService.IsGPosing == false) return false;
+       
+        return _physicsService.FreezeEnable();
+    }
+
+    public bool UnFreezePhysics_Impl()
+    {
+        if(_gPoseService.IsGPosing == false) return false;
+
+        return _physicsService.FreezeRevert();
     }
 
     public void Dispose()
