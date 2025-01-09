@@ -41,6 +41,9 @@ public static class BrioAPI
     private static ICallGateSubscriber<IGameObject, bool> Actor_Freeze_IPC;
     private static ICallGateSubscriber<IGameObject, bool> Actor_UnFreeze_IPC;
 
+    private static ICallGateSubscriber<bool> FreezePhysics_IPC;
+    private static ICallGateSubscriber<bool> UnFreezePhysics_IPC;
+
     //
     //
 
@@ -73,12 +76,15 @@ public static class BrioAPI
 
         Actor_Exists_IPC = pluginInterface.GetIpcSubscriber<IGameObject, bool>("Brio.Actor.Exists");
         Actor_GetAll_IPC = pluginInterface.GetIpcSubscriber<IGameObject[]?>("Brio.Actor.GetAll");
-  
+
         Actor_SetSpeed_IPC = pluginInterface.GetIpcSubscriber<IGameObject, float, bool>("Brio.Actor.SetSpeed");
         Actor_GetSpeed_IPC = pluginInterface.GetIpcSubscriber<IGameObject, float>("Brio.Actor.GetSpeed");
 
         Actor_Freeze_IPC = pluginInterface.GetIpcSubscriber<IGameObject, bool>("Brio.Actor.Freeze");
         Actor_UnFreeze_IPC = pluginInterface.GetIpcSubscriber<IGameObject, bool>("Brio.Actor.UnFreeze");
+
+        FreezePhysics_IPC = pluginInterface.GetIpcSubscriber<bool>("Brio.FreezePhysics");
+        UnFreezePhysics_IPC = pluginInterface.GetIpcSubscriber<bool>("Brio.UnFreezePhysics");
     }
 
     /// <summary>
@@ -358,5 +364,25 @@ public static class BrioAPI
         if (hasInit is false) throw new Exception("Call BrioAPI.InitBrioAPI first!");
 
         return Actor_UnFreeze_IPC.InvokeFunc(actor);
+    }
+
+    /// <summary>
+    /// Freezes FFXIV's physics simulation. 
+    /// </summary>
+    public static bool FreezePhysics()
+    {
+        if (hasInit is false) throw new Exception("Call BrioAPI.InitBrioAPI first!");
+
+        return FreezePhysics_IPC.InvokeFunc();
+    }
+
+    /// <summary>
+    /// Unfreezes FFXIV's physics simulation. 
+    /// </summary>
+    public static bool UnFreezePhysics()
+    {
+        if (hasInit is false) throw new Exception("Call BrioAPI.InitBrioAPI first!");
+
+        return UnFreezePhysics_IPC.InvokeFunc();
     }
 }
