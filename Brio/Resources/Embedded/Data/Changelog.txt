@@ -11,7 +11,7 @@ To open this window again click `Information` on the Scene Manager then -> `View
 - Added a new setting in the Import Pose popup, 
   - You can now Freeze an Actor after import
 
-- Updated Brio's IPC API
+- Updated Brio's IPC API (Thanks to Darkarchon for the collaborative efforts!)
   - For more info on Brio's updated IPC look at `BrioAPI_V2.cs` in the root of Brio's GitHub repo
 
 - Loading a pose will now be more consistent & predictable
