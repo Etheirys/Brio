@@ -20,7 +20,6 @@ public static class BrioAPI
     private static ICallGateSubscriber<bool, bool, bool, Task<IGameObject?>> Actor_SpawnExAsync_IPC;
 
     private static ICallGateSubscriber<IGameObject, bool> Actor_DespawnActor_Ipc;
-    private static ICallGateSubscriber<IGameObject, Task<bool>> Actor_DespawnActorAsync_Ipc;
 
     private static ICallGateSubscriber<IGameObject, Vector3?, Quaternion?, Vector3?, bool, bool> Actor_SetModelTransform_IPC;
     private static ICallGateSubscriber<IGameObject, (Vector3?, Quaternion?, Vector3?)> Actor_GetModelTransform_IPC;
@@ -62,7 +61,6 @@ public static class BrioAPI
         Actor_SpawnExAsync_IPC = pluginInterface.GetIpcSubscriber<bool, bool, bool, Task<IGameObject?>>("Brio.Actor.SpawnExAsync");
 
         Actor_DespawnActor_Ipc = pluginInterface.GetIpcSubscriber<IGameObject, bool>("Brio.Actor.Despawn");
-        Actor_DespawnActorAsync_Ipc = pluginInterface.GetIpcSubscriber<IGameObject, Task<bool>>("Brio.Actor.DespawnAsync");
 
         Actor_SetModelTransform_IPC = pluginInterface.GetIpcSubscriber<IGameObject, Vector3?, Quaternion?, Vector3?, bool, bool>("Brio.Actor.SetModelTransform");
         Actor_GetModelTransform_IPC = pluginInterface.GetIpcSubscriber<IGameObject, (Vector3?, Quaternion?, Vector3?)>("Brio.Actor.GetModelTransform");
@@ -144,18 +142,6 @@ public static class BrioAPI
         if (hasInit is false) throw new Exception("Call BrioAPI.InitBrioAPI first!");
 
         return Actor_DespawnActor_Ipc.InvokeFunc(actorToDespawn);
-    }
-
-    /// <summary>
-    /// Despawns an actor asynchronously.
-    /// </summary>
-    /// <param name="actorToDespawn">The actor to despawn.</param>
-    /// <returns>True if the actor was successfully despawned, otherwise false.</returns>
-    public static Task<bool> DespawnActorAsync(IGameObject actorToDespawn)
-    {
-        if (hasInit is false) throw new Exception("Call BrioAPI.InitBrioAPI first!");
-
-        return Actor_DespawnActorAsync_Ipc.InvokeFunc(actorToDespawn);
     }
 
     /// <summary>

@@ -48,9 +48,6 @@ internal class BrioIPCService : IDisposable
     public const string Actor_Despawn_IPCName = "Brio.Actor.Despawn";
     private ICallGateProvider<IGameObject, bool>? Actor_DespawnActor_IPC;
 
-    public const string Actor_DespawnAsync_IPCName = "Brio.Actor.DespawnAsync";
-    private ICallGateProvider<IGameObject, Task<bool>>? Actor_DespawnActorAsync_IPC;
-
 
     public const string Actor_SetModelTransform_IPCName = "Brio.Actor.SetModelTransform";
     private ICallGateProvider<IGameObject, Vector3?, Quaternion?, Vector3?, bool, bool>? Actor_SetModelTransform_IPC;
@@ -157,9 +154,6 @@ internal class BrioIPCService : IDisposable
         Actor_DespawnActor_IPC = _pluginInterface.GetIpcProvider<IGameObject, bool>(Actor_Despawn_IPCName);
         Actor_DespawnActor_IPC.RegisterFunc(DespawnActor);
 
-        Actor_DespawnActorAsync_IPC = _pluginInterface.GetIpcProvider<IGameObject, Task<bool>>(Actor_DespawnAsync_IPCName);
-        Actor_DespawnActorAsync_IPC.RegisterFunc(DespawnActorAsync_Impl);
-
         Actor_SetModelTransform_IPC = _pluginInterface.GetIpcProvider<IGameObject, Vector3?, Quaternion?, Vector3?, bool, bool>(Actor_SetModelTransform_IPCName);
         Actor_SetModelTransform_IPC.RegisterFunc(ActorSetModelTransform_Impl);
 
@@ -216,7 +210,6 @@ internal class BrioIPCService : IDisposable
         Actor_SpawnExAsync_IPC?.UnregisterFunc();
 
         Actor_DespawnActor_IPC?.UnregisterFunc();
-        Actor_DespawnActorAsync_IPC?.UnregisterFunc();
 
         Actor_SetModelTransform_IPC?.UnregisterFunc();
         Actor_GetModelTransform_IPC?.UnregisterFunc();
@@ -245,7 +238,6 @@ internal class BrioIPCService : IDisposable
         Actor_SpawnExAsync_IPC = null;
 
         Actor_DespawnActor_IPC = null;
-        Actor_DespawnActorAsync_IPC = null;
 
         Actor_SetModelTransform_IPC = null;
         Actor_GetModelTransform_IPC = null;
