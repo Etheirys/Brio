@@ -12,7 +12,7 @@ To open this window again click `Information` on the Scene Manager then -> `View
   - You can now Freeze an Actor after import
 
 - Updated Brio's IPC API
-  - For more info on Brio's updated IPC look at `BrioAPI_V2.cs` in the root of Brio's github repo
+  - For more info on Brio's updated IPC look at `BrioAPI_V2.cs` in the root of Brio's GitHub repo
 
 - Loading a pose will now be more consistent & predictable
 
@@ -23,6 +23,7 @@ To open this window again click `Information` on the Scene Manager then -> `View
 - Status Effects in the effects selector that have no VFX are now filtered out (Thank you MKhayle!)
 - Added better localization for Status Effects selector (Thank you MKhayle!)
 
+- Fixed an issue with Anamnesis and editing Brio actors 
 - Fixed the Library's Search Suggest Box closing when it shouldn't
 - Fixed multiple possible crashes!
 
