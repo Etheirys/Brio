@@ -8,7 +8,7 @@ internal static partial class ImBrio
 {
     public static bool DrawTag(Tag tag)
     {
-        return ImGui.Button(tag.DisplayName);
+        return ImGui.Button($"{tag.DisplayName}###drawTag{tag.GetHashCode()}");
     }
 
     public static Tag? DrawTags(IEnumerable<Tag> tags)
