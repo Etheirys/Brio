@@ -1,5 +1,4 @@
 ﻿using Brio.Capabilities.Actor;
-using Brio.Capabilities.Core;
 using Brio.Config;
 using Brio.Core;
 using Brio.Entities.Actor;
@@ -138,7 +137,7 @@ internal class PosingCapability : ActorCharacterCapability
             actionTimeline.StopSpeedAndResetTimeline(() =>
             {
                 ImportPose_internal(rawPoseFile, options, reset: false, reconcile: false, asExpression: asExpression, asScene: asScene, asIPCpose: asIPCpose, asBody: asBody);
-                
+
             }, !(ConfigurationService.Instance.Configuration.Posing.FreezeActorOnPoseImport || freezeOnLoad));
         }
         else
@@ -173,17 +172,17 @@ internal class PosingCapability : ActorCharacterCapability
             options = _posingService.ExpressionOptions;
             tempPose = GeneratePoseFile();
         }
-        else if (asBody)
+        else if(asBody)
         {
             options = _posingService.BodyOptions;
         }
-        else if (asScene)
+        else if(asScene)
         {
             options = _posingService.SceneImporterOptions;
 
             options.ApplyModelTransform = ConfigurationService.Instance.Configuration.Import.ApplyModelTransform;
         }
-        else if (asIPCpose)
+        else if(asIPCpose)
         {
             options = _posingService.DefaultIPCImporterOptions;
         }
@@ -268,7 +267,8 @@ internal class PosingCapability : ActorCharacterCapability
 
     public void Reset(bool generateSnapshot = true, bool reset = true, bool clearHistStack = true)
     {
-        SkeletonPosing.ResetPose();
+        if(Actor.IsProp == false)
+            SkeletonPosing.ResetPose();
         ModelPosing.ResetTransform();
 
         if(clearHistStack)

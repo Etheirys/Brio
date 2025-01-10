@@ -366,6 +366,9 @@ public static class BrioAPI
         return Actor_UnFreeze_IPC.InvokeFunc(actor);
     }
 
+    /// <summary>
+    /// Freezes FFXIV's physics simulation. 
+    /// </summary>
     public static bool FreezePhysics()
     {
         if (hasInit is false) throw new Exception("Call BrioAPI.InitBrioAPI first!");
@@ -373,11 +376,13 @@ public static class BrioAPI
         return FreezePhysics_IPC.InvokeFunc();
     }
 
+    /// <summary>
+    /// Unfreezes FFXIV's physics simulation. 
+    /// </summary>
     public static bool UnFreezePhysics()
     {
         if (hasInit is false) throw new Exception("Call BrioAPI.InitBrioAPI first!");
 
         return UnFreezePhysics_IPC.InvokeFunc();
     }
-
 }

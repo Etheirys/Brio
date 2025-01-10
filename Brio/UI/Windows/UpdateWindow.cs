@@ -19,7 +19,7 @@ internal class UpdateWindow : Window
     {
         Namespace = "brio_update_namespace";
 
-        Size = new Vector2(630, 535);
+        Size = new Vector2(630, 635);
         Flags = ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoCollapse;
 
         ShowCloseButton = false;
@@ -46,7 +46,7 @@ internal class UpdateWindow : Window
     {
         var segmentSize = ImGui.GetWindowSize().X / 1f;
 
-        if(ImGui.BeginChild("###brio_update_text", new Vector2(ImBrio.GetRemainingWidth(), ImBrio.GetRemainingHeight() - 35f), true, Flags = ImGuiWindowFlags.NoSavedSettings))
+        if(ImGui.BeginChild("###brio_update_text", new Vector2(ImBrio.GetRemainingWidth(), ImBrio.GetRemainingHeight() - 35f), true, Flags = ImGuiWindowFlags.NoSavedSettings | ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoCollapse))
         {
             if(_scrollToTop)
             {

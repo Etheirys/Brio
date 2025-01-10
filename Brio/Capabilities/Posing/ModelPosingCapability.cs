@@ -18,7 +18,7 @@ internal class ModelPosingCapability : ActorCharacterCapability
         {
             if(_transformOverride.HasValue)
                 return _transformOverride.Value;
-
+            
             return _transformService.GetTransform(GameObject);
         }
         set

@@ -99,7 +99,6 @@ internal class GameDataAppearanceEntry : ItemEntryBase
         if(args is not null and ActorEntity actor)
         {
             SetAppearance(actor);
-            Brio.Log.Warning("SetAppearance");
             return true;
         }
 
@@ -118,7 +117,6 @@ internal class GameDataAppearanceEntry : ItemEntryBase
         if(actorEntity.TryGetCapability<ActorAppearanceCapability>(out var capability) && capability != null)
         {
             _ = capability.SetAppearance(Appearance, AppearanceImportOptions.All);
-            Brio.Log.Warning("TryGetCapability SetAppearance");
         }
     }
 

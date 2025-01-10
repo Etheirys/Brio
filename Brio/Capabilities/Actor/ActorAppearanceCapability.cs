@@ -150,7 +150,7 @@ internal class ActorAppearanceCapability : ActorCharacterCapability
         return SetAppearance(appearance, AppearanceImportOptions.Gear);
     }
 
-    public Task ToggelHide()
+    public Task ToggleHide()
     {
         var appearance = _actorAppearanceService.GetActorAppearance(Character);
 
@@ -188,6 +188,7 @@ internal class ActorAppearanceCapability : ActorCharacterCapability
         appearance.Weapons.OffHand = SpecialAppearances.EmperorsOffHand;
         return SetAppearance(appearance, AppearanceImportOptions.Gear);
     }
+
 
     public async Task Redraw()
     {

@@ -2,6 +2,7 @@
 using Brio.Capabilities.Posing;
 using Brio.Config;
 using Brio.Entities.Core;
+using Brio.Game.Actor;
 using Brio.Game.Actor.Extensions;
 using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Interface;
@@ -33,9 +34,11 @@ namespace Brio.Entities.Actor
                 RawName = value;
             }
         }
-        public override FontAwesomeIcon Icon => GameObject.GetFriendlyIcon();
+        public override FontAwesomeIcon Icon => IsProp ? FontAwesomeIcon.Cube : GameObject.GetFriendlyIcon();
 
         public unsafe override bool IsVisible => true;
+
+        public bool IsProp => SpawnFlag.HasFlag(SpawnFlags.AsProp);
 
         public override void OnAttached()
         {
@@ -45,10 +48,14 @@ namespace Brio.Entities.Actor
             AddCapability(ActivatorUtilities.CreateInstance<SkeletonPosingCapability>(_serviceProvider, this));
             AddCapability(ActivatorUtilities.CreateInstance<ModelPosingCapability>(_serviceProvider, this));
             AddCapability(ActivatorUtilities.CreateInstance<PosingCapability>(_serviceProvider, this));
-
+          
             AddCapability(ActionTimelineCapability.CreateIfEligible(_serviceProvider, this));
-            AddCapability(CompanionCapability.CreateIfEligible(_serviceProvider, this));
-            AddCapability(StatusEffectCapability.CreateIfEligible(_serviceProvider, this));
+
+            if(IsProp == false)
+            {
+                AddCapability(CompanionCapability.CreateIfEligible(_serviceProvider, this));
+                AddCapability(StatusEffectCapability.CreateIfEligible(_serviceProvider, this));
+            }
 
             AddCapability(ActivatorUtilities.CreateInstance<ActorDebugCapability>(_serviceProvider, this));
         }

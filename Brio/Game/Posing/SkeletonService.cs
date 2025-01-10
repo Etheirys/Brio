@@ -11,6 +11,7 @@ using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Hooking;
 using Dalamud.Plugin.Services;
 using FFXIVClientStructs.Havok.Animation.Rig;
+using FFXIVClientStructs.Havok.Common.Base.Math.QsTransform;
 using FFXIVClientStructs.Havok.Common.Base.Math.Quaternion;
 using FFXIVClientStructs.Havok.Common.Base.Math.Vector;
 using System;
@@ -269,12 +270,10 @@ internal unsafe class SkeletonService : IDisposable
 
         var boneId = bone.Index;
 
-        var trans = info.Transform;
-        trans.Filter(info.PropagateComponents);
+        var prop = info.PropagateComponents.HasFlag(TransformComponents.Position);
+        var modelSpace = pose->AccessBoneModelSpace(boneId, prop ? PropagateOrNot.Propagate : PropagateOrNot.DontPropagate);
 
         // Position
-        bool prop = info.PropagateComponents.HasFlag(TransformComponents.Position);
-        var modelSpace = pose->AccessBoneModelSpace(boneId, prop ? PropagateOrNot.Propagate : PropagateOrNot.DontPropagate);
         temp = modelSpace;
         temp.Position += info.Transform.Position;
         if(info.IKInfo.Enabled)

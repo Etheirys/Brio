@@ -20,7 +20,6 @@ public static class BrioAPI
     private static ICallGateSubscriber<bool, bool, bool, Task<IGameObject?>> Actor_SpawnExAsync_IPC;
 
     private static ICallGateSubscriber<IGameObject, bool> Actor_DespawnActor_Ipc;
-    private static ICallGateSubscriber<IGameObject, Task<bool>> Actor_DespawnActorAsync_Ipc;
 
     private static ICallGateSubscriber<IGameObject, Vector3?, Quaternion?, Vector3?, bool, bool> Actor_SetModelTransform_IPC;
     private static ICallGateSubscriber<IGameObject, (Vector3?, Quaternion?, Vector3?)> Actor_GetModelTransform_IPC;
@@ -41,6 +40,9 @@ public static class BrioAPI
     private static ICallGateSubscriber<IGameObject, bool> Actor_Freeze_IPC;
     private static ICallGateSubscriber<IGameObject, bool> Actor_UnFreeze_IPC;
 
+    private static ICallGateSubscriber<bool> FreezePhysics_IPC;
+    private static ICallGateSubscriber<bool> UnFreezePhysics_IPC;
+
     //
     //
 
@@ -59,7 +61,6 @@ public static class BrioAPI
         Actor_SpawnExAsync_IPC = pluginInterface.GetIpcSubscriber<bool, bool, bool, Task<IGameObject?>>("Brio.Actor.SpawnExAsync");
 
         Actor_DespawnActor_Ipc = pluginInterface.GetIpcSubscriber<IGameObject, bool>("Brio.Actor.Despawn");
-        Actor_DespawnActorAsync_Ipc = pluginInterface.GetIpcSubscriber<IGameObject, Task<bool>>("Brio.Actor.DespawnAsync");
 
         Actor_SetModelTransform_IPC = pluginInterface.GetIpcSubscriber<IGameObject, Vector3?, Quaternion?, Vector3?, bool, bool>("Brio.Actor.SetModelTransform");
         Actor_GetModelTransform_IPC = pluginInterface.GetIpcSubscriber<IGameObject, (Vector3?, Quaternion?, Vector3?)>("Brio.Actor.GetModelTransform");
@@ -73,12 +74,15 @@ public static class BrioAPI
 
         Actor_Exists_IPC = pluginInterface.GetIpcSubscriber<IGameObject, bool>("Brio.Actor.Exists");
         Actor_GetAll_IPC = pluginInterface.GetIpcSubscriber<IGameObject[]?>("Brio.Actor.GetAll");
-  
+
         Actor_SetSpeed_IPC = pluginInterface.GetIpcSubscriber<IGameObject, float, bool>("Brio.Actor.SetSpeed");
         Actor_GetSpeed_IPC = pluginInterface.GetIpcSubscriber<IGameObject, float>("Brio.Actor.GetSpeed");
 
         Actor_Freeze_IPC = pluginInterface.GetIpcSubscriber<IGameObject, bool>("Brio.Actor.Freeze");
         Actor_UnFreeze_IPC = pluginInterface.GetIpcSubscriber<IGameObject, bool>("Brio.Actor.UnFreeze");
+
+        FreezePhysics_IPC = pluginInterface.GetIpcSubscriber<bool>("Brio.FreezePhysics");
+        UnFreezePhysics_IPC = pluginInterface.GetIpcSubscriber<bool>("Brio.UnFreezePhysics");
     }
 
     /// <summary>
@@ -138,18 +142,6 @@ public static class BrioAPI
         if (hasInit is false) throw new Exception("Call BrioAPI.InitBrioAPI first!");
 
         return Actor_DespawnActor_Ipc.InvokeFunc(actorToDespawn);
-    }
-
-    /// <summary>
-    /// Despawns an actor asynchronously.
-    /// </summary>
-    /// <param name="actorToDespawn">The actor to despawn.</param>
-    /// <returns>True if the actor was successfully despawned, otherwise false.</returns>
-    public static Task<bool> DespawnActorAsync(IGameObject actorToDespawn)
-    {
-        if (hasInit is false) throw new Exception("Call BrioAPI.InitBrioAPI first!");
-
-        return Actor_DespawnActorAsync_Ipc.InvokeFunc(actorToDespawn);
     }
 
     /// <summary>
@@ -358,5 +350,25 @@ public static class BrioAPI
         if (hasInit is false) throw new Exception("Call BrioAPI.InitBrioAPI first!");
 
         return Actor_UnFreeze_IPC.InvokeFunc(actor);
+    }
+
+    /// <summary>
+    /// Freezes FFXIV's physics simulation. 
+    /// </summary>
+    public static bool FreezePhysics()
+    {
+        if (hasInit is false) throw new Exception("Call BrioAPI.InitBrioAPI first!");
+
+        return FreezePhysics_IPC.InvokeFunc();
+    }
+
+    /// <summary>
+    /// Unfreezes FFXIV's physics simulation. 
+    /// </summary>
+    public static bool UnFreezePhysics()
+    {
+        if (hasInit is false) throw new Exception("Call BrioAPI.InitBrioAPI first!");
+
+        return UnFreezePhysics_IPC.InvokeFunc();
     }
 }

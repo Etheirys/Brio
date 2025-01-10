@@ -2,27 +2,55 @@
 To open this window again click `Information` on the Scene Manager then -> `View the Changelog`
 
 --------------------------------------------------------------------------------
-	 ---> Brio, Version 0.4.3 - 0.4.3.1 <--- 
+	 ---> Brio, Version 0.4.4 <--- 
 --------------------------------------------------------------------------------
+
+- Added a Hide Actor button to the `Entity Hierarchy`
+
+- Added `Import as Body`, to Import Pose button 
+- Added a new setting in the Import Pose popup, 
+  - You can now Freeze an Actor after import
+
+- Updated Brio's IPC API (Thanks to Darkarchon for the collaborative efforts!)
+  - For more info on Brio's updated IPC look at `BrioAPI_V2.cs` in the root of Brio's GitHub repo
+
+- Loading a pose will now be more consistent & predictable
+
+- You can now double-click items in Library to apply them
+- You can now make the Library Window smaller
+- You can now make the Library item icon size smaller 
+
+- Status Effects in the effects selector that have no VFX are now filtered out (Thank you MKhayle!)
+- Added better localization for Status Effects selector (Thank you MKhayle!)
+
+- Fixed an issue with Anamnesis and editing Brio actors 
+- Fixed the Library's Search Suggest Box closing when it shouldn't
+- Fixed multiple possible crashes!
+
+--------------------------------------------------------------------------------
+	 --- Brio, Version 0.4.3 --- 
+--------------------------------------------------------------------------------
+
+---------- 0.4.3.1 ----------
+
+- Fix an issue where not all of the actions would appear in the animation select list
+- Fixed an isues with Penumbra and 100+ actors 
+
+---------- 0.4.3.0 ----------
 
 - Support for FFXIV 7.1!
 
 - Brio can now spawn up to 239 Actors
 
----------- 0.4.3.1  ----------
-
-- Fix an issue where not all of the actions would appear in the animation select list
-- Fixed an isues with Penumbra and 100+ actors 
-
---------------------------------------------------------------------------------
-	 --- Brio, Version 0.4.2 --- 
---------------------------------------------------------------------------------
-
-- Provide better compatibility for .chara files
-
 --------------------------------------------------------------------------------
 	 --- Brio, Version 0.4.1 --- 
 --------------------------------------------------------------------------------
+
+---------- 0.4.2.0 ----------
+
+- Provide better compatibility for .chara files
+
+---------- 0.4.1.0 ----------
 
 - Added a `Universal Gizmo` mode to the `Brio Overlay` Gizmo!
 - Added `Upper & Lower Teeth` bones to `Advanced Pose` window
@@ -45,17 +73,18 @@ To open this window again click `Information` on the Scene Manager then -> `View
 - Not all of the new bones are named yet
 - The Library does not have an option to `Import as Expression`
 
+
 --------------------------------------------------------------------------------
-	 --- Brio, Version 0.4.0.3 --- 
+	 --- Brio, Version 0.4.0 --- 
 --------------------------------------------------------------------------------
+
+---------- 0.4.0.3 ----------
 
 - Fixed being unable to change an Actor's Appearance if you don't have Glamourer installed
 - Fixed the Camera Window from moving endlessly to the right
 - Fix a crash when leaving GPose with Freeze Physics Enabled
 
---------------------------------------------------------------------------------
-	 --- Brio, Version 0.4.0 --- 
---------------------------------------------------------------------------------
+---------- 0.4.0.0 ----------
 
 - Updated the `Advanced Pose` Window
  - Added a `Freeze Physics` & `Freeze Character` button
@@ -80,7 +109,7 @@ To open this window again click `Information` on the Scene Manager then -> `View
    - Added a new setting when searching for a animation, `Start Animation On Select`
 
 - Added 3 new Key-binds
-  - Stop Playing Cutscene         (Shift + B)
+  - Stop Playing Cutscene       (Shift + B)
   - Start All Actors Animations (Shift + N)
   - Stop All Actors Animations  (Shift + M)
 
@@ -122,7 +151,7 @@ When importing a pose as Expression the head does not rotate properly,
 You can fix this by rotating the "Head" bone manually
 
 --------------------------------------------------------------------------------
-	 --- Brio, Version 0.3.2.0  -> Brio, Version 0.3.2.2  --- 
+	 --- Brio, Version 0.3.2 --- 
 --------------------------------------------------------------------------------
 
 - Update Brio for Dawntrail 7.01 
@@ -139,10 +168,10 @@ You can fix this by rotating the "Head" bone manually
 
 --------------------------------------------------------------------------------
 
-A Big Thank you to (Sufferhymn), (Night Song), (Alvar Valo), (YikesXD), 
-(Yasumi), (Yume) (A.HK), (LotusEcho), & (Selitha), for their support on Kofi!
+A Big Thank you to (Sufferhymn), (Night Song), (Alvar Valo), (Yasumi), (YikesXD), 
+(Selitha), (AquilaHK), (LotusEcho), & (Yume) for their support on Kofi!
 
-Also, Thank you, to: (@Yuki-Codes), (@danma3x), (@snaeling), (@WorstAquaPlayer), (@Caraxi), 
-& (@gris-fuego), for their contributions to Brio!
+Also, Thank you, to: (@MKhayle), (@ashna_ff14), (@Yuki-Codes), (@danma3x), (@snaeling),  
+(@WorstAquaPlayer), (@Caraxi), & (@gris-fuego), for their contributions to Brio!
 
 --------------------------------------------------------------------------------

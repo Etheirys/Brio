@@ -36,14 +36,13 @@ internal class InfoWindow : Window
 
                     Brio is a suite of tools to enhance your GPosing experience,
                     Brio is currently in alpha, as such, there may be bugs,
-                    if you find any, please report them.
+                    if you find any, please report them!
 
-                    A Big Thank you to (Sufferhymn), (Night Song), (Alvar Valo), (YikesXD), 
-                    (Yasumi), (Yume) (A.HK), (LotusEcho), & (Selitha), for their support on Kofi!
-                    
-                    Thank you to the following for their code contributions to Brio!  
-                    (@Yuki-Codes), (@danma3x), (@WorstAquaPlayer), 
-                    (@snaeling), (@Caraxi) & (@gris-fuego);
+                    A Big Thank you to (Sufferhymn), (Night Song), (Alvar Valo), (Yasumi), (YikesXD), 
+                    (Selitha), (AquilaHK), (LotusEcho), & (Yume) for their support on Kofi!
+
+                    Also, Thank you, to: (@MKhayle), (@ashna_ff14), (@Yuki-Codes), (@danma3x), (@snaeling),  
+                    (@WorstAquaPlayer), (@Caraxi), & (@gris-fuego), for their contributions to Brio!
 
                     Maintained & Developed by: Minmoose.
                     Originally Developed by: Asgard.

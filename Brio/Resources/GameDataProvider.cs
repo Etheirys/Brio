@@ -43,7 +43,7 @@ internal class GameDataProvider
 
     public readonly HumanData HumanData;
 
-    public GameDataProvider(IDataManager dataManager)
+    public GameDataProvider(IDataManager dataManager, ResourceProvider _resourceProvider)
     {
         Instance = this;
 
@@ -95,7 +95,7 @@ internal class GameDataProvider
 
         HumanData = new HumanData(dataManager.GetFile("chara/xls/charamake/human.cmp")!.Data);
 
-        ModelDatabase = new();
+        ModelDatabase = new(_resourceProvider);
 
         DataManager = dataManager;
     }
