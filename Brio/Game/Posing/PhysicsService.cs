@@ -119,7 +119,7 @@ internal unsafe partial class PhysicsService : IDisposable
         {
             Brio.Log.Fatal($"Brio encountered Fatal Error, FreezeRevert faild: {ex}");
         }
-       
+
         return IsFreezeEnabled;
     }
 

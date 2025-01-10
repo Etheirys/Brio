@@ -1,27 +1,23 @@
 using Brio.Capabilities.Actor;
 using Brio.Capabilities.Posing;
 using Brio.Config;
+using Brio.Entities;
 using Brio.Files;
 using Brio.Game.Actor.Appearance;
 using Brio.Game.Posing;
+using Brio.Game.Scene;
 using Brio.Game.Types;
 using Brio.Library;
 using Brio.Library.Filters;
+using Brio.Resources;
 using Brio.UI.Controls.Core;
 using Brio.UI.Controls.Editors;
 using Dalamud.Interface;
 using Dalamud.Interface.Utility.Raii;
 using ImGuiNET;
-using OneOf;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Numerics;
-using Brio.Entities;
-using Brio.Game.Scene;
-using Brio.Resources;
-using Brio.Capabilities.Core;
-using System.Drawing;
 
 namespace Brio.UI.Controls.Stateless;
 
@@ -76,7 +72,7 @@ internal class FileUIHelpers
                 size.Y = 44;
 
                 ImGui.Checkbox("Freeze Actor on Import", ref freezeOnLoad);
-            
+
                 ImGui.Separator();
 
                 if(ImGui.Button("Import as Body", size))
@@ -279,7 +275,7 @@ internal class FileUIHelpers
                         ConfigurationService.Instance.Configuration.LastScenePath = directory;
                         ConfigurationService.Instance.Save();
                     }
-                    
+
                     SceneFile sceneFile = SceneService.GenerateSceneFile(entityManager);
                     ResourceProvider.Instance.SaveFileDocument(path, sceneFile);
                     Brio.Log.Info("Finished exporting scene");
@@ -291,7 +287,7 @@ internal class FileUIHelpers
     {
         List<Type> types = [typeof(SceneFile)];
         TypeFilter filter = new("Scenes", [.. types]);
-        
+
         LibraryManager.GetWithFilePicker(filter, r =>
         {
             Brio.Log.Verbose("Importing scene...");
@@ -301,7 +297,7 @@ internal class FileUIHelpers
                 Brio.Log.Verbose("Finished imported scene!");
             }
             else
-            { 
+            {
                 throw new IOException("The file selected is not a valid scene file");
             }
         });

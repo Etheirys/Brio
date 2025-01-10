@@ -18,7 +18,7 @@ internal class ActorContainerEntity(IServiceProvider provider) : Entity("actorCo
 
     public override void OnChildAttached() => SortChildren();
     public override void OnChildDetached() => SortChildren();
-    
+
 
     private void SortChildren()
     {

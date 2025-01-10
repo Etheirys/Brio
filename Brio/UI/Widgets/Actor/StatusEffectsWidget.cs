@@ -1,5 +1,4 @@
 ﻿using Brio.Capabilities.Actor;
-using Brio.Capabilities.Core;
 using Brio.Resources;
 using Brio.UI.Controls.Selectors;
 using Brio.UI.Controls.Stateless;
@@ -84,9 +83,9 @@ internal class StatusEffectsWidget(StatusEffectCapability capability) : Widget<S
 
         ImGui.SameLine();
 
-		ImGui.Checkbox("###status_vfx_filter", ref _VFXLockEnabled);
-		if(ImGui.IsItemHovered())
-			ImGui.SetTooltip("Hide Status Effects that have no VFX.");
+        ImGui.Checkbox("###status_vfx_filter", ref _VFXLockEnabled);
+        if(ImGui.IsItemHovered())
+            ImGui.SetTooltip("Hide Status Effects that have no VFX.");
 
         ImGui.SameLine();
 

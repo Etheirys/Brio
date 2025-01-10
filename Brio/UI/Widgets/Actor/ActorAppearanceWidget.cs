@@ -1,6 +1,5 @@
 ﻿using Brio.Capabilities.Actor;
 using Brio.Game.Actor.Appearance;
-using Brio.Game.Actor.Extensions;
 using Brio.Resources;
 using Brio.UI.Controls.Editors;
 using Brio.UI.Controls.Selectors;
@@ -38,7 +37,7 @@ internal class ActorAppearanceWidget(ActorAppearanceCapability capability) : Wid
     {
         var currentAppearance = Capability.CurrentAppearance;
         var originalAppearance = Capability.OriginalAppearance;
-       
+
         bool didChange = DrawReset(ref currentAppearance, originalAppearance);
 
         didChange |= DrawPropSlot(ref currentAppearance, ref currentAppearance.Weapons.OffHand, ActorEquipSlot.Prop | ActorEquipSlot.OffHand);

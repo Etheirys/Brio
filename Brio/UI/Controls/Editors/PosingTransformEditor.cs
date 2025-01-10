@@ -4,11 +4,8 @@ using Brio.Game.Posing;
 using Brio.UI.Controls.Stateless;
 using Dalamud.Interface;
 using Dalamud.Interface.Utility.Raii;
-using FFXIVClientStructs.FFXIV.Common.Lua;
 using ImGuiNET;
 using System.Numerics;
-using System.Reflection.Emit;
-using System.Threading.Channels;
 
 namespace Brio.UI.Controls.Editors;
 
@@ -129,13 +126,13 @@ internal class PosingTransformEditor
 
         (var pdidChange, var panyActive) = ImBrio.DragFloat3($"###_transformPosition_0", ref realTransform.Position, 0.1f, FontAwesomeIcon.ArrowsUpDownLeftRight, "Position");
         (var rdidChange, var ranyActive) = ImBrio.DragFloat3($"###_transformRotation_0", ref realEuler, 5.0f, FontAwesomeIcon.ArrowsSpin, "Rotation");
-       
+
         bool sdidChange = false;
         bool sanyActive = false;
         if(isProp)
         {
             ImBrio.Icon(FontAwesomeIcon.ExpandAlt);
-          
+
             ImGui.SameLine();
 
             Vector2 size = new(0, 0)

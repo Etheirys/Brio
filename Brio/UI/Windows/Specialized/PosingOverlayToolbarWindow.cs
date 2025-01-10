@@ -1,5 +1,4 @@
-﻿using Brio.Capabilities.Core;
-using Brio.Capabilities.Posing;
+﻿using Brio.Capabilities.Posing;
 using Brio.Config;
 using Brio.Entities;
 using Brio.Game.Posing;
@@ -180,7 +179,7 @@ internal class PosingOverlayToolbarWindow : Window
         }
         if(ImGui.IsItemHovered())
             ImGui.SetTooltip("Scale");
-     
+
         ImGui.SameLine();
 
         using(ImRaii.PushColor(ImGuiCol.Text, _posingService.Operation == PosingOperation.Universal ? UIConstants.ToggleButtonActive : UIConstants.ToggleButtonInactive))
@@ -312,7 +311,7 @@ internal class PosingOverlayToolbarWindow : Window
         }
         if(ImGui.IsItemHovered())
             ImGui.SetTooltip("Import Pose");
-       
+
         FileUIHelpers.DrawImportPoseMenuPopup(posing, false);
 
         ImGui.SameLine();

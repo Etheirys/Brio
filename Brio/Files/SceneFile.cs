@@ -1,7 +1,7 @@
-using System;
-using System.Collections.Generic;
 using Brio.Resources;
 using Dalamud.Interface.Textures.TextureWraps;
+using System;
+using System.Collections.Generic;
 
 
 namespace Brio.Files;

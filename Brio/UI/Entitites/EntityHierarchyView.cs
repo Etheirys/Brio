@@ -91,7 +91,7 @@ internal class EntityHierarchyView(EntityManager entityManager)
         if(entity is ActorEntity actor)
         {
             ImGui.SameLine();
-      
+
             var aac = actor.GetCapability<ActorAppearanceCapability>();
 
             using(ImRaii.PushColor(ImGuiCol.Button, UIConstants.GizmoRed, aac.IsHidden))

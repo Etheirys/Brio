@@ -1,5 +1,4 @@
-﻿using Brio.Config;
-using Brio.Core;
+﻿using Brio.Core;
 using Brio.Files;
 using Brio.Game.Posing.Skeletons;
 

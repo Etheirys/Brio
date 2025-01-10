@@ -90,10 +90,10 @@ internal class GearSelector(string id) : Selector<ModelDatabase.ModelInfo>(id)
             };
             modelId = $"{equipmentModelId.Id}, {equipmentModelId.Variant}";
         }
-		if(_allowedSlots.HasFlag(ActorEquipSlot.Prop))
-			ImGui.Text($"{item.Name}\n{modelId}");
+        if(_allowedSlots.HasFlag(ActorEquipSlot.Prop))
+            ImGui.Text($"{item.Name}\n{modelId}");
         else
-			ImGui.Text($"{item.Name}\n{modelId}\n{item.Slots}");
+            ImGui.Text($"{item.Name}\n{modelId}\n{item.Slots}");
     }
 
 

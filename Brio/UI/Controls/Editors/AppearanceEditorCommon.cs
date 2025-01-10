@@ -1,5 +1,4 @@
 ﻿using Brio.Capabilities.Actor;
-using Brio.Entities;
 using Brio.Game.Actor.Appearance;
 using Brio.UI.Controls.Selectors;
 using Brio.UI.Controls.Stateless;

@@ -1,12 +1,10 @@
-﻿using Brio.Game.Posing;
-using Brio.Resources;
+﻿using Brio.Resources;
 using Brio.UI.Controls.Core;
 using Dalamud.Interface;
 using Dalamud.Interface.Textures.TextureWraps;
 using Dalamud.Interface.Utility.Raii;
 using ImGuiNET;
 using System.Numerics;
-using static Dalamud.Interface.Utility.Raii.ImRaii;
 
 namespace Brio.UI.Controls.Stateless;
 internal static partial class ImBrio
@@ -27,7 +25,7 @@ internal static partial class ImBrio
     public static bool FontIconButton(FontAwesomeIcon icon, Vector2 size)
     {
         bool clicked = false;
-        
+
         using(ImRaii.PushFont(UiBuilder.IconFont))
         {
             clicked = ImGui.Button(icon.ToIconString(), size);

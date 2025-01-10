@@ -86,7 +86,7 @@ internal class InfoWindow : Window
             }
             ImGui.PopStyleColor();
             ImGui.SameLine();
-          
+
             ImGui.PushStyleColor(ImGuiCol.Button, new Vector4(0, 70, 0, 255) / 255);
             if(ImGui.Button("License & Attributions", buttonSize))
                 Process.Start(new ProcessStartInfo { FileName = "https://github.com/Etheirys/Brio/blob/main/Acknowledgements.md", UseShellExecute = true });

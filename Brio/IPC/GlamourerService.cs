@@ -22,7 +22,7 @@ internal class GlamourerService : IDisposable
     private readonly GPoseService _gPoseService;
     private readonly IFramework _framework;
     private readonly ActorRedrawService _redrawService;
-    private readonly PenumbraService _penumbraService; 
+    private readonly PenumbraService _penumbraService;
 
     private readonly Glamourer.Api.Helpers.EventSubscriber _glamourerInitializedSubscriber;
 
@@ -32,7 +32,7 @@ internal class GlamourerService : IDisposable
 
     private readonly uint UnLockCode = 0x6D617265; // From MareSynchronos's IpcCallerGlamourer.cs
 
-    public GlamourerService(IDalamudPluginInterface pluginInterface, ConfigurationService configurationService, GPoseService gPoseService, IFramework framework, PenumbraService penumbraService,  ActorRedrawService redrawService)
+    public GlamourerService(IDalamudPluginInterface pluginInterface, ConfigurationService configurationService, GPoseService gPoseService, IFramework framework, PenumbraService penumbraService, ActorRedrawService redrawService)
     {
         _pluginInterface = pluginInterface;
         _configurationService = configurationService;

@@ -4,7 +4,6 @@ using Brio.Entities.Actor;
 using Brio.Game.Actor.Extensions;
 using Brio.Game.Types;
 using System;
-using System.Linq;
 
 namespace Brio.Files;
 
@@ -12,7 +11,7 @@ namespace Brio.Files;
 internal class ActorFile
 {
     public string Name { get; set; } = "";
-    
+
     public required AnamnesisCharaFile AnamnesisCharaFile { get; set; }
     public required PoseFile PoseFile { get; set; }
 
@@ -28,17 +27,17 @@ internal class ActorFile
     public int BaseAnimation { get; set; }
 
     public static implicit operator ActorFile(ActorEntity actorEntity)
-    {   
+    {
         var appearanceCapability = actorEntity.GetCapability<ActorAppearanceCapability>();
         var posingCapability = actorEntity.GetCapability<PosingCapability>();
-     
+
         var actorFile = new ActorFile
         {
             Name = actorEntity.RawName,
             AnamnesisCharaFile = appearanceCapability.CurrentAppearance,
             PoseFile = posingCapability.GeneratePoseFile()
         };
-        
+
         CompanionContainer? companionContainer;
 
         if(posingCapability.Character.HasSpawnedCompanion())
@@ -46,7 +45,7 @@ internal class ActorFile
             var companionCapability = actorEntity.GetCapability<CompanionCapability>();
 
             companionContainer = companionCapability.Character.GetCompanionInfo();
-         
+
             actorFile.HasChild = true;
             actorFile.Child = new ChildActor() { Companion = companionContainer.Value };
 

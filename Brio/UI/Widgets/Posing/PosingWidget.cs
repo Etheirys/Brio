@@ -1,6 +1,5 @@
 ﻿using Brio.Capabilities.Actor;
 using Brio.Capabilities.Posing;
-using Brio.Game.Posing;
 using Brio.UI.Controls.Editors;
 using Brio.UI.Controls.Stateless;
 using Brio.UI.Widgets.Core;
@@ -40,7 +39,7 @@ internal class PosingWidget(PosingCapability capability) : Widget<PosingCapabili
         {
             Capability.OverlayOpen = !overlayOpen;
         }
-      
+
         ImGui.SameLine();
 
         if(Capability.Actor.TryGetCapability<ActionTimelineCapability>(out var capability))

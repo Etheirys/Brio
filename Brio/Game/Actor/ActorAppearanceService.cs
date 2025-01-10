@@ -224,7 +224,7 @@ internal class ActorAppearanceService : IDisposable
 
                 native->DrawData.Weapon(DrawDataContainer.WeaponSlot.MainHand).ModelId = appearance.Weapons.MainHand;
                 native->DrawData.Weapon(DrawDataContainer.WeaponSlot.OffHand).ModelId = appearance.Weapons.OffHand;
-              
+
                 // Weapon Visibility
                 if(existingAppearance.Runtime.IsMainHandHidden != appearance.Runtime.IsMainHandHidden)
                     character.GetWeaponDrawObjectData(ActorEquipSlot.MainHand)->IsHidden = appearance.Runtime.IsMainHandHidden;
@@ -237,14 +237,14 @@ internal class ActorAppearanceService : IDisposable
             }
         }
 
-       
+
         if(glamourerUnlocked)
         {
             await _glamourerService.UnlockAndRevertCharacter(character);
 
             needsRedraw = true;
         }
-     
+
         RedrawResult redrawResult = RedrawResult.Optmized;
 
         if(needsRedraw)
@@ -254,7 +254,7 @@ internal class ActorAppearanceService : IDisposable
             await _glamourerService.RevertCharacter(character);
 
         unsafe
-            {
+        {
 
             var native = character.Native();
 

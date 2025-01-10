@@ -1,5 +1,4 @@
-﻿using Brio.Resources;
-using Brio.Resources.Sheets;
+﻿using Brio.Resources.Sheets;
 using Dalamud.Game.ClientState.Objects.Enums;
 using System.Linq;
 

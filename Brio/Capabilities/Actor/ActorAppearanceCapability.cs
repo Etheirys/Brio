@@ -1,5 +1,4 @@
-﻿using Brio.Capabilities.Core;
-using Brio.Core;
+﻿using Brio.Core;
 using Brio.Entities.Actor;
 using Brio.Files;
 using Brio.Game.Actor;

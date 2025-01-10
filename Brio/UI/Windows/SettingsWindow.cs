@@ -274,7 +274,7 @@ internal class SettingsWindow : Window
 
     private void DrawImportScene()
     {
-        
+
         if(ImGui.CollapsingHeader("General", ImGuiTreeNodeFlags.DefaultOpen))
         {
             bool destroyActorsBeforeImport = _configurationService.Configuration.SceneDestoryActorsBeforeImport;
@@ -287,14 +287,14 @@ internal class SettingsWindow : Window
 
         if(ImGui.CollapsingHeader("Import", ImGuiTreeNodeFlags.DefaultOpen))
         {
-            
+
             bool applyModelTransform = _configurationService.Configuration.Import.ApplyModelTransform;
             if(ImGui.Checkbox("Apply Model Transform on Import", ref applyModelTransform))
             {
                 _configurationService.Configuration.Import.ApplyModelTransform = applyModelTransform;
                 _configurationService.ApplyChange();
             }
-            
+
             var positionTransformType = _configurationService.Configuration.Import.PositionTransformType;
             ImGui.SetNextItemWidth(200);
             using(var combo = ImRaii.Combo("Position", positionTransformType.ToString()))
@@ -311,7 +311,7 @@ internal class SettingsWindow : Window
                     }
                 }
             }
-            
+
             var rotationTransformType = _configurationService.Configuration.Import.RotationTransformType;
             ImGui.SetNextItemWidth(200);
             using(var combo = ImRaii.Combo("Rotation", rotationTransformType.ToString()))
@@ -328,7 +328,7 @@ internal class SettingsWindow : Window
                     }
                 }
             }
-            
+
             var scaleTransformType = _configurationService.Configuration.Import.ScaleTransformType;
             ImGui.SetNextItemWidth(200);
             using(var combo = ImRaii.Combo("Scale", scaleTransformType.ToString()))
@@ -345,7 +345,7 @@ internal class SettingsWindow : Window
                     }
                 }
             }
-            
+
         }
     }
 

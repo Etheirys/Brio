@@ -80,7 +80,7 @@ internal class CutsceneManager : IDisposable
             {
                 if(atCap is null)
                     return;
-            
+
                 ActionTimelineEditor.ApplyBaseOverride(atCap, true);
             }
         }

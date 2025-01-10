@@ -9,6 +9,7 @@ using Brio.Game.Core;
 using Brio.Game.Cutscene;
 using Brio.Game.GPose;
 using Brio.Game.Posing;
+using Brio.Game.Scene;
 using Brio.Game.World;
 using Brio.Input;
 using Brio.IPC;
@@ -24,7 +25,6 @@ using Dalamud.Plugin.Services;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Diagnostics;
-using Brio.Game.Scene;
 
 namespace Brio;
 
@@ -159,7 +159,7 @@ public class Brio : IDalamudPlugin
         serviceCollection.AddSingleton<FileTypeInfoBase, MareCharacterDataFileInfo>();
         serviceCollection.AddSingleton<FileTypeInfoBase, SceneFileInfo>();
         serviceCollection.AddSingleton<FileService>();
-        
+
         serviceCollection.AddSingleton<SourceBase, GameDataNpcSource>();
         serviceCollection.AddSingleton<SourceBase, GameDataMountSource>();
         serviceCollection.AddSingleton<SourceBase, GameDataOrnamentSource>();

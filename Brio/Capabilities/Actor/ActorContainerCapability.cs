@@ -1,5 +1,4 @@
-﻿using System;
-using Brio.Capabilities.Core;
+﻿using Brio.Capabilities.Core;
 using Brio.Entities;
 using Brio.Entities.Actor;
 using Brio.Entities.Core;
@@ -8,6 +7,7 @@ using Brio.Game.Core;
 using Brio.Game.GPose;
 using Brio.UI.Widgets.Actor;
 using Dalamud.Game.ClientState.Objects.Types;
+using System;
 
 namespace Brio.Capabilities.Actor;
 
@@ -49,7 +49,7 @@ internal class ActorContainerCapability : Capability
             }
             return (characterId, chara);
         }
-        
+
         throw new Exception("Failed to create character");
     }
 

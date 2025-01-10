@@ -72,7 +72,7 @@ internal class DebugWidget(DebugCapability capability, IClientState _clientState
     private void DrawMisc()
     {
         var io = ImGui.GetIO();
-        
+
         ImGui.Text($"MapId - {_clientState.MapId}");
         ImGui.Text($"TerritoryType - {_clientState.TerritoryType}");
         ImGui.Text($"CurrentWorld - {_clientState.LocalPlayer.CurrentWorld.Value.InternalName}");

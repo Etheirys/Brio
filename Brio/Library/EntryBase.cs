@@ -1,5 +1,4 @@
-﻿using Brio.Capabilities.Core;
-using Brio.Library.Filters;
+﻿using Brio.Library.Filters;
 using Brio.Library.Sources;
 using Brio.Library.Tags;
 using Brio.UI.Controls.Stateless;

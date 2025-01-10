@@ -47,7 +47,7 @@ internal class WelcomeService
         if(configService.Configuration.Version <= 2)
         {
             infoWindow.IsOpen = true;
-            
+
             configService.Configuration.Version = Configuration.CurrentVersion;
         }
 

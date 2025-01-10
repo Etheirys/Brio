@@ -46,7 +46,7 @@ internal struct BrioHairMakeType : IExcelRow<BrioHairMakeType>
 
     public static IEnumerable<CharaMakeCustomize> GetHairStyles(ActorCustomize customize)
     {
-        var HairMakeType = GameDataProvider.Instance.DataManager.GetExcelSheet<BrioHairMakeType>().Where(x => x.Gender == customize.Gender && x.Race.RowId == (uint) customize.Race && x.Tribe.RowId == (uint) customize.Tribe);
+        var HairMakeType = GameDataProvider.Instance.DataManager.GetExcelSheet<BrioHairMakeType>().Where(x => x.Gender == customize.Gender && x.Race.RowId == (uint)customize.Race && x.Tribe.RowId == (uint)customize.Tribe);
 
         foreach(var item in HairMakeType)
         {
