@@ -1033,7 +1033,7 @@ internal class LibraryWindow : Window
             if(ImGui.IsMouseDoubleClicked(ImGuiMouseButton.Left))
             {
                 _toOpen = entry;
-                Brio.Log.Warning("IsMouseDoubleClicked");
+                Brio.Log.Verbose("IsMouseDoubleClicked");
             }
         }
 
@@ -1136,7 +1136,6 @@ internal class LibraryWindow : Window
                     else
                     {
                         itemEntry.InvokeDefaultAction(_entityManager.SelectedEntity);
-                        Brio.Log.Warning("InvokeDefaultAction");
                     }
                 }
             }
