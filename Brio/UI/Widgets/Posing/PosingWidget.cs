@@ -15,7 +15,7 @@ internal class PosingWidget(PosingCapability capability) : Widget<PosingCapabili
 {
     public override string HeaderName => "Posing";
 
-    public override WidgetFlags Flags => WidgetFlags.DrawBody | WidgetFlags.HasAdvanced | WidgetFlags.DefaultOpen;
+    public override WidgetFlags Flags => capability.Actor.IsProp ? (WidgetFlags.DefaultOpen | WidgetFlags.DrawBody) : (WidgetFlags.DrawBody | WidgetFlags.HasAdvanced | WidgetFlags.DefaultOpen);
 
     private readonly PosingTransformEditor _posingTransformEditor = new();
 
@@ -33,6 +33,7 @@ internal class PosingWidget(PosingCapability capability) : Widget<PosingCapabili
 
     private void DrawButtons()
     {
+
         var overlayOpen = Capability.OverlayOpen;
         if(ImBrio.FontIconButton("overlay", overlayOpen ? FontAwesomeIcon.EyeSlash : FontAwesomeIcon.Eye, overlayOpen ? "Close Overlay" : "Open Overlay"))
         {
@@ -53,19 +54,22 @@ internal class PosingWidget(PosingCapability capability) : Widget<PosingCapabili
         if(ImBrio.FontIconButton("export", FontAwesomeIcon.FileExport, "Export Pose"))
             FileUIHelpers.ShowExportPoseModal(Capability);
 
-        ImGui.SameLine();
-
-        using(ImRaii.Disabled(Capability.Selected.Value is None))
+        if(capability.Actor.IsProp == false)
         {
-            if(ImBrio.FontIconButton("clear_selection", FontAwesomeIcon.MinusSquare, "Clear Selection"))
-                Capability.ClearSelection();
-        }
+            ImGui.SameLine();
 
-        ImGui.SameLine();
+            using(ImRaii.Disabled(Capability.Selected.Value is None))
+            {
+                if(ImBrio.FontIconButton("clear_selection", FontAwesomeIcon.MinusSquare, "Clear Selection"))
+                    Capability.ClearSelection();
+            }
 
-        if(ImBrio.FontIconButton("bone_search", FontAwesomeIcon.Search, "Bone Search"))
-        {
-            ImGui.OpenPopup("widget_bone_search_popup");
+            ImGui.SameLine();
+
+            if(ImBrio.FontIconButton("bone_search", FontAwesomeIcon.Search, "Bone Search"))
+            {
+                ImGui.OpenPopup("widget_bone_search_popup");
+            }
         }
 
         ImGui.SameLine();
@@ -86,7 +90,7 @@ internal class PosingWidget(PosingCapability capability) : Widget<PosingCapabili
 
         if(ImBrio.FontIconButtonRight("reset", FontAwesomeIcon.Undo, 1, "Reset Pose", Capability.HasOverride))
         {
-            Capability.Reset(false, false);
+            Capability.Reset(false, false, true);
         }
 
         using(var popup = ImRaii.Popup("widget_bone_search_popup", ImGuiWindowFlags.AlwaysAutoResize))
