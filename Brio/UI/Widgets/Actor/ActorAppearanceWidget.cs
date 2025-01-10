@@ -1,5 +1,6 @@
 ﻿using Brio.Capabilities.Actor;
 using Brio.Game.Actor.Appearance;
+using Brio.Game.Actor.Extensions;
 using Brio.Resources;
 using Brio.UI.Controls.Editors;
 using Brio.UI.Controls.Selectors;
@@ -17,11 +18,11 @@ internal class ActorAppearanceWidget(ActorAppearanceCapability capability) : Wid
 {
     public override string HeaderName => "Appearance";
 
+    public override WidgetFlags Flags => WidgetFlags.DefaultOpen | WidgetFlags.DrawBody | WidgetFlags.DrawQuickIcons | WidgetFlags.DrawPopup | WidgetFlags.HasAdvanced | WidgetFlags.CanHide;
+
     private static readonly GearSelector _gearSelector = new("gear_selector");
     private const ActorEquipSlot _propSlots = ActorEquipSlot.Prop;
     private Vector2 IconSize => new(ImGui.GetTextLineHeight() * 3.9f);
-
-    public override WidgetFlags Flags => WidgetFlags.DefaultOpen | WidgetFlags.DrawBody | WidgetFlags.DrawQuickIcons | WidgetFlags.HasAdvanced | WidgetFlags.CanHide;
 
     public override void DrawBody()
     {
@@ -159,7 +160,7 @@ internal class ActorAppearanceWidget(ActorAppearanceCapability capability) : Wid
 
         ImGui.SameLine();
 
-        if(ImBrio.FontIconButton("import_charafile", FontAwesomeIcon.FileImport, "Import Character"))
+        if(ImBrio.FontIconButton("import_charafile", FontAwesomeIcon.Download, "Import Character"))
             FileUIHelpers.ShowImportCharacterModal(Capability, AppearanceImportOptions.Default);
 
         ImGui.SameLine();
@@ -194,6 +195,13 @@ internal class ActorAppearanceWidget(ActorAppearanceCapability capability) : Wid
                     ImGui.CloseCurrentPopup();
             }
         }
+    }
+
+    public override void DrawPopup()
+    {
+        var toggele = Capability.IsHidden ? "Show" : "Hide";
+        if(ImGui.MenuItem($"{toggele} {Capability.Actor.FriendlyName}###Appearance_popup_toggle"))
+            Capability.ToggelHide();
     }
 
     public override void DrawQuickIcons()

@@ -1,4 +1,5 @@
-﻿using Brio.Capabilities.Posing;
+﻿using Brio.Capabilities.Actor;
+using Brio.Capabilities.Posing;
 using Brio.Game.Posing;
 using Brio.UI.Controls.Editors;
 using Brio.UI.Controls.Stateless;
@@ -39,10 +40,23 @@ internal class PosingWidget(PosingCapability capability) : Widget<PosingCapabili
         {
             Capability.OverlayOpen = !overlayOpen;
         }
+      
+        ImGui.SameLine();
+
+        if(Capability.Actor.TryGetCapability<ActionTimelineCapability>(out var capability))
+        {
+            if(ImBrio.ToggelFontIconButton("freezeActor", FontAwesomeIcon.Snowflake, new Vector2(110, 0), capability.SpeedMultiplier == 0, hoverText: capability.SpeedMultiplierOverride == 0 ? "Un-Freeze Character" : "Freeze Character"))
+            {
+                if(capability.SpeedMultiplierOverride == 0)
+                    capability.ResetOverallSpeedOverride();
+                else
+                    capability.SetOverallSpeedOverride(0f);
+            }
+        }
 
         ImGui.SameLine();
 
-        if(ImBrio.FontIconButton("import", FontAwesomeIcon.FileImport, "Import Pose"))
+        if(ImBrio.FontIconButton("import", FontAwesomeIcon.Download, "Import Pose"))
         {
             ImGui.OpenPopup("DrawImportPoseMenuPopup");
         }

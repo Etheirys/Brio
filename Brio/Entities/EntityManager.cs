@@ -124,6 +124,17 @@ internal unsafe partial class EntityManager : IDisposable
         _entityMap.TryGetValue(id, out var entity);
         return entity;
     }
+    
+    public T? GetEntity<T>(EntityId id) where T : Entity
+    {
+        _entityMap.TryGetValue(id, out var entity);
+
+        if(entity is T t)
+        {
+            return t;
+        }
+        return null;
+    }
 
     public bool EntityExists(EntityId id)
     {

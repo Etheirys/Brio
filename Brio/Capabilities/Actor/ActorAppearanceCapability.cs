@@ -166,6 +166,20 @@ internal class ActorAppearanceCapability : ActorCharacterCapability
         return SetAppearance(appearance, AppearanceImportOptions.ExtendedAppearance);
     }
 
+    public Task Hide()
+    {
+        var appearance = _actorAppearanceService.GetActorAppearance(Character);
+        appearance.ExtendedAppearance.Transparency = 1f;
+        return SetAppearance(appearance, AppearanceImportOptions.ExtendedAppearance);
+    }
+
+    public Task Show()
+    {
+        var appearance = _actorAppearanceService.GetActorAppearance(Character);
+        appearance.ExtendedAppearance.Transparency = 0f;
+        return SetAppearance(appearance, AppearanceImportOptions.ExtendedAppearance);
+    }
+
     public Task ApplyEmperors()
     {
         var appearance = _actorAppearanceService.GetActorAppearance(Character);

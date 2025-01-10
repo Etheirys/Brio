@@ -5,15 +5,21 @@ using System.Linq;
 using System.Numerics;
 using System.Text;
 
-namespace Brio.Game.Cutscene.Files;
+namespace Brio.Files;
 
+[Serializable]
 public record CameraKeyframe(int Frame, Vector3 Position, Quaternion Rotation, float FoV);
 
-public class XATCameraPathFile
+[Serializable]
+public class XATCameraFile
 {
     public List<CameraKeyframe> CameraFrames { get; private set; }
 
-    public XATCameraPathFile(BinaryReader reader)
+#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
+    public XATCameraFile() { }
+#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
+
+    public XATCameraFile(BinaryReader reader)
     {
         // Header
         string fileMagic = Encoding.ASCII.GetString(reader.ReadBytes(4));

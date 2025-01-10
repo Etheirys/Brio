@@ -320,7 +320,7 @@ internal class PosingOverlayToolbarWindow : Window
         using(ImRaii.PushFont(UiBuilder.IconFont))
         {
             if(ImGui.Button($"{FontAwesomeIcon.FileExport.ToIconString()}###export_pose", new Vector2(buttonSize)))
-                FileUIHelpers.ShowExportPoseModal(posing); ;
+                FileUIHelpers.ShowExportPoseModal(posing);
         }
         if(ImGui.IsItemHovered())
             ImGui.SetTooltip("Export Pose");

@@ -17,21 +17,21 @@ namespace Brio.Entities.Actor
 
         private readonly ConfigurationService _configService = provider.GetRequiredService<ConfigurationService>();
 
-        string name = "";
+        public string RawName = "";
         public override string FriendlyName
         {
             get
             {
-                if(string.IsNullOrEmpty(name))
+                if(string.IsNullOrEmpty(RawName))
                 {
                     return _configService.Configuration.Interface.CensorActorNames ? GameObject.GetCensoredName() : GameObject.GetFriendlyName();
                 }
 
-                return GameObject.GetAsCustomName(name);
+                return GameObject.GetAsCustomName(RawName);
             }
             set
             {
-                name = value;
+                RawName = value;
             }
         }
         public override FontAwesomeIcon Icon => IsProp ? FontAwesomeIcon.Cube : GameObject.GetFriendlyIcon();

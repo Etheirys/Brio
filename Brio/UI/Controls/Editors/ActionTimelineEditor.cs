@@ -2,10 +2,10 @@
 using Brio.Config;
 using Brio.Entities;
 using Brio.Entities.Core;
+using Brio.Files;
 using Brio.Game.Actor.Extensions;
 using Brio.Game.Camera;
 using Brio.Game.Cutscene;
-using Brio.Game.Cutscene.Files;
 using Brio.Game.GPose;
 using Brio.Game.Posing;
 using Brio.Resources;
@@ -510,7 +510,7 @@ internal class ActionTimelineEditor(CutsceneManager cutsceneManager, GPoseServic
                             _configService.Configuration.LastXATPath = folderPath;
                             _configService.Save();
 
-                            _cutsceneManager.CameraPath = new XATCameraPathFile(new BinaryReader(File.OpenRead(_cameraPath)));
+                            _cutsceneManager.CameraPath = new XATCameraFile(new BinaryReader(File.OpenRead(_cameraPath)));
                         }
                     }
                     else
