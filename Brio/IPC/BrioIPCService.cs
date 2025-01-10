@@ -284,8 +284,10 @@ internal class BrioIPCService : IDisposable
                         {
                             if(_entityManager.TryGetEntity(character.Native(), out var entity))
                             {
-                                var actionTimeline = entity.GetCapability<ActionTimelineCapability>();
-                                actionTimeline.SetOverallSpeedOverride(0);
+                                if(entity.TryGetCapability<ActionTimelineCapability>(out var actionTimeline))
+                                {
+                                    actionTimeline.SetOverallSpeedOverride(0);
+                                }
                             }
                         },
                         100,
@@ -406,7 +408,7 @@ internal class BrioIPCService : IDisposable
                     }
                     else
                     {
-                        posingCapability.ImportPose(JsonSerializer.Deserialize<PoseFile>(json), null, asIPCpose: true);
+                        posingCapability.ImportPose(JsonSerializer.Deserialize<PoseFile>(json), null, asIPCpose: false);
                     }
 
                     return true;
