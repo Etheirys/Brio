@@ -16,7 +16,6 @@ internal class PosingService
     public BoneFilter OverlayFilter { get; }
 
     public PoseImporterOptions DefaultImporterOptions { get; }
-
     public PoseImporterOptions DefaultIPCImporterOptions { get; }
 
     public PoseImporterOptions SceneImporterOptions { get; }
@@ -40,6 +39,7 @@ internal class PosingService
         BodyOptions = new PoseImporterOptions(new BoneFilter(this), TransformComponents.Rotation | TransformComponents.Position, false);
         BodyOptions.BoneFilter.DisableCategory("weapon");
         BodyOptions.BoneFilter.DisableCategory("head");
+        BodyOptions.BoneFilter.DisableCategory("ears");
         BodyOptions.BoneFilter.DisableCategory("face");
         BodyOptions.BoneFilter.DisableCategory("eyes");
         BodyOptions.BoneFilter.DisableCategory("lips");
@@ -49,6 +49,7 @@ internal class PosingService
         ExpressionOptions = new PoseImporterOptions(new BoneFilter(this), TransformComponents.All, false);
         ExpressionOptions.BoneFilter.DisableAll();
         ExpressionOptions.BoneFilter.EnableCategory("head");
+        ExpressionOptions.BoneFilter.EnableCategory("ears");
         ExpressionOptions.BoneFilter.EnableCategory("face");
         ExpressionOptions.BoneFilter.EnableCategory("eyes");
         ExpressionOptions.BoneFilter.EnableCategory("lips");
