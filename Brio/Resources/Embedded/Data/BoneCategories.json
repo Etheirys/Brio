@@ -111,6 +111,7 @@
     "ears": {
       "Type": "Filter",
       "Bones": [
+        "n_ear_",
         "j_mimi",
         "j_zer"
       ]
@@ -150,7 +151,6 @@
     "clothing": {
       "Type": "Filter",
       "Bones": [
-        "n_ear_",
         "n_hijisoubi_",
         "n_hizasoubi_",
         "n_kataarmor_",
