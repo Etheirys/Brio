@@ -1,8 +1,8 @@
 ﻿using Brio.Capabilities.Actor;
 using Brio.Entities;
+using Brio.Files;
 using Brio.Game.Actor.Extensions;
 using Brio.Game.Camera;
-using Brio.Game.Cutscene.Files;
 using Brio.Game.GPose;
 using Brio.Input;
 using Brio.UI;
@@ -49,7 +49,7 @@ internal class CutsceneManager : IDisposable
     public CutsceneCameraSettings CameraSettings { get; } = new();
     public VirtualCamera VirtualCamera { get; }
 
-    public XATCameraPathFile? CameraPath { get; set; }
+    public XATCameraFile? CameraPath { get; set; }
 
     public CutsceneManager(GPoseService gPoseService, VirtualCamera virtualCamera, EntityManager entityManager, ITargetManager targetManager, IFramework framework)
     {
@@ -80,7 +80,7 @@ internal class CutsceneManager : IDisposable
             {
                 if(atCap is null)
                     return;
-            
+
                 ActionTimelineEditor.ApplyBaseOverride(atCap, true);
             }
         }

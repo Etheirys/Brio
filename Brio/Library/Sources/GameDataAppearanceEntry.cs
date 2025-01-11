@@ -1,5 +1,4 @@
 ﻿using Brio.Capabilities.Actor;
-using Brio.Capabilities.Core;
 using Brio.Entities;
 using Brio.Entities.Actor;
 using Brio.Game.Actor.Appearance;

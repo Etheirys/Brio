@@ -1,11 +1,13 @@
 ﻿using Brio.Capabilities.Core;
 using Brio.Entities;
 using Brio.Entities.Actor;
+using Brio.Entities.Core;
 using Brio.Game.Actor;
 using Brio.Game.Core;
 using Brio.Game.GPose;
 using Brio.UI.Widgets.Actor;
 using Dalamud.Game.ClientState.Objects.Types;
+using System;
 
 namespace Brio.Capabilities.Actor;
 
@@ -32,7 +34,7 @@ internal class ActorContainerCapability : Capability
         _entityManager.SetSelectedEntity(entity);
     }
 
-    public void CreateCharacter(bool enableAttachments, bool targetNewInHierarchy, bool forceSpawnActorWithoutCompanion = false)
+    public (EntityId, ICharacter) CreateCharacter(bool enableAttachments, bool targetNewInHierarchy, bool forceSpawnActorWithoutCompanion = false)
     {
         SpawnFlags flags = SpawnFlags.Default;
         if(enableAttachments)
@@ -40,11 +42,15 @@ internal class ActorContainerCapability : Capability
 
         if(_actorSpawnService.CreateCharacter(out var chara, flags, disableSpawnCompanion: forceSpawnActorWithoutCompanion))
         {
+            EntityId characterId = new EntityId(chara);
             if(targetNewInHierarchy)
             {
-                _entityManager.SetSelectedEntity(chara);
+                _entityManager.SetSelectedEntity(characterId);
             }
+            return (characterId, chara);
         }
+
+        throw new Exception("Failed to create character");
     }
 
     public void DestroyCharacter(ActorEntity entity)

@@ -4,8 +4,8 @@
 // (Lumina.Excel.Sheets.ActionTimeline)
 //
 
-using Lumina.Excel.Sheets;
 using Lumina.Excel;
+using Lumina.Excel.Sheets;
 using Lumina.Text.ReadOnly;
 
 namespace Brio.Resources.Sheets;

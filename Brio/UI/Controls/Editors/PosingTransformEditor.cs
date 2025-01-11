@@ -30,7 +30,7 @@ internal class PosingTransformEditor
                     bone =>
                     {
                         var realBone = posingCapability.SkeletonPosing.GetBone(bone);
-                        if(realBone != null && realBone.Skeleton.IsValid)
+                        if(realBone != null && realBone.Skeleton.IsValid && posingCapability.Actor.IsProp == false)
                         {
                             DrawBoneTransformEditor(posingCapability, bone, compactMode);
                         }
@@ -117,6 +117,7 @@ internal class PosingTransformEditor
     private void DrawModelTransformEditor(PosingCapability posingCapability)
     {
         var before = posingCapability.ModelPosing.Transform;
+        var isProp = posingCapability.Actor.IsProp;
         var realTransform = _trackingTransform ?? before;
         var realEuler = _trackingEuler ?? before.Rotation.ToEuler();
 
@@ -125,7 +126,28 @@ internal class PosingTransformEditor
 
         (var pdidChange, var panyActive) = ImBrio.DragFloat3($"###_transformPosition_0", ref realTransform.Position, 0.1f, FontAwesomeIcon.ArrowsUpDownLeftRight, "Position");
         (var rdidChange, var ranyActive) = ImBrio.DragFloat3($"###_transformRotation_0", ref realEuler, 5.0f, FontAwesomeIcon.ArrowsSpin, "Rotation");
-        (var sdidChange, var sanyActive) = ImBrio.DragFloat3($"###_transformScale_0", ref realTransform.Scale, 0.1f, FontAwesomeIcon.ExpandAlt, "Scale");
+
+        bool sdidChange = false;
+        bool sanyActive = false;
+        if(isProp)
+        {
+            ImBrio.Icon(FontAwesomeIcon.ExpandAlt);
+
+            ImGui.SameLine();
+
+            Vector2 size = new(0, 0)
+            {
+                X = ImBrio.GetRemainingWidth() + ImGui.GetStyle().ItemSpacing.X
+            };
+
+            float entryWidth = (size.X - (ImGui.GetStyle().ItemSpacing.X * 2));
+            ImGui.SetNextItemWidth(entryWidth);
+
+            sdidChange |= ImGui.DragFloat($"##transformScale", ref realTransform.Scale.X, 0.1f / 10);
+            sanyActive |= ImGui.IsItemActive();
+        }
+        else
+            (sdidChange, sanyActive) = ImBrio.DragFloat3($"###_transformScale_0", ref realTransform.Scale, 0.1f, FontAwesomeIcon.ExpandAlt, "Scale");
 
         didChange |= pdidChange |= rdidChange |= sdidChange;
         anyActive |= panyActive |= ranyActive |= sanyActive;

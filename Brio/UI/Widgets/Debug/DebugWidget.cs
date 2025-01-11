@@ -1,11 +1,12 @@
 ﻿using Brio.Capabilities.Debug;
 using Brio.UI.Widgets.Core;
 using Dalamud.Interface.Utility.Raii;
+using Dalamud.Plugin.Services;
 using ImGuiNET;
 
 namespace Brio.UI.Widgets.Debug;
 
-internal class DebugWidget(DebugCapability capability) : Widget<DebugCapability>(capability)
+internal class DebugWidget(DebugCapability capability, IClientState _clientState) : Widget<DebugCapability>(capability)
 {
     public override string HeaderName => "Debug";
 
@@ -71,6 +72,12 @@ internal class DebugWidget(DebugCapability capability) : Widget<DebugCapability>
     private void DrawMisc()
     {
         var io = ImGui.GetIO();
+
+        ImGui.Text($"MapId - {_clientState.MapId}");
+        ImGui.Text($"TerritoryType - {_clientState.TerritoryType}");
+        ImGui.Text($"CurrentWorld - {_clientState.LocalPlayer.CurrentWorld.Value.InternalName}");
+        ImGui.Text($"HomeWorld - {_clientState.LocalPlayer.HomeWorld.Value.InternalName}");
+
         ImGui.Text(io.Framerate.ToString("F2") + " FPS");
     }
 }

@@ -2,6 +2,7 @@
 using Brio.Capabilities.Posing;
 using Brio.Config;
 using Brio.Entities.Core;
+using Brio.Game.Actor;
 using Brio.Game.Actor.Extensions;
 using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Interface;
@@ -16,26 +17,28 @@ namespace Brio.Entities.Actor
 
         private readonly ConfigurationService _configService = provider.GetRequiredService<ConfigurationService>();
 
-        string name = "";
+        public string RawName = "";
         public override string FriendlyName
         {
             get
             {
-                if(string.IsNullOrEmpty(name))
+                if(string.IsNullOrEmpty(RawName))
                 {
                     return _configService.Configuration.Interface.CensorActorNames ? GameObject.GetCensoredName() : GameObject.GetFriendlyName();
                 }
 
-                return GameObject.GetAsCustomName(name);
+                return GameObject.GetAsCustomName(RawName);
             }
             set
             {
-                name = value;
+                RawName = value;
             }
         }
-        public override FontAwesomeIcon Icon => GameObject.GetFriendlyIcon();
+        public override FontAwesomeIcon Icon => IsProp ? FontAwesomeIcon.Cube : GameObject.GetFriendlyIcon();
 
         public unsafe override bool IsVisible => true;
+
+        public bool IsProp => SpawnFlag.HasFlag(SpawnFlags.AsProp);
 
         public override void OnAttached()
         {
@@ -47,8 +50,12 @@ namespace Brio.Entities.Actor
             AddCapability(ActivatorUtilities.CreateInstance<PosingCapability>(_serviceProvider, this));
 
             AddCapability(ActionTimelineCapability.CreateIfEligible(_serviceProvider, this));
-            AddCapability(CompanionCapability.CreateIfEligible(_serviceProvider, this));
-            AddCapability(StatusEffectCapability.CreateIfEligible(_serviceProvider, this));
+
+            if(IsProp == false)
+            {
+                AddCapability(CompanionCapability.CreateIfEligible(_serviceProvider, this));
+                AddCapability(StatusEffectCapability.CreateIfEligible(_serviceProvider, this));
+            }
 
             AddCapability(ActivatorUtilities.CreateInstance<ActorDebugCapability>(_serviceProvider, this));
         }

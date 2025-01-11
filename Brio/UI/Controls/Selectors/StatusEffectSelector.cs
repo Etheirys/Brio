@@ -1,5 +1,4 @@
 ﻿using Brio.Resources;
-using Brio.UI.Widgets.Actor;
 using Dalamud.Interface.Textures.TextureWraps;
 using ImGuiNET;
 using Lumina.Excel.Sheets;
@@ -31,16 +30,16 @@ internal class StatusEffectSelector(string id) : Selector<StatusEffectSelectorHo
         }
     }
 
-	protected override void DrawOptions()
-	{
-		base.DrawOptions();
+    protected override void DrawOptions()
+    {
+        base.DrawOptions();
 
-		if(ImGui.Checkbox("###status_vfx_filter", ref this._VFXLockEnabled))
-		    UpdateList();
+        if(ImGui.Checkbox("###status_vfx_filter", ref this._VFXLockEnabled))
+            UpdateList();
         ImGui.SameLine();
         ImGui.Text("Remove Status Effects that do not have a VFX.");
 
-	}
+    }
 
     protected override void DrawItem(StatusEffectSelectorHolder sesh, bool isHovered)
     {
@@ -49,7 +48,7 @@ internal class StatusEffectSelector(string id) : Selector<StatusEffectSelectorHo
         IDalamudTextureWrap? tex = null;
         if(item.Icon != 0)
             tex = UIManager.Instance.TextureProvider.GetFromGameIcon(item.Icon).GetWrapOrEmpty();
-        
+
         tex ??= ResourceProvider.Instance.GetResourceImage("Images.StatusEffect.png");
 
         float ratio = tex.Size.X / tex.Size.Y;
@@ -77,7 +76,7 @@ internal class StatusEffectSelector(string id) : Selector<StatusEffectSelectorHo
     protected override bool Filter(StatusEffectSelectorHolder sesh, string search)
     {
         var item = sesh.Status;
-		if(_VFXLockEnabled && item.VFX.RowId == 0) return false;
+        if(_VFXLockEnabled && item.VFX.RowId == 0) return false;
 
         if(item.StatusCategory == 0)
             return false;

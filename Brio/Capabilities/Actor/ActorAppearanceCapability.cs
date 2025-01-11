@@ -1,5 +1,4 @@
-﻿using Brio.Capabilities.Core;
-using Brio.Core;
+﻿using Brio.Core;
 using Brio.Entities.Actor;
 using Brio.Files;
 using Brio.Game.Actor;
@@ -150,7 +149,7 @@ internal class ActorAppearanceCapability : ActorCharacterCapability
         return SetAppearance(appearance, AppearanceImportOptions.Gear);
     }
 
-    public Task ToggelHide()
+    public Task ToggleHide()
     {
         var appearance = _actorAppearanceService.GetActorAppearance(Character);
 
@@ -166,6 +165,20 @@ internal class ActorAppearanceCapability : ActorCharacterCapability
         return SetAppearance(appearance, AppearanceImportOptions.ExtendedAppearance);
     }
 
+    public Task Hide()
+    {
+        var appearance = _actorAppearanceService.GetActorAppearance(Character);
+        appearance.ExtendedAppearance.Transparency = 1f;
+        return SetAppearance(appearance, AppearanceImportOptions.ExtendedAppearance);
+    }
+
+    public Task Show()
+    {
+        var appearance = _actorAppearanceService.GetActorAppearance(Character);
+        appearance.ExtendedAppearance.Transparency = 0f;
+        return SetAppearance(appearance, AppearanceImportOptions.ExtendedAppearance);
+    }
+
     public Task ApplyEmperors()
     {
         var appearance = _actorAppearanceService.GetActorAppearance(Character);
@@ -174,6 +187,7 @@ internal class ActorAppearanceCapability : ActorCharacterCapability
         appearance.Weapons.OffHand = SpecialAppearances.EmperorsOffHand;
         return SetAppearance(appearance, AppearanceImportOptions.Gear);
     }
+
 
     public async Task Redraw()
     {

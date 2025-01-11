@@ -6,7 +6,6 @@ using Brio.Game.GPose;
 using Brio.Game.Posing;
 using Brio.UI.Controls.Editors;
 using Dalamud.Interface.Windowing;
-using ImGuiNET;
 using System;
 using System.Numerics;
 

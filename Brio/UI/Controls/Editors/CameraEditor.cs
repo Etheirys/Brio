@@ -83,7 +83,7 @@ internal static class CameraEditor
                     ImGui.SetNextItemWidth(width);
                     if(ImGui.DragFloat2(panText, ref pan, 0.001f))
                         camera->Pan = pan;
-            
+
                     ImGui.SameLine();
 
                     if(ImBrio.FontIconButtonRight("resetPan", Dalamud.Interface.FontAwesomeIcon.Undo, 1f, "Reset", pan != Vector2.Zero))
@@ -94,7 +94,7 @@ internal static class CameraEditor
                     ImGui.SetNextItemWidth(width);
                     if(ImGui.DragFloat2(angleText, ref angle, 0.001f))
                         camera->Angle = angle;
-        
+
                     var disable = capability.DisableCollision;
                     if(ImGui.Checkbox("Disable Collision", ref disable))
                         capability.DisableCollision = disable;

@@ -27,6 +27,8 @@ internal class Configuration : IPluginConfiguration
     // Environment
     public EnvironmentConfiguration Environment { get; set; } = new EnvironmentConfiguration();
 
+    public SceneImportConfiguration Import { get; set; } = new SceneImportConfiguration();
+
     // Library
     public LibraryConfiguration Library { get; set; } = new LibraryConfiguration();
 
@@ -34,7 +36,11 @@ internal class Configuration : IPluginConfiguration
     public string LastExportPath { get; set; } = string.Empty;
     public string LastXATPath { get; set; } = string.Empty;
 
+    public string LastScenePath { get; set; } = string.Empty;
+
     public bool UseLibraryWhenImporting { get; set; } = true;
+
+    public bool SceneDestoryActorsBeforeImport { get; set; } = false;
 
     // Input
     public InputConfiguration Input { get; set; } = new InputConfiguration();

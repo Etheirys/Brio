@@ -4,7 +4,6 @@ using Dalamud.Interface.Windowing;
 using ImGuiNET;
 using System.Collections.Generic;
 using System.IO;
-using System.IO.Pipes;
 using System.Numerics;
 using System.Text;
 

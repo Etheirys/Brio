@@ -12,7 +12,7 @@ internal class ModelDatabase
     private readonly MultiValueDictionary<ulong, ModelInfo> _modelLookupTable;
     private readonly List<ModelInfo> _modelsList;
 
-    public ModelDatabase()
+    public ModelDatabase(ResourceProvider _resourceProvider)
     {
         _modelLookupTable = new();
         _modelsList = [];
@@ -33,6 +33,25 @@ internal class ModelDatabase
                     modelInfo = new ModelInfo(item.ModelSub, item.RowId, item.Name.ToString(), item.Icon, ActorEquipSlot.OffHand, item);
                     AddModel(modelInfo);
                 }
+            }
+        }
+
+        // From JSON
+        var knownEntries = _resourceProvider.GetResourceDocument<List<PropsFileEntry>>("Data.Props.json");
+        foreach(var item in knownEntries)
+        {
+            ushort[] result = item.Id.Split(", ").Select(ushort.Parse).ToArray();
+            if(result.Length > 2)
+            {
+                WeaponModelId weaponItem = new() { Id = result[0], Type = result[1], Variant = (byte)result[2] };
+                var modelInfo = new ModelInfo(weaponItem.Value, 0, $"{item.Name.ToString()}\n{item.Description?.ToString()}", 0, ActorEquipSlot.Prop, null);
+                AddModel(modelInfo);
+            }
+            else
+            {
+                EquipmentModelId actualItem = new() { Id = result[0], Variant = (byte)result[1] };
+                var modelInfo = new ModelInfo(actualItem.Value, 0, $"{item.Name.ToString()}\n{item.Description?.ToString()}", 0, ActorEquipSlot.Prop, null);
+                AddModel(modelInfo);
             }
         }
 
@@ -74,5 +93,13 @@ internal class ModelDatabase
     }
 
     public record class ModelInfo(ulong ModelId, uint ItemId, string Name, uint Icon, ActorEquipSlot Slots, Item? Item);
+
+    private class PropsFileEntry
+    {
+        public string Id { get; set; }
+        public string Name { get; set; } = null!;
+        public string Description { get; set; }
+        public string Slot { get; set; }
+    }
 
 }

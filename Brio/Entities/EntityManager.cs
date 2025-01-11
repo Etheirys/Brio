@@ -8,11 +8,9 @@ using Brio.Entities.World;
 using Dalamud.Game.ClientState.Objects.Types;
 using Microsoft.Extensions.DependencyInjection;
 using System;
-using System.Linq;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using Brio.Capabilities.Actor;
-using FFXIVClientStructs.FFXIV.Client.Game.Object;
+using System.Linq;
 
 
 namespace Brio.Entities;
@@ -123,6 +121,17 @@ internal unsafe partial class EntityManager : IDisposable
     {
         _entityMap.TryGetValue(id, out var entity);
         return entity;
+    }
+
+    public T? GetEntity<T>(EntityId id) where T : Entity
+    {
+        _entityMap.TryGetValue(id, out var entity);
+
+        if(entity is T t)
+        {
+            return t;
+        }
+        return null;
     }
 
     public bool EntityExists(EntityId id)
