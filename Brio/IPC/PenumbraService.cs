@@ -96,7 +96,7 @@ internal class PenumbraService : IDisposable
 
     public void OpenPenumbra()
     {
-        _penumbraOpenMainWindow.Invoke(Penumbra.Api.Enums.TabType.Mods);
+       _penumbraOpenMainWindow.Invoke(Penumbra.Api.Enums.TabType.Mods);
     }
 
     public string GetCollectionForObject(IGameObject gameObject)

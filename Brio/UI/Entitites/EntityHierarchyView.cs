@@ -91,7 +91,7 @@ internal class EntityHierarchyView(EntityManager entityManager)
         if(entity is ActorEntity actor)
         {
             ImGui.SameLine();
-
+      
             var aac = actor.GetCapability<ActorAppearanceCapability>();
 
             using(ImRaii.PushColor(ImGuiCol.Button, UIConstants.GizmoRed, aac.IsHidden))
@@ -99,7 +99,7 @@ internal class EntityHierarchyView(EntityManager entityManager)
                 string toolTip = aac.IsHidden ? $"Show {aac.Actor.FriendlyName}" : $"Hide {aac.Actor.FriendlyName}";
                 if(ImBrio.FontIconButtonRight($"###{entity.Id}_hideActor", aac.IsHidden ? FontAwesomeIcon.EyeSlash : FontAwesomeIcon.Eye, 1f, toolTip, bordered: false))
                 {
-                    aac.ToggleHide();
+                    aac.ToggelHide();
                 }
             }
 

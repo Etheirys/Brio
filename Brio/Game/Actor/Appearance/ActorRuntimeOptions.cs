@@ -7,5 +7,5 @@ internal struct ActorRuntimeOptions()
 
     public bool IsMainHandHidden = false;
     public bool IsOffHandHidden = false;
-    public bool IsPropHandHidden = false;
+
 }

@@ -87,7 +87,7 @@ internal unsafe struct BrioCharaMakeType(ExcelPage page, uint offset, uint row) 
     public static MenuCollection BuildMenus(ActorAppearance appearance)
     {
         var menus = new List<Menu>();
-
+        
         var CharaMakeTypes = GameDataProvider.Instance.DataManager.GetExcelSheet<BrioCharaMakeType>(name: "CharaMakeType").
             Where(x => x.Gender == (sbyte)appearance.Customize.Gender && x.Race.RowId == (uint)appearance.Customize.Race).
             First();
@@ -134,7 +134,7 @@ internal unsafe struct BrioCharaMakeType(ExcelPage page, uint offset, uint row) 
                 (Genders)CharaMakeTypes.Gender, menuType, subMenuMask, customizeIndex,
                 initialValue, subParams, subGraphics, [.. CharaMakeTypes.VoiceStruct], FacialFeatures));
 
-
+            
         }
 
         return new MenuCollection([.. menus]);

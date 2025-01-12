@@ -1,5 +1,4 @@
-﻿using Brio.Entities;
-using Brio.Entities.Actor;
+﻿using Brio.Entities.Actor;
 using Brio.Game.Actor;
 using Brio.Game.Actor.Extensions;
 using Brio.Game.Types;
@@ -15,14 +14,13 @@ internal unsafe class CompanionCapability : ActorCharacterCapability
     public ModeType Mode { get; }
 
     private readonly ActorSpawnService _actorSpawnService;
-    private readonly EntityManager _entityManager;
 
-    public CompanionCapability(ActorEntity parent, ModeType mode, ActorSpawnService actorSpawnService, EntityManager entityManager) : base(parent)
+
+    public CompanionCapability(ActorEntity parent, ModeType mode, ActorSpawnService actorSpawnService) : base(parent)
     {
-        _actorSpawnService = actorSpawnService;
-        _entityManager = entityManager;
-
         Mode = mode;
+        _actorSpawnService = actorSpawnService;
+
         Widget = new CompanionWidget(this);
     }
 
@@ -34,19 +32,6 @@ internal unsafe class CompanionCapability : ActorCharacterCapability
     public void SetCompanion(CompanionContainer container)
     {
         _actorSpawnService.CreateCompanion(Character, container);
-    }
-
-    public unsafe Entities.Core.Entity? GetCompanionAsEntity()
-    {
-        if(Character.HasSpawnedCompanion())
-        {
-            if(_entityManager.TryGetEntity(&Character.Native()->CompanionObject->Character.GameObject, out Entities.Core.Entity? actor))
-            {
-                return actor;
-            }
-        }
-
-        return null;
     }
 
     public static CompanionCapability? CreateIfEligible(IServiceProvider provider, ActorEntity entity)

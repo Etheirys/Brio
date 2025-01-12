@@ -56,7 +56,6 @@ internal unsafe class ModelTransformService : IDisposable
     public unsafe void SetTransform(StructsGameObject* native, Transform transform)
     {
         var drawObject = native->DrawObject;
-
         if(drawObject != null)
         {
             *(Transform*)(&drawObject->Object.Position) = transform;

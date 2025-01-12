@@ -234,7 +234,7 @@ internal class UIManager : IDisposable
 
     public void ReopenAllTemporarilyHiddenWindows()
     {
-        foreach(var window in _hiddenWindows)
+        foreach (var window in _hiddenWindows)
         {
             window.IsOpen = true;
         }

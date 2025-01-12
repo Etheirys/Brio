@@ -4,6 +4,7 @@ using Brio.Entities.Camera;
 using Brio.Game.GPose;
 using Brio.UI.Controls.Editors;
 using Dalamud.Interface.Windowing;
+using ImGuiNET;
 using System;
 
 namespace Brio.UI.Windows.Specialized;

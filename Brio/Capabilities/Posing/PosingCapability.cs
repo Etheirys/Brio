@@ -1,7 +1,9 @@
 ﻿using Brio.Capabilities.Actor;
+using Brio.Capabilities.Core;
 using Brio.Config;
 using Brio.Core;
 using Brio.Entities.Actor;
+using Brio.Entities.Core;
 using Brio.Files;
 using Brio.Game.Posing;
 using Brio.Input;
@@ -137,7 +139,7 @@ internal class PosingCapability : ActorCharacterCapability
             actionTimeline.StopSpeedAndResetTimeline(() =>
             {
                 ImportPose_internal(rawPoseFile, options, reset: false, reconcile: false, asExpression: asExpression, asScene: asScene, asIPCpose: asIPCpose, asBody: asBody);
-
+                
             }, !(ConfigurationService.Instance.Configuration.Posing.FreezeActorOnPoseImport || freezeOnLoad));
         }
         else
@@ -172,17 +174,15 @@ internal class PosingCapability : ActorCharacterCapability
             options = _posingService.ExpressionOptions;
             tempPose = GeneratePoseFile();
         }
-        else if(asBody)
+        else if (asBody)
         {
             options = _posingService.BodyOptions;
         }
-        else if(asScene)
+        else if (asScene)
         {
             options = _posingService.SceneImporterOptions;
-
-            options.ApplyModelTransform = ConfigurationService.Instance.Configuration.Import.ApplyModelTransform;
         }
-        else if(asIPCpose)
+        else if (asIPCpose)
         {
             options = _posingService.DefaultIPCImporterOptions;
         }
@@ -197,7 +197,7 @@ internal class PosingCapability : ActorCharacterCapability
         SkeletonPosing.ImportSkeletonPose(poseFile, options, expressionPhase2);
 
         if(asExpression == false)
-            ModelPosing.ImportModelPose(poseFile, options, asScene);
+            ModelPosing.ImportModelPose(poseFile, options);
 
         if(generateSnapshot)
             _framework.RunOnTick(() => Snapshot(reset, reconcile, asExpression: asExpression), delayTicks: 4);
@@ -267,8 +267,7 @@ internal class PosingCapability : ActorCharacterCapability
 
     public void Reset(bool generateSnapshot = true, bool reset = true, bool clearHistStack = true)
     {
-        if(Actor.IsProp == false)
-            SkeletonPosing.ResetPose();
+        SkeletonPosing.ResetPose();
         ModelPosing.ResetTransform();
 
         if(clearHistStack)
@@ -296,7 +295,8 @@ internal class PosingCapability : ActorCharacterCapability
             ImportPose_internal(poseFile, options: all, generateSnapshot: false);
         }, delayTicks: 2);
     }
-    public PoseFile GeneratePoseFile()
+
+    private PoseFile GeneratePoseFile()
     {
         var poseFile = new PoseFile();
         SkeletonPosing.ExportSkeletonPose(poseFile);

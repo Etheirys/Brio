@@ -1,5 +1,5 @@
-﻿using Brio.Capabilities.Actor;
-using Brio.Capabilities.Posing;
+﻿using Brio.Capabilities.Posing;
+using Brio.Game.Posing;
 using Brio.UI.Controls.Editors;
 using Brio.UI.Controls.Stateless;
 using Brio.UI.Widgets.Core;
@@ -15,7 +15,7 @@ internal class PosingWidget(PosingCapability capability) : Widget<PosingCapabili
 {
     public override string HeaderName => "Posing";
 
-    public override WidgetFlags Flags => capability.Actor.IsProp ? (WidgetFlags.DefaultOpen | WidgetFlags.DrawBody) : (WidgetFlags.DrawBody | WidgetFlags.HasAdvanced | WidgetFlags.DefaultOpen);
+    public override WidgetFlags Flags => WidgetFlags.DrawBody | WidgetFlags.HasAdvanced | WidgetFlags.DefaultOpen;
 
     private readonly PosingTransformEditor _posingTransformEditor = new();
 
@@ -33,7 +33,6 @@ internal class PosingWidget(PosingCapability capability) : Widget<PosingCapabili
 
     private void DrawButtons()
     {
-
         var overlayOpen = Capability.OverlayOpen;
         if(ImBrio.FontIconButton("overlay", overlayOpen ? FontAwesomeIcon.EyeSlash : FontAwesomeIcon.Eye, overlayOpen ? "Close Overlay" : "Open Overlay"))
         {
@@ -42,20 +41,7 @@ internal class PosingWidget(PosingCapability capability) : Widget<PosingCapabili
 
         ImGui.SameLine();
 
-        if(Capability.Actor.TryGetCapability<ActionTimelineCapability>(out var capability))
-        {
-            if(ImBrio.ToggelFontIconButton("freezeActor", FontAwesomeIcon.Snowflake, new Vector2(110, 0), capability.SpeedMultiplier == 0, hoverText: capability.SpeedMultiplierOverride == 0 ? "Un-Freeze Character" : "Freeze Character"))
-            {
-                if(capability.SpeedMultiplierOverride == 0)
-                    capability.ResetOverallSpeedOverride();
-                else
-                    capability.SetOverallSpeedOverride(0f);
-            }
-        }
-
-        ImGui.SameLine();
-
-        if(ImBrio.FontIconButton("import", FontAwesomeIcon.Download, "Import Pose"))
+        if(ImBrio.FontIconButton("import", FontAwesomeIcon.FileImport, "Import Pose"))
         {
             ImGui.OpenPopup("DrawImportPoseMenuPopup");
         }
@@ -67,22 +53,19 @@ internal class PosingWidget(PosingCapability capability) : Widget<PosingCapabili
         if(ImBrio.FontIconButton("export", FontAwesomeIcon.FileExport, "Export Pose"))
             FileUIHelpers.ShowExportPoseModal(Capability);
 
-        if(capability.Actor.IsProp == false)
+        ImGui.SameLine();
+
+        using(ImRaii.Disabled(Capability.Selected.Value is None))
         {
-            ImGui.SameLine();
+            if(ImBrio.FontIconButton("clear_selection", FontAwesomeIcon.MinusSquare, "Clear Selection"))
+                Capability.ClearSelection();
+        }
 
-            using(ImRaii.Disabled(Capability.Selected.Value is None))
-            {
-                if(ImBrio.FontIconButton("clear_selection", FontAwesomeIcon.MinusSquare, "Clear Selection"))
-                    Capability.ClearSelection();
-            }
+        ImGui.SameLine();
 
-            ImGui.SameLine();
-
-            if(ImBrio.FontIconButton("bone_search", FontAwesomeIcon.Search, "Bone Search"))
-            {
-                ImGui.OpenPopup("widget_bone_search_popup");
-            }
+        if(ImBrio.FontIconButton("bone_search", FontAwesomeIcon.Search, "Bone Search"))
+        {
+            ImGui.OpenPopup("widget_bone_search_popup");
         }
 
         ImGui.SameLine();
@@ -103,7 +86,7 @@ internal class PosingWidget(PosingCapability capability) : Widget<PosingCapabili
 
         if(ImBrio.FontIconButtonRight("reset", FontAwesomeIcon.Undo, 1, "Reset Pose", Capability.HasOverride))
         {
-            Capability.Reset(false, false, true);
+            Capability.Reset(false, false);
         }
 
         using(var popup = ImRaii.Popup("widget_bone_search_popup", ImGuiWindowFlags.AlwaysAutoResize))

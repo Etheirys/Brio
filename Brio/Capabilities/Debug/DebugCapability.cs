@@ -2,7 +2,6 @@
 using Brio.Entities.Core;
 using Brio.Game.GPose;
 using Brio.UI.Widgets.Debug;
-using Dalamud.Plugin.Services;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using FFXIVClientStructs.FFXIV.Client.Game.Control;
 using FFXIVClientStructs.FFXIV.Client.Game.Event;
@@ -17,10 +16,10 @@ internal unsafe class DebugCapability : Capability
 {
     private readonly GPoseService _gPoseService;
 
-    public DebugCapability(IClientState clientState, Entity parent, GPoseService gPoseService) : base(parent)
+    public DebugCapability(Entity parent, GPoseService gPoseService) : base(parent)
     {
         _gPoseService = gPoseService;
-        Widget = new DebugWidget(this, clientState);
+        Widget = new DebugWidget(this);
     }
 
     public void EnterGPose()

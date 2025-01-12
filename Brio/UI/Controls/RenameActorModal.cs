@@ -58,7 +58,7 @@ internal class RenameActorModal
                     ImGui.InputText("Actor Name###brio_renamemodal_popup_name", ref currentActorName, 20);
 
                     float buttonW = (MinimumSize.X / 3) - 7;
-
+            
                     using(ImRaii.Disabled(string.IsNullOrEmpty(currentActorName)))
                     {
                         if(ImGui.Button("Save", new(buttonW, 0)))

@@ -1,4 +1,5 @@
-﻿using Brio.Capabilities.Posing;
+﻿using Brio.Capabilities.Core;
+using Brio.Capabilities.Posing;
 using Brio.Config;
 using Brio.Entities;
 using Brio.Game.Posing;
@@ -179,7 +180,7 @@ internal class PosingOverlayToolbarWindow : Window
         }
         if(ImGui.IsItemHovered())
             ImGui.SetTooltip("Scale");
-
+     
         ImGui.SameLine();
 
         using(ImRaii.PushColor(ImGuiCol.Text, _posingService.Operation == PosingOperation.Universal ? UIConstants.ToggleButtonActive : UIConstants.ToggleButtonInactive))
@@ -311,7 +312,7 @@ internal class PosingOverlayToolbarWindow : Window
         }
         if(ImGui.IsItemHovered())
             ImGui.SetTooltip("Import Pose");
-
+       
         FileUIHelpers.DrawImportPoseMenuPopup(posing, false);
 
         ImGui.SameLine();
@@ -319,7 +320,7 @@ internal class PosingOverlayToolbarWindow : Window
         using(ImRaii.PushFont(UiBuilder.IconFont))
         {
             if(ImGui.Button($"{FontAwesomeIcon.FileExport.ToIconString()}###export_pose", new Vector2(buttonSize)))
-                FileUIHelpers.ShowExportPoseModal(posing);
+                FileUIHelpers.ShowExportPoseModal(posing); ;
         }
         if(ImGui.IsItemHovered())
             ImGui.SetTooltip("Export Pose");

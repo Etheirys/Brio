@@ -9,7 +9,6 @@ using Brio.Game.Core;
 using Brio.Game.Cutscene;
 using Brio.Game.GPose;
 using Brio.Game.Posing;
-using Brio.Game.Scene;
 using Brio.Game.World;
 using Brio.Input;
 using Brio.IPC;
@@ -114,7 +113,6 @@ public class Brio : IDalamudPlugin
         serviceCollection.AddSingleton<GameDataProvider>();
         serviceCollection.AddSingleton<WelcomeService>();
         serviceCollection.AddSingleton<InputService>();
-        serviceCollection.AddSingleton<SceneService>();
 
         // IPC
         serviceCollection.AddSingleton<BrioIPCService>();
@@ -157,7 +155,6 @@ public class Brio : IDalamudPlugin
         serviceCollection.AddSingleton<FileTypeInfoBase, CMToolPoseFileInfo>();
         serviceCollection.AddSingleton<FileTypeInfoBase, PoseFileInfo>();
         serviceCollection.AddSingleton<FileTypeInfoBase, MareCharacterDataFileInfo>();
-        serviceCollection.AddSingleton<FileTypeInfoBase, SceneFileInfo>();
         serviceCollection.AddSingleton<FileService>();
 
         serviceCollection.AddSingleton<SourceBase, GameDataNpcSource>();

@@ -1,4 +1,6 @@
-﻿using System.Text;
+﻿using static System.Runtime.InteropServices.JavaScript.JSType;
+using System.Numerics;
+using System.Text;
 
 namespace Brio.Core;
 
@@ -13,7 +15,7 @@ internal static class IntExtensions
 
         if(number < 100)
         {
-            if(number < 20)
+             if(number < 20)
             {
                 result.Append(ones[number]);
             }
@@ -45,7 +47,7 @@ internal static class IntExtensions
                 result.Append(separator);
                 result.Append("Hundred");
                 result.Append(separator);
-                result.Append(ToWords(remainder, ""));
+                result.Append(ToWords(remainder, "")); 
             }
         }
 

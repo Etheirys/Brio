@@ -8,6 +8,7 @@ using Dalamud.Interface.Textures.TextureWraps;
 using FFXIVClientStructs.FFXIV.Client.Game.Character;
 using System;
 using System.Numerics;
+using System.Text.Json.Serialization;
 
 namespace Brio.Files;
 

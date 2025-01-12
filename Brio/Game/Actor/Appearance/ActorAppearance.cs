@@ -40,7 +40,6 @@ internal struct ActorAppearance()
 
         actorAppearance.Runtime.IsMainHandHidden = character.GetWeaponDrawObjectData(ActorEquipSlot.MainHand)->IsHidden;
         actorAppearance.Runtime.IsOffHandHidden = character.GetWeaponDrawObjectData(ActorEquipSlot.OffHand)->IsHidden;
-        actorAppearance.Runtime.IsPropHandHidden = character.GetWeaponDrawObjectData(ActorEquipSlot.Prop)->IsHidden;
 
         actorAppearance.ExtendedAppearance.Transparency = native->Alpha;
 
@@ -50,7 +49,7 @@ internal struct ActorAppearance()
             actorAppearance.ExtendedAppearance.CharacterTint = charaBase->Tint;
             actorAppearance.ExtendedAppearance.Wetness = charaBase->Wetness;
             actorAppearance.ExtendedAppearance.WetnessDepth = charaBase->WetnessDepth;
-
+        
             actorAppearance.ExtendedAppearance.HeightMultiplier = charaBase->ScaleFactor2;
         }
 

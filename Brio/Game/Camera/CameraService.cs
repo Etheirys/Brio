@@ -1,4 +1,5 @@
 ﻿using Brio.Capabilities.Camera;
+using Brio.Core;
 using Brio.Entities;
 using Brio.Entities.Camera;
 using Brio.Game.Cutscene;
@@ -36,13 +37,13 @@ internal unsafe class CameraService : IDisposable
 
     private delegate void CameraMatrixLoadDelegate(BrioRenderCamera* camera, nint a1);
     private readonly CameraMatrixLoadDelegate _cameraMatrixLoad;
-
+   
     public CameraService(EntityManager entityManager, CutsceneManager cutsceneManager, GPoseService gPoseService, ISigScanner scanner, IGameInteropProvider hooking)
     {
         _entityManager = entityManager;
         _gPoseService = gPoseService;
         _cutsceneManager = cutsceneManager;
-
+        
         var cameraProjection = "E8 ?? ?? ?? ?? EB ?? F3 0F ?? ?? ?? ?? ?? ?? F3 0F ?? ?? ?? ?? E8 ?? ?? ?? ?? 0F ?? ?? ?? 48 ?? ?? ??";
         ProjectionHook = hooking.HookFromAddress<ProjectionMatrix>(scanner.ScanText(cameraProjection), ProjectionDetour);
         ProjectionHook.Enable();
@@ -87,12 +88,12 @@ internal unsafe class CameraService : IDisposable
         }
         return result;
     }
-
+ 
     private unsafe Matrix4x4* ProjectionDetour(IntPtr ptr, float fov, float aspect, float nearPlane, float farPlane, float a6, float a7)
     {
         if(_cutsceneManager.VirtualCamera.IsActive && _cutsceneManager.CameraSettings.EnableFOV)
             fov = _cutsceneManager.VirtualCamera.State.FoV;
-
+   
         var exec = ProjectionHook.Original(ptr, fov, aspect, nearPlane, farPlane, a6, a7);
 
         return exec;
@@ -101,7 +102,7 @@ internal unsafe class CameraService : IDisposable
     private nint CameraSceneUpdateDetour(BrioSceneCamera* gsc)
     {
         var exec = _cameraSceneUpdateHook.Original(gsc);
-
+      
         if(_cutsceneManager.VirtualCamera.IsActive == false)
             return exec;
 
@@ -139,7 +140,7 @@ internal unsafe class CameraService : IDisposable
 
         return _cameraCollisionHook.Original(camera, a2, a3, a4, a5, a6);
     }
-
+   
     public BrioCamera* GetCurrentCamera()
     {
         return (BrioCamera*)CameraManager.Instance()->GetActiveCamera();

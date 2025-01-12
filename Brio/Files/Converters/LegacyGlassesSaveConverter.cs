@@ -1,6 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Threading.Tasks;
 using static Brio.Files.AnamnesisCharaFile;
 
 namespace Brio.Files.Converters;
@@ -12,7 +16,7 @@ internal class LegacyGlassesSaveConverter : JsonConverter<GlassesSave>
         try
         {
             ushort? str = reader.GetUInt16();
-
+                  
             return new GlassesSave { GlassesId = (byte)str.Value };
         }
         catch(Exception)

@@ -1,12 +1,15 @@
 ﻿using Brio.Capabilities.Actor;
 using Brio.Config;
 using Brio.Entities;
-using Brio.Files;
+using Brio.Entities.Core;
 using Brio.Game.Actor.Extensions;
+using Brio.Game.Camera;
 using Brio.Game.Cutscene;
+using Brio.Game.Cutscene.Files;
 using Brio.Game.GPose;
 using Brio.Game.Posing;
 using Brio.Resources;
+using Brio.UI.Controls.Core;
 using Brio.UI.Controls.Selectors;
 using Brio.UI.Controls.Stateless;
 using Dalamud.Interface;
@@ -88,9 +91,9 @@ internal class ActionTimelineEditor(CutsceneManager cutsceneManager, GPoseServic
         {
             ImGui.OpenPopup("animation_control");
         }
-
+       
         ImGui.SameLine();
-
+    
         using(ImRaii.PushColor(ImGuiCol.Button, 0))
         {
             var curPos = ImGui.GetCursorPos();
@@ -159,7 +162,7 @@ internal class ActionTimelineEditor(CutsceneManager cutsceneManager, GPoseServic
                     }
                 }
             }
-
+   
             if(ImGui.Button("Stop all Animations", Vector2.Zero))
             {
                 foreach(var actor in _entityManager.TryGetAllActors())
@@ -225,7 +228,7 @@ internal class ActionTimelineEditor(CutsceneManager cutsceneManager, GPoseServic
                 ImGui.Checkbox("Start Animation On Select", ref _startAnimationOnSelect);
                 if(ImGui.IsItemHovered())
                     ImGui.SetTooltip("Start Animation On Select");
-
+                
                 _globalTimelineSelector.Draw();
 
                 if(_globalTimelineSelector.SoftSelectionChanged && _globalTimelineSelector.SoftSelected != null)
@@ -268,7 +271,7 @@ internal class ActionTimelineEditor(CutsceneManager cutsceneManager, GPoseServic
             ApplyBlend(_capability);
 
         ImGui.SameLine();
-
+  
         if(ImBrio.FontIconButtonRight("blend_search", FontAwesomeIcon.Search, 1, "Search"))
         {
             _globalTimelineSelector.Select(null, false);
@@ -398,7 +401,7 @@ internal class ActionTimelineEditor(CutsceneManager cutsceneManager, GPoseServic
     {
 
         var slots = Enum.GetValues<ActionTimelineSlots>();
-
+  
         foreach(var slot in slots)
         {
             using(ImRaii.PushId((int)slot))
@@ -447,12 +450,12 @@ internal class ActionTimelineEditor(CutsceneManager cutsceneManager, GPoseServic
     {
         float existingSpeed = _capability.SpeedMultiplier;
         float newSpeed = existingSpeed;
-
+      
         const string speedLabel = "Speed";
         ImGui.SetNextItemWidth(drawAdvanced ? MaxItemWidth - ImGui.CalcTextSize("XXXX").X : MaxItemWidth);
         if(ImGui.SliderFloat($"###speed_slider", ref newSpeed, _delimitSpeed ? -5f : 0f, _delimitSpeed ? 10f : 5f))
             _capability.SetOverallSpeedOverride(newSpeed);
-
+    
         if(drawAdvanced)
         {
             ImGui.SameLine();
@@ -507,7 +510,7 @@ internal class ActionTimelineEditor(CutsceneManager cutsceneManager, GPoseServic
                             _configService.Configuration.LastXATPath = folderPath;
                             _configService.Save();
 
-                            _cutsceneManager.CameraPath = new XATCameraFile(new BinaryReader(File.OpenRead(_cameraPath)));
+                            _cutsceneManager.CameraPath = new XATCameraPathFile(new BinaryReader(File.OpenRead(_cameraPath)));
                         }
                     }
                     else
@@ -523,7 +526,7 @@ internal class ActionTimelineEditor(CutsceneManager cutsceneManager, GPoseServic
         using(ImRaii.Disabled(string.IsNullOrEmpty(_cameraPath)))
         {
             ImGui.Checkbox("Enable FOV", ref _cutsceneManager.CameraSettings.EnableFOV);
-
+          
             ImGui.Separator();
 
             ImGui.Text("Disabling FOV will make for a less accurate Camera, but might");
@@ -540,14 +543,14 @@ internal class ActionTimelineEditor(CutsceneManager cutsceneManager, GPoseServic
             ImGui.Checkbox("Loop", ref _cutsceneManager.CameraSettings.Loop);
 
             ImGui.Checkbox("Hide Brio On Play  (Press 'Shift + B' to Stop Cutscene)", ref _cutsceneManager.CloseWindowsOnPlay);
-
+        
             ImGui.Checkbox("###delay_Start", ref _cutsceneManager.DelayStart);
             if(ImGui.IsItemHovered())
                 ImGui.SetTooltip("Start Delay");
-
+         
             ImGui.SameLine();
             ImGui.SetNextItemWidth(MaxItemWidth);
-
+    
             using(ImRaii.Disabled(_cutsceneManager.DelayStart == false))
             {
                 ImGui.InputInt($"###delay_Start_Chek", ref _cutsceneManager.DelayTime, 0, 0);
@@ -558,9 +561,9 @@ internal class ActionTimelineEditor(CutsceneManager cutsceneManager, GPoseServic
             ImGui.Text("Start Delay");
 
             ImGui.Separator();
-
+          
             ImGui.Checkbox("Start All Actors Animations On Play", ref _cutsceneManager.StartAllActorAnimationsOnPlay);
-
+        
             using(ImRaii.Disabled(_cutsceneManager.StartAllActorAnimationsOnPlay == false))
             {
                 ImGui.Checkbox("###animation_delay_Start", ref _cutsceneManager.DelayAnimationStart);

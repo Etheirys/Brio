@@ -1,5 +1,4 @@
 ﻿using Brio.Capabilities.Core;
-using Brio.Game.Actor;
 using Dalamud.Interface;
 using System;
 using System.Collections.Generic;
@@ -13,8 +12,6 @@ internal abstract class Entity : IDisposable
     public EntityId Id { get; private set; }
 
     public Entity? Parent { get; protected set; }
-
-    public SpawnFlags SpawnFlag { get; protected set; }
 
     public IReadOnlyCollection<Entity> Children => _children.AsReadOnly();
 
@@ -189,16 +186,6 @@ internal abstract class Entity : IDisposable
         }
 
         return results.Count != 0;
-    }
-
-    public bool SetSpawnFlags(SpawnFlags flags)
-    {
-        if(SpawnFlag is SpawnFlags.None)
-        {
-            SpawnFlag = flags;
-            return true;
-        }
-        return false;
     }
 
     public virtual void Dispose()

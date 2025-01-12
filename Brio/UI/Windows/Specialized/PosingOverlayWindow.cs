@@ -116,53 +116,50 @@ internal class PosingOverlayWindow : Window, IDisposable
         }
 
         // Bone Transforms
-        if(posing.Actor.IsProp == false)
+        foreach(var (skeleton, poseSlot) in posing.SkeletonPosing.Skeletons)
         {
-            foreach(var (skeleton, poseSlot) in posing.SkeletonPosing.Skeletons)
+            if(!skeleton.IsValid)
+                continue;
+
+            var charaBase = skeleton.CharacterBase;
+            if(charaBase == null)
+                continue;
+
+            var modelMatrix = new Transform()
             {
-                if(!skeleton.IsValid)
+                Position = (Vector3)charaBase->CharacterBase.DrawObject.Object.Position,
+                Rotation = (Quaternion)charaBase->CharacterBase.DrawObject.Object.Rotation,
+                Scale = (Vector3)charaBase->CharacterBase.DrawObject.Object.Scale * charaBase->ScaleFactor
+            }.ToMatrix();
+
+
+            foreach(var bone in skeleton.Bones)
+            {
+                if(!_posingService.OverlayFilter.IsBoneValid(bone, poseSlot) || bone.Name == "n_throw")
                     continue;
 
-                var charaBase = skeleton.CharacterBase;
-                if(charaBase == null)
-                    continue;
+                var boneWorldPosition = Vector3.Transform(bone.LastTransform.Position, modelMatrix);
 
-                var modelMatrix = new Transform()
+                if(camera->WorldToScreen(boneWorldPosition, out var boneScreen))
                 {
-                    Position = (Vector3)charaBase->CharacterBase.DrawObject.Object.Position,
-                    Rotation = (Quaternion)charaBase->CharacterBase.DrawObject.Object.Rotation,
-                    Scale = (Vector3)charaBase->CharacterBase.DrawObject.Object.Scale * charaBase->ScaleFactor
-                }.ToMatrix();
-
-
-                foreach(var bone in skeleton.Bones)
-                {
-                    if(!_posingService.OverlayFilter.IsBoneValid(bone, poseSlot) || bone.Name == "n_throw")
-                        continue;
-
-                    var boneWorldPosition = Vector3.Transform(bone.LastTransform.Position, modelMatrix);
-
-                    if(camera->WorldToScreen(boneWorldPosition, out var boneScreen))
+                    clickables.Add(new ClickableItem
                     {
-                        clickables.Add(new ClickableItem
+                        Item = posing.SkeletonPosing.GetBonePose(bone).Id,
+                        ScreenPosition = boneScreen,
+                        Size = config.BoneCircleSize,
+                    });
+
+                    if(bone.Parent != null)
+                    {
+                        if(!_posingService.OverlayFilter.IsBoneValid(bone.Parent, poseSlot))
+                            continue;
+
+                        var parentWorldPosition = Vector3.Transform(bone.Parent.LastTransform.Position, modelMatrix);
+                        if(camera->WorldToScreen(parentWorldPosition, out var parentScreen))
                         {
-                            Item = posing.SkeletonPosing.GetBonePose(bone).Id,
-                            ScreenPosition = boneScreen,
-                            Size = config.BoneCircleSize,
-                        });
-
-                        if(bone.Parent != null)
-                        {
-                            if(!_posingService.OverlayFilter.IsBoneValid(bone.Parent, poseSlot))
-                                continue;
-
-                            var parentWorldPosition = Vector3.Transform(bone.Parent.LastTransform.Position, modelMatrix);
-                            if(camera->WorldToScreen(parentWorldPosition, out var parentScreen))
-                            {
-                                clickables.Last().ParentScreenPosition = parentScreen;
-                            }
-
+                            clickables.Last().ParentScreenPosition = parentScreen;
                         }
+
                     }
                 }
             }

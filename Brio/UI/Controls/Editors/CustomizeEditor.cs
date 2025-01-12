@@ -1,5 +1,6 @@
 ﻿using Brio.Capabilities.Actor;
 using Brio.Game.Actor.Appearance;
+using Brio.Game.Actor.Extensions;
 using Brio.Resources;
 using Brio.Resources.Sheets;
 using Brio.UI.Controls.Stateless;
@@ -36,7 +37,7 @@ internal class CustomizeEditor()
             ImGui.Separator();
             didChange |= DrawRaceSelector(ref currentAppearance.Customize);
             ImGui.Separator();
-
+        
             var menus = BrioCharaMakeType.BuildMenus(currentAppearance);
             didChange |= DrawMenus(ref currentAppearance, menus);
         }
