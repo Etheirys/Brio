@@ -117,7 +117,7 @@ internal unsafe partial class PhysicsService : IDisposable
         }
         catch(Exception ex)
         {
-            Brio.Log.Fatal($"Brio encountered Fatal Error, FreezeRevert faild: {ex}");
+            Brio.Log.Fatal($"Brio encountered Fatal Error, FreezeRevert failed: {ex}");
         }
        
         return IsFreezeEnabled;
@@ -125,13 +125,25 @@ internal unsafe partial class PhysicsService : IDisposable
 
     public bool FreezeEnable()
     {
-        using Process currentProcess = Process.GetCurrentProcess();
+        if(IsFreezeEnabled)
+            return IsFreezeEnabled;
 
-        WriteProcessMemory(currentProcess.Handle, freezeSkeletonPhysics1, nopFreezeBytes1, nopFreezeBytes1.Length, out _);
+        try
+        {
+            using Process currentProcess = Process.GetCurrentProcess();
 
-        WriteProcessMemory(currentProcess.Handle, freezeSkeletonPhysics2, nopFreezeBytes2, nopFreezeBytes2.Length, out _);
+            WriteProcessMemory(currentProcess.Handle, freezeSkeletonPhysics1, nopFreezeBytes1, nopFreezeBytes1.Length, out _);
 
-        return IsFreezeEnabled = true;
+            WriteProcessMemory(currentProcess.Handle, freezeSkeletonPhysics2, nopFreezeBytes2, nopFreezeBytes2.Length, out _);
+
+            IsFreezeEnabled = true;
+        }
+        catch(Exception ex)
+        {
+            Brio.Log.Fatal($"Brio encountered Fatal Error, FreezeRevert failed: {ex}");
+        }
+
+        return IsFreezeEnabled;
     }
 
     public void Dispose()

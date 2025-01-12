@@ -22,7 +22,7 @@ using System.Threading.Tasks;
 namespace Brio.IPC;
 internal class BrioIPCService : IDisposable
 {
-    public static readonly (int, int) CurrentApiVersion = (2, 0);
+    public static readonly (int, int) CurrentApiVersion = (2, 1);
 
     public bool IsIPCEnabled { get; private set; } = false;
 
@@ -523,18 +523,18 @@ internal class BrioIPCService : IDisposable
     private unsafe bool FreezActor_Impl(IGameObject actor)
     {
         if(_gPoseService.IsGPosing == false) return false;
-        Brio.Log.Fatal($"FreezActor_Impl 0");
+        Brio.Log.Verbose($"FreezActor_Impl 0");
 
         if(_entityManager.TryGetEntity(actor.Native(), out var entity))
         {
-            Brio.Log.Fatal($"FreezActor_Impl 1");
+            Brio.Log.Verbose($"FreezActor_Impl 1");
 
             if(entity.TryGetCapability<ActionTimelineCapability>(out var actionTimeline))
             {
-                Brio.Log.Fatal($"FreezActor_Impl 2");
+                Brio.Log.Verbose($"FreezActor_Impl 2");
 
                 actionTimeline.StopSpeedAndResetTimeline();
-                Brio.Log.Fatal($"FreezActor_Impl 3");
+                Brio.Log.Verbose($"FreezActor_Impl 3");
                 return true;
             }
         }
@@ -559,9 +559,14 @@ internal class BrioIPCService : IDisposable
 
     public bool FreezePhysics_Impl()
     {
+        Task.Run(() => { FreezePhysics(); });
+        return true;
+    }
+    public bool FreezePhysics()
+    {
         if(_gPoseService.IsGPosing == false) return false;
        
-        Brio.Log.Fatal($"FreezeEnable 0");
+        Brio.Log.Verbose($"FreezeEnable 0");
 
         return _physicsService.FreezeEnable();
     }

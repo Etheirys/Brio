@@ -109,13 +109,13 @@ internal class ActionTimelineCapability : ActorCharacterCapability
 
     public async void StopSpeedAndResetTimeline(Action? postStopAction = null, bool resetSpeedAfterAction = false)
     {
-        Brio.Log.Fatal($"StopSpeedAndResetTimeline {postStopAction is not null} {resetSpeedAfterAction}");
+        Brio.Log.Verbose($"StopSpeedAndResetTimeline {postStopAction is not null} {resetSpeedAfterAction}");
 
         var oldSpeed = SpeedMultiplier;
 
         SetOverallSpeedOverride(0);
 
-        Brio.Log.Fatal($"SetOverallSpeedOverride {oldSpeed} {SpeedMultiplier}");
+        Brio.Log.Verbose($"SetOverallSpeedOverride {oldSpeed} {SpeedMultiplier}");
 
         await _framework.RunOnTick(() =>
         {
@@ -168,23 +168,23 @@ internal class ActionTimelineCapability : ActorCharacterCapability
             }
             catch(Exception ex)
             {
-                Brio.Log.Fatal(ex, "StopSpeedAndResetTimeline");
+                Brio.Log.Verbose(ex, "StopSpeedAndResetTimeline");
             }
         }, delayTicks: 4);
 
         postStopAction?.Invoke();
 
-        Brio.Log.Fatal($"postStopAction Invoke: {postStopAction is not null}");
+        Brio.Log.Verbose($"postStopAction Invoke: {postStopAction is not null}");
 
         if(resetSpeedAfterAction)
         {
             await _framework.RunOnTick(() =>
             {
-                Brio.Log.Fatal($"SetOverallSpeedOverride 0 {SpeedMultiplier}");
+                Brio.Log.Verbose($"SetOverallSpeedOverride 0 {SpeedMultiplier}");
                
                 SetOverallSpeedOverride(oldSpeed);
 
-                Brio.Log.Fatal($"SetOverallSpeedOverride 1 {SpeedMultiplier}");
+                Brio.Log.Verbose($"SetOverallSpeedOverride 1 {SpeedMultiplier}");
             }, delayTicks: 2);
         }
     }
