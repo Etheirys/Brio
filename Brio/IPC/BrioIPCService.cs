@@ -523,12 +523,18 @@ internal class BrioIPCService : IDisposable
     private unsafe bool FreezActor_Impl(IGameObject actor)
     {
         if(_gPoseService.IsGPosing == false) return false;
+        Brio.Log.Fatal($"FreezActor_Impl 0");
 
         if(_entityManager.TryGetEntity(actor.Native(), out var entity))
         {
+            Brio.Log.Fatal($"FreezActor_Impl 1");
+
             if(entity.TryGetCapability<ActionTimelineCapability>(out var actionTimeline))
             {
+                Brio.Log.Fatal($"FreezActor_Impl 2");
+
                 actionTimeline.StopSpeedAndResetTimeline();
+                Brio.Log.Fatal($"FreezActor_Impl 3");
                 return true;
             }
         }
@@ -538,7 +544,7 @@ internal class BrioIPCService : IDisposable
     private unsafe bool UnFreezActor_Impl(IGameObject actor)
     {
         if(_gPoseService.IsGPosing == false) return false;
-
+       
         if(_entityManager.TryGetEntity(actor.Native(), out var entity))
         {
             if(entity.TryGetCapability<ActionTimelineCapability>(out var actionTimeline))
@@ -554,6 +560,8 @@ internal class BrioIPCService : IDisposable
     public bool FreezePhysics_Impl()
     {
         if(_gPoseService.IsGPosing == false) return false;
+       
+        Brio.Log.Fatal($"FreezeEnable 0");
 
         return _physicsService.FreezeEnable();
     }

@@ -109,73 +109,82 @@ internal class ActionTimelineCapability : ActorCharacterCapability
 
     public async void StopSpeedAndResetTimeline(Action? postStopAction = null, bool resetSpeedAfterAction = false)
     {
-        Brio.Log.Verbose($"StopSpeedAndResetTimeline {postStopAction is not null} {resetSpeedAfterAction}");
+        Brio.Log.Fatal($"StopSpeedAndResetTimeline {postStopAction is not null} {resetSpeedAfterAction}");
 
         var oldSpeed = SpeedMultiplier;
 
         SetOverallSpeedOverride(0);
 
-        Brio.Log.Verbose($"SetOverallSpeedOverride {oldSpeed} {SpeedMultiplier}");
+        Brio.Log.Fatal($"SetOverallSpeedOverride {oldSpeed} {SpeedMultiplier}");
 
         await _framework.RunOnTick(() =>
         {
-            unsafe
+            try
             {
-                var drawObj = Character.Native()->GameObject.DrawObject;
-                if(drawObj == null)
-                    return;
-
-                if(drawObj->Object.GetObjectType() != ObjectType.CharacterBase)
-                    return;
-
-                var charaBase = (CharacterBase*)drawObj;
-                if(charaBase->Skeleton == null)
-                    return;
-
-                var skeleton = charaBase->Skeleton;
-                for(int p = 0; p < skeleton->PartialSkeletonCount; ++p)
+                unsafe
                 {
-                    var partial = &skeleton->PartialSkeletons[p];
+                    var drawObj = Character.Native()->GameObject.DrawObject;
+                    if(drawObj == null)
+                        return;
 
-                    var animatedSkele = partial->GetHavokAnimatedSkeleton(0);
-                    if(animatedSkele == null)
-                        continue;
+                    if(drawObj->Object.GetObjectType() != ObjectType.CharacterBase)
+                        return;
 
-                    for(int c = 0; c < animatedSkele->AnimationControls.Length; ++c)
+                    var charaBase = (CharacterBase*)drawObj;
+                    if(charaBase->Skeleton == null)
+                        return;
+
+                    var skeleton = charaBase->Skeleton;
+                    for(int p = 0; p < skeleton->PartialSkeletonCount; ++p)
                     {
-                        var control = animatedSkele->AnimationControls[c].Value;
-                        if(control == null)
+                        var partial = &skeleton->PartialSkeletons[p];
+
+                        var animatedSkele = partial->GetHavokAnimatedSkeleton(0);
+                        if(animatedSkele == null)
                             continue;
 
-                        var binding = control->hkaAnimationControl.Binding;
-                        if(binding.ptr == null)
-                            continue;
-
-                        var anim = binding.ptr->Animation.ptr;
-                        if(anim == null)
-                            continue;
-
-                        if(control->PlaybackSpeed == 0)
+                        for(int c = 0; c < animatedSkele->AnimationControls.Length; ++c)
                         {
-                            control->hkaAnimationControl.LocalTime = 0;
-                            Brio.Log.Verbose($"hkaAnimationControl");
+                            var control = animatedSkele->AnimationControls[c].Value;
+                            if(control == null)
+                                continue;
+
+                            var binding = control->hkaAnimationControl.Binding;
+                            if(binding.ptr == null)
+                                continue;
+
+                            var anim = binding.ptr->Animation.ptr;
+                            if(anim == null)
+                                continue;
+
+                            if(control->PlaybackSpeed == 0)
+                            {
+                                control->hkaAnimationControl.LocalTime = 0;
+                                Brio.Log.Verbose($"hkaAnimationControl");
+                            }
                         }
                     }
                 }
+            }
+            catch(Exception ex)
+            {
+                Brio.Log.Fatal(ex, "StopSpeedAndResetTimeline");
             }
         }, delayTicks: 4);
 
         postStopAction?.Invoke();
 
-        Brio.Log.Verbose($"postStopAction Invoke: {postStopAction is not null}");
+        Brio.Log.Fatal($"postStopAction Invoke: {postStopAction is not null}");
 
         if(resetSpeedAfterAction)
         {
             await _framework.RunOnTick(() =>
             {
+                Brio.Log.Fatal($"SetOverallSpeedOverride 0 {SpeedMultiplier}");
+               
                 SetOverallSpeedOverride(oldSpeed);
 
-                Brio.Log.Verbose($"SetOverallSpeedOverride {SpeedMultiplier}");
+                Brio.Log.Fatal($"SetOverallSpeedOverride 1 {SpeedMultiplier}");
             }, delayTicks: 2);
         }
     }
