@@ -5,6 +5,10 @@ To open this window again click `Information` on the Scene Manager then -> `View
 	 ---> Brio, Version 0.4.4 <--- 
 --------------------------------------------------------------------------------
 
+---------- 0.4.4.4 ----------
+
+- Fixed an issue with hair when Importing Pose
+
 ---------- 0.4.4.3 ----------
 
 - Fixed an issue with Brio's IPC causing a crash
