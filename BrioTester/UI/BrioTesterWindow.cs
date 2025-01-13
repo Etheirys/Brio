@@ -33,6 +33,7 @@ public class BrioTesterWindow : Window
         };
     }
 
+    private string json = "";
     private string logText = "";
     public override void Draw()
     {
@@ -159,6 +160,29 @@ public class BrioTesterWindow : Window
                 {
                     BrioAPI.FreezeActor(gameObject);
                 }
+            }
+            ImGui.PopStyleColor();
+
+
+            ImGui.PushStyleColor(ImGuiCol.Button, new Vector4(0, 100, 255, 255) / 255);
+            if (ImGui.Button("Load Pose", buttonSize))
+            {
+                if (gameObject is null)
+                    return;
+
+                json = BrioAPI.GetActorPoseAsJson(gameObject);
+            }
+            ImGui.PopStyleColor();
+
+            ImGui.SameLine();
+
+            ImGui.PushStyleColor(ImGuiCol.Button, new Vector4(0, 100, 255, 255) / 255);
+            if (ImGui.Button("Put Pose", buttonSize))
+            {
+                if (gameObject is null && string.IsNullOrEmpty(json))
+                    return;
+
+                Brio.BrioAPI.SetActorPoseFromJson(gameObject, json);
             }
             ImGui.PopStyleColor();
 
