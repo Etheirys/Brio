@@ -176,6 +176,16 @@
         "iv_"
       ]
     },
+     "ex": {
+      "Type": "Filter",
+      "Bones": [
+        "j_ago",
+        "j_f_noanim_",
+        "j_f_eyeprmroll_",
+        "j_f_eyeprm_",
+        "j_f_irisprm_"
+      ]
+    },
     "other": {
       "Type": "Filter",
       "Bones": []

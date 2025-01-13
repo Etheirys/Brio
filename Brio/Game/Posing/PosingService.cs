@@ -28,9 +28,11 @@ internal class PosingService
     public PosingService()
     {
         OverlayFilter = new BoneFilter(this);
+        OverlayFilter.DisableCategory("ex");
 
         DefaultImporterOptions = new PoseImporterOptions(new BoneFilter(this), TransformComponents.Rotation, false);
         DefaultImporterOptions.BoneFilter.DisableCategory("weapon");
+        DefaultImporterOptions.BoneFilter.DisableCategory("ex");
 
         DefaultIPCImporterOptions = new PoseImporterOptions(new BoneFilter(this), TransformComponents.All, false);
 
@@ -46,6 +48,7 @@ internal class PosingService
         BodyOptions.BoneFilter.DisableCategory("lips");
         BodyOptions.BoneFilter.DisableCategory("jaw");
         BodyOptions.BoneFilter.DisableCategory("head");
+        BodyOptions.BoneFilter.DisableCategory("ex");
 
         ExpressionOptions = new PoseImporterOptions(new BoneFilter(this), TransformComponents.All, false);
         ExpressionOptions.BoneFilter.DisableAll();
