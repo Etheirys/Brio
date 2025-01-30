@@ -19,8 +19,8 @@ internal unsafe class ActorVFXService : IDisposable
         var vfxCreateAddress = scanner.ScanText("E8 ?? ?? ?? ?? 48 8B D8 48 85 C0 74 ?? 0F B6 57 ?? 48 8B C8 C0 EA");
         _createActorVfx = (delegate* unmanaged<string, NativeGameObject*, NativeGameObject*, float, byte, ushort, byte, nint>)vfxCreateAddress;
 
-        var vfxDetourAddress = scanner.ScanText("48 89 5C 24 ?? 57 48 83 EC ?? 48 8D 05 ?? ?? ?? ?? 48 8B D9 48 89 01 8B FA 48 8D 05 ?? ?? ?? ?? 48 89 81 ?? ?? ?? ?? 48 8B 89 ?? ?? ?? ?? 48 85 C9 74 ?? 48 8B 01 48 8B D3");
-        _vfxDtor = (delegate* unmanaged<nint, void>)vfxDetourAddress;
+        var vfxDtorAddress = scanner.ScanText("48 89 5C 24 ?? 57 48 83 EC ?? 48 8D 05 ?? ?? ?? ?? 48 8B D9 48 89 01 8B FA 48 8D 05 ?? ?? ?? ?? 48 89 81 ?? ?? ?? ?? 48 8B 89 ?? ?? ?? ?? 48 85 C9 74 ?? 48 8B 01 48 8B D3");
+        _vfxDtor = (delegate* unmanaged<nint, void>)vfxDtorAddress;
     }
 
     public nint CreateActorVFX(string vfxName, IGameObject actor, IGameObject? target = null)
