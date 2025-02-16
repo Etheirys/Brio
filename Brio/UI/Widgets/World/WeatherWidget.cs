@@ -10,7 +10,7 @@ using System.Numerics;
 
 namespace Brio.UI.Widgets.World;
 
-internal class WeatherWidget(WeatherCapability weatherCapability) : Widget<WeatherCapability>(weatherCapability)
+public class WeatherWidget(WeatherCapability weatherCapability) : Widget<WeatherCapability>(weatherCapability)
 {
     public override string HeaderName => "Weather";
     public override WidgetFlags Flags => WidgetFlags.DefaultOpen | WidgetFlags.DrawBody;

@@ -6,7 +6,7 @@ using static FFXIVClientStructs.FFXIV.Client.Graphics.Scene.CharacterBase;
 
 namespace Brio.Game.Posing.Skeletons;
 
-internal class Bone(int index, Skeleton skeleton, PartialSkeleton partial)
+public class Bone(int index, Skeleton skeleton, PartialSkeleton partial)
 {
     public int Index = index;
     public string Name = null!;

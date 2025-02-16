@@ -1,6 +1,6 @@
 ﻿namespace Brio.Config;
 
-internal class PosingConfiguration
+public class PosingConfiguration
 {
     // Overlay
     public bool OverlayDefaultsOn { get; set; } = false;

@@ -11,7 +11,7 @@ using NativeCharacter = FFXIVClientStructs.FFXIV.Client.Game.Character.Character
 
 namespace Brio.Game.GPose;
 
-internal unsafe class GPoseService : IDisposable
+public unsafe class GPoseService : IDisposable
 {
     public bool IsGPosing => _isInFakeGPose || _isInGPose;
 

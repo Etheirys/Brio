@@ -9,7 +9,7 @@ using System;
 
 namespace Brio.Game.Actor;
 
-internal unsafe class ActionTimelineService : IDisposable
+public unsafe class ActionTimelineService : IDisposable
 {
     public enum ActionTimelineSlots : int
     {

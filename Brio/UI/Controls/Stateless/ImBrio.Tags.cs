@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace Brio.UI.Controls.Stateless;
 
-internal static partial class ImBrio
+public static partial class ImBrio
 {
     public static bool DrawTag(Tag tag)
     {

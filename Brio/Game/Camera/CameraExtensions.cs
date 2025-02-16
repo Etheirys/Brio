@@ -2,7 +2,7 @@
 
 namespace Brio.Game.Camera;
 
-internal static class CameraExtensions
+public static class CameraExtensions
 {
     public unsafe static Matrix4x4 GetProjectionMatrix(this BrioCamera camera)
     {

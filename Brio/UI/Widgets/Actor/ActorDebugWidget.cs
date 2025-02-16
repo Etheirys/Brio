@@ -6,7 +6,7 @@ using ImGuiNET;
 
 namespace Brio.UI.Widgets.Actor;
 
-internal class ActorDebugWidget(ActorDebugCapability capability) : Widget<ActorDebugCapability>(capability)
+public class ActorDebugWidget(ActorDebugCapability capability) : Widget<ActorDebugCapability>(capability)
 {
     public override string HeaderName => "Debug";
 

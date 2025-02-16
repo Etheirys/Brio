@@ -1,5 +1,6 @@
 ﻿using Brio.Resources;
 using Brio.UI.Controls.Core;
+using Brio.UI.Theming;
 using Dalamud.Interface;
 using Dalamud.Interface.Textures.TextureWraps;
 using Dalamud.Interface.Utility.Raii;
@@ -7,7 +8,7 @@ using ImGuiNET;
 using System.Numerics;
 
 namespace Brio.UI.Controls.Stateless;
-internal static partial class ImBrio
+public static partial class ImBrio
 {
     public static void FontIcon(FontAwesomeIcon icon)
     {
@@ -49,7 +50,7 @@ internal static partial class ImBrio
 
         using(ImRaii.PushFont(UiBuilder.IconFont))
         {
-            if(ImGui.Button($"{icon.ToIconString()}###{id}"))
+            if(ImGui.Button($"{icon.ToIconString()}###{id}", new Vector2(25)))
                 wasClicked = true;
         }
 
@@ -86,7 +87,7 @@ internal static partial class ImBrio
 
         using(ImRaii.PushFont(UiBuilder.IconFont))
         {
-            if(ImGui.Button($"{icon.ToIconString()}###{id}"))
+            if(ImGui.Button($"{icon.ToIconString()}###{id}", new Vector2(25)))
                 wasClicked = true;
         }
 
@@ -110,7 +111,7 @@ internal static partial class ImBrio
         return Button(label, icon, Vector2.Zero);
     }
 
-    public static bool Button(string label, FontAwesomeIcon icon, Vector2 size, string hoverText = "")
+    public static bool Button(string label, FontAwesomeIcon icon, Vector2 size, string hoverText = "", bool centerTest = false)
     {
         bool clicked;
 
@@ -131,7 +132,7 @@ internal static partial class ImBrio
 
         float iconR = iconWidth + ImGui.GetStyle().ItemInnerSpacing.X;
         float textOffset = iconR / innerWidth;
-        using(ImRaii.PushStyle(ImGuiStyleVar.ButtonTextAlign, new Vector2(textOffset, 0.5f)))
+        using(ImRaii.PushStyle(ImGuiStyleVar.ButtonTextAlign, new Vector2(textOffset, 0.5f), centerTest == false))
         {
             Vector2 startPos = ImGui.GetCursorPos();
             clicked = ImGui.Button(label, size);
@@ -159,13 +160,17 @@ internal static partial class ImBrio
         return clicked;
     }
 
-    public static bool ToggelButton(string lable, bool isToggled, uint toggledColor = UIConstants.GizmoRed, string hoverText = "")
+    public static bool ToggelButton(string lable, bool isToggled, uint toggledColor = 0, string hoverText = "")
     {
+        if(toggledColor == 0) toggledColor = TheameManager.CurrentTheame.Accent.AccentColor;
+
         return ToggelButton(lable, Vector2.Zero, isToggled, toggledColor, hoverText);
     }
 
-    public static bool ToggelButton(string lable, Vector2 size, bool isToggled, uint toggledColor = UIConstants.GizmoRed, string hoverText = "")
+    public static bool ToggelButton(string lable, Vector2 size, bool isToggled, uint toggledColor = 0, string hoverText = "")
     {
+        if(toggledColor == 0) toggledColor = TheameManager.CurrentTheame.Accent.AccentColor;
+
         if(isToggled)
             ImGui.PushStyleColor(ImGuiCol.Button, toggledColor);
 
@@ -183,16 +188,23 @@ internal static partial class ImBrio
         return clicked;
     }
 
-    public static bool ToggelFontIconButton(string id, FontAwesomeIcon icon, Vector2 size, bool isToggled, uint toggledColor = UIConstants.GizmoRed, string hoverText = "")
+    public static bool ToggelFontIconButton(string id, FontAwesomeIcon icon, Vector2 size, bool isToggled, uint toggledColor = 0, string hoverText = "")
     {
         var clicked = false;
+
+        if(toggledColor == 0) toggledColor = TheameManager.CurrentTheame.Accent.AccentColor;
 
         if(isToggled)
             ImGui.PushStyleColor(ImGuiCol.Button, toggledColor);
 
+        if(size.X >= 0 || size.Y >= 0)
+        {
+            size += new Vector2(25);
+        }
+
         using(ImRaii.PushFont(UiBuilder.IconFont))
         {
-            if(ImGui.Button($"{icon.ToIconString()}###{id}"))
+            if(ImGui.Button($"{icon.ToIconString()}###{id}", size))
                 clicked = true;
         }
 

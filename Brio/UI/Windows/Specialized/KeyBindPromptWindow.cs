@@ -8,7 +8,7 @@ using System;
 
 namespace Brio.UI.Windows.Specialized;
 
-internal class KeyBindPromptWindow : Window, IDisposable
+public class KeyBindPromptWindow : Window, IDisposable
 {
     private readonly InputService _inputService;
     private readonly ConfigurationService _configurationService;

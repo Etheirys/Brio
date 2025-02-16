@@ -3,7 +3,7 @@ using Dalamud.Interface.Utility.Raii;
 using ImGuiNET;
 
 namespace Brio.UI.Controls.Stateless;
-internal static partial class ImBrio
+public static partial class ImBrio
 {
     public static void TextCentered(string text, float width)
     {
@@ -31,7 +31,7 @@ internal static partial class ImBrio
         ImGui.PushStyleColor(ImGuiCol.ButtonActive, 0);
         using(ImRaii.PushFont(UiBuilder.IconFont))
         {
-            ImGui.Button(icon.ToIconString(), new(22, 0));
+            ImGui.Button(icon.ToIconString(), new(25, 0));
         }
         ImGui.PopStyleColor();
         ImGui.PopStyleColor();

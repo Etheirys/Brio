@@ -2,7 +2,7 @@
 
 namespace Brio.Core;
 
-internal class EventBus
+public class EventBus
 {
     public static EventBus Instance { get; private set; } = null!;
 

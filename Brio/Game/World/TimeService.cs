@@ -8,7 +8,7 @@ using System;
 
 namespace Brio.Game.World;
 
-internal class TimeService : IDisposable
+public class TimeService : IDisposable
 {
     public bool IsTimeFrozen
     {

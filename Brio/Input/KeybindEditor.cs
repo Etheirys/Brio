@@ -6,7 +6,7 @@ using System.Collections.Generic;
 
 namespace Brio.Input;
 
-internal static class KeybindEditor
+public static class KeybindEditor
 {
     private static string[] virtualKeyNames;
     private static List<VirtualKey> virtualKeys;

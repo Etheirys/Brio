@@ -20,7 +20,7 @@ using static Brio.Game.Actor.ActionTimelineService;
 
 namespace Brio.UI.Controls.Editors;
 
-internal class ActionTimelineEditor(CutsceneManager cutsceneManager, GPoseService gPoseService, EntityManager entityManager, PhysicsService physicsService, ConfigurationService configService)
+public class ActionTimelineEditor(CutsceneManager cutsceneManager, GPoseService gPoseService, EntityManager entityManager, PhysicsService physicsService, ConfigurationService configService)
 {
     private readonly CutsceneManager _cutsceneManager = cutsceneManager;
     private readonly GPoseService _gPoseService = gPoseService;
@@ -31,7 +31,6 @@ internal class ActionTimelineEditor(CutsceneManager cutsceneManager, GPoseServic
     private static float MaxItemWidth => ImGui.GetContentRegionAvail().X - ImGui.CalcTextSize("XXXXXXXXXXXXXXXXXX").X;
     private static float LabelStart => MaxItemWidth + ImGui.GetCursorPosX() + (ImGui.GetStyle().FramePadding.X * 2f);
 
-    private static readonly float _hederButtonSize = ImGui.CalcTextSize("#########").X + 28;
     private static readonly ActionTimelineSelector _globalTimelineSelector = new("global_timeline_selector");
 
     private static bool _startAnimationOnSelect = true;
@@ -51,6 +50,13 @@ internal class ActionTimelineEditor(CutsceneManager cutsceneManager, GPoseServic
         DrawBaseOverride();
         DrawBlend();
         DrawOverallSpeed(drawAdvanced);
+
+        if(drawAdvanced == false)
+        {
+            ImGui.Separator();
+
+            DrawFirstScrub();
+        }
 
         if(drawAdvanced)
         {
@@ -75,16 +81,16 @@ internal class ActionTimelineEditor(CutsceneManager cutsceneManager, GPoseServic
 
     private void DrawHeder()
     {
-        if(ImBrio.ToggelButton("Freeze Physics", new Vector2(95, 0), _physicsService.IsFreezeEnabled, hoverText: _physicsService.IsFreezeEnabled ? "Un-Freeze Physics" : "Freeze Physics"))
+        if(ImBrio.ToggelButton("Freeze Physics", new Vector2(95, 25), _physicsService.IsFreezeEnabled, hoverText: _physicsService.IsFreezeEnabled ? "Un-Freeze Physics" : "Freeze Physics"))
         {
             _physicsService.FreezeToggle();
         }
 
         ImGui.SameLine();
 
-        ImBrio.RightAlign(_hederButtonSize, 1);
+        ImBrio.RightAlign(97, 1);
 
-        if(ImGui.Button("Actors       "))
+        if(ImGui.Button("Actors     ", new Vector2(70, 25)))
         {
             ImGui.OpenPopup("animation_control");
         }
@@ -94,7 +100,7 @@ internal class ActionTimelineEditor(CutsceneManager cutsceneManager, GPoseServic
         using(ImRaii.PushColor(ImGuiCol.Button, 0))
         {
             var curPos = ImGui.GetCursorPos();
-            ImGui.SetCursorPos(new Vector2(curPos.X - 28, curPos.Y));
+            ImGui.SetCursorPos(new Vector2(curPos.X - 30, curPos.Y + 2));
 
             ImGui.ArrowButton("###animation_control_drop", ImGuiDir.Down);
         }
@@ -335,8 +341,6 @@ internal class ActionTimelineEditor(CutsceneManager cutsceneManager, GPoseServic
 
     private unsafe void DrawScrub()
     {
-        bool drewAny = false;
-
         float width = -ImGui.CalcTextSize("XXXX").X;
 
         var drawObj = _capability.Character.Native()->GameObject.DrawObject;
@@ -374,24 +378,77 @@ internal class ActionTimelineEditor(CutsceneManager cutsceneManager, GPoseServic
                 if(anim == null)
                     continue;
 
-                if(control->PlaybackSpeed == 0)
+                var duration = anim->Duration;
+                var time = control->hkaAnimationControl.LocalTime;
+                ImGui.SetNextItemWidth(width);
+                if(ImGui.SliderFloat($"###scrub_{p}_{c}", ref time, 0f, duration, "%.2f", ImGuiSliderFlags.AlwaysClamp))
                 {
-                    drewAny |= true;
-                    var duration = anim->Duration;
-                    var time = control->hkaAnimationControl.LocalTime;
-                    ImGui.SetNextItemWidth(width);
-                    if(ImGui.SliderFloat($"###scrub_{p}_{c}", ref time, 0f, duration, "%.2f", ImGuiSliderFlags.AlwaysClamp))
-                    {
-                        control->hkaAnimationControl.LocalTime = time;
-                    }
-                    ImGui.SameLine();
-                    ImGui.Text($"{p}.{c}");
+                    control->hkaAnimationControl.LocalTime = time;
                 }
+                if(ImGui.IsItemClicked(ImGuiMouseButton.Left))
+                {
+                    _capability.SetOverallSpeedOverride(0f);
+                }
+                ImGui.SameLine();
+                ImGui.Text($"{p}.{c}");
             }
         }
+    }
 
-        if(!drewAny)
-            ImGui.Text("Pause motion to enable.");
+    private unsafe void DrawFirstScrub()
+    {
+
+        var drawObj = _capability.Character.Native()->GameObject.DrawObject;
+        if(drawObj == null)
+            return;
+
+        if(drawObj->Object.GetObjectType() != ObjectType.CharacterBase)
+            return;
+
+        var charaBase = (CharacterBase*)drawObj;
+
+        if(charaBase->Skeleton == null)
+            return;
+
+        var skeleton = charaBase->Skeleton;
+
+        if(!(skeleton->PartialSkeletonCount > 0))
+            return;
+
+        var partial = &skeleton->PartialSkeletons[0];
+        var animatedSkele = partial->GetHavokAnimatedSkeleton(0);
+        if(animatedSkele == null)
+            return;
+
+        if(!(animatedSkele->AnimationControls.Length > 0))
+            return;
+
+        var control = animatedSkele->AnimationControls[0].Value;
+        if(control == null)
+            return;
+
+        var binding = control->hkaAnimationControl.Binding;
+        if(binding.ptr == null)
+            return;
+
+        var anim = binding.ptr->Animation.ptr;
+        if(anim == null)
+            return;
+
+        var duration = anim->Duration;
+        var time = control->hkaAnimationControl.LocalTime;
+
+        ImGui.SetNextItemWidth(-ImGui.CalcTextSize("ScrubX").X);
+        if(ImGui.SliderFloat($"###scrub_001", ref time, 0f, duration, "%.2f", ImGuiSliderFlags.AlwaysClamp))
+        {
+            control->hkaAnimationControl.LocalTime = time;
+        }
+        if(ImGui.IsItemClicked(ImGuiMouseButton.Left))
+        {
+            _capability.SetOverallSpeedOverride(0f);
+        }
+        ImGui.SameLine();
+        ImGui.Text("Scrub");
     }
 
     private void DrawSlots()

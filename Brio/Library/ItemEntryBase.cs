@@ -18,7 +18,7 @@ namespace Brio.Library;
 /// <summary>
 /// An item entry is an entry in teh library that the user can load, or otherwise perform actions on.
 /// </summary>
-internal abstract class ItemEntryBase : EntryBase
+public abstract class ItemEntryBase : EntryBase
 {
     protected ItemEntryBase(SourceBase? source)
         : base(source)

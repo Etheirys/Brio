@@ -9,7 +9,7 @@ using System.Numerics;
 
 namespace Brio.UI.Controls.Editors;
 
-internal class BoneSearchControl
+public class BoneSearchControl
 {
     private string _searchTerm = string.Empty;
     public void Draw(string id, PosingCapability posing)

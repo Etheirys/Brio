@@ -3,7 +3,7 @@ using System.Numerics;
 
 namespace Brio.Game.Actor.Appearance;
 
-internal struct ModelShaderOverride()
+public struct ModelShaderOverride()
 {
     public Vector3? SkinColor = null;
     public float? MuscleTone = null;

@@ -5,7 +5,7 @@ using System;
 
 namespace Brio.UI.Controls.Stateless;
 
-internal partial class ImBrio
+public partial class ImBrio
 {
     public static void DrawApplyToActor(EntityManager entityManager, Action<ActorEntity> callback)
     {

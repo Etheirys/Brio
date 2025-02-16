@@ -5,7 +5,7 @@ using System.IO;
 
 namespace Brio.Files;
 
-internal abstract class FileTypeInfoBase
+public abstract class FileTypeInfoBase
 {
     public abstract string Name { get; }
     public abstract IDalamudTextureWrap Icon { get; }
@@ -40,7 +40,7 @@ internal abstract class FileTypeInfoBase
     }
 }
 
-internal abstract class FileTypeInfoBase<T> : FileTypeInfoBase
+public abstract class FileTypeInfoBase<T> : FileTypeInfoBase
 {
     public override Type Type => typeof(T);
 }

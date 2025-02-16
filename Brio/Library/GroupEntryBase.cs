@@ -8,7 +8,7 @@ namespace Brio.Library;
 /// <summary>
 /// An group entry is an entry in the library that contains other entries, such as a directory or folder.
 /// </summary>
-internal abstract class GroupEntryBase : EntryBase
+public abstract class GroupEntryBase : EntryBase
 {
     private List<EntryBase> _allEntries = new List<EntryBase>();
     private List<EntryBase> _filteredEntries = new List<EntryBase>();

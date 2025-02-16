@@ -6,7 +6,7 @@ using System.Text.Json.Serialization;
 
 namespace Brio.Files.Converters;
 
-internal class Vector2Converter : JsonConverter<Vector2>
+public class Vector2Converter : JsonConverter<Vector2>
 {
     public override Vector2 Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
@@ -29,7 +29,7 @@ internal class Vector2Converter : JsonConverter<Vector2>
     }
 }
 
-internal class Vector3Converter : JsonConverter<Vector3>
+public class Vector3Converter : JsonConverter<Vector3>
 {
     public override Vector3 Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
@@ -53,7 +53,7 @@ internal class Vector3Converter : JsonConverter<Vector3>
     }
 }
 
-internal class Vector4Converter : JsonConverter<Vector4>
+public class Vector4Converter : JsonConverter<Vector4>
 {
     public override Vector4 Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {

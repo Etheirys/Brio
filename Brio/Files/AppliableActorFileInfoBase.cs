@@ -5,7 +5,7 @@ using Brio.UI.Controls.Stateless;
 
 namespace Brio.Files;
 
-internal abstract class AppliableActorFileInfoBase<T> : JsonDocumentBaseFileInfo<T>
+public abstract class AppliableActorFileInfoBase<T> : JsonDocumentBaseFileInfo<T>
     where T : class
 {
     private EntityManager _entityManager;

@@ -4,7 +4,7 @@ using ImGuiNET;
 
 namespace Brio.UI.Controls.Stateless;
 
-internal static partial class ImBrio
+public static partial class ImBrio
 {
     public static void Spinner(ref float angle, float speed = 3.5f)
     {

@@ -5,7 +5,7 @@ using Brio.UI.Widgets.World;
 
 namespace Brio.Capabilities.World;
 
-internal class TimeCapability : Capability
+public class TimeCapability : Capability
 {
     public TimeService TimeService { get; }
 

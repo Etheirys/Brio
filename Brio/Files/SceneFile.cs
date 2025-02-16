@@ -1,12 +1,13 @@
+using Brio.Game.Types;
 using Brio.Resources;
 using Dalamud.Interface.Textures.TextureWraps;
+using MessagePack;
 using System;
 using System.Collections.Generic;
 
-
 namespace Brio.Files;
 
-internal class SceneFileInfo : JsonDocumentBaseFileInfo<SceneFile>
+public class SceneFileInfo : JsonDocumentBaseFileInfo<SceneFile>
 {
     public override string Name => "Scene File";
 
@@ -14,33 +15,41 @@ internal class SceneFileInfo : JsonDocumentBaseFileInfo<SceneFile>
     public override string Extension => ".brioscn";
 
 }
-internal class ProjectFileInfo : JsonDocumentBaseFileInfo<SceneFile>
+
+[Serializable]
+[MessagePackObject]
+public class SceneFile : JsonDocumentBase
 {
-    public override string Name => "Brio Project";
+    [Key(5)] public string FileType => "Brio Scene";
 
-    public override IDalamudTextureWrap Icon => ResourceProvider.Instance.GetResourceImage("Images.FileIcon_Unknown.png");
-    public override string Extension => ".briosln";
+    [Key(6)] public List<ActorFile> Actors { get; set; } = [];
 
+    [Key(7)] public List<GameCameraFile> GameCameras { get; set; } = [];
+
+    [Key(8)] public SceneMetaData? MetaData { get; set; }
+
+    [Key(9)] public EnvironmentData? EnvironmentData { get; set; }
 }
 
 [Serializable]
-internal class SceneFile : JsonDocumentBase
-{
-    public string FileType { get; set; } = "Brio Scene";
-
-    public List<ActorFile> Actors { get; set; } = [];
-
-    public GameCameraFile? GameCamera { get; set; }
-
-    public XATCameraFile? XATCamera { get; set; }
-
-    public SceneMetaData? MetaData { get; set; }
-}
-
-[Serializable]
-internal class SceneMetaData
+[MessagePackObject(keyAsPropertyName: true)]
+public class SceneMetaData
 {
     public uint Map { get; set; }
     public ushort Territory { get; set; }
     public string? World { get; set; }
+}
+
+[Serializable]
+[MessagePackObject(keyAsPropertyName: true)]
+public class EnvironmentData
+{
+    public bool IsTimeFrozen;
+    public long EorzeaTime;
+
+    public int MinuteOfDay;
+    public int DayOfMonth;
+
+    public WeatherId CurrentWeather;
+    public bool IsWaterFrozen;
 }

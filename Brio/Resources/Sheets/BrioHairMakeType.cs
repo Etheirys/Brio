@@ -7,7 +7,7 @@ using System.Linq;
 namespace Brio.Resources.Sheets;
 
 [Sheet("HairMakeType")]
-internal struct BrioHairMakeType : IExcelRow<BrioHairMakeType>
+public struct BrioHairMakeType : IExcelRow<BrioHairMakeType>
 {
     public const int EntryCount = 100;
 

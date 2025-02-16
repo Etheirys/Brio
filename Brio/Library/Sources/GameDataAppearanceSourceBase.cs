@@ -4,7 +4,7 @@ using Dalamud.Interface.Textures.TextureWraps;
 
 namespace Brio.Library.Sources;
 
-internal abstract class GameDataAppearanceSourceBase : SourceBase
+public abstract class GameDataAppearanceSourceBase : SourceBase
 {
     private GameDataProvider _lumina;
     private EntityManager _entityManager;

@@ -1,6 +1,6 @@
 namespace Brio.Config;
 
-internal class SceneImportConfiguration
+public class SceneImportConfiguration
 {
     public bool ApplyModelTransform { get; set; } = true;
 
@@ -9,7 +9,7 @@ internal class SceneImportConfiguration
     public ScenePoseTransformType ScaleTransformType { get; set; } = ScenePoseTransformType.Absolute;
 }
 
-internal enum ScenePoseTransformType
+public enum ScenePoseTransformType
 {
     Ignore,
     Difference,

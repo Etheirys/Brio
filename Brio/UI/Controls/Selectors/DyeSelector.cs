@@ -8,7 +8,7 @@ using System.Numerics;
 
 namespace Brio.UI.Controls.Selectors;
 
-internal class DyeSelector(string id) : Selector<DyeUnion>(id)
+public class DyeSelector(string id) : Selector<DyeUnion>(id)
 {
     protected override Vector2 MinimumListSize { get; } = new(300, 300);
 

@@ -1,4 +1,5 @@
 ﻿using FFXIVClientStructs.Havok.Common.Base.Math.QsTransform;
+using MessagePack;
 using System;
 using System.Numerics;
 using System.Runtime.InteropServices;
@@ -8,7 +9,8 @@ using StructsTransforms = FFXIVClientStructs.FFXIV.Client.Graphics.Transform;
 namespace Brio.Core;
 
 [StructLayout(LayoutKind.Sequential)]
-internal struct Transform
+[MessagePackObject(keyAsPropertyName: true)]
+public struct Transform
 {
     public Vector3 Position;
     public Quaternion Rotation;
@@ -148,7 +150,7 @@ internal struct Transform
 }
 
 [Flags]
-internal enum TransformComponents
+public enum TransformComponents
 {
     None = 0,
     Position = 1,

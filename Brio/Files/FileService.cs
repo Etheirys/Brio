@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Brio.Files;
 
-internal class FileService
+public class FileService
 {
     private readonly IEnumerable<FileTypeInfoBase> _fileInfos;
     private readonly Dictionary<Type, FileTypeInfoBase> _typeInfoMap = new();
@@ -24,14 +24,14 @@ internal class FileService
         }
     }
 
-    internal FileTypeInfoBase? GetFileTypeInfo(Type fileType)
+    public FileTypeInfoBase? GetFileTypeInfo(Type fileType)
     {
         FileTypeInfoBase? result = null;
         _typeInfoMap.TryGetValue(fileType, out result);
         return result;
     }
 
-    internal FileTypeInfoBase? GetFileTypeInfo(string path)
+    public FileTypeInfoBase? GetFileTypeInfo(string path)
     {
         foreach(FileTypeInfoBase fileType in _fileInfos)
         {
@@ -47,7 +47,7 @@ internal class FileService
     /// <summary>
     /// Attempt to load the file at the given path with any file type info that supports it.
     /// </summary>
-    internal object? Load(string path)
+    public object? Load(string path)
     {
         Exception? lastException = null;
 

@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace Brio.Game.Core;
 
-internal static class FrameworkExtensions
+public static class FrameworkExtensions
 {
     public static Task RunUntilSatisfied(
         this IFramework framework,

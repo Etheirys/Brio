@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Brio.Game.Actor;
 
-internal class ActorRedrawService(IFramework framework, IObjectTable objectTable)
+public class ActorRedrawService(IFramework framework, IObjectTable objectTable)
 {
     public delegate void ActorRedrawEventDelegate(IGameObject go, RedrawStage stage);
 

@@ -4,7 +4,7 @@ using System;
 
 namespace Brio.Entities.World;
 
-internal class WorldEntity : Entity
+public class WorldEntity : Entity
 {
     public override string FriendlyName => "World";
     public override FontAwesomeIcon Icon => FontAwesomeIcon.Globe;

@@ -4,7 +4,7 @@ using System.Runtime.InteropServices;
 namespace Brio.Game.Actor.Interop;
 
 [StructLayout(LayoutKind.Explicit)]
-internal unsafe struct BrioDrawData
+public unsafe struct BrioDrawData
 {
     [FieldOffset(0x0)]
     public DrawDataContainer DawData;

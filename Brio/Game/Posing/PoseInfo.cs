@@ -7,7 +7,7 @@ using System.Numerics;
 
 namespace Brio.Game.Posing;
 
-internal class PoseInfo
+public class PoseInfo
 {
     private readonly Dictionary<BonePoseInfoId, BonePoseInfo> _poses = [];
 
@@ -58,7 +58,7 @@ internal class PoseInfo
     }
 }
 
-internal class BonePoseInfo(BonePoseInfoId id, PoseInfo parent)
+public class BonePoseInfo(BonePoseInfoId id, PoseInfo parent)
 {
     public BonePoseInfoId Id { get; } = id;
     public PoseInfo Parent { get; } = parent;
@@ -178,7 +178,7 @@ internal class BonePoseInfo(BonePoseInfoId id, PoseInfo parent)
     }
 }
 
-internal enum PoseInfoSlot
+public enum PoseInfoSlot
 {
     Character,
     MainHand,
@@ -187,14 +187,14 @@ internal enum PoseInfoSlot
     Unknown
 }
 
-internal enum PoseMirrorMode
+public enum PoseMirrorMode
 {
     None,
     Mirror,
     Copy
 }
 
-internal record struct BonePoseInfoId(string BoneName, int Partial, PoseInfoSlot Slot)
+public record struct BonePoseInfoId(string BoneName, int Partial, PoseInfoSlot Slot)
 {
     public override readonly string ToString() => $"{BoneName}/{Partial}/{(int)Slot}";
 
@@ -215,9 +215,9 @@ internal record struct BonePoseInfoId(string BoneName, int Partial, PoseInfoSlot
         return null;
     }
 }
-internal record struct BonePoseTransformInfo(TransformComponents PropagateComponents, BoneIKInfo IKInfo, Transform Transform);
+public record struct BonePoseTransformInfo(TransformComponents PropagateComponents, BoneIKInfo IKInfo, Transform Transform);
 
-internal struct BoneIKInfo
+public struct BoneIKInfo
 {
     public bool Enabled = false;
 

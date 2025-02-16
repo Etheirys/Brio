@@ -2,6 +2,7 @@ using Brio.Config;
 using Brio.Input;
 using Brio.IPC;
 using Brio.Resources;
+using Brio.UI.Controls.Core;
 using Brio.UI.Controls.Editors;
 using Brio.UI.Controls.Stateless;
 using Brio.Web;
@@ -14,13 +15,14 @@ using System.Numerics;
 
 namespace Brio.UI.Windows;
 
-internal class SettingsWindow : Window
+public class SettingsWindow : Window
 {
     private readonly ConfigurationService _configurationService;
     private readonly PenumbraService _penumbraService;
     private readonly GlamourerService _glamourerService;
     private readonly WebService _webService;
     private readonly BrioIPCService _brioIPCService;
+    private readonly CustomizePlusService _customizePlusService;
     private readonly MareService _mareService;
 
     public SettingsWindow(
@@ -28,6 +30,7 @@ internal class SettingsWindow : Window
         PenumbraService penumbraService,
         GlamourerService glamourerService,
         WebService webService,
+        CustomizePlusService customizePlusService,
         BrioIPCService brioIPCService,
         MareService mareService) : base($"{Brio.Name} Settings###brio_settings_window", ImGuiWindowFlags.NoResize)
     {
@@ -39,6 +42,7 @@ internal class SettingsWindow : Window
         _webService = webService;
         _brioIPCService = brioIPCService;
         _mareService = mareService;
+        _customizePlusService = customizePlusService;
 
         Size = new Vector2(450, 450);
     }
@@ -77,7 +81,6 @@ internal class SettingsWindow : Window
                 {
                     IsOpen = false;
                 }
-
             }
             else
             {
@@ -190,11 +193,18 @@ internal class SettingsWindow : Window
             _configurationService.Configuration.Interface.CensorActorNames = censorActorNames;
             _configurationService.ApplyChange();
         }
+
+        bool enableBrioColor = _configurationService.Configuration.Appearance.EnableBrioColor;
+        if(ImGui.Checkbox("Enable Brio Color", ref enableBrioColor))
+        {
+            _configurationService.Configuration.Appearance.EnableBrioColor = enableBrioColor;
+            _configurationService.ApplyChange();
+        }
     }
 
     private void DrawSceneTab()
     {
-        using(var tab = ImRaii.TabItem("Scene"))
+        using(var tab = ImRaii.TabItem("Auto-Save"))
         {
             if(tab.Success)
             {
@@ -219,54 +229,97 @@ internal class SettingsWindow : Window
     {
         if(ImGui.CollapsingHeader("Third-Party", ImGuiTreeNodeFlags.DefaultOpen))
         {
-            bool enablePenumbra = _configurationService.Configuration.IPC.AllowPenumbraIntegration;
-            if(ImGui.Checkbox("Allow Penumbra Integration", ref enablePenumbra))
+            bool enableCustomizePlus = _configurationService.Configuration.IPC.AllowCustomizePlusIntegration;
+            if(ImGui.Checkbox("Allow Customize+ Integration", ref enableCustomizePlus))
             {
-                _configurationService.Configuration.IPC.AllowPenumbraIntegration = enablePenumbra;
+                _configurationService.Configuration.IPC.AllowCustomizePlusIntegration = enableCustomizePlus;
                 _configurationService.ApplyChange();
+                _customizePlusService.CheckStatus(true);
             }
 
-            using(ImRaii.Disabled(!enablePenumbra))
+            var customizePlusStatus = _customizePlusService.CheckStatus();
+            using(ImRaii.Disabled(!enableCustomizePlus))
             {
-                ImGui.Text($"Penumbra Status: {(_penumbraService.IsPenumbraAvailable ? "Active" : "Inactive")}");
+                ImGui.Text($"Customize+ Status: {customizePlusStatus}");
+                ImGui.SameLine();
+                if(ImBrio.FontIconButton("refresh_Customize", FontAwesomeIcon.Sync, "Refresh Customize+ Status"))
+                {
+                    _customizePlusService.CheckStatus(true);
+                }
+            }
+        }
+
+        if(ImGui.CollapsingHeader("Third-Party [Penumbra Based]", ImGuiTreeNodeFlags.DefaultOpen))
+        {
+            var penumbraStatus = _penumbraService.CheckStatus();
+            var penumbraUnavailable = penumbraStatus is IPCStatus.None or IPCStatus.NotInstalled or IPCStatus.VersionMismatch or IPCStatus.Error;
+
+            if(penumbraUnavailable)
+            {
+                using(ImRaii.PushColor(ImGuiCol.Text, UIConstants.GizmoRed))
+                    ImGui.Text("Please Install Penumbra");
+            }
+
+            using(ImRaii.Disabled(penumbraUnavailable))
+            {
+                bool enablePenumbra = _configurationService.Configuration.IPC.AllowPenumbraIntegration;
+                if(ImGui.Checkbox("Allow Penumbra Integration", ref enablePenumbra))
+                {
+                    _configurationService.Configuration.IPC.AllowPenumbraIntegration = enablePenumbra;
+                    _configurationService.ApplyChange();
+                    _penumbraService.CheckStatus(true);
+                }
+
+                ImGui.Text($"Penumbra Status: {penumbraStatus}");
                 ImGui.SameLine();
                 if(ImBrio.FontIconButton("refresh_penumbra", FontAwesomeIcon.Sync, "Refresh Penumbra Status"))
                 {
-                    _penumbraService.RefreshPenumbraStatus();
+                    _penumbraService.CheckStatus(true);
                 }
-            }
 
-            bool enableGlamourer = _configurationService.Configuration.IPC.AllowGlamourerIntegration;
-            if(ImGui.Checkbox("Allow Glamourer Integration", ref enableGlamourer))
-            {
-                _configurationService.Configuration.IPC.AllowGlamourerIntegration = enableGlamourer;
-                _configurationService.ApplyChange();
-            }
-
-            using(ImRaii.Disabled(!enableGlamourer))
-            {
-                ImGui.Text($"Glamourer Status: {(_glamourerService.IsGlamourerAvailable ? "Active" : "Inactive")}");
-                ImGui.SameLine();
-                if(ImBrio.FontIconButton("refresh_glamourer", FontAwesomeIcon.Sync, "Refresh Glamourer Status"))
+                using(ImRaii.Disabled(!enablePenumbra))
                 {
-                    _glamourerService.RefreshGlamourerStatus();
-                }
-            }
+                    bool enableGlamourer = _configurationService.Configuration.IPC.AllowGlamourerIntegration;
+                    if(ImGui.Checkbox("Allow Glamourer Integration", ref enableGlamourer))
+                    {
+                        _configurationService.Configuration.IPC.AllowGlamourerIntegration = enableGlamourer;
+                        _configurationService.ApplyChange();
+                        _glamourerService.CheckStatus(true);
+                    }
 
-            bool enableMare = _configurationService.Configuration.IPC.AllowMareIntegration;
-            if(ImGui.Checkbox("Allow Mare Synchronos Integration", ref enableMare))
-            {
-                _configurationService.Configuration.IPC.AllowMareIntegration = enableMare;
-                _configurationService.ApplyChange();
-            }
+                    var glamourerStatus = _glamourerService.CheckStatus();
+                    using(ImRaii.Disabled(!enableGlamourer))
+                    {
+                        ImGui.Text($"Glamourer Status: {glamourerStatus}");
+                        ImGui.SameLine();
+                        if(ImBrio.FontIconButton("refresh_glamourer", FontAwesomeIcon.Sync, "Refresh Glamourer Status"))
+                        {
+                            _glamourerService.CheckStatus(true);
+                        }
+                    }
 
-            using(ImRaii.Disabled(!enableMare))
-            {
-                ImGui.Text($"Mare Synchronos Status: {(_mareService.IsMareAvailable ? "Active" : "Inactive")}");
-                ImGui.SameLine();
-                if(ImBrio.FontIconButton("refresh_mare", FontAwesomeIcon.Sync, "Refresh Mare Synchronos Status"))
-                {
-                    _mareService.RefreshMareStatus();
+                    bool enableMare = _configurationService.Configuration.IPC.AllowMareIntegration;
+
+                    if(ImGui.Checkbox("Allow Mare Synchronos Integration", ref enableMare))
+                    {
+                        _configurationService.Configuration.IPC.AllowMareIntegration = enableMare;
+                        _configurationService.ApplyChange();
+                        _mareService.CheckStatus(true);
+                    }
+
+                    var mareStatus = _mareService.CheckStatus();
+                    using(ImRaii.Disabled(!enableMare))
+                    {
+                        ImGui.Text($"Mare Synchronos Status: {mareStatus}");
+                        ImGui.SameLine();
+                        if(ImBrio.FontIconButton("refresh_mare", FontAwesomeIcon.Sync, "Refresh Mare Synchronos Status"))
+                        {
+                            _mareService.CheckStatus(true);
+                        }
+                    }
+
+                    _glamourerService.Disabled = !enablePenumbra;
+                    _mareService.Disabled = _glamourerService.Disabled;
                 }
             }
         }
@@ -274,84 +327,89 @@ internal class SettingsWindow : Window
 
     private void DrawImportScene()
     {
-
         if(ImGui.CollapsingHeader("General", ImGuiTreeNodeFlags.DefaultOpen))
         {
-            bool destroyActorsBeforeImport = _configurationService.Configuration.SceneDestoryActorsBeforeImport;
-            if(ImGui.Checkbox("Destroy Actors before Scene import", ref destroyActorsBeforeImport))
-            {
-                _configurationService.Configuration.SceneDestoryActorsBeforeImport = destroyActorsBeforeImport;
-                _configurationService.ApplyChange();
-            }
-        }
+            var enabled = _configurationService.Configuration.AutoSave.AutoSaveSystemEnabled;
+            if(ImGui.Checkbox("Auto-Save Enabled", ref enabled))
+                _configurationService.Configuration.AutoSave.AutoSaveSystemEnabled = enabled;
 
-        if(ImGui.CollapsingHeader("Import", ImGuiTreeNodeFlags.DefaultOpen))
-        {
-
-            bool applyModelTransform = _configurationService.Configuration.Import.ApplyModelTransform;
-            if(ImGui.Checkbox("Apply Model Transform on Import", ref applyModelTransform))
+            using(ImRaii.Disabled(!enabled))
             {
-                _configurationService.Configuration.Import.ApplyModelTransform = applyModelTransform;
-                _configurationService.ApplyChange();
-            }
-
-            var positionTransformType = _configurationService.Configuration.Import.PositionTransformType;
-            ImGui.SetNextItemWidth(200);
-            using(var combo = ImRaii.Combo("Position", positionTransformType.ToString()))
-            {
-                if(combo.Success)
+                var saveInterval = _configurationService.Configuration.AutoSave.AutoSaveInterval;
+                if(ImGui.SliderInt("Auto-Save Interval", ref saveInterval, 15, 500, "%d seconds"))
                 {
-                    foreach(var poseImportTransformType in Enum.GetValues<ScenePoseTransformType>())
-                    {
-                        if(ImGui.Selectable($"{poseImportTransformType}", poseImportTransformType == positionTransformType))
-                        {
-                            _configurationService.Configuration.Import.PositionTransformType = poseImportTransformType;
-                            _configurationService.ApplyChange();
-                        }
-                    }
+                    _configurationService.Configuration.AutoSave.AutoSaveInterval = saveInterval;
                 }
-            }
 
-            var rotationTransformType = _configurationService.Configuration.Import.RotationTransformType;
-            ImGui.SetNextItemWidth(200);
-            using(var combo = ImRaii.Combo("Rotation", rotationTransformType.ToString()))
-            {
-                if(combo.Success)
+                var maxSaves = _configurationService.Configuration.AutoSave.MaxAutoSaves;
+                if(ImGui.SliderInt("Max Auto-Saves", ref maxSaves, 3, 30))
                 {
-                    foreach(var poseImportTransformType in Enum.GetValues<ScenePoseTransformType>())
-                    {
-                        if(ImGui.Selectable($"{poseImportTransformType}", poseImportTransformType == rotationTransformType))
-                        {
-                            _configurationService.Configuration.Import.RotationTransformType = poseImportTransformType;
-                            _configurationService.ApplyChange();
-                        }
-                    }
+                    _configurationService.Configuration.AutoSave.MaxAutoSaves = maxSaves;
                 }
-            }
 
-            var scaleTransformType = _configurationService.Configuration.Import.ScaleTransformType;
-            ImGui.SetNextItemWidth(200);
-            using(var combo = ImRaii.Combo("Scale", scaleTransformType.ToString()))
-            {
-                if(combo.Success)
-                {
-                    foreach(var poseImportTransformType in Enum.GetValues<ScenePoseTransformType>())
-                    {
-                        if(ImGui.Selectable($"{poseImportTransformType}", poseImportTransformType == scaleTransformType))
-                        {
-                            _configurationService.Configuration.Import.ScaleTransformType = poseImportTransformType;
-                            _configurationService.ApplyChange();
-                        }
-                    }
-                }
-            }
+                //bool applyModelTransform = _configurationService.Configuration.Import.ApplyModelTransform;
+                //if(ImGui.Checkbox("Apply Model Transform on Import", ref applyModelTransform))
+                //{
+                //    _configurationService.Configuration.Import.ApplyModelTransform = applyModelTransform;
+                //    _configurationService.ApplyChange();
+                //}
 
+                //var positionTransformType = _configurationService.Configuration.Import.PositionTransformType;
+                //ImGui.SetNextItemWidth(200);
+                //using(var combo = ImRaii.Combo("Position", positionTransformType.ToString()))
+                //{
+                //    if(combo.Success)
+                //    {
+                //        foreach(var poseImportTransformType in Enum.GetValues<ScenePoseTransformType>())
+                //        {
+                //            if(ImGui.Selectable($"{poseImportTransformType}", poseImportTransformType == positionTransformType))
+                //            {
+                //                _configurationService.Configuration.Import.PositionTransformType = poseImportTransformType;
+                //                _configurationService.ApplyChange();
+                //            }
+                //        }
+                //    }
+                //}
+
+                //var rotationTransformType = _configurationService.Configuration.Import.RotationTransformType;
+                //ImGui.SetNextItemWidth(200);
+                //using(var combo = ImRaii.Combo("Rotation", rotationTransformType.ToString()))
+                //{
+                //    if(combo.Success)
+                //    {
+                //        foreach(var poseImportTransformType in Enum.GetValues<ScenePoseTransformType>())
+                //        {
+                //            if(ImGui.Selectable($"{poseImportTransformType}", poseImportTransformType == rotationTransformType))
+                //            {
+                //                _configurationService.Configuration.Import.RotationTransformType = poseImportTransformType;
+                //                _configurationService.ApplyChange();
+                //            }
+                //        }
+                //    }
+                //}
+
+                //var scaleTransformType = _configurationService.Configuration.Import.ScaleTransformType;
+                //ImGui.SetNextItemWidth(200);
+                //using(var combo = ImRaii.Combo("Scale", scaleTransformType.ToString()))
+                //{
+                //    if(combo.Success)
+                //    {
+                //        foreach(var poseImportTransformType in Enum.GetValues<ScenePoseTransformType>())
+                //        {
+                //            if(ImGui.Selectable($"{poseImportTransformType}", poseImportTransformType == scaleTransformType))
+                //            {
+                //                _configurationService.Configuration.Import.ScaleTransformType = poseImportTransformType;
+                //                _configurationService.ApplyChange();
+                //            }
+                //        }
+                //    }
+                //}
+            }
         }
     }
 
     private void DrawBrioIPC()
     {
-
         if(ImGui.CollapsingHeader("Brio", ImGuiTreeNodeFlags.DefaultOpen))
         {
             bool enableBrioIpc = _configurationService.Configuration.IPC.EnableBrioIPC;
@@ -363,15 +421,14 @@ internal class SettingsWindow : Window
             ImGui.Text($"Brio IPC Status: {(_brioIPCService.IsIPCEnabled ? "Active" : "Inactive")}");
 
             bool enableWebApi = _configurationService.Configuration.IPC.AllowWebAPI;
-            if(ImGui.Checkbox("Enable Web API", ref enableWebApi))
+            if(ImGui.Checkbox("Enable Brio API", ref enableWebApi))
             {
                 _configurationService.Configuration.IPC.AllowWebAPI = enableWebApi;
                 _configurationService.ApplyChange();
             }
 
-            ImGui.Text($"Web API Status: {(_webService.IsRunning ? "Active" : "Inactive")}");
+            ImGui.Text($"Brio API Status: {(_webService.IsRunning ? "Active" : "Inactive")}");
         }
-
     }
 
     private void DrawNPCAppearanceHack()
@@ -601,7 +658,7 @@ internal class SettingsWindow : Window
                 {
                     ImGui.Checkbox("Enable [ Reset Settings to Default ] Button", ref resetSettings);
 
-                    using(ImRaii.Disabled(resetSettings))
+                    using(ImRaii.Disabled(!resetSettings))
                     {
                         if(ImGui.Button("Reset Settings to Default", new(170, 0)))
                         {
@@ -613,7 +670,6 @@ internal class SettingsWindow : Window
 
             }
         }
-
     }
 
     private void DrawEnvironmentSection()
@@ -709,7 +765,6 @@ internal class SettingsWindow : Window
             {
                 ImGui.EndDisabled();
             }
-
         }
     }
 
@@ -721,6 +776,5 @@ internal class SettingsWindow : Window
         {
             _configurationService.ApplyChange();
         }
-
     }
 }

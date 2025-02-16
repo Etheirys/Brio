@@ -9,7 +9,7 @@ using NativeCharacter = FFXIVClientStructs.FFXIV.Client.Game.Character.Character
 
 namespace Brio.Game.Core;
 
-internal unsafe class ObjectMonitorService : IDisposable
+public unsafe class ObjectMonitorService : IDisposable
 {
     public IObjectTable ObjectTable => _objectTable;
 

@@ -6,7 +6,7 @@ namespace Brio.Game.Posing.Skeletons;
 
 
 
-internal unsafe class PartialSkeleton(Skeleton skeleton, int id)
+public unsafe class PartialSkeleton(Skeleton skeleton, int id)
 {
     public int Id { get; } = id;
 

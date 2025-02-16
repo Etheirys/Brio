@@ -10,7 +10,7 @@ using System.Numerics;
 using System.Runtime.InteropServices;
 
 namespace Brio.Game.Posing;
-internal unsafe class IKService : IDisposable
+public unsafe class IKService : IDisposable
 {
     delegate* unmanaged<hkaCCDSolver*, int, float, void> _ccdSolverCtr;
     delegate* unmanaged<hkaCCDSolver*, byte*, hkArray<CCDIKConstraint>*, hkaPose*, byte*> _ccdSolverSolve;

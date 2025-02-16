@@ -8,7 +8,7 @@ using System.Numerics;
 
 namespace Brio.UI.Controls.Stateless;
 
-internal static partial class ImBrioGizmo
+public static partial class ImBrioGizmo
 {
     const int numPoints = 144;
     const int axisHoverMouseDist = 10;

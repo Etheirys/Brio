@@ -1,15 +1,26 @@
 ﻿using Brio.Capabilities.Actor;
 using Brio.Entities.Core;
+using Brio.Game.GPose;
+using Brio.UI.Controls.Editors;
+using Brio.UI.Controls.Stateless;
+using Brio.UI.Theming;
 using Dalamud.Interface;
+using Dalamud.Interface.Utility.Raii;
+using ImGuiNET;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 
 namespace Brio.Entities.Actor;
 
-internal class ActorContainerEntity(IServiceProvider provider) : Entity("actorContainer", provider)
+public class ActorContainerEntity(IServiceProvider provider) : Entity("actorContainer", provider)
 {
+    private readonly GPoseService _gPoseService = provider.GetRequiredService<GPoseService>();
+    private readonly EntityManager _entityManager = provider.GetRequiredService<EntityManager>();
+
     public override string FriendlyName => "Actors";
     public override FontAwesomeIcon Icon => FontAwesomeIcon.Users;
+
+    public override EntityFlags Flags => EntityFlags.HasContextButton;
 
     public override void OnAttached()
     {
@@ -19,6 +30,21 @@ internal class ActorContainerEntity(IServiceProvider provider) : Entity("actorCo
     public override void OnChildAttached() => SortChildren();
     public override void OnChildDetached() => SortChildren();
 
+    public override void DrawContextButton()
+    {
+        using(ImRaii.Disabled(_gPoseService.IsGPosing == false))
+        {
+            using(ImRaii.PushColor(ImGuiCol.Button, TheameManager.CurrentTheame.Accent.AccentColor))
+            {
+                string toolTip = $"New Actor";
+                if(ImBrio.FontIconButtonRight($"###{Id}_actors_contextButton", FontAwesomeIcon.Plus, 1f, toolTip, bordered: false))
+                {
+                    ImGui.OpenPopup("ActorEditorDrawSpawnMenuPopup");
+                }
+                ActorEditor.DrawSpawnMenu(this);
+            }
+        }
+    }
 
     private void SortChildren()
     {

@@ -8,7 +8,7 @@ using static Brio.Game.Actor.ActionTimelineService;
 
 namespace Brio.UI.Controls.Selectors;
 
-internal class ActionTimelineSelector(string id) : Selector<ActionTimelineSelectorEntry>(id)
+public class ActionTimelineSelector(string id) : Selector<ActionTimelineSelectorEntry>(id)
 {
     protected override Vector2 MinimumListSize { get; } = new(300, 300);
 
@@ -172,7 +172,7 @@ internal class ActionTimelineSelector(string id) : Selector<ActionTimelineSelect
     }
 }
 
-internal record class ActionTimelineSelectorEntry(string Name, ushort TimelineId, uint SecondaryId, string Key, ActionTimelineSelectorEntry.OriginalType TimelineType, ActionTimelineSelectorEntry.AnimationPurpose Purpose, ActionTimelineSlots Slot, uint Icon)
+public record class ActionTimelineSelectorEntry(string Name, ushort TimelineId, uint SecondaryId, string Key, ActionTimelineSelectorEntry.OriginalType TimelineType, ActionTimelineSelectorEntry.AnimationPurpose Purpose, ActionTimelineSlots Slot, uint Icon)
 {
     public enum AnimationPurpose
     {

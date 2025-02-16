@@ -5,7 +5,7 @@ using System.Runtime.InteropServices;
 namespace Brio.Game.Actor.Interop;
 
 [StructLayout(LayoutKind.Explicit)]
-internal struct BrioHuman
+public struct BrioHuman
 {
     [FieldOffset(0x0)]
     public Human Human;

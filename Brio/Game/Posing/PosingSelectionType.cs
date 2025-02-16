@@ -5,7 +5,7 @@ using OneOf.Types;
 namespace Brio.Game.Posing;
 
 [GenerateOneOf]
-internal partial class PosingSelectionType : OneOfBase<BonePoseInfoId, ModelTransformSelection, None>
+public partial class PosingSelectionType : OneOfBase<BonePoseInfoId, ModelTransformSelection, None>
 {
     public static None None { get; } = new None();
     public static ModelTransformSelection ModelTransform { get; } = new();
@@ -56,4 +56,4 @@ internal partial class PosingSelectionType : OneOfBase<BonePoseInfoId, ModelTran
     public override int GetHashCode() => UniqueId.GetHashCode();
 }
 
-internal record struct ModelTransformSelection();
+public record struct ModelTransformSelection();

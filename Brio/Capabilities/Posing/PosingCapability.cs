@@ -17,7 +17,7 @@ using System.Linq;
 
 namespace Brio.Capabilities.Posing;
 
-internal class PosingCapability : ActorCharacterCapability
+public class PosingCapability : ActorCharacterCapability
 {
     public PosingSelectionType Selected { get; set; } = new None();
     public PosingSelectionType Hover { get; set; } = new None();
@@ -25,6 +25,8 @@ internal class PosingCapability : ActorCharacterCapability
 
     public SkeletonPosingCapability SkeletonPosing => Entity.GetCapability<SkeletonPosingCapability>();
     public ModelPosingCapability ModelPosing => Entity.GetCapability<ModelPosingCapability>();
+
+    public PosingService PosingService => _posingService;
 
     public bool HasOverride
     {
@@ -110,6 +112,11 @@ internal class PosingCapability : ActorCharacterCapability
 
     public void ClearSelection() => Selected = PosingSelectionType.None;
 
+    public void LoadResourcesPose(string resourcesPath, bool freezeOnLoad = false)
+    {
+        ImportPose(JsonSerializer.Deserialize<PoseFile>(ResourceProvider.Instance.GetRawResourceString(resourcesPath)), _posingService.SceneImporterOptions, freezeOnLoad: freezeOnLoad);
+    }
+
     public void ImportPose(string path, PoseImporterOptions? options = null)
     {
         try
@@ -128,7 +135,8 @@ internal class PosingCapability : ActorCharacterCapability
         }
     }
 
-    public void ImportPose(OneOf<PoseFile, CMToolPoseFile> rawPoseFile, PoseImporterOptions? options = null, bool asExpression = false, bool asScene = false, bool asIPCpose = false, bool asBody = false, bool freezeOnLoad = false)
+    public void ImportPose(OneOf<PoseFile, CMToolPoseFile> rawPoseFile, PoseImporterOptions? options = null, bool asExpression = false, bool asScene = false, bool asIPCpose = false, bool asBody = false,
+        bool freezeOnLoad = false, bool asProp = false, TransformComponents? transformComponents = null, bool? applyModelTransformOverride = null)
     {
         if(Actor.TryGetCapability<ActionTimelineCapability>(out var actionTimeline))
         {
@@ -136,7 +144,8 @@ internal class PosingCapability : ActorCharacterCapability
 
             actionTimeline.StopSpeedAndResetTimeline(() =>
             {
-                ImportPose_internal(rawPoseFile, options, reset: false, reconcile: false, asExpression: asExpression, asScene: asScene, asIPCpose: asIPCpose, asBody: asBody);
+                ImportPose_Internal(rawPoseFile, options, reset: false, reconcile: false, asExpression: asExpression, asScene: asScene,
+                    asIPCpose: asIPCpose, asBody: asBody, asProp: asProp, transformComponents: transformComponents);
 
             }, !(ConfigurationService.Instance.Configuration.Posing.FreezeActorOnPoseImport || freezeOnLoad));
         }
@@ -148,8 +157,9 @@ internal class PosingCapability : ActorCharacterCapability
 
     // TODO change this boolean hell into flags after Scenes are added
     PoseFile? tempPose;
-    internal void ImportPose_internal(OneOf<PoseFile, CMToolPoseFile> rawPoseFile, PoseImporterOptions? options = null, bool generateSnapshot = true, bool reset = true, bool reconcile = true,
-        bool asExpression = false, bool expressionPhase2 = false, bool asScene = false, bool asIPCpose = false, bool asBody = false)
+    internal void ImportPose_Internal(OneOf<PoseFile, CMToolPoseFile> rawPoseFile, PoseImporterOptions? options = null, bool generateSnapshot = true, bool reset = true, bool reconcile = true,
+        bool asExpression = false, bool expressionPhase2 = false, bool asScene = false, bool asIPCpose = false, bool asBody = false, bool asProp = false, 
+        TransformComponents? transformComponents = null, bool? applyModelTransformOverride = null)
     {
         var poseFile = rawPoseFile.Match(
                 poseFile => poseFile,
@@ -191,6 +201,16 @@ internal class PosingCapability : ActorCharacterCapability
             options ??= _posingService.DefaultImporterOptions;
         }
 
+        if(transformComponents.HasValue)
+        {
+            options.TransformComponents = transformComponents.Value;
+        }
+
+        if(applyModelTransformOverride.HasValue)
+        {
+            options.ApplyModelTransform = applyModelTransformOverride.Value;
+        }
+
         if(options.ApplyModelTransform && reset)
             ModelPosing.ResetTransform();
 
@@ -227,7 +247,7 @@ internal class PosingCapability : ActorCharacterCapability
 
         if(asExpression == true)
         {
-            ImportPose_internal(tempPose!, new PoseImporterOptions(new BoneFilter(_posingService), TransformComponents.All, false),
+            ImportPose_Internal(tempPose!, new PoseImporterOptions(new BoneFilter(_posingService), TransformComponents.All, false),
             generateSnapshot: true, expressionPhase2: true);
 
             return;
@@ -293,7 +313,7 @@ internal class PosingCapability : ActorCharacterCapability
             {
                 Reset(generateSnapshot, false);
             }
-            ImportPose_internal(poseFile, options: all, generateSnapshot: false);
+            ImportPose_Internal(poseFile, options: all, generateSnapshot: false);
         }, delayTicks: 2);
     }
     public PoseFile GeneratePoseFile()
@@ -304,7 +324,7 @@ internal class PosingCapability : ActorCharacterCapability
         return poseFile;
     }
 
-    internal record struct PoseStack(PoseInfo Info, Transform ModelTransform);
+    public record struct PoseStack(PoseInfo Info, Transform ModelTransform);
 }
 
 public enum ExpressionPhase

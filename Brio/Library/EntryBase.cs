@@ -11,7 +11,7 @@ namespace Brio.Library;
 /// <summary>
 /// An entry is a library object
 /// </summary>
-internal abstract class EntryBase : ITagged
+public abstract class EntryBase : ITagged
 {
     private SourceBase? _source;
 
@@ -28,7 +28,7 @@ internal abstract class EntryBase : ITagged
     public SourceBase? Source => _source;
     public string? SourceInfo { get; set; }
 
-    public string Identifier => $"{this.Source?.GetInternalId()}||{GetInternalId()}";
+    public string Identifier => $"{this.Source?.GetpublicId()}||{GetpublicId()}";
 
     public abstract bool PassesFilters(params FilterBase[] filters);
 
@@ -85,5 +85,5 @@ internal abstract class EntryBase : ITagged
         return false;
     }
 
-    protected abstract string GetInternalId();
+    protected abstract string GetpublicId();
 }

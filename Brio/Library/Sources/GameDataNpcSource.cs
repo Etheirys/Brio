@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace Brio.Library.Sources;
 
-internal class GameDataNpcSource : GameDataAppearanceSourceBase
+public class GameDataNpcSource : GameDataAppearanceSourceBase
 {
     public GameDataNpcSource(GameDataProvider lumina, EntityManager entityManager)
         : base(lumina, entityManager)
@@ -79,7 +79,7 @@ internal class GameDataNpcSource : GameDataAppearanceSourceBase
         return null;
     }
 
-    protected override string GetInternalId()
+    protected override string GetpublicId()
     {
         return "NPCs";
     }

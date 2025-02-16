@@ -7,7 +7,7 @@ using System.Collections.Generic;
 
 namespace Brio.UI.Widgets.Core;
 
-internal class WidgetHelpers
+public class WidgetHelpers
 {
     public static void DrawBodies(IEnumerable<Capability> capabilities)
     {

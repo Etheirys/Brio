@@ -6,7 +6,7 @@ using System.Collections.Generic;
 
 namespace Brio.Capabilities.Actor;
 
-internal class ActorDebugCapability : ActorCharacterCapability
+public class ActorDebugCapability : ActorCharacterCapability
 {
 
     public bool IsDebug => _configService.IsDebug;
