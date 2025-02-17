@@ -200,6 +200,13 @@ public class SettingsWindow : Window
             _configurationService.Configuration.Appearance.EnableBrioColor = enableBrioColor;
             _configurationService.ApplyChange();
         }
+
+        bool enableBrioScale = _configurationService.Configuration.Appearance.EnableBrioScale;
+        if(ImGui.Checkbox("Enable Brio Text Scale", ref enableBrioScale))
+        {
+            _configurationService.Configuration.Appearance.EnableBrioScale = enableBrioScale;
+            _configurationService.ApplyChange();
+        }
     }
 
     private void DrawSceneTab()

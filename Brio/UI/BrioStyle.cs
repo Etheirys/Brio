@@ -6,9 +6,11 @@ public static class BrioStyle
 {
     public static bool EnableStyle { get; set; }
     public static bool EnableColor => Config.ConfigurationService.Instance.Configuration.Appearance.EnableBrioColor;
+    public static bool EnableScale => Config.ConfigurationService.Instance.Configuration.Appearance.EnableBrioScale;
 
     static bool _hasPushed = false;
     static bool _hasPushedColor = false;
+    static bool _hasPushedScale = false;
     static float _lastGlobalScale;
 
     public static void PushStyle()
@@ -21,8 +23,12 @@ public static class BrioStyle
 
         var imIO = ImGui.GetIO();
 
-        //_lastGlobalScale = imIO.FontGlobalScale;
-        //imIO.FontGlobalScale = 1f;
+        if(EnableScale)
+        {
+            _lastGlobalScale = imIO.FontGlobalScale;
+            imIO.FontGlobalScale = 1f;
+            _hasPushedScale = true;
+        }
 
         if(EnableColor)
         {
@@ -32,7 +38,7 @@ public static class BrioStyle
             PushStyleColor(ImGuiCol.TextDisabled, new Vector4(128, 128, 128, 255));
 
             PushStyleColor(ImGuiCol.WindowBg, new Vector4(25, 25, 25, 248));
-            PushStyleColor(ImGuiCol.ChildBg, new Vector4(25, 25, 25, 228));
+            PushStyleColor(ImGuiCol.ChildBg, new Vector4(25, 25, 25, 66));
             PushStyleColor(ImGuiCol.PopupBg, new Vector4(25, 25, 25, 248));
 
             PushStyleColor(ImGuiCol.Border, new Vector4(44, 44, 44, 255));
@@ -146,7 +152,8 @@ public static class BrioStyle
                 ImGui.PopStyleColor(51);
             }
 
-            //ImGui.GetIO().FontGlobalScale = _lastGlobalScale;
+            if(_hasPushedScale)
+                ImGui.GetIO().FontGlobalScale = _lastGlobalScale;
         }
     }
 }
