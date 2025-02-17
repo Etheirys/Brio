@@ -67,10 +67,10 @@ public class PosingOverlayWindow : Window, IDisposable
 
         ImGuizmo.SetID(_gizmoId);
 
-        if(_trackingTransform.HasValue)
-        {
-            Flags &= ~ImGuiWindowFlags.NoInputs;
-        }
+        //if(_trackingTransform.HasValue)
+        //{
+        //    Flags &= ~ImGuiWindowFlags.NoInputs;
+        //}
     }
 
     public override void Draw()
