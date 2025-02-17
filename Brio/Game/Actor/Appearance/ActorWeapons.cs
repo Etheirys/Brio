@@ -2,7 +2,7 @@
 
 namespace Brio.Game.Actor.Appearance;
 
-internal struct ActorWeapons
+public struct ActorWeapons
 {
     public WeaponModelId MainHand;
     public WeaponModelId OffHand;

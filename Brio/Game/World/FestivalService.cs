@@ -11,7 +11,7 @@ using System.Numerics;
 
 namespace Brio.Game.World;
 
-internal unsafe class FestivalService : IDisposable
+public unsafe class FestivalService : IDisposable
 {
     public const int MaxFestivals = 4;
 
@@ -71,7 +71,7 @@ internal unsafe class FestivalService : IDisposable
         {
             var pending = _pendingChanges.Dequeue();
             if(pending != null)
-                InternalApply(pending);
+                publicApply(pending);
         }
     }
 
@@ -126,7 +126,7 @@ internal unsafe class FestivalService : IDisposable
         {
             if(tryThisFrame)
             {
-                InternalApply(_originalState, false);
+                publicApply(_originalState, false);
             }
             else
             {
@@ -137,7 +137,7 @@ internal unsafe class FestivalService : IDisposable
         }
     }
 
-    private void InternalApply(uint[] festivals, bool applyNow = true)
+    private void publicApply(uint[] festivals, bool applyNow = true)
     {
         if(applyNow)
         {

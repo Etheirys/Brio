@@ -3,7 +3,7 @@ using Brio.Resources;
 
 namespace Brio.Library.Sources;
 
-internal class GameDataOrnamentSource : GameDataAppearanceSourceBase
+public class GameDataOrnamentSource : GameDataAppearanceSourceBase
 {
     public GameDataOrnamentSource(GameDataProvider lumina, EntityManager entityManager)
         : base(lumina, entityManager)
@@ -26,7 +26,7 @@ internal class GameDataOrnamentSource : GameDataAppearanceSourceBase
     }
 
 
-    protected override string GetInternalId()
+    protected override string GetpublicId()
     {
         return "Ornaments";
     }

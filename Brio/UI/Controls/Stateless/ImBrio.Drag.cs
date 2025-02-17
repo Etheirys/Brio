@@ -1,21 +1,49 @@
 ﻿using Brio.Input;
+using Brio.UI.Controls.Core;
 using Dalamud.Interface;
+using Dalamud.Interface.Utility.Raii;
 using ImGuiNET;
+using System.Collections.Generic;
 using System.Numerics;
 
 namespace Brio.UI.Controls.Stateless;
 
-internal static partial class ImBrio
+public static partial class ImBrio
 {
-    public static (bool anyActive, bool didChange) DragFloat3(string label, ref Vector3 vectorValue, float step = 1.0f, FontAwesomeIcon icon = FontAwesomeIcon.None, string tooltip = "")
+    private static readonly HashSet<string> expanded = [];
+
+    public static (bool anyActive, bool didChange) DragFloat3(string label, ref Vector3 vectorValue, float step = 1.0f,
+        FontAwesomeIcon icon = FontAwesomeIcon.None, string tooltip = "", bool enableExpanded = false)
     {
+        bool isExpanded = expanded.Contains(label);
+
         if(icon == FontAwesomeIcon.None)
         {
             ImGui.Text(label);
         }
         else
         {
-            Icon(icon);
+            if(enableExpanded)
+            {
+                using(ImRaii.PushColor(ImGuiCol.Button, UIConstants.Transparent))
+                {
+                    if(Button($"{label}##Button", icon, new Vector2(25)))
+                    {
+                        if(isExpanded)
+                        {
+                            expanded.Remove(label);
+                        }
+                        else
+                        {
+                            expanded.Add(label);
+                        }
+                    }
+                }
+            }
+            else
+            {
+                Icon(icon);
+            }
         }
 
         ImGui.SameLine();
@@ -26,6 +54,41 @@ internal static partial class ImBrio
         };
 
         (bool changed, bool active) = DragFloat3Horizontal($"###{label}_drag3", ref vectorValue, step, size);
+
+        if(isExpanded && enableExpanded)
+        {
+            float height = (GetLineHeight()) * 3 + (ImGui.GetStyle().ItemSpacing.Y * 2) + (ImGui.GetStyle().WindowPadding.Y * 2);
+
+            ImGui.PushStyleColor(ImGuiCol.FrameBg, UIConstants.GizmoBlue);
+
+            float x = vectorValue.X;
+            (var pdidChange, var panyActive) = DragFloat($"###{label}_x", ref x, step, $"{tooltip} X");
+            vectorValue.X = x;
+
+            ImGui.PopStyleColor();
+            ImGui.PushStyleColor(ImGuiCol.FrameBg, UIConstants.GizmoGreen);
+
+            float y = vectorValue.Y;
+            (var rdidChange, var ranyActive) = DragFloat($"###{label}_y", ref y, step, $"{tooltip} Y");
+            vectorValue.Y = y;
+
+            ImGui.PopStyleColor();
+            ImGui.PushStyleColor(ImGuiCol.FrameBg, UIConstants.GizmoRed);
+
+            float z = vectorValue.Z;
+            (var sdidChange, var sanyActive) = DragFloat($"###{label}_z", ref z, step, $"{tooltip} Z");
+            vectorValue.Z = z;
+
+            changed |= pdidChange |= rdidChange |= sdidChange;
+            active |= panyActive |= ranyActive |= sanyActive;
+
+            ImGui.PopStyleColor();
+
+            //if(ImGui.BeginChild($"###{label}_child", new Vector2(GetRemainingWidth(), height), false))
+            //{
+            //    ImGui.EndChild();
+            //}
+        }
 
         return (active, changed);
     }

@@ -5,6 +5,6 @@ using OneOf.Types;
 namespace Brio.Game.Types;
 
 [GenerateOneOf]
-internal partial class ItemUnion : OneOfBase<Item, None>
+public partial class ItemUnion : OneOfBase<Item, None>
 {
 }

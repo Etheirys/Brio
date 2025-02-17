@@ -2,7 +2,7 @@
 using System.Numerics;
 namespace Brio.Core;
 
-internal static class NumericsExtensions
+public static class NumericsExtensions
 {
     public static Quaternion ToQuaternion(this Vector3 euler)
     {

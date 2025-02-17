@@ -5,7 +5,7 @@ using static Brio.Files.AnamnesisCharaFile;
 
 namespace Brio.Files.Converters;
 
-internal class LegacyGlassesSaveConverter : JsonConverter<GlassesSave>
+public class LegacyGlassesSaveConverter : JsonConverter<GlassesSave>
 {
     public override GlassesSave Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {

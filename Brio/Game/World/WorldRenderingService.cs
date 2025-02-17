@@ -7,7 +7,7 @@ using System;
 
 namespace Brio.Game.World;
 
-internal class WorldRenderingService : IDisposable
+public class WorldRenderingService : IDisposable
 {
 
     private readonly GPoseService _gPoseService;
@@ -61,7 +61,7 @@ internal class WorldRenderingService : IDisposable
         _updateWaterRendererHook?.Dispose();
     }
 
-    internal nint UpdateWaterRenderer(IntPtr a1)
+    public nint UpdateWaterRenderer(IntPtr a1)
     {
         return 0;
     }

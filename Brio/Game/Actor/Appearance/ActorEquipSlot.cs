@@ -3,7 +3,7 @@
 namespace Brio.Game.Actor.Appearance;
 
 [Flags]
-internal enum ActorEquipSlot
+public enum ActorEquipSlot
 {
     None = 0,
     MainHand = 1 << 0,

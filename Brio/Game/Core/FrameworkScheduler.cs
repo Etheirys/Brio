@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace Brio.Game.Core;
 
-internal class FrameworkScheduler(IFramework framework, bool alwaysDefer) : TaskScheduler
+public class FrameworkScheduler(IFramework framework, bool alwaysDefer) : TaskScheduler
 {
     private readonly IFramework _framework = framework;
     private readonly bool _alwaysDefer = alwaysDefer;

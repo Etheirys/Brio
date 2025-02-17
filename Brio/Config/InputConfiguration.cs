@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace Brio.Config;
 
-internal class InputConfiguration
+public class InputConfiguration
 {
     public Dictionary<KeyBindEvents, KeyBind> Bindings { get; set; } = new()
     {
@@ -16,6 +16,8 @@ internal class InputConfiguration
         { KeyBindEvents.Posing_ToggleOverlay, new(VirtualKey.O, true) },
         { KeyBindEvents.Posing_Undo, new(VirtualKey.Z, true) },
         { KeyBindEvents.Posing_Redo, new(VirtualKey.Y, true) },
+
+        { KeyBindEvents.Poseing_Esc, new(VirtualKey.ESCAPE) },
 
         { KeyBindEvents.Posing_DisableGizmo, new(VirtualKey.SHIFT) },
         { KeyBindEvents.Posing_DisableSkeleton, new(VirtualKey.CONTROL) },
@@ -31,4 +33,7 @@ internal class InputConfiguration
     public bool ShowPromptsInGPose { get; set; } = false;
 
     public bool EnableKeybinds { get; set; } = true;
+
+    public bool EnableKeyHandling { get; set; } = true;
+    public bool EnableKeyHandlingOnKeyMod { get; set; } = true;
 }

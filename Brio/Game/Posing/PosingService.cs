@@ -3,7 +3,7 @@ using ImGuizmoNET;
 
 namespace Brio.Game.Posing;
 
-internal class PosingService
+public class PosingService
 {
     public PosingOperation Operation { get; set; } = PosingOperation.Rotate;
 
@@ -28,9 +28,11 @@ internal class PosingService
     public PosingService()
     {
         OverlayFilter = new BoneFilter(this);
+        OverlayFilter.DisableCategory("ex");
 
         DefaultImporterOptions = new PoseImporterOptions(new BoneFilter(this), TransformComponents.Rotation, false);
         DefaultImporterOptions.BoneFilter.DisableCategory("weapon");
+        DefaultImporterOptions.BoneFilter.DisableCategory("ex");
 
         DefaultIPCImporterOptions = new PoseImporterOptions(new BoneFilter(this), TransformComponents.All, false);
 
@@ -40,16 +42,20 @@ internal class PosingService
         BodyOptions.BoneFilter.DisableCategory("weapon");
         BodyOptions.BoneFilter.DisableCategory("head");
         BodyOptions.BoneFilter.DisableCategory("ears");
+        BodyOptions.BoneFilter.DisableCategory("hair");
         BodyOptions.BoneFilter.DisableCategory("face");
         BodyOptions.BoneFilter.DisableCategory("eyes");
         BodyOptions.BoneFilter.DisableCategory("lips");
         BodyOptions.BoneFilter.DisableCategory("jaw");
         BodyOptions.BoneFilter.DisableCategory("head");
+        BodyOptions.BoneFilter.DisableCategory("legacy");
+        BodyOptions.BoneFilter.DisableCategory("ex");
 
         ExpressionOptions = new PoseImporterOptions(new BoneFilter(this), TransformComponents.All, false);
         ExpressionOptions.BoneFilter.DisableAll();
         ExpressionOptions.BoneFilter.EnableCategory("head");
         ExpressionOptions.BoneFilter.EnableCategory("ears");
+        ExpressionOptions.BoneFilter.EnableCategory("hair");
         ExpressionOptions.BoneFilter.EnableCategory("face");
         ExpressionOptions.BoneFilter.EnableCategory("eyes");
         ExpressionOptions.BoneFilter.EnableCategory("lips");
@@ -59,15 +65,18 @@ internal class PosingService
         ExpressionOptions2.BoneFilter.DisableAll();
         ExpressionOptions2.BoneFilter.EnableCategory("head");
     }
+
+    public PoseImporterOptions GetNewPoseImporterOptions(TransformComponents transformComponents, bool applyModelTransform)
+        => new PoseImporterOptions(new BoneFilter(this), transformComponents, applyModelTransform);
 }
 
-internal enum PosingCoordinateMode
+public enum PosingCoordinateMode
 {
     Local,
     World
 }
 
-internal enum PosingOperation
+public enum PosingOperation
 {
     Translate,
     Rotate,
@@ -75,7 +84,7 @@ internal enum PosingOperation
     Universal
 }
 
-internal static class PosingExtensions
+public static class PosingExtensions
 {
     public static MODE AsGizmoMode(this PosingCoordinateMode mode) => mode switch
     {

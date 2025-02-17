@@ -10,7 +10,7 @@ using static Brio.UI.Controls.Selectors.NpcSelector;
 
 namespace Brio.UI.Controls.Selectors;
 
-internal class NpcSelector(string id) : Selector<NpcSelectorEntry>(id)
+public class NpcSelector(string id) : Selector<NpcSelectorEntry>(id)
 {
     protected override Vector2 MinimumListSize { get; } = new(300, 300);
 

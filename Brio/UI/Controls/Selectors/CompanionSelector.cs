@@ -7,7 +7,7 @@ using System.Numerics;
 
 namespace Brio.UI.Controls.Selectors;
 
-internal class CompanionSelector(string id) : Selector<CompanionRowUnion>(id)
+public class CompanionSelector(string id) : Selector<CompanionRowUnion>(id)
 {
     protected override Vector2 MinimumListSize { get; } = new(300, 300);
 

@@ -14,7 +14,7 @@ using System.Numerics;
 
 namespace Brio.UI.Windows.Specialized;
 
-internal class PosingTransformWindow : Window
+public class PosingTransformWindow : Window
 {
     private readonly EntityManager _entityManager;
     private readonly PosingService _posingService;

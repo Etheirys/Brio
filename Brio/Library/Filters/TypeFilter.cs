@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Brio.Library.Filters;
 
-internal class TypeFilter : FilterBase
+public class TypeFilter : FilterBase
 {
     private HashSet<Type> _types = new();
 

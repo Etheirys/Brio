@@ -27,128 +27,70 @@
 
 using Brio.Game.GPose;
 using Dalamud.Game;
+using Dalamud.Hooking;
 using Dalamud.Plugin.Services;
 using System;
-using System.Diagnostics;
-using System.Runtime.InteropServices;
 
 namespace Brio.Game.Posing;
 
-internal unsafe partial class PhysicsService : IDisposable
+public unsafe partial class PhysicsService : IDisposable
 {
     private readonly GPoseService _gPoseService;
     private readonly IFramework _framework;
 
-    //
+    private unsafe delegate void HandlePhysicsDelegate(IntPtr arg1, short arg2, IntPtr arg3, char arg4, char arg5);
+    private readonly Hook<HandlePhysicsDelegate> _handlePhysicsDelegate = null!;
 
-    const byte NOP = 0x90;
     public bool IsFreezeEnabled { get; private set; } = false;
 
-    //
-
-    private readonly IntPtr freezeSkeletonPhysics1;
-    private readonly IntPtr freezeSkeletonPhysics2;
-
-    private readonly byte[] originalFreezeBytes1;
-    private readonly byte[] originalFreezeBytes2;
-
-    private readonly byte[] nopFreezeBytes1;
-    private readonly byte[] nopFreezeBytes2;
-
-    public PhysicsService(ISigScanner scanner, IFramework framework, GPoseService gPoseService)
+    public PhysicsService(ISigScanner scanner, IFramework framework, GPoseService gPoseService, IGameInteropProvider hooking)
     {
         _gPoseService = gPoseService;
         _framework = framework;
 
-        // This signature is from Anamnesis (https://github.com/imchillin/Anamnesis)
-        // Found in AddressService.cs on line 159 - SkeletonFreezePhysics (1/2/3)
-        string freezePhysicsAddress = "0F 11 48 10 41 0F 10 44 24 ?? 0F 11 40 20 48 8B 46 28";
-
-        var freezePhysics = scanner.ScanText(freezePhysicsAddress);
-
-        freezeSkeletonPhysics1 = freezePhysics;
-        freezeSkeletonPhysics2 = freezePhysics - 0x9;
-
         _framework.Update += OnFrameworkUpdate;
 
-        (originalFreezeBytes1, originalFreezeBytes2) = FreezeReadBytes();
+        // This signature is from Anamnesis (https://github.com/imchillin/Anamnesis)
+        // Found in AddressService.cs on line 159 - SkeletonFreezePhysics (1/2/3)
+        //var oldFreezePhysicsAddress = "0F 11 48 10 41 0F 10 44 24 ?? 0F 11 40 20 48 8B 46 28";
 
-        nopFreezeBytes1 = [
-            NOP,
-            NOP,
-            NOP,
-            NOP
-        ];
-
-        nopFreezeBytes2 = [
-            NOP,
-            NOP,
-            NOP
-        ];
+        // Thank you Winter!
+        var handlePhysicsSig = "E9 ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? 41 ?? ?? ?? 4C ?? ?? 45 ?? ?? 48 ?? ?? ?? ?? ?? ?? 41"; // e9 2d e0 09 00 ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? 41 0f b6 c0 4c 8b d1 45 8b c8 48 69 c8 20 02 00 00
+        _handlePhysicsDelegate = hooking.HookFromAddress<HandlePhysicsDelegate>(scanner.ScanText(handlePhysicsSig), HandlePhysicsDetour);
+        _handlePhysicsDelegate.Enable();
     }
 
-    public (byte[], byte[]) FreezeReadBytes()
+    public unsafe void HandlePhysicsDetour(IntPtr arg1, short arg2, IntPtr arg3, char arg4, char arg5)
     {
-        return ([
-            Marshal.ReadByte(freezeSkeletonPhysics1, 0),
-            Marshal.ReadByte(freezeSkeletonPhysics1, 1),
-            Marshal.ReadByte(freezeSkeletonPhysics1, 2),
-            Marshal.ReadByte(freezeSkeletonPhysics1, 3)
-        ], [
-            Marshal.ReadByte(freezeSkeletonPhysics2, 0),
-            Marshal.ReadByte(freezeSkeletonPhysics2, 1),
-            Marshal.ReadByte(freezeSkeletonPhysics2, 2)
-        ]);
+        if(IsFreezeEnabled)
+        {
+            return;
+        }
+
+        _handlePhysicsDelegate.Original(arg1, arg2, arg3, arg4, arg5);
     }
 
     public bool FreezeToggle() => IsFreezeEnabled ? FreezeRevert() : FreezeEnable();
 
-    public bool FreezeRevert()
+    public bool FreezeRevert() => IsFreezeEnabled = false;
+    public bool FreezeEnable() => IsFreezeEnabled = true;
+
+    private void OnFrameworkUpdate(IFramework framework)
     {
-        IsFreezeEnabled = false;
-
-        try
+        if(IsFreezeEnabled && _gPoseService.IsGPosing == false)
         {
-            using Process currentProcess = Process.GetCurrentProcess();
-
-            WriteProcessMemory(currentProcess.Handle, freezeSkeletonPhysics1, originalFreezeBytes1, originalFreezeBytes1.Length, out _);
-
-            WriteProcessMemory(currentProcess.Handle, freezeSkeletonPhysics2, originalFreezeBytes2, originalFreezeBytes2.Length, out _);
+            FreezeRevert();
         }
-        catch(Exception ex)
-        {
-            Brio.Log.Fatal($"Brio encountered Fatal Error, FreezeRevert faild: {ex}");
-        }
-
-        return IsFreezeEnabled;
-    }
-
-    public bool FreezeEnable()
-    {
-        using Process currentProcess = Process.GetCurrentProcess();
-
-        WriteProcessMemory(currentProcess.Handle, freezeSkeletonPhysics1, nopFreezeBytes1, nopFreezeBytes1.Length, out _);
-
-        WriteProcessMemory(currentProcess.Handle, freezeSkeletonPhysics2, nopFreezeBytes2, nopFreezeBytes2.Length, out _);
-
-        return IsFreezeEnabled = true;
     }
 
     public void Dispose()
     {
         if(IsFreezeEnabled)
+        {
             FreezeRevert();
+        }
 
         _framework.Update -= OnFrameworkUpdate;
+        _handlePhysicsDelegate.Dispose();
     }
-
-    private void OnFrameworkUpdate(IFramework framework)
-    {
-        if(IsFreezeEnabled && _gPoseService.IsGPosing == false)
-            FreezeRevert();
-    }
-
-    [LibraryImport("kernel32.dll", SetLastError = true)]
-    [return: MarshalAs(UnmanagedType.Bool)]
-    public static partial bool WriteProcessMemory(IntPtr hProcess, IntPtr lpBaseAddress, byte[] lpBuffer, int nSize, out int lpNumberOfBytesWritten);
 }

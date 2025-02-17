@@ -3,7 +3,7 @@ using ImGuiNET;
 using System.Numerics;
 
 namespace Brio.UI.Controls.Stateless;
-internal static partial class ImBrio
+public static partial class ImBrio
 {
     public static bool BorderedGameIcon(string id, WeatherUnion union, bool showText = true, ImGuiButtonFlags flags = ImGuiButtonFlags.MouseButtonLeft, Vector2? size = null)
     {

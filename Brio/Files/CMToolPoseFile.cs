@@ -48,7 +48,7 @@ using System.Reflection;
 
 namespace Brio.Files;
 
-internal class CMToolPoseFileInfo : AppliableActorFileInfoBase<CMToolPoseFile>
+public class CMToolPoseFileInfo : AppliableActorFileInfoBase<CMToolPoseFile>
 {
     private PosingService _posingService;
 
@@ -93,7 +93,7 @@ internal class CMToolPoseFileInfo : AppliableActorFileInfoBase<CMToolPoseFile>
 }
 
 [Serializable]
-internal class CMToolPoseFile
+public class CMToolPoseFile
 {
     public string? Race { get; set; }
 

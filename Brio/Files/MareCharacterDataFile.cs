@@ -8,7 +8,7 @@ using Dalamud.Interface.Textures.TextureWraps;
 
 namespace Brio.Files;
 
-internal class MareCharacterDataFileInfo : AppliableActorFileInfoBase<MareCharacterDataFile>
+public class MareCharacterDataFileInfo : AppliableActorFileInfoBase<MareCharacterDataFile>
 {
     public MareCharacterDataFileInfo(EntityManager entityManager)
     : base(entityManager)
@@ -33,7 +33,7 @@ internal class MareCharacterDataFileInfo : AppliableActorFileInfoBase<MareCharac
     }
 }
 
-internal class MareCharacterDataFile : IFileMetadata
+public class MareCharacterDataFile : IFileMetadata
 {
     private string _filePath;
 

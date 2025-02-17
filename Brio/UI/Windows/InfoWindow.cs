@@ -7,14 +7,18 @@ using System.Numerics;
 
 namespace Brio.UI.Windows;
 
-internal class InfoWindow : Window
+public class InfoWindow : Window
 {
     private readonly ConfigurationService _configurationService;
     private readonly UpdateWindow _updateWindow;
 
-    public InfoWindow(ConfigurationService configurationService, UpdateWindow updateWindow) : base($"{Brio.Name} Welcome###brio_info_window", ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.AlwaysAutoResize)
+    public InfoWindow(ConfigurationService configurationService, UpdateWindow updateWindow) : base($"{Brio.Name} Welcome###brio_info_window", ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.AlwaysAutoResize)
     {
         Namespace = "brio_info_namespace";
+
+        this.AllowClickthrough = false;
+        this.AllowPinning = false;
+        this.ForceMainWindow = true;
 
         _configurationService = configurationService;
         _updateWindow = updateWindow;
@@ -41,8 +45,8 @@ internal class InfoWindow : Window
                     A Big Thank you to (Sufferhymn), (Night Song), (Alvar Valo), (Yasumi), (YikesXD), 
                     (Selitha), (AquilaHK), (LotusEcho), & (Yume) for their support on Kofi!
 
-                    Also, Thank you, to: (@MKhayle), (@ashna_ff14), (@Yuki-Codes), (@danma3x), (@snaeling),  
-                    (@WorstAquaPlayer), (@Caraxi), & (@gris-fuego), for their contributions to Brio!
+                    Also, Thank you, to: (Ashadow700), (@MKhayle), (@ashna_ff14), (@Yuki-Codes), (@danma3x), (@snaeling),  
+                    (@WorstAquaPlayer), (@Caraxi), (@Enth) & (@gris-fuego), for their contributions to Brio!
 
                     Maintained & Developed by: Minmoose.
                     Originally Developed by: Asgard.

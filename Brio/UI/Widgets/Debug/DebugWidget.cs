@@ -6,7 +6,7 @@ using ImGuiNET;
 
 namespace Brio.UI.Widgets.Debug;
 
-internal class DebugWidget(DebugCapability capability, IClientState _clientState) : Widget<DebugCapability>(capability)
+public class DebugWidget(DebugCapability capability, IClientState _clientState) : Widget<DebugCapability>(capability)
 {
     public override string HeaderName => "Debug";
 
@@ -75,8 +75,8 @@ internal class DebugWidget(DebugCapability capability, IClientState _clientState
 
         ImGui.Text($"MapId - {_clientState.MapId}");
         ImGui.Text($"TerritoryType - {_clientState.TerritoryType}");
-        ImGui.Text($"CurrentWorld - {_clientState.LocalPlayer.CurrentWorld.Value.InternalName}");
-        ImGui.Text($"HomeWorld - {_clientState.LocalPlayer.HomeWorld.Value.InternalName}");
+        ImGui.Text($"CurrentWorld - {_clientState.LocalPlayer.CurrentWorld.Value.Name}");
+        ImGui.Text($"HomeWorld - {_clientState.LocalPlayer.HomeWorld.Value.Name}");
 
         ImGui.Text(io.Framerate.ToString("F2") + " FPS");
     }

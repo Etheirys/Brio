@@ -5,7 +5,7 @@ using Brio.UI.Widgets.World;
 
 namespace Brio.Capabilities.World;
 
-internal class WeatherCapability : Capability
+public class WeatherCapability : Capability
 {
     public WeatherService WeatherService { get; }
 

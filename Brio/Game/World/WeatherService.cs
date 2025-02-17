@@ -15,7 +15,7 @@ using System.Linq;
 
 namespace Brio.Game.World;
 
-internal class WeatherService : IDisposable
+public class WeatherService : IDisposable
 {
     public ReadOnlyCollection<Weather> TerritoryWeatherTable
     {
@@ -97,7 +97,6 @@ internal class WeatherService : IDisposable
 
         var twAddress = scanner.ScanText("48 89 5C 24 ?? 55 56 57 48 83 EC ?? 48 8B F9 48 8D 0D");
         _updateTerritoryWeatherHook = hooking.HookFromAddress<UpdateTerritoryWeatherDelegate>(twAddress, UpdateTerritoryWeatherDetour);
-
 
         UpdateWeathersForCurrentTerritory();
 

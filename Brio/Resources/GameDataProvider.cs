@@ -9,7 +9,7 @@ using Glasses = Lumina.Excel.Sheets.Glasses;
 
 namespace Brio.Resources;
 
-internal class GameDataProvider
+public class GameDataProvider
 {
     public static GameDataProvider Instance { get; private set; } = null!;
 

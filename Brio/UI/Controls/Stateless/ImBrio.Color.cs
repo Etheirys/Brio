@@ -4,7 +4,7 @@ using System.Numerics;
 
 namespace Brio.UI.Controls.Stateless;
 
-internal static partial class ImBrio
+public static partial class ImBrio
 {
     public static bool DrawLabeledColor(string id, uint color, string colorText, string description, Vector2? size = null)
     {

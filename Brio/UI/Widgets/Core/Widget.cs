@@ -3,7 +3,7 @@ using System;
 
 namespace Brio.UI.Widgets.Core;
 
-internal interface IWidget
+public interface IWidget
 {
     public string HeaderName { get; }
     public WidgetFlags Flags { get; }
@@ -17,7 +17,7 @@ internal interface IWidget
     public void ToggleAdvancedWindow();
 }
 
-internal abstract class Widget<T>(T capability) : IWidget where T : Capability
+public abstract class Widget<T>(T capability) : IWidget where T : Capability
 {
     public T Capability { get; } = capability;
     public abstract string HeaderName { get; }
@@ -33,7 +33,7 @@ internal abstract class Widget<T>(T capability) : IWidget where T : Capability
 }
 
 [Flags]
-internal enum WidgetFlags
+public enum WidgetFlags
 {
     None = 0,
     DefaultOpen = 1 << 0,

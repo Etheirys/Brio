@@ -1,6 +1,7 @@
 ﻿using Brio.Capabilities.Actor;
 using Brio.Config;
 using Brio.Entities;
+using Brio.Entities.Actor;
 using Brio.Game.Cutscene;
 using Brio.Game.GPose;
 using Brio.Game.Posing;
@@ -11,7 +12,7 @@ using System.Numerics;
 
 namespace Brio.UI.Windows.Specialized;
 
-internal class ActionTimelineWindow : Window, IDisposable
+public class ActionTimelineWindow : Window, IDisposable
 {
     private readonly ActionTimelineEditor _editor;
     private readonly EntityManager _entityManager;
@@ -40,6 +41,11 @@ internal class ActionTimelineWindow : Window, IDisposable
 
     public override bool DrawConditions()
     {
+        if(_entityManager.SelectedEntity is ActorEntity actor && actor.IsProp == true)
+        {
+            return false;
+        }
+
         if(!_entityManager.SelectedHasCapability<ActionTimelineCapability>())
         {
             return false;

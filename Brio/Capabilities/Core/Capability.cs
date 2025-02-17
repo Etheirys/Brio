@@ -4,7 +4,7 @@ using System;
 
 namespace Brio.Capabilities.Core;
 
-internal abstract class Capability(Entity parent) : IDisposable
+public abstract class Capability(Entity parent) : IDisposable
 {
     public Entity Entity { get; } = parent;
 

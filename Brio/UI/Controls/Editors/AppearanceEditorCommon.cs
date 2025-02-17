@@ -5,15 +5,20 @@ using Brio.UI.Controls.Stateless;
 using Dalamud.Interface;
 using Dalamud.Interface.Utility.Raii;
 using ImGuiNET;
+using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 
 namespace Brio.UI.Controls.Editors;
 
-internal static class AppearanceEditorCommon
+public static class AppearanceEditorCommon
 {
     private const string _collectionLabel = "Collection";
-    private static float _lableWidth { get; } = ImGui.CalcTextSize($"{_collectionLabel} XXXXXXXXXX").X;
+    private const string _collectionLabelDesign = "Design";
+    private const string _collectionLabelProfile = "Profile";
+    private static float _lableWidth { get; } = ImGui.CalcTextSize($"{_collectionLabel}  IIXXXXXXXX").X;
+    private static float _lableWidthDesign { get; } = ImGui.CalcTextSize($"{_collectionLabelDesign}  IIIXXXXXXXXXX").X;
+    private static float _lableWidthProfile { get; } = ImGui.CalcTextSize($"{_collectionLabelProfile}  IIIIIXXXXXXXXX").X;
 
     private static readonly NpcSelector _globalNpcSelector = new("global_npc_selector");
 
@@ -22,7 +27,7 @@ internal static class AppearanceEditorCommon
         if(!capability.HasPenumbraIntegration)
             return;
 
-        if(ImBrio.FontIconButton(FontAwesomeIcon.EarthOceania))
+        if(ImBrio.FontIconButton(FontAwesomeIcon.EarthOceania, new Vector2(25)))
         {
             capability.PenumbraService.OpenPenumbra();
         }
@@ -52,8 +57,122 @@ internal static class AppearanceEditorCommon
 
         ImGui.SameLine();
 
-        if(ImBrio.FontIconButtonRight("actorappearancewidget_reset", FontAwesomeIcon.Undo, 1, "Reset", capability.IsCollectionOverridden))
+        if(ImBrio.FontIconButtonRight("actorappearancewidget_reset", FontAwesomeIcon.Undo, 1, "Reset Collection", capability.IsCollectionOverridden))
             capability.ResetCollection();
+    }
+    public static void DrawGlamourerDesignSwitcher(ActorAppearanceCapability capability)
+    {
+        if(!capability.HasGlamourerIntegration)
+            return;
+
+        if(ImBrio.FontIconButton(FontAwesomeIcon.TheaterMasks, new Vector2(25)))
+        {
+
+        }
+
+        if(ImGui.IsItemHovered())
+            ImGui.SetTooltip("Glamourer Design");
+        ImGui.SameLine();
+
+        var currentDesign = capability.CurrentDesign;
+
+        ImGui.SetNextItemWidth(_lableWidthDesign);
+
+        using(var combo = ImRaii.Combo(_collectionLabelDesign, "Apply Design"))
+        {
+            if(combo.Success)
+            {
+                var collections = capability.GlamourerService.GetDesignList();
+
+                if(collections is not null)
+                {
+                    foreach(var collection in collections)
+                    {
+                        bool isSelected = collection.Value.Equals(currentDesign);
+                        if(ImGui.Selectable(collection.Value, isSelected))
+                        {
+                            capability.CurrentDesign = collection.Value;
+                            capability.SetDesign(collection.Key);
+                        }
+                    }
+                }
+            }
+        }
+
+        ImGui.SameLine();
+
+        if(ImBrio.FontIconButtonRight("actorappearancewidget_DesignReset", FontAwesomeIcon.Undo, 1, "Reset Design"))
+            capability.ResetDesign();
+
+    }
+
+    private static bool _isProfileOpen = false;
+    private static IEnumerable<IPCProfileDataTuple> _profiles = [];
+    public static void DrawCustomizePlusProfileSwitcher(ActorAppearanceCapability capability)
+    {
+        if(!capability.HasCustomizePlusIntegration)
+            return;
+
+        if(ImGui.Button("C+", new Vector2(25)))
+        {
+
+        }
+
+        if(ImGui.IsItemHovered())
+            ImGui.SetTooltip("Customize+ Profile");
+        ImGui.SameLine();
+
+        ImGui.SetNextItemWidth(_lableWidthProfile);
+
+        if(capability.SelectedDesign.name is null)
+        {
+            capability.SetSelectedProfile();
+        }
+
+        using(var combo = ImRaii.Combo(_collectionLabelProfile, capability.SelectedDesign.name!))
+        {
+            if(combo.Success)
+            {
+                if(_isProfileOpen == false)
+                {
+                    _isProfileOpen = true;
+                    _profiles = capability.CustomizePlusService.GetProfiles();
+
+                    if(capability.SelectedDesign.id is null)
+                        capability.SetSelectedProfile();
+                }
+
+                if(_profiles is not null)
+                {
+                    foreach(var collection in _profiles)
+                    {
+                        bool isSelected = collection.UniqueId.Equals(capability.CurrentProfile.id);
+                        if(ImGui.Selectable(collection.Name, isSelected))
+                        {
+                            capability.ResetProfile();
+                            var (_, data) = capability.CustomizePlusService.GetProfile(collection.UniqueId);
+                            if(string.IsNullOrEmpty(data) == false)
+                            {
+                                capability.SelectedDesign = (collection.Name, collection.UniqueId);
+                                capability.SetProfile(data);
+                            }
+                        }
+                    }
+                }
+            }
+            else if(_isProfileOpen)
+            {
+                _isProfileOpen = false;
+                _profiles = [];
+            }
+        }
+
+        ImGui.SameLine();
+
+        if(ImBrio.FontIconButtonRight("actorappearancewidget_ProfileReset", FontAwesomeIcon.Undo, 1, "Reset C+ Profile"))
+        {
+            capability.ResetProfile();
+        }
     }
 
     public static void ResetNPCSelector()

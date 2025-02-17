@@ -8,7 +8,7 @@ using GameSkeleton = FFXIVClientStructs.FFXIV.Client.Graphics.Render.Skeleton;
 
 namespace Brio.Game.Posing.Skeletons;
 
-internal class Skeleton : IDisposable
+public class Skeleton : IDisposable
 {
     public List<PartialSkeleton> Partials { get; } = [];
 
@@ -191,7 +191,7 @@ internal class Skeleton : IDisposable
 }
 
 [Flags]
-internal enum CacheTypes
+public enum CacheTypes
 {
     None = 0,
     LastTransform = 1 << 0,
@@ -199,7 +199,7 @@ internal enum CacheTypes
     All = LastTransform | LastRawTransform,
 }
 
-internal enum SkeletonType
+public enum SkeletonType
 {
     Character,
     MainHandWeapon,

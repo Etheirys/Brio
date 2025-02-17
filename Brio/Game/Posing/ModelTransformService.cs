@@ -13,7 +13,7 @@ using StructsGameObject = FFXIVClientStructs.FFXIV.Client.Game.Object.GameObject
 
 namespace Brio.Game.Posing;
 
-internal unsafe class ModelTransformService : IDisposable
+public unsafe class ModelTransformService : IDisposable
 {
     public delegate void SetPositionDelegate(StructsGameObject* gameObject, float x, float y, float z);
     private readonly Hook<SetPositionDelegate> _setPositionHook = null!;

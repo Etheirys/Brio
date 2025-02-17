@@ -1,4 +1,5 @@
 ﻿using Brio.Config;
+using Brio.Game.Camera;
 using Brio.Game.GPose;
 using Dalamud.Game.ClientState.Keys;
 using Dalamud.Plugin.Services;
@@ -7,25 +8,27 @@ using System.Collections.Generic;
 
 namespace Brio.Input;
 
-internal class InputService
+public class InputService
 {
     private readonly IKeyState _keyState;
     private readonly IFramework _framework;
     private readonly ConfigurationService _configService;
     private readonly GPoseService _gPoseService;
+    private readonly VirtualCameraManager _virtualCameraManager;
 
     private readonly HashSet<KeyBindEvents> _eventsDown = new();
     private readonly Dictionary<KeyBindEvents, List<Action>> _listeners = new();
 
     public static InputService Instance { get; private set; } = null!;
 
-    public InputService(IKeyState keyState, IFramework framework, ConfigurationService configService, GPoseService gPoseService)
+    public InputService(IKeyState keyState, IFramework framework, ConfigurationService configService, VirtualCameraManager virtualCameraManager, GPoseService gPoseService)
     {
         Instance = this;
         _keyState = keyState;
         _framework = framework;
         _configService = configService;
         _gPoseService = gPoseService;
+        _virtualCameraManager = virtualCameraManager;
 
         _framework.Update += OnFrameworkUpdate;
     }
@@ -76,7 +79,16 @@ internal class InputService
 
     private void OnFrameworkUpdate(IFramework framework)
     {
-        if(_gPoseService.IsGPosing && _configService.Configuration.Input.EnableKeybinds)
+        if(_gPoseService.IsGPosing == false)
+            return;
+
+        bool disable = false;
+        if(_virtualCameraManager.CurrentCamera is not null && _virtualCameraManager.CurrentCamera.FreeCamValues.IsMovementEnabled)
+        {
+            disable = true;
+        }
+
+        if(_configService.Configuration.Input.EnableKeybinds && disable == false)
         {
             foreach(var evt in Enum.GetValues<KeyBindEvents>())
             {

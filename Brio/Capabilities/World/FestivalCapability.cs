@@ -7,7 +7,7 @@ using static Brio.Game.World.FestivalService;
 
 namespace Brio.Capabilities.World;
 
-internal class FestivalCapability : Capability
+public class FestivalCapability : Capability
 {
     private readonly FestivalService _festivalService;
 

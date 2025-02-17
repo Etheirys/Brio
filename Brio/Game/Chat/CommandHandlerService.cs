@@ -5,7 +5,7 @@ using System;
 
 namespace Brio.Game.Chat;
 
-internal class CommandHandlerService : IDisposable
+public class CommandHandlerService : IDisposable
 {
     private const string BrioCommandName = "/brio";
     private const string XATCommandName = "/xat";

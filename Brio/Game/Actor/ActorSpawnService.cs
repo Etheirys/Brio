@@ -1,9 +1,16 @@
-﻿using Brio.Core;
+﻿using Brio.Capabilities.Actor;
+using Brio.Capabilities.Posing;
+using Brio.Core;
+using Brio.Entities;
+using Brio.Files;
+using Brio.Game.Actor.Appearance;
 using Brio.Game.Actor.Extensions;
 using Brio.Game.Core;
 using Brio.Game.GPose;
+using Brio.Game.Posing;
 using Brio.Game.Types;
 using Brio.IPC;
+using Brio.Resources;
 using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Plugin.Services;
 using System;
@@ -15,7 +22,7 @@ using NativeCharacter = FFXIVClientStructs.FFXIV.Client.Game.Character.Character
 
 namespace Brio.Game.Actor;
 
-internal class ActorSpawnService : IDisposable
+public class ActorSpawnService : IDisposable
 {
     private readonly ObjectMonitorService _monitorService;
     private readonly IObjectTable _objectTable;
@@ -25,10 +32,14 @@ internal class ActorSpawnService : IDisposable
     private readonly ActorRedrawService _actorRedrawService;
     private readonly GlamourerService _glamourerService;
     private readonly TargetService _targetService;
+    private readonly EntityManager _entityManager;
+    private readonly PosingService _posingService;
+    private readonly ActorAppearanceService _actorAppearanceService;
+    private readonly CustomizePlusService _customizePlusService;
 
     private readonly Dictionary<ushort, SpawnFlags> _createdIndexes = [];
 
-    public unsafe ActorSpawnService(ObjectMonitorService monitorService, GlamourerService glamourerService, IObjectTable objectTable, IClientState clientState, IFramework framework, GPoseService gPoseService, ActorRedrawService actorRedrawService, TargetService targetService)
+    public unsafe ActorSpawnService(ObjectMonitorService monitorService, CustomizePlusService customizePlusService, ActorAppearanceService actorAppearanceService, PosingService posingService, GlamourerService glamourerService, EntityManager entityManager, IObjectTable objectTable, IClientState clientState, IFramework framework, GPoseService gPoseService, ActorRedrawService actorRedrawService, TargetService targetService)
     {
         _monitorService = monitorService;
         _objectTable = objectTable;
@@ -38,6 +49,10 @@ internal class ActorSpawnService : IDisposable
         _actorRedrawService = actorRedrawService;
         _glamourerService = glamourerService;
         _targetService = targetService;
+        _entityManager = entityManager;
+        _posingService = posingService;
+        _actorAppearanceService = actorAppearanceService;
+        _customizePlusService = customizePlusService;
 
         _monitorService.CharacterDestroyed += OnCharacterDestroyed;
         _gPoseService.OnGPoseStateChange += OnGPoseStateChanged;
@@ -125,6 +140,52 @@ internal class ActorSpawnService : IDisposable
         return false;
     }
 
+    public unsafe bool SpawnNewProp(out ICharacter? gamechara)
+    {
+        if(CreateCharacter(out ICharacter? chara, SpawnFlags.IsProp | SpawnFlags.CopyPosition, true))
+        {
+            _framework.RunUntilSatisfied(
+            () => chara.Native()->IsReadyToDraw(),
+            (__) =>
+            {
+                var entity = _entityManager.GetEntity(chara.Native());
+                if(entity is not null)
+                {
+                    entity.GetCapability<ActionTimelineCapability>().SetOverallSpeedOverride(0);
+
+                    var acf = JsonSerializer.Deserialize<AnamnesisCharaFile>(ResourceProvider.Instance.GetRawResourceString("Data.BrioPropChar.chara"));
+                    if(acf.Race == 0 && acf.ModelType == 0)
+                    {
+                        Brio.Log.Fatal("BrioPropChar was Invalid!!");
+                    }
+                    else
+                    {
+                        entity.GetCapability<ActorAppearanceCapability>().SetAppearanceAsTask(acf, AppearanceImportOptions.Default);
+                    }
+
+                    _framework.RunOnTick(() =>
+                    {
+                        entity.GetCapability<PosingCapability>().LoadResourcesPose("Data.BrioPropPose.pose");
+
+                        _framework.RunOnTick(() =>
+                        {
+                            entity.GetCapability<ActorAppearanceCapability>().AttachWeapon();
+                        }, delayTicks: 5);
+                    }, delayTicks: 5);
+                }
+            },
+                100,
+                dontStartFor: 2
+            );
+
+            gamechara = chara;
+            return true;
+        }
+
+        gamechara = null;
+        return false;
+    }
+
     public void ClearAll()
     {
         for(int i = ActorTableHelpers.GPoseStart; i <= ActorTableHelpers.GPoseEnd; i++)
@@ -151,6 +212,13 @@ internal class ActorSpawnService : IDisposable
     {
         if(go is null)
             return false;
+
+        _actorAppearanceService.RemoveFromLook(go);
+
+        if(_glamourerService.CheckForLock(go))
+            _glamourerService.UnlockAndRevertCharacter(go);
+
+        _customizePlusService.RemoveTemporaryProfile(go);
 
         Brio.Log.Debug($"Destroying gameobject: {go.ObjectIndex}...");
 
@@ -183,14 +251,14 @@ internal class ActorSpawnService : IDisposable
     {
         if(character.CalculateCompanionInfo(out var info))
         {
-            InternalSetCompanion(character, info.Kind, 0);
+            publicSetCompanion(character, info.Kind, 0);
         }
     }
 
     public unsafe void CreateCompanion(ICharacter character, CompanionContainer container)
     {
         DestroyCompanion(character);
-        InternalSetCompanion(character, container.Kind, (short)container.Id);
+        publicSetCompanion(character, container.Kind, (short)container.Id);
 
         // We need to wait for the companion to be ready before we can draw it.
         var companionNative = &character.Native()->CompanionObject->Character.GameObject;
@@ -202,7 +270,7 @@ internal class ActorSpawnService : IDisposable
         );
     }
 
-    private unsafe void InternalSetCompanion(ICharacter character, CompanionKind kind, short id)
+    private unsafe void publicSetCompanion(ICharacter character, CompanionKind kind, short id)
     {
         var native = character.Native();
         switch(kind)
@@ -267,7 +335,7 @@ internal class ActorSpawnService : IDisposable
     {
         if(_createdIndexes.TryGetValue(objectIndex, out var spawnFlags))
         {
-            Brio.Log.Warning($"GetSpawnFlagsByIndex {objectIndex} {spawnFlags}");
+            Brio.Log.Verbose($"GetSpawnFlagsByIndex {objectIndex} {spawnFlags}");
             return spawnFlags;
         }
 
@@ -308,14 +376,16 @@ internal class ActorSpawnService : IDisposable
 }
 
 [Flags]
-enum SpawnFlags
+public enum SpawnFlags
 {
     None = 0,
     ReserveCompanionSlot = 1 << 0,
     CopyPosition = 1 << 1,
-    AsProp = 1 << 2,
-    SetDefaultAppearance = 1 << 3,
+    IsProp = 1 << 2,
+    IsEffect = 1 << 3,
+    SetDefaultAppearance = 1 << 4,
 
-    Prop = AsProp | SetDefaultAppearance,
+    Prop = IsProp | SetDefaultAppearance | CopyPosition,
+    Effect = IsEffect | SetDefaultAppearance | CopyPosition,
     Default = CopyPosition,
 }

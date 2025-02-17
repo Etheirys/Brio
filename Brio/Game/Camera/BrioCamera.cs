@@ -5,7 +5,7 @@ using System.Runtime.InteropServices;
 using GameCamera = FFXIVClientStructs.FFXIV.Client.Game.Camera;
 
 [StructLayout(LayoutKind.Explicit, Size = 0x2B0)]
-internal struct BrioCamera
+public struct BrioCamera
 {
     [FieldOffset(0x0)]
     public GameCamera Camera;

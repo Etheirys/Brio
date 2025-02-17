@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MessagePack;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -8,10 +9,12 @@ using System.Text;
 namespace Brio.Files;
 
 [Serializable]
+[MessagePackObject(keyAsPropertyName: true)]
 public record CameraKeyframe(int Frame, Vector3 Position, Quaternion Rotation, float FoV);
 
 [Serializable]
-public class XATCameraFile
+[MessagePackObject(keyAsPropertyName: true)]
+public partial class XATCameraFile
 {
     public List<CameraKeyframe> CameraFrames { get; private set; }
 

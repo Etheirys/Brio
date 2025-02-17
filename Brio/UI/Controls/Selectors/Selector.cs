@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace Brio.UI.Controls.Selectors;
 
-internal abstract class Selector<T> where T : class
+public abstract class Selector<T> where T : class
 {
     public T? Selected => _selected;
     public T? SoftSelected => _softSelected;
@@ -266,7 +266,7 @@ internal abstract class Selector<T> where T : class
 }
 
 [Flags]
-internal enum SelectorFlags
+public enum SelectorFlags
 {
     None = 0,
     AllowSearch = 1 << 0,

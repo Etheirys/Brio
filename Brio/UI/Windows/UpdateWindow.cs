@@ -9,7 +9,7 @@ using System.Text;
 
 namespace Brio.UI.Windows;
 
-internal class UpdateWindow : Window
+public class UpdateWindow : Window
 {
     private readonly List<string> _changelogTest = [];
     private const float _closeButtonWidth = 210f;
@@ -64,7 +64,7 @@ internal class UpdateWindow : Window
 
         ImGui.SetCursorPosX(((ImBrio.GetRemainingWidth() - _closeButtonWidth) / 2));
 
-        if(ImBrio.Button("Close", Dalamud.Interface.FontAwesomeIcon.SquareXmark, new Vector2(_closeButtonWidth, 0)))
+        if(ImBrio.Button("Close", Dalamud.Interface.FontAwesomeIcon.SquareXmark, new Vector2(_closeButtonWidth, 0), centerTest: true))
         {
             this.IsOpen = false;
         }

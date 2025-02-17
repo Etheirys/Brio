@@ -4,7 +4,7 @@ using System.Runtime.InteropServices;
 namespace Brio.Game.Actor.Appearance;
 
 [StructLayout(LayoutKind.Explicit, Size = Count)]
-internal unsafe struct ActorEquipment
+public unsafe struct ActorEquipment
 {
     public const int Count = 0x50;
 

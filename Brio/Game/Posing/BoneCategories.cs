@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Brio.Game.Posing;
 
-internal class BoneCategories
+public class BoneCategories
 {
     public IReadOnlyList<BoneCategory> Categories => _categories;
 
@@ -21,16 +21,16 @@ internal class BoneCategories
         }
     }
 
-    internal record class BoneCategory(string Id, string Name, BoneCategoryTypes Type, List<string> Bones);
+    public record class BoneCategory(string Id, string Name, BoneCategoryTypes Type, List<string> Bones);
 
     private class BoneCategoryFile
     {
         public Dictionary<string, BoneCategoryFileEntry> Categories { get; set; } = [];
 
-        internal record class BoneCategoryFileEntry(BoneCategoryTypes Type, List<string> Bones);
+        public record class BoneCategoryFileEntry(BoneCategoryTypes Type, List<string> Bones);
     }
 
-    internal enum BoneCategoryTypes
+    public enum BoneCategoryTypes
     {
         Filter
     }

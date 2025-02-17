@@ -1,19 +1,20 @@
-﻿using Brio.Entities.Actor;
+﻿using Brio.Entities.Core;
 using Dalamud.Interface.Utility.Raii;
 using ImGuiNET;
 using System.Numerics;
 
 namespace Brio.UI.Controls;
-internal class RenameActorModal
+
+public class RenameActorModal
 {
     static Vector2 MinimumSize = new(400, 95);
     static bool IsOpen = false;
 
-    static ActorEntity? currentActorEntity;
+    static Entity? currentActorEntity;
 
     static string currentActorName = string.Empty;
 
-    public static bool Open(ActorEntity actor)
+    public static bool Open(Entity actor)
     {
         if(actor is not null)
         {

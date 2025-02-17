@@ -20,7 +20,7 @@ using System.Numerics;
 using System.Threading.Tasks;
 
 namespace Brio.IPC;
-internal class BrioIPCService : IDisposable
+public class BrioIPCService : IDisposable
 {
     public static readonly (int, int) CurrentApiVersion = (2, 0);
 
@@ -318,13 +318,11 @@ internal class BrioIPCService : IDisposable
             }
 
             return character;
-
         }
 
         return null;
     }
 
-    private Task<bool> DespawnActorAsync_Impl(IGameObject gameObject) => _framework.RunOnTick(() => DespawnActor(gameObject));
     private bool DespawnActor(IGameObject gameObject)
     {
         if(_gPoseService.IsGPosing == false) return false;
@@ -429,7 +427,7 @@ internal class BrioIPCService : IDisposable
                     }
                     else
                     {
-                        posingCapability.ImportPose(JsonSerializer.Deserialize<PoseFile>(json), null, asIPCpose: false);
+                        posingCapability.ImportPose(JsonSerializer.Deserialize<PoseFile>(json), null, asIPCpose: true);
                     }
 
                     return true;

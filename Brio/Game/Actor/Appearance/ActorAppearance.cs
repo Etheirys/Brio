@@ -5,7 +5,7 @@ using DalamudCharacter = Dalamud.Game.ClientState.Objects.Types.ICharacter;
 
 namespace Brio.Game.Actor.Appearance;
 
-internal struct ActorAppearance()
+public struct ActorAppearance()
 {
     public int ModelCharaId;
     public byte Facewear;

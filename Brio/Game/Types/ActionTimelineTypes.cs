@@ -6,7 +6,7 @@ using OneOf.Types;
 namespace Brio.Game.Types;
 
 [GenerateOneOf]
-internal partial class ActionTimelineUnion : OneOfBase<BrioActionTimeline, None>
+public partial class ActionTimelineUnion : OneOfBase<BrioActionTimeline, None>
 {
     public static implicit operator ActionTimelineUnion(ActionTimelineId actionTimelineId)
     {
@@ -17,7 +17,7 @@ internal partial class ActionTimelineUnion : OneOfBase<BrioActionTimeline, None>
     }
 }
 
-internal record struct ActionTimelineId(ushort Id)
+public record struct ActionTimelineId(ushort Id)
 {
     public static ActionTimelineId None { get; } = new(0);
 

@@ -2,6 +2,7 @@
 using Brio.Entities;
 using Brio.Game.Actor.Appearance;
 using Brio.Game.Actor.Extensions;
+using Brio.Game.Camera;
 using Brio.Game.GPose;
 using Brio.IPC;
 using Dalamud.Game;
@@ -11,6 +12,8 @@ using Dalamud.Plugin.Services;
 using FFXIVClientStructs.FFXIV.Client.Game.Character;
 using FFXIVClientStructs.FFXIV.Client.Graphics.Scene;
 using System;
+using System.Collections.Generic;
+using System.Numerics;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using static Brio.Game.Actor.ActorRedrawService;
@@ -18,13 +21,15 @@ using DrawDataContainer = FFXIVClientStructs.FFXIV.Client.Game.Character.DrawDat
 
 namespace Brio.Game.Actor;
 
-internal class ActorAppearanceService : IDisposable
+public class ActorAppearanceService : IDisposable
 {
     private readonly GPoseService _gPoseService;
     private readonly ConfigurationService _configurationService;
     private readonly ActorRedrawService _redrawService;
     private readonly GlamourerService _glamourerService;
+    private readonly VirtualCameraManager _virtualCameraManager;
     private readonly EntityManager _entityManager;
+    private readonly IObjectTable _objectTable;
 
     private delegate byte EnforceKindRestrictionsDelegate(nint a1, nint a2);
     private readonly Hook<EnforceKindRestrictionsDelegate> _enforceKindRestrictionsHook = null!;
@@ -36,18 +41,21 @@ internal class ActorAppearanceService : IDisposable
     private readonly Hook<UpdateTintDelegate> _updateTintHook = null!;
 
     private unsafe delegate* unmanaged<DrawDataContainer*, byte, byte, void> _setFacewear;
+    private unsafe delegate* unmanaged<nint, LookAtTarget*, uint, nint, void> _updateLookAt;
 
     private uint _forceNpcHackCount = 0;
 
     public bool CanTint => _configurationService.Configuration.Appearance.EnableTinting;
 
-    public unsafe ActorAppearanceService(GPoseService gPoseService, ConfigurationService configurationService, ActorRedrawService redrawService, GlamourerService glamourerService, EntityManager entityManager, ISigScanner sigScanner, IGameInteropProvider hooks)
+    public unsafe ActorAppearanceService(GPoseService gPoseService, VirtualCameraManager virtualCameraManager, IObjectTable objectTable, ConfigurationService configurationService, ActorRedrawService redrawService, GlamourerService glamourerService, EntityManager entityManager, ISigScanner sigScanner, IGameInteropProvider hooks)
     {
         _gPoseService = gPoseService;
         _configurationService = configurationService;
         _redrawService = redrawService;
         _glamourerService = glamourerService;
         _entityManager = entityManager;
+        _objectTable = objectTable;
+        _virtualCameraManager = virtualCameraManager;
 
         var enforceKindRestrictionsAddress = sigScanner.ScanText("E8 ?? ?? ?? ?? 41 B0 ?? 48 8B D6 48 8B");
         _enforceKindRestrictionsHook = hooks.HookFromAddress<EnforceKindRestrictionsDelegate>(enforceKindRestrictionsAddress, EnforceKindRestrictionsDetour);
@@ -57,28 +65,115 @@ internal class ActorAppearanceService : IDisposable
         _updateWetnessHook = hooks.HookFromAddress<UpdateWetnessDelegate>(updateWetnessAddress, UpdateWetnessDetour);
         _updateWetnessHook.Enable();
 
-        var updateTintHook = Marshal.ReadInt64((nint)(CharacterBase.StaticVirtualTablePointer) + 0xC0);
-        _updateTintHook = hooks.HookFromAddress<UpdateTintDelegate>((nint)updateTintHook, UpdateTintDetour);
+        var updateTintHookAddress = Marshal.ReadInt64((nint)(CharacterBase.StaticVirtualTablePointer) + 0xC0);
+        _updateTintHook = hooks.HookFromAddress<UpdateTintDelegate>((nint)updateTintHookAddress, UpdateTintDetour);
         _updateTintHook.Enable();
 
         var setFacewearAddress = sigScanner.ScanText("E8 ?? ?? ?? ?? 41 FF C7 41 83 FF ?? 72 ?? 48");
         _setFacewear = (delegate* unmanaged<DrawDataContainer*, byte, byte, void>)setFacewearAddress;
+
+        var updateFaceTrackerAddress = sigScanner.ScanText("E8 ?? ?? ?? ?? 8B D7 48 8B CB E8 ?? ?? ?? ?? 41 ?? ?? 8B D7 48 ?? ?? 48 ?? ?? ?? ?? 48 83 ?? ?? 5F");
+        _updateLookAt = (delegate* unmanaged<nint, LookAtTarget*, uint, nint, void>)updateFaceTrackerAddress;
+
+        var actorLookAtLoopAddress = sigScanner.ScanText("E8 ?? ?? ?? ?? 48 83 C3 08 48 83 EF 01 75 CF 48 ?? ?? ?? ?? 48");
+        _actorLookAtLoop = hooks.HookFromAddress<ActorLookAtLoopDelegate>(actorLookAtLoopAddress, ActorLookAtLoopDetour);
+        _actorLookAtLoop.Enable();
     }
 
-    public void PushForceNpcHack() => ++_forceNpcHackCount;
-    public void PopForceNpcHack()
+    public delegate nint ActorLookAtLoopDelegate(nint a1);
+    public Hook<ActorLookAtLoopDelegate> _actorLookAtLoop = null!;
+
+    Dictionary<ulong, LookAtDataHolder> _lookAtHandles = [];
+
+    public unsafe IntPtr ActorLookAtLoopDetour(nint a1)
     {
-        if(_forceNpcHackCount == 0)
-            throw new Exception("Invalid _forceNpcHack count (is already 0)");
+        if(_gPoseService.IsGPosing)
+        {
+            var obj = _objectTable.CreateObjectReference((a1 - 0xD00));
+            if(obj is not null && obj.IsValid() && obj.IsGPose() && _lookAtHandles.ContainsKey(obj.GameObjectId))
+            {
+                actorLook(obj, _lookAtHandles[obj.GameObjectId]);
+            }
+        }
 
-        --_forceNpcHackCount;
+        return _actorLookAtLoop.Original(a1);
     }
 
-    public IDisposable ForceNpcHack()
+    public unsafe void actorLook(IGameObject targetActor, LookAtDataHolder lookAtDataHolder)
     {
-        PushForceNpcHack();
-        return new HackDisposer(this);
+        LookAtSource lookAt = lookAtDataHolder.Target;
+
+        lookAt.Eyes.LookAtTarget.LookMode = (uint)lookAtDataHolder.LookAtMode;
+        lookAt.Head.LookAtTarget.LookMode = (uint)lookAtDataHolder.LookAtMode;
+        lookAt.Body.LookAtTarget.LookMode = (uint)lookAtDataHolder.LookAtMode;
+
+        if(lookAtDataHolder.LookatType == LookAtTargetMode.Camera)
+        {
+            var camera = _virtualCameraManager?.CurrentCamera;
+
+            if(camera is null)
+                return;
+
+            if(lookAtDataHolder.lookAtTargetType.HasFlag(LookAtTargetType.Eyes))
+                lookAt.Eyes.LookAtTarget.Position = camera.RealPosition;
+            if(lookAtDataHolder.lookAtTargetType.HasFlag(LookAtTargetType.Body))
+                lookAt.Head.LookAtTarget.Position = camera.RealPosition;
+            if(lookAtDataHolder.lookAtTargetType.HasFlag(LookAtTargetType.Head))
+                lookAt.Body.LookAtTarget.Position = camera.RealPosition;
+        }
+        else if(lookAtDataHolder.LookatType == LookAtTargetMode.None)
+            return;
+
+        if(lookAtDataHolder.lookAtTargetType.HasFlag(LookAtTargetType.Eyes))
+            _updateLookAt(targetActor.Address + 0xD10, &lookAt.Eyes.LookAtTarget, (uint)LookEditType.Eyes, 0);
+        if(lookAtDataHolder.lookAtTargetType.HasFlag(LookAtTargetType.Body))
+            _updateLookAt(targetActor.Address + 0xD10, &lookAt.Body.LookAtTarget, (uint)LookEditType.Body, 0);
+        if(lookAtDataHolder.lookAtTargetType.HasFlag(LookAtTargetType.Head))
+            _updateLookAt(targetActor.Address + 0xD10, &lookAt.Head.LookAtTarget, (uint)LookEditType.Head, 0);
     }
+
+    public unsafe void TESTactorlookClear(IGameObject gameobj)
+    {
+        if(_lookAtHandles.TryGetValue(gameobj.GameObjectId, out var obj))
+        {
+            obj.LookAtMode = LookMode.None;
+            obj.lookAtTargetType = LookAtTargetType.All;
+            obj.LookatType = LookAtTargetMode.None;
+        }
+        else
+        {
+
+        }
+    }
+
+    public unsafe void TESTactorlook(IGameObject gameobj)
+    {
+        if(_lookAtHandles.TryGetValue(gameobj.GameObjectId, out var obj))
+        {
+            obj.LookAtMode = LookMode.Position;
+            obj.lookAtTargetType = LookAtTargetType.All;
+            obj.LookatType = LookAtTargetMode.Camera;
+        }
+        else
+        {
+            _lookAtHandles.Add(gameobj.GameObjectId, new LookAtDataHolder
+            {
+                Target = new(),
+                LookAtMode = LookMode.Position,
+                lookAtTargetType = LookAtTargetType.All,
+                LookatType = LookAtTargetMode.Camera
+            });
+        }
+    }
+    public void RemoveFromLook(IGameObject gameobj)
+    {
+        if(_lookAtHandles.ContainsKey(gameobj.GameObjectId))
+        {
+            _lookAtHandles.Remove(gameobj.GameObjectId);
+        }
+    }
+
+    //
 
     public async Task<RedrawResult> Redraw(ICharacter character)
     {
@@ -353,13 +448,94 @@ internal class ActorAppearanceService : IDisposable
         _enforceKindRestrictionsHook.Dispose();
         _updateWetnessHook.Dispose();
         _updateTintHook.Dispose();
+        _actorLookAtLoop.Dispose();
     }
+}
 
-    private class HackDisposer(ActorAppearanceService service) : IDisposable
+public record class LookAtDataHolder
+{
+    public LookAtTargetMode LookatType;
+
+    public LookAtTargetType lookAtTargetType;
+    public LookMode LookAtMode;
+
+    public LookAtSource Target;
+
+    public void SetTarget(Vector3 vector, LookAtTargetType targetType)
     {
-        public void Dispose()
-        {
-            service.PopForceNpcHack();
-        }
+        if(targetType.HasFlag(LookAtTargetType.Eyes))
+            Target.Eyes.LookAtTarget.Position = vector;
+        if(targetType.HasFlag(LookAtTargetType.Body))
+            Target.Head.LookAtTarget.Position = vector;
+        if(targetType.HasFlag(LookAtTargetType.Head))
+            Target.Body.LookAtTarget.Position = vector;
     }
+}
+
+public enum LookAtTargetMode
+{
+    None,
+    Forward,
+    Camera,
+    Position
+}
+
+public class LookAtData
+{
+    public uint EntityIdSource;
+    public LookAtSource LookAtSource;
+
+    public LookMode LookMode;
+    public LookAtTargetType TargetType;
+
+    public uint TargetEntityId;
+    public Vector3 TargetPosition;
+}
+
+[Flags]
+public enum LookAtTargetType
+{
+    Body = 0,
+    Head = 1,
+    Eyes = 2,
+
+    Face = Head | Eyes,
+    All = Body | Head | Eyes
+}
+
+[StructLayout(LayoutKind.Sequential)]
+public struct LookAtSource
+{
+    public LookAtType Body;
+    public LookAtType Head;
+    public LookAtType Eyes;
+    public LookAtType Unknown;
+}
+
+[StructLayout(LayoutKind.Explicit)]
+public struct LookAtType
+{
+    [FieldOffset(0x30)] public LookAtTarget LookAtTarget;
+}
+
+[StructLayout(LayoutKind.Explicit)]
+public struct LookAtTarget
+{
+    [FieldOffset(0x08)] public uint LookMode;
+    [FieldOffset(0x10)] public Vector3 Position;
+}
+
+public enum LookEditType
+{
+    Body = 0,
+    Head = 1,
+    Eyes = 2
+}
+
+public enum LookMode
+{
+    None = 0,
+    Frozen = 1,
+    Pivot = 2,
+    Position = 3,
 }

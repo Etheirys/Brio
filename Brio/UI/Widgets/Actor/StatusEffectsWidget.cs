@@ -12,7 +12,7 @@ using System.Numerics;
 
 namespace Brio.UI.Widgets.Actor;
 
-internal class StatusEffectsWidget(StatusEffectCapability capability) : Widget<StatusEffectCapability>(capability)
+public class StatusEffectsWidget(StatusEffectCapability capability) : Widget<StatusEffectCapability>(capability)
 {
     public override string HeaderName => "Status Effects";
 

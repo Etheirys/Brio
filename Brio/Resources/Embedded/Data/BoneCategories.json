@@ -111,6 +111,8 @@
     "ears": {
       "Type": "Filter",
       "Bones": [
+        "n_ear_a_",
+        "n_ear_b_",
         "n_ear_",
         "j_mimi",
         "j_zer"
@@ -174,6 +176,35 @@
       "Type": "Filter",
       "Bones": [
         "iv_"
+      ]
+    },
+     "ex": {
+      "Type": "Filter",
+      "Bones": [
+        "j_f_noanim_ago",
+        "J_f_eyeprm_01_",
+        "j_f_eyeprm_02_",
+        "j_f_irisprm_",
+        "j_f_irisprm_",
+        "j_f_noanim_eyesize_",
+        "j_f_eyeprmroll_r"
+      ]
+    },
+    "legacy": {
+      "Type": "Filter",
+      "Bones": [
+        "j_ago",
+        "j_f_dmab_",
+        "j_f_umab_",
+        "j_f_memoto",
+        "j_f_miken_r",
+        "j_f_miken_l",
+        "j_f_ulip_b",
+        "j_f_lip_l",
+        "j_f_lip_r",
+        "j_f_dlip_b",
+        "j_f_dlip_a",
+        "j_f_ulip_a"
       ]
     },
     "other": {

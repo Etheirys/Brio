@@ -6,7 +6,7 @@ using OneOf.Types;
 namespace Brio.Game.Types;
 
 [GenerateOneOf]
-internal partial class FacewearUnion : OneOfBase<Glasses, None>
+public partial class FacewearUnion : OneOfBase<Glasses, None>
 {
     public static implicit operator FacewearUnion(FacewearId facewearId)
     {
@@ -17,7 +17,7 @@ internal partial class FacewearUnion : OneOfBase<Glasses, None>
     }
 }
 
-internal record struct FacewearId(byte Id)
+public record struct FacewearId(byte Id)
 {
     public static FacewearId None { get; } = new(0);
 

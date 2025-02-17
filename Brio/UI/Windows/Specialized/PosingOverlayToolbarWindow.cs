@@ -15,7 +15,7 @@ using System.Numerics;
 
 namespace Brio.UI.Windows.Specialized;
 
-internal class PosingOverlayToolbarWindow : Window
+public class PosingOverlayToolbarWindow : Window
 {
     private readonly PosingOverlayWindow _overlayWindow;
     private readonly EntityManager _entityManager;
@@ -38,6 +38,11 @@ internal class PosingOverlayToolbarWindow : Window
         _overlayTransformWindow = overlayTransformWindow;
         _posingService = posingService;
         _configurationService = configurationService;
+
+        this.AllowClickthrough = false;
+        this.AllowPinning = false;
+        this.ForceMainWindow = true;
+
         ShowCloseButton = false;
     }
 

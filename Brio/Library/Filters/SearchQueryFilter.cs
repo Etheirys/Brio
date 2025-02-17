@@ -1,6 +1,6 @@
 ﻿namespace Brio.Library.Filters;
 
-internal class SearchQueryFilter : FilterBase
+public class SearchQueryFilter : FilterBase
 {
     public string[]? Query;
 

@@ -3,7 +3,7 @@ using ImGuiNET;
 
 namespace Brio.Library.Sources;
 
-internal abstract class SourceBase : GroupEntryBase
+public abstract class SourceBase : GroupEntryBase
 {
     public SourceBase()
         : base(null)

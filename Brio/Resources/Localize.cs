@@ -3,7 +3,7 @@ using System.Text.Json;
 
 namespace Brio.Resources;
 
-internal static class Localize
+public static class Localize
 {
     private static readonly Dictionary<string, string> _stringDb = [];
 

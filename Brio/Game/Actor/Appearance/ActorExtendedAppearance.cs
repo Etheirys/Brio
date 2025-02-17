@@ -2,7 +2,7 @@
 
 namespace Brio.Game.Actor.Appearance;
 
-internal struct ActorExtendedAppearance()
+public struct ActorExtendedAppearance()
 {
     public float Transparency = 1.0f;
     public float Wetness = 0.0f;

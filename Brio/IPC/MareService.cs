@@ -1,54 +1,60 @@
 ﻿using Brio.Config;
+using Brio.Game.Core;
 using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Ipc;
 using System;
-using System.Linq;
+using System.Collections.Generic;
 
 namespace Brio.IPC;
 
-internal class MareService : IDisposable
+public class MareService : BrioIPC
 {
-    public bool IsMareAvailable { get; private set; } = false;
+    public override string Name { get; } = "Mare Synchronos";
+
+    public override bool IsAvailable
+        => CheckStatus() == IPCStatus.Available;
+
+    public override bool AllowIntegration
+        => _configurationService.Configuration.IPC.AllowMareIntegration;
+
+    public override int APIMajor => 1;
+    public override int APIMinor => 0;
+
+    public override (int Major, int Minor) GetAPIVersion()
+        => (1, 0);
+
+    public override IDalamudPluginInterface GetPluginInterface()
+        => _pluginInterface;
+
+    //
+    //
 
     private readonly IDalamudPluginInterface _pluginInterface;
     private readonly ConfigurationService _configurationService;
+    private readonly ObjectMonitorService _objectMonitorService;
 
     private readonly ICallGateSubscriber<string, IGameObject, bool> _mareApplyMcdf;
+    private readonly ICallGateSubscriber<List<nint>> _mareGetHandledAddresses;
 
-    public MareService(IDalamudPluginInterface pluginInterface, ConfigurationService configurationService)
+    public MareService(IDalamudPluginInterface pluginInterface, ObjectMonitorService objectMonitorService, ConfigurationService configurationService)
     {
         _pluginInterface = pluginInterface;
         _configurationService = configurationService;
+        _objectMonitorService = objectMonitorService;
 
         _mareApplyMcdf = pluginInterface.GetIpcSubscriber<string, IGameObject, bool>("MareSynchronos.LoadMcdf");
+        _mareGetHandledAddresses = pluginInterface.GetIpcSubscriber<List<nint>>("MareSynchronos.GetHandledAddresses");
 
-        RefreshMareStatus();
+        OnConfigurationChanged();
 
-        _configurationService.OnConfigurationChanged += RefreshMareStatus;
-    }
-
-    public void RefreshMareStatus()
-    {
-        if(_configurationService.Configuration.IPC.AllowMareIntegration)
-        {
-            IsMareAvailable = ConnectToMare();
-        }
-        else
-        {
-            IsMareAvailable = false;
-        }
+        _configurationService.OnConfigurationChanged += OnConfigurationChanged;
     }
 
     public bool LoadMcdfAsync(string fileName, IGameObject target)
     {
-        RefreshMareStatus();
-
-        if(IsMareAvailable == false)
-        {
-            Brio.Log.Error($"Failed load MCDF file, Mare is not available");
+        if(IsAvailable == false || target is null)
             return false;
-        }
 
         try
         {
@@ -61,31 +67,40 @@ internal class MareService : IDisposable
         }
     }
 
-    private bool ConnectToMare()
+    public bool HandledByMare(IGameObject obj)
     {
-        try
-        {
-            bool mareInstalled = _pluginInterface.InstalledPlugins.Any(x => x.Name == "Mare Synchronos" && x.IsLoaded == true);
-
-            if(!mareInstalled)
-            {
-                Brio.Log.Debug("Mare Synchronos not present");
-                return false;
-            }
-
-            Brio.Log.Debug("Mare Synchronos integration initialized");
-
-            return true;
-        }
-        catch(Exception ex)
-        {
-            Brio.Log.Debug(ex, "Mare Synchronos initialize error");
+        if(IsAvailable == false || obj is null)
             return false;
+
+
+        Brio.Log.Error($"HandledByMareIPC");
+
+        var pointers = _mareGetHandledAddresses.InvokeFunc();
+
+        foreach(var address in pointers)
+        {
+            try
+            {
+                Brio.Log.Error($"HandledByMareIPC address: {address}");
+
+                var mareObj = _objectMonitorService.ObjectTable.CreateObjectReference(address);
+                if(mareObj is not null && mareObj.ObjectIndex == obj.ObjectIndex)
+                {
+                    return true;
+                }
+            }
+            catch
+            {
+            }
         }
+        return false;
     }
 
-    public void Dispose()
+    private void OnConfigurationChanged()
+        => CheckStatus();
+
+    public override void Dispose()
     {
-        _configurationService.OnConfigurationChanged -= RefreshMareStatus;
+        _configurationService.OnConfigurationChanged -= OnConfigurationChanged;
     }
 }

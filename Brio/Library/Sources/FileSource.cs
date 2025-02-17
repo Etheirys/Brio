@@ -14,7 +14,7 @@ using System.Runtime.InteropServices;
 
 namespace Brio.Library.Sources;
 
-internal class FileSource : SourceBase
+public class FileSource : SourceBase
 {
     public readonly string DirectoryPath = string.Empty;
 
@@ -57,9 +57,9 @@ internal class FileSource : SourceBase
     public override IDalamudTextureWrap? Icon => ResourceProvider.Instance.GetResourceImage("Images.ProviderIcon_Directory.png");
     public override string Description => DirectoryPath;
 
-    protected override string GetInternalId()
+    protected override string GetpublicId()
     {
-        // All file sources share the same internal Id, as the files themselves are unique on the
+        // All file sources share the same public Id, as the files themselves are unique on the
         // file system.
         return $"File";
     }
@@ -108,7 +108,7 @@ public interface IFileMetadata
     void GetAutoTags(ref TagCollection tags);
 }
 
-internal class DirectoryEntry : GroupEntryBase
+public class DirectoryEntry : GroupEntryBase
 {
     private string _name;
     private IDalamudTextureWrap _icon;
@@ -130,7 +130,7 @@ internal class DirectoryEntry : GroupEntryBase
     public override string Name => _name;
     public override IDalamudTextureWrap? Icon => _icon;
 
-    protected override string GetInternalId()
+    protected override string GetpublicId()
     {
         return _path;
     }
@@ -154,7 +154,7 @@ internal class DirectoryEntry : GroupEntryBase
     }
 }
 
-internal class FileEntry : ItemEntryBase
+public class FileEntry : ItemEntryBase
 {
     public readonly string FilePath;
 
@@ -276,7 +276,7 @@ internal class FileEntry : ItemEntryBase
         _previewImage?.Dispose();
     }
 
-    protected override string GetInternalId()
+    protected override string GetpublicId()
     {
         return FilePath;
     }

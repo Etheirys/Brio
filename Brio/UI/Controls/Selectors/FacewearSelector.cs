@@ -7,7 +7,7 @@ using System.Numerics;
 
 namespace Brio.UI.Controls.Selectors;
 
-internal class FacewearSelector(string id) : Selector<FacewearUnion>(id)
+public class FacewearSelector(string id) : Selector<FacewearUnion>(id)
 {
     protected override Vector2 MinimumListSize { get; } = new(300, 300);
 

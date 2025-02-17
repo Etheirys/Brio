@@ -8,6 +8,7 @@ using Brio.Game.Chat;
 using Brio.Game.Core;
 using Brio.Game.Cutscene;
 using Brio.Game.GPose;
+using Brio.Game.Input;
 using Brio.Game.Posing;
 using Brio.Game.Scene;
 using Brio.Game.World;
@@ -115,12 +116,15 @@ public class Brio : IDalamudPlugin
         serviceCollection.AddSingleton<WelcomeService>();
         serviceCollection.AddSingleton<InputService>();
         serviceCollection.AddSingleton<SceneService>();
+        serviceCollection.AddSingleton<ProjectSystem>();
+        serviceCollection.AddSingleton<AutoSaveService>();
 
         // IPC
         serviceCollection.AddSingleton<BrioIPCService>();
         serviceCollection.AddSingleton<PenumbraService>();
         serviceCollection.AddSingleton<GlamourerService>();
         serviceCollection.AddSingleton<MareService>();
+        serviceCollection.AddSingleton<CustomizePlusService>();
 
         // Web
         serviceCollection.AddSingleton<WebService>();
@@ -148,8 +152,9 @@ public class Brio : IDalamudPlugin
         serviceCollection.AddSingleton<CameraService>();
         serviceCollection.AddSingleton<ObjectMonitorService>();
         serviceCollection.AddSingleton<PhysicsService>();
+        serviceCollection.AddSingleton<GameInputService>();
+        serviceCollection.AddSingleton<VirtualCameraManager>();
 
-        serviceCollection.AddSingleton<VirtualCamera>();
         serviceCollection.AddSingleton<CutsceneManager>();
 
         // Library
@@ -172,6 +177,7 @@ public class Brio : IDalamudPlugin
         serviceCollection.AddSingleton<MainWindow>();
         serviceCollection.AddSingleton<SettingsWindow>();
         serviceCollection.AddSingleton<InfoWindow>();
+        serviceCollection.AddSingleton<ProjectWindow>();
         serviceCollection.AddSingleton<UpdateWindow>();
         serviceCollection.AddSingleton<LibraryWindow>();
         serviceCollection.AddSingleton<ActorAppearanceWindow>();

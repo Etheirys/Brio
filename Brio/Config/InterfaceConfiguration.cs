@@ -1,6 +1,6 @@
 ﻿namespace Brio.Config;
 
-internal class InterfaceConfiguration
+public class InterfaceConfiguration
 {
     public OpenBrioBehavior OpenBrioBehavior { get; set; } = OpenBrioBehavior.OnGPoseEnter;
     public bool ShowInGPose { get; set; } = true;

@@ -16,7 +16,7 @@ using System.Numerics;
 
 namespace Brio.Game.Cutscene;
 
-internal class CutsceneManager : IDisposable
+public class CutsceneManager : IDisposable
 {
     private const double FRAME_STEP = 33.33333333333333;
 
@@ -40,21 +40,18 @@ internal class CutsceneManager : IDisposable
 
     public bool IsRunning => Stopwatch.IsRunning;
 
-    public bool DelayStart = false;
     public int DelayTime = 0;
+    public bool DelayStart = false;
 
-    public bool DelayAnimationStart = false;
     public int DelayAnimationTime = 0;
+    public bool DelayAnimationStart = false;
 
+    public VirtualCamera VirtualCamera { get; } = new VirtualCamera(300);
     public CutsceneCameraSettings CameraSettings { get; } = new();
-    public VirtualCamera VirtualCamera { get; }
+    public XATCameraFile? CameraPath { get; set; } = null;
 
-    public XATCameraFile? CameraPath { get; set; }
-
-    public CutsceneManager(GPoseService gPoseService, VirtualCamera virtualCamera, EntityManager entityManager, ITargetManager targetManager, IFramework framework)
+    public CutsceneManager(GPoseService gPoseService, EntityManager entityManager, ITargetManager targetManager, IFramework framework)
     {
-        VirtualCamera = virtualCamera;
-
         _targetManager = targetManager;
         _gPoseService = gPoseService;
         _entityManager = entityManager;
@@ -123,7 +120,7 @@ internal class CutsceneManager : IDisposable
 
         Stopwatch.Reset();
         Stopwatch.Start();
-        VirtualCamera.IsActive = true;
+        VirtualCamera.IsActiveCamera = true;
     }
     public void StopPlayback()
     {
@@ -136,7 +133,7 @@ internal class CutsceneManager : IDisposable
 
             Stopwatch.Reset();
             _animationStarted = false;
-            VirtualCamera.IsActive = false;
+            VirtualCamera.IsActiveCamera = false;
             if(StartAllActorAnimationsOnPlay)
             {
                 StopAllActors();
@@ -238,16 +235,10 @@ internal class CutsceneManager : IDisposable
         // Create a matrix with the base position
         var basePositionMatrix = Matrix4x4.CreateTranslation(-BasePosition);
 
+        VirtualCamera.FoV = rawFoV;
+
         // Create the final matrix
-        var finalMat = basePositionMatrix * (localTranslationMatrix * invertedLocalRotationMatrix);
-
-        this.VirtualCamera.State = new
-        (
-            ViewMatrix: finalMat,
-            FoV: rawFoV
-        );
-
-        return finalMat;
+        return basePositionMatrix * (localTranslationMatrix * invertedLocalRotationMatrix);
     }
 
     public void Dispose()
@@ -255,6 +246,8 @@ internal class CutsceneManager : IDisposable
         InputService.Instance.RemoveListener(KeyBindEvents.Interface_StopCutscene, StopPlayback);
         InputService.Instance.RemoveListener(KeyBindEvents.Interface_StartAllActorsAnimations, StartAllActors);
         InputService.Instance.RemoveListener(KeyBindEvents.Interface_StopAllActorsAnimations, StopAllActors);
+
+        _gPoseService.OnGPoseStateChange -= OnGPoseStateChange;
 
         if(IsRunning)
             StopPlayback();

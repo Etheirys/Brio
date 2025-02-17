@@ -6,7 +6,7 @@ using Dalamud.Plugin.Services;
 
 namespace Brio.Core;
 
-internal class DalamudServices
+public class DalamudServices
 {
     [PluginService] public IDalamudPluginInterface PluginInterface { get; private set; } = null!;
     [PluginService] public IFramework Framework { get; private set; } = null!;

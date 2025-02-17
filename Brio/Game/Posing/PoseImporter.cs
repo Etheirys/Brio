@@ -4,7 +4,7 @@ using Brio.Game.Posing.Skeletons;
 
 namespace Brio.Game.Posing;
 
-internal class PoseImporter(PoseFile poseFile, PoseImporterOptions options, bool expressionPhase = false)
+public class PoseImporter(PoseFile poseFile, PoseImporterOptions options, bool expressionPhase = false)
 {
     public void ApplyBone(Bone bone, BonePoseInfo poseInfo)
     {
@@ -63,7 +63,7 @@ internal class PoseImporter(PoseFile poseFile, PoseImporterOptions options, bool
     }
 }
 
-internal class PoseImporterOptions(BoneFilter filter, TransformComponents transformComponents, bool applyModelTransform)
+public class PoseImporterOptions(BoneFilter filter, TransformComponents transformComponents, bool applyModelTransform)
 {
     public BoneFilter BoneFilter { get; set; } = filter;
     public TransformComponents TransformComponents { get; set; } = transformComponents;

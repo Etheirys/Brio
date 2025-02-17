@@ -1,8 +1,8 @@
 ﻿using Brio.Capabilities.Posing;
 using Brio.Core;
 using Brio.Game.Posing;
-using Brio.UI.Controls.Core;
 using Brio.UI.Controls.Stateless;
+using Brio.UI.Theming;
 using Dalamud.Interface;
 using Dalamud.Interface.Utility.Raii;
 using ImGuiNET;
@@ -11,56 +11,62 @@ using System.Numerics;
 
 namespace Brio.UI.Controls.Editors;
 
-internal static class PosingEditorCommon
+public static class PosingEditorCommon
 {
     public static void DrawSelectionName(PosingCapability posing)
     {
         ImGui.Text(posing.Selected.DisplayName);
 
-        ImGui.SetWindowFontScale(0.75f);
-        ImGui.TextDisabled(posing.Selected.Subtitle);
-        ImGui.SetWindowFontScale(1.0f);
+        if(posing.Actor.IsProp == false)
+        {
+            ImGui.SetWindowFontScale(0.75f);
+            ImGui.TextDisabled(posing.Selected.Subtitle);
+            ImGui.SetWindowFontScale(1.0f);
+        }
     }
 
-    public static void DrawImportOptionEditor(PoseImporterOptions options)
+    public static void DrawImportOptionEditor(PoseImporterOptions options, bool compact = false)
     {
         DrawBoneFilterEditor(options.BoneFilter);
 
-        ImGui.Separator();
-
-        var selected = options.TransformComponents.HasFlag(TransformComponents.Position);
-        if(ImGui.Checkbox("Position", ref selected))
+        if(compact == false)
         {
-            if(selected)
-                options.TransformComponents |= TransformComponents.Position;
-            else
-                options.TransformComponents &= ~TransformComponents.Position;
-        }
+            ImGui.Separator();
 
-        selected = options.TransformComponents.HasFlag(TransformComponents.Rotation);
-        if(ImGui.Checkbox("Rotation", ref selected))
-        {
-            if(selected)
-                options.TransformComponents |= TransformComponents.Rotation;
-            else
-                options.TransformComponents &= ~TransformComponents.Rotation;
-        }
+            var selected = options.TransformComponents.HasFlag(TransformComponents.Position);
+            if(ImGui.Checkbox("Position", ref selected))
+            {
+                if(selected)
+                    options.TransformComponents |= TransformComponents.Position;
+                else
+                    options.TransformComponents &= ~TransformComponents.Position;
+            }
 
-        selected = options.TransformComponents.HasFlag(TransformComponents.Scale);
-        if(ImGui.Checkbox("Scale", ref selected))
-        {
-            if(selected)
-                options.TransformComponents |= TransformComponents.Scale;
-            else
-                options.TransformComponents &= ~TransformComponents.Scale;
-        }
+            selected = options.TransformComponents.HasFlag(TransformComponents.Rotation);
+            if(ImGui.Checkbox("Rotation", ref selected))
+            {
+                if(selected)
+                    options.TransformComponents |= TransformComponents.Rotation;
+                else
+                    options.TransformComponents &= ~TransformComponents.Rotation;
+            }
 
-        ImGui.Separator();
+            selected = options.TransformComponents.HasFlag(TransformComponents.Scale);
+            if(ImGui.Checkbox("Scale", ref selected))
+            {
+                if(selected)
+                    options.TransformComponents |= TransformComponents.Scale;
+                else
+                    options.TransformComponents &= ~TransformComponents.Scale;
+            }
 
-        selected = options.ApplyModelTransform;
-        if(ImGui.Checkbox("Model Transform", ref selected))
-        {
-            options.ApplyModelTransform = selected;
+            ImGui.Separator();
+
+            selected = options.ApplyModelTransform;
+            if(ImGui.Checkbox("Model Transform", ref selected))
+            {
+                options.ApplyModelTransform = selected;
+            }
         }
     }
 
@@ -155,11 +161,6 @@ internal static class PosingEditorCommon
         }
     }
 
-    public static void DrawIKSelect(PosingCapability posing)
-    {
-        DrawIKSelect(posing, Vector2.Zero);
-    }
-
     public static void DrawIKSelect(PosingCapability posing, Vector2 buttonSize)
     {
         if(posing.Selected.Value is BonePoseInfoId boneId)
@@ -174,7 +175,7 @@ internal static class PosingEditorCommon
                 var ik = bonePose.DefaultIK;
                 bool enabled = ik.Enabled && BrioStyle.EnableStyle;
 
-                using(ImRaii.PushColor(ImGuiCol.Button, UIConstants.GizmoRed, enabled))
+                using(ImRaii.PushColor(ImGuiCol.Button, TheameManager.CurrentTheame.Accent.AccentColor, enabled))
                 {
                     if(ImGui.Button("IK", buttonSize))
                         ImGui.OpenPopup("transform_ik_popup");

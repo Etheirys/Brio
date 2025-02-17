@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace Brio.Game.Actor.Appearance;
 
-internal static class AppearanceSanitizer
+public static class AppearanceSanitizer
 {
     public static void SanitizeAppearance(ref ActorAppearance appearance, ActorAppearance? oldAppearance = null)
     {

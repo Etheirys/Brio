@@ -2,7 +2,7 @@
 
 namespace Brio.Input;
 
-internal class KeyBind
+public class KeyBind
 {
     public VirtualKey Key { get; set; }
     public bool Control { get; set; }

@@ -1,7 +1,7 @@
 ﻿using System;
 namespace Brio.Game.Actor.Appearance;
 
-internal class HumanData
+public class HumanData
 {
     private readonly uint[] _rawColors;
 

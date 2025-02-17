@@ -5,6 +5,7 @@
   "Description": "Control actors during GPose sessions.",
   "AssemblyVersion": "0.0.0.1",
   "InternalName": "Brio",
+  "publicName": "Brio",
   "ApplicableVersion": "any",
   "IconUrl": "https://raw.githubusercontent.com/Etheirys/Brio/main/Resources/Images/BrioIcon.png",
   "Tags": [
