@@ -118,9 +118,17 @@ public class PosingCapability : ActorCharacterCapability
 
     public void ClearSelection() => Selected = PosingSelectionType.None;
 
-    public void LoadResourcesPose(string resourcesPath, bool freezeOnLoad = false)
+    public void LoadResourcesPose(string resourcesPath, bool freezeOnLoad = false, bool asBody = false)
     {
-        ImportPose(JsonSerializer.Deserialize<PoseFile>(ResourceProvider.Instance.GetRawResourceString(resourcesPath)), _posingService.SceneImporterOptions, freezeOnLoad: freezeOnLoad);
+        var option = _posingService.SceneImporterOptions;
+        TransformComponents? tfc = null;
+        if(asBody)
+        {
+            option = _posingService.BodyOptions;
+            tfc = TransformComponents.Rotation;
+        }
+
+        ImportPose(JsonSerializer.Deserialize<PoseFile>(ResourceProvider.Instance.GetRawResourceString(resourcesPath)), option, freezeOnLoad: freezeOnLoad, asBody: asBody, transformComponents: tfc);
     }
 
     public void ImportPose(string path, PoseImporterOptions? options = null)

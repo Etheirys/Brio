@@ -167,13 +167,13 @@ public class FileUIHelpers
 
                 if(ImGui.Button("Import A-Pose", new(size.X, 25)))
                 {
-                    capability.LoadResourcesPose("Data.BrioAPose.pose", freezeOnLoad: freezeOnLoad);
+                    capability.LoadResourcesPose("Data.BrioAPose.pose", freezeOnLoad: freezeOnLoad, asBody: true);
                     ImGui.CloseCurrentPopup();
                 }
 
                 if(ImGui.Button("Import T-Pose", new(size.X, 25)))
                 {
-                    capability.LoadResourcesPose("Data.BrioTPose.pose", freezeOnLoad: freezeOnLoad);
+                    capability.LoadResourcesPose("Data.BrioTPose.pose", freezeOnLoad: freezeOnLoad, asBody: true);
                     ImGui.CloseCurrentPopup();
                 }
             }
