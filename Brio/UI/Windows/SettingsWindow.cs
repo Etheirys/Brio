@@ -331,7 +331,10 @@ public class SettingsWindow : Window
         {
             var enabled = _configurationService.Configuration.AutoSave.AutoSaveSystemEnabled;
             if(ImGui.Checkbox("Auto-Save Enabled", ref enabled))
+            {
                 _configurationService.Configuration.AutoSave.AutoSaveSystemEnabled = enabled;
+                _configurationService.ApplyChange();
+            }
 
             using(ImRaii.Disabled(!enabled))
             {
@@ -339,12 +342,14 @@ public class SettingsWindow : Window
                 if(ImGui.SliderInt("Auto-Save Interval", ref saveInterval, 15, 500, "%d seconds"))
                 {
                     _configurationService.Configuration.AutoSave.AutoSaveInterval = saveInterval;
+                    _configurationService.ApplyChange();
                 }
 
                 var maxSaves = _configurationService.Configuration.AutoSave.MaxAutoSaves;
                 if(ImGui.SliderInt("Max Auto-Saves", ref maxSaves, 3, 30))
                 {
                     _configurationService.Configuration.AutoSave.MaxAutoSaves = maxSaves;
+                    _configurationService.ApplyChange();
                 }
 
                 //bool applyModelTransform = _configurationService.Configuration.Import.ApplyModelTransform;
@@ -721,6 +726,13 @@ public class SettingsWindow : Window
         {
             if(!tab.Success)
                 return;
+
+            bool enableKeyHandlingOnKeyMod = _configurationService.Configuration.Input.EnableKeyHandlingOnKeyMod;
+            if(ImGui.Checkbox("Handle & cancel game keyboard input when pressing Shift, Ctrl or Alt", ref enableKeyHandlingOnKeyMod))
+            {
+                _configurationService.Configuration.Input.EnableKeyHandlingOnKeyMod = enableKeyHandlingOnKeyMod;
+                _configurationService.ApplyChange();
+            }
 
             bool enableKeybinds = _configurationService.Configuration.Input.EnableKeybinds;
             if(ImGui.Checkbox("Enable keyboard shortcuts", ref enableKeybinds))
