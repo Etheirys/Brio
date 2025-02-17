@@ -39,10 +39,6 @@ public class PosingOverlayToolbarWindow : Window
         _posingService = posingService;
         _configurationService = configurationService;
 
-        this.AllowClickthrough = false;
-        this.AllowPinning = false;
-        this.ForceMainWindow = true;
-
         ShowCloseButton = false;
     }
 
@@ -389,7 +385,7 @@ public class PosingOverlayToolbarWindow : Window
         const string helpText = "Alt - Hide Overlay\nShift - Disable Gizmo\nCtrl - Disable Skeleton";
 
         ImGui.SetCursorPosY(0);
-        ImBrio.FontIconButtonRight("overlay_help", FontAwesomeIcon.QuestionCircle, 1f, helpText, bordered: false);
+        ImBrio.FontIconButtonRight("overlay_help", FontAwesomeIcon.QuestionCircle, 2f, helpText, bordered: false);
 
         ImGui.PopClipRect();
         ImGui.SetCursorPos(initialPos);
