@@ -3,6 +3,7 @@ using Brio.Config;
 using Brio.Core;
 using Brio.Entities.Actor;
 using Brio.Files;
+using Brio.Game.Input;
 using Brio.Game.Posing;
 using Brio.Input;
 using Brio.Resources;
@@ -54,7 +55,12 @@ public class PosingCapability : ActorCharacterCapability
     public bool OverlayOpen
     {
         get => _overlayWindow.IsOpen;
-        set => _overlayWindow.IsOpen = value;
+        set
+        {
+            _overlayWindow.IsOpen = value;
+            if(value == false)
+                _gameInputService.AllowEscape = true;
+        }
     }
 
     public bool TransformWindowOpen
@@ -69,7 +75,7 @@ public class PosingCapability : ActorCharacterCapability
     private readonly PosingTransformWindow _overlayTransformWindow;
     private readonly IFramework _framework;
     private readonly InputService _input;
-    private readonly PhysicsService _physicsService;
+    private readonly GameInputService _gameInputService;
 
     public PosingCapability(
         ActorEntity parent,
@@ -77,8 +83,8 @@ public class PosingCapability : ActorCharacterCapability
         PosingService posingService,
         ConfigurationService configurationService,
         PosingTransformWindow overlayTransformWindow,
-        PhysicsService physicsService,
         IFramework framework,
+        GameInputService gameInputService,
         InputService input)
         : base(parent)
     {
@@ -89,7 +95,7 @@ public class PosingCapability : ActorCharacterCapability
         _overlayTransformWindow = overlayTransformWindow;
         _framework = framework;
         _input = input;
-        _physicsService = physicsService;
+        _gameInputService = gameInputService;
     }
 
     public override void OnEntitySelected()
@@ -158,7 +164,7 @@ public class PosingCapability : ActorCharacterCapability
     // TODO change this boolean hell into flags after Scenes are added
     PoseFile? tempPose;
     internal void ImportPose_Internal(OneOf<PoseFile, CMToolPoseFile> rawPoseFile, PoseImporterOptions? options = null, bool generateSnapshot = true, bool reset = true, bool reconcile = true,
-        bool asExpression = false, bool expressionPhase2 = false, bool asScene = false, bool asIPCpose = false, bool asBody = false, bool asProp = false, 
+        bool asExpression = false, bool expressionPhase2 = false, bool asScene = false, bool asIPCpose = false, bool asBody = false, bool asProp = false,
         TransformComponents? transformComponents = null, bool? applyModelTransformOverride = null)
     {
         var poseFile = rawPoseFile.Match(
