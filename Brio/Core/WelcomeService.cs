@@ -50,11 +50,6 @@ public class WelcomeService
             configService.Configuration.Version = Configuration.CurrentVersion;
         }
 
-        if(configService.Configuration.Version <= 3)
-        {
-            configService.Configuration.Input.EnableKeyHandlingOnKeyMod = false;
-        }
-
         configService.ApplyChange();
 
         #endregion

@@ -35,5 +35,5 @@ public class InputConfiguration
     public bool EnableKeybinds { get; set; } = true;
 
     public bool EnableKeyHandling { get; set; } = true;
-    public bool EnableKeyHandlingOnKeyMod { get; set; } = false;
+    public bool EnableKeyHandlingOnKeyMod { get; set; } = true;
 }

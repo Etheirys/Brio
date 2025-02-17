@@ -41,7 +41,7 @@ public class GameInputService : IDisposable
         {
             _virtualCameraService.Update(mouseFrame, keyboardFrame);
 
-            if(Config.ConfigurationService.Instance.Configuration.Input.EnableKeyHandlingOnKeyMod)
+            if(_virtualCameraService.CurrentCamera.FreeCamValues.IsMovementEnabled && Config.ConfigurationService.Instance.Configuration.Input.EnableKeyHandlingOnKeyMod)
             {
                 if(keyboardFrame->IsKeyDown(VirtualKey.CONTROL, true) || keyboardFrame->IsKeyDown(VirtualKey.SHIFT, true) || keyboardFrame->IsKeyDown(VirtualKey.MENU, true))
                 {

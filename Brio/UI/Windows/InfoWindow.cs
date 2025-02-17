@@ -45,8 +45,9 @@ public class InfoWindow : Window
                     A Big Thank you to (Sufferhymn), (Night Song), (Alvar Valo), (Yasumi), (YikesXD), 
                     (Selitha), (AquilaHK), (LotusEcho), & (Yume) for their support on Kofi!
 
-                    Also, Thank you, to: (Ashadow700), (@MKhayle), (@ashna_ff14), (@Yuki-Codes), (@danma3x), (@snaeling),  
-                    (@WorstAquaPlayer), (@Caraxi), (@Enth) & (@gris-fuego), for their contributions to Brio!
+                    Also, Thank you, to: (Ashadow700), (@MKhayle), (@ashna_ff14), (@Yuki-Codes), (@danma3x), 
+                    (@snaeling), (@WorstAquaPlayer), (@Caraxi), (@Enth) & (@gris-fuego);
+                    For their contributions to Brio!
 
                     Maintained & Developed by: Minmoose.
                     Originally Developed by: Asgard.
