@@ -61,7 +61,7 @@ public class PosingOverlayWindow : Window, IDisposable
         SizeCondition = ImGuiCond.Always;
 
         var io = ImGui.GetIO();
-        Size = io.DisplaySize;
+        Size = io.DisplaySize * ImGui.GetFontSize();
 
         Flags = ImGuiWindowFlags.NoBackground | ImGuiWindowFlags.NoInputs | ImGuiWindowFlags.NoDecoration | ImGuiWindowFlags.NoCollapse;
 
