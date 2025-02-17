@@ -108,7 +108,7 @@ public class VirtualCameraManager : IDisposable
         if(cameraID == 0)
             return false;
 
-        Brio.Log.Info("Destroying Brio camera " + _cameraId);
+        Brio.Log.Verbose("Destroying Brio camera " + _cameraId);
 
         if(_entityManager.TryGetEntity("cameras", out var ent))
         {
