@@ -55,16 +55,29 @@ public class VirtualCameraManager : IDisposable
 
             if(virtualCamera is null)
             {
-                if(cameraType == CameraType.Free)
+                switch(cameraType)
                 {
-                    camEnt.VirtualCamera.FreeCamValues.MovementSpeed = DefaultMovementSpeed;
-                    camEnt.VirtualCamera.FreeCamValues.MouseSensitivity = DefaultMouseSensitivity;
-                    camEnt.VirtualCamera.IsFreeCamera = true;
-                    camEnt.VirtualCamera.ActivateCamera();
-                    camEnt.VirtualCamera.ToFreeCam();
-                    camEnt.VirtualCamera.DeactivateCamera();
-
-                    _createdCameras.Add(_cameraId, camEnt);
+                    case CameraType.Free:
+                        camEnt.VirtualCamera.FreeCamValues.MovementSpeed = DefaultMovementSpeed;
+                        camEnt.VirtualCamera.FreeCamValues.MouseSensitivity = DefaultMouseSensitivity;
+                        camEnt.VirtualCamera.IsFreeCamera = true;
+                        camEnt.VirtualCamera.ActivateCamera();
+                        camEnt.VirtualCamera.ToFreeCam();
+                        camEnt.VirtualCamera.DeactivateCamera();
+                        _createdCameras.Add(_cameraId, camEnt);
+                        break;
+                    case CameraType.Brio:
+                        camEnt.VirtualCamera.IsFreeCamera = false;
+                        camEnt.VirtualCamera.ActivateCamera();
+                        camEnt.VirtualCamera.DeactivateCamera();
+                        _createdCameras.Add(_cameraId, camEnt);
+                        break;
+                    //case CameraType.Cutscene:
+                    //    unimplemented
+                    //    break;
+                    default:
+                        Brio.Log.Error($"Unknown camera type: {cameraType}");
+                        break;
                 }
             }
             else
