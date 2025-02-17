@@ -64,10 +64,6 @@ public class MainWindow : Window, IDisposable
             MinimumSize = new Vector2(270, 200)
         };
 
-        this.AllowClickthrough = false;
-        this.AllowPinning = false;
-        this.ForceMainWindow = true;
-
         input.AddListener(KeyBindEvents.Interface_ToggleBrioWindow, this.OnMainWindowToggle);
         input.AddListener(KeyBindEvents.Interface_ToggleBindPromptWindow, this.OnPromptWindowToggle);
     }
