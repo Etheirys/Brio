@@ -6,6 +6,14 @@ To open this window again click `Information` on the Scene Manager then -> `View
 ---------------------------------------------------------------------------------------------------------------------------------------------------------
 	
 --------------------------------------------------------------------------------
+	--- Brio, Version 0.5.0.2 --- 
+
+- The Glamourer Design menu is now in alphabetical order
+- Once again, fix an issue where PosingOverlayWindow would be to small if the text scale was less then 100%
+- Fixed Auto-Save not turning off when is was disabled in the settings
+- Fixed Cameras being unable to be destroyed in certain situations
+
+--------------------------------------------------------------------------------
 	--- Brio, Version 0.5.0.1 --- 
 
 - Fixed text scaling issues
