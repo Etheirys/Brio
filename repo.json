@@ -1,24 +1,27 @@
 [
     {
-        "Author": "Asgard, Minmoose and Contributors",
+        "Author": "Minmoose, Asgard and Contributors",
         "Name": "Brio",
         "Punchline": "Enhanced GPosing.",
-        "Description": "Control actors during GPose sessions.",
+        "Description": "Control & edit actors during GPose sessions.",
         "InternalName": "Brio",
-        "AssemblyVersion": "0.4.4.6",
-        "TestingAssemblyVersion": "0.4.4.6",
+        "AssemblyVersion": "0.5.0",
+        "TestingAssemblyVersion": "0.5.0",
         "RepoUrl": "https://github.com/Etheirys/Brio",
         "ApplicableVersion": "any",
         "DalamudApiLevel": 11,
-        "DownloadLinkInstall": "https://github.com/Etheirys/Brio/releases/download/v0.4.4.6/Brio.zip",
-        "DownloadLinkTesting": "https://github.com/Etheirys/Brio/releases/download/v0.4.4.6/Brio.zip",
-        "DownloadLinkUpdate": "https://github.com/Etheirys/Brio/releases/download/v0.4.4.6/Brio.zip",
+        "DownloadLinkInstall": "https://github.com/Etheirys/Brio/releases/download/v0.5.0/Brio.zip",
+        "DownloadLinkTesting": "https://github.com/Etheirys/Brio/releases/download/v0.5.0/Brio.zip",
+        "DownloadLinkUpdate": "https://github.com/Etheirys/Brio/releases/download/v0.5.0/Brio.zip",
         "IconUrl": "https://raw.githubusercontent.com/Etheirys/Brio/main/Resources/Images/BrioIcon.png",
         "Tags": [ 
             "gpose",
             "brio",
             "posing",
-            "animation"
+            "pose",
+            "animation",
+            "xat",
+            "cutscene"
         ]
     }
 ]
