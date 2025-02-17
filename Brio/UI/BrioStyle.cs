@@ -21,8 +21,8 @@ public static class BrioStyle
 
         var imIO = ImGui.GetIO();
 
-        _lastGlobalScale = imIO.FontGlobalScale;
-        imIO.FontGlobalScale = 1f;
+        //_lastGlobalScale = imIO.FontGlobalScale;
+        //imIO.FontGlobalScale = 1f;
 
         if(EnableColor)
         {
@@ -146,7 +146,7 @@ public static class BrioStyle
                 ImGui.PopStyleColor(51);
             }
 
-            ImGui.GetIO().FontGlobalScale = _lastGlobalScale;
+            //ImGui.GetIO().FontGlobalScale = _lastGlobalScale;
         }
     }
 }
