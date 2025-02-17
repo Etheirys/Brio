@@ -38,7 +38,17 @@ public class GameInputService : IDisposable
             return;
 
         if(_virtualCameraService.CurrentCamera?.IsFreeCamera == true)
+        {
             _virtualCameraService.Update(mouseFrame, keyboardFrame);
+
+            if(Config.ConfigurationService.Instance.Configuration.Input.EnableKeyHandlingOnKeyMod)
+            {
+                if(keyboardFrame->IsKeyDown(VirtualKey.CONTROL, true) || keyboardFrame->IsKeyDown(VirtualKey.SHIFT, true) || keyboardFrame->IsKeyDown(VirtualKey.MENU, true))
+                {
+                    keyboardFrame->HandleAllKeys();
+                }
+            }
+        }
 
         if(HandleAllKeys)
         {
@@ -52,14 +62,6 @@ public class GameInputService : IDisposable
         if(HandleAllMouse)
         {
             // TODO: Implement mouse handling logic
-        }
-
-        if(Config.ConfigurationService.Instance.Configuration.Input.EnableKeyHandlingOnKeyMod)
-        {
-            if(keyboardFrame->IsKeyDown(VirtualKey.CONTROL, true) || keyboardFrame->IsKeyDown(VirtualKey.SHIFT, true) || keyboardFrame->IsKeyDown(VirtualKey.MENU, true))
-            {
-                keyboardFrame->HandleAllKeys();
-            }
         }
     }
 

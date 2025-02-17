@@ -728,11 +728,13 @@ public class SettingsWindow : Window
                 return;
 
             bool enableKeyHandlingOnKeyMod = _configurationService.Configuration.Input.EnableKeyHandlingOnKeyMod;
-            if(ImGui.Checkbox("Handle & cancel game keyboard input when pressing Shift, Ctrl or Alt", ref enableKeyHandlingOnKeyMod))
+            if(ImGui.Checkbox("Cancel, [Shift], [Ctrl] & [Alt] keyboard input when using a FreeCam", ref enableKeyHandlingOnKeyMod))
             {
                 _configurationService.Configuration.Input.EnableKeyHandlingOnKeyMod = enableKeyHandlingOnKeyMod;
                 _configurationService.ApplyChange();
             }
+
+            ImGui.Separator();
 
             bool enableKeybinds = _configurationService.Configuration.Input.EnableKeybinds;
             if(ImGui.Checkbox("Enable keyboard shortcuts", ref enableKeybinds))

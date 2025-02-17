@@ -9,4 +9,5 @@ public class AppearanceConfiguration
     public bool EnableBrioStyle { get; set; } = true;
 
     public bool EnableBrioColor { get; set; } = true;
+    public bool EnableBrioScale { get; set; } = false;
 }
