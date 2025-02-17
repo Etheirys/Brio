@@ -33,45 +33,50 @@ public unsafe class VirtualCamera
     public Vector3 PositionOffset = Vector3.Zero;
     public Vector3 Rotation = Vector3.Zero;
 
+    float pivotRotation;
     public float PivotRotation
     {
-        get => IsActiveCamera ? BrioCamera->Rotation : (field);
+        get => IsActiveCamera ? BrioCamera->Rotation : (pivotRotation);
         set
         {
-            _ = IsActiveCamera ? (BrioCamera->Rotation = field = value) : (field = value);
+            _ = IsActiveCamera ? (BrioCamera->Rotation = pivotRotation = value) : (pivotRotation = value);
         }
     }
+    float zoom = 0;
     public float Zoom
     {
-        get => IsActiveCamera ? BrioCamera->Camera.Distance : (field);
+        get => IsActiveCamera ? BrioCamera->Camera.Distance : (zoom);
         set
         {
-            _ = IsActiveCamera ? (BrioCamera->Camera.Distance = field = value) : (field = value);
+            _ = IsActiveCamera ? (BrioCamera->Camera.Distance = zoom = value) : (zoom = value);
         }
     }
+    float fov = 0;
     public float FoV
     {
-        get => IsActiveCamera ? BrioCamera->FoV : (field);
+        get => IsActiveCamera ? BrioCamera->FoV : (fov);
         set
         {
-            _ = IsActiveCamera ? (BrioCamera->FoV = field = value) : (field = value);
+            _ = IsActiveCamera ? (BrioCamera->FoV = fov = value) : (fov = value);
         }
     }
 
+    Vector2 pan;
     public Vector2 Pan
     {
-        get => IsActiveCamera ? BrioCamera->Pan : (field);
+        get => IsActiveCamera ? BrioCamera->Pan : (pan);
         set
         {
-            _ = IsActiveCamera ? (BrioCamera->Pan = field = value) : (field = value);
+            _ = IsActiveCamera ? (BrioCamera->Pan = pan = value) : (pan = value);
         }
     }
+    Vector2 angle;
     public Vector2 Angle
     {
-        get => IsActiveCamera ? BrioCamera->Angle : (field);
+        get => IsActiveCamera ? BrioCamera->Angle : (angle);
         set
         {
-            _ = IsActiveCamera ? (BrioCamera->Angle = field = value) : (field = value);
+            _ = IsActiveCamera ? (BrioCamera->Angle = angle = value) : (angle = value);
         }
     }
 
