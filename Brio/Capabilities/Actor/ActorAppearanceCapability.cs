@@ -328,7 +328,6 @@ public class ActorAppearanceCapability : ActorCharacterCapability
     private unsafe void ApplyShaderOverride()
     {
         var shaders = Character.GetShaderParams();
-        var test = *shaders;
         if(shaders != null)
         {
             _modelShaderOverride.Apply(ref *shaders);
