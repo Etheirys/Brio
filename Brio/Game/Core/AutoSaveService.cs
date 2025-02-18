@@ -72,25 +72,28 @@ public class AutoSaveService : IDisposable
 
     private void AutoSave()
     {
-        try
+        if (ConfigurationService.Instance.Configuration.AutoSave.AutoSaveSystemEnabled)
         {
-            var scene = _sceneService.GenerateSceneFile();
+            try
+            {
+                var scene = _sceneService.GenerateSceneFile();
 
-            byte[] bytes = MessagePackSerializer.Serialize(scene);
+                byte[] bytes = MessagePackSerializer.Serialize(scene);
 
-            var path = Path.Combine(AutoSaveFolder, $"autosave-{DateTime.Now:yyyy-MM-dd}-{DateTime.Now:hh-mm-ss}.brioautosave");
-            Brio.Log.Verbose($"AutoSaving: {path}");
+                var path = Path.Combine(AutoSaveFolder, $"autosave-{DateTime.Now:yyyy-MM-dd}-{DateTime.Now:hh-mm-ss}.brioautosave");
+                Brio.Log.Verbose($"AutoSaving: {path}");
 
-            File.WriteAllBytes(path, bytes);
+                File.WriteAllBytes(path, bytes);
 
-            Brio.Log.Verbose($"AutoSaved!");
+                Brio.Log.Verbose($"AutoSaved!");
 
-            Update();
-            CleanOldSaves();
-        }
-        catch(Exception ex)
-        {
-            Brio.Log.Error(ex, "Exception AutoSaving!");
+                Update();
+                CleanOldSaves();
+            }
+            catch(Exception ex)
+            {
+                Brio.Log.Error(ex, "Exception AutoSaving!");
+            }
         }
     }
 

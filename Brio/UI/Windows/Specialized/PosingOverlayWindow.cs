@@ -61,7 +61,7 @@ public class PosingOverlayWindow : Window, IDisposable
         SizeCondition = ImGuiCond.Always;
 
         var io = ImGui.GetIO();
-        Size = io.DisplaySize;
+        Size = io.DisplaySize * ImGui.GetFontSize();
 
         Flags = ImGuiWindowFlags.NoBackground | ImGuiWindowFlags.NoInputs | ImGuiWindowFlags.NoDecoration | ImGuiWindowFlags.NoCollapse;
 
@@ -494,14 +494,14 @@ public class PosingOverlayWindow : Window, IDisposable
 
     private class OverlayUIState(PosingConfiguration configuration)
     {
-        public bool PopupOpen => ImGui.IsPopupOpen(_boneSelectPopupName);
-        public bool UsingGizmo => ImGuizmo.IsUsing();
-        public bool HoveringGizmo => ImGuizmo.IsOver();
-        public bool AnyActive => ImGui.IsAnyItemActive();
-        public bool AnyWindowHovered => ImGui.IsWindowHovered(ImGuiHoveredFlags.AnyWindow);
-        public bool UserDisablingSkeleton => InputService.IsKeyBindDown(KeyBindEvents.Posing_DisableSkeleton);
-        public bool UserDisablingGizmo => InputService.IsKeyBindDown(KeyBindEvents.Posing_DisableGizmo);
-        public bool UserHidingOverlay => InputService.IsKeyBindDown(KeyBindEvents.Posing_HideOverlay);
+        public bool PopupOpen = ImGui.IsPopupOpen(_boneSelectPopupName);
+        public bool UsingGizmo = ImGuizmo.IsUsing();
+        public bool HoveringGizmo = ImGuizmo.IsOver();
+        public bool AnyActive = ImGui.IsAnyItemActive();
+        public bool AnyWindowHovered = ImGui.IsWindowHovered(ImGuiHoveredFlags.AnyWindow);
+        public bool UserDisablingSkeleton = InputService.IsKeyBindDown(KeyBindEvents.Posing_DisableSkeleton);
+        public bool UserDisablingGizmo = InputService.IsKeyBindDown(KeyBindEvents.Posing_DisableGizmo);
+        public bool UserHidingOverlay = InputService.IsKeyBindDown(KeyBindEvents.Posing_HideOverlay);
 
 
         public bool AnythingBusy => PopupOpen || UsingGizmo || AnyActive || AnyWindowHovered;

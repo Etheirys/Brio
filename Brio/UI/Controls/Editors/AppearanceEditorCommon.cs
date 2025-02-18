@@ -86,7 +86,7 @@ public static class AppearanceEditorCommon
 
                 if(collections is not null)
                 {
-                    foreach(var collection in collections)
+                    foreach(var collection in from col in collections orderby col.Value ascending select col)
                     {
                         bool isSelected = collection.Value.Equals(currentDesign);
                         if(ImGui.Selectable(collection.Value, isSelected))
