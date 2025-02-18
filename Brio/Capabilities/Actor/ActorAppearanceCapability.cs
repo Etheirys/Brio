@@ -4,6 +4,7 @@ using Brio.Files;
 using Brio.Game.Actor;
 using Brio.Game.Actor.Appearance;
 using Brio.Game.Actor.Extensions;
+using Brio.Game.Actor.Interop;
 using Brio.Game.GPose;
 using Brio.Game.Types;
 using Brio.IPC;
@@ -206,9 +207,18 @@ public class ActorAppearanceCapability : ActorCharacterCapability
             _ = SetAppearance(doc, options);
     }
 
-    public void ExportAppearance(string file)
+    public unsafe void ExportAppearance(string file)
     {
-        AnamnesisCharaFile appearance = CurrentAppearance;
+        var currentAppearance = CurrentAppearance;
+        BrioHuman.ShaderParams* shaders = Character.GetShaderParams();
+
+        ActorAppearanceExtended actor = new()
+        {
+            Appearance = currentAppearance,
+            ShaderParams = *shaders
+        };
+
+        AnamnesisCharaFile appearance = actor;
         ResourceProvider.Instance.SaveFileDocument(file, appearance);
     }
 
@@ -318,6 +328,7 @@ public class ActorAppearanceCapability : ActorCharacterCapability
     private unsafe void ApplyShaderOverride()
     {
         var shaders = Character.GetShaderParams();
+        var test = *shaders;
         if(shaders != null)
         {
             _modelShaderOverride.Apply(ref *shaders);
