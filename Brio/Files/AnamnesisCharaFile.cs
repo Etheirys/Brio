@@ -2,6 +2,7 @@
 using Brio.Entities;
 using Brio.Entities.Actor;
 using Brio.Game.Actor.Appearance;
+using Brio.Game.Actor.Interop;
 using Brio.Library.Tags;
 using Brio.Resources;
 using Dalamud.Interface.Textures.TextureWraps;
@@ -164,8 +165,31 @@ public class AnamnesisCharaFile : JsonDocumentBase
         return appearance;
     }
 
-    public static implicit operator AnamnesisCharaFile(ActorAppearance appearance)
+    public static implicit operator BrioHuman.ShaderParams(AnamnesisCharaFile chara)
     {
+        // More Extended Appearance (Shaders)
+        var shaders = new BrioHuman.ShaderParams
+        {
+            SkinColor = chara.SkinColor ?? Vector3.One,
+            SkinGloss = chara.SkinGloss ?? Vector3.One,
+            LeftEyeColor = chara.LeftEyeColor ?? Vector3.One,
+            RightEyeColor = chara.RightEyeColor ?? Vector3.One,
+            HairColor = chara.HairColor ?? Vector3.One,
+            HairGloss = chara.HairGloss ?? Vector3.One,
+            HairHighlight = chara.HairHighlight ?? Vector3.One,
+            MouthColor = chara.MouthColor ?? Vector4.One,
+            MuscleTone = chara.MuscleTone,
+            FeatureColor = chara.LimbalRingColor ?? Vector3.One,
+        };
+
+        return shaders;
+    }
+
+    public static implicit operator AnamnesisCharaFile(ActorAppearanceExtended appearanceExt)
+    {
+        var appearance = appearanceExt.Appearance;
+        var shaders = appearanceExt.ShaderParams;
+
         var charaFile = new AnamnesisCharaFile
         {
             // Model
@@ -220,7 +244,18 @@ public class AnamnesisCharaFile : JsonDocumentBase
 
             // Extended Appearance
             Transparency = appearance.ExtendedAppearance.Transparency,
-            HeightMultiplier = appearance.ExtendedAppearance.HeightMultiplier
+            HeightMultiplier = appearance.ExtendedAppearance.HeightMultiplier,
+
+            SkinColor = shaders.SkinColor,
+            SkinGloss = shaders.SkinGloss,
+            LeftEyeColor = shaders.LeftEyeColor,
+            RightEyeColor = shaders.RightEyeColor,
+            HairColor = shaders.HairColor,
+            HairGloss = shaders.HairGloss,
+            HairHighlight = shaders.HairHighlight,
+            MouthColor = shaders.MouthColor,
+            MuscleTone = shaders.MuscleTone,
+            LimbalRingColor = shaders.FeatureColor,
         };
 
         return charaFile;
