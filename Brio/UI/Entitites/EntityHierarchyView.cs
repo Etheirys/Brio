@@ -1,5 +1,6 @@
 ﻿using Brio.Entities;
 using Brio.Entities.Core;
+using Brio.Game.GPose;
 using Brio.UI.Theming;
 using Brio.UI.Widgets.Core;
 using Dalamud.Interface;
@@ -9,7 +10,7 @@ using System.Numerics;
 
 namespace Brio.UI.Entitites;
 
-public class EntityHierarchyView(EntityManager entityManager)
+public class EntityHierarchyView(EntityManager entityManager, GPoseService gPoseService)
 {
     private readonly float buttonWidth = ImGui.GetTextLineHeight() * 13f;
     private readonly float offsetWidth = 16f;
@@ -33,7 +34,9 @@ public class EntityHierarchyView(EntityManager entityManager)
         {
             foreach(var item in root.Children)
             {
-                DrawEntity(item, selectedEntityId);
+                var disable = gPoseService.IsGPosing == false && item.Flags.HasFlag(EntityFlags.AllowOutSideGpose) == false;
+                using(ImRaii.Disabled(disable))
+                    DrawEntity(item, selectedEntityId);
             }
         }
     }

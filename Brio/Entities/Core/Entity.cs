@@ -244,4 +244,5 @@ public enum EntityFlags
     None,
     DefaultOpen = 1 << 0,
     HasContextButton = 1 << 1,
+    AllowOutSideGpose = 1 << 2,
 }
