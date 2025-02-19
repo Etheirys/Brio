@@ -43,7 +43,7 @@ public class GameInputService : IDisposable
 
             if(_virtualCameraService.CurrentCamera.FreeCamValues.IsMovementEnabled && Config.ConfigurationService.Instance.Configuration.Input.EnableKeyHandlingOnKeyMod)
             {
-                if(keyboardFrame->IsKeyDown(VirtualKey.CONTROL, true) || keyboardFrame->IsKeyDown(VirtualKey.SHIFT, true) || keyboardFrame->IsKeyDown(VirtualKey.MENU, true))
+                if(keyboardFrame->IsKeyDown(VirtualKey.CONTROL, true) || keyboardFrame->IsKeyDown(VirtualKey.SHIFT, true) || keyboardFrame->IsKeyDown(VirtualKey.MENU, true) || keyboardFrame->IsKeyDown(VirtualKey.SPACE, true))
                 {
                     keyboardFrame->HandleAllKeys();
                 }

@@ -735,7 +735,7 @@ public class SettingsWindow : Window
                 return;
 
             bool enableKeyHandlingOnKeyMod = _configurationService.Configuration.Input.EnableKeyHandlingOnKeyMod;
-            if(ImGui.Checkbox("Consumed, [Shift], [Ctrl] & [Alt] keyboard input when moving a FreeCam", ref enableKeyHandlingOnKeyMod))
+            if(ImGui.Checkbox("Consumed, [SPACE], [Shift], [Ctrl] & [Alt] keyboard input when moving a FreeCam", ref enableKeyHandlingOnKeyMod))
             {
                 _configurationService.Configuration.Input.EnableKeyHandlingOnKeyMod = enableKeyHandlingOnKeyMod;
                 _configurationService.ApplyChange();
