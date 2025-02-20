@@ -114,13 +114,10 @@ public class VirtualCameraManager : IDisposable
         {
             if(_createdCameras.TryGetValue(cameraID, out CameraEntity? camEnt))
             {
-                if(_entityManager.SelectedEntity == camEnt && camEnt.VirtualCamera.IsActiveCamera)
+                if(_entityManager.TryGetEntity(new Entities.Core.CameraId(0), out var defaultCamEnt) && defaultCamEnt is CameraEntity cameraEnt)
                 {
-                    if(_entityManager.TryGetEntity(new Entities.Core.CameraId(0), out var defaultCamEnt) && defaultCamEnt is CameraEntity cameraEnt)
-                    {
-                        SelectCamera(cameraEnt.VirtualCamera);
-                        _entityManager.SetSelectedEntity(defaultCamEnt);
-                    }
+                    SelectCamera(cameraEnt.VirtualCamera);
+                    _entityManager.SetSelectedEntity(defaultCamEnt);
                 }
 
                 ent.RemoveChild(camEnt);
