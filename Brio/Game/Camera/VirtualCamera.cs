@@ -5,7 +5,7 @@ using System.Numerics;
 namespace Brio.Game.Camera;
 
 [MessagePackObject(keyAsPropertyName: true)]
-public unsafe class VirtualCamera
+public unsafe partial class VirtualCamera
 {
     public VirtualCamera() { }
     public VirtualCamera(int cameraID)
@@ -15,7 +15,7 @@ public unsafe class VirtualCamera
         ResetCamera();
     }
 
-    public FreeCamValues FreeCamValues { get; } = new FreeCamValues();
+    public FreeCamValues FreeCamValues { get; private set; } = new FreeCamValues();
 
     [IgnoreMember] public BrioCamera* BrioCamera => (BrioCamera*)CameraManager.Instance()->GetActiveCamera();
 
@@ -195,8 +195,8 @@ public class FreeCamValues
     public bool IsMovementEnabled = false;
     public bool Move2D = false;
 
-    public float MouseSensitivity = 0f;
-    public float MovementSpeed = 0f;
+    public float MouseSensitivity { get; set; } = 0f;
+    public float MovementSpeed { get; set; } = 0f;
 
     public bool DelimitAngle = false;
 }
