@@ -139,12 +139,16 @@ public class PosingTransformEditor
             }
         }
 
-        (var pdidChange, var panyActive) = ImBrio.DragFloat3($"###_transformPosition_0", ref realTransform.Position, 0.1f, FontAwesomeIcon.ArrowsUpDownLeftRight, "Position", enableExpanded: compactMode);
-        (var rdidChange, var ranyActive) = ImBrio.DragFloat3($"###_transformRotation_0", ref realEuler, 1f, FontAwesomeIcon.ArrowsSpin, "Rotation", enableExpanded: compactMode);
-        (var sdidChange, var sanyActive) = ImBrio.DragFloat3($"###_transformScale_0", ref realTransform.Scale, 0.1f, FontAwesomeIcon.ExpandAlt, "Scale", enableExpanded: compactMode);
+        (var pdidChange, var panyActive) = ImBrio.DragFloat3($"###_transformPosition_0", ref realTransform.Position, realTransform.Offset, FontAwesomeIcon.ArrowsUpDownLeftRight, "Position", enableExpanded: compactMode);
+        (var rdidChange, var ranyActive) = ImBrio.DragFloat3($"###_transformRotation_0", ref realEuler, realTransform.Offset, FontAwesomeIcon.ArrowsSpin, "Rotation", enableExpanded: compactMode);
+        (var sdidChange, var sanyActive) = ImBrio.DragFloat3($"###_transformScale_0", ref realTransform.Scale, realTransform.Offset, FontAwesomeIcon.ExpandAlt, "Scale", enableExpanded: compactMode);
 
-        didChange |= pdidChange |= rdidChange |= sdidChange;
-        anyActive |= panyActive |= ranyActive |= sanyActive;
+        ImBrio.Icon(FontAwesomeIcon.ArrowsLeftRightToLine);
+        ImGui.SameLine();
+        (var oanyActive, var odidChange) = ImBrio.DragFloat($"##transformSpeed_0", ref realTransform.Offset, 0.01f, "Offset");
+
+        didChange |= pdidChange |= rdidChange |= sdidChange |= odidChange;
+        anyActive |= panyActive |= ranyActive |= sanyActive |= oanyActive;
 
         realTransform.Rotation = realEuler.ToQuaternion();
         var toApply = before + realTransform.CalculateDiff(beforeMods);
@@ -182,8 +186,8 @@ public class PosingTransformEditor
         bool didChange = false;
         bool anyActive = false;
 
-        (var pdidChange, var panyActive) = ImBrio.DragFloat3($"###_transformPosition_1", ref realTransform.Position, 0.1f, FontAwesomeIcon.ArrowsUpDownLeftRight, "Position", enableExpanded: compactMode);
-        (var rdidChange, var ranyActive) = ImBrio.DragFloat3($"###_transformRotation_1", ref realEuler, 5.0f, FontAwesomeIcon.ArrowsSpin, "Rotation", enableExpanded: compactMode);
+        (var pdidChange, var panyActive) = ImBrio.DragFloat3($"###_transformPosition_1", ref realTransform.Position, realTransform.Offset, FontAwesomeIcon.ArrowsUpDownLeftRight, "Position", enableExpanded: compactMode);
+        (var rdidChange, var ranyActive) = ImBrio.DragFloat3($"###_transformRotation_1", ref realEuler, realTransform.Offset, FontAwesomeIcon.ArrowsSpin, "Rotation", enableExpanded: compactMode);
 
         bool sdidChange = false;
         bool sanyActive = false;
@@ -201,13 +205,17 @@ public class PosingTransformEditor
             float entryWidth = (size.X - (ImGui.GetStyle().ItemSpacing.X * 2));
             ImGui.SetNextItemWidth(entryWidth);
 
-            (sanyActive, sdidChange) = ImBrio.DragFloat($"##transformScale", ref realTransform.Scale.X, 0.1f / 10);
+            (sanyActive, sdidChange) = ImBrio.DragFloat($"##transformScale", ref realTransform.Scale.X, realTransform.Offset / 10);
         }
         else
-            (sdidChange, sanyActive) = ImBrio.DragFloat3($"###_transformScale_1", ref realTransform.Scale, 0.1f, FontAwesomeIcon.ExpandAlt, "Scale", enableExpanded: compactMode);
+            (sdidChange, sanyActive) = ImBrio.DragFloat3($"###_transformScale_1", ref realTransform.Scale, realTransform.Offset, FontAwesomeIcon.ExpandAlt, "Scale", enableExpanded: compactMode);
 
-        didChange |= pdidChange |= rdidChange |= sdidChange;
-        anyActive |= panyActive |= ranyActive |= sanyActive;
+        ImBrio.Icon(FontAwesomeIcon.ArrowsLeftRightToLine);
+        ImGui.SameLine();
+        (var oanyActive, var odidChange) = ImBrio.DragFloat($"##transformSpeed_1", ref realTransform.Offset, 0.01f, "Offset");
+
+        didChange |= pdidChange |= rdidChange |= sdidChange |= odidChange;
+        anyActive |= panyActive |= ranyActive |= sanyActive |= oanyActive;
 
         realTransform.Rotation = realEuler.ToQuaternion();
 
@@ -278,6 +286,7 @@ public class PosingTransformEditor
         }
         if(ImGui.IsItemHovered())
             ImGui.SetTooltip("Propagate Scales");
+
 
         return didChange;
     }

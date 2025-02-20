@@ -15,12 +15,14 @@ public struct Transform
     public Vector3 Position;
     public Quaternion Rotation;
     public Vector3 Scale;
+    public float Offset;
 
     public static Transform Identity => new()
     {
         Position = Vector3.Zero,
         Rotation = Quaternion.Identity,
-        Scale = Vector3.Zero
+        Scale = Vector3.Zero,
+        Offset = 0.01f
     };
 
     public static implicit operator Transform(StructsTransforms transform)
@@ -29,7 +31,8 @@ public struct Transform
         {
             Position = transform.Position,
             Rotation = transform.Rotation,
-            Scale = transform.Scale
+            Scale = transform.Scale,
+            Offset = 0.01f
         };
     }
 
@@ -39,7 +42,8 @@ public struct Transform
         {
             Position = transform->Position,
             Rotation = transform->Rotation,
-            Scale = transform->Scale
+            Scale = transform->Scale,
+            Offset = 0.01f
         };
     }
 
@@ -59,7 +63,8 @@ public struct Transform
         {
             Position = new Vector3(transform.Translation.X, transform.Translation.Y, transform.Translation.Z),
             Rotation = new Quaternion(transform.Rotation.X, transform.Rotation.Y, transform.Rotation.Z, transform.Rotation.W),
-            Scale = new Vector3(transform.Scale.X, transform.Scale.Y, transform.Scale.Z)
+            Scale = new Vector3(transform.Scale.X, transform.Scale.Y, transform.Scale.Z),
+            Offset = 0.01f
         };
     }
 
@@ -69,7 +74,8 @@ public struct Transform
         {
             Position = new Vector3(transform->Translation.X, transform->Translation.Y, transform->Translation.Z),
             Rotation = new Quaternion(transform->Rotation.X, transform->Rotation.Y, transform->Rotation.Z, transform->Rotation.W),
-            Scale = new Vector3(transform->Scale.X, transform->Scale.Y, transform->Scale.Z)
+            Scale = new Vector3(transform->Scale.X, transform->Scale.Y, transform->Scale.Z),
+            Offset = 0.01f
         };
     }
 
@@ -79,7 +85,8 @@ public struct Transform
         {
             Position = a.Position + b.Position,
             Rotation = Quaternion.Normalize(a.Rotation * b.Rotation),
-            Scale = a.Scale + b.Scale
+            Scale = a.Scale + b.Scale,
+            Offset = a.Offset + b.Offset
         };
     }
 
@@ -89,7 +96,8 @@ public struct Transform
         {
             Position = Position - other.Position,
             Rotation = Quaternion.Normalize(Quaternion.Conjugate(other.Rotation) * Rotation),
-            Scale = Scale - other.Scale
+            Scale = Scale - other.Scale,
+            Offset = other.Offset
         };
     }
 
@@ -146,7 +154,6 @@ public struct Transform
 
         return false;
     }
-
 }
 
 [Flags]
