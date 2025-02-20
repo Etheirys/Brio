@@ -2,7 +2,7 @@
 To open this window again click `Information` on the Scene Manager then -> `View the Changelog`
 
 --------------------------------------------------------------------------------------------------------------------------------------------------------
-	 ---> Brio, Version 0.5.0 <--- Props, Free Cameras & Projects!
+	 ---> Brio, Version 0.5.0.X <--- Props, Free Cameras & Projects!
 ---------------------------------------------------------------------------------------------------------------------------------------------------------
 	
 --------------------------------------------------------------------------------
@@ -113,16 +113,6 @@ I want to give you the only thing else I know to give you,
 I dedicate Brio to you
 
 I love you, forever unto eternity~
-
---------------------------------------------------------------------------------------------------------------------------------------------------------
-	 --- Brio, Version 0.4.4.5 --- 
---------------------------------------------------------------------------------------------------------------------------------------------------------
-
-- Fixed an issue with Brio's IPC not loading Expressions when loading a pose
-
-- Fixed an issue with hair when Importing Pose
-
-- Fixed an issue with Brio's IPC causing a crash
 
 --------------------------------------------------------------------------------
 
