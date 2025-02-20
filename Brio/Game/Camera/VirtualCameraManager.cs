@@ -213,9 +213,9 @@ public class VirtualCameraManager : IDisposable
             leftRight += 1;
 
         // Handle vertical movement (up and down)
-        if(keyboardFrame->IsKeyDown(VirtualKey.E, true))
+        if(keyboardFrame->IsKeyDown(VirtualKey.E, true) || keyboardFrame->IsKeyDown(VirtualKey.SPACE, true))
             upDown += 1;
-        else if(keyboardFrame->IsKeyDown(VirtualKey.Q, true))
+        else if(keyboardFrame->IsKeyDown(VirtualKey.Q, true) || keyboardFrame->IsKeyDown(VirtualKey.CONTROL, true))
             upDown += -1;
 
         // Handle movement speed
