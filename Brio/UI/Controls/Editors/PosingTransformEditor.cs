@@ -50,7 +50,7 @@ public class PosingTransformEditor
 
                 ImBrio.Icon(FontAwesomeIcon.ArrowsLeftRightToLine);
                 ImGui.SameLine();
-                (var oanyActive, var odidChange) = ImBrio.DragFloat($"##transformSpeed_1", ref posingCapability.AdjusterOffset, 0.01f, "Offset");
+                ImBrio.DragFloat($"##transformSpeed_1", ref posingCapability.AdjusterOffset, 0.01f, "Offset");
 
                 if(posingCapability.Actor.IsProp == false)
                 {
