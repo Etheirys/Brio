@@ -52,10 +52,10 @@ public class MainWindow : Window, IDisposable
         _infoWindow = infoWindow;
         _inputService = input;
         _entityManager = entityManager;
-        _entitySelector = new(_entityManager);
+        _gPoseService = gPoseService;
+        _entitySelector = new(_entityManager, _gPoseService);
         _sceneService = sceneService;
         _projectWindow = projectWindow;
-        _gPoseService = gPoseService;
         _autoSaveService = autoSaveService;
 
         SizeConstraints = new WindowSizeConstraints
@@ -78,23 +78,20 @@ public class MainWindow : Window, IDisposable
                 ImGui.Text("Open GPose to use Brio!");
         }
 
-        using(ImRaii.Disabled(_gPoseService.IsGPosing == false))
+        var rootEntity = _entityManager.RootEntity;
+
+        if(rootEntity is null)
+            return;
+
+        using(var container = ImRaii.Child("###entity_hierarchy_container", new Vector2(-1, ImGui.GetTextLineHeight() * 18f), true))
         {
-            var rootEntity = _entityManager.RootEntity;
-
-            if(rootEntity is null)
-                return;
-
-            using(var container = ImRaii.Child("###entity_hierarchy_container", new Vector2(-1, ImGui.GetTextLineHeight() * 18f), true))
+            if(container.Success)
             {
-                if(container.Success)
-                {
-                    _entitySelector.Draw(rootEntity);
-                }
+                _entitySelector.Draw(rootEntity);
             }
-
-            EntityHelpers.DrawEntitySection(_entityManager.SelectedEntity);
         }
+
+        EntityHelpers.DrawEntitySection(_entityManager.SelectedEntity);
     }
 
     private void OnMainWindowToggle()

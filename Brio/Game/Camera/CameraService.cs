@@ -131,18 +131,16 @@ public unsafe class CameraService : IDisposable
     {
         if(_gPoseService.IsGPosing)
         {
-            if(_entityManager.TryGetEntity<CameraContainerEntity>("camera", out var cameraEntity))
+            if(_entityManager.TryGetEntity<CameraContainerEntity>("cameras", out var cameraEntity))
             {
                 if(cameraEntity.TryGetCapability<CameraContainerCapability>(out var cameraCapability))
                 {
-                    if(cameraCapability.CurrentCamera.DisableCollision)
-                    {
-                        if(camera == cameraCapability.CurrentCamera.BrioCamera)
+                    if(cameraCapability.CurrentCamera is not null && cameraCapability.IsAllowed && cameraCapability.CurrentCamera.IsFreeCamera == false)
+                        if(cameraCapability.CurrentCamera.DisableCollision && cameraCapability.CurrentCamera.IsActiveCamera)
                         {
                             camera->Collide = new Vector2(camera->Camera.MaxDistance);
                             return 0;
                         }
-                    }
                 }
             }
         }

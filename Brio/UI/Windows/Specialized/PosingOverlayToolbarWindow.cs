@@ -1,6 +1,7 @@
 ﻿using Brio.Capabilities.Posing;
 using Brio.Config;
 using Brio.Entities;
+using Brio.Game.Input;
 using Brio.Game.Posing;
 using Brio.Input;
 using Brio.UI.Controls.Core;
@@ -22,6 +23,7 @@ public class PosingOverlayToolbarWindow : Window
     private readonly PosingTransformWindow _overlayTransformWindow;
     private readonly PosingService _posingService;
     private readonly ConfigurationService _configurationService;
+    private readonly GameInputService _gameInputService;
 
     private readonly BoneSearchControl _boneSearchControl = new();
 
@@ -29,7 +31,7 @@ public class PosingOverlayToolbarWindow : Window
 
     private const string _boneFilterPopupName = "bone_filter_popup";
 
-    public PosingOverlayToolbarWindow(PosingOverlayWindow overlayWindow, EntityManager entityManager, PosingTransformWindow overlayTransformWindow, PosingService posingService, ConfigurationService configurationService) : base($"Brio - Overlay###brio_posing_overlay_toolbar_window", ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoCollapse)
+    public PosingOverlayToolbarWindow(PosingOverlayWindow overlayWindow, GameInputService gameInputService, EntityManager entityManager, PosingTransformWindow overlayTransformWindow, PosingService posingService, ConfigurationService configurationService) : base($"Brio - Overlay###brio_posing_overlay_toolbar_window", ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoCollapse)
     {
         Namespace = "brio_posing_overlay_toolbar_namespace";
 
@@ -38,6 +40,7 @@ public class PosingOverlayToolbarWindow : Window
         _overlayTransformWindow = overlayTransformWindow;
         _posingService = posingService;
         _configurationService = configurationService;
+        _gameInputService = gameInputService;
 
         ShowCloseButton = false;
     }
@@ -56,6 +59,8 @@ public class PosingOverlayToolbarWindow : Window
 
     public override bool DrawConditions()
     {
+        _gameInputService.AllowEscape = true;
+
         if(!_overlayWindow.IsOpen)
             return false;
 
@@ -83,6 +88,16 @@ public class PosingOverlayToolbarWindow : Window
 
         if(!_entityManager.TryGetCapabilityFromSelectedEntity<PosingCapability>(out var posing))
             return;
+
+        if(posing.Selected.Value is not null and BonePoseInfoId)
+        {
+            _gameInputService.AllowEscape = false;
+
+            if(InputService.IsKeyBindDown(KeyBindEvents.Poseing_Esc))
+            {
+                posing.ClearSelection();
+            }
+        }
 
         DrawHeaderButtons();
         DrawButtons(posing);

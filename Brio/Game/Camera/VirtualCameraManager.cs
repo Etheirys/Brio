@@ -114,13 +114,10 @@ public class VirtualCameraManager : IDisposable
         {
             if(_createdCameras.TryGetValue(cameraID, out CameraEntity? camEnt))
             {
-                if(_entityManager.SelectedEntity == camEnt && camEnt.VirtualCamera.IsActiveCamera)
+                if(_entityManager.TryGetEntity(new Entities.Core.CameraId(0), out var defaultCamEnt) && defaultCamEnt is CameraEntity cameraEnt)
                 {
-                    if(_entityManager.TryGetEntity(new Entities.Core.CameraId(0), out var defaultCamEnt) && defaultCamEnt is CameraEntity cameraEnt)
-                    {
-                        SelectCamera(cameraEnt.VirtualCamera);
-                        _entityManager.SetSelectedEntity(defaultCamEnt);
-                    }
+                    SelectCamera(cameraEnt.VirtualCamera);
+                    _entityManager.SetSelectedEntity(defaultCamEnt);
                 }
 
                 ent.RemoveChild(camEnt);
@@ -216,9 +213,9 @@ public class VirtualCameraManager : IDisposable
             leftRight += 1;
 
         // Handle vertical movement (up and down)
-        if(keyboardFrame->IsKeyDown(VirtualKey.E, true))
+        if(keyboardFrame->IsKeyDown(VirtualKey.E, true) || keyboardFrame->IsKeyDown(VirtualKey.SPACE, true))
             upDown += 1;
-        else if(keyboardFrame->IsKeyDown(VirtualKey.Q, true))
+        else if(keyboardFrame->IsKeyDown(VirtualKey.Q, true) || keyboardFrame->IsKeyDown(VirtualKey.CONTROL, true))
             upDown += -1;
 
         // Handle movement speed

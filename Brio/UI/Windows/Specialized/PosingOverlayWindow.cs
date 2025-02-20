@@ -29,7 +29,6 @@ public class PosingOverlayWindow : Window, IDisposable
     private readonly ConfigurationService _configurationService;
     private readonly PosingService _posingService;
     private readonly GPoseService _gPoseService;
-    private readonly GameInputService _gameInputService;
 
     private List<ClickableItem> _selectingFrom = [];
     private Transform? _trackingTransform;
@@ -38,7 +37,7 @@ public class PosingOverlayWindow : Window, IDisposable
     private const int _gizmoId = 142857;
     private const string _boneSelectPopupName = "brio_bone_select_popup";
 
-    public PosingOverlayWindow(EntityManager entityManager, CameraService cameraService, GameInputService gameInputService, ConfigurationService configService, PosingService posingService, GPoseService gPoseService)
+    public PosingOverlayWindow(EntityManager entityManager, CameraService cameraService, ConfigurationService configService, PosingService posingService, GPoseService gPoseService)
         : base("##brio_posing_overlay_window", ImGuiWindowFlags.AlwaysAutoResize, true)
     {
         Namespace = "brio_posing_overlay_namespace";
@@ -49,7 +48,6 @@ public class PosingOverlayWindow : Window, IDisposable
         _configurationService = configService;
         _posingService = posingService;
         _gPoseService = gPoseService;
-        _gameInputService = gameInputService;
 
         _gPoseService.OnGPoseStateChange += OnGPoseStateChanged;
     }
@@ -94,20 +92,6 @@ public class PosingOverlayWindow : Window, IDisposable
         var overlayConfig = _configurationService.Configuration.Posing;
         var uiState = new OverlayUIState(overlayConfig);
         var clickables = new List<ClickableItem>();
-
-        if(posing.Selected.Value is not null and BonePoseInfoId)
-        {
-            _gameInputService.AllowEscape = false;
-
-            if(InputService.IsKeyBindDown(KeyBindEvents.Poseing_Esc))
-            {
-                posing.ClearSelection();
-            }
-        }
-        else
-        {
-            _gameInputService.AllowEscape = true;
-        }
 
         CalculateClickables(posing, uiState, overlayConfig, ref clickables);
 
