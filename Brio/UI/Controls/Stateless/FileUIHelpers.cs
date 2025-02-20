@@ -320,7 +320,7 @@ public class FileUIHelpers
                     if(options.HasFlag(AppearanceImportOptions.Shaders))
                     {
                         BrioHuman.ShaderParams shaderParams = appearanceFile;
-                        ImportShadersFromFile(ref capability._modelShaderOverride, shaderParams);
+                        BrioUtilities.ImportShadersFromFile(ref capability._modelShaderOverride, shaderParams);
                     }
                     _ = capability.SetAppearance(appearanceFile, options);
                 }
