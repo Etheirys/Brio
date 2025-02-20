@@ -98,6 +98,10 @@ public class PosingOverlayToolbarWindow : Window
                 posing.ClearSelection();
             }
         }
+        else
+        {
+            _gameInputService.AllowEscape = true;
+        }
 
         DrawHeaderButtons();
         DrawButtons(posing);
