@@ -14,6 +14,7 @@ public class PosingTransformEditor
 {
     private Transform? _trackingTransform;
     private Vector3? _trackingEuler;
+    private float _trackingOffset = 0.01f;
 
     public void Draw(string id, PosingCapability posingCapability, bool compactMode = false)
     {
@@ -139,13 +140,13 @@ public class PosingTransformEditor
             }
         }
 
-        (var pdidChange, var panyActive) = ImBrio.DragFloat3($"###_transformPosition_0", ref realTransform.Position, realTransform.Offset, FontAwesomeIcon.ArrowsUpDownLeftRight, "Position", enableExpanded: compactMode);
-        (var rdidChange, var ranyActive) = ImBrio.DragFloat3($"###_transformRotation_0", ref realEuler, realTransform.Offset, FontAwesomeIcon.ArrowsSpin, "Rotation", enableExpanded: compactMode);
-        (var sdidChange, var sanyActive) = ImBrio.DragFloat3($"###_transformScale_0", ref realTransform.Scale, realTransform.Offset, FontAwesomeIcon.ExpandAlt, "Scale", enableExpanded: compactMode);
+        (var pdidChange, var panyActive) = ImBrio.DragFloat3($"###_transformPosition_0", ref realTransform.Position, _trackingOffset, FontAwesomeIcon.ArrowsUpDownLeftRight, "Position", enableExpanded: compactMode);
+        (var rdidChange, var ranyActive) = ImBrio.DragFloat3($"###_transformRotation_0", ref realEuler, _trackingOffset, FontAwesomeIcon.ArrowsSpin, "Rotation", enableExpanded: compactMode);
+        (var sdidChange, var sanyActive) = ImBrio.DragFloat3($"###_transformScale_0", ref realTransform.Scale, _trackingOffset, FontAwesomeIcon.ExpandAlt, "Scale", enableExpanded: compactMode);
 
         ImBrio.Icon(FontAwesomeIcon.ArrowsLeftRightToLine);
         ImGui.SameLine();
-        (var oanyActive, var odidChange) = ImBrio.DragFloat($"##transformSpeed_0", ref realTransform.Offset, 0.01f, "Offset");
+        (var oanyActive, var odidChange) = ImBrio.DragFloat($"##transformSpeed_0", ref _trackingOffset, 0.01f, "Offset");
 
         didChange |= pdidChange |= rdidChange |= sdidChange |= odidChange;
         anyActive |= panyActive |= ranyActive |= sanyActive |= oanyActive;
@@ -186,8 +187,8 @@ public class PosingTransformEditor
         bool didChange = false;
         bool anyActive = false;
 
-        (var pdidChange, var panyActive) = ImBrio.DragFloat3($"###_transformPosition_1", ref realTransform.Position, realTransform.Offset, FontAwesomeIcon.ArrowsUpDownLeftRight, "Position", enableExpanded: compactMode);
-        (var rdidChange, var ranyActive) = ImBrio.DragFloat3($"###_transformRotation_1", ref realEuler, realTransform.Offset, FontAwesomeIcon.ArrowsSpin, "Rotation", enableExpanded: compactMode);
+        (var pdidChange, var panyActive) = ImBrio.DragFloat3($"###_transformPosition_1", ref realTransform.Position, _trackingOffset, FontAwesomeIcon.ArrowsUpDownLeftRight, "Position", enableExpanded: compactMode);
+        (var rdidChange, var ranyActive) = ImBrio.DragFloat3($"###_transformRotation_1", ref realEuler, _trackingOffset, FontAwesomeIcon.ArrowsSpin, "Rotation", enableExpanded: compactMode);
 
         bool sdidChange = false;
         bool sanyActive = false;
@@ -205,14 +206,14 @@ public class PosingTransformEditor
             float entryWidth = (size.X - (ImGui.GetStyle().ItemSpacing.X * 2));
             ImGui.SetNextItemWidth(entryWidth);
 
-            (sanyActive, sdidChange) = ImBrio.DragFloat($"##transformScale", ref realTransform.Scale.X, realTransform.Offset / 10);
+            (sanyActive, sdidChange) = ImBrio.DragFloat($"##transformScale", ref realTransform.Scale.X, _trackingOffset / 10);
         }
         else
-            (sdidChange, sanyActive) = ImBrio.DragFloat3($"###_transformScale_1", ref realTransform.Scale, realTransform.Offset, FontAwesomeIcon.ExpandAlt, "Scale", enableExpanded: compactMode);
+            (sdidChange, sanyActive) = ImBrio.DragFloat3($"###_transformScale_1", ref realTransform.Scale, _trackingOffset, FontAwesomeIcon.ExpandAlt, "Scale", enableExpanded: compactMode);
 
         ImBrio.Icon(FontAwesomeIcon.ArrowsLeftRightToLine);
         ImGui.SameLine();
-        (var oanyActive, var odidChange) = ImBrio.DragFloat($"##transformSpeed_1", ref realTransform.Offset, 0.01f, "Offset");
+        (var oanyActive, var odidChange) = ImBrio.DragFloat($"##transformSpeed_1", ref _trackingOffset, 0.01f, "Offset");
 
         didChange |= pdidChange |= rdidChange |= sdidChange |= odidChange;
         anyActive |= panyActive |= ranyActive |= sanyActive |= oanyActive;
@@ -286,7 +287,6 @@ public class PosingTransformEditor
         }
         if(ImGui.IsItemHovered())
             ImGui.SetTooltip("Propagate Scales");
-
 
         return didChange;
     }
