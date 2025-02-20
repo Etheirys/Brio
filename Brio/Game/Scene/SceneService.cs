@@ -145,12 +145,14 @@ public class SceneService(EntityManager _entityManager, VirtualCameraManager _vi
             if(actorFile.PropData is not null)
                 modelCapability.Transform += actorFile.PropData.PropTransformDifference;
 
-            await appearanceCapability.SetAppearance(actorFile.AnamnesisCharaFile, AppearanceImportOptions.Weapon);
-         
-            await _framework.RunOnTick(() =>
+            await _framework.RunOnTick(async () =>
             {
-                appearanceCapability.AttachWeapon();
-            }, delayTicks: 10);
+                await appearanceCapability.SetAppearance(actorFile.AnamnesisCharaFile, AppearanceImportOptions.Weapon);
+                await _framework.RunOnTick(() =>
+                {
+                    appearanceCapability.AttachWeapon();
+                }, delayTicks: 10);
+            }, delayTicks: 10);        
         }, delayTicks: 2);
     }
 
@@ -167,7 +169,7 @@ public class SceneService(EntityManager _entityManager, VirtualCameraManager _vi
 
         await _framework.RunOnTick(async () =>
         {
-            await appearanceCapability.SetAppearance(actorFile.AnamnesisCharaFile, AppearanceImportOptions.Default);
+            await appearanceCapability.SetAppearance(actorFile.AnamnesisCharaFile, AppearanceImportOptions.All);
 
             await _framework.RunOnTick(async () =>
             {

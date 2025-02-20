@@ -2,6 +2,7 @@ using Brio.Capabilities.Actor;
 using Brio.Capabilities.Posing;
 using Brio.Core;
 using Brio.Entities.Actor;
+using Brio.Game.Actor.Appearance;
 using Brio.Game.Actor.Extensions;
 using Brio.Game.Types;
 using MessagePack;
@@ -32,7 +33,7 @@ public class ActorFile
 
     public bool IsProp { get; set; }
 
-    public static implicit operator ActorFile(ActorEntity actorEntity)
+    public static unsafe implicit operator ActorFile(ActorEntity actorEntity)
     {
         var appearanceCapability = actorEntity.GetCapability<ActorAppearanceCapability>();
         var posingCapability = actorEntity.GetCapability<PosingCapability>();
@@ -41,7 +42,7 @@ public class ActorFile
         var actorFile = new ActorFile
         {
             Name = actorEntity.RawName,
-            AnamnesisCharaFile = appearanceCapability.CurrentAppearance,
+            AnamnesisCharaFile = new ActorAppearanceExtended { Appearance = appearanceCapability.CurrentAppearance, ShaderParams = *appearanceCapability.Character.GetShaderParams() },
             PoseFile = posingCapability.GeneratePoseFile(),
             IsProp = actorEntity.IsProp,
             PropData = new PropData

@@ -240,6 +240,15 @@ public class ActorAppearanceWindow : Window, IDisposable
                     else
                         _importOptions &= ~AppearanceImportOptions.ExtendedAppearance;
                 }
+
+                bool shaders = _importOptions.HasFlag(AppearanceImportOptions.Shaders);
+                if(ImGui.Checkbox("Shaders", ref shaders))
+                {
+                    if(shaders)
+                        _importOptions |= AppearanceImportOptions.Shaders;
+                    else
+                        _importOptions &= ~AppearanceImportOptions.Shaders;
+                }
             }
         }
     }
