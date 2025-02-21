@@ -11,7 +11,6 @@ using Brio.Files;
 using Brio.Game.Actor;
 using Brio.Game.Actor.Appearance;
 using Brio.Game.Actor.Extensions;
-using Brio.Game.Actor.Interop;
 using Brio.Game.Camera;
 using Brio.Game.Core;
 using Brio.Game.Posing;
@@ -95,7 +94,7 @@ public class SceneService(EntityManager _entityManager, VirtualCameraManager _vi
                 );
             }
             else
-            { 
+            {
                 var (actorId, actor) = actorCapability.CreateCharacter(actorFile.HasChild, false, forceSpawnActorWithoutCompanion: !actorFile.HasChild);
 
                 _framework.RunUntilSatisfied(
@@ -154,7 +153,7 @@ public class SceneService(EntityManager _entityManager, VirtualCameraManager _vi
                 {
                     appearanceCapability.AttachWeapon();
                 }, delayTicks: 10);
-            }, delayTicks: 10);        
+            }, delayTicks: 10);
         }, delayTicks: 2);
     }
 
@@ -171,7 +170,9 @@ public class SceneService(EntityManager _entityManager, VirtualCameraManager _vi
 
         await _framework.RunOnTick(async () =>
         {
-            BrioUtilities.ImportShadersFromFile(ref appearanceCapability._modelShaderOverride, actorFile.AnamnesisCharaFile);
+
+            if(actorFile.AnamnesisCharaFile.IsExtendedAppearanceValid)
+                BrioUtilities.ImportShadersFromFile(ref appearanceCapability._modelShaderOverride, actorFile.AnamnesisCharaFile);
             await appearanceCapability.SetAppearance(actorFile.AnamnesisCharaFile, AppearanceImportOptions.All);
 
             await _framework.RunOnTick(async () =>

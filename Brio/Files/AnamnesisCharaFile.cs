@@ -93,6 +93,8 @@ public class AnamnesisCharaFile : JsonDocumentBase
 
     public Vector3? BustScale { get; set; } = null;
 
+    public bool IsExtendedAppearanceValid => SkinColor.HasValue || SkinGloss.HasValue || LeftEyeColor.HasValue || RightEyeColor.HasValue ||
+        LimbalRingColor.HasValue || HairColor.HasValue || HairGloss.HasValue || HairHighlight.HasValue || MouthColor.HasValue;
 
     public override void GetAutoTags(ref TagCollection tags)
     {
