@@ -48,6 +48,8 @@ public class PosingOverlayToolbarWindow : Window
     public override void PreOpenCheck()
     {
         IsOpen = _overlayWindow.IsOpen;
+      
+        _gameInputService.AllowEscape = true;
 
         if(UIManager.IsPosingGraphicalWindowOpen && _configurationService.Configuration.Posing.HideToolbarWhenAdvandedPosingOpen)
         {

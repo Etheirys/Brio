@@ -161,6 +161,11 @@ public class FileUIHelpers
 
                 if(ImGui.Button("Import", new(size.X, 25)))
                 {
+                    //bool? modelTransformOverride = null;
+                    //if(doTransform)
+                    //{
+                    //    modelTransformOverride = doTransform;
+                    //}
                     ShowImportPoseModal(capability, freezeOnLoad: freezeOnLoad, transformComponents: transformComponents, applyModelTransformOverride: doTransform);
                 }
 
@@ -274,20 +279,6 @@ public class FileUIHelpers
                 }, ConfigurationService.Instance.Configuration.LastExportPath, true);
     }
 
-    public static void ImportShadersFromFile(ref ModelShaderOverride modelShaderOverride, BrioHuman.ShaderParams shaderParams)
-    {
-        modelShaderOverride.SkinColor = shaderParams.SkinColor;
-        modelShaderOverride.SkinGloss = shaderParams.SkinGloss;
-        modelShaderOverride.MuscleTone = shaderParams.MuscleTone;
-        modelShaderOverride.MouthColor = shaderParams.MouthColor;
-        modelShaderOverride.HairColor = shaderParams.HairColor;
-        modelShaderOverride.HairGloss = shaderParams.HairGloss;
-        modelShaderOverride.HairHighlight = shaderParams.HairHighlight;
-        modelShaderOverride.LeftEyeColor = shaderParams.LeftEyeColor;
-        modelShaderOverride.RightEyeColor = shaderParams.RightEyeColor;
-        modelShaderOverride.FeatureColor = shaderParams.FeatureColor;
-    }
-
     public static void ShowImportCharacterModal(ActorAppearanceCapability capability, AppearanceImportOptions options)
     {
         List<Type> types = [typeof(ActorAppearanceUnion), typeof(AnamnesisCharaFile)];
@@ -310,7 +301,7 @@ public class FileUIHelpers
                     if (options.HasFlag(AppearanceImportOptions.Shaders))
                     {
                         BrioHuman.ShaderParams shaderParams = appearanceFile;
-                        ImportShadersFromFile(ref capability._modelShaderOverride, shaderParams);
+                        BrioUtilities.ImportShadersFromFile(ref capability._modelShaderOverride, shaderParams);
                     }
                     _ = capability.SetAppearance(appearanceFile, options);
                 }
@@ -334,7 +325,7 @@ public class FileUIHelpers
                     if(options.HasFlag(AppearanceImportOptions.Shaders))
                     {
                         BrioHuman.ShaderParams shaderParams = appearanceFile;
-                        ImportShadersFromFile(ref capability._modelShaderOverride, shaderParams);
+                        BrioUtilities.ImportShadersFromFile(ref capability._modelShaderOverride, shaderParams);
                     }
                     _ = capability.SetAppearance(appearanceFile, options);
                 }

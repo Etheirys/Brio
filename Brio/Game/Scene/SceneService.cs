@@ -2,6 +2,7 @@ using Brio.Capabilities.Actor;
 using Brio.Capabilities.Posing;
 using Brio.Capabilities.World;
 using Brio.Config;
+using Brio.Core;
 using Brio.Entities;
 using Brio.Entities.Actor;
 using Brio.Entities.Core;
@@ -152,7 +153,7 @@ public class SceneService(EntityManager _entityManager, VirtualCameraManager _vi
                 {
                     appearanceCapability.AttachWeapon();
                 }, delayTicks: 10);
-            }, delayTicks: 10);        
+            }, delayTicks: 10);
         }, delayTicks: 2);
     }
 
@@ -169,6 +170,9 @@ public class SceneService(EntityManager _entityManager, VirtualCameraManager _vi
 
         await _framework.RunOnTick(async () =>
         {
+
+            if(actorFile.AnamnesisCharaFile.IsExtendedAppearanceValid)
+                BrioUtilities.ImportShadersFromFile(ref appearanceCapability._modelShaderOverride, actorFile.AnamnesisCharaFile);
             await appearanceCapability.SetAppearance(actorFile.AnamnesisCharaFile, AppearanceImportOptions.All);
 
             await _framework.RunOnTick(async () =>

@@ -141,9 +141,9 @@ public class VirtualCameraManager : IDisposable
     {
         _cameraId = 0;
         CurrentCamera = null;
-        foreach(var item in _createdCameras)
+        foreach(var item in _createdCameras.Values)
         {
-            DestroyCamera(item.Key);
+            DestroyCamera(item.CameraID);
         }
     }
 
