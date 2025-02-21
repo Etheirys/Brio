@@ -159,7 +159,7 @@ public class PosingCapability : ActorCharacterCapability
             actionTimeline.StopSpeedAndResetTimeline(() =>
             {
                 ImportPose_Internal(rawPoseFile, options, reset: false, reconcile: false, asExpression: asExpression, asScene: asScene,
-                    asIPCpose: asIPCpose, asBody: asBody, asProp: asProp, transformComponents: transformComponents);
+                    asIPCpose: asIPCpose, asBody: asBody, asProp: asProp, transformComponents: transformComponents, applyModelTransformOverride: applyModelTransformOverride);
 
             }, !(ConfigurationService.Instance.Configuration.Posing.FreezeActorOnPoseImport || freezeOnLoad));
         }
@@ -189,6 +189,7 @@ public class PosingCapability : ActorCharacterCapability
 
         poseFile.SanitizeBoneNames();
 
+        bool applyModelTransform = false;
         if(asExpression)
         {
             Brio.Log.Info("Loading as Expression");
@@ -204,7 +205,7 @@ public class PosingCapability : ActorCharacterCapability
         {
             options = _posingService.SceneImporterOptions;
 
-            options.ApplyModelTransform = ConfigurationService.Instance.Configuration.Import.ApplyModelTransform;
+            applyModelTransform |= ConfigurationService.Instance.Configuration.Import.ApplyModelTransform;
         }
         else if(asIPCpose)
         {
@@ -215,6 +216,8 @@ public class PosingCapability : ActorCharacterCapability
             options ??= _posingService.DefaultImporterOptions;
         }
 
+        applyModelTransform |= options.ApplyModelTransform;
+
         if(transformComponents.HasValue)
         {
             options.TransformComponents = transformComponents.Value;
@@ -222,16 +225,16 @@ public class PosingCapability : ActorCharacterCapability
 
         if(applyModelTransformOverride.HasValue)
         {
-            options.ApplyModelTransform = applyModelTransformOverride.Value;
+            applyModelTransform = applyModelTransformOverride.Value;
         }
 
-        if(options.ApplyModelTransform && reset)
+        if(applyModelTransform && reset)
             ModelPosing.ResetTransform();
 
         SkeletonPosing.ImportSkeletonPose(poseFile, options, expressionPhase2);
 
         if(asExpression == false)
-            ModelPosing.ImportModelPose(poseFile, options, asScene);
+            ModelPosing.ImportModelPose(poseFile, options, asScene, applyModelTransform);
 
         if(generateSnapshot)
             _framework.RunOnTick(() => Snapshot(reset, reconcile, asExpression: asExpression), delayTicks: 4);

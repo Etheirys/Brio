@@ -67,9 +67,9 @@ public class ModelPosingCapability : ActorCharacterCapability
         ResetTransform();
     }
 
-    public void ImportModelPose(PoseFile poseFile, PoseImporterOptions options, bool isLoadingAsScene)
+    public void ImportModelPose(PoseFile poseFile, PoseImporterOptions options, bool isLoadingAsScene, bool applyModelTransform)
     {
-        if(options.ApplyModelTransform)
+        if(applyModelTransform)
         {
             if(isLoadingAsScene)
             {

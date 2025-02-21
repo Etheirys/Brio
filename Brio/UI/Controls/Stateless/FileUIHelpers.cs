@@ -161,6 +161,11 @@ public class FileUIHelpers
 
                 if(ImGui.Button("Import", new(size.X, 25)))
                 {
+                    //bool? modelTransformOverride = null;
+                    //if(doTransform)
+                    //{
+                    //    modelTransformOverride = doTransform;
+                    //}
                     ShowImportPoseModal(capability, freezeOnLoad: freezeOnLoad, transformComponents: transformComponents, applyModelTransformOverride: doTransform);
                 }
 
