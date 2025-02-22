@@ -6,33 +6,42 @@ To open this window again click `Information` on the Scene Manager then -> `View
 ---------------------------------------------------------------------------------------------------------------------------------------------------------
 	
 --------------------------------------------------------------------------------
+	--- Brio, Version 0.5.0.4 --- 
+
+- Once more, fixed ESCAPE not opening the "End group pose" menu.
+- Fixed an issue where the import setting `ModelTransform` was not working
+- Fixed Destroying Camera on Scene load if "Override Current Scene" was enabled.
+- Fixed Projects saving Free Cameras being frozen in place and unable to move. 
+- Fixed Scene loading characters with custom colors. (Thanks @Bronya-Rand)
+
+--------------------------------------------------------------------------------
 	--- Brio, Version 0.5.0.3 --- 
 
-- Environment is once again useable outside of Gpose
-- Added a new setting "Consumed, [SPACE], [Shift], [Ctrl] & [Alt] keyboard input when moving a FreeCam"
-- Added SPACE (Up) & CONTROL (Down) to Camera movement
-- Fixed "Disable Collision" on Brio Cameras
+- Environment is once again useable outside of Gpose.
+- Added a new setting "Consumed, [SPACE], [Shift], [Ctrl] & [Alt] keyboard input when moving a FreeCam".
+- Added SPACE (Up) & CONTROL (Down) to Camera movement.
+- Fixed "Disable Collision" on Brio Cameras.
 - Fixed ESCAPE not opening the "End group pose" menu.
-- Fixed on destroying a Camera not targeting Default Camera
-- Fixed loading and saving characters with custom colors
-- Updated Thank Yous
+- Fixed on destroying a Camera not targeting Default Camera. (Thanks @Bronya-Rand)
+- Fixed loading and saving characters with custom colors. (Thanks @Bronya-Rand)
+- Updated Thank Yous.
 
 --------------------------------------------------------------------------------
 	--- Brio, Version 0.5.0.2 --- 
 
-- The Glamourer Design menu is now in alphabetical order
-- Once again, fix an issue where PosingOverlayWindow would be to small if the text scale was less then 100%
-- Fixed Auto-Save not turning off when is was disabled in the settings
-- Fixed Cameras being unable to be destroyed in certain situations
+- The Glamourer Design menu is now in alphabetical order.
+- Once again, fix an issue where PosingOverlayWindow would be to small if the text scale was less then 100%.
+- Fixed Auto-Save not turning off when is was disabled in the settings.
+- Fixed Cameras being unable to be destroyed in certain situations.
 
 --------------------------------------------------------------------------------
 	--- Brio, Version 0.5.0.1 --- 
 
-- Fixed text scaling issues
-- Fixed an issue with T-Pose & A-Pose loading
-- Fixed not being able to drag the Main window off FFXIV
-- Fixed [Shift], [Ctrl] & [Alt] being consumed my Brio
-- Once again allow AllowPinning & AllowClickthrough on the Overlay window & Main window
+- Fixed text scaling issues.
+- Fixed an issue with T-Pose & A-Pose loading.
+- Fixed not being able to drag the Main window off FFXIV.
+- Fixed [Shift], [Ctrl] & [Alt] being consumed my Brio.
+- Once again allow AllowPinning & AllowClickthrough on the Overlay window & Main window.
 
 --------------------------------------------------------------------------------
 	--- Brio, Version 0.5.0 --- 
