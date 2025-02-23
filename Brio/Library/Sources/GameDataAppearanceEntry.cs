@@ -8,6 +8,7 @@ using Brio.UI;
 using Brio.UI.Controls.Stateless;
 using Dalamud.Interface.Textures.TextureWraps;
 using System;
+using ImGuiNET;
 
 namespace Brio.Library.Sources;
 
@@ -109,6 +110,8 @@ public class GameDataAppearanceEntry : ItemEntryBase
         base.DrawActions(isModal);
 
         ImBrio.DrawApplyToActor(_entityManager, SetAppearance);
+        ImGui.SameLine();
+        ImBrio.DrawSpawnActor(_entityManager, SetAppearance);
     }
 
     void SetAppearance(ActorEntity actorEntity)
