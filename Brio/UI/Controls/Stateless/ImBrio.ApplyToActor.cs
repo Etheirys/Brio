@@ -2,11 +2,13 @@
 using Brio.Entities.Actor;
 using ImGuiNET;
 using System;
+using System.Numerics;
 using Brio.Entities.Core;
 using Brio.Game.Actor;
 using Brio.Game.Actor.Extensions;
 using Brio.Game.Core;
 using Dalamud.Game.ClientState.Objects.Types;
+using Dalamud.Interface;
 using Dalamud.Interface.Utility.Raii;
 
 namespace Brio.UI.Controls.Stateless;
@@ -23,7 +25,7 @@ public partial class ImBrio
         }
         else
         {
-            if(ImGui.Button($"Apply To"))
+            if(ImGui.Button($"Apply To {selectedActor.FriendlyName}"))
             {
                 callback?.Invoke(selectedActor);
             }
@@ -37,17 +39,18 @@ public partial class ImBrio
             using var _ = ImRaii.Disabled(true);
             ImGui.Button("Unable to Spawn");
         }
+        
 
-        if(ImGui.Button($"Spawn New Actor"))
+        if(FontIconButton(FontAwesomeIcon.Plus))
         {
             if(!spawnService.CreateCharacter(out var character, disableSpawnCompanion: true))
             {
                 Brio.Log.Error("Unable to spawn character");
                 return;
             }
-            
+
             unsafe bool IsReadyToDraw() => character.Native()->IsReadyToDraw();
-            
+
             Brio.Framework.RunUntilSatisfied(
                 IsReadyToDraw,
                 (_) =>
@@ -64,21 +67,9 @@ public partial class ImBrio
                 100,
                 dontStartFor: 2
             );
-            
-            //var entity = entityManager.AttachEntity(new Entity)
-            
-            // Brio.Framework.RunOnTick(() =>
-            //     {
-            //         var entity = entityManager.GetEntity(new EntityId(character)); 
-            //         if(entity is not ActorEntity actorEntity)
-            //         {
-            //             Brio.Log.Error($"Unable to get actor entity is: {entity?.GetType()} {entity}"); 
-            //             return;
-            //         }
-            //
-            //         callback.Invoke(actorEntity);
-            //     }
-            // );
         }
+        
+        if(ImGui.IsItemHovered())
+            ImGui.SetTooltip("Spawn As New Actor");
     }
 }
