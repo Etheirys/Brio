@@ -8,6 +8,7 @@ using Brio.UI;
 using Brio.UI.Controls.Stateless;
 using Dalamud.Interface.Textures.TextureWraps;
 using System;
+using ImGuiNET;
 
 namespace Brio.Library.Sources;
 
