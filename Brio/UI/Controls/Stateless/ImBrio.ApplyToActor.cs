@@ -19,9 +19,14 @@ public partial class ImBrio
     {
         if(entityManager.SelectedEntity is null || entityManager.SelectedEntity is not ActorEntity selectedActor)
         {
-            ImGui.BeginDisabled();
-            ImGui.Button($"Select an Actor");
-            ImGui.EndDisabled();
+            DrawSpawnActor(entityManager, callback);
+            
+            return;
+        }
+
+        if(ImGui.IsKeyDown(ImGuiKey.LeftCtrl) || ImGui.IsKeyDown(ImGuiKey.RightCtrl))
+        {
+            DrawSpawnActor(entityManager, callback);
         }
         else
         {
@@ -29,19 +34,24 @@ public partial class ImBrio
             {
                 callback?.Invoke(selectedActor);
             }
+
+
+            if(ImGui.IsItemHovered())
+                ImGui.SetTooltip("Hold Ctrl to spawn as a new actor");
         }
+
     }
 
-    public static void DrawSpawnActor(EntityManager entityManager, Action<ActorEntity> callback)
+    private static void DrawSpawnActor(EntityManager entityManager, Action<ActorEntity> callback)
     {
         if(!Brio.TryGetService(out ActorSpawnService spawnService))
         {
             using var _ = ImRaii.Disabled(true);
             ImGui.Button("Unable to Spawn");
         }
-        
 
-        if(FontIconButton(FontAwesomeIcon.Plus))
+
+        if(ImGui.Button("Spawn As New Actor"))
         {
             if(!spawnService.CreateCharacter(out var character, disableSpawnCompanion: true))
             {
@@ -68,8 +78,5 @@ public partial class ImBrio
                 dontStartFor: 2
             );
         }
-        
-        if(ImGui.IsItemHovered())
-            ImGui.SetTooltip("Spawn As New Actor");
     }
 }

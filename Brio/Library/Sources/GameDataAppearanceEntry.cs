@@ -110,8 +110,6 @@ public class GameDataAppearanceEntry : ItemEntryBase
         base.DrawActions(isModal);
 
         ImBrio.DrawApplyToActor(_entityManager, SetAppearance);
-        ImGui.SameLine();
-        ImBrio.DrawSpawnActor(_entityManager, SetAppearance);
     }
 
     void SetAppearance(ActorEntity actorEntity)
