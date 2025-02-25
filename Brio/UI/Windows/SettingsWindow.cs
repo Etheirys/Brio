@@ -345,6 +345,14 @@ public class SettingsWindow : Window
 
             using(ImRaii.Disabled(!enabled))
             {
+
+                var individual = _configurationService.Configuration.AutoSave.AutoSaveIndividualPoses;
+                if(ImGui.Checkbox("Save Individual Poses", ref individual))
+                {
+                    _configurationService.Configuration.AutoSave.AutoSaveIndividualPoses = individual;
+                    _configurationService.ApplyChange();
+                }
+
                 var saveInterval = _configurationService.Configuration.AutoSave.AutoSaveInterval;
                 if(ImGui.SliderInt("Auto-Save Interval", ref saveInterval, 15, 500, "%d seconds"))
                 {

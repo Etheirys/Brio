@@ -2,6 +2,7 @@
 using Brio.Files;
 using Brio.Game.GPose;
 using Brio.Game.Scene;
+using Brio.Resources;
 using Brio.UI;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
@@ -80,10 +81,37 @@ public class AutoSaveService : IDisposable
 
                 byte[] bytes = MessagePackSerializer.Serialize(scene);
 
-                var path = Path.Combine(AutoSaveFolder, $"autosave-{DateTime.Now:yyyy-MM-dd}-{DateTime.Now:hh-mm-ss}.brioautosave");
+                var path = Path.Combine(AutoSaveFolder, $"autosave-{DateTime.Now:yyyy-MM-dd}-{DateTime.Now:hh-mm-ss}");
+
+                if(Directory.Exists(path) == false)
+                {
+                    Directory.CreateDirectory(path);
+                }
+
                 Brio.Log.Verbose($"AutoSaving: {path}");
 
-                File.WriteAllBytes(path, bytes);
+                File.WriteAllBytes(Path.Combine(path, "SceneAutoSave.brioautosave"), bytes);
+
+                if(ConfigurationService.Instance.Configuration.AutoSave.AutoSaveIndividualPoses)
+                {
+                    var posespath = Path.Combine(path, "Poses");
+
+                    if(Directory.Exists(posespath) == false)
+                    {
+                        Directory.CreateDirectory(posespath);
+                    }
+
+                    foreach(var item in scene.Actors)
+                    {
+
+                        ResourceProvider.Instance.SaveFileDocument(Path.Combine(posespath, $"{item.FriendlyName}.pose"), item.PoseFile);
+
+                        if(item.HasChild && item.Child?.PoseFile != null)
+                        {
+                            ResourceProvider.Instance.SaveFileDocument(Path.Combine(posespath, $"{item.FriendlyName}-Companion.pose"), item.Child.PoseFile);
+                        }
+                    }
+                }
 
                 Brio.Log.Verbose($"AutoSaved!");
 
@@ -143,22 +171,22 @@ public class AutoSaveService : IDisposable
     {
         try
         {
-            var saveFiles = Directory.EnumerateFiles(AutoSaveFolder)
-                                 .Select(f => new FileInfo(f))
+            var saveFolders = Directory.EnumerateDirectories(AutoSaveFolder)
+                                 .Select(f => new DirectoryInfo(f))
                                  .OrderByDescending(f => f.LastWriteTime)
                                  .ToList();
 
-            if(saveFiles.Count > ConfigurationService.Instance.Configuration.AutoSave.MaxAutoSaves)
+            if(saveFolders.Count > ConfigurationService.Instance.Configuration.AutoSave.MaxAutoSaves)
             {
 
             }
 
             // Keep the newest files and delete the rest
-            var filesToDelete = saveFiles.Skip(ConfigurationService.Instance.Configuration.AutoSave.MaxAutoSaves);
+            var foldersToDelete = saveFolders.Skip(ConfigurationService.Instance.Configuration.AutoSave.MaxAutoSaves);
 
-            foreach(var file in filesToDelete)
+            foreach(var folder in foldersToDelete)
             {
-                file.Delete();
+                folder.Delete(true);
             }
         }
         catch(Exception ex)
