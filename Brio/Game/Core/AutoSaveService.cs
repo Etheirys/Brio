@@ -83,12 +83,12 @@ public class AutoSaveService : IDisposable
 
                 var path = Path.Combine(AutoSaveFolder, $"autosave-{DateTime.Now:yyyy-MM-dd}-{DateTime.Now:hh-mm-ss}");
 
+                Brio.Log.Verbose($"AutoSaving: {path}");
+
                 if(Directory.Exists(path) == false)
                 {
                     Directory.CreateDirectory(path);
                 }
-
-                Brio.Log.Verbose($"AutoSaving: {path}");
 
                 File.WriteAllBytes(Path.Combine(path, "SceneAutoSave.brioautosave"), bytes);
 
@@ -101,14 +101,14 @@ public class AutoSaveService : IDisposable
                         Directory.CreateDirectory(posespath);
                     }
 
-                    foreach(var item in scene.Actors)
+                    foreach(var actor in scene.Actors)
                     {
 
-                        ResourceProvider.Instance.SaveFileDocument(Path.Combine(posespath, $"{item.FriendlyName}.pose"), item.PoseFile);
+                        ResourceProvider.Instance.SaveFileDocument(Path.Combine(posespath, $"{actor.FriendlyName}.pose"), actor.PoseFile);
 
-                        if(item.HasChild && item.Child?.PoseFile != null)
+                        if(actor.HasChild && actor.Child?.PoseFile != null)
                         {
-                            ResourceProvider.Instance.SaveFileDocument(Path.Combine(posespath, $"{item.FriendlyName}-Companion.pose"), item.Child.PoseFile);
+                            ResourceProvider.Instance.SaveFileDocument(Path.Combine(posespath, $"{actor.FriendlyName}-Companion.pose"), actor.Child.PoseFile);
                         }
                     }
                 }
@@ -172,8 +172,8 @@ public class AutoSaveService : IDisposable
         try
         {
             var saveFolders = Directory.EnumerateDirectories(AutoSaveFolder)
-                                 .Select(f => new DirectoryInfo(f))
-                                 .OrderByDescending(f => f.LastWriteTime)
+                                 .Select(d => new DirectoryInfo(d))
+                                 .OrderByDescending(d => d.LastWriteTime)
                                  .ToList();
 
             if(saveFolders.Count > ConfigurationService.Instance.Configuration.AutoSave.MaxAutoSaves)
@@ -199,13 +199,13 @@ public class AutoSaveService : IDisposable
     {
         try
         {
-            var saveFiles = Directory.EnumerateFiles(AutoSaveFolder)
-                                 .Select(f => new FileInfo(f))
+            var saveFolders = Directory.EnumerateDirectories(AutoSaveFolder)
+                                 .Select(d => new DirectoryInfo(d))
                                  .ToList();
 
-            foreach(var file in saveFiles)
+            foreach(var folder in saveFolders)
             {
-                file.Delete();
+                folder.Delete(true);
             }
         }
         catch(Exception ex)
