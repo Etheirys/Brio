@@ -16,6 +16,8 @@ public class ActorFile
 {
     public string Name { get; set; } = "";
 
+    public string FriendlyName { get; set; } = "Actor";
+
     public required AnamnesisCharaFile AnamnesisCharaFile { get; set; }
     public required PoseFile PoseFile { get; set; }
 
@@ -42,6 +44,7 @@ public class ActorFile
         var actorFile = new ActorFile
         {
             Name = actorEntity.RawName,
+            FriendlyName = actorEntity.FriendlyName,
             AnamnesisCharaFile = new ActorAppearanceExtended { Appearance = appearanceCapability.CurrentAppearance, ShaderParams = *appearanceCapability.Character.GetShaderParams() },
             PoseFile = posingCapability.GeneratePoseFile(),
             IsProp = actorEntity.IsProp,
