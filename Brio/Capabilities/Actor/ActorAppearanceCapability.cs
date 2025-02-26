@@ -341,6 +341,7 @@ public class ActorAppearanceCapability : ActorCharacterCapability
 
         ResetCollection();
         _ = ResetAppearance();
+        ResetProfile();
     }
 
     private void OnPenumbraRedraw(int gameObjectId)
@@ -356,5 +357,6 @@ public class ActorAppearanceCapability : ActorCharacterCapability
 
         ResetCollection();
         _ = ResetAppearance();
+        ResetProfile();
     }
 }
