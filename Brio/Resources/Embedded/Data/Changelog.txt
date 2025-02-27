@@ -2,20 +2,26 @@
 To open this window again click `Information` on the Scene Manager then -> `View the Changelog`
 
 --------------------------------------------------------------------------------------------------------------------------------------------------------
-	 ---> Brio, Version 0.5.0.X <--- Props, Free Cameras & Projects!
+	 ---> Brio, Version 0.5.0.X <--- Props, Free Cameras, Projects & More!
 ---------------------------------------------------------------------------------------------------------------------------------------------------------
 	
 --------------------------------------------------------------------------------
-	--- Brio, Version 0.5.0.4 --- 
+	--- Brio, Version [0.5.0.5] --- 
+
+- Added a new Library Feature "Spawn as new actor (Thanks @Cazzar)
+
+- Fixed an issue with C+ not being reverted on exiting Gpose or actor despawn (Thanks @HoloWise)
+- Fixed a rare issue with loading projects
+- Made a small optimization to speed up Brio's rendering
+
+--------------------------------------------------------------------------------
+	--- Brio, Versions [0.5.0.4 - 0.5.0.1] --- 
 
 - Once more, fixed ESCAPE not opening the "End group pose" menu.
 - Fixed an issue where the import setting `ModelTransform` was not working
 - Fixed Destroying Camera on Scene load if "Override Current Scene" was enabled.
 - Fixed Projects saving Free Cameras being frozen in place and unable to move. 
 - Fixed Scene loading characters with custom colors. (Thanks @Bronya-Rand)
-
---------------------------------------------------------------------------------
-	--- Brio, Version 0.5.0.3 --- 
 
 - Environment is once again useable outside of Gpose.
 - Added a new setting "Consumed, [SPACE], [Shift], [Ctrl] & [Alt] keyboard input when moving a FreeCam".
@@ -26,16 +32,10 @@ To open this window again click `Information` on the Scene Manager then -> `View
 - Fixed loading and saving characters with custom colors. (Thanks @Bronya-Rand)
 - Updated Thank Yous.
 
---------------------------------------------------------------------------------
-	--- Brio, Version 0.5.0.2 --- 
-
 - The Glamourer Design menu is now in alphabetical order.
 - Once again, fix an issue where PosingOverlayWindow would be to small if the text scale was less then 100%.
 - Fixed Auto-Save not turning off when is was disabled in the settings.
 - Fixed Cameras being unable to be destroyed in certain situations.
-
---------------------------------------------------------------------------------
-	--- Brio, Version 0.5.0.1 --- 
 
 - Fixed text scaling issues.
 - Fixed an issue with T-Pose & A-Pose loading.
@@ -44,7 +44,7 @@ To open this window again click `Information` on the Scene Manager then -> `View
 - Once again allow AllowPinning & AllowClickthrough on the Overlay window & Main window.
 
 --------------------------------------------------------------------------------
-	--- Brio, Version 0.5.0 --- 
+	--- Brio, Version [0.5.0] --- 
 
 - Brio has a new Icon!
 	- Over time it will update in Dalamud 
@@ -125,11 +125,12 @@ I love you, forever unto eternity~
 
 --------------------------------------------------------------------------------
 
-A Big Thank you to (Sufferhymn), (Night Song), (Alvar Valo), (Yasumi), (YikesXD), 
+A Big Thank you to (Sufferhymn), (Night Song), (Alvar Valo), (@Conna),(Yasumi), (YikesXD), 
 (Selitha), (AquilaHK), (LotusEcho), & (Yume) for their support on Kofi!
 
-Also, Thank you, to: (@Ashadow700), (@Bronya-Rand) (@MKhayle), (@ashna_ff14), (@Yuki-Codes), 
-(@danma3x), (@snaeling), (@WorstAquaPlayer), (@Caraxi), (@Enth) & (@gris-fuego);
+Also, Thank you, to: (@AsgardXIV), (@Ashadow700), (@ashna_ff14), (@Bronya-Rand), (@Caraxi),
+(@Cazzar), (@danma3x), (@Enth), (@gris-fuego), (@HoloWise), (@MKhayle),
+(@WorstAquaPlayer), (@snaeling), (@Yuki-Codes);
 For their contributions to Brio!
 
 --------------------------------------------------------------------------------
