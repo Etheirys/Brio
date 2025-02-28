@@ -126,6 +126,7 @@ public class VirtualCameraManager : IDisposable
                 if(oldCamEnt.CameraType == CameraType.Free)
                 {
                     newCam.VirtualCamera.Position = oldCam.Position;
+                    newCam.VirtualCamera.IsFreeCamera = true;
                 }
                 else
                 {
