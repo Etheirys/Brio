@@ -114,14 +114,14 @@ public class ActorAppearanceCapability : ActorCharacterCapability
     {
         _ = _glamourerService.ApplyDesign(design, Character);
     }
-    public void ResetDesign(bool isRest = false)
+    public void ResetDesign(bool checkResetLock = true)
     {
         _glamourerService.RevertCharacter(Character);
 
-        if(isRest == false && _glamourerService.CheckForLock(Character))
+        if(checkResetLock && _glamourerService.CheckForLock(Character))
         {
             ResetCollection();
-            ResetProfile(true);
+            ResetProfile(false);
         }
     }
 
@@ -129,14 +129,14 @@ public class ActorAppearanceCapability : ActorCharacterCapability
     {
         _customizePlusService.SetProfile(Character, data);
     }
-    public void ResetProfile(bool isRest = false)
+    public void ResetProfile(bool checkResetLock = true)
     {
         _customizePlusService.RemoveTemporaryProfile(Character);
 
-        if(isRest == false && _glamourerService.CheckForLock(Character))
+        if(checkResetLock && _glamourerService.CheckForLock(Character))
         {
             ResetCollection();
-            ResetDesign(true);
+            ResetDesign(false);
         }
 
         SetSelectedProfile();
@@ -340,8 +340,8 @@ public class ActorAppearanceCapability : ActorCharacterCapability
             return;
 
         ResetCollection();
-        _ = ResetAppearance();
         ResetProfile();
+        _ = ResetAppearance();
     }
 
     private void OnPenumbraRedraw(int gameObjectId)
@@ -355,8 +355,11 @@ public class ActorAppearanceCapability : ActorCharacterCapability
         _gposeService.OnGPoseStateChange -= OnGPoseStateChanged;
         _penumbraService.OnPenumbraRedraw -= OnPenumbraRedraw;
 
-        ResetCollection();
-        _ = ResetAppearance();
-        ResetProfile();
+        if(Character.IsValid())
+        {
+            ResetCollection();
+            ResetProfile();
+            _ = ResetAppearance();
+        }
     }
 }
