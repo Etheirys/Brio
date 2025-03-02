@@ -1,9 +1,7 @@
-﻿using Brio.Capabilities.Actor;
-using Brio.Entities;
-using Brio.Entities.Actor;
+﻿using Brio.Entities;
 using Brio.Entities.Core;
-using Brio.UI.Controls.Core;
-using Brio.UI.Controls.Stateless;
+using Brio.Game.GPose;
+using Brio.UI.Theming;
 using Brio.UI.Widgets.Core;
 using Dalamud.Interface;
 using Dalamud.Interface.Utility.Raii;
@@ -12,7 +10,7 @@ using System.Numerics;
 
 namespace Brio.UI.Entitites;
 
-internal class EntityHierarchyView(EntityManager entityManager)
+public class EntityHierarchyView(EntityManager entityManager, GPoseService gPoseService)
 {
     private readonly float buttonWidth = ImGui.GetTextLineHeight() * 13f;
     private readonly float offsetWidth = 16f;
@@ -36,7 +34,9 @@ internal class EntityHierarchyView(EntityManager entityManager)
         {
             foreach(var item in root.Children)
             {
-                DrawEntity(item, selectedEntityId);
+                var disable = gPoseService.IsGPosing == false && item.Flags.HasFlag(EntityFlags.AllowOutSideGpose) == false;
+                using(ImRaii.Disabled(disable))
+                    DrawEntity(item, selectedEntityId);
             }
         }
     }
@@ -56,8 +56,12 @@ internal class EntityHierarchyView(EntityManager entityManager)
             using(ImRaii.PushColor(ImGuiCol.Button, 0))
             {
                 var invsButtonPos = ImGui.GetCursorPos();
-
-                if(ImGui.Button($"###{entity.Id}_invs_button", new(buttonWidth, 0)))
+                float width = buttonWidth;
+                if(entity.ContextButtonCount >= 2)
+                {
+                    width -= 30 - entity.ContextButtonCount;
+                }
+                if(ImGui.Button($"###{entity.Id}_invs_button", new(width, 0)))
                 {
                     Select(entity);
                 }
@@ -77,7 +81,7 @@ internal class EntityHierarchyView(EntityManager entityManager)
                 lastOffset += offsetWidth;
             }
 
-            using(ImRaii.PushColor(ImGuiCol.Button, UIConstants.GizmoRed, isSelected))
+            using(ImRaii.PushColor(ImGuiCol.Button, TheameManager.CurrentTheame.Accent.AccentColor, isSelected))
             {
                 using(ImRaii.Disabled(true))
                 {
@@ -88,21 +92,11 @@ internal class EntityHierarchyView(EntityManager entityManager)
 
         DrawNode(entity);
 
-        if(entity is ActorEntity actor)
+        if(entity.Flags.HasFlag(EntityFlags.HasContextButton))
         {
             ImGui.SameLine();
 
-            var aac = actor.GetCapability<ActorAppearanceCapability>();
-
-            using(ImRaii.PushColor(ImGuiCol.Button, UIConstants.GizmoRed, aac.IsHidden))
-            {
-                string toolTip = aac.IsHidden ? $"Show {aac.Actor.FriendlyName}" : $"Hide {aac.Actor.FriendlyName}";
-                if(ImBrio.FontIconButtonRight($"###{entity.Id}_hideActor", aac.IsHidden ? FontAwesomeIcon.EyeSlash : FontAwesomeIcon.Eye, 1f, toolTip, bordered: false))
-                {
-                    aac.ToggleHide();
-                }
-            }
-
+            entity.DrawContextButton();
         }
 
         using(var popup = ImRaii.Popup($"context_popup{entity.Id}"))

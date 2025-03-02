@@ -6,7 +6,7 @@ using OneOf.Types;
 namespace Brio.Game.Types;
 
 [GenerateOneOf]
-internal partial class DyeUnion : OneOfBase<Stain, None>
+public partial class DyeUnion : OneOfBase<Stain, None>
 {
     public static implicit operator DyeUnion(DyeId dyeId)
     {
@@ -17,7 +17,7 @@ internal partial class DyeUnion : OneOfBase<Stain, None>
     }
 }
 
-internal record struct DyeId(byte Id)
+public record struct DyeId(byte Id)
 {
     public static DyeId None { get; } = new(0);
 

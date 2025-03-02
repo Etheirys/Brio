@@ -11,7 +11,7 @@ using System;
 
 namespace Brio.Library.Sources;
 
-internal class GameDataAppearanceEntry : ItemEntryBase
+public class GameDataAppearanceEntry : ItemEntryBase
 {
     private string _name;
     private uint _icon;
@@ -91,7 +91,7 @@ internal class GameDataAppearanceEntry : ItemEntryBase
         return match;
     }
 
-    protected override string GetInternalId() => _id;
+    protected override string GetpublicId() => _id;
 
     public override bool InvokeDefaultAction(object? args)
     {

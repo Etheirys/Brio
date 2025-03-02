@@ -6,7 +6,7 @@ using System;
 
 namespace Brio.Entities.Debug;
 
-internal class DebugEntity(IServiceProvider provider) : Entity(FixedId, provider)
+public class DebugEntity(IServiceProvider provider) : Entity(FixedId, provider)
 {
     public const string FixedId = "debug_entity";
 

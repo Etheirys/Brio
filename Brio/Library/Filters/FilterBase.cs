@@ -1,6 +1,6 @@
 ﻿namespace Brio.Library.Filters;
 
-internal abstract class FilterBase
+public abstract class FilterBase
 {
     public readonly string Name;
 

@@ -3,7 +3,7 @@ using Dalamud.Interface.Textures.TextureWraps;
 
 namespace Brio.Library;
 
-internal class LibraryRoot : GroupEntryBase
+public class LibraryRoot : GroupEntryBase
 {
     public LibraryRoot()
         : base(null)
@@ -18,7 +18,7 @@ internal class LibraryRoot : GroupEntryBase
         base.DrawInfo(window);
     }
 
-    protected override string GetInternalId()
+    protected override string GetpublicId()
     {
         return "Root";
     }

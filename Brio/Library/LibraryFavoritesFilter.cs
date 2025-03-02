@@ -3,7 +3,7 @@ using Brio.Library.Filters;
 
 namespace Brio.Library;
 
-internal class LibraryFavoritesFilter : FilterBase
+public class LibraryFavoritesFilter : FilterBase
 {
     private ConfigurationService _configurationService;
 

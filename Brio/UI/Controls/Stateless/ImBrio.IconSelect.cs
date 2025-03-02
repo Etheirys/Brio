@@ -5,7 +5,7 @@ using System.Numerics;
 
 namespace Brio.UI.Controls.Stateless;
 
-internal static partial class ImBrio
+public static partial class ImBrio
 {
     public static bool DrawIconSelector(string id, IconSelectorEntry[] entries, ref int selectedId, int columns = 4, Vector2? iconSize = null, string fallbackImage = "Images.UnknownIcon.png", bool bitField = false)
     {

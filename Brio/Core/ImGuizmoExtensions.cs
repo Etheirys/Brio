@@ -5,7 +5,7 @@ using System.Numerics;
 
 namespace Brio.Core;
 
-internal static class ImGuizmoExtensions
+public static class ImGuizmoExtensions
 {
     public static bool MouseWheelManipulate(ref Matrix4x4 matrix)
     {

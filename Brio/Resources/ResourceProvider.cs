@@ -9,7 +9,7 @@ using System.Reflection;
 
 namespace Brio.Resources;
 
-internal class ResourceProvider : IDisposable
+public class ResourceProvider : IDisposable
 {
     public static ResourceProvider Instance { get; private set; } = null!;
 

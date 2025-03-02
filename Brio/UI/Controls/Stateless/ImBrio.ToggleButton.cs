@@ -4,7 +4,7 @@ using System.Numerics;
 
 namespace Brio.UI.Controls.Stateless;
 
-internal static partial class ImBrio
+public static partial class ImBrio
 {
     public static bool ToggleButton(string label, ref bool selected, bool canDeselect = true)
     {

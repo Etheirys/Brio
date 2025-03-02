@@ -12,13 +12,14 @@ using Dalamud.Interface;
 using Dalamud.Interface.Textures.TextureWraps;
 using Dalamud.Interface.Utility.Raii;
 using ImGuiNET;
+using MessagePack;
 using System;
 using System.Collections.Generic;
 using System.Numerics;
 
 namespace Brio.Files;
 
-internal class PoseFileInfo : AppliableActorFileInfoBase<PoseFile>
+public class PoseFileInfo : AppliableActorFileInfoBase<PoseFile>
 {
     private PosingService _posingService;
 
@@ -63,7 +64,8 @@ internal class PoseFileInfo : AppliableActorFileInfoBase<PoseFile>
 }
 
 [Serializable]
-internal class PoseFile : JsonDocumentBase
+[MessagePackObject(keyAsPropertyName: true)]
+public class PoseFile : JsonDocumentBase
 {
     public string TypeName { get; set; } = "Brio Pose";
 
@@ -78,6 +80,7 @@ internal class PoseFile : JsonDocumentBase
     public Quaternion Rotation { get; set; } // legacy & for better support for other pose tools
     public Vector3 Scale { get; set; } // legacy & for better support for other pose tools
 
+    [MessagePackObject(keyAsPropertyName: true)]
     public class Bone
     {
         public Vector3 Position { get; set; }

@@ -11,7 +11,7 @@ using System;
 
 namespace Brio.Capabilities.Actor;
 
-internal class ActorContainerCapability : Capability
+public class ActorContainerCapability : Capability
 {
     private readonly EntityManager _entityManager;
     private readonly ActorSpawnService _actorSpawnService;
@@ -51,6 +51,21 @@ internal class ActorContainerCapability : Capability
         }
 
         throw new Exception("Failed to create character");
+    }
+
+    public (EntityId, ICharacter) CreateProp(bool selectInHierarchy)
+    {
+        if(_actorSpawnService.SpawnNewProp(out ICharacter? character))
+        {
+            EntityId characterId = new EntityId(character!);
+            if(selectInHierarchy)
+            {
+                _entityManager.SetSelectedEntity(character!);
+            }
+            return (characterId, character!);
+        }
+
+        throw new Exception("Failed to create prop");
     }
 
     public void DestroyCharacter(ActorEntity entity)

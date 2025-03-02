@@ -1,0 +1,113 @@
+{
+  "ModelType": 0,
+  "Race": "Miqote",
+  "Gender": "Masculine",
+  "Age": "Normal",
+  "Tribe": "SeekerOfTheSun",
+  "Height": 0,
+  "Head": 1,
+  "Hair": 1,
+  "EnableHighlights": true,
+  "Skintone": 105,
+  "REyeColor": 162,
+  "HairTone": 44,
+  "Highlights": 47,
+  "FacialFeatures": "None",
+  "LimbalEyes": 153,
+  "Eyebrows": 1,
+  "LEyeColor": 161,
+  "Eyes": 129,
+  "Nose": 1,
+  "Jaw": 1,
+  "Mouth": 129,
+  "LipsToneFurPattern": 183,
+  "EarMuscleTailSize": 0,
+  "TailEarsType": 1,
+  "Bust": 0,
+  "FacePaint": 0,
+  "FacePaintColor": 169,
+  "MainHand": {
+    "Color": "0, 0, 0",
+    "Scale": "0, 0, 0",
+    "ModelSet": 3001,
+    "ModelBase": 1,
+    "ModelVariant": 1,
+    "DyeId": 0,
+    "DyeId2": 0
+  },
+  "OffHand": {
+    "Color": "0, 0, 0",
+    "Scale": "0, 0, 0",
+    "ModelSet": 3051,
+    "ModelBase": 1,
+    "ModelVariant": 1,
+    "DyeId": 0,
+    "DyeId2": 0
+  },
+  "HeadGear": {
+    "ModelBase": 279,
+    "ModelVariant": 1,
+    "DyeId": 0,
+    "DyeId2": 0
+  },
+  "Body": {
+    "ModelBase": 2,
+    "ModelVariant": 45,
+    "DyeId": 0,
+    "DyeId2": 0
+  },
+  "Hands": {
+    "ModelBase": 279,
+    "ModelVariant": 1,
+    "DyeId": 0,
+    "DyeId2": 0
+  },
+  "Legs": {
+    "ModelBase": 10,
+    "ModelVariant": 1,
+    "DyeId": 0,
+    "DyeId2": 6
+  },
+  "Feet": {
+    "ModelBase": 279,
+    "ModelVariant": 1,
+    "DyeId": 0,
+    "DyeId2": 0
+  },
+  "Ears": {
+    "ModelBase": 53,
+    "ModelVariant": 1,
+    "DyeId": 0,
+    "DyeId2": 0
+  },
+  "Neck": {
+    "ModelBase": 53,
+    "ModelVariant": 1,
+    "DyeId": 0,
+    "DyeId2": 0
+  },
+  "Wrists": {
+    "ModelBase": 53,
+    "ModelVariant": 1,
+    "DyeId": 0,
+    "DyeId2": 0
+  },
+  "LeftRing": {
+    "ModelBase": 53,
+    "ModelVariant": 1,
+    "DyeId": 0,
+    "DyeId2": 0
+  },
+  "RightRing": {
+    "ModelBase": 53,
+    "ModelVariant": 1,
+    "DyeId": 0,
+    "DyeId2": 0
+  },
+  "Glasses": {
+    "GlassesId": 0
+  },
+  "Transparency": 1,
+  "HeightMultiplier": 0.91,
+  "MuscleTone": 1
+}

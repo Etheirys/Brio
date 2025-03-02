@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 
 namespace Brio.Config;
-internal class LibraryConfiguration
+public class LibraryConfiguration
 {
     public float IconSize { get; set; } = 120;
 

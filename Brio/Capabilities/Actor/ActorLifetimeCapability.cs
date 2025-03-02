@@ -1,34 +1,24 @@
-﻿using Brio.Capabilities.Posing;
-using Brio.Core;
-using Brio.Entities;
+﻿using Brio.Entities;
 using Brio.Entities.Actor;
-using Brio.Files;
 using Brio.Game.Actor;
 using Brio.Game.Actor.Extensions;
 using Brio.Game.Core;
-using Brio.Game.Posing;
-using Brio.Resources;
 using Brio.UI.Widgets.Actor;
 using Dalamud.Game.ClientState.Objects.Types;
-using Dalamud.Plugin.Services;
 
 namespace Brio.Capabilities.Actor;
 
-internal class ActorLifetimeCapability : ActorCapability
+public class ActorLifetimeCapability : ActorCapability
 {
     private readonly TargetService _targetService;
 
     private readonly ActorSpawnService _actorSpawnService;
     private readonly EntityManager _entityManager;
-    private readonly IFramework _framework;
-    private readonly PosingService _posingService;
-    public ActorLifetimeCapability(ActorEntity parent, PosingService posingService, TargetService targetService, ActorSpawnService actorSpawnService, EntityManager entityManager, IFramework framework) : base(parent)
+    public ActorLifetimeCapability(ActorEntity parent, TargetService targetService, ActorSpawnService actorSpawnService, EntityManager entityManager) : base(parent)
     {
         _targetService = targetService;
         _actorSpawnService = actorSpawnService;
         _entityManager = entityManager;
-        _framework = framework;
-        _posingService = posingService;
 
         Widget = new ActorLifetimeWidget(this);
     }
@@ -57,32 +47,17 @@ internal class ActorLifetimeCapability : ActorCapability
         }
     }
 
-    public unsafe void SpawnNewProp(bool selectInHierarchy)
+    public void SpawnNewProp(bool selectInHierarchy)
     {
-        if(_actorSpawnService.CreateCharacter(out ICharacter? chara, SpawnFlags.AsProp | SpawnFlags.CopyPosition, true))
+        if(_actorSpawnService.SpawnNewProp(out ICharacter? character))
         {
             if(selectInHierarchy)
             {
-                _entityManager.SetSelectedEntity(chara);
+                _entityManager.SetSelectedEntity(character!);
             }
-
-            _framework.RunUntilSatisfied(
-            () => chara.Native()->IsReadyToDraw(),
-            (__) =>
-            {
-                var entity = _entityManager.GetEntity(chara.Native());
-                if(entity is not null)
-                {
-                    entity.GetCapability<ActionTimelineCapability>().SetOverallSpeedOverride(0);
-                    entity.GetCapability<PosingCapability>().ImportPose(JsonSerializer.Deserialize<PoseFile>(ResourceProvider.Instance.GetRawResourceString("Data.BrioPropPose.pose")), _posingService.SceneImporterOptions);
-                    entity.GetCapability<ActorAppearanceCapability>().AttachWeapon();
-                }
-            },
-                100,
-                dontStartFor: 2
-            );
         }
     }
+
 
     public void Clone(bool selectInHierarchy)
     {

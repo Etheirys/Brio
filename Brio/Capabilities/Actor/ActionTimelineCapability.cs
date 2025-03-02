@@ -16,7 +16,7 @@ using static Brio.Game.Actor.ActionTimelineService;
 
 namespace Brio.Capabilities.Actor;
 
-internal class ActionTimelineCapability : ActorCharacterCapability
+public class ActionTimelineCapability : ActorCharacterCapability
 {
     private readonly IFramework _framework;
 

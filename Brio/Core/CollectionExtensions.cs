@@ -3,7 +3,7 @@ using System.Linq;
 
 namespace Brio.Core;
 
-internal static class CollectionExtensions
+public static class CollectionExtensions
 {
     public static Stack<T> Trim<T>(this Stack<T> stack, int trimCount)
     {

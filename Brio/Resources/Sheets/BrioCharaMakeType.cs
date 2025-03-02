@@ -14,7 +14,7 @@ using System.Linq;
 namespace Brio.Resources.Sheets;
 
 [Sheet("CharaMakeType", 0x80D7DB6D)]
-internal unsafe struct BrioCharaMakeType(ExcelPage page, uint offset, uint row) : IExcelRow<BrioCharaMakeType>
+public unsafe struct BrioCharaMakeType(ExcelPage page, uint offset, uint row) : IExcelRow<BrioCharaMakeType>
 {
     public const int MenuCount = 28;
     public const int SubMenuParamCount = 100;

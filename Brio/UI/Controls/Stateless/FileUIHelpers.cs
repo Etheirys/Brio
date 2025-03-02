@@ -1,64 +1,78 @@
 using Brio.Capabilities.Actor;
 using Brio.Capabilities.Posing;
 using Brio.Config;
+using Brio.Core;
 using Brio.Entities;
 using Brio.Files;
 using Brio.Game.Actor.Appearance;
+using Brio.Game.Actor.Interop;
+using Brio.Game.Core;
 using Brio.Game.Posing;
 using Brio.Game.Scene;
 using Brio.Game.Types;
 using Brio.Library;
 using Brio.Library.Filters;
-using Brio.Resources;
 using Brio.UI.Controls.Core;
 using Brio.UI.Controls.Editors;
+using Brio.UI.Windows;
 using Dalamud.Interface;
 using Dalamud.Interface.Utility.Raii;
 using ImGuiNET;
+using MessagePack;
+using OneOf;
 using System;
 using System.Collections.Generic;
 using System.IO;
 
 namespace Brio.UI.Controls.Stateless;
 
-internal class FileUIHelpers
+public class FileUIHelpers
 {
-    public static void DrawProjectPopup(SceneService sceneService, EntityManager entityManager)
+    public static void DrawProjectPopup(SceneService sceneService, EntityManager entityManager, ProjectWindow projectWindow, AutoSaveService autoSaveService)
     {
         using var popup = ImRaii.Popup("DrawProjectPopup");
         if(popup.Success)
         {
             using(ImRaii.PushColor(ImGuiCol.Button, UIConstants.Transparent))
             {
-                if(ImGui.Button("Save Project"))
+                if(ImGui.Button("Save/Load Project"))
                 {
-
+                    projectWindow.IsOpen = true;
                 }
-                if(ImGui.Button("Load Project"))
-                {
-
-                }
+                if(ImGui.IsItemHovered())
+                    ImGui.SetTooltip("Save or Load this Scene");
 
                 if(ImGui.Button("View Auto-Saves"))
                 {
-
+                    autoSaveService.ShowAutoSaves();
                 }
+                if(ImGui.IsItemHovered())
+                    ImGui.SetTooltip("View Scene Auto-Saves");
 
                 ImGui.Separator();
 
-                if(ImGui.Button("Export Scene"))
+                using(ImRaii.Disabled(true))
                 {
-                    ShowExportSceneModal(entityManager);
-                }
-                if(ImGui.Button("Import Scene"))
-                {
-                    ShowImportSceneModal(sceneService);
+                    if(ImGui.Button("Export Scene"))
+                    {
+                        ShowExportSceneModal(entityManager, sceneService);
+                    }
+                    if(ImGui.Button("Import Scene"))
+                    {
+                        ShowImportSceneModal(sceneService);
+                    }
                 }
             }
         }
     }
 
     static bool freezeOnLoad = false;
+    static bool smartDefaults = false;
+
+    static bool doExpression = false;
+    static bool doBody = false;
+    static bool doTransform = false;
+    static TransformComponents? transformComponents = null;
     public static void DrawImportPoseMenuPopup(PosingCapability capability, bool showImportOptions = true)
     {
         using var popup = ImRaii.Popup("DrawImportPoseMenuPopup");
@@ -68,36 +82,105 @@ internal class FileUIHelpers
             using(ImRaii.PushColor(ImGuiCol.Button, UIConstants.Transparent))
             {
 
-                var size = ImGui.CalcTextSize("XXXX Freeze Actor on Import");
+                var size = ImGui.GetContentRegionAvail(); //ImGui.CalcTextSize("XXXX Freeze Actor on Import");
                 size.Y = 44;
+
+                var buttonSize = size / 8;
+
+                var with = buttonSize * 4;
 
                 ImGui.Checkbox("Freeze Actor on Import", ref freezeOnLoad);
 
                 ImGui.Separator();
 
-                if(ImGui.Button("Import as Body", size))
-                {
-                    ShowImportPoseModal(capability, asBody: true, freezeOnLoad: freezeOnLoad);
-                }
+                using(ImRaii.Disabled(true))
+                    ImGui.Checkbox("Smart Import", ref smartDefaults);
 
-                if(ImGui.Button("Import as Expression", size))
+                transformComponents ??= capability.PosingService.DefaultImporterOptions.TransformComponents;
+
+                using(ImRaii.Disabled(smartDefaults))
                 {
-                    ShowImportPoseModal(capability, asExpression: true, freezeOnLoad: freezeOnLoad);
+                    using(ImRaii.Disabled(doExpression))
+                    {
+                        if(ImBrio.ToggelFontIconButton("ImportPosition", FontAwesomeIcon.ArrowsUpDownLeftRight, buttonSize, transformComponents.Value.HasFlag(TransformComponents.Position), hoverText: "Import Position"))
+                        {
+                            if(transformComponents.Value.HasFlag(TransformComponents.Position))
+                                transformComponents &= ~TransformComponents.Position;
+                            else
+                                transformComponents |= TransformComponents.Position;
+                        }
+                        ImGui.SameLine();
+                        if(ImBrio.ToggelFontIconButton("ImportRotation", FontAwesomeIcon.ArrowsSpin, buttonSize, transformComponents.Value.HasFlag(TransformComponents.Rotation), hoverText: "Import Rotation"))
+                        {
+                            if(transformComponents.Value.HasFlag(TransformComponents.Rotation))
+                                transformComponents &= ~TransformComponents.Rotation;
+                            else
+                                transformComponents |= TransformComponents.Rotation;
+                        }
+                        ImGui.SameLine();
+                        if(ImBrio.ToggelFontIconButton("ImportScale", FontAwesomeIcon.ExpandAlt, buttonSize, transformComponents.Value.HasFlag(TransformComponents.Scale), hoverText: "Import Scale"))
+                        {
+                            if(transformComponents.Value.HasFlag(TransformComponents.Scale))
+                                transformComponents &= ~TransformComponents.Scale;
+                            else
+                                transformComponents |= TransformComponents.Scale;
+                        }
+                    }
+
+                    ImGui.SameLine();
+                    if(ImBrio.ToggelFontIconButton("ImportTransform", FontAwesomeIcon.ArrowsToCircle, buttonSize, doTransform, hoverText: "Import Model Transform"))
+                    {
+                        doTransform = !doTransform;
+                    }
+
+                    if(smartDefaults == true)
+                    {
+                        transformComponents = null;
+                    }
                 }
 
                 ImGui.Separator();
 
-                if(ImBrio.FontIconButton(FontAwesomeIcon.Cog))
-                    ImGui.OpenPopup("import_optionsImportPoseMenuPopup");
-
-                if(ImGui.IsItemHovered())
-                    ImGui.SetTooltip("Import Options");
-
-                ImGui.SameLine();
-
-                if(ImGui.Button("Import with Options", new(size.X - 32, 25)))
+                if(ImBrio.ToggelButton("Import Body", new(size.X, 35), doBody))
                 {
-                    ShowImportPoseModal(capability, freezeOnLoad: freezeOnLoad);
+                    doBody = !doBody;
+                }
+
+                if(ImBrio.ToggelButton("Import Expression", new(size.X, 35), doExpression))
+                {
+                    doExpression = !doExpression;
+                }
+
+                using(ImRaii.Disabled(doExpression || doBody))
+                {
+                    if(ImBrio.Button("Import Options", FontAwesomeIcon.Cog, new(size.X, 25), centerTest: true, hoverText: "Import Options"))
+                        ImGui.OpenPopup("import_optionsImportPoseMenuPopup");
+                }
+
+                ImGui.Separator();
+
+                if(ImGui.Button("Import", new(size.X, 25)))
+                {
+                    //bool? modelTransformOverride = null;
+                    //if(doTransform)
+                    //{
+                    //    modelTransformOverride = doTransform;
+                    //}
+                    ShowImportPoseModal(capability, freezeOnLoad: freezeOnLoad, transformComponents: transformComponents, applyModelTransformOverride: doTransform);
+                }
+
+                ImGui.Separator();
+
+                if(ImGui.Button("Import A-Pose", new(size.X, 25)))
+                {
+                    capability.LoadResourcesPose("Data.BrioAPose.pose", freezeOnLoad: freezeOnLoad, asBody: true);
+                    ImGui.CloseCurrentPopup();
+                }
+
+                if(ImGui.Button("Import T-Pose", new(size.X, 25)))
+                {
+                    capability.LoadResourcesPose("Data.BrioTPose.pose", freezeOnLoad: freezeOnLoad, asBody: true);
+                    ImGui.CloseCurrentPopup();
                 }
             }
 
@@ -105,13 +188,14 @@ internal class FileUIHelpers
             {
                 if(popup2.Success && showImportOptions && Brio.TryGetService<PosingService>(out var service))
                 {
-                    PosingEditorCommon.DrawImportOptionEditor(service.DefaultImporterOptions);
+                    PosingEditorCommon.DrawImportOptionEditor(service.DefaultImporterOptions, true);
                 }
             }
         }
     }
 
-    public static void ShowImportPoseModal(PosingCapability capability, PoseImporterOptions? options = null, bool asExpression = false, bool asBody = false, bool freezeOnLoad = false)
+    public static void ShowImportPoseModal(PosingCapability capability, PoseImporterOptions? options = null, bool asExpression = false,
+        bool asBody = false, bool freezeOnLoad = false, TransformComponents? transformComponents = null, bool? applyModelTransformOverride = false)
     {
         TypeFilter filter = new("Poses", typeof(CMToolPoseFile), typeof(PoseFile));
 
@@ -122,11 +206,11 @@ internal class FileUIHelpers
             {
                 if(r is CMToolPoseFile cmPose)
                 {
-                    capability.ImportPose(cmPose, options: options, asExpression: asExpression, asBody: asBody, freezeOnLoad: freezeOnLoad);
+                    ImportPose(capability, cmPose, options: options, transformComponents: transformComponents, applyModelTransformOverride: applyModelTransformOverride);
                 }
                 else if(r is PoseFile pose)
                 {
-                    capability.ImportPose(pose, options: options, asExpression: asExpression, asBody: asBody, freezeOnLoad: freezeOnLoad);
+                    ImportPose(capability, pose, options: options, transformComponents: transformComponents, applyModelTransformOverride: applyModelTransformOverride);
                 }
             });
         }
@@ -136,13 +220,40 @@ internal class FileUIHelpers
             {
                 if(r is CMToolPoseFile cmPose)
                 {
-                    capability.ImportPose(cmPose, options: options, asExpression: asExpression, asBody: asBody, freezeOnLoad: freezeOnLoad);
+                    ImportPose(capability, cmPose, options: options, transformComponents: transformComponents, applyModelTransformOverride: applyModelTransformOverride);
                 }
                 else if(r is PoseFile pose)
                 {
-                    capability.ImportPose(pose, options: options, asExpression: asExpression, asBody: asBody, freezeOnLoad: freezeOnLoad);
+                    ImportPose(capability, pose, options: options, transformComponents: transformComponents, applyModelTransformOverride: applyModelTransformOverride);
                 }
             });
+        }
+    }
+
+    private static void ImportPose(PosingCapability capability, OneOf<PoseFile, CMToolPoseFile> rawPoseFile, PoseImporterOptions? options = null,
+        TransformComponents? transformComponents = null, bool? applyModelTransformOverride = false)
+    {
+        if(doBody && doExpression)
+        {
+            capability.ImportPose(rawPoseFile, options: capability.PosingService.DefaultIPCImporterOptions, asExpression: false, asBody: false, freezeOnLoad: freezeOnLoad,
+                transformComponents: null, applyModelTransformOverride: applyModelTransformOverride);
+            return;
+        }
+
+        if(doBody)
+        {
+            capability.ImportPose(rawPoseFile, options: null, asExpression: false, asBody: true, freezeOnLoad: freezeOnLoad,
+                transformComponents: transformComponents, applyModelTransformOverride: applyModelTransformOverride);
+        }
+        else if(doExpression)
+        {
+            capability.ImportPose(rawPoseFile, options: null, asExpression: true, asBody: false, freezeOnLoad: freezeOnLoad,
+                transformComponents: null, applyModelTransformOverride: null);
+        }
+        else
+        {
+            capability.ImportPose(rawPoseFile, options: options, asExpression: false, asBody: false, freezeOnLoad: freezeOnLoad,
+                transformComponents: transformComponents, applyModelTransformOverride: applyModelTransformOverride);
         }
     }
 
@@ -187,6 +298,11 @@ internal class FileUIHelpers
                 }
                 else if(r is AnamnesisCharaFile appearanceFile)
                 {
+                    if(options.HasFlag(AppearanceImportOptions.Shaders))
+                    {
+                        BrioHuman.ShaderParams shaderParams = appearanceFile;
+                        BrioUtilities.ImportShadersFromFile(ref capability._modelShaderOverride, shaderParams);
+                    }
                     _ = capability.SetAppearance(appearanceFile, options);
                 }
                 else if(r is MareCharacterDataFile mareFile)
@@ -206,6 +322,11 @@ internal class FileUIHelpers
                 }
                 else if(r is AnamnesisCharaFile appearanceFile)
                 {
+                    if(options.HasFlag(AppearanceImportOptions.Shaders))
+                    {
+                        BrioHuman.ShaderParams shaderParams = appearanceFile;
+                        BrioUtilities.ImportShadersFromFile(ref capability._modelShaderOverride, shaderParams);
+                    }
                     _ = capability.SetAppearance(appearanceFile, options);
                 }
                 else if(r is MareCharacterDataFile mareFile)
@@ -258,7 +379,7 @@ internal class FileUIHelpers
                  }, 1, ConfigurationService.Instance.Configuration.LastMCDFPath, true);
     }
 
-    public static void ShowExportSceneModal(EntityManager entityManager)
+    public static void ShowExportSceneModal(EntityManager entityManager, SceneService sceneService)
     {
         UIManager.Instance.FileDialogManager.SaveFileDialog("Export Scene File###export_scene_window", "Brio Scene File (*.brioscn){.brioscn}", "brioscn", "{.brioscn}",
             (success, path) =>
@@ -276,8 +397,17 @@ internal class FileUIHelpers
                         ConfigurationService.Instance.Save();
                     }
 
-                    SceneFile sceneFile = SceneService.GenerateSceneFile(entityManager);
-                    ResourceProvider.Instance.SaveFileDocument(path, sceneFile);
+                    SceneFile sceneFile = sceneService.GenerateSceneFile();
+                    //ResourceProvider.Instance.SaveFileDocument(path, sceneFile);
+
+                    byte[] bytes = MessagePackSerializer.Serialize(sceneFile);
+                    File.WriteAllBytes(path, bytes);
+
+                    //TODO REMOVE
+                    path += ".json";
+                    var json = MessagePackSerializer.ConvertToJson(bytes);
+                    File.WriteAllText(path, json);
+
                     Brio.Log.Info("Finished exporting scene");
                 }
             }, ConfigurationService.Instance.Configuration.LastScenePath, true);
@@ -300,7 +430,7 @@ internal class FileUIHelpers
             {
                 throw new IOException("The file selected is not a valid scene file");
             }
-        });
+        }, true);
     }
 }
 

@@ -8,7 +8,7 @@ using System.Numerics;
 
 namespace Brio.Capabilities.Posing;
 
-internal class ModelPosingCapability : ActorCharacterCapability
+public class ModelPosingCapability : ActorCharacterCapability
 {
     public bool HasOverride => _transformOverride.HasValue;
 
@@ -67,9 +67,9 @@ internal class ModelPosingCapability : ActorCharacterCapability
         ResetTransform();
     }
 
-    public void ImportModelPose(PoseFile poseFile, PoseImporterOptions options, bool isLoadingAsScene)
+    public void ImportModelPose(PoseFile poseFile, PoseImporterOptions options, bool isLoadingAsScene, bool applyModelTransform)
     {
-        if(options.ApplyModelTransform)
+        if(applyModelTransform)
         {
             if(isLoadingAsScene)
             {

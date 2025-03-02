@@ -9,7 +9,7 @@ using System.Numerics;
 
 namespace Brio.UI.Controls.Selectors;
 
-internal class GearSelector(string id) : Selector<ModelDatabase.ModelInfo>(id)
+public class GearSelector(string id) : Selector<ModelDatabase.ModelInfo>(id)
 {
     protected override Vector2 MinimumListSize { get; } = new(300, 300);
 

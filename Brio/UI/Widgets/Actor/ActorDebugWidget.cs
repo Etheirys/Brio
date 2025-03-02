@@ -6,7 +6,7 @@ using ImGuiNET;
 
 namespace Brio.UI.Widgets.Actor;
 
-internal class ActorDebugWidget(ActorDebugCapability capability) : Widget<ActorDebugCapability>(capability)
+public class ActorDebugWidget(ActorDebugCapability capability) : Widget<ActorDebugCapability>(capability)
 {
     public override string HeaderName => "Debug";
 
@@ -82,6 +82,14 @@ internal class ActorDebugWidget(ActorDebugCapability capability) : Widget<ActorD
                             Capability.VFXService.DestroyVFX(_spawnedGoopInstance);
                             _spawnedGoopInstance = 0;
                         }
+                    }
+                }
+
+                using(var infoTab = ImRaii.TabItem("GameObject"))
+                {
+                    if(infoTab.Success)
+                    {
+                        Dalamud.Utility.Util.ShowGameObjectStruct(Capability.GameObject, true);
                     }
                 }
             }

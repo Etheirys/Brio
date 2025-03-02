@@ -14,7 +14,7 @@ using System.Numerics;
 
 namespace Brio.UI.Controls.Editors;
 
-internal class CustomizeEditor()
+public class CustomizeEditor()
 {
     private float MaxItemWidth => ImGui.GetContentRegionAvail().X - ImGui.CalcTextSize("XXXXXXXXXX").X;
     private float LabelStart => MaxItemWidth + ImGui.GetCursorPosX() + ImGui.GetStyle().FramePadding.X * 2f;

@@ -2,7 +2,7 @@
 
 namespace Brio.Library.Filters;
 
-internal class TagFilter : FilterBase
+public class TagFilter : FilterBase
 {
     public TagCollection? Tags;
 

@@ -3,6 +3,7 @@ using Brio.Capabilities.Posing;
 using Brio.Config;
 using Brio.Core;
 using Brio.Entities;
+using Brio.Entities.Actor;
 using Brio.Game.Actor.Appearance;
 using Brio.Game.Camera;
 using Brio.Game.GPose;
@@ -23,7 +24,7 @@ using System.Numerics;
 
 namespace Brio.UI.Windows.Specialized;
 
-internal class PosingGraphicalWindow : Window, IDisposable
+public class PosingGraphicalWindow : Window, IDisposable
 {
     private const float RightPanelWidth = 250;
 
@@ -62,6 +63,11 @@ internal class PosingGraphicalWindow : Window, IDisposable
 
     public override bool DrawConditions()
     {
+        if(_entityManager.SelectedEntity is ActorEntity actor && actor.IsProp == true)
+        {
+            return false;
+        }
+
         if(!_entityManager.SelectedHasCapability<PosingCapability>() || !_entityManager.SelectedHasCapability<ActorAppearanceCapability>())
         {
             return false;
@@ -286,7 +292,6 @@ internal class PosingGraphicalWindow : Window, IDisposable
                _ => null,
                _ => null
         );
-
 
         using(ImRaii.Disabled(parentBone == null))
         {

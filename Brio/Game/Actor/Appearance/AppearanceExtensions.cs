@@ -2,7 +2,7 @@
 
 namespace Brio.Game.Actor.Appearance;
 
-internal static class AppearanceExtensions
+public static class AppearanceExtensions
 {
     public static Tribes[] GetValidTribes(this Races race)
     {

@@ -3,7 +3,7 @@
 namespace Brio.Game.Actor.Appearance;
 
 [StructLayout(LayoutKind.Explicit, Size = Count)]
-internal struct ActorCustomize
+public struct ActorCustomize
 {
     public const int Count = 0x1A;
 

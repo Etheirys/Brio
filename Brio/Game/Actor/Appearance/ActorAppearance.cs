@@ -1,11 +1,12 @@
 ﻿using Brio.Game.Actor.Extensions;
+using Brio.Game.Actor.Interop;
 using FFXIVClientStructs.FFXIV.Client.Game.Character;
 using Lumina.Excel.Sheets;
 using DalamudCharacter = Dalamud.Game.ClientState.Objects.Types.ICharacter;
 
 namespace Brio.Game.Actor.Appearance;
 
-internal struct ActorAppearance()
+public struct ActorAppearance()
 {
     public int ModelCharaId;
     public byte Facewear;
@@ -331,4 +332,10 @@ internal struct ActorAppearance()
 
         return (mainHand, offHand, equipment);
     }
+}
+
+public struct ActorAppearanceExtended
+{
+    public ActorAppearance Appearance;
+    public BrioHuman.ShaderParams ShaderParams;
 }

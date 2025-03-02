@@ -8,6 +8,7 @@ using Brio.UI.Controls.Editors;
 using Brio.UI.Windows;
 using Dalamud.Interface;
 using Dalamud.Plugin.Services;
+using MessagePack;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -16,7 +17,7 @@ using System.Threading.Tasks;
 
 namespace Brio.Library;
 
-internal class LibraryManager : IDisposable
+public class LibraryManager : IDisposable
 {
     private static LibraryManager? _instance;
 
@@ -25,7 +26,7 @@ internal class LibraryManager : IDisposable
     private readonly IFramework _framework;
     private readonly LibraryRoot _rootItem;
     private readonly List<SourceBase> _sources = new();
-    private readonly IEnumerable<SourceBase> _internalSources;
+    private readonly IEnumerable<SourceBase> _publicSources;
 
     private LibraryWindow? _window;
 
@@ -39,14 +40,14 @@ internal class LibraryManager : IDisposable
         FileService fileService,
         ConfigurationService configurationService,
         IFramework framework,
-        IEnumerable<SourceBase> internalSources)
+        IEnumerable<SourceBase> publicSources)
     {
         _instance = this;
         _fileService = fileService;
         _configurationService = configurationService;
         _framework = framework;
         _rootItem = new();
-        _internalSources = internalSources;
+        _publicSources = publicSources;
 
         _configurationService.Configuration.Library.ReEstablishDefaultPaths();
         _configurationService.OnConfigurationChanged += OnConfigurationChanged;
@@ -84,14 +85,14 @@ internal class LibraryManager : IDisposable
         _window = window;
     }
 
-    public static void GetWithFilePicker(FilterBase filter, Action<object> callback)
+    public static void GetWithFilePicker(FilterBase filter, Action<object> callback, bool loadMessagePack = false)
     {
         if(_instance == null || _instance._window == null)
             return;
 
-        _instance.ShowFilePicker(filter, callback);
+        _instance.ShowFilePicker(filter, callback, loadMessagePack);
     }
-    private void ShowFilePicker(FilterBase filter, Action<object> callback)
+    private void ShowFilePicker(FilterBase filter, Action<object> callback, bool loadMessagePack)
     {
         string title = $"Import {filter.Name}###import_browse";
 
@@ -144,7 +145,6 @@ internal class LibraryManager : IDisposable
                 filterBuilder.Append("){");
                 filterBuilder.Append(typeInfo.Extension);
                 filterBuilder.Append("}");
-
             }
         }
 
@@ -175,8 +175,12 @@ internal class LibraryManager : IDisposable
             {
                 if(success && paths.Count == 1)
                 {
-                    var path = paths[0];
-                    object? result = _fileService.Load(path);
+                    string path = paths[0];
+                    object? result;
+                    if(loadMessagePack)
+                        result = MessagePackSerializer.Deserialize<SceneFile>(File.ReadAllBytes(path));
+                    else
+                        result = _fileService.Load(path);
 
                     if(result is null)
                         return;
@@ -218,7 +222,7 @@ internal class LibraryManager : IDisposable
     {
         Tag.ClearTagCache();
 
-        foreach(SourceBase source in _internalSources)
+        foreach(SourceBase source in _publicSources)
         {
             source.Dispose();
         }
@@ -245,7 +249,7 @@ internal class LibraryManager : IDisposable
             AddSource(new FileSource(_fileService, sourceConfig));
         }
 
-        foreach(SourceBase source in _internalSources)
+        foreach(SourceBase source in _publicSources)
         {
             _rootItem.Add(source);
         }
@@ -278,7 +282,7 @@ internal class LibraryManager : IDisposable
         try
         {
             List<Task> scanTasks = new();
-            foreach(SourceBase source in _internalSources)
+            foreach(SourceBase source in _publicSources)
             {
                 scanTasks.Add(Task.Run(() => ScanSource(source)));
             }

@@ -21,7 +21,7 @@ using GameSkeleton = FFXIVClientStructs.FFXIV.Client.Graphics.Render.Skeleton;
 
 namespace Brio.Game.Posing;
 
-internal unsafe class SkeletonService : IDisposable
+public unsafe class SkeletonService : IDisposable
 {
     public delegate void SkeletonUpdateEvent();
     public event SkeletonUpdateEvent? SkeletonUpdateStart;

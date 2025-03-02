@@ -12,7 +12,7 @@ using System.Numerics;
 
 namespace Brio.UI.Controls.Editors;
 
-internal class GearEditor()
+public class GearEditor()
 {
     private WeaponModelId BlankItem = new() { Id = 0, Type = 0 };
 

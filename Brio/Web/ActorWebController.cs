@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace Brio.Web;
 
-internal class ActorWebController(IFramework framework, ActorSpawnService actorSpawnService, ActorRedrawService redrawService) : WebApiController
+public class ActorWebController(IFramework framework, ActorSpawnService actorSpawnService, ActorRedrawService redrawService) : WebApiController
 {
     private readonly IFramework _framework = framework;
     private readonly ActorSpawnService _actorSpawnService = actorSpawnService;

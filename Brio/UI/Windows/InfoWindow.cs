@@ -7,14 +7,18 @@ using System.Numerics;
 
 namespace Brio.UI.Windows;
 
-internal class InfoWindow : Window
+public class InfoWindow : Window
 {
     private readonly ConfigurationService _configurationService;
     private readonly UpdateWindow _updateWindow;
 
-    public InfoWindow(ConfigurationService configurationService, UpdateWindow updateWindow) : base($"{Brio.Name} Welcome###brio_info_window", ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.AlwaysAutoResize)
+    public InfoWindow(ConfigurationService configurationService, UpdateWindow updateWindow) : base($"{Brio.Name} Welcome###brio_info_window", ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.AlwaysAutoResize)
     {
         Namespace = "brio_info_namespace";
+
+        this.AllowClickthrough = false;
+        this.AllowPinning = false;
+        this.ForceMainWindow = true;
 
         _configurationService = configurationService;
         _updateWindow = updateWindow;
@@ -38,12 +42,13 @@ internal class InfoWindow : Window
                     Brio is currently in alpha, as such, there may be bugs,
                     if you find any, please report them!
 
-                    A Big Thank you to (Sufferhymn), (Night Song), (Alvar Valo), (Yasumi), (YikesXD), 
+                    A Big Thank you to (Sufferhymn), (Night Song), (Alvar Valo), (@Conna),(Yasumi), (YikesXD), 
                     (Selitha), (AquilaHK), (LotusEcho), & (Yume) for their support on Kofi!
 
-                    Also, Thank you, to: (@MKhayle), (@ashna_ff14), (@Yuki-Codes), (@danma3x), (@snaeling),  
-                    (@WorstAquaPlayer), (@Caraxi), & (@gris-fuego), for their contributions to Brio!
-
+                    Also, Thank you, to: (@AsgardXIV), (@Ashadow700), (@ashna_ff14), (@Bronya-Rand), 
+                    (@Caraxi), (@Cazzar), (@danma3x), (@Enth), (@gris-fuego), 
+                    (@HoloWise), (@MKhayle), (@WorstAquaPlayer), (@snaeling), (@Yuki-Codes);
+                    
                     Maintained & Developed by: Minmoose.
                     Originally Developed by: Asgard.
                     

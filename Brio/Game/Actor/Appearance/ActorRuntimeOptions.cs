@@ -1,6 +1,6 @@
 ﻿namespace Brio.Game.Actor.Appearance;
 
-internal struct ActorRuntimeOptions()
+public struct ActorRuntimeOptions()
 {
     public bool IsHatHidden = false;
     public bool IsVisorToggled = false;

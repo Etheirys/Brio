@@ -6,7 +6,7 @@ using static Brio.Game.World.FestivalService;
 
 namespace Brio.UI.Controls.Selectors;
 
-internal class FestivalSelector(string id, IEnumerable<FestivalEntry> entries) : Selector<FestivalEntry>(id)
+public class FestivalSelector(string id, IEnumerable<FestivalEntry> entries) : Selector<FestivalEntry>(id)
 {
     protected override Vector2 MinimumListSize { get; } = new(300, 300);
 

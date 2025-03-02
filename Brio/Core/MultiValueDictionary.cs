@@ -3,7 +3,7 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace Brio.Core;
 
-internal class MultiValueDictionary<TKey, TValue> where TKey : notnull
+public class MultiValueDictionary<TKey, TValue> where TKey : notnull
 {
     private readonly Dictionary<TKey, List<TValue>> _underlyingDictionary = [];
 

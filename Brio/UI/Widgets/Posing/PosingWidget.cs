@@ -6,16 +6,15 @@ using Brio.UI.Widgets.Core;
 using Dalamud.Interface;
 using Dalamud.Interface.Utility.Raii;
 using ImGuiNET;
-using OneOf.Types;
 using System.Numerics;
 
 namespace Brio.UI.Widgets.Posing;
 
-internal class PosingWidget(PosingCapability capability) : Widget<PosingCapability>(capability)
+public class PosingWidget(PosingCapability capability) : Widget<PosingCapability>(capability)
 {
     public override string HeaderName => "Posing";
 
-    public override WidgetFlags Flags => capability.Actor.IsProp ? (WidgetFlags.DefaultOpen | WidgetFlags.DrawBody) : (WidgetFlags.DrawBody | WidgetFlags.HasAdvanced | WidgetFlags.DefaultOpen);
+    public override WidgetFlags Flags => Capability.Actor.IsProp ? (WidgetFlags.DefaultOpen | WidgetFlags.DrawBody) : (WidgetFlags.DrawBody | WidgetFlags.HasAdvanced | WidgetFlags.DefaultOpen);
 
     private readonly PosingTransformEditor _posingTransformEditor = new();
 
@@ -33,6 +32,10 @@ internal class PosingWidget(PosingCapability capability) : Widget<PosingCapabili
 
     private void DrawButtons()
     {
+        if(Capability.Actor.TryGetCapability<ActionTimelineCapability>(out var timelineCapability) == false)
+        {
+            return;
+        }
 
         var overlayOpen = Capability.OverlayOpen;
         if(ImBrio.FontIconButton("overlay", overlayOpen ? FontAwesomeIcon.EyeSlash : FontAwesomeIcon.Eye, overlayOpen ? "Close Overlay" : "Open Overlay"))
@@ -42,40 +45,19 @@ internal class PosingWidget(PosingCapability capability) : Widget<PosingCapabili
 
         ImGui.SameLine();
 
-        if(Capability.Actor.TryGetCapability<ActionTimelineCapability>(out var capability))
+        if(Capability.Actor.IsProp == false)
         {
-            if(ImBrio.ToggelFontIconButton("freezeActor", FontAwesomeIcon.Snowflake, new Vector2(110, 0), capability.SpeedMultiplier == 0, hoverText: capability.SpeedMultiplierOverride == 0 ? "Un-Freeze Character" : "Freeze Character"))
+            if(ImBrio.FontIconButton("import", FontAwesomeIcon.FileDownload, "Import Pose"))
             {
-                if(capability.SpeedMultiplierOverride == 0)
-                    capability.ResetOverallSpeedOverride();
-                else
-                    capability.SetOverallSpeedOverride(0f);
+                ImGui.OpenPopup("DrawImportPoseMenuPopup");
             }
-        }
 
-        ImGui.SameLine();
+            FileUIHelpers.DrawImportPoseMenuPopup(Capability);
 
-        if(ImBrio.FontIconButton("import", FontAwesomeIcon.Download, "Import Pose"))
-        {
-            ImGui.OpenPopup("DrawImportPoseMenuPopup");
-        }
-
-        FileUIHelpers.DrawImportPoseMenuPopup(Capability);
-
-        ImGui.SameLine();
-
-        if(ImBrio.FontIconButton("export", FontAwesomeIcon.FileExport, "Export Pose"))
-            FileUIHelpers.ShowExportPoseModal(Capability);
-
-        if(capability.Actor.IsProp == false)
-        {
             ImGui.SameLine();
 
-            using(ImRaii.Disabled(Capability.Selected.Value is None))
-            {
-                if(ImBrio.FontIconButton("clear_selection", FontAwesomeIcon.MinusSquare, "Clear Selection"))
-                    Capability.ClearSelection();
-            }
+            if(ImBrio.FontIconButton("export", FontAwesomeIcon.Save, "Save Pose"))
+                FileUIHelpers.ShowExportPoseModal(Capability);
 
             ImGui.SameLine();
 
@@ -100,6 +82,19 @@ internal class PosingWidget(PosingCapability capability) : Widget<PosingCapabili
         }
 
         ImGui.SameLine();
+
+        if(Capability.Actor.IsProp == false)
+        {
+            if(ImBrio.ToggelFontIconButton("freezeActor", FontAwesomeIcon.Snowflake, new Vector2(0), timelineCapability.SpeedMultiplier == 0, hoverText: timelineCapability.SpeedMultiplierOverride == 0 ? "Un-Freeze Character" : "Freeze Character"))
+            {
+                if(timelineCapability.SpeedMultiplierOverride == 0)
+                    timelineCapability.ResetOverallSpeedOverride();
+                else
+                    timelineCapability.SetOverallSpeedOverride(0f);
+
+            }
+            ImGui.SameLine();
+        }
 
         if(ImBrio.FontIconButtonRight("reset", FontAwesomeIcon.Undo, 1, "Reset Pose", Capability.HasOverride))
         {

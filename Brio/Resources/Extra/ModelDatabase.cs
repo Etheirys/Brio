@@ -7,7 +7,7 @@ using System.Linq;
 
 namespace Brio.Resources.Extra;
 
-internal class ModelDatabase
+public class ModelDatabase
 {
     private readonly MultiValueDictionary<ulong, ModelInfo> _modelLookupTable;
     private readonly List<ModelInfo> _modelsList;
@@ -38,19 +38,20 @@ internal class ModelDatabase
 
         // From JSON
         var knownEntries = _resourceProvider.GetResourceDocument<List<PropsFileEntry>>("Data.Props.json");
+        knownEntries = knownEntries.GroupBy(x => x.Name).Select(g => g.First()).ToList();
         foreach(var item in knownEntries)
         {
             ushort[] result = item.Id.Split(", ").Select(ushort.Parse).ToArray();
             if(result.Length > 2)
             {
                 WeaponModelId weaponItem = new() { Id = result[0], Type = result[1], Variant = (byte)result[2] };
-                var modelInfo = new ModelInfo(weaponItem.Value, 0, $"{item.Name.ToString()}\n{item.Description?.ToString()}", 0, ActorEquipSlot.Prop, null);
+                var modelInfo = new ModelInfo(weaponItem.Value, 0, $"{item.Name}\n{item.Description?.ToString()}", 0, ActorEquipSlot.Prop, null);
                 AddModel(modelInfo);
             }
             else
             {
                 EquipmentModelId actualItem = new() { Id = result[0], Variant = (byte)result[1] };
-                var modelInfo = new ModelInfo(actualItem.Value, 0, $"{item.Name.ToString()}\n{item.Description?.ToString()}", 0, ActorEquipSlot.Prop, null);
+                var modelInfo = new ModelInfo(actualItem.Value, 0, $"{item.Name}\n{item.Description?.ToString()}", 0, ActorEquipSlot.Prop, null);
                 AddModel(modelInfo);
             }
         }
@@ -96,10 +97,10 @@ internal class ModelDatabase
 
     private class PropsFileEntry
     {
-        public string Id { get; set; }
-        public string Name { get; set; } = null!;
-        public string Description { get; set; }
-        public string Slot { get; set; }
+        public string Id { get; set; } = string.Empty;
+        public string Name { get; set; } = string.Empty;
+        public string? Description { get; set; }
+        public string? Slot { get; set; }
     }
 
 }

@@ -1,6 +1,6 @@
 ﻿namespace Brio.Input;
 
-internal enum KeyBindEvents
+public enum KeyBindEvents
 {
     Interface_ToggleBrioWindow,
     Interface_ToggleBindPromptWindow,
@@ -20,5 +20,6 @@ internal enum KeyBindEvents
     Posing_Translate,
     Posing_Rotate,
     Posing_Scale,
-    Posing_Universal
+    Posing_Universal,
+    Poseing_Esc
 }

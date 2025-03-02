@@ -8,7 +8,7 @@ using Dalamud.Interface.Utility.Raii;
 using ImGuiNET;
 namespace Brio.UI.Widgets.Actor;
 
-internal unsafe class CompanionWidget(CompanionCapability capability) : Widget<CompanionCapability>(capability)
+public unsafe class CompanionWidget(CompanionCapability capability) : Widget<CompanionCapability>(capability)
 {
     public override string HeaderName => Capability.Mode switch
     {

@@ -5,7 +5,7 @@ using Brio.UI.Widgets.World;
 
 namespace Brio.Capabilities.World;
 
-internal class WorldRenderingCapability : Capability
+public class WorldRenderingCapability : Capability
 {
     public WorldRenderingService WorldRenderingService { get; }
 

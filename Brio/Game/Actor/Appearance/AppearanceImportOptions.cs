@@ -3,7 +3,7 @@
 namespace Brio.Game.Actor.Appearance;
 
 [Flags]
-internal enum AppearanceImportOptions
+public enum AppearanceImportOptions
 {
     Customize = 1 << 0,
     Weapon = 1 << 1,

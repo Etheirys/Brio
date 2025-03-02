@@ -10,7 +10,7 @@ using System.Collections.Generic;
 
 namespace Brio.Capabilities.Actor;
 
-internal class StatusEffectCapability : ActorCapability
+public class StatusEffectCapability : ActorCapability
 {
     public IBattleChara Character { get; }
 

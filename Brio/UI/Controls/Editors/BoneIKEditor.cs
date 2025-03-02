@@ -4,7 +4,7 @@ using Dalamud.Interface.Utility.Raii;
 using ImGuiNET;
 
 namespace Brio.UI.Controls.Editors;
-internal class BoneIKEditor
+public class BoneIKEditor
 {
     public static void Draw(BonePoseInfo poseInfo, PosingCapability posing)
     {

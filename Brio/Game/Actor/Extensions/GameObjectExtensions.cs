@@ -6,7 +6,7 @@ using StructsObject = FFXIVClientStructs.FFXIV.Client.Game.Object.GameObject;
 
 namespace Brio.Game.Actor.Extensions;
 
-internal static class GameObjectExtensions
+public static class GameObjectExtensions
 {
     public static FontAwesomeIcon GetFriendlyIcon(this IGameObject go)
     {

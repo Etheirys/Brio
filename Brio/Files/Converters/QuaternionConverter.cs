@@ -6,7 +6,7 @@ using System.Text.Json.Serialization;
 
 namespace Brio.Files.Converters;
 
-internal class QuaternionConverter : JsonConverter<Quaternion>
+public class QuaternionConverter : JsonConverter<Quaternion>
 {
     public override Quaternion Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {

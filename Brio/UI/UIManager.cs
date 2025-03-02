@@ -15,7 +15,7 @@ using System.Collections.Generic;
 
 namespace Brio.UI;
 
-internal class UIManager : IDisposable
+public class UIManager : IDisposable
 {
     private readonly IDalamudPluginInterface _pluginInterface;
     private readonly GPoseService _gPoseService;
@@ -24,6 +24,7 @@ internal class UIManager : IDisposable
     private readonly MainWindow _mainWindow;
     private readonly SettingsWindow _settingsWindow;
     private readonly InfoWindow _infoWindow;
+    private readonly ProjectWindow _projectWindow;
     private readonly UpdateWindow _updateWindow;
     private readonly LibraryWindow _libraryWindow;
     private readonly ActorAppearanceWindow _actorAppearanceWindow;
@@ -59,6 +60,9 @@ internal class UIManager : IDisposable
 
     public static bool IsPosingGraphicalWindowOpen => Instance._graphicalWindow.IsOpen;
 
+    public bool IsActorAppearanceWindowOpen => _actorAppearanceWindow.IsOpen;
+    public bool IsActorPoseWindowOpen => _graphicalWindow.IsOpen;
+
     public UIManager
         (
             IDalamudPluginInterface pluginInterface,
@@ -72,6 +76,7 @@ internal class UIManager : IDisposable
             InfoWindow infoWindow,
             UpdateWindow updateWindow,
             LibraryWindow libraryWindow,
+            ProjectWindow projectWindow,
             ActorAppearanceWindow appearanceWindow,
             ActionTimelineWindow actionTimelineWindow,
             PosingOverlayWindow overlayWindow,
@@ -99,6 +104,7 @@ internal class UIManager : IDisposable
         _libraryWindow = libraryWindow;
         _infoWindow = infoWindow;
         _updateWindow = updateWindow;
+        _projectWindow = projectWindow;
         _actorAppearanceWindow = appearanceWindow;
         _actionTimelineWindow = actionTimelineWindow;
         _overlayWindow = overlayWindow;
@@ -119,6 +125,7 @@ internal class UIManager : IDisposable
         _windowSystem.AddWindow(_mainWindow);
         _windowSystem.AddWindow(_settingsWindow);
         _windowSystem.AddWindow(_libraryWindow);
+        _windowSystem.AddWindow(_projectWindow);
         _windowSystem.AddWindow(_infoWindow);
         _windowSystem.AddWindow(_updateWindow);
         _windowSystem.AddWindow(_actorAppearanceWindow);
@@ -136,7 +143,6 @@ internal class UIManager : IDisposable
         _pluginInterface.UiBuilder.Draw += DrawUI;
         _pluginInterface.UiBuilder.OpenConfigUi += ShowSettingsWindow;
         _pluginInterface.UiBuilder.OpenMainUi += ShowMainWindow;
-        _pluginInterface.ActivePluginsChanged += ActivePluginsChanged;
 
         ApplySettings();
     }
@@ -156,6 +162,11 @@ internal class UIManager : IDisposable
         _graphicalWindow.IsOpen = !_graphicalWindow.IsOpen;
     }
 
+    public void ToggleProjectWindow()
+    {
+        _projectWindow.IsOpen = !_projectWindow.IsOpen;
+    }
+
     public void ShowSettingsWindow()
     {
         _settingsWindow.IsOpen = true;
@@ -164,18 +175,6 @@ internal class UIManager : IDisposable
     public void ShowMainWindow()
     {
         _mainWindow.IsOpen = true;
-    }
-
-    private void ActivePluginsChanged(PluginListInvalidationKind kind, bool affectedThisPlugin)
-    {
-        foreach(var plugin in _pluginInterface.InstalledPlugins)
-        {
-            Brio.Log.Debug($"InstalledPlugins: {plugin}");
-        }
-
-        _penumbraService.RefreshPenumbraStatus();
-        _glamourerService.RefreshGlamourerStatus();
-        _mareService.RefreshMareStatus();
     }
 
     public void NotifyError(string message)

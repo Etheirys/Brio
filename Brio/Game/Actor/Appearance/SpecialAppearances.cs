@@ -4,7 +4,7 @@ using Lumina.Excel.Sheets;
 
 namespace Brio.Game.Actor.Appearance;
 
-internal static class SpecialAppearances
+public static class SpecialAppearances
 {
     public static WeaponModelId EmperorsMainHand { get; } = new()
     {

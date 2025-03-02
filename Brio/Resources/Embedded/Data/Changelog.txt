@@ -1,183 +1,144 @@
 
 To open this window again click `Information` on the Scene Manager then -> `View the Changelog`
 
---------------------------------------------------------------------------------
-	 ---> Brio, Version 0.4.4 <--- 
---------------------------------------------------------------------------------
-
----------- 0.4.4.1 ----------
-
-- Fixed an issue with Ears when importing as Body or Expression
-
----------- 0.4.4.0 ----------
-
-- Added a Hide Actor button to the `Entity Hierarchy`
-
-- Added `Import as Body`, to Import Pose button 
-- Added a new setting in the Import Pose popup, 
-  - You can now Freeze an Actor after import
-
-- Updated Brio's IPC API (Thanks to Darkarchon for the collaborative efforts!)
-  - For more info on Brio's updated IPC look at `BrioAPI_V2.cs` in the root of Brio's GitHub repo
-
-- Loading a pose will now be more consistent & predictable
-
-- You can now double-click items in Library to apply them
-- You can now make the Library Window smaller
-- You can now make the Library item icon size smaller 
-
-- Status Effects in the effects selector that have no VFX are now filtered out (Thank you MKhayle!)
-- Added better localization for Status Effects selector (Thank you MKhayle!)
-
-- Fixed an issue with Anamnesis and editing Brio actors 
-- Fixed the Library's Search Suggest Box closing when it shouldn't
-- Fixed multiple possible crashes!
+--------------------------------------------------------------------------------------------------------------------------------------------------------
+	 ---> Brio, Version 0.5.0.X <--- Props, Free Cameras, Projects & More!
+---------------------------------------------------------------------------------------------------------------------------------------------------------
 
 --------------------------------------------------------------------------------
-	 --- Brio, Version 0.4.3 --- 
---------------------------------------------------------------------------------
+	--- Brio, Version [0.5.0.6] --- 
 
----------- 0.4.3.1 ----------
+- Added Camera cloning
 
-- Fix an issue where not all of the actions would appear in the animation select list
-- Fixed an isues with Penumbra and 100+ actors 
-
----------- 0.4.3.0 ----------
-
-- Support for FFXIV 7.1!
-
-- Brio can now spawn up to 239 Actors
+- Fix camera snaping when leaving Gpose
+- Tried to fix a crash when leaving a cutscene
 
 --------------------------------------------------------------------------------
-	 --- Brio, Version 0.4.1 --- 
---------------------------------------------------------------------------------
+	--- Brio, Version [0.5.0.5] --- 
 
----------- 0.4.2.0 ----------
+- Added a new Library Feature "Spawn as new actor (Thanks @Cazzar)
 
-- Provide better compatibility for .chara files
-
----------- 0.4.1.0 ----------
-
-- Added a `Universal Gizmo` mode to the `Brio Overlay` Gizmo!
-- Added `Upper & Lower Teeth` bones to `Advanced Pose` window
-- Added `IVCS Buttock` bones to `Advanced Pose` window
-
-- Added a `Enable FOV` setting to the `Cutscene Control`
-- Added a `Delimit Speed` setting to the `Advanced Animation` Window
-   - With this enabled you can make the animation speed go in reverse or very very fast! 
-
-- Fixed an issue that caused incorrect items to show up when you right-clicked an item in the `Entity Hierarchy`
-- Fixed `Glamourer` desync issues
-- Fixed FOV being high when playing a XAT Cutscene(`.xcp`) file
-
-- Made more micro-optimizations & more stability improvements
-
- --  Known Issues -- 
-
-- When importing a pose as Expression the head does not rotate properly,
-   - You can fix this by rotating the "Head" bone manually
-- Not all of the new bones are named yet
-- The Library does not have an option to `Import as Expression`
-
+- Fixed an issue with C+ not being reverted on exiting Gpose or actor despawn (Thanks @HoloWise)
+- Fixed a rare issue with loading projects
+- Made a small optimization to speed up Brio's rendering
 
 --------------------------------------------------------------------------------
-	 --- Brio, Version 0.4.0 --- 
---------------------------------------------------------------------------------
+	--- Brio, Versions [0.5.0.4 - 0.5.0.1] --- 
 
----------- 0.4.0.3 ----------
+- Once more, fixed ESCAPE not opening the "End group pose" menu.
+- Fixed an issue where the import setting `ModelTransform` was not working
+- Fixed Destroying Camera on Scene load if "Override Current Scene" was enabled.
+- Fixed Projects saving Free Cameras being frozen in place and unable to move. 
+- Fixed Scene loading characters with custom colors. (Thanks @Bronya-Rand)
 
-- Fixed being unable to change an Actor's Appearance if you don't have Glamourer installed
-- Fixed the Camera Window from moving endlessly to the right
-- Fix a crash when leaving GPose with Freeze Physics Enabled
+- Environment is once again useable outside of Gpose.
+- Added a new setting "Consumed, [SPACE], [Shift], [Ctrl] & [Alt] keyboard input when moving a FreeCam".
+- Added SPACE (Up) & CONTROL (Down) to Camera movement.
+- Fixed "Disable Collision" on Brio Cameras.
+- Fixed ESCAPE not opening the "End group pose" menu.
+- Fixed on destroying a Camera not targeting Default Camera. (Thanks @Bronya-Rand)
+- Fixed loading and saving characters with custom colors. (Thanks @Bronya-Rand)
+- Updated Thank Yous.
 
----------- 0.4.0.0 ----------
+- The Glamourer Design menu is now in alphabetical order.
+- Once again, fix an issue where PosingOverlayWindow would be to small if the text scale was less then 100%.
+- Fixed Auto-Save not turning off when is was disabled in the settings.
+- Fixed Cameras being unable to be destroyed in certain situations.
 
-- Updated the `Advanced Pose` Window
- - Added a `Freeze Physics` & `Freeze Character` button
- - Changed the Bone Page selector visual style
- - Better layout of Bones on Body page
-
-- Refreshed the UI for the `Entity Hierarchy`
-
-- Updated the `Animation Control` Editor
- - Ported XAT's `Cutscene Control` to the `Advanced Animation Control` Window
-   - Added a new Cutscene setting, `Start All Actors Animations On Play`
-      - `With this enabled all actors will play the animation set in the `Base` slot`
-   - Added `Start Delay` & `Animation Delay`
-     - Note: `The time-scale for the delay functions are in milliseconds!`
-     - `1000 Milliseconds = 1 Second` 
-
- - Refreshed user experience of the `Animation Control` Editor
-   - Added a `Freeze Physics` button 
-   - Added new `Actors` dropdown list 
-      - `With this menu you can Freeze/Un-Freeze all Actors or Stop/Play All Actors Animations`
-   - Pausing Actors should now be more reliable
-   - Added a new setting when searching for a animation, `Start Animation On Select`
-
-- Added 3 new Key-binds
-  - Stop Playing Cutscene       (Shift + B)
-  - Start All Actors Animations (Shift + N)
-  - Stop All Actors Animations  (Shift + M)
-
-- Added simple savable camera presets to the `Camera Editor`
-  - These presets **do not** persist and will be 'forgotten' after ending a Gpose session 
-- The open `Advanced Window` buttons will now toggle their respective Advanced Windows 
-- Updated the `Brio Welcome` Window
-- Brio will now respond to `/xat` in FFXIV chat
-- Made micro optimizations across the codebase
-
-- Fixed a crash with IMGUI
-- Fixed an issue with MCDFs
-- Fixed the margins on the `Rename Actor` Popup 
+- Fixed text scaling issues.
+- Fixed an issue with T-Pose & A-Pose loading.
+- Fixed not being able to drag the Main window off FFXIV.
+- Fixed [Shift], [Ctrl] & [Alt] being consumed my Brio.
+- Once again allow AllowPinning & AllowClickthrough on the Overlay window & Main window.
 
 --------------------------------------------------------------------------------
-	 --- Brio, Version 0.3.3 --- 
---------------------------------------------------------------------------------
+	--- Brio, Version [0.5.0] --- 
 
-Support for FFXIV 7.05!
+- Brio has a new Icon!
+	- Over time it will update in Dalamud 
 
--Updated the Advanced Pose Window.
-  - Added a new separate page for Face Bones
-  - You can now undock the Transform Control Pane
-  - You can now Hide the Transform Control Pane
+- Added "Legacy" bone filter.
+	- Use this import filter when loading on to pre-dawntrail faces
 
-Added more Bone Categories: Face, Eyes, Lips & Jaw
+- Added Brio Style  
+	- Fixes a bug under certain circumstances.
+	- More styles will be added in the future.
+	- You can disabled the Color Style in the Settings.
 
-Added a new setting "Use the Library when importing a file"
-`With this disabled you use the Dalamud File Picker when importing files`
+- Added Projects, save and load the entire Brio scene. 
+	- Project System is in Beta. NOTE: Projects might not be compatible from version to version!
+	- Scene exporting will be available in a later update.
+    - (Thanks Ashadow700 for the initial implementation and inspiration)
 
-Fixed an issue with the Undo Button upon resetting a pose
+- Added AutoSaving, saves the entire Brio scene. 
+	- Default interval is once a minute.
 
-And finally,
-- Added 'Import as Expression"
+- Added Customize+ suport.
 
- --  Known Issues -- 
+- Added a Change Customize+ Profile menu.
+- Added a Change Glamourer Design menu.
 
-When importing a pose as Expression the head does not rotate properly,
-You can fix this by rotating the "Head" bone manually
+- Added Virtual Cameras, You can now spawn more then one Camera!
 
---------------------------------------------------------------------------------
-	 --- Brio, Version 0.3.2 --- 
---------------------------------------------------------------------------------
+- Added Free Cameras!
+	- Keybinds will be changeable in the future.
 
-- Update Brio for Dawntrail 7.01 
-- Add support for Facewear
+- Added Prop Spawning! (Thanks MKhayle for inspiration)
+	- If you have issues  seeing the Prop be sure to click the "Refresh" button in the top left of the widget!
 
-- More facial bones added to advanced posing
-- More facial bones named
+- Added "Change weapon into a Prop" button to the Advanced Appearance window. (Thanks MKhayle!)
+	- If you have issues  seeing the Prop be sure to press the Attach Weapon button.
 
-- Update Brio for Dawntrail (Thanks Asgard!)
-- Added support for the second dye channel 
-- Added the Import Options button to the Library when importing a pose
-- Renamed some of the bones for better consistency
-- Made the default size of the Skeleton's LineThickness & Bone's CircleSize smaller
+- Added a Reset model transform button to the posing widget.
+
+- You can now press Escape to clear the selected bone.
+	- Keybind will be changeable in the future.
+
+- Refresh the designs of the Appearance, Posing, & Animation Control widgets!
+	- Added multiple buttons to the posing widget.
+	- Change the icons to the import and export buttons.
+	- Added a scrub bar to the animation control widget.
+
+- Rewrote the Freeze Physics System for better reliability. (Thanks Winter & darkarchon for the tip!)
+
+- Fixed an issue when loading as 'Body' on pre-dawntrail actors
+- Fixed an issue with Third-Party plugins not being Available after being updated or installed!
+- Fixed an issue with font scaling, Brio's font scale will now always be '1'.
+- Fixed an issue with the Reset Settings button being enabled when it shouldn't have been
 
 --------------------------------------------------------------------------------
 
-A Big Thank you to (Sufferhymn), (Night Song), (Alvar Valo), (Yasumi), (YikesXD), 
+And finally, a message: It's been over a year now that I've been the developer & maintainer for Brio.
+
+Thank you to everyone who uses Brio, supports it monetarily, contributes with code, requests features, 
+reports bugs, or simply engages with the community.
+I'm truly grateful for all the wonderful people I have met over the past year.
+
+This last year has been the hardest of my life. Without all of you, and without Brio,
+it would have been much worse, so again, Thank You!
+
+But there is one in particular whom I have met I wish to make a message for, 
+
+I started talking to you to simply ask you what the color of your sky was, 
+what I found was a sky full of beautiful colors, colors I couldn't stop looking at, 
+colors I fell in love with, colors I wish never to forget.
+I told you I'll give you stars and the moon and a soul to guide you 
+and a promise I'll never go, I mean it now more then ever.
+
+So, while it is not mine to give necessary, 
+I want to give you the only thing else I know to give you,
+I dedicate Brio to you
+
+I love you, forever unto eternity~
+
+--------------------------------------------------------------------------------
+
+A Big Thank you to (Sufferhymn), (Night Song), (Alvar Valo), (@Conna), (Yasumi), (YikesXD), 
 (Selitha), (AquilaHK), (LotusEcho), & (Yume) for their support on Kofi!
 
-Also, Thank you, to: (@MKhayle), (@ashna_ff14), (@Yuki-Codes), (@danma3x), (@snaeling),  
-(@WorstAquaPlayer), (@Caraxi), & (@gris-fuego), for their contributions to Brio!
+Also, Thank you, to: (@AsgardXIV), (@Ashadow700), (@ashna_ff14), (@Bronya-Rand), (@Caraxi),
+(@Cazzar), (@danma3x), (@Enth), (@gris-fuego), (@HoloWise), (@MKhayle),
+(@WorstAquaPlayer), (@snaeling), (@Yuki-Codes);
+For their contributions to Brio!
 
 --------------------------------------------------------------------------------

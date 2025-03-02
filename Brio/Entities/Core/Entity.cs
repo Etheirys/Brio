@@ -8,7 +8,7 @@ using System.Linq;
 
 namespace Brio.Entities.Core;
 
-internal abstract class Entity : IDisposable
+public abstract class Entity : IDisposable
 {
     public EntityId Id { get; private set; }
 
@@ -44,6 +44,10 @@ internal abstract class Entity : IDisposable
     public virtual bool IsAttached => Parent != null;
     public virtual EntityFlags Flags => EntityFlags.DefaultOpen;
 
+    public virtual int ContextButtonCount => 1;
+    public virtual bool IsIPCControlled => false;
+    public virtual bool IsLocked => false;
+
 
     protected List<Entity> _children = [];
 
@@ -73,7 +77,8 @@ internal abstract class Entity : IDisposable
     {
         OnChildDetached();
         child.Parent = null;
-        _children.Remove(child);
+        if(_children.Contains(child))
+            _children.Remove(child);
     }
 
     public virtual void OnAttached()
@@ -110,6 +115,11 @@ internal abstract class Entity : IDisposable
         {
             capability.OnEntityDeselected();
         }
+    }
+
+    public virtual void DrawContextButton()
+    {
+
     }
 
     public void AddCapability<T>(T? capability) where T : Capability
@@ -229,8 +239,10 @@ internal abstract class Entity : IDisposable
 }
 
 [Flags]
-internal enum EntityFlags
+public enum EntityFlags
 {
     None,
     DefaultOpen = 1 << 0,
+    HasContextButton = 1 << 1,
+    AllowOutSideGpose = 1 << 2,
 }

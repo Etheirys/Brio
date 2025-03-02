@@ -1,125 +1,107 @@
 ﻿using Brio.Config;
 using Brio.Game.Actor;
-using Brio.Game.GPose;
 using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
 using System;
-using System.Linq;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Brio.IPC;
 
-internal class GlamourerService : IDisposable
+public class GlamourerService : BrioIPC
 {
-    public bool IsGlamourerAvailable { get; private set; } = false;
+    public override string Name { get; } = "Glamourer";
 
-    private const int GlamourerApiMajor = 1;
-    private const int GlamourerApiMinor = 1;
+    public override bool IsAvailable
+        => CheckStatus() == IPCStatus.Available;
 
-    private readonly IDalamudPluginInterface _pluginInterface;
+    public override bool AllowIntegration
+        => _configurationService.Configuration.IPC.AllowGlamourerIntegration;
+
+    public override int APIMajor => 1;
+    public override int APIMinor => 4;
+
+    public override (int Major, int Minor) GetAPIVersion()
+        => _glamourerApiVersion.Invoke();
+
+    public override IDalamudPluginInterface GetPluginInterface()
+        => _pluginInterface;
+
+    //
+
     private readonly ConfigurationService _configurationService;
-    private readonly GPoseService _gPoseService;
-    private readonly IFramework _framework;
+    private readonly IDalamudPluginInterface _pluginInterface;
     private readonly ActorRedrawService _redrawService;
-    private readonly PenumbraService _penumbraService;
+    private readonly IFramework _framework;
+
+    //
+    //
 
     private readonly Glamourer.Api.Helpers.EventSubscriber _glamourerInitializedSubscriber;
 
-    private readonly Glamourer.Api.IpcSubscribers.ApiVersion _glamourerApiVersions;
     private readonly Glamourer.Api.IpcSubscribers.RevertState _glamourerRevertCharacter;
+    private readonly Glamourer.Api.IpcSubscribers.ApiVersion _glamourerApiVersion;
     private readonly Glamourer.Api.IpcSubscribers.GetState _glamourerGetState;
 
-    private readonly uint UnLockCode = 0x6D617265; // From MareSynchronos's IpcCallerGlamourer.cs
+    private readonly Glamourer.Api.IpcSubscribers.GetDesignList _glamourerGetDesignList;
+    private readonly Glamourer.Api.IpcSubscribers.ApplyDesign _glamourerApplyDesign;
 
-    public GlamourerService(IDalamudPluginInterface pluginInterface, ConfigurationService configurationService, GPoseService gPoseService, IFramework framework, PenumbraService penumbraService, ActorRedrawService redrawService)
+    //
+
+    public readonly uint BrioKey = 0x11625;
+    private readonly uint _unlock = 0x6D617265; // From MareSynchronos's IpcCallerGlamourer.cs
+
+    public GlamourerService(IDalamudPluginInterface pluginInterface, ConfigurationService configurationService, IFramework framework, ActorRedrawService redrawService)
     {
         _pluginInterface = pluginInterface;
         _configurationService = configurationService;
-        _gPoseService = gPoseService;
         _framework = framework;
         _redrawService = redrawService;
-        _penumbraService = penumbraService;
 
-        _glamourerInitializedSubscriber = Glamourer.Api.IpcSubscribers.Initialized.Subscriber(pluginInterface, RefreshGlamourerStatus);
+        _glamourerInitializedSubscriber = Glamourer.Api.IpcSubscribers.Initialized.Subscriber(pluginInterface, OnConfigurationChanged);
 
-        _glamourerApiVersions = new Glamourer.Api.IpcSubscribers.ApiVersion(pluginInterface);
+        _glamourerApiVersion = new Glamourer.Api.IpcSubscribers.ApiVersion(pluginInterface);
         _glamourerRevertCharacter = new Glamourer.Api.IpcSubscribers.RevertState(pluginInterface);
         _glamourerGetState = new Glamourer.Api.IpcSubscribers.GetState(pluginInterface);
 
-        RefreshGlamourerStatus();
+        _glamourerGetDesignList = new Glamourer.Api.IpcSubscribers.GetDesignList(pluginInterface);
+        _glamourerApplyDesign = new Glamourer.Api.IpcSubscribers.ApplyDesign(pluginInterface);
 
-        _configurationService.OnConfigurationChanged += RefreshGlamourerStatus;
-        _gPoseService.OnGPoseStateChange += OnGPoseStateChange;
+        OnConfigurationChanged();
+
+        _configurationService.OnConfigurationChanged += OnConfigurationChanged;
     }
 
-    public void RefreshGlamourerStatus()
+    public bool CheckForLock(IGameObject? character)
     {
-        if(_configurationService.Configuration.IPC.AllowGlamourerIntegration)
-        {
-            IsGlamourerAvailable = ConnectToGlamourer();
-        }
-        else
-        {
-            IsGlamourerAvailable = false;
-        }
-
-        bool ConnectToGlamourer()
-        {
-            try
-            {
-                bool glamourerInstalled = _pluginInterface.InstalledPlugins.Any(x => x.Name == "Glamourer" && x.IsLoaded == true);
-                if(!glamourerInstalled)
-                {
-                    Brio.Log.Debug("Glamourer not present");
-                    return false;
-                }
-
-                var (major, minor) = _glamourerApiVersions.Invoke();
-                if(major != GlamourerApiMajor || minor < GlamourerApiMinor)
-                {
-                    Brio.Log.Warning($"Glamourer API mismatch, found v{major}.{minor}");
-                    return false;
-                }
-
-
-                Brio.Log.Debug("Glamourer integration initialized");
-
-                return true;
-            }
-            catch(Exception ex)
-            {
-                Brio.Log.Debug(ex, "Glamourer initialize error");
-                return false;
-            }
-        }
-    }
-
-    public bool CheckForLock(ICharacter? character)
-    {
-        if(IsGlamourerAvailable == false || character is null)
+        if(IsAvailable == false || character is null)
             return false;
 
-        var success = _glamourerGetState.Invoke(character!.ObjectIndex);
+        var (key, _) = _glamourerGetState.Invoke(character!.ObjectIndex);
 
-        Brio.Log.Warning("Glamourer CheckForLock... " + success.Item1);
+        Brio.Log.Verbose("Glamourer CheckForLock... " + key);
 
-        return success.Item1 == Glamourer.Api.Enums.GlamourerApiEc.InvalidKey;
+        return key == Glamourer.Api.Enums.GlamourerApiEc.InvalidKey;
     }
 
-    public Task UnlockAndRevertCharacter(ICharacter? character)
+    public Task UnlockAndRevertCharacter(IGameObject? character)
     {
-        if(IsGlamourerAvailable == false || character is null)
+        if(IsAvailable == false || character is null)
             return Task.CompletedTask;
 
-        Brio.Log.Warning("Starting glamourer UnlockAndRevert...");
+        Brio.Log.Debug("Starting glamourer UnlockAndRevert...");
 
-        var success = _glamourerRevertCharacter.Invoke(character!.ObjectIndex, UnLockCode);
+        var success = _glamourerRevertCharacter.Invoke(character!.ObjectIndex, _unlock);
 
         if(success == Glamourer.Api.Enums.GlamourerApiEc.InvalidKey)
         {
-            Brio.Log.Fatal("Glamourer revert failed! Please report this to the Brio Devs!");
-            return Task.CompletedTask;
+            var success2 = _glamourerRevertCharacter.Invoke(character!.ObjectIndex, BrioKey);
+            if(success2 == Glamourer.Api.Enums.GlamourerApiEc.InvalidKey)
+            {
+                Brio.Log.Fatal("Glamourer revert failed! Please report this to the Brio Devs!");
+                return Task.CompletedTask;
+            }
         }
 
         return _framework.RunOnTick(async () =>
@@ -127,41 +109,61 @@ internal class GlamourerService : IDisposable
             await _redrawService.WaitForDrawing(character!);
             Brio.Log.Debug("Glamourer revert complete");
         }, delayTicks: 5);
-
     }
 
-    public Task RevertCharacter(ICharacter? character)
+    public Task RevertCharacter(IGameObject? character)
     {
-        if(IsGlamourerAvailable == false || character is null)
+        if(IsAvailable == false || character is null)
             return Task.CompletedTask;
 
-        Brio.Log.Warning("Starting glamourer Revert...");
+        Brio.Log.Debug("Starting glamourer Revert...");
 
         var success = _glamourerRevertCharacter.Invoke(character!.ObjectIndex);
 
         if(success == Glamourer.Api.Enums.GlamourerApiEc.InvalidKey)
         {
+            Brio.Log.Info("Glamourer character was locked..");
             UnlockAndRevertCharacter(character);
             return Task.CompletedTask;
         }
 
-        return _framework.RunOnTick(async () =>
+        if(success == Glamourer.Api.Enums.GlamourerApiEc.Success)
         {
-            await _redrawService.WaitForDrawing(character!);
-            Brio.Log.Debug("Glamourer revert complete");
-        }, delayTicks: 5);
+            Brio.Log.Debug("Glamourer revert Started");
+            return _framework.RunOnTick(async () =>
+            {
+                await _redrawService.WaitForDrawing(character!);
+                Brio.Log.Debug("Glamourer revert complete");
+            }, delayTicks: 5);
+        }
 
+        return Task.CompletedTask;
     }
 
-    private void OnGPoseStateChange(bool newState)
+    public Dictionary<Guid, string>? GetDesignList()
     {
-        RefreshGlamourerStatus();
+        if(IsAvailable == false)
+            return null;
+
+        return _glamourerGetDesignList.Invoke();
     }
 
-    public void Dispose()
+    public bool ApplyDesign(Guid design, IGameObject? character)
     {
-        _configurationService.OnConfigurationChanged -= RefreshGlamourerStatus;
-        _gPoseService.OnGPoseStateChange -= OnGPoseStateChange;
+        if(IsAvailable == false || character is null)
+            return false;
+
+        _glamourerApplyDesign.Invoke(design, character!.ObjectIndex);
+
+        return true;
+    }
+
+    private void OnConfigurationChanged()
+        => CheckStatus();
+
+    public override void Dispose()
+    {
+        _configurationService.OnConfigurationChanged -= OnConfigurationChanged;
 
         _glamourerInitializedSubscriber.Dispose();
     }

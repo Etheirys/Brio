@@ -14,7 +14,8 @@ public static class JsonSerializer
     {
         _serializeOptions = new()
         {
-            WriteIndented = true
+            WriteIndented = true,
+            AllowTrailingCommas = true
         };
 
         _serializeOptions.Converters.Add(new JsonStringEnumConverter());
@@ -25,7 +26,8 @@ public static class JsonSerializer
 
         _legacySerializeOptions = new()
         {
-            WriteIndented = true
+            WriteIndented = true,
+            AllowTrailingCommas = true
         };
 
         _legacySerializeOptions.Converters.Add(new JsonStringEnumConverter());

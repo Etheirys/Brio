@@ -1,6 +1,6 @@
 ﻿namespace Brio.Game.Actor;
 
-internal class ActorTableHelpers
+public class ActorTableHelpers
 {
     public const int OverworldStart = 0;
     public const int OverworldEnd = 199;

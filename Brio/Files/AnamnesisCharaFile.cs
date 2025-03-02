@@ -2,16 +2,18 @@
 using Brio.Entities;
 using Brio.Entities.Actor;
 using Brio.Game.Actor.Appearance;
+using Brio.Game.Actor.Interop;
 using Brio.Library.Tags;
 using Brio.Resources;
 using Dalamud.Interface.Textures.TextureWraps;
 using FFXIVClientStructs.FFXIV.Client.Game.Character;
+using MessagePack;
 using System;
 using System.Numerics;
 
 namespace Brio.Files;
 
-internal class AnamnesisCharaFileInfo(EntityManager entityManager) : AppliableActorFileInfoBase<AnamnesisCharaFile>(entityManager)
+public class AnamnesisCharaFileInfo(EntityManager entityManager) : AppliableActorFileInfoBase<AnamnesisCharaFile>(entityManager)
 {
     public override string Name => "Character File";
     public override IDalamudTextureWrap Icon => ResourceProvider.Instance.GetResourceImage("Images.FileIcon_Chara.png");
@@ -27,7 +29,8 @@ internal class AnamnesisCharaFileInfo(EntityManager entityManager) : AppliableAc
 }
 
 [Serializable]
-internal class AnamnesisCharaFile : JsonDocumentBase
+[MessagePackObject(keyAsPropertyName: true)]
+public class AnamnesisCharaFile : JsonDocumentBase
 {
     public uint ModelType { get; set; } = 0;
     public Races Race { get; set; }
@@ -90,6 +93,8 @@ internal class AnamnesisCharaFile : JsonDocumentBase
 
     public Vector3? BustScale { get; set; } = null;
 
+    public bool IsExtendedAppearanceValid => SkinColor.HasValue || SkinGloss.HasValue || LeftEyeColor.HasValue || RightEyeColor.HasValue ||
+        LimbalRingColor.HasValue || HairColor.HasValue || HairGloss.HasValue || HairHighlight.HasValue || MouthColor.HasValue;
 
     public override void GetAutoTags(ref TagCollection tags)
     {
@@ -162,8 +167,31 @@ internal class AnamnesisCharaFile : JsonDocumentBase
         return appearance;
     }
 
-    public static implicit operator AnamnesisCharaFile(ActorAppearance appearance)
+    public static implicit operator BrioHuman.ShaderParams(AnamnesisCharaFile chara)
     {
+        // More Extended Appearance (Shaders)
+        var shaders = new BrioHuman.ShaderParams
+        {
+            SkinColor = chara.SkinColor ?? Vector3.One,
+            SkinGloss = chara.SkinGloss ?? Vector3.One,
+            LeftEyeColor = chara.LeftEyeColor ?? Vector3.One,
+            RightEyeColor = chara.RightEyeColor ?? Vector3.One,
+            HairColor = chara.HairColor ?? Vector3.One,
+            HairGloss = chara.HairGloss ?? Vector3.One,
+            HairHighlight = chara.HairHighlight ?? Vector3.One,
+            MouthColor = chara.MouthColor ?? Vector4.One,
+            MuscleTone = chara.MuscleTone,
+            FeatureColor = chara.LimbalRingColor ?? Vector3.One,
+        };
+
+        return shaders;
+    }
+
+    public static implicit operator AnamnesisCharaFile(ActorAppearanceExtended appearanceExt)
+    {
+        var appearance = appearanceExt.Appearance;
+        var shaders = appearanceExt.ShaderParams;
+
         var charaFile = new AnamnesisCharaFile
         {
             // Model
@@ -218,13 +246,25 @@ internal class AnamnesisCharaFile : JsonDocumentBase
 
             // Extended Appearance
             Transparency = appearance.ExtendedAppearance.Transparency,
-            HeightMultiplier = appearance.ExtendedAppearance.HeightMultiplier
+            HeightMultiplier = appearance.ExtendedAppearance.HeightMultiplier,
+
+            SkinColor = shaders.SkinColor,
+            SkinGloss = shaders.SkinGloss,
+            LeftEyeColor = shaders.LeftEyeColor,
+            RightEyeColor = shaders.RightEyeColor,
+            HairColor = shaders.HairColor,
+            HairGloss = shaders.HairGloss,
+            HairHighlight = shaders.HairHighlight,
+            MouthColor = shaders.MouthColor,
+            MuscleTone = shaders.MuscleTone,
+            LimbalRingColor = shaders.FeatureColor,
         };
 
         return charaFile;
     }
 
-    internal struct ItemSave
+    [MessagePackObject(keyAsPropertyName: true)]
+    public struct ItemSave
     {
         public ushort ModelBase { get; set; }
         public byte ModelVariant { get; set; }
@@ -249,7 +289,8 @@ internal class AnamnesisCharaFile : JsonDocumentBase
         };
     }
 
-    internal struct GlassesSave
+    [MessagePackObject(keyAsPropertyName: true)]
+    public struct GlassesSave
     {
         public ushort GlassesId { get; set; }
 
@@ -261,7 +302,8 @@ internal class AnamnesisCharaFile : JsonDocumentBase
         };
     }
 
-    internal struct WeaponSave
+    [MessagePackObject(keyAsPropertyName: true)]
+    public struct WeaponSave
     {
         public Vector3 Color { get; set; }
         public Vector3 Scale { get; set; }

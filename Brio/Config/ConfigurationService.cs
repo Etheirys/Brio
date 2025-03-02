@@ -3,7 +3,7 @@ using System;
 
 namespace Brio.Config;
 
-internal class ConfigurationService : IDisposable
+public class ConfigurationService : IDisposable
 {
     public Configuration Configuration { get; private set; } = null!;
 

@@ -11,7 +11,7 @@ using NativeCharacter = FFXIVClientStructs.FFXIV.Client.Game.Character.Character
 
 namespace Brio.Entities;
 
-internal unsafe class EntityActorManager : IDisposable
+public unsafe class EntityActorManager : IDisposable
 {
     private readonly EntityManager _entityManager;
     private readonly IServiceProvider _serviceProvider;

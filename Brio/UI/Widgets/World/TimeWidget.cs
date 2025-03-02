@@ -8,7 +8,7 @@ using System.Numerics;
 
 namespace Brio.UI.Widgets.World;
 
-internal class TimeWidget(TimeCapability timeCapability) : Widget<TimeCapability>(timeCapability)
+public class TimeWidget(TimeCapability timeCapability) : Widget<TimeCapability>(timeCapability)
 {
     public override string HeaderName => "Time";
     public override WidgetFlags Flags => WidgetFlags.DefaultOpen | WidgetFlags.DrawBody;

@@ -1,6 +1,7 @@
 ﻿using Brio.Capabilities.Posing;
 using Brio.Config;
 using Brio.Entities;
+using Brio.Game.Input;
 using Brio.Game.Posing;
 using Brio.Input;
 using Brio.UI.Controls.Core;
@@ -15,13 +16,14 @@ using System.Numerics;
 
 namespace Brio.UI.Windows.Specialized;
 
-internal class PosingOverlayToolbarWindow : Window
+public class PosingOverlayToolbarWindow : Window
 {
     private readonly PosingOverlayWindow _overlayWindow;
     private readonly EntityManager _entityManager;
     private readonly PosingTransformWindow _overlayTransformWindow;
     private readonly PosingService _posingService;
     private readonly ConfigurationService _configurationService;
+    private readonly GameInputService _gameInputService;
 
     private readonly BoneSearchControl _boneSearchControl = new();
 
@@ -29,7 +31,7 @@ internal class PosingOverlayToolbarWindow : Window
 
     private const string _boneFilterPopupName = "bone_filter_popup";
 
-    public PosingOverlayToolbarWindow(PosingOverlayWindow overlayWindow, EntityManager entityManager, PosingTransformWindow overlayTransformWindow, PosingService posingService, ConfigurationService configurationService) : base($"Brio - Overlay###brio_posing_overlay_toolbar_window", ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoCollapse)
+    public PosingOverlayToolbarWindow(PosingOverlayWindow overlayWindow, GameInputService gameInputService, EntityManager entityManager, PosingTransformWindow overlayTransformWindow, PosingService posingService, ConfigurationService configurationService) : base($"Brio - Overlay###brio_posing_overlay_toolbar_window", ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoCollapse)
     {
         Namespace = "brio_posing_overlay_toolbar_namespace";
 
@@ -38,12 +40,16 @@ internal class PosingOverlayToolbarWindow : Window
         _overlayTransformWindow = overlayTransformWindow;
         _posingService = posingService;
         _configurationService = configurationService;
+        _gameInputService = gameInputService;
+
         ShowCloseButton = false;
     }
 
     public override void PreOpenCheck()
     {
         IsOpen = _overlayWindow.IsOpen;
+
+        _gameInputService.AllowEscape = true;
 
         if(UIManager.IsPosingGraphicalWindowOpen && _configurationService.Configuration.Posing.HideToolbarWhenAdvandedPosingOpen)
         {
@@ -55,6 +61,8 @@ internal class PosingOverlayToolbarWindow : Window
 
     public override bool DrawConditions()
     {
+        _gameInputService.AllowEscape = true;
+
         if(!_overlayWindow.IsOpen)
             return false;
 
@@ -82,6 +90,20 @@ internal class PosingOverlayToolbarWindow : Window
 
         if(!_entityManager.TryGetCapabilityFromSelectedEntity<PosingCapability>(out var posing))
             return;
+
+        if(posing.Selected.Value is not null and BonePoseInfoId)
+        {
+            _gameInputService.AllowEscape = false;
+
+            if(InputService.IsKeyBindDown(KeyBindEvents.Poseing_Esc))
+            {
+                posing.ClearSelection();
+            }
+        }
+        else
+        {
+            _gameInputService.AllowEscape = true;
+        }
 
         DrawHeaderButtons();
         DrawButtons(posing);
@@ -384,7 +406,7 @@ internal class PosingOverlayToolbarWindow : Window
         const string helpText = "Alt - Hide Overlay\nShift - Disable Gizmo\nCtrl - Disable Skeleton";
 
         ImGui.SetCursorPosY(0);
-        ImBrio.FontIconButtonRight("overlay_help", FontAwesomeIcon.QuestionCircle, 1f, helpText, bordered: false);
+        ImBrio.FontIconButtonRight("overlay_help", FontAwesomeIcon.QuestionCircle, 2f, helpText, bordered: false);
 
         ImGui.PopClipRect();
         ImGui.SetCursorPos(initialPos);

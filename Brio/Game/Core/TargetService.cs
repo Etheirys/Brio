@@ -8,7 +8,7 @@ using System;
 
 namespace Brio.Game.Core;
 
-internal class TargetService : IDisposable
+public class TargetService : IDisposable
 {
     private readonly EntityManager _entityManager;
     private readonly ITargetManager _targetManager;

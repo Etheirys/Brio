@@ -7,7 +7,7 @@ using ImGuiNET;
 
 namespace Brio.UI.Controls.Editors;
 
-internal class ModelShaderEditor()
+public class ModelShaderEditor()
 {
     private static float MaxItemWidth => ImGui.GetContentRegionAvail().X - ImGui.CalcTextSize("XXXXXXXXXX").X;
     private static float LabelStart => MaxItemWidth + ImGui.GetCursorPosX() + ImGui.GetStyle().FramePadding.X * 2f;

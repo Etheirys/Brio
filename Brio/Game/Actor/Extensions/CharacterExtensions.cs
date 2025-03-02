@@ -13,7 +13,7 @@ using StructsCharacter = FFXIVClientStructs.FFXIV.Client.Game.Character.Characte
 using StructsCharacterBase = FFXIVClientStructs.FFXIV.Client.Graphics.Scene.CharacterBase;
 using StructsDrawDataContainer = FFXIVClientStructs.FFXIV.Client.Game.Character.DrawDataContainer;
 
-internal static class CharacterExtensions
+public static class CharacterExtensions
 {
     public unsafe static StructsCharacter* Native(this ICharacter go)
     {

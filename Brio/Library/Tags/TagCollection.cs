@@ -1,9 +1,12 @@
-﻿using System.Collections;
+﻿using MessagePack;
+using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Text;
 
 namespace Brio.Library.Tags;
+
+[MessagePackObject(keyAsPropertyName: true)]
 public class TagCollection : IEnumerable<Tag>, INotifyCollectionChanged
 {
     public static readonly TagCollection Empty = new();

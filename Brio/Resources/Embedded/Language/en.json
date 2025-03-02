@@ -275,6 +275,8 @@
     "hands": "Hands",
     "weapon": "Weapons",
     "ivcs": "IVCS",
+    "ex": "EX",
+    "legacy": "Legacy",
     "other": "Other"
   },
 

@@ -20,7 +20,7 @@ using System.Numerics;
 
 namespace Brio.UI.Windows.Specialized;
 
-internal class PosingOverlayWindow : Window, IDisposable
+public class PosingOverlayWindow : Window, IDisposable
 {
 
     private readonly EntityManager _entityManager;
@@ -37,7 +37,7 @@ internal class PosingOverlayWindow : Window, IDisposable
     private const string _boneSelectPopupName = "brio_bone_select_popup";
 
     public PosingOverlayWindow(EntityManager entityManager, CameraService cameraService, ConfigurationService configService, PosingService posingService, GPoseService gPoseService)
-        : base("##brio_posing_overlay_window", ImGuiWindowFlags.NoInputs | ImGuiWindowFlags.NoBackground | ImGuiWindowFlags.NoDecoration, true)
+        : base("##brio_posing_overlay_window", ImGuiWindowFlags.AlwaysAutoResize, true)
     {
         Namespace = "brio_posing_overlay_namespace";
 
@@ -56,15 +56,18 @@ internal class PosingOverlayWindow : Window, IDisposable
         base.PreDraw();
         ImGuiHelpers.SetNextWindowPosRelativeMainViewport(new Vector2(0, 0), ImGuiCond.Always);
         SizeCondition = ImGuiCond.Always;
+
         var io = ImGui.GetIO();
         Size = io.DisplaySize * ImGui.GetFontSize();
 
-        Flags = ImGuiWindowFlags.NoInputs | ImGuiWindowFlags.NoBackground | ImGuiWindowFlags.NoDecoration;
+        Flags = ImGuiWindowFlags.NoBackground | ImGuiWindowFlags.NoInputs | ImGuiWindowFlags.NoDecoration | ImGuiWindowFlags.NoCollapse;
 
         ImGuizmo.SetID(_gizmoId);
 
-        if(ImGuizmo.IsUsing() && _trackingTransform.HasValue)
-            Flags &= ~ImGuiWindowFlags.NoInputs;
+        //if(_trackingTransform.HasValue)
+        //{
+        //    Flags &= ~ImGuiWindowFlags.NoInputs;
+        //}
     }
 
     public override void Draw()
@@ -287,7 +290,6 @@ internal class PosingOverlayWindow : Window, IDisposable
 
                     posing.Selected = _selectingFrom[selectedIndex].Item;
                 }
-
             }
         }
     }
@@ -500,7 +502,7 @@ internal class PosingOverlayWindow : Window, IDisposable
         public bool GizmoEnabled => !PopupOpen && !AnyClickableClicked && !AnyClickableHovered && !UserDisablingGizmo;
     }
 
-    internal class ClickableItem
+    public class ClickableItem
     {
         public PosingSelectionType Item = null!;
 

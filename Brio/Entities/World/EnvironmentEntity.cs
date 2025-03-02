@@ -6,10 +6,12 @@ using System;
 
 namespace Brio.Entities.World;
 
-internal class EnvironmentEntity(IServiceProvider provider) : Entity("environment", provider)
+public class EnvironmentEntity(IServiceProvider provider) : Entity("environment", provider)
 {
     public override string FriendlyName => "Environment";
     public override FontAwesomeIcon Icon => FontAwesomeIcon.MountainSun;
+
+    public override EntityFlags Flags => EntityFlags.AllowOutSideGpose | EntityFlags.DefaultOpen;
 
     public override void OnAttached()
     {

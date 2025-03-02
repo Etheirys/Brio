@@ -6,7 +6,7 @@ using StatusManager = FFXIVClientStructs.FFXIV.Client.Game.StatusManager;
 
 namespace Brio.Game.Actor.Extensions;
 
-internal static class StatusManagerExtensions
+public static class StatusManagerExtensions
 {
     public static List<Status> GetAllStatuses(this ref StatusManager sm)
     {

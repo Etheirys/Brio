@@ -6,7 +6,7 @@ using System;
 
 namespace Brio.Web;
 
-internal class WebService : IDisposable
+public class WebService : IDisposable
 {
     public bool IsRunning => _shouldBeRunning && _webServer != null && _webServer.State == WebServerState.Listening;
 

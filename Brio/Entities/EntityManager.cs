@@ -15,9 +15,9 @@ using System.Linq;
 
 namespace Brio.Entities;
 
-internal unsafe partial class EntityManager : IDisposable
+public unsafe partial class EntityManager(IServiceProvider serviceProvider, ConfigurationService configurationService) : IDisposable
 {
-    private readonly IServiceProvider _serviceProvider;
+    private readonly IServiceProvider _serviceProvider = serviceProvider;
 
     public Entity? RootEntity => _worldEntity;
 
@@ -41,13 +41,7 @@ internal unsafe partial class EntityManager : IDisposable
     private WorldEntity? _worldEntity;
     private readonly Dictionary<EntityId, Entity> _entityMap = [];
 
-    private readonly ConfigurationService _configurationService;
-
-    public EntityManager(IServiceProvider serviceProvider, ConfigurationService configurationService)
-    {
-        _serviceProvider = serviceProvider;
-        _configurationService = configurationService;
-    }
+    private readonly ConfigurationService _configurationService = configurationService;
 
     public void SetupDefaultEntities()
     {
@@ -57,8 +51,11 @@ internal unsafe partial class EntityManager : IDisposable
         var environmentEntity = ActivatorUtilities.CreateInstance<EnvironmentEntity>(_serviceProvider);
         AttachEntity(environmentEntity, _worldEntity);
 
-        var cameraEntity = ActivatorUtilities.CreateInstance<CameraEntity>(_serviceProvider);
-        AttachEntity(cameraEntity, _worldEntity);
+        var cameraContainerEntity = ActivatorUtilities.CreateInstance<CameraContainerEntity>(_serviceProvider);
+        AttachEntity(cameraContainerEntity, _worldEntity);
+
+        var defaultCameraEntity = ActivatorUtilities.CreateInstance<CameraEntity>(_serviceProvider, 0, CameraType.Default);
+        AttachEntity(defaultCameraEntity, cameraContainerEntity);
 
         RefreshDebugEntity();
     }
@@ -164,7 +161,8 @@ internal unsafe partial class EntityManager : IDisposable
         {
             if(entity is ActorEntity actor)
             {
-                yield return actor;
+                if(actor.IsProp == false)
+                    yield return actor;
             }
         }
     }

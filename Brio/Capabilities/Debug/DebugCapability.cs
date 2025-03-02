@@ -13,7 +13,7 @@ using System.Collections.Generic;
 
 namespace Brio.Capabilities.Debug;
 
-internal unsafe class DebugCapability : Capability
+public unsafe class DebugCapability : Capability
 {
     private readonly GPoseService _gPoseService;
 

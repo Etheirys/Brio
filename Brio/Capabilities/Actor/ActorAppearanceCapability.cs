@@ -4,23 +4,28 @@ using Brio.Files;
 using Brio.Game.Actor;
 using Brio.Game.Actor.Appearance;
 using Brio.Game.Actor.Extensions;
+using Brio.Game.Actor.Interop;
 using Brio.Game.GPose;
 using Brio.Game.Types;
 using Brio.IPC;
 using Brio.Resources;
 using Brio.UI.Widgets.Actor;
+using Dalamud.Plugin.Services;
+using FFXIVClientStructs.FFXIV.Client.Game.Character;
 using System;
 using System.Threading.Tasks;
 
 namespace Brio.Capabilities.Actor;
 
-internal class ActorAppearanceCapability : ActorCharacterCapability
+public class ActorAppearanceCapability : ActorCharacterCapability
 {
     private readonly ActorAppearanceService _actorAppearanceService;
     private readonly PenumbraService _penumbraService;
+    private readonly CustomizePlusService _customizePlusService;
     private readonly GlamourerService _glamourerService;
     private readonly MareService _mareService;
     private readonly GPoseService _gposeService;
+    private readonly IFramework _framework;
 
     public string CurrentCollection => _penumbraService.GetCollectionForObject(Character);
     public PenumbraService PenumbraService => _penumbraService;
@@ -28,10 +33,22 @@ internal class ActorAppearanceCapability : ActorCharacterCapability
     public bool IsCollectionOverridden => _oldCollection != null;
     private string? _oldCollection = null;
 
+
+    public string CurrentDesign { get; set; } = "None";
+    public GlamourerService GlamourerService => _glamourerService;
+
+
+    public (string? name, Guid? id) SelectedDesign { get; set; } = ("None", null);
+    public (string? data, Guid? id) CurrentProfile => _customizePlusService.GetActiveProfile(Character);
+    public CustomizePlusService CustomizePlusService => _customizePlusService;
+
+
     private ActorAppearance? _originalAppearance = null;
     public bool IsAppearanceOverridden => _originalAppearance.HasValue;
 
-    public bool HasPenumbraIntegration => _penumbraService.IsPenumbraAvailable;
+    public bool HasPenumbraIntegration => _penumbraService.IsAvailable;
+    public bool HasGlamourerIntegration => _glamourerService.IsAvailable;
+    public bool HasCustomizePlusIntegration => _customizePlusService.IsAvailable;
 
     public ActorAppearance CurrentAppearance => _actorAppearanceService.GetActorAppearance(Character);
 
@@ -43,17 +60,20 @@ internal class ActorAppearanceCapability : ActorCharacterCapability
 
     public bool CanTint => _actorAppearanceService.CanTint;
 
-    public bool CanMcdf => _mareService.IsMareAvailable;
+    public bool CanMcdf => _mareService.IsAvailable;
 
     public bool IsHidden => CurrentAppearance.ExtendedAppearance.Transparency == 0;
 
-    public ActorAppearanceCapability(ActorEntity parent, ActorAppearanceService actorAppearanceService, PenumbraService penumbraService, GlamourerService glamourerService, MareService mareService, GPoseService gPoseService) : base(parent)
+    public ActorAppearanceCapability(ActorEntity parent, IFramework framework, ActorAppearanceService actorAppearanceService, CustomizePlusService customizePlusService, PenumbraService penumbraService, GlamourerService glamourerService, MareService mareService, GPoseService gPoseService) : base(parent)
     {
         _actorAppearanceService = actorAppearanceService;
         _penumbraService = penumbraService;
         _glamourerService = glamourerService;
         _mareService = mareService;
         _gposeService = gPoseService;
+        _customizePlusService = customizePlusService;
+        _framework = framework;
+
         Widget = new ActorAppearanceWidget(this);
 
         _gposeService.OnGPoseStateChange += OnGPoseStateChanged;
@@ -80,7 +100,6 @@ internal class ActorAppearanceCapability : ActorCharacterCapability
 
         _ = _actorAppearanceService.Redraw(Character);
     }
-
     public void ResetCollection()
     {
         if(IsCollectionOverridden)
@@ -90,6 +109,65 @@ internal class ActorAppearanceCapability : ActorCharacterCapability
             _ = _actorAppearanceService.Redraw(Character);
         }
     }
+
+    public void SetDesign(Guid design)
+    {
+        _ = _glamourerService.ApplyDesign(design, Character);
+    }
+    public void ResetDesign(bool checkResetLock = true)
+    {
+        _glamourerService.RevertCharacter(Character);
+
+        if(checkResetLock && _glamourerService.CheckForLock(Character))
+        {
+            ResetCollection();
+            ResetProfile(false);
+        }
+    }
+
+    public void SetProfile(string data)
+    {
+        _customizePlusService.SetProfile(Character, data);
+    }
+    public void ResetProfile(bool checkResetLock = true)
+    {
+        _customizePlusService.RemoveTemporaryProfile(Character);
+
+        if(checkResetLock && _glamourerService.CheckForLock(Character))
+        {
+            ResetCollection();
+            ResetDesign(false);
+        }
+
+        SetSelectedProfile();
+    }
+    public Guid? GetActiveProfile()
+    {
+        return _customizePlusService.GetActiveProfile(Character).Item2;
+    }
+    public void SetSelectedProfile()
+    {
+        var profiles = _customizePlusService.GetProfiles();
+
+        var activeProfile = GetActiveProfile();
+        if(activeProfile is not null)
+        {
+            foreach(var item in profiles)
+            {
+                if(item.UniqueId == activeProfile.Value)
+                {
+                    SelectedDesign = (item.Name, activeProfile.Value);
+                }
+            }
+        }
+        else
+        {
+            SelectedDesign = ("None", null);
+        }
+    }
+
+    public async void SetAppearanceAsTask(ActorAppearance appearance, AppearanceImportOptions options)
+        => await SetAppearance(appearance, options);
 
     public async Task SetAppearance(ActorAppearance appearance, AppearanceImportOptions options)
     {
@@ -107,6 +185,12 @@ internal class ActorAppearanceCapability : ActorCharacterCapability
             _modelShaderOverride.Reset();
         }
 
+        if(Entity is ActorEntity actor && actor.IsProp == true)
+            await _framework.RunOnTick(() =>
+            {
+                AttachWeapon();
+            }, delayTicks: 5);
+
         Brio.Log.Debug($"Appearance set for gameobject {GameObject.ObjectIndex}.");
     }
 
@@ -123,9 +207,18 @@ internal class ActorAppearanceCapability : ActorCharacterCapability
             _ = SetAppearance(doc, options);
     }
 
-    public void ExportAppearance(string file)
+    public unsafe void ExportAppearance(string file)
     {
-        AnamnesisCharaFile appearance = CurrentAppearance;
+        var currentAppearance = CurrentAppearance;
+        BrioHuman.ShaderParams* shaders = Character.GetShaderParams();
+
+        ActorAppearanceExtended actor = new()
+        {
+            Appearance = currentAppearance,
+            ShaderParams = *shaders
+        };
+
+        AnamnesisCharaFile appearance = actor;
         ResourceProvider.Instance.SaveFileDocument(file, appearance);
     }
 
@@ -193,6 +286,13 @@ internal class ActorAppearanceCapability : ActorCharacterCapability
     {
         await _actorAppearanceService.Redraw(Character);
         ApplyShaderOverride();
+
+        if(Entity is ActorEntity actor && actor.IsProp == true)
+            await _framework.RunOnTick(() =>
+            {
+                AttachWeapon();
+            }, delayTicks: 5);
+
         return;
     }
 
@@ -212,6 +312,19 @@ internal class ActorAppearanceCapability : ActorCharacterCapability
         Character.Native()->Timeline.TimelineSequencer.PlayTimeline(5616);
     }
 
+    public Task SetProp(WeaponModelId modelId)
+    {
+        var appearance = _actorAppearanceService.GetActorAppearance(Character);
+        appearance.Weapons.MainHand = modelId;
+        return SetAppearance(appearance, AppearanceImportOptions.Weapon);
+    }
+
+    public WeaponModelId GetProp()
+    {
+        var appearance = _actorAppearanceService.GetActorAppearance(Character);
+        return appearance.Weapons.MainHand;
+    }
+
     private unsafe void ApplyShaderOverride()
     {
         var shaders = Character.GetShaderParams();
@@ -227,6 +340,7 @@ internal class ActorAppearanceCapability : ActorCharacterCapability
             return;
 
         ResetCollection();
+        ResetProfile();
         _ = ResetAppearance();
     }
 
@@ -241,7 +355,11 @@ internal class ActorAppearanceCapability : ActorCharacterCapability
         _gposeService.OnGPoseStateChange -= OnGPoseStateChanged;
         _penumbraService.OnPenumbraRedraw -= OnPenumbraRedraw;
 
-        ResetCollection();
-        _ = ResetAppearance();
+        if(Character.IsValid())
+        {
+            ResetCollection();
+            ResetProfile();
+            _ = ResetAppearance();
+        }
     }
 }

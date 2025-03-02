@@ -1,4 +1,5 @@
 ﻿using Brio.Capabilities.Actor;
+using Brio.Capabilities.Posing;
 using Brio.Game.Actor.Appearance;
 using Brio.Resources;
 using Brio.UI.Controls.Editors;
@@ -13,11 +14,12 @@ using System.Numerics;
 
 namespace Brio.UI.Widgets.Actor;
 
-internal class ActorAppearanceWidget(ActorAppearanceCapability capability) : Widget<ActorAppearanceCapability>(capability)
+public class ActorAppearanceWidget(ActorAppearanceCapability capability) : Widget<ActorAppearanceCapability>(capability)
 {
-    public override string HeaderName => "Appearance";
+    public override string HeaderName => Capability.Actor.IsProp ? "Change Prop" : "Appearance";
 
-    public override WidgetFlags Flags => WidgetFlags.DefaultOpen | WidgetFlags.DrawBody | WidgetFlags.DrawQuickIcons | WidgetFlags.DrawPopup | WidgetFlags.HasAdvanced | WidgetFlags.CanHide;
+    public override WidgetFlags Flags => Capability.Actor.IsProp ? WidgetFlags.DefaultOpen | WidgetFlags.DrawBody | WidgetFlags.DrawPopup | WidgetFlags.DrawQuickIcons
+        : WidgetFlags.DefaultOpen | WidgetFlags.DrawBody | WidgetFlags.DrawQuickIcons | WidgetFlags.DrawPopup | WidgetFlags.HasAdvanced;
 
     private static readonly GearSelector _gearSelector = new("gear_selector");
     private const ActorEquipSlot _propSlots = ActorEquipSlot.Prop;
@@ -26,19 +28,36 @@ internal class ActorAppearanceWidget(ActorAppearanceCapability capability) : Wid
     public override void DrawBody()
     {
         if(Capability.Actor.IsProp)
+        {
             DrawPropLoadAppearance();
+            ImGui.Separator();
+            AppearanceEditorCommon.DrawPenumbraCollectionSwitcher(Capability);
+        }
         else
         {
             DrawLoadAppearance();
+            ImGui.Separator();
             AppearanceEditorCommon.DrawPenumbraCollectionSwitcher(Capability);
+            AppearanceEditorCommon.DrawGlamourerDesignSwitcher(Capability);
+            AppearanceEditorCommon.DrawCustomizePlusProfileSwitcher(Capability);
         }
     }
+
     private void DrawPropLoadAppearance()
     {
         var currentAppearance = Capability.CurrentAppearance;
         var originalAppearance = Capability.OriginalAppearance;
 
+        if(ImBrio.FontIconButton("attachweapon", FontAwesomeIcon.Retweet, "Reload Prop"))
+        {
+            Capability.AttachWeapon();
+            Capability.Actor.GetCapability<PosingCapability>().LoadResourcesPose("Data.BrioPropPose.pose");
+        }
+        ImGui.SameLine();
+
         bool didChange = DrawReset(ref currentAppearance, originalAppearance);
+
+        ImGui.Separator();
 
         didChange |= DrawPropSlot(ref currentAppearance, ref currentAppearance.Weapons.OffHand, ActorEquipSlot.Prop | ActorEquipSlot.OffHand);
 
@@ -50,7 +69,7 @@ internal class ActorAppearanceWidget(ActorAppearanceCapability capability) : Wid
     {
         bool didChange = false;
 
-        var resetTo = ImGui.GetCursorPos();
+        //var resetTo = ImGui.GetCursorPos();
         bool equipChanged = !currentAppearance.Equipment.Equals(originalAppearance.Equipment) || !currentAppearance.Weapons.Equals(originalAppearance.Weapons) || !currentAppearance.Runtime.Equals(originalAppearance.Runtime);
         if(ImBrio.FontIconButtonRight("reset_equipment", FontAwesomeIcon.Undo, 1, "Reset Equipment", equipChanged))
         {
@@ -59,7 +78,7 @@ internal class ActorAppearanceWidget(ActorAppearanceCapability capability) : Wid
             currentAppearance.Runtime = originalAppearance.Runtime;
             didChange |= true;
         }
-        ImGui.SetCursorPos(resetTo);
+        //ImGui.SetCursorPos(resetTo);
 
         return didChange;
     }
@@ -76,7 +95,7 @@ internal class ActorAppearanceWidget(ActorAppearanceCapability capability) : Wid
 
         var model = GameDataProvider.Instance.ModelDatabase.GetModelById(equip, _propSlots);
 
-        using(ImRaii.PushId(slot.ToString()))
+        using(ImRaii.PushId("DrawPropSlot"))
         {
             if(ImBrio.BorderedGameIcon("##icon", model?.Icon ?? 0, fallback, size: IconSize))
             {
@@ -90,7 +109,7 @@ internal class ActorAppearanceWidget(ActorAppearanceCapability capability) : Wid
             {
                 if(group.Success)
                 {
-                    string description = $"{slot}: {model?.Name ?? "Unknown"}";
+                    string description = $"{model?.Name ?? "Unknown"}";
 
                     ImGui.Text(description);
 
@@ -116,13 +135,6 @@ internal class ActorAppearanceWidget(ActorAppearanceCapability capability) : Wid
                     if(ImGui.InputInt("##variant", ref equipVariant, 0, 0, ImGuiInputTextFlags.EnterReturnsTrue))
                     {
                         equip.Variant = (byte)equipVariant;
-                        didChange |= true;
-                    }
-
-                    ImGui.SameLine();
-                    if(ImBrio.FontIconButton("attachweapon", FontAwesomeIcon.FistRaised, "Attach Weapon", bordered: false))
-                    {
-                        Capability.AttachWeapon();
                         didChange |= true;
                     }
 
@@ -159,12 +171,12 @@ internal class ActorAppearanceWidget(ActorAppearanceCapability capability) : Wid
 
         ImGui.SameLine();
 
-        if(ImBrio.FontIconButton("import_charafile", FontAwesomeIcon.Download, "Import Character"))
+        if(ImBrio.FontIconButton("import_charafile", FontAwesomeIcon.FileDownload, "Import Character"))
             FileUIHelpers.ShowImportCharacterModal(Capability, AppearanceImportOptions.Default);
 
         ImGui.SameLine();
 
-        if(ImBrio.FontIconButton("export_charafile", FontAwesomeIcon.FileExport, "Export Character File"))
+        if(ImBrio.FontIconButton("export_charafile", FontAwesomeIcon.Save, "Save Character File"))
             FileUIHelpers.ShowExportCharacterModal(Capability);
 
         ImGui.SameLine();

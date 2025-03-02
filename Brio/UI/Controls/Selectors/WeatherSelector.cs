@@ -8,7 +8,7 @@ using System.Numerics;
 
 namespace Brio.UI.Controls.Selectors;
 
-internal class WeatherSelector(string id) : Selector<WeatherUnion>(id)
+public class WeatherSelector(string id) : Selector<WeatherUnion>(id)
 {
     protected override Vector2 MinimumListSize { get; } = new(300, 300);
 

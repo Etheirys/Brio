@@ -11,6 +11,7 @@ using Brio.Library.Tags;
 using Brio.UI.Controls.Core;
 using Brio.UI.Controls.Editors;
 using Brio.UI.Controls.Stateless;
+using Brio.UI.Theming;
 using Dalamud.Interface;
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Interface.Windowing;
@@ -24,14 +25,14 @@ using System.Numerics;
 
 namespace Brio.UI.Windows;
 
-internal class LibraryWindow : Window
+public class LibraryWindow : Window
 {
     private static float WindowContentWidth => ImGui.GetWindowContentRegionMax().X - ImGui.GetWindowContentRegionMin().X;
     private static float WindowContentHeight => ImGui.GetWindowContentRegionMax().Y - ImGui.GetWindowContentRegionMin().Y;
 
     private static Vector2 MinimumSize = new(785, 435);
 
-    private const float InfoPaneWidth = 350;
+    private const float InfoPaneWidth = 285;
     private const float SearchWidth = 400;
     private const int MaxTagsInSuggest = 25;
     private const float PathBarButtonWidth = 25;
@@ -301,7 +302,7 @@ internal class LibraryWindow : Window
 
     public override void Draw()
     {
-        DrawInternal();
+        DrawLibrary();
     }
 
     public void DrawModal()
@@ -317,12 +318,12 @@ internal class LibraryWindow : Window
         {
             if(popup.Success)
             {
-                DrawInternal();
+                DrawLibrary();
             }
         }
     }
 
-    private void DrawInternal()
+    private void DrawLibrary()
     {
         using(ImRaii.PushId("##brio_library"))
         {
@@ -440,7 +441,7 @@ internal class LibraryWindow : Window
                             var config = ConfigurationService.Instance.Configuration;
                             bool isFavorite = config.Library.Favorites.Contains(ieb.Identifier);
 
-                            using(ImRaii.PushColor(ImGuiCol.Text, isFavorite ? UIConstants.GizmoRed : UIConstants.ToggleButtonInactive))
+                            using(ImRaii.PushColor(ImGuiCol.Text, isFavorite ? TheameManager.CurrentTheame.Accent.AccentColor : UIConstants.ToggleButtonInactive))
                             {
                                 if(ImBrio.FontIconButton(FontAwesomeIcon.Heart))
                                 {
@@ -712,7 +713,7 @@ internal class LibraryWindow : Window
     {
         float searchBarWidth = ImBrio.GetRemainingWidth();
         float searchBarHeight = ImBrio.GetLineHeight();
-        Vector2 searchbarPosition = ImGui.GetCursorScreenPos();
+        Vector2 searchBarPosition = ImGui.GetCursorScreenPos();
 
         using(ImRaii.PushColor(ImGuiCol.ChildBg, ImGui.GetColorU32(ImGuiCol.FrameBg)))
         {
@@ -817,7 +818,7 @@ internal class LibraryWindow : Window
                                 _searchLostFocus = 0;
                             }
 
-                            _searchSuggestPos = new Vector2(searchbarPosition.X, searchbarPosition.Y + searchBarHeight);
+                            _searchSuggestPos = new Vector2(searchBarPosition.X, searchBarPosition.Y + searchBarHeight);
                             _searchSuggestSize = new Vector2(searchBarWidth, searchBarHeight);
                         }
                     }

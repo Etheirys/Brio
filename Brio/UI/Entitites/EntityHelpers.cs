@@ -4,7 +4,7 @@ using Dalamud.Interface.Utility.Raii;
 
 namespace Brio.UI.Entitites;
 
-internal static class EntityHelpers
+public static class EntityHelpers
 {
     public static void DrawEntitySection(Entity? entity)
     {

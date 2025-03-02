@@ -12,7 +12,7 @@ using System.Linq;
 namespace Brio.Capabilities.Posing
 {
 
-    internal class SkeletonPosingCapability : ActorCharacterCapability
+    public class SkeletonPosingCapability : ActorCharacterCapability
     {
         private readonly SkeletonService _skeletonService;
         private readonly PosingService _posingService;
@@ -186,7 +186,5 @@ namespace Brio.Capabilities.Posing
             PoseInfo.Clear();
             base.Dispose();
         }
-
-
     }
 }

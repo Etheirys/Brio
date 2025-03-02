@@ -1,5 +1,6 @@
 ﻿using Brio.Capabilities.Actor;
 using Brio.Entities;
+using Brio.Entities.Actor;
 using Brio.Game.Actor.Appearance;
 using Brio.Game.Actor.Extensions;
 using Brio.Game.GPose;
@@ -14,7 +15,7 @@ using System.Numerics;
 
 namespace Brio.UI.Windows.Specialized;
 
-internal class ActorAppearanceWindow : Window, IDisposable
+public class ActorAppearanceWindow : Window, IDisposable
 {
     private readonly CustomizeEditor _customizeEditor;
     private readonly GearEditor _gearEditor;
@@ -49,6 +50,11 @@ internal class ActorAppearanceWindow : Window, IDisposable
 
     public override bool DrawConditions()
     {
+        if(_entityManager.SelectedEntity is ActorEntity actor && actor.IsProp == true)
+        {
+            return false;
+        }
+
         if(!_entityManager.SelectedHasCapability<ActorAppearanceCapability>())
         {
             return false;
@@ -233,6 +239,15 @@ internal class ActorAppearanceWindow : Window, IDisposable
                         _importOptions |= AppearanceImportOptions.ExtendedAppearance;
                     else
                         _importOptions &= ~AppearanceImportOptions.ExtendedAppearance;
+                }
+
+                bool shaders = _importOptions.HasFlag(AppearanceImportOptions.Shaders);
+                if(ImGui.Checkbox("Shaders", ref shaders))
+                {
+                    if(shaders)
+                        _importOptions |= AppearanceImportOptions.Shaders;
+                    else
+                        _importOptions &= ~AppearanceImportOptions.Shaders;
                 }
             }
         }

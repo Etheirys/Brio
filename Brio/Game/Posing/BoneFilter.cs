@@ -5,7 +5,7 @@ using static Brio.Game.Posing.BoneCategories;
 
 namespace Brio.Game.Posing;
 
-internal class BoneFilter
+public class BoneFilter
 {
     private readonly PosingService _posingService;
 

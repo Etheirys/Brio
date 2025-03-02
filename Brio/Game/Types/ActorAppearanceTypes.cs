@@ -8,7 +8,7 @@ using Ornament = Lumina.Excel.Sheets.Ornament;
 namespace Brio.Game.Types;
 
 [GenerateOneOf]
-internal partial class ActorAppearanceUnion : OneOfBase<BNpcBase, ENpcBase, Mount, Companion, Ornament, None>
+public partial class ActorAppearanceUnion : OneOfBase<BNpcBase, ENpcBase, Mount, Companion, Ornament, None>
 {
     public static implicit operator ActorAppearance(ActorAppearanceUnion union) => union.Match(
         bnpc => ActorAppearance.FromBNpc(bnpc),
