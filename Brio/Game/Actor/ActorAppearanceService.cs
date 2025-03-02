@@ -146,20 +146,79 @@ public class ActorAppearanceService : IDisposable
 
     public unsafe void TESTactorlook(IGameObject gameobj)
     {
+        var camera = _virtualCameraManager?.CurrentCamera;
+
+        if(camera is null)
+            return;
+
         if(_lookAtHandles.TryGetValue(gameobj.GameObjectId, out var obj))
         {
             obj.LookAtMode = LookMode.Position;
             obj.lookAtTargetType = LookAtTargetType.All;
-            obj.LookatType = LookAtTargetMode.Camera;
+            obj.LookatType = LookAtTargetMode.Position;
+            obj.Target = new()
+            {
+                Body = new LookAtType
+                {
+                    LookAtTarget = new LookAtTarget
+                    {
+                        LookMode = (uint)LookMode.Position,
+                        Position = camera.RealPosition
+                    }
+                },
+                Eyes = new LookAtType
+                {
+                    LookAtTarget = new LookAtTarget
+                    {
+                        LookMode = (uint)LookMode.Position,
+                        Position = camera.RealPosition
+                    }
+                },
+                Head = new LookAtType
+                {
+                    LookAtTarget = new LookAtTarget
+                    {
+                        LookMode = (uint)LookMode.Position,
+                        Position = camera.RealPosition
+                    }
+                }
+            };
         }
-        else
+
+        if(obj is null)
         {
             _lookAtHandles.Add(gameobj.GameObjectId, new LookAtDataHolder
             {
-                Target = new(),
+                Target = new()
+                {
+                    Body = new LookAtType
+                    {
+                        LookAtTarget = new LookAtTarget
+                        {
+                            LookMode = (uint)LookMode.Position,
+                            Position = camera.RealPosition
+                        }
+                    },
+                    Eyes = new LookAtType
+                    {
+                        LookAtTarget = new LookAtTarget
+                        {
+                            LookMode = (uint)LookMode.Position,
+                            Position = camera.RealPosition
+                        }
+                    },
+                    Head = new LookAtType
+                    {
+                        LookAtTarget = new LookAtTarget
+                        {
+                            LookMode = (uint)LookMode.Position,
+                            Position = camera.RealPosition
+                        }
+                    }
+                },
                 LookAtMode = LookMode.Position,
                 lookAtTargetType = LookAtTargetType.All,
-                LookatType = LookAtTargetMode.Camera
+                LookatType = LookAtTargetMode.Position
             });
         }
     }
