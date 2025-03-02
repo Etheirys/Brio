@@ -41,7 +41,7 @@ public class VirtualCameraManager : IDisposable
     private readonly Dictionary<int, CameraEntity> _createdCameras = [];
 
     private float _moveSpeed = DefaultMovementSpeed;
-    private float _mouseSensitivity = DefaultMouseSensitivity;
+    //private float _mouseSensitivity = DefaultMouseSensitivity;
 
     public (bool, int) CreateCamera(CameraType cameraType, bool selectCamera = true, bool targetNewInHierarch = true, VirtualCamera? virtualCamera = null)
     {

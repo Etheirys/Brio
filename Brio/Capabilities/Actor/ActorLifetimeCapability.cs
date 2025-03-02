@@ -49,11 +49,11 @@ public class ActorLifetimeCapability : ActorCapability
 
     public void SpawnNewProp(bool selectInHierarchy)
     {
-        if(_actorSpawnService.SpawnNewProp(out ICharacter? chara))
+        if(_actorSpawnService.SpawnNewProp(out ICharacter? character))
         {
             if(selectInHierarchy)
             {
-                _entityManager.SetSelectedEntity(chara);
+                _entityManager.SetSelectedEntity(character!);
             }
         }
     }

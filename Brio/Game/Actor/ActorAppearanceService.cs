@@ -43,8 +43,6 @@ public class ActorAppearanceService : IDisposable
     private unsafe delegate* unmanaged<DrawDataContainer*, byte, byte, void> _setFacewear;
     private unsafe delegate* unmanaged<nint, LookAtTarget*, uint, nint, void> _updateLookAt;
 
-    private uint _forceNpcHackCount = 0;
-
     public bool CanTint => _configurationService.Configuration.Appearance.EnableTinting;
 
     public unsafe ActorAppearanceService(GPoseService gPoseService, VirtualCameraManager virtualCameraManager, IObjectTable objectTable, ConfigurationService configurationService, ActorRedrawService redrawService, GlamourerService glamourerService, EntityManager entityManager, ISigScanner sigScanner, IGameInteropProvider hooks)
