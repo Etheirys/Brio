@@ -1,15 +1,12 @@
 ﻿using Brio.Entities;
 using Brio.Entities.Actor;
-using ImGuiNET;
-using System;
-using System.Numerics;
 using Brio.Entities.Core;
 using Brio.Game.Actor;
 using Brio.Game.Actor.Extensions;
 using Brio.Game.Core;
-using Dalamud.Game.ClientState.Objects.Types;
-using Dalamud.Interface;
 using Dalamud.Interface.Utility.Raii;
+using ImGuiNET;
+using System;
 
 namespace Brio.UI.Controls.Stateless;
 
@@ -20,7 +17,7 @@ public partial class ImBrio
         if(entityManager.SelectedEntity is null || entityManager.SelectedEntity is not ActorEntity selectedActor)
         {
             DrawSpawnActor(entityManager, callback);
-            
+
             return;
         }
 

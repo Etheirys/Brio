@@ -34,7 +34,7 @@ public class PosingCapability : ActorCharacterCapability
         get
         {
             if(Entity.TryGetCapability<SkeletonPosingCapability>(out var skeletonPosing))
-                if(skeletonPosing.PoseInfo.IsOveridden)
+                if(skeletonPosing.PoseInfo.IsOverridden)
                     return true;
 
             if(Entity.TryGetCapability<ModelPosingCapability>(out var modelPosing))

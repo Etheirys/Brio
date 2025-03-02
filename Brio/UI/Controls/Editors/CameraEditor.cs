@@ -116,7 +116,7 @@ public static class CameraEditor
                     float moveSpeed = camera.FreeCamValues.MovementSpeed;
                     if(ImBrio.SliderFloat("##MovementSpeed", ref moveSpeed, 0.005f, 0.3f, "%.4f", ImGuiSliderFlags.None, step: 0.001f))
                         camera.FreeCamValues.MovementSpeed = moveSpeed;
-                  
+
                     ImGui.SameLine();
 
                     if(ImBrio.FontIconButtonRight("resetMovementSpeed", FontAwesomeIcon.Undo, 1f, "Reset Movement Speed", moveSpeed != VirtualCameraManager.DefaultMovementSpeed))
@@ -131,7 +131,7 @@ public static class CameraEditor
                     float mouseSpeed = camera.FreeCamValues.MouseSensitivity;
                     if(ImBrio.SliderFloat("##MouseSensitivity", ref mouseSpeed, 0.001f, 0.2f, "%.4f", ImGuiSliderFlags.None, step: 0.001f))
                         camera.FreeCamValues.MouseSensitivity = mouseSpeed;
-                  
+
                     ImGui.SameLine();
 
                     if(ImBrio.FontIconButtonRight("resetMouseSensitivity", FontAwesomeIcon.Undo, 1f, "Reset MouseSensitivity", mouseSpeed != VirtualCameraManager.DefaultMouseSensitivity))
