@@ -4,6 +4,7 @@ using Brio.Core;
 using Brio.Entities.Actor;
 using Brio.Game.Actor.Appearance;
 using Brio.Game.Actor.Extensions;
+using Brio.Game.Actor.Interop;
 using Brio.Game.Types;
 using MessagePack;
 using System;
@@ -39,10 +40,19 @@ public class ActorFile
         var posingCapability = actorEntity.GetCapability<PosingCapability>();
         var modelCapability = actorEntity.GetCapability<ModelPosingCapability>();
 
+        ActorAppearanceExtended anaCharaFile = new() { Appearance = appearanceCapability.CurrentAppearance };
+        BrioHuman.ShaderParams* shaderParams = appearanceCapability.Character.GetShaderParams();
+
+        // append shader params to appearance if they exist
+        if(shaderParams is not null)
+        {
+            anaCharaFile.ShaderParams = *shaderParams;
+        }
+
         var actorFile = new ActorFile
         {
             Name = actorEntity.RawName,
-            AnamnesisCharaFile = new ActorAppearanceExtended { Appearance = appearanceCapability.CurrentAppearance, ShaderParams = *appearanceCapability.Character.GetShaderParams() },
+            AnamnesisCharaFile = anaCharaFile,
             PoseFile = posingCapability.GeneratePoseFile(),
             IsProp = actorEntity.IsProp,
             PropData = new PropData

@@ -337,5 +337,5 @@ public struct ActorAppearance()
 public struct ActorAppearanceExtended
 {
     public ActorAppearance Appearance;
-    public BrioHuman.ShaderParams ShaderParams;
+    public BrioHuman.ShaderParams? ShaderParams;
 }
