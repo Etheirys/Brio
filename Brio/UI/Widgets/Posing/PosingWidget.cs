@@ -14,7 +14,7 @@ public class PosingWidget(PosingCapability capability) : Widget<PosingCapability
 {
     public override string HeaderName => "Posing";
 
-    public override WidgetFlags Flags => capability.Actor.IsProp ? (WidgetFlags.DefaultOpen | WidgetFlags.DrawBody) : (WidgetFlags.DrawBody | WidgetFlags.HasAdvanced | WidgetFlags.DefaultOpen);
+    public override WidgetFlags Flags => Capability.Actor.IsProp ? (WidgetFlags.DefaultOpen | WidgetFlags.DrawBody) : (WidgetFlags.DrawBody | WidgetFlags.HasAdvanced | WidgetFlags.DefaultOpen);
 
     private readonly PosingTransformEditor _posingTransformEditor = new();
 
@@ -32,7 +32,7 @@ public class PosingWidget(PosingCapability capability) : Widget<PosingCapability
 
     private void DrawButtons()
     {
-        if(Capability.Actor.TryGetCapability<ActionTimelineCapability>(out var capability) == false)
+        if(Capability.Actor.TryGetCapability<ActionTimelineCapability>(out var timelineCapability) == false)
         {
             return;
         }
@@ -45,7 +45,7 @@ public class PosingWidget(PosingCapability capability) : Widget<PosingCapability
 
         ImGui.SameLine();
 
-        if(capability.Actor.IsProp == false)
+        if(Capability.Actor.IsProp == false)
         {
             if(ImBrio.FontIconButton("import", FontAwesomeIcon.FileDownload, "Import Pose"))
             {
@@ -83,14 +83,14 @@ public class PosingWidget(PosingCapability capability) : Widget<PosingCapability
 
         ImGui.SameLine();
 
-        if(capability.Actor.IsProp == false)
+        if(Capability.Actor.IsProp == false)
         {
-            if(ImBrio.ToggelFontIconButton("freezeActor", FontAwesomeIcon.Snowflake, new Vector2(0), capability.SpeedMultiplier == 0, hoverText: capability.SpeedMultiplierOverride == 0 ? "Un-Freeze Character" : "Freeze Character"))
+            if(ImBrio.ToggelFontIconButton("freezeActor", FontAwesomeIcon.Snowflake, new Vector2(0), timelineCapability.SpeedMultiplier == 0, hoverText: timelineCapability.SpeedMultiplierOverride == 0 ? "Un-Freeze Character" : "Freeze Character"))
             {
-                if(capability.SpeedMultiplierOverride == 0)
-                    capability.ResetOverallSpeedOverride();
+                if(timelineCapability.SpeedMultiplierOverride == 0)
+                    timelineCapability.ResetOverallSpeedOverride();
                 else
-                    capability.SetOverallSpeedOverride(0f);
+                    timelineCapability.SetOverallSpeedOverride(0f);
 
             }
             ImGui.SameLine();

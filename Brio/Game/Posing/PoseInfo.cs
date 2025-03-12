@@ -19,7 +19,7 @@ public class PoseInfo
         return _poses[id] = new BonePoseInfo(id, this);
     }
 
-    public bool IsOveridden => _poses.Any(x => x.Value.HasStacks);
+    public bool IsOverridden => _poses.Any(x => x.Value.HasStacks);
 
     public bool HasIKStacks => _poses.Any(x => x.Value.Stacks.Any(s => s.IKInfo.Enabled));
 
@@ -144,7 +144,7 @@ public class BonePoseInfo(BonePoseInfoId id, PoseInfo parent)
             MirrorMode = MirrorMode
         };
 
-        clone._stacks.AddRange(_stacks.ToList());
+        clone._stacks.AddRange([.. _stacks]);
 
         return clone;
     }

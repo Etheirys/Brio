@@ -34,7 +34,7 @@ public class PosingCapability : ActorCharacterCapability
         get
         {
             if(Entity.TryGetCapability<SkeletonPosingCapability>(out var skeletonPosing))
-                if(skeletonPosing.PoseInfo.IsOveridden)
+                if(skeletonPosing.PoseInfo.IsOverridden)
                     return true;
 
             if(Entity.TryGetCapability<ModelPosingCapability>(out var modelPosing))
@@ -218,16 +218,19 @@ public class PosingCapability : ActorCharacterCapability
             options ??= _posingService.DefaultImporterOptions;
         }
 
-        applyModelTransform |= options.ApplyModelTransform;
-
-        if(transformComponents.HasValue)
+        if(asScene == false)
         {
-            options.TransformComponents = transformComponents.Value;
-        }
+            applyModelTransform |= options.ApplyModelTransform;
 
-        if(applyModelTransformOverride.HasValue)
-        {
-            applyModelTransform = applyModelTransformOverride.Value;
+            if(transformComponents.HasValue)
+            {
+                options.TransformComponents = transformComponents.Value;
+            }
+
+            if(applyModelTransformOverride.HasValue)
+            {
+                applyModelTransform = applyModelTransformOverride.Value;
+            }
         }
 
         if(applyModelTransform && reset)

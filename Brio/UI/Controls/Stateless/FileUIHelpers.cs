@@ -298,7 +298,7 @@ public class FileUIHelpers
                 }
                 else if(r is AnamnesisCharaFile appearanceFile)
                 {
-                    if (options.HasFlag(AppearanceImportOptions.Shaders))
+                    if(options.HasFlag(AppearanceImportOptions.Shaders))
                     {
                         BrioHuman.ShaderParams shaderParams = appearanceFile;
                         BrioUtilities.ImportShadersFromFile(ref capability._modelShaderOverride, shaderParams);

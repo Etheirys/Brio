@@ -42,13 +42,13 @@ public class InfoWindow : Window
                     Brio is currently in alpha, as such, there may be bugs,
                     if you find any, please report them!
 
-                    A Big Thank you to (Sufferhymn), (Night Song), (Alvar Valo), (Yasumi), (YikesXD), 
+                    A Big Thank you to (Sufferhymn), (Night Song), (Alvar Valo), (@Conna),(Yasumi), (YikesXD), 
                     (Selitha), (AquilaHK), (LotusEcho), & (Yume) for their support on Kofi!
 
-                    Also, Thank you, to: (@Ashadow700), (@Bronya-Rand) (@MKhayle), (@ashna_ff14), (@Yuki-Codes), 
-                    (@danma3x), (@snaeling), (@WorstAquaPlayer), (@Caraxi), (@Enth) & (@gris-fuego);
-                    For their contributions to Brio!
-
+                    Also, Thank you, to: (@AsgardXIV), (@Ashadow700), (@ashna_ff14), (@Bronya-Rand), 
+                    (@Caraxi), (@Cazzar), (@danma3x), (@Enth), (@gris-fuego), 
+                    (@HoloWise), (@MKhayle), (@WorstAquaPlayer), (@snaeling), (@Yuki-Codes);
+                    
                     Maintained & Developed by: Minmoose.
                     Originally Developed by: Asgard.
                     

@@ -4,7 +4,6 @@ using Brio.Core;
 using Brio.Entities;
 using Brio.Game.Camera;
 using Brio.Game.GPose;
-using Brio.Game.Input;
 using Brio.Game.Posing;
 using Brio.Input;
 using Brio.UI.Controls.Editors;

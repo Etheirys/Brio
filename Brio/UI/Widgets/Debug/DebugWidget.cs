@@ -75,8 +75,8 @@ public class DebugWidget(DebugCapability capability, IClientState _clientState) 
 
         ImGui.Text($"MapId - {_clientState.MapId}");
         ImGui.Text($"TerritoryType - {_clientState.TerritoryType}");
-        ImGui.Text($"CurrentWorld - {_clientState.LocalPlayer.CurrentWorld.Value.Name}");
-        ImGui.Text($"HomeWorld - {_clientState.LocalPlayer.HomeWorld.Value.Name}");
+        ImGui.Text($"CurrentWorld - {_clientState.LocalPlayer?.CurrentWorld.Value.Name}");
+        ImGui.Text($"HomeWorld - {_clientState.LocalPlayer?.HomeWorld.Value.Name}");
 
         ImGui.Text(io.Framerate.ToString("F2") + " FPS");
     }

@@ -5,7 +5,7 @@ namespace Brio.Config;
 public class Configuration : IPluginConfiguration
 {
     public const int CurrentVersion = 3;
-    public const int CurrentPopupKey = 14;
+    public const int CurrentPopupKey = 15;
 
     public int Version { get; set; } = CurrentVersion;
 

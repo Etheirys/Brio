@@ -11,7 +11,7 @@ public class ActionTimelineWidget(ActionTimelineCapability capability, EntityMan
 {
     public override string HeaderName => "Animation Control";
 
-    public override WidgetFlags Flags => capability.Actor.IsProp ? WidgetFlags.None : WidgetFlags.DrawBody | WidgetFlags.HasAdvanced;
+    public override WidgetFlags Flags => Capability.Actor.IsProp ? WidgetFlags.None : WidgetFlags.DrawBody | WidgetFlags.HasAdvanced;
 
     private readonly ActionTimelineEditor _editor = new(null!, null!, entityManager, physicsService, configService);
 

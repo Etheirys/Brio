@@ -55,7 +55,7 @@ public class ProjectSystem : IDisposable
         _sceneService = sceneService;
 
         Directory.CreateDirectory(ProjectSaveFolder);
-        
+
         LoadProjectData();
 
         gPoseService.OnGPoseStateChange += GPoseService_OnGPoseStateChange;
@@ -74,7 +74,7 @@ public class ProjectSystem : IDisposable
 
             byte[] bytes = MessagePackSerializer.Serialize(scene);
             File.WriteAllBytes(path, bytes);
-         
+
             BrioProjects.Projects.Add(new Project { Name = projectName, Path = path, Description = Description, Created = DateTime.UtcNow });
 
             SaveProjectData();

@@ -1,5 +1,4 @@
 ﻿using Brio.Capabilities.Camera;
-using Brio.Capabilities.Core;
 using Brio.Entities;
 using Brio.Entities.Camera;
 using Brio.Entities.Core;
