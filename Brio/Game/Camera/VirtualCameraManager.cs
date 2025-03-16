@@ -318,7 +318,7 @@ public class VirtualCameraManager : IDisposable
         var upVector = Vector3.Cross(lookDirection, rightVector);
 
         // Create the view matrix
-        return new Matrix4x4
+        var matrix = new Matrix4x4
         (
             rightVector.X, upVector.X, lookDirection.X, 0.0f,
             rightVector.Y, upVector.Y, lookDirection.Y, 0.0f,
@@ -329,6 +329,10 @@ public class VirtualCameraManager : IDisposable
             (-CurrentCamera.Position.X * lookDirection.X) - (CurrentCamera.Position.Y * lookDirection.Y) - (CurrentCamera.Position.Z * lookDirection.Z),
             1f
         );
+
+        // apply the Z axis rotation
+        var viewMatrix = Matrix4x4.Transform(matrix, Quaternion.CreateFromAxisAngle(Vector3.UnitZ, CurrentCamera.Rotation.Z));
+        return viewMatrix;
     }
 
     private void OnGPoseStateChange(bool newState)
