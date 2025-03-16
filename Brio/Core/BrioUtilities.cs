@@ -20,4 +20,14 @@ public static class BrioUtilities
         modelShaderOverride.RightEyeColor = shaderParams.RightEyeColor;
         modelShaderOverride.FeatureColor = shaderParams.FeatureColor;
     }
+
+    public static float DegreesToRadians(float degrees)
+    {
+        return degrees * (float)(System.Math.PI / 180);
+    }
+
+    public static float RadiansToDegrees(float radians)
+    {
+        return radians * (float)(180 / System.Math.PI);
+    }
 }

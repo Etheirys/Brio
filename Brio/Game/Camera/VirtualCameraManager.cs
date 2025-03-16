@@ -270,10 +270,45 @@ public class VirtualCameraManager : IDisposable
             forwardBackward += 1;
 
         // Check for lateral movement
+        // Invert logic around the 90 degree pivot points
+        // (Similar to XIV's Default Camera)
         if(keyboardFrame->IsKeyDown(VirtualKey.A, true))
-            leftRight -= 1;
+        {
+            if(CurrentCamera.IsFreeCamera)
+            {
+                if(CurrentCamera.PivotRotation < BrioUtilities.DegreesToRadians(-90) || CurrentCamera.PivotRotation > BrioUtilities.DegreesToRadians(90))
+                {
+                    leftRight += 1;
+                }
+                else
+                {
+                    leftRight -= 1;
+                }
+            }
+            else
+            {
+                leftRight += 1;
+            }
+        }
+
         if(keyboardFrame->IsKeyDown(VirtualKey.D, true))
-            leftRight += 1;
+        {
+            if(CurrentCamera.IsFreeCamera)
+            {
+                if(CurrentCamera.PivotRotation < BrioUtilities.DegreesToRadians(-90) || CurrentCamera.PivotRotation > BrioUtilities.DegreesToRadians(90))
+                {
+                    leftRight -= 1;
+                }
+                else
+                {
+                    leftRight += 1;
+                }
+            }
+            else
+            {
+                leftRight -= 1;
+            }
+        }
 
         // Handle vertical movement (up and down)
         if(keyboardFrame->IsKeyDown(VirtualKey.E, true) || keyboardFrame->IsKeyDown(VirtualKey.SPACE, true))
@@ -331,7 +366,7 @@ public class VirtualCameraManager : IDisposable
         );
 
         // apply the Z axis rotation
-        var viewMatrix = Matrix4x4.Transform(matrix, Quaternion.CreateFromAxisAngle(Vector3.UnitZ, CurrentCamera.Rotation.Z));
+        var viewMatrix = Matrix4x4.Transform(matrix, Quaternion.CreateFromAxisAngle(Vector3.UnitZ, CurrentCamera.PivotRotation));
         return viewMatrix;
     }
 
