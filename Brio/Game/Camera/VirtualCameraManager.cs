@@ -37,7 +37,7 @@ public class VirtualCameraManager : IDisposable
 
     private readonly Vector3 Up = new(0f, 1f, 0f);
 
-    int _cameraId = 1;
+    private int _nextCameraId = 1;
     private readonly Dictionary<int, CameraEntity> _createdCameras = [];
 
     private float _moveSpeed = DefaultMovementSpeed;
@@ -49,9 +49,9 @@ public class VirtualCameraManager : IDisposable
         {
             CurrentCamera?.DeactivateCamera();
 
-            _cameraId++;
+            int cameraId = _nextCameraId + 1;
 
-            var camEnt = ActivatorUtilities.CreateInstance<CameraEntity>(_serviceProvider, _cameraId, cameraType);
+            var camEnt = ActivatorUtilities.CreateInstance<CameraEntity>(_serviceProvider, cameraId, cameraType);
             _entityManager.AttachEntity(camEnt, ent);
 
             if(virtualCamera is null)
@@ -65,13 +65,13 @@ public class VirtualCameraManager : IDisposable
                         camEnt.VirtualCamera.ActivateCamera();
                         camEnt.VirtualCamera.ToFreeCam();
                         camEnt.VirtualCamera.DeactivateCamera();
-                        _createdCameras.Add(_cameraId, camEnt);
+                        _createdCameras.Add(cameraId, camEnt);
                         break;
                     case CameraType.Brio:
                         camEnt.VirtualCamera.IsFreeCamera = false;
                         camEnt.VirtualCamera.ActivateCamera();
                         camEnt.VirtualCamera.DeactivateCamera();
-                        _createdCameras.Add(_cameraId, camEnt);
+                        _createdCameras.Add(cameraId, camEnt);
                         break;
                     //case CameraType.Cutscene:
                     //    unimplemented
@@ -99,7 +99,8 @@ public class VirtualCameraManager : IDisposable
             else if(selectCamera)
                 SelectCamera(camEnt.VirtualCamera);
 
-            return (true, _cameraId);
+            _nextCameraId = cameraId;
+            return (true, cameraId);
         }
         return (false, -1);
     }
@@ -114,10 +115,10 @@ public class VirtualCameraManager : IDisposable
             {
                 CurrentCamera?.DeactivateCamera();
 
-                _cameraId++;
+                int newCameraId = _nextCameraId + 1;
 
                 var oldCam = oldCamEnt.VirtualCamera;
-                var newCam = ActivatorUtilities.CreateInstance<CameraEntity>(_serviceProvider, _cameraId, oldCamEnt.CameraType);
+                var newCam = ActivatorUtilities.CreateInstance<CameraEntity>(_serviceProvider, newCameraId, oldCamEnt.CameraType);
                 _entityManager.AttachEntity(newCam, ent);
 
                 oldCam.CopyPropertiesTo(newCam.VirtualCamera);
@@ -135,7 +136,7 @@ public class VirtualCameraManager : IDisposable
                     newCam.VirtualCamera.Pan = oldCam.Pan;
                 }
 
-                _createdCameras.Add(_cameraId, newCam);
+                _createdCameras.Add(newCameraId, newCam);
                 CurrentCamera?.ActivateCamera();
                 _entityManager.SetSelectedEntity(newCam);
 
@@ -151,7 +152,8 @@ public class VirtualCameraManager : IDisposable
                     newCam.VirtualCamera.DelimitCamera = oldCam.DelimitCamera;
                 }
 
-                return (true, _cameraId);
+                _nextCameraId = newCameraId;
+                return (true, newCameraId);
             }
             Brio.Log.Error($"Camera with ID {cameraID} not found");
             return (false, -1);
@@ -165,7 +167,7 @@ public class VirtualCameraManager : IDisposable
         if(cameraID == 0)
             return false;
 
-        Brio.Log.Verbose("Destroying Brio camera " + _cameraId);
+        Brio.Log.Verbose("Destroying Brio camera " + cameraID);
 
         if(_entityManager.TryGetEntity("cameras", out var ent))
         {
@@ -178,6 +180,10 @@ public class VirtualCameraManager : IDisposable
                 }
 
                 ent.RemoveChild(camEnt);
+
+                // destroy the camera from the dictionary
+                // prevents cameras using old camera positions/rotations
+                _createdCameras.Remove(cameraID);
 
                 return true;
             }
@@ -196,12 +202,12 @@ public class VirtualCameraManager : IDisposable
 
     public void DestroyAll()
     {
-        _cameraId = 0;
         CurrentCamera = null;
         foreach(var item in _createdCameras.Values)
         {
             DestroyCamera(item.CameraID);
         }
+        _nextCameraId = 1;
     }
 
     public void SelectInHierarchy(CameraEntity selectedEntity)
