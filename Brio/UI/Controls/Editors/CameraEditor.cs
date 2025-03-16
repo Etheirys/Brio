@@ -106,6 +106,16 @@ public static class CameraEditor
                         camera.FoV = fov;
                 }
 
+                {
+                    ImBrio.Icon(FontAwesomeIcon.CameraRotate);
+
+                    ImGui.SameLine();
+
+                    float pivot = camera.PivotRotation;
+                    if(ImBrio.SliderAngle("##PivotRotation", ref pivot, -180, 180, "%.2f"))
+                        camera.PivotRotation = pivot;
+                }
+
                 ImGui.Separator();
 
                 {
