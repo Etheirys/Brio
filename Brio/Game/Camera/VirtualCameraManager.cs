@@ -311,10 +311,23 @@ public class VirtualCameraManager : IDisposable
         }
 
         // Handle vertical movement (up and down)
+        // Invert logic around the 90 degree pivot points (like lateral movement)
         if(keyboardFrame->IsKeyDown(VirtualKey.E, true) || keyboardFrame->IsKeyDown(VirtualKey.SPACE, true))
-            upDown += 1;
+            if(CurrentCamera.IsFreeCamera)
+                if(CurrentCamera.PivotRotation < BrioUtilities.DegreesToRadians(-90) || CurrentCamera.PivotRotation > BrioUtilities.DegreesToRadians(90))
+                    upDown += 1;
+                else
+                    upDown -= 1;
+            else
+                upDown += 1;
         else if(keyboardFrame->IsKeyDown(VirtualKey.Q, true) || keyboardFrame->IsKeyDown(VirtualKey.CONTROL, true))
-            upDown += -1;
+            if(CurrentCamera.IsFreeCamera)
+                if(CurrentCamera.PivotRotation < BrioUtilities.DegreesToRadians(-90) || CurrentCamera.PivotRotation > BrioUtilities.DegreesToRadians(90))
+                    upDown -= 1;
+                else
+                    upDown += 1;
+            else
+                upDown -= 1;
 
         // Handle movement speed
         if(keyboardFrame->IsKeyDown(VirtualKey.SHIFT, true))
