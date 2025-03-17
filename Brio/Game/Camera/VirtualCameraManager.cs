@@ -273,42 +273,22 @@ public class VirtualCameraManager : IDisposable
         // Invert logic around the 90 degree pivot points
         // (Similar to XIV's Default Camera)
         if(keyboardFrame->IsKeyDown(VirtualKey.A, true))
-        {
             if(CurrentCamera.IsFreeCamera)
-            {
                 if(CurrentCamera.PivotRotation < BrioUtilities.DegreesToRadians(-90) || CurrentCamera.PivotRotation > BrioUtilities.DegreesToRadians(90))
-                {
                     leftRight += 1;
-                }
                 else
-                {
                     leftRight -= 1;
-                }
-            }
             else
-            {
                 leftRight += 1;
-            }
-        }
 
         if(keyboardFrame->IsKeyDown(VirtualKey.D, true))
-        {
             if(CurrentCamera.IsFreeCamera)
-            {
                 if(CurrentCamera.PivotRotation < BrioUtilities.DegreesToRadians(-90) || CurrentCamera.PivotRotation > BrioUtilities.DegreesToRadians(90))
-                {
                     leftRight -= 1;
-                }
                 else
-                {
                     leftRight += 1;
-                }
-            }
             else
-            {
                 leftRight -= 1;
-            }
-        }
 
         // Handle vertical movement (up and down)
         // Invert logic around the 90 degree pivot points (like lateral movement)
