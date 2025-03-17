@@ -92,7 +92,7 @@ public static class CameraEditor
 
                     ImGui.SetNextItemWidth(width);
                     var rotation = camera.Rotation;
-                    if(ImBrio.DragFloat2V3("Rotation", ref rotation, -360, 360, "%.0f", true, ImGuiSliderFlags.AlwaysClamp))
+                    if(ImBrio.DragFloat2V3("Rotation", ref rotation, -360, 360, "%.3f", true, ImGuiSliderFlags.AlwaysClamp))
                         camera.Rotation = rotation;
                 }
 
