@@ -212,11 +212,11 @@ public class ActorAppearanceCapability : ActorCharacterCapability
         var currentAppearance = CurrentAppearance;
         BrioHuman.ShaderParams* shaders = Character.GetShaderParams();
 
-        ActorAppearanceExtended actor = new()
+        ActorAppearanceExtended actor = new() { Appearance = currentAppearance };
+        if(shaders != null)
         {
-            Appearance = currentAppearance,
-            ShaderParams = *shaders
-        };
+            actor.ShaderParams = *shaders;
+        }
 
         AnamnesisCharaFile appearance = actor;
         ResourceProvider.Instance.SaveFileDocument(file, appearance);
