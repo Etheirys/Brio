@@ -114,6 +114,11 @@ public static class CameraEditor
                     float pivot = camera.PivotRotation;
                     if(ImBrio.SliderAngle("##PivotRotation", ref pivot, -180, 180, "%.2f"))
                         camera.PivotRotation = pivot;
+                   
+                    ImGui.SameLine();
+
+                    if(ImBrio.FontIconButtonRight("resetPivotRotation", FontAwesomeIcon.Undo, 1f, "Reset Pivot", camera.PivotRotation != 0))
+                        camera.PivotRotation = 0;
                 }
 
                 ImGui.Separator();
