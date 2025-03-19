@@ -1,4 +1,5 @@
-﻿using Brio.Input;
+﻿using Brio.Core;
+using Brio.Input;
 using Brio.UI.Controls.Core;
 using Dalamud.Interface;
 using Dalamud.Interface.Utility.Raii;
@@ -225,6 +226,36 @@ public static partial class ImBrio
         }
 
         return (active, changed);
+    }
+
+    // Allows Vector3 to be used when Z is not needed in the UI
+    public static bool DragFloat2V3(string label, ref Vector3 value, float min, float max, string format, bool degrees = false, ImGuiSliderFlags flags = ImGuiSliderFlags.None, float step = 1.0f)
+    {
+        Vector2 vector2;
+        bool changed = false;
+
+        if(degrees)
+        {
+            // Convert to degrees
+            vector2 = new Vector2(BrioUtilities.RadiansToDegrees(-value.X), BrioUtilities.RadiansToDegrees(-value.Y));
+            changed = ImGui.DragFloat2(label, ref vector2, step, min, max, format, flags);
+            if(changed)
+            {
+                value.X = BrioUtilities.DegreesToRadians(-vector2.X);
+                value.Y = BrioUtilities.DegreesToRadians(-vector2.Y);
+            }
+        }
+        else
+        {
+            vector2 = new Vector2(value.X, value.Y);
+            changed = ImGui.DragFloat2(label, ref vector2, step, min, max, format, flags);
+            if(changed)
+            {
+                value.X = vector2.X;
+                value.Y = vector2.Y;
+            }
+        }
+        return changed;
     }
 }
 

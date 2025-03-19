@@ -92,7 +92,7 @@ public static class CameraEditor
 
                     ImGui.SetNextItemWidth(width);
                     var rotation = camera.Rotation;
-                    if(ImGui.DragFloat3("Rotation", ref rotation, 0.001f))
+                    if(ImBrio.DragFloat2V3("Pan", ref rotation, -360, 360, "%.3f", true, ImGuiSliderFlags.AlwaysClamp))
                         camera.Rotation = rotation;
                 }
 
@@ -104,6 +104,21 @@ public static class CameraEditor
                     var fov = camera.FoV;
                     if(ImBrio.SliderAngle("##FoV", ref fov, -44, 120, "%.2f", ImGuiSliderFlags.AlwaysClamp))
                         camera.FoV = fov;
+                }
+
+                {
+                    ImBrio.Icon(FontAwesomeIcon.CameraRotate);
+
+                    ImGui.SameLine();
+
+                    float pivot = camera.PivotRotation;
+                    if(ImBrio.SliderAngle("##PivotRotation", ref pivot, -180, 180, "%.2f"))
+                        camera.PivotRotation = pivot;
+                   
+                    ImGui.SameLine();
+
+                    if(ImBrio.FontIconButtonRight("resetPivotRotation", FontAwesomeIcon.Undo, 1f, "Reset Pivot", camera.PivotRotation != 0))
+                        camera.PivotRotation = 0;
                 }
 
                 ImGui.Separator();
