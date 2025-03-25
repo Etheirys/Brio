@@ -1,4 +1,4 @@
-﻿<Project Sdk="Dalamud.NET.SDK/12.0.1">
+﻿<Project Sdk="Dalamud.NET.SDK/12.0.2">
 
 	<PropertyGroup>
 		<TargetFramework>net9.0-windows</TargetFramework>
