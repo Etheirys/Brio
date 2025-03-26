@@ -10,7 +10,7 @@ public struct BrioHuman
     [FieldOffset(0x0)]
     public Human Human;
 
-    [FieldOffset(0xBE0)]
+    [FieldOffset(0xBF0)]
     public unsafe ShaderManager* Shaders;
 
     [StructLayout(LayoutKind.Explicit)]
