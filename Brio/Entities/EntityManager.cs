@@ -55,6 +55,7 @@ public unsafe partial class EntityManager(IServiceProvider serviceProvider, Conf
         AttachEntity(cameraContainerEntity, _worldEntity);
 
         var defaultCameraEntity = ActivatorUtilities.CreateInstance<CameraEntity>(_serviceProvider, 0, CameraType.Default);
+        defaultCameraEntity.VirtualCamera.SaveCameraState();
         AttachEntity(defaultCameraEntity, cameraContainerEntity);
 
         RefreshDebugEntity();
