@@ -73,9 +73,12 @@ public class VirtualCameraManager : IDisposable
                         camEnt.VirtualCamera.DeactivateCamera();
                         _createdCameras.Add(cameraId, camEnt);
                         break;
-                    //case CameraType.Cutscene:
-                    //    unimplemented
-                    //    break;
+                    case CameraType.Cutscene:
+                        camEnt.VirtualCamera.IsCutsceneCamera = true;
+                        camEnt.VirtualCamera.ActivateCamera();
+                        camEnt.VirtualCamera.DeactivateCamera();
+                        _createdCameras.Add(cameraId, camEnt);
+                        break;
                     default:
                         Brio.Log.Error($"Unknown camera type: {cameraType}");
                         break;
