@@ -124,11 +124,11 @@ public class ActorAppearanceService : IDisposable
             return;
 
         if(lookAtDataHolder.lookAtTargetType.HasFlag(LookAtTargetType.Eyes))
-            _updateLookAt(targetActor.Address + 0xD10, &lookAt.Eyes.LookAtTarget, (uint)LookEditType.Eyes, 0);
+            _updateLookAt(targetActor.Address + 0xD00, &lookAt.Eyes.LookAtTarget, (uint)LookEditType.Eyes, 0);
         if(lookAtDataHolder.lookAtTargetType.HasFlag(LookAtTargetType.Body))
-            _updateLookAt(targetActor.Address + 0xD10, &lookAt.Body.LookAtTarget, (uint)LookEditType.Body, 0);
+            _updateLookAt(targetActor.Address + 0xD00, &lookAt.Body.LookAtTarget, (uint)LookEditType.Body, 0);
         if(lookAtDataHolder.lookAtTargetType.HasFlag(LookAtTargetType.Head))
-            _updateLookAt(targetActor.Address + 0xD10, &lookAt.Head.LookAtTarget, (uint)LookEditType.Head, 0);
+            _updateLookAt(targetActor.Address + 0xD00, &lookAt.Head.LookAtTarget, (uint)LookEditType.Head, 0);
     }
 
     public unsafe void TESTactorlookClear(IGameObject gameobj)
@@ -152,76 +152,44 @@ public class ActorAppearanceService : IDisposable
         if(camera is null)
             return;
 
-        if(_lookAtHandles.TryGetValue(gameobj.GameObjectId, out var obj))
-        {
-            obj.LookAtMode = LookMode.Position;
-            obj.lookAtTargetType = LookAtTargetType.All;
-            obj.LookatType = LookAtTargetMode.Position;
-            obj.Target = new()
-            {
-                Body = new LookAtType
-                {
-                    LookAtTarget = new LookAtTarget
-                    {
-                        LookMode = (uint)LookMode.Position,
-                        Position = camera.RealPosition
-                    }
-                },
-                Eyes = new LookAtType
-                {
-                    LookAtTarget = new LookAtTarget
-                    {
-                        LookMode = (uint)LookMode.Position,
-                        Position = camera.RealPosition
-                    }
-                },
-                Head = new LookAtType
-                {
-                    LookAtTarget = new LookAtTarget
-                    {
-                        LookMode = (uint)LookMode.Position,
-                        Position = camera.RealPosition
-                    }
-                }
-            };
-        }
+        _lookAtHandles.TryGetValue(gameobj.GameObjectId, out LookAtDataHolder? obj);
 
         if(obj is null)
         {
-            _lookAtHandles.Add(gameobj.GameObjectId, new LookAtDataHolder
-            {
-                Target = new()
-                {
-                    Body = new LookAtType
-                    {
-                        LookAtTarget = new LookAtTarget
-                        {
-                            LookMode = (uint)LookMode.Position,
-                            Position = camera.RealPosition
-                        }
-                    },
-                    Eyes = new LookAtType
-                    {
-                        LookAtTarget = new LookAtTarget
-                        {
-                            LookMode = (uint)LookMode.Position,
-                            Position = camera.RealPosition
-                        }
-                    },
-                    Head = new LookAtType
-                    {
-                        LookAtTarget = new LookAtTarget
-                        {
-                            LookMode = (uint)LookMode.Position,
-                            Position = camera.RealPosition
-                        }
-                    }
-                },
-                LookAtMode = LookMode.Position,
-                lookAtTargetType = LookAtTargetType.All,
-                LookatType = LookAtTargetMode.Position
-            });
+            obj = new LookAtDataHolder();
+            _lookAtHandles.Add(gameobj.GameObjectId, obj);
         }
+
+        obj.LookAtMode = LookMode.Position;
+        obj.lookAtTargetType = LookAtTargetType.All;
+        obj.LookatType = LookAtTargetMode.Camera;
+        obj.Target = new()
+        {
+            Body = new LookAtType
+            {
+                LookAtTarget = new LookAtTarget
+                {
+                    LookMode = (uint)LookMode.Position,
+                    Position = camera.RealPosition
+                }
+            },
+            Eyes = new LookAtType
+            {
+                LookAtTarget = new LookAtTarget
+                {
+                    LookMode = (uint)LookMode.Position,
+                    Position = camera.RealPosition
+                }
+            },
+            Head = new LookAtType
+            {
+                LookAtTarget = new LookAtTarget
+                {
+                    LookMode = (uint)LookMode.Position,
+                    Position = camera.RealPosition
+                }
+            },
+        };
     }
     public void RemoveFromLook(IGameObject gameobj)
     {
