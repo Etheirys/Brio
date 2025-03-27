@@ -87,7 +87,8 @@ public class ActorAppearanceService : IDisposable
     {
         if(_gPoseService.IsGPosing)
         {
-            var obj = _objectTable.CreateObjectReference((a1 - 0xD00));
+            var lookAtContainer = (ContainerInterface*)a1;
+            var obj = _objectTable.CreateObjectReference((nint)lookAtContainer->OwnerObject);
             if(obj is not null && obj.IsValid() && obj.IsGPose() && _lookAtHandles.ContainsKey(obj.GameObjectId))
             {
                 actorLook(obj, _lookAtHandles[obj.GameObjectId]);
