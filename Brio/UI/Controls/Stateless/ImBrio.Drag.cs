@@ -193,7 +193,7 @@ public static partial class ImBrio
         {
             ImGui.SetNextItemWidth((ImBrio.GetRemainingWidth() - buttonWidth) + ImGui.GetStyle().ItemSpacing.X);
         }
-
+        
         changed |= ImGui.DragFloat($"##{label}_drag", ref value, step / 10.0f);
         active |= ImGui.IsItemActive();
 
@@ -213,6 +213,116 @@ public static partial class ImBrio
         if(ImGui.ArrowButton($"##{label}_increase", ImGuiDir.Right))
         {
             value += step;
+            changed = true;
+        }
+
+        if(ImGui.IsItemHovered())
+            ImGui.SetTooltip($"Increase {tooltip}");
+
+        if(hasLabel)
+        {
+            ImGui.SameLine();
+            ImGui.Text(label);
+        }
+
+        return (active, changed);
+    }
+
+    public static (bool anyActive, bool didChange) DragFloat(string label, ref float value, float min, float max, float step = 0.1f, string tooltip = "", int width = 0)
+    {
+        bool changed = false;
+        bool active = false;
+
+        if(InputService.IsKeyBindDown(KeyBindEvents.Interface_IncrementSmallModifier))
+            step /= 10;
+
+        if(InputService.IsKeyBindDown(KeyBindEvents.Interface_IncrementLargeModifier))
+            step *= 10;
+
+        float buttonWidth = 32;
+        ImGui.SetNextItemWidth(buttonWidth);
+        if(ImGui.ArrowButton($"##{label}_decrease", ImGuiDir.Left))
+        {
+            if (value - step <= min)
+            {
+                value = min;
+            }
+            else
+            {
+                value -= step;
+            }
+            changed = true;
+        }
+
+        if(ImGui.IsItemHovered())
+            ImGui.SetTooltip($"Decrease {tooltip}");
+
+        ImGui.SameLine();
+
+        bool hasLabel = !label.StartsWith("##");
+
+        if(hasLabel)
+        {
+            ImGui.SetNextItemWidth((ImGui.GetWindowWidth() * 0.65f) - (buttonWidth * 2) - ImGui.GetStyle().CellPadding.X);
+        }
+        else
+        {
+            ImGui.SetNextItemWidth((ImBrio.GetRemainingWidth() - buttonWidth) + ImGui.GetStyle().ItemSpacing.X);
+        }
+
+        if(width > 0)
+        {
+            ImGui.SetNextItemWidth(width);
+        }
+        
+        if(ImGui.DragFloat($"##{label}_drag", ref value, step / 10.0f, min, max))
+        {
+            if(value < min)
+            {
+                value = min;
+            }
+            else if(value > max)
+            {
+                value = max;
+            }
+            changed |= true;
+        }
+        active |= ImGui.IsItemActive();
+
+        if(ImGui.IsItemHovered())
+        {
+            ImGui.SetTooltip($"{tooltip}");
+            float mouseWheel = ImGui.GetIO().MouseWheel / 10;
+            if(mouseWheel != 0)
+            {
+                if(value + (mouseWheel * step) <= min)
+                {
+                    value = min;
+                }
+                else if(value + (mouseWheel * step) >= max)
+                {
+                    value = max;
+                }
+                else
+                {
+                    value += mouseWheel * step;
+                }
+                changed = true;
+            }
+        }
+
+        ImGui.SameLine();
+        ImGui.SetNextItemWidth(buttonWidth);
+        if(ImGui.ArrowButton($"##{label}_increase", ImGuiDir.Right))
+        {
+            if(value + step >= max)
+            {
+                value = max;
+            }
+            else
+            {
+                value += step;
+            }
             changed = true;
         }
 

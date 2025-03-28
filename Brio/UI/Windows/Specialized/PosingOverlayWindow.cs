@@ -364,6 +364,8 @@ public class PosingOverlayWindow : Window, IDisposable
         Transform currentTransform = Transform.Identity;
         Matrix4x4 worldViewMatrix = viewMatrix;
 
+        Game.Posing.Skeletons.Bone? selectedBone = null;
+
         var shouldDraw = selected.Match(
             boneSelect =>
             {
@@ -382,6 +384,7 @@ public class PosingOverlayWindow : Window, IDisposable
                 if(charaBase == null)
                     return false;
 
+                selectedBone = bone;
                 var modelMatrix = new Transform()
                 {
                     Position = (Vector3)charaBase->CharacterBase.DrawObject.Object.Position,
@@ -420,8 +423,9 @@ public class PosingOverlayWindow : Window, IDisposable
 
         if(ImGuizmoExtensions.MouseWheelManipulate(ref matrix))
         {
-            newTransform = matrix.ToTransform();
-            _trackingTransform = newTransform;
+            if(!posing.ModelPosing.Freeze && !(selectedBone != null && selectedBone.Freeze))
+                newTransform = matrix.ToTransform();
+                _trackingTransform = newTransform;
         }
 
         if(ImGuizmo.Manipulate(
@@ -432,8 +436,9 @@ public class PosingOverlayWindow : Window, IDisposable
             ref matrix.M11
         ))
         {
-            newTransform = matrix.ToTransform();
-            _trackingTransform = newTransform;
+            if(!posing.ModelPosing.Freeze && !(selectedBone != null && selectedBone.Freeze))
+                newTransform = matrix.ToTransform();
+                _trackingTransform = newTransform;
         }
 
         if(_trackingTransform.HasValue && !ImGuizmo.IsUsing())

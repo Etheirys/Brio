@@ -12,6 +12,9 @@ public class ModelPosingCapability : ActorCharacterCapability
 {
     public bool HasOverride => _transformOverride.HasValue;
 
+    public float TransformOffset = 0.01f;
+    public bool Freeze = false;
+
     public unsafe Transform Transform
     {
         get

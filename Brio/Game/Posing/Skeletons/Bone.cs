@@ -35,6 +35,9 @@ public class Bone(int index, Skeleton skeleton, PartialSkeleton partial)
     public bool IsPartialRoot;
     public bool IsSkeletonRoot;
 
+    public float BoneAdjustmentOffset = 0.01f;
+    public bool Freeze = false;
+
     public List<Bone> Children = [];
     public List<Skeleton> Attachments = [];
 
