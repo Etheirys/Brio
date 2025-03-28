@@ -15,7 +15,6 @@ public struct Transform
     public Vector3 Position;
     public Quaternion Rotation;
     public Vector3 Scale;
-    public float Offset;
 
     public static Transform Identity => new()
     {
