@@ -171,17 +171,16 @@ public class PosingTransformWindow : Window
 
         if(ImBrioGizmo.DrawRotation(ref matrix, gizmoSize, _posingService.CoordinateMode == PosingCoordinateMode.World))
         {
-            _trackingMatrix = matrix;
+            if(!posing.FreezeValues)
+                _trackingMatrix = matrix;
         }
 
         if(_trackingMatrix.HasValue)
-        {
             selected.Switch(
                 boneSelect => posing.SkeletonPosing.GetBonePose(boneSelect).Apply(_trackingMatrix.Value.ToTransform(), originalMatrix.ToTransform()),
                 _ => posing.ModelPosing.Transform += _trackingMatrix.Value.ToTransform().CalculateDiff(originalMatrix.ToTransform()),
                 _ => posing.ModelPosing.Transform += _trackingMatrix.Value.ToTransform().CalculateDiff(originalMatrix.ToTransform())
             );
-        }
 
         if(!ImBrioGizmo.IsUsing() && _trackingMatrix.HasValue)
         {
@@ -189,5 +188,4 @@ public class PosingTransformWindow : Window
             _trackingMatrix = null;
         }
     }
-
 }

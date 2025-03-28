@@ -410,7 +410,8 @@ public class PosingGraphicalWindow : Window, IDisposable
 
         if(ImBrioGizmo.DrawRotation(ref matrix, gizmoSize, _posingService.CoordinateMode == PosingCoordinateMode.World))
         {
-            _trackingMatrix = matrix;
+            if(!posing.FreezeValues)
+                _trackingMatrix = matrix;
         }
 
         if(_trackingMatrix.HasValue)

@@ -29,6 +29,9 @@ public class PosingCapability : ActorCharacterCapability
 
     public PosingService PosingService => _posingService;
 
+    public float AdjustmentOffset = 0.01f;
+    public bool FreezeValues = false;
+
     public bool HasOverride
     {
         get
@@ -48,8 +51,6 @@ public class PosingCapability : ActorCharacterCapability
     public bool HasUndoStack => _undoStack.Count > 1;
     public bool HasRedoStack => _redoStack.Any();
     public bool HasIKApplied => SkeletonPosing.PoseInfo.HasIKStacks;
-    
-    public float AdjusterOffset = 0.01f;
 
     private Stack<PoseStack> _undoStack = [];
     private Stack<PoseStack> _redoStack = [];
