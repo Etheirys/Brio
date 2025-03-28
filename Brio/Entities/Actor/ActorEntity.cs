@@ -76,7 +76,7 @@ namespace Brio.Entities.Actor
         {
             AddCapability(ActivatorUtilities.CreateInstance<ActorLifetimeCapability>(_serviceProvider, this));
             AddCapability(ActivatorUtilities.CreateInstance<ActorAppearanceCapability>(_serviceProvider, this));
-            AddCapability(ActivatorUtilities.CreateInstance<ActorDynamicPoseCapability>(_serviceProvider, this));
+            //AddCapability(ActivatorUtilities.CreateInstance<ActorDynamicPoseCapability>(_serviceProvider, this));
 
             AddCapability(ActivatorUtilities.CreateInstance<SkeletonPosingCapability>(_serviceProvider, this));
             AddCapability(ActivatorUtilities.CreateInstance<ModelPosingCapability>(_serviceProvider, this));

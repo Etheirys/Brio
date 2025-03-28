@@ -25,9 +25,9 @@
       },
       "Glamourer.Api": {
         "type": "Direct",
-        "requested": "[2.4.0, )",
-        "resolved": "2.4.0",
-        "contentHash": "i8PEKb4R2tyunfHEHZHY+yCx2p6D0hsoQ24Q8UDVb7rNvynzDqMrRhGTQjuF+Tg2XGWA7sb32wJqHXCv0oKoeA=="
+        "requested": "[2.4.1, )",
+        "resolved": "2.4.1",
+        "contentHash": "Q9jrGWDlIAXoMXihu+HbSRu8FpgR9xNy2j5YpAoqDHzhl2MZLgqAJPlQ+N5ISp6cn7xqQVMmxB9PchW2uEYoEA=="
       },
       "MessagePack": {
         "type": "Direct",
@@ -42,11 +42,11 @@
       },
       "Microsoft.Extensions.DependencyInjection": {
         "type": "Direct",
-        "requested": "[9.0.1, )",
-        "resolved": "9.0.1",
-        "contentHash": "qZI42ASAe3hr2zMSA6UjM92pO1LeDq5DcwkgSowXXPY8I56M76pEKrnmsKKbxagAf39AJxkH2DY4sb72ixyOrg==",
+        "requested": "[9.0.3, )",
+        "resolved": "9.0.3",
+        "contentHash": "lDbxJpkl6X8KZGpkAxgrrthQ42YeiR0xjPp7KPx+sCPc3ZbpaIbjzd0QQ+9kDdK2RU2DOl3pc6tQyAgEZY3V0A==",
         "dependencies": {
-          "Microsoft.Extensions.DependencyInjection.Abstractions": "9.0.1"
+          "Microsoft.Extensions.DependencyInjection.Abstractions": "9.0.3"
         }
       },
       "OneOf": {
@@ -63,9 +63,9 @@
       },
       "Penumbra.Api": {
         "type": "Direct",
-        "requested": "[5.6.0, )",
-        "resolved": "5.6.0",
-        "contentHash": "zMmkxX1+7COn23aTeq0L+UMA79ocmvQdvj5RgksEfTKrKZLbtaqRPCe6NsChyfGvcj79sgfAW/9hJ+FAzzVcNg=="
+        "requested": "[5.6.1, )",
+        "resolved": "5.6.1",
+        "contentHash": "pZesXuBB9cMXKN10EfLJclLay3vjRYQy376PXXcPdx33kNI0jHwgPXGcy6BtVmoaMvn4UvK+EqGVYlt2b/Ns9Q=="
       },
       "MessagePack.Annotations": {
         "type": "Transitive",
@@ -79,8 +79,8 @@
       },
       "Microsoft.Extensions.DependencyInjection.Abstractions": {
         "type": "Transitive",
-        "resolved": "9.0.1",
-        "contentHash": "Tr74eP0oQ3AyC24ch17N8PuEkrPbD0JqIfENCYqmgKYNOmL8wQKzLJu3ObxTUDrjnn4rHoR1qKa37/eQyHmCDA=="
+        "resolved": "9.0.3",
+        "contentHash": "TfaHPSe39NyL2wxkisRxXK7xvHGZYBZ+dy3r+mqGvnxKgAPdHkMu3QMQZI4pquP6W5FIQBqs8FJpWV8ffCgDqQ=="
       },
       "Microsoft.NET.StringTools": {
         "type": "Transitive",
