@@ -9,7 +9,7 @@ namespace Brio.Game.Actor.Appearance;
 public struct ActorAppearance()
 {
     public int ModelCharaId;
-    public byte Facewear;
+    public ushort Facewear;
     public ActorWeapons Weapons = new();
     public ActorEquipment Equipment = new();
     public ActorCustomize Customize = new();

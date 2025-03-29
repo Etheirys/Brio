@@ -298,9 +298,9 @@ public class AnamnesisCharaFile : JsonDocumentBase
     {
         public ushort GlassesId { get; set; }
 
-        public static implicit operator byte(GlassesSave save) => (byte)save.GlassesId;
+        public static implicit operator ushort(GlassesSave save) => (ushort)save.GlassesId;
 
-        public static implicit operator GlassesSave(byte save) => new()
+        public static implicit operator GlassesSave(ushort save) => new()
         {
             GlassesId = save
         };
