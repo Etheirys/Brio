@@ -46,7 +46,6 @@ public class AutoSaveService : IDisposable
 
         _timer = new Timer(TimeSpan.FromSeconds(ConfigurationService.Instance.Configuration.AutoSave.AutoSaveInterval));
         _timer.Elapsed += OnElapsed;
-        _timer.AutoReset = true;
 
         _timer.Start();
     }
@@ -54,6 +53,8 @@ public class AutoSaveService : IDisposable
     public void Stop()
     {
         _timer?.Stop();
+    
+        Brio.Log.Verbose($"AutoSave: Stop");
 
         if(ConfigurationService.Instance.Configuration.AutoSave.CleanAutoSaveOnLeavingGpose)
         {
@@ -73,6 +74,8 @@ public class AutoSaveService : IDisposable
 
     private void AutoSave()
     {
+        Update();
+
         if(ConfigurationService.Instance.Configuration.AutoSave.AutoSaveSystemEnabled)
         {
             try
@@ -103,7 +106,6 @@ public class AutoSaveService : IDisposable
 
                     foreach(var actor in scene.Actors)
                     {
-
                         ResourceProvider.Instance.SaveFileDocument(Path.Combine(posespath, $"{actor.FriendlyName}.pose"), actor.PoseFile);
 
                         if(actor.HasChild && actor.Child?.PoseFile != null)
@@ -115,7 +117,6 @@ public class AutoSaveService : IDisposable
 
                 Brio.Log.Verbose($"AutoSaved!");
 
-                Update();
                 CleanOldSaves();
             }
             catch(Exception ex)
@@ -127,7 +128,6 @@ public class AutoSaveService : IDisposable
 
     public void ShowAutoSaves()
     {
-        IsEnabled = false;
         UIManager.Instance.FileDialogManager.CustomSideBarItems.Clear();
         UIManager.Instance.FileDialogManager.OpenFileDialog(
             "Load AutoSave",
@@ -151,7 +151,6 @@ public class AutoSaveService : IDisposable
                         }
                     }
                 }
-                IsEnabled = true;
             },
             1,
             AutoSaveFolder,
@@ -160,6 +159,8 @@ public class AutoSaveService : IDisposable
 
     internal void Update()
     {
+        Brio.Log.Verbose($"AutoSave: Update");
+       
         var timeInterval = TimeSpan.FromSeconds(ConfigurationService.Instance.Configuration.AutoSave.AutoSaveInterval).TotalMilliseconds;
         if(_timer is not null && _timer.Interval != timeInterval)
         {
@@ -218,10 +219,12 @@ public class AutoSaveService : IDisposable
     {
         if(newState)
         {
+            Brio.Log.Verbose($"AutoSave: GPoseStateChange Start");
             Start();
         }
         else
         {
+            Brio.Log.Verbose($"AutoSave: GPoseStateChange Stop");
             Stop();
         }
     }
