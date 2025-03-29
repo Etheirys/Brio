@@ -2,6 +2,7 @@
 using Brio.Files;
 using Brio.Game.GPose;
 using Brio.Game.Scene;
+using Brio.Resources;
 using Brio.UI;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
@@ -45,7 +46,6 @@ public class AutoSaveService : IDisposable
 
         _timer = new Timer(TimeSpan.FromSeconds(ConfigurationService.Instance.Configuration.AutoSave.AutoSaveInterval));
         _timer.Elapsed += OnElapsed;
-        _timer.AutoReset = true;
 
         _timer.Start();
     }
@@ -53,6 +53,8 @@ public class AutoSaveService : IDisposable
     public void Stop()
     {
         _timer?.Stop();
+    
+        Brio.Log.Verbose($"AutoSave: Stop");
 
         if(ConfigurationService.Instance.Configuration.AutoSave.CleanAutoSaveOnLeavingGpose)
         {
@@ -72,6 +74,8 @@ public class AutoSaveService : IDisposable
 
     private void AutoSave()
     {
+        Update();
+
         if(ConfigurationService.Instance.Configuration.AutoSave.AutoSaveSystemEnabled)
         {
             try
@@ -80,14 +84,39 @@ public class AutoSaveService : IDisposable
 
                 byte[] bytes = MessagePackSerializer.Serialize(scene);
 
-                var path = Path.Combine(AutoSaveFolder, $"autosave-{DateTime.Now:yyyy-MM-dd}-{DateTime.Now:hh-mm-ss}.brioautosave");
+                var path = Path.Combine(AutoSaveFolder, $"autosave-{DateTime.Now:yyyy-MM-dd}-{DateTime.Now:hh-mm-ss}");
+
                 Brio.Log.Verbose($"AutoSaving: {path}");
 
-                File.WriteAllBytes(path, bytes);
+                if(Directory.Exists(path) == false)
+                {
+                    Directory.CreateDirectory(path);
+                }
+
+                File.WriteAllBytes(Path.Combine(path, "SceneAutoSave.brioautosave"), bytes);
+
+                if(ConfigurationService.Instance.Configuration.AutoSave.AutoSaveIndividualPoses)
+                {
+                    var posespath = Path.Combine(path, "Poses");
+
+                    if(Directory.Exists(posespath) == false)
+                    {
+                        Directory.CreateDirectory(posespath);
+                    }
+
+                    foreach(var actor in scene.Actors)
+                    {
+                        ResourceProvider.Instance.SaveFileDocument(Path.Combine(posespath, $"{actor.FriendlyName}.pose"), actor.PoseFile);
+
+                        if(actor.HasChild && actor.Child?.PoseFile != null)
+                        {
+                            ResourceProvider.Instance.SaveFileDocument(Path.Combine(posespath, $"{actor.FriendlyName}-Companion.pose"), actor.Child.PoseFile);
+                        }
+                    }
+                }
 
                 Brio.Log.Verbose($"AutoSaved!");
 
-                Update();
                 CleanOldSaves();
             }
             catch(Exception ex)
@@ -99,7 +128,6 @@ public class AutoSaveService : IDisposable
 
     public void ShowAutoSaves()
     {
-        IsEnabled = false;
         UIManager.Instance.FileDialogManager.CustomSideBarItems.Clear();
         UIManager.Instance.FileDialogManager.OpenFileDialog(
             "Load AutoSave",
@@ -123,7 +151,6 @@ public class AutoSaveService : IDisposable
                         }
                     }
                 }
-                IsEnabled = true;
             },
             1,
             AutoSaveFolder,
@@ -132,6 +159,8 @@ public class AutoSaveService : IDisposable
 
     internal void Update()
     {
+        Brio.Log.Verbose($"AutoSave: Update");
+       
         var timeInterval = TimeSpan.FromSeconds(ConfigurationService.Instance.Configuration.AutoSave.AutoSaveInterval).TotalMilliseconds;
         if(_timer is not null && _timer.Interval != timeInterval)
         {
@@ -143,22 +172,22 @@ public class AutoSaveService : IDisposable
     {
         try
         {
-            var saveFiles = Directory.EnumerateFiles(AutoSaveFolder)
-                                 .Select(f => new FileInfo(f))
-                                 .OrderByDescending(f => f.LastWriteTime)
+            var saveFolders = Directory.EnumerateDirectories(AutoSaveFolder)
+                                 .Select(d => new DirectoryInfo(d))
+                                 .OrderByDescending(d => d.LastWriteTime)
                                  .ToList();
 
-            if(saveFiles.Count > ConfigurationService.Instance.Configuration.AutoSave.MaxAutoSaves)
+            if(saveFolders.Count > ConfigurationService.Instance.Configuration.AutoSave.MaxAutoSaves)
             {
 
             }
 
             // Keep the newest files and delete the rest
-            var filesToDelete = saveFiles.Skip(ConfigurationService.Instance.Configuration.AutoSave.MaxAutoSaves);
+            var foldersToDelete = saveFolders.Skip(ConfigurationService.Instance.Configuration.AutoSave.MaxAutoSaves);
 
-            foreach(var file in filesToDelete)
+            foreach(var folder in foldersToDelete)
             {
-                file.Delete();
+                folder.Delete(true);
             }
         }
         catch(Exception ex)
@@ -171,13 +200,13 @@ public class AutoSaveService : IDisposable
     {
         try
         {
-            var saveFiles = Directory.EnumerateFiles(AutoSaveFolder)
-                                 .Select(f => new FileInfo(f))
+            var saveFolders = Directory.EnumerateDirectories(AutoSaveFolder)
+                                 .Select(d => new DirectoryInfo(d))
                                  .ToList();
 
-            foreach(var file in saveFiles)
+            foreach(var folder in saveFolders)
             {
-                file.Delete();
+                folder.Delete(true);
             }
         }
         catch(Exception ex)
@@ -190,10 +219,12 @@ public class AutoSaveService : IDisposable
     {
         if(newState)
         {
+            Brio.Log.Verbose($"AutoSave: GPoseStateChange Start");
             Start();
         }
         else
         {
+            Brio.Log.Verbose($"AutoSave: GPoseStateChange Stop");
             Stop();
         }
     }
