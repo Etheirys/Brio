@@ -10,17 +10,14 @@ namespace Brio.UI.Windows.Specialized;
 
 public class KeyBindPromptWindow : Window, IDisposable
 {
-    private readonly InputService _inputService;
     private readonly ConfigurationService _configurationService;
     private readonly GPoseService _gPoseService;
 
     public KeyBindPromptWindow(
-        InputService inputService,
         ConfigurationService configurationService,
         GPoseService gPoseService)
         : base("Key Bind Prompt Window", ImGuiWindowFlags.NoInputs | ImGuiWindowFlags.NoDecoration | ImGuiWindowFlags.NoBackground)
     {
-        _inputService = inputService;
         _configurationService = configurationService;
         _gPoseService = gPoseService;
 
@@ -38,14 +35,10 @@ public class KeyBindPromptWindow : Window, IDisposable
 
         ImGui.SetCursorPosY(50);
 
-        foreach(var evt in Enum.GetValues<KeyBindEvents>())
+        foreach(var evt in Enum.GetValues<InputOverlayAction>())
         {
-            if(!_inputService.HasListener(evt))
-                continue;
-
-            KeyBind? bind = _inputService.GetKeyBind(evt);
-            if(bind == null || bind.GetIsEmpty())
-                continue;
+            var actualEvt = (InputAction)evt;
+            var bind = _configurationService.Configuration.InputManager.KeyBindings[actualEvt].ToString();
 
             ImGui.SetCursorPosX(20);
 
@@ -64,13 +57,13 @@ public class KeyBindPromptWindow : Window, IDisposable
     {
         if(newState)
         {
-            if(_configurationService.Configuration.Input.EnableKeybinds == false)
+            if(_configurationService.Configuration.InputManager.Enable == false)
             {
                 IsOpen = false;
                 return;
             }
 
-            IsOpen = _configurationService.Configuration.Input.ShowPromptsInGPose;
+            IsOpen = _configurationService.Configuration.InputManager.ShowPromptsInGPose;
         }
         else
         {
@@ -80,13 +73,13 @@ public class KeyBindPromptWindow : Window, IDisposable
 
     private void OnConfigurationChanged()
     {
-        if(_configurationService.Configuration.Input.EnableKeybinds == false || _gPoseService.IsGPosing == false)
+        if(_configurationService.Configuration.InputManager.Enable == false || _gPoseService.IsGPosing == false)
         {
             IsOpen = false;
             return;
         }
 
-        this.IsOpen = _configurationService.Configuration.Input.ShowPromptsInGPose;
+        this.IsOpen = _configurationService.Configuration.InputManager.ShowPromptsInGPose;
     }
 
     public void Dispose()

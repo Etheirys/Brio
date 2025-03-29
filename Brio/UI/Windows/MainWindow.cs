@@ -22,7 +22,6 @@ public class MainWindow : Window, IDisposable
     private readonly InfoWindow _infoWindow;
     private readonly LibraryWindow _libraryWindow;
     private readonly ConfigurationService _configurationService;
-    private readonly InputService _inputService;
     private readonly EntityManager _entityManager;
     private readonly EntityHierarchyView _entitySelector;
     private readonly SceneService _sceneService;
@@ -36,7 +35,6 @@ public class MainWindow : Window, IDisposable
         InfoWindow infoWindow,
         LibraryWindow libraryWindow,
         EntityManager entityManager,
-        InputService input,
         SceneService sceneService,
         GPoseService gPoseService,
         ProjectWindow projectWindow,
@@ -50,7 +48,6 @@ public class MainWindow : Window, IDisposable
         _settingsWindow = settingsWindow;
         _libraryWindow = libraryWindow;
         _infoWindow = infoWindow;
-        _inputService = input;
         _entityManager = entityManager;
         _gPoseService = gPoseService;
         _entitySelector = new(_entityManager, _gPoseService);
@@ -63,9 +60,6 @@ public class MainWindow : Window, IDisposable
             MaximumSize = new Vector2(270, 1030),
             MinimumSize = new Vector2(270, 200)
         };
-
-        input.AddListener(KeyBindEvents.Interface_ToggleBrioWindow, this.OnMainWindowToggle);
-        input.AddListener(KeyBindEvents.Interface_ToggleBindPromptWindow, this.OnPromptWindowToggle);
     }
 
     public override void Draw()
@@ -101,7 +95,7 @@ public class MainWindow : Window, IDisposable
 
     private void OnPromptWindowToggle()
     {
-        _configurationService.Configuration.Input.ShowPromptsInGPose = !_configurationService.Configuration.Input.ShowPromptsInGPose;
+        _configurationService.Configuration.InputManager.ShowPromptsInGPose = !_configurationService.Configuration.InputManager.ShowPromptsInGPose;
 
         _configurationService.ApplyChange();
     }
@@ -151,7 +145,6 @@ public class MainWindow : Window, IDisposable
 
     public void Dispose()
     {
-        _inputService.RemoveListener(KeyBindEvents.Interface_ToggleBrioWindow, this.OnMainWindowToggle);
-        _inputService.RemoveListener(KeyBindEvents.Interface_ToggleBindPromptWindow, this.OnPromptWindowToggle);
+
     }
 }

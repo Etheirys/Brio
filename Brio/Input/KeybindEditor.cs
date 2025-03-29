@@ -19,7 +19,7 @@ public static class KeybindEditor
         names.Add("None");
         keys.Add(VirtualKey.NO_KEY);
 
-        foreach(var vk in InputService.GetValidKeys())
+        foreach(var vk in InputManagerService.GetValidKeys())
         {
             if(vk > VirtualKey.NO_KEY && vk <= VirtualKey.XBUTTON2)
                 continue;
@@ -47,26 +47,27 @@ public static class KeybindEditor
         virtualKeys = keys;
     }
 
-    public static bool KeySelector(string label, KeyBindEvents evt, InputConfiguration config)
+    public static bool KeySelector(string label, InputAction evt, InputManagerConfiguration config)
     {
-        if(!config.Bindings.ContainsKey(evt))
-            config.Bindings.Add(evt, new());
+        if(!config.KeyBindings.ContainsKey(evt))
+            config.KeyBindings.Add(evt, new KeyConfig(VirtualKey.NO_KEY));
 
-        KeyBind bind = config.Bindings[evt];
-        return KeySelector(label, ref bind);
+        return KeySelector(label, ref evt, config);
     }
 
-    public static bool KeySelector(string label, ref KeyBind keyBind)
+    public static bool KeySelector(string label, ref InputAction evt, InputManagerConfiguration config)
     {
         bool changed = false;
+        var bind = config.KeyBindings[evt];
+        ref var keyBind = ref bind;
 
         // Control
-        using(ImRaii.Disabled(keyBind.Key == VirtualKey.CONTROL))
+        using(ImRaii.Disabled(keyBind.isCtrl))
         {
-            bool control = keyBind.Control;
+            bool control = keyBind.requireCtrl;
             if(ImGui.Checkbox($"##{label}_Control", ref control))
             {
-                keyBind.Control = control;
+                keyBind.requireCtrl = control;
                 changed = true;
             }
 
@@ -79,12 +80,12 @@ public static class KeybindEditor
         // Alt
         ImGui.SameLine();
 
-        using(ImRaii.Disabled(keyBind.Key == VirtualKey.MENU))
+        using(ImRaii.Disabled(keyBind.isAlt))
         {
-            bool alt = keyBind.Alt;
+            bool alt = keyBind.requireAlt;
             if(ImGui.Checkbox($"##{label}_Alt", ref alt))
             {
-                keyBind.Alt = alt;
+                keyBind.requireAlt = alt;
                 changed = true;
             }
 
@@ -96,12 +97,12 @@ public static class KeybindEditor
 
         // Shift
         ImGui.SameLine();
-        using(ImRaii.Disabled(keyBind.Key == VirtualKey.SHIFT))
+        using(ImRaii.Disabled(keyBind.isShift))
         {
-            bool shift = keyBind.Shift;
+            bool shift = keyBind.requireShift;
             if(ImGui.Checkbox($"##{label}_Shift", ref shift))
             {
-                keyBind.Shift = shift;
+                keyBind.requireShift = shift;
                 changed = true;
             }
 
@@ -111,13 +112,25 @@ public static class KeybindEditor
             }
         }
 
+        // Reset to Default Button
+        ImGui.SameLine();
+        if(ImGui.Button($"Reset##{label}"))
+        {
+            config.ResetKeyToDefault(evt);
+        }
+        
+        if(ImGui.IsItemHovered())
+        {
+            ImGui.SetTooltip("Reset Key to Default");
+        }
+
         // Key
         ImGui.SameLine();
-        int currentIndex = virtualKeys.IndexOf(keyBind.Key);
+        int currentIndex = virtualKeys.IndexOf(keyBind.key);
         ImGui.SetNextItemWidth(100);
         if(ImGui.Combo(label, ref currentIndex, virtualKeyNames, virtualKeyNames.Length))
         {
-            keyBind.Key = virtualKeys[currentIndex];
+            keyBind.key = virtualKeys[currentIndex];
             changed = true;
         }
 
