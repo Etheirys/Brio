@@ -1,4 +1,5 @@
 ﻿using Brio.Capabilities.Posing;
+using Brio.Config;
 using Brio.Core;
 using Brio.Entities;
 using Brio.Entities.Actor;
@@ -27,8 +28,8 @@ public class PoseFileInfo : AppliableActorFileInfoBase<PoseFile>
     public override IDalamudTextureWrap Icon => ResourceProvider.Instance.GetResourceImage("Images.FileIcon_Pose.png");
     public override string Extension => ".pose";
 
-    public PoseFileInfo(EntityManager entityManager, PosingService posingService)
-    : base(entityManager)
+    public PoseFileInfo(EntityManager entityManager, PosingService posingService, ConfigurationService configurationService)
+    : base(entityManager, configurationService)
     {
         _posingService = posingService;
     }

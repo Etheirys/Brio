@@ -117,6 +117,11 @@ public abstract class Entity : IDisposable
         }
     }
 
+    public virtual void OnDoubleClick()
+    {
+
+    }
+
     public virtual void DrawContextButton()
     {
 
@@ -245,4 +250,5 @@ public enum EntityFlags
     DefaultOpen = 1 << 0,
     HasContextButton = 1 << 1,
     AllowOutSideGpose = 1 << 2,
+    AllowDoubleClick = 1 << 3,
 }

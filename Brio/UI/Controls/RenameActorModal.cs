@@ -91,6 +91,16 @@ public class RenameActorModal
                     {
                         Close();
                     }
+
+                    if(ImGui.IsKeyDown(ImGuiKey.Enter))
+                    {
+                        if(currentActorEntity.IsAttached)
+                        {
+                            Brio.Log.Info($"Renamed {currentActorEntity.FriendlyName} -> {currentActorName} (via Enter Key)");
+                            currentActorEntity.FriendlyName = currentActorName;
+                        }
+                        Close();
+                    }
                 }
                 else
                 {
