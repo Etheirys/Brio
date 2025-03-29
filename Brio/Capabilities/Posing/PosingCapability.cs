@@ -34,7 +34,7 @@ public class PosingCapability : ActorCharacterCapability
         get
         {
             if(Entity.TryGetCapability<SkeletonPosingCapability>(out var skeletonPosing))
-                if(skeletonPosing.PoseInfo.IsOveridden)
+                if(skeletonPosing.PoseInfo.IsOverridden)
                     return true;
 
             if(Entity.TryGetCapability<ModelPosingCapability>(out var modelPosing))
@@ -216,16 +216,19 @@ public class PosingCapability : ActorCharacterCapability
             options ??= _posingService.DefaultImporterOptions;
         }
 
-        applyModelTransform |= options.ApplyModelTransform;
-
-        if(transformComponents.HasValue)
+        if(asScene == false)
         {
-            options.TransformComponents = transformComponents.Value;
-        }
+            applyModelTransform |= options.ApplyModelTransform;
 
-        if(applyModelTransformOverride.HasValue)
-        {
-            applyModelTransform = applyModelTransformOverride.Value;
+            if(transformComponents.HasValue)
+            {
+                options.TransformComponents = transformComponents.Value;
+            }
+
+            if(applyModelTransformOverride.HasValue)
+            {
+                applyModelTransform = applyModelTransformOverride.Value;
+            }
         }
 
         if(applyModelTransform && reset)
@@ -339,6 +342,21 @@ public class PosingCapability : ActorCharacterCapability
         SkeletonPosing.ExportSkeletonPose(poseFile);
         ModelPosing.ExportModelPose(poseFile);
         return poseFile;
+    }
+    public BonePoseInfoId? IsSelectedBone()
+    {
+        Game.Posing.Skeletons.Bone? realBone = null;
+        return Selected.Match<BonePoseInfoId?>(
+            bone =>
+            {
+                realBone = SkeletonPosing.GetBone(bone);
+                if (realBone != null && realBone.Skeleton.IsValid)
+                    return bone;
+                return null;
+            },
+            _ => null,
+            _ => null
+        );
     }
 
     public record struct PoseStack(PoseInfo Info, Transform ModelTransform);

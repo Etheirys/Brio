@@ -25,9 +25,11 @@ public class TimeWidget(TimeCapability timeCapability) : Widget<TimeCapability>(
         int originalMinute = minuteOfDay;
         int originalDay = dayOfMonth;
 
+        ImGui.Text($"{displayTime.Hours:D2}:{displayTime.Minutes:D2}");
+        ImGui.SameLine();
 
         ImGui.PushItemWidth(-((ImGui.GetStyle().FramePadding.X * 2) + ImGui.CalcTextSize("XXXXXXXXXXXXX").X));
-        ImGui.SliderInt("Time of Day", ref minuteOfDay, 0, 1439, $"{displayTime.Hours:D2}:{displayTime.Minutes:D2}");
+        ImGui.SliderInt("Time of Day", ref minuteOfDay, 0, 1439);
         ImGui.SameLine();
         unlockPos = ImGui.GetCursorPos();
         ImGui.NewLine();

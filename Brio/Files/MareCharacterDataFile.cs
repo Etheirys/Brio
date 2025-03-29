@@ -1,4 +1,5 @@
 ﻿using Brio.Capabilities.Actor;
+using Brio.Config;
 using Brio.Entities;
 using Brio.Entities.Actor;
 using Brio.Library.Sources;
@@ -10,8 +11,8 @@ namespace Brio.Files;
 
 public class MareCharacterDataFileInfo : AppliableActorFileInfoBase<MareCharacterDataFile>
 {
-    public MareCharacterDataFileInfo(EntityManager entityManager)
-    : base(entityManager)
+    public MareCharacterDataFileInfo(EntityManager entityManager, ConfigurationService configurationService)
+    : base(entityManager, configurationService)
     {
     }
 

@@ -4,6 +4,7 @@ using Brio.Config;
 using Brio.Entities.Core;
 using Brio.Game.Actor;
 using Brio.Game.Actor.Extensions;
+using Brio.UI.Controls;
 using Brio.UI.Controls.Stateless;
 using Brio.UI.Theming;
 using Dalamud.Game.ClientState.Objects.Types;
@@ -42,7 +43,7 @@ namespace Brio.Entities.Actor
 
         public unsafe override bool IsVisible => true;
 
-        public override EntityFlags Flags => EntityFlags.HasContextButton | EntityFlags.DefaultOpen;
+        public override EntityFlags Flags => EntityFlags.AllowDoubleClick | EntityFlags.HasContextButton | EntityFlags.DefaultOpen;
 
         public bool IsProp => ActorType == ActorType.Prop;
 
@@ -56,6 +57,12 @@ namespace Brio.Entities.Actor
                 return ActorType.Prop;
 
             return ActorType.BrioActor;
+        }
+
+        public override void OnDoubleClick()
+        {
+            var aac = GetCapability<ActorAppearanceCapability>();
+            RenameActorModal.Open(aac.Actor);
         }
 
         public override void DrawContextButton()

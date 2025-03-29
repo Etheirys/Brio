@@ -73,7 +73,7 @@ public class AutoSaveService : IDisposable
 
     private void AutoSave()
     {
-        if (ConfigurationService.Instance.Configuration.AutoSave.AutoSaveSystemEnabled)
+        if(ConfigurationService.Instance.Configuration.AutoSave.AutoSaveSystemEnabled)
         {
             try
             {

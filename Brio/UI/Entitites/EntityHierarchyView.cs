@@ -41,7 +41,7 @@ public class EntityHierarchyView(EntityManager entityManager, GPoseService gPose
         }
     }
 
-    private void DrawEntity(Entity entity, EntityId? selectedEntityId, float lastOffset = 0)
+    private void DrawEntity(Entity entity, EntityId? selectedEntityId, float lastOffset = 0, bool isChild = false)
     {
         bool isSelected = false;
         bool hasChildren = false;
@@ -68,6 +68,10 @@ public class EntityHierarchyView(EntityManager entityManager, GPoseService gPose
                 if(ImGui.IsItemClicked(ImGuiMouseButton.Right))
                 {
                     ImGui.OpenPopup($"context_popup{entity.Id}");
+                }
+                if (entity.Flags.HasFlag(EntityFlags.AllowDoubleClick) && ImGui.IsMouseDoubleClicked(ImGuiMouseButton.Left) && ImGui.IsItemHovered())
+                {
+                    entity.OnDoubleClick();
                 }
 
                 ImGui.SetCursorPos(invsButtonPos);
@@ -116,7 +120,9 @@ public class EntityHierarchyView(EntityManager entityManager, GPoseService gPose
         if(hasChildren)
         {
             foreach(var child in entity.Children)
+            {
                 DrawEntity(child, selectedEntityId, lastOffset == 0 ? 3 : lastOffset);
+            }
         }
     }
 

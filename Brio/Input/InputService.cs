@@ -19,6 +19,8 @@ public class InputService
     private readonly HashSet<KeyBindEvents> _eventsDown = new();
     private readonly Dictionary<KeyBindEvents, List<Action>> _listeners = new();
 
+    KeyBindEvents[] keyBindEvents;
+
     public static InputService Instance { get; private set; } = null!;
 
     public InputService(IKeyState keyState, IFramework framework, ConfigurationService configService, VirtualCameraManager virtualCameraManager, GPoseService gPoseService)
@@ -31,6 +33,8 @@ public class InputService
         _virtualCameraManager = virtualCameraManager;
 
         _framework.Update += OnFrameworkUpdate;
+
+        keyBindEvents = (KeyBindEvents[])Enum.GetValues(typeof(KeyBindEvents));
     }
 
     public static IEnumerable<VirtualKey> GetValidKeys()
@@ -90,7 +94,7 @@ public class InputService
 
         if(_configService.Configuration.Input.EnableKeybinds && disable == false)
         {
-            foreach(var evt in Enum.GetValues<KeyBindEvents>())
+            foreach(var evt in keyBindEvents)
             {
                 this.CheckEvent(evt);
             }
@@ -99,8 +103,7 @@ public class InputService
 
     private void CheckEvent(KeyBindEvents evt)
     {
-        KeyBind? bind;
-        if(!_configService.Configuration.Input.Bindings.TryGetValue(evt, out bind) || bind == null)
+        if(!_configService.Configuration.Input.Bindings.TryGetValue(evt, out KeyBind? bind) || bind == null)
             return;
 
         bool isDown = this.IsDown(bind);
@@ -114,15 +117,13 @@ public class InputService
         {
             _eventsDown.Add(evt);
 
-            try
+            if(_listeners.TryGetValue(evt, out var eventListeners))
             {
-                // just released, invoke listeners
-                foreach(Action callback in _listeners[evt])
+                foreach(Action callback in eventListeners)
                 {
                     callback?.Invoke();
                 }
             }
-            catch(Exception) { }
         }
     }
 

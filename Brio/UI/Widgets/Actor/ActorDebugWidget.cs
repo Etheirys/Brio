@@ -62,6 +62,15 @@ public class ActorDebugWidget(ActorDebugCapability capability) : Widget<ActorDeb
                         }
                     }
                 }
+
+                using(var infoTab = ImRaii.TabItem("GameObject"))
+                {
+                    if(infoTab.Success)
+                    {
+                        Dalamud.Utility.Util.ShowGameObjectStruct(Capability.GameObject, true);
+                    }
+                }
+
             }
         }
     }

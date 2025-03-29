@@ -1,4 +1,5 @@
 ﻿using Brio.Capabilities.Actor;
+using Brio.Config;
 using Brio.Entities;
 using Brio.Entities.Actor;
 using Brio.Game.Actor.Appearance;
@@ -12,8 +13,7 @@ using System;
 using System.Numerics;
 
 namespace Brio.Files;
-
-public class AnamnesisCharaFileInfo(EntityManager entityManager) : AppliableActorFileInfoBase<AnamnesisCharaFile>(entityManager)
+public class AnamnesisCharaFileInfo(EntityManager entityManager, ConfigurationService configurationService) : AppliableActorFileInfoBase<AnamnesisCharaFile>(entityManager, configurationService)
 {
     public override string Name => "Character File";
     public override IDalamudTextureWrap Icon => ResourceProvider.Instance.GetResourceImage("Images.FileIcon_Chara.png");
@@ -21,6 +21,7 @@ public class AnamnesisCharaFileInfo(EntityManager entityManager) : AppliableActo
 
     protected override void Apply(AnamnesisCharaFile file, ActorEntity actor, bool asExpression = false)
     {
+        Brio.Log.Debug($"Name: {Name} | File: {file}");
         if(actor.TryGetCapability<ActorAppearanceCapability>(out ActorAppearanceCapability? capability) && capability != null)
         {
             _ = capability.SetAppearance(file, AppearanceImportOptions.All);
@@ -247,18 +248,21 @@ public class AnamnesisCharaFile : JsonDocumentBase
             // Extended Appearance
             Transparency = appearance.ExtendedAppearance.Transparency,
             HeightMultiplier = appearance.ExtendedAppearance.HeightMultiplier,
-
-            SkinColor = shaders.SkinColor,
-            SkinGloss = shaders.SkinGloss,
-            LeftEyeColor = shaders.LeftEyeColor,
-            RightEyeColor = shaders.RightEyeColor,
-            HairColor = shaders.HairColor,
-            HairGloss = shaders.HairGloss,
-            HairHighlight = shaders.HairHighlight,
-            MouthColor = shaders.MouthColor,
-            MuscleTone = shaders.MuscleTone,
-            LimbalRingColor = shaders.FeatureColor,
         };
+
+        if(shaders.HasValue)
+        {
+            charaFile.SkinColor = shaders.Value.SkinColor;
+            charaFile.SkinGloss = shaders.Value.SkinGloss;
+            charaFile.LeftEyeColor = shaders.Value.LeftEyeColor;
+            charaFile.RightEyeColor = shaders.Value.RightEyeColor;
+            charaFile.HairColor = shaders.Value.HairColor;
+            charaFile.HairGloss = shaders.Value.HairGloss;
+            charaFile.HairHighlight = shaders.Value.HairHighlight;
+            charaFile.MouthColor = shaders.Value.MouthColor;
+            charaFile.MuscleTone = shaders.Value.MuscleTone;
+            charaFile.LimbalRingColor = shaders.Value.FeatureColor;
+        }
 
         return charaFile;
     }

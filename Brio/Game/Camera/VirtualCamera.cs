@@ -16,14 +16,18 @@ public unsafe partial class VirtualCamera
     }
 
     public FreeCamValues FreeCamValues { get; private set; } = new FreeCamValues();
+    public CutsceneCamValues CutsceneCamValues { get; private set; } = new CutsceneCamValues();
 
     [IgnoreMember] public BrioCamera* BrioCamera => (BrioCamera*)CameraManager.Instance()->GetActiveCamera();
 
     public unsafe bool IsOverridden => DisableCollision || DelimitCamera || PositionOffset != Vector3.Zero
     | PivotRotation != 0 | FoV != 0 | Pan != Vector2.Zero | BrioCamera->Camera.Distance != 2.5f;
 
+    public bool HasDelimitOverride => delimitCameraHasOverride;
+
     [IgnoreMember] public bool IsActiveCamera { get; set; } = false;
     public bool IsFreeCamera { get; set; } = false;
+    public bool IsCutsceneCamera { get; set; } = false;
 
     [IgnoreMember] public int CameraID { get; private set; } = -1;
 
@@ -199,4 +203,17 @@ public class FreeCamValues
     public float MovementSpeed { get; set; } = 0f;
 
     public bool DelimitAngle = false;
+}
+
+[MessagePackObject(keyAsPropertyName: true)]
+public class CutsceneCamValues
+{
+    public bool StartAnimationOnSelect = true;
+    public string CameraPath = string.Empty;
+
+    public Vector3 Scale = Vector3.One;
+    public Vector3 Offset = Vector3.Zero;
+    public bool Loop = false;
+    public bool EnableFOV = true;
+
 }

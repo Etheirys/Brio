@@ -2,20 +2,42 @@
 To open this window again click `Information` on the Scene Manager then -> `View the Changelog`
 
 --------------------------------------------------------------------------------------------------------------------------------------------------------
-	 ---> Brio, Version 0.5.0.X <--- Props, Free Cameras & Projects!
+	 ---> Brio, Versions 0.5.1 <--- 7.2 Support 
+---------------------------------------------------------------------------------------------------------------------------------------------------------
+
+- Update Brio to support FFXIV 7.2 (Thanks for the help Asgard!)
+
+- Added the ability to rotate Free Cameras! (Thanks @Bronya-Rand)
+
+- Fixed saving a project with props or mounts would cause the project not to load (Thanks @Bronya-Rand)
+- Fixed the formant of `Time of Day` slider in Environment so it can be edited
+- Fixed a crash when training your chocobo 
+- Fixed a crash when in certain cutscenes
+- Fixed the camera from snaping on gpose enter/exit
+- Fixed a potential memory leak 
+
+--------------------------------------------------------------------------------------------------------------------------------------------------------
+	 --- Brio, Versions 0.5.0.0 - 0.5.0.6  --- Props, Free Cameras, Projects & More!
 ---------------------------------------------------------------------------------------------------------------------------------------------------------
 	
---------------------------------------------------------------------------------
-	--- Brio, Version 0.5.0.4 --- 
+	--- Brio, Versions 0.5.0.1 - 0.5.0.6 --- 
+
+- Added Camera cloning
+
+- Fix camera snaping when leaving Gpose
+- Tried to fix a crash when leaving a cutscene
+
+- Added a new Library Feature "Spawn as new actor (Thanks @Cazzar)
+
+- Fixed an issue with C+ not being reverted on exiting Gpose or actor despawn (Thanks @HoloWise)
+- Fixed a rare issue with loading projects
+- Made a small optimization to speed up Brio's rendering
 
 - Once more, fixed ESCAPE not opening the "End group pose" menu.
 - Fixed an issue where the import setting `ModelTransform` was not working
 - Fixed Destroying Camera on Scene load if "Override Current Scene" was enabled.
 - Fixed Projects saving Free Cameras being frozen in place and unable to move. 
 - Fixed Scene loading characters with custom colors. (Thanks @Bronya-Rand)
-
---------------------------------------------------------------------------------
-	--- Brio, Version 0.5.0.3 --- 
 
 - Environment is once again useable outside of Gpose.
 - Added a new setting "Consumed, [SPACE], [Shift], [Ctrl] & [Alt] keyboard input when moving a FreeCam".
@@ -26,16 +48,10 @@ To open this window again click `Information` on the Scene Manager then -> `View
 - Fixed loading and saving characters with custom colors. (Thanks @Bronya-Rand)
 - Updated Thank Yous.
 
---------------------------------------------------------------------------------
-	--- Brio, Version 0.5.0.2 --- 
-
 - The Glamourer Design menu is now in alphabetical order.
 - Once again, fix an issue where PosingOverlayWindow would be to small if the text scale was less then 100%.
 - Fixed Auto-Save not turning off when is was disabled in the settings.
 - Fixed Cameras being unable to be destroyed in certain situations.
-
---------------------------------------------------------------------------------
-	--- Brio, Version 0.5.0.1 --- 
 
 - Fixed text scaling issues.
 - Fixed an issue with T-Pose & A-Pose loading.
@@ -43,8 +59,7 @@ To open this window again click `Information` on the Scene Manager then -> `View
 - Fixed [Shift], [Ctrl] & [Alt] being consumed my Brio.
 - Once again allow AllowPinning & AllowClickthrough on the Overlay window & Main window.
 
---------------------------------------------------------------------------------
-	--- Brio, Version 0.5.0 --- 
+	--- Brio, Version [0.5.0] --- 
 
 - Brio has a new Icon!
 	- Over time it will update in Dalamud 
@@ -100,7 +115,7 @@ To open this window again click `Information` on the Scene Manager then -> `View
 
 --------------------------------------------------------------------------------
 
-And finally, a message: It's been over a year now that I've been the developer & maintainer for Brio.
+It's been over a year now that I've been the developer & maintainer for Brio.
 
 Thank you to everyone who uses Brio, supports it monetarily, contributes with code, requests features, 
 reports bugs, or simply engages with the community.
@@ -125,11 +140,12 @@ I love you, forever unto eternity~
 
 --------------------------------------------------------------------------------
 
-A Big Thank you to (Sufferhymn), (Night Song), (Alvar Valo), (Yasumi), (YikesXD), 
+A Big Thank you to (Sufferhymn), (Night Song), (Alvar Valo), (@Conna), (Yasumi), (YikesXD), 
 (Selitha), (AquilaHK), (LotusEcho), & (Yume) for their support on Kofi!
 
-Also, Thank you, to: (@Ashadow700), (@Bronya-Rand) (@MKhayle), (@ashna_ff14), (@Yuki-Codes), 
-(@danma3x), (@snaeling), (@WorstAquaPlayer), (@Caraxi), (@Enth) & (@gris-fuego);
+Also, Thank you, to: (@AsgardXIV), (@Ashadow700), (@ashna_ff14), (@Bronya-Rand), (@Caraxi),
+(@Cazzar), (@danma3x), (@Enth), (@gris-fuego), (@HoloWise), (@MKhayle),
+(@WorstAquaPlayer), (@snaeling), (@Yuki-Codes);
 For their contributions to Brio!
 
 --------------------------------------------------------------------------------

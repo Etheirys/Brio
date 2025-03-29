@@ -33,6 +33,8 @@ public class ActorAppearanceCapability : ActorCharacterCapability
     public bool IsCollectionOverridden => _oldCollection != null;
     private string? _oldCollection = null;
 
+    public bool IsDesignOverridden;
+    public bool IsProfileOverridden;
 
     public string CurrentDesign { get; set; } = "None";
     public GlamourerService GlamourerService => _glamourerService;
@@ -112,34 +114,44 @@ public class ActorAppearanceCapability : ActorCharacterCapability
 
     public void SetDesign(Guid design)
     {
+        IsDesignOverridden = true;
         _ = _glamourerService.ApplyDesign(design, Character);
     }
-    public void ResetDesign(bool isRest = false)
+    public void ResetDesign(bool checkResetLock = true)
     {
-        _glamourerService.RevertCharacter(Character);
-
-        if(isRest == false && _glamourerService.CheckForLock(Character))
+        if(IsDesignOverridden)
         {
-            ResetCollection();
-            ResetProfile(true);
+            IsDesignOverridden = false;
+            _glamourerService.RevertCharacter(Character);
+
+            if(checkResetLock && _glamourerService.CheckForLock(Character))
+            {
+                ResetCollection();
+                ResetProfile(false);
+            }
         }
     }
-
     public void SetProfile(string data)
     {
+        IsProfileOverridden = true;
+
         _customizePlusService.SetProfile(Character, data);
     }
-    public void ResetProfile(bool isRest = false)
+    public void ResetProfile(bool checkResetLock = true)
     {
-        _customizePlusService.RemoveTemporaryProfile(Character);
-
-        if(isRest == false && _glamourerService.CheckForLock(Character))
+        if(IsProfileOverridden)
         {
-            ResetCollection();
-            ResetDesign(true);
-        }
+            IsProfileOverridden = false;
+            _customizePlusService.RemoveTemporaryProfile(Character);
 
-        SetSelectedProfile();
+            if(checkResetLock && _glamourerService.CheckForLock(Character))
+            {
+                ResetCollection();
+                ResetDesign(false);
+            }
+
+            SetSelectedProfile();
+        }
     }
     public Guid? GetActiveProfile()
     {
@@ -212,11 +224,11 @@ public class ActorAppearanceCapability : ActorCharacterCapability
         var currentAppearance = CurrentAppearance;
         BrioHuman.ShaderParams* shaders = Character.GetShaderParams();
 
-        ActorAppearanceExtended actor = new()
+        ActorAppearanceExtended actor = new() { Appearance = currentAppearance };
+        if(shaders != null)
         {
-            Appearance = currentAppearance,
-            ShaderParams = *shaders
-        };
+            actor.ShaderParams = *shaders;
+        }
 
         AnamnesisCharaFile appearance = actor;
         ResourceProvider.Instance.SaveFileDocument(file, appearance);
@@ -340,6 +352,7 @@ public class ActorAppearanceCapability : ActorCharacterCapability
             return;
 
         ResetCollection();
+        ResetProfile();
         _ = ResetAppearance();
     }
 
@@ -355,6 +368,7 @@ public class ActorAppearanceCapability : ActorCharacterCapability
         _penumbraService.OnPenumbraRedraw -= OnPenumbraRedraw;
 
         ResetCollection();
+        ResetProfile();
         _ = ResetAppearance();
     }
 }

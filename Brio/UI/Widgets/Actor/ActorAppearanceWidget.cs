@@ -16,9 +16,9 @@ namespace Brio.UI.Widgets.Actor;
 
 public class ActorAppearanceWidget(ActorAppearanceCapability capability) : Widget<ActorAppearanceCapability>(capability)
 {
-    public override string HeaderName => capability.Actor.IsProp ? "Change Prop" : "Appearance";
+    public override string HeaderName => Capability.Actor.IsProp ? "Change Prop" : "Appearance";
 
-    public override WidgetFlags Flags => capability.Actor.IsProp ? WidgetFlags.DefaultOpen | WidgetFlags.DrawBody | WidgetFlags.DrawPopup | WidgetFlags.DrawQuickIcons
+    public override WidgetFlags Flags => Capability.Actor.IsProp ? WidgetFlags.DefaultOpen | WidgetFlags.DrawBody | WidgetFlags.DrawPopup | WidgetFlags.DrawQuickIcons
         : WidgetFlags.DefaultOpen | WidgetFlags.DrawBody | WidgetFlags.DrawQuickIcons | WidgetFlags.DrawPopup | WidgetFlags.HasAdvanced;
 
     private static readonly GearSelector _gearSelector = new("gear_selector");

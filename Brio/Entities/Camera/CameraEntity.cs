@@ -4,6 +4,7 @@ using Brio.Entities.Core;
 using Brio.Game.Camera;
 using Brio.Game.GPose;
 using Brio.Game.Input;
+using Brio.UI.Controls;
 using Brio.UI.Controls.Stateless;
 using Brio.UI.Theming;
 using Dalamud.Interface;
@@ -52,7 +53,7 @@ public class CameraEntity(IServiceProvider provider, int cameraID, CameraType ca
 
     public CameraContainerEntity? CameraContainer => Parent as CameraContainerEntity;
 
-    public override EntityFlags Flags => EntityFlags.HasContextButton | EntityFlags.DefaultOpen;
+    public override EntityFlags Flags => EntityFlags.AllowDoubleClick | EntityFlags.HasContextButton | EntityFlags.DefaultOpen;
 
     public override int ContextButtonCount => VirtualCamera.IsFreeCamera ? 2 : 1;
 
@@ -77,6 +78,13 @@ public class CameraEntity(IServiceProvider provider, int cameraID, CameraType ca
     {
         _gameInputService.AllowEscape = true;
         base.OnSelected();
+    }
+
+    public override void OnDoubleClick()
+    {
+        var ce = GetCapability<CameraLifetimeCapability>();
+        if (!ce.CanDestroy) return;
+        RenameActorModal.Open(ce.Entity);
     }
 
     public override void DrawContextButton()

@@ -1,4 +1,5 @@
-﻿using Brio.Input;
+﻿using Brio.Core;
+using Brio.Input;
 using Brio.UI.Controls.Core;
 using Dalamud.Interface;
 using Dalamud.Interface.Utility.Raii;
@@ -192,7 +193,7 @@ public static partial class ImBrio
         {
             ImGui.SetNextItemWidth((ImBrio.GetRemainingWidth() - buttonWidth) + ImGui.GetStyle().ItemSpacing.X);
         }
-
+        
         changed |= ImGui.DragFloat($"##{label}_drag", ref value, step / 10.0f);
         active |= ImGui.IsItemActive();
 
@@ -225,6 +226,146 @@ public static partial class ImBrio
         }
 
         return (active, changed);
+    }
+
+    public static (bool anyActive, bool didChange) DragFloat(string label, ref float value, float min, float max, float step = 0.1f, string tooltip = "", int width = 0)
+    {
+        bool changed = false;
+        bool active = false;
+
+        if(InputService.IsKeyBindDown(KeyBindEvents.Interface_IncrementSmallModifier))
+            step /= 10;
+
+        if(InputService.IsKeyBindDown(KeyBindEvents.Interface_IncrementLargeModifier))
+            step *= 10;
+
+        float buttonWidth = 32;
+        ImGui.SetNextItemWidth(buttonWidth);
+        if(ImGui.ArrowButton($"##{label}_decrease", ImGuiDir.Left))
+        {
+            if (value - step <= min)
+            {
+                value = min;
+            }
+            else
+            {
+                value -= step;
+            }
+            changed = true;
+        }
+
+        if(ImGui.IsItemHovered())
+            ImGui.SetTooltip($"Decrease {tooltip}");
+
+        ImGui.SameLine();
+
+        bool hasLabel = !label.StartsWith("##");
+
+        if(hasLabel)
+        {
+            ImGui.SetNextItemWidth((ImGui.GetWindowWidth() * 0.65f) - (buttonWidth * 2) - ImGui.GetStyle().CellPadding.X);
+        }
+        else
+        {
+            ImGui.SetNextItemWidth((ImBrio.GetRemainingWidth() - buttonWidth) + ImGui.GetStyle().ItemSpacing.X);
+        }
+
+        if(width > 0)
+        {
+            ImGui.SetNextItemWidth(width);
+        }
+        
+        if(ImGui.DragFloat($"##{label}_drag", ref value, step / 10.0f, min, max))
+        {
+            if(value < min)
+            {
+                value = min;
+            }
+            else if(value > max)
+            {
+                value = max;
+            }
+            changed |= true;
+        }
+        active |= ImGui.IsItemActive();
+
+        if(ImGui.IsItemHovered())
+        {
+            ImGui.SetTooltip($"{tooltip}");
+            float mouseWheel = ImGui.GetIO().MouseWheel / 10;
+            if(mouseWheel != 0)
+            {
+                if(value + (mouseWheel * step) <= min)
+                {
+                    value = min;
+                }
+                else if(value + (mouseWheel * step) >= max)
+                {
+                    value = max;
+                }
+                else
+                {
+                    value += mouseWheel * step;
+                }
+                changed = true;
+            }
+        }
+
+        ImGui.SameLine();
+        ImGui.SetNextItemWidth(buttonWidth);
+        if(ImGui.ArrowButton($"##{label}_increase", ImGuiDir.Right))
+        {
+            if(value + step >= max)
+            {
+                value = max;
+            }
+            else
+            {
+                value += step;
+            }
+            changed = true;
+        }
+
+        if(ImGui.IsItemHovered())
+            ImGui.SetTooltip($"Increase {tooltip}");
+
+        if(hasLabel)
+        {
+            ImGui.SameLine();
+            ImGui.Text(label);
+        }
+
+        return (active, changed);
+    }
+
+    // Allows Vector3 to be used when Z is not needed in the UI
+    public static bool DragFloat2V3(string label, ref Vector3 value, float min, float max, string format, bool degrees = false, ImGuiSliderFlags flags = ImGuiSliderFlags.None, float step = 1.0f)
+    {
+        Vector2 vector2;
+        bool changed = false;
+
+        if(degrees)
+        {
+            // Convert to degrees
+            vector2 = new Vector2(BrioUtilities.RadiansToDegrees(-value.X), BrioUtilities.RadiansToDegrees(-value.Y));
+            changed = ImGui.DragFloat2(label, ref vector2, step, min, max, format, flags);
+            if(changed)
+            {
+                value.X = BrioUtilities.DegreesToRadians(-vector2.X);
+                value.Y = BrioUtilities.DegreesToRadians(-vector2.Y);
+            }
+        }
+        else
+        {
+            vector2 = new Vector2(value.X, value.Y);
+            changed = ImGui.DragFloat2(label, ref vector2, step, min, max, format, flags);
+            if(changed)
+            {
+                value.X = vector2.X;
+                value.Y = vector2.Y;
+            }
+        }
+        return changed;
     }
 }
 

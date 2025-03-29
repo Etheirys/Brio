@@ -55,14 +55,14 @@ public class ActorContainerCapability : Capability
 
     public (EntityId, ICharacter) CreateProp(bool selectInHierarchy)
     {
-        if(_actorSpawnService.SpawnNewProp(out ICharacter? chara))
+        if(_actorSpawnService.SpawnNewProp(out ICharacter? character))
         {
-            EntityId characterId = new EntityId(chara);
+            EntityId characterId = new EntityId(character!);
             if(selectInHierarchy)
             {
-                _entityManager.SetSelectedEntity(chara);
+                _entityManager.SetSelectedEntity(character!);
             }
-            return (characterId, chara);
+            return (characterId, character!);
         }
 
         throw new Exception("Failed to create prop");

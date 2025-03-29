@@ -24,9 +24,9 @@ public class CameraCapability : Capability, IDisposable
 
     private void OnGPoseStateChange(bool newState)
     {
-        if(newState is false)
+        if(newState is false && VirtualCamera.HasDelimitOverride)
         {
-            VirtualCamera.ResetCamera();
+            VirtualCamera.DelimitCamera = false;
         }
     }
 

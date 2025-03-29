@@ -19,7 +19,7 @@ using System.Threading.Tasks;
 
 namespace Brio.Game.Scene;
 
-public class SceneService(EntityManager _entityManager, VirtualCameraManager _virtualCameraManager, PosingService _posingService, ActorSpawnService _actorSpawnService, IClientState _clientState, IFramework _framework)
+public class SceneService(EntityManager _entityManager, VirtualCameraManager _virtualCameraManager, IFramework _framework)
 {
     public bool IsLoading { get; private set; }
 
@@ -170,10 +170,20 @@ public class SceneService(EntityManager _entityManager, VirtualCameraManager _vi
 
         await _framework.RunOnTick(async () =>
         {
-
-            if(actorFile.AnamnesisCharaFile.IsExtendedAppearanceValid)
+            // only import shaders if the appearance is valid and it's not a prop (characters only)
+            if(actorFile.AnamnesisCharaFile.IsExtendedAppearanceValid && !actorFile.IsProp)
+            {
                 BrioUtilities.ImportShadersFromFile(ref appearanceCapability._modelShaderOverride, actorFile.AnamnesisCharaFile);
-            await appearanceCapability.SetAppearance(actorFile.AnamnesisCharaFile, AppearanceImportOptions.All);
+                await appearanceCapability.SetAppearance(actorFile.AnamnesisCharaFile, AppearanceImportOptions.All);
+            }
+            else if(actorFile.IsProp) // if it's a prop, only import the appearance
+            {
+                await appearanceCapability.SetAppearance(actorFile.AnamnesisCharaFile, AppearanceImportOptions.Customize);
+            }
+            else // chars with invalid extended appearances
+            {
+                await appearanceCapability.SetAppearance(actorFile.AnamnesisCharaFile, AppearanceImportOptions.Default);
+            }
 
             await _framework.RunOnTick(async () =>
             {
@@ -182,7 +192,7 @@ public class SceneService(EntityManager _entityManager, VirtualCameraManager _vi
                     mountPose = true;
 
                 if(mountPose == false)
-                    posingCapability.ImportPose(actorFile.PoseFile, asScene: true);
+                    posingCapability.ImportPose(actorFile.PoseFile, asScene: true, asProp: actorFile.IsProp);
 
                 if(attachedActor.HasCapability<CompanionCapability>() == true && actorFile.HasChild && actorFile.Child is not null)
                 {
@@ -191,20 +201,20 @@ public class SceneService(EntityManager _entityManager, VirtualCameraManager _vi
                     companionCapability.SetCompanion(actorFile.Child.Companion);
 
                     await _framework.RunOnTick(() =>
+                    {
+                        if(actorFile.Child.PoseFile is not null)
                         {
-                            if(actorFile.Child.PoseFile is not null)
+                            var companionEntity = companionCapability.GetCompanionAsEntity();
+
+                            if(companionEntity is not null && companionEntity.TryGetCapability<PosingCapability>(out var posingCapability))
                             {
-                                var companionEntity = companionCapability.GetCompanionAsEntity();
-
-                                if(companionEntity is not null && companionEntity.TryGetCapability<PosingCapability>(out var posingCapability))
-                                {
-                                    posingCapability.ImportPose(actorFile.Child.PoseFile, asScene: true, freezeOnLoad: true);
-                                }
+                                posingCapability.ImportPose(actorFile.Child.PoseFile, asScene: true, freezeOnLoad: true, asProp: actorFile.IsProp);
                             }
+                        }
 
-                            if(mountPose == true)
-                                posingCapability.ImportPose(actorFile.PoseFile, asScene: true);
-                        });
+                        if(mountPose == true)
+                            posingCapability.ImportPose(actorFile.PoseFile, asScene: true, asProp: actorFile.IsProp);
+                    });
                 }
             }, delayTicks: 10); // I don't like having to set delayTicks to this but I don't think I have another way without more rework
         });
