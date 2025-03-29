@@ -1,8 +1,10 @@
 ﻿using Brio.Capabilities.Camera;
+using Brio.Config;
 using Brio.Entities;
 using Brio.Entities.Camera;
 using Brio.Entities.Core;
 using Brio.Game.Camera;
+using Brio.Game.Cutscene;
 using Brio.Game.GPose;
 using Brio.UI.Controls.Editors;
 using Dalamud.Interface.Windowing;
@@ -16,14 +18,18 @@ public class CameraWindow : Window, IDisposable
     private readonly EntityManager _entityManager;
     private readonly GPoseService _gPoseService;
     private readonly VirtualCameraManager _virtualCameraService;
+    private readonly CutsceneManager _cutsceneManager;
+    private readonly ConfigurationService _configService;
 
-    public CameraWindow(EntityManager entityManager, GPoseService gPoseService, VirtualCameraManager virtualCameraService) : base($"{Brio.Name} - Camera###brio_camera_window")
+    public CameraWindow(EntityManager entityManager, GPoseService gPoseService, CutsceneManager cutsceneManager, ConfigurationService configService, VirtualCameraManager virtualCameraService) : base($"{Brio.Name} - Camera###brio_camera_window")
     {
         Namespace = "brio_camera_namespace";
 
         _entityManager = entityManager;
         _gPoseService = gPoseService;
         _virtualCameraService = virtualCameraService;
+        _cutsceneManager = cutsceneManager;
+        _configService = configService;
 
         _gPoseService.OnGPoseStateChange += OnGPoseStateChange;
     }
@@ -65,7 +71,7 @@ public class CameraWindow : Window, IDisposable
                         }
                         else if(camBrioCap.CameraEntity.CameraType == CameraType.Cutscene)
                         {
-
+                            CameraEditor.DrawBrioCutscene("camera_widget_editor", camBrioCap, _cutsceneManager, _configService);
                         }
                         else
                         {

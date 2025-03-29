@@ -1,5 +1,7 @@
 ﻿using Brio.Capabilities.Camera;
+using Brio.Config;
 using Brio.Entities.Camera;
+using Brio.Game.Cutscene;
 using Brio.UI.Controls.Editors;
 using Brio.UI.Controls.Stateless;
 using Brio.UI.Widgets.Core;
@@ -101,7 +103,7 @@ public class CameraContainerWidget(CameraContainerCapability capability) : Widge
     }
 }
 
-public class BrioCameraWidget(BrioCameraCapability capability) : Widget<BrioCameraCapability>(capability)
+public class BrioCameraWidget(BrioCameraCapability capability, CutsceneManager _cutsceneManager, ConfigurationService _configService) : Widget<BrioCameraCapability>(capability)
 {
     public override string HeaderName => "Camera Editor";
 
@@ -115,6 +117,11 @@ public class BrioCameraWidget(BrioCameraCapability capability) : Widget<BrioCame
         }
         else if(Capability.CameraEntity.CameraType == CameraType.Cutscene)
         {
+            if(ImGui.Button("Open Camera Window"))
+            {
+                Capability.ShowCameraWindow();
+            }
+            ImBrio.TextCentered("Open the Camera Window to edit play a Cutscene ", ImGui.GetWindowContentRegionMax().X);
 
         }
         else

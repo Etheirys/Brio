@@ -244,7 +244,7 @@ public class UIManager : IDisposable
     {
         _gPoseService.OnGPoseStateChange -= OnGPoseStateChange;
         _configurationService.OnConfigurationChanged -= ApplySettings;
-        _pluginInterface.UiBuilder.Draw -= _windowSystem.Draw;
+        _pluginInterface.UiBuilder.Draw -= DrawUI;
         _pluginInterface.UiBuilder.OpenConfigUi -= ShowSettingsWindow;
         _pluginInterface.UiBuilder.OpenMainUi -= ShowMainWindow;
 

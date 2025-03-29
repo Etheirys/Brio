@@ -128,6 +128,13 @@ public class SettingsWindow : Window
                         _configurationService.Configuration.Library.ReturnLibraryToLastLocation = returnToLastLocation;
                         _configurationService.ApplyChange();
                     }
+
+                    bool useFilenameAsActorName = _configurationService.Configuration.Library.UseFilenameAsActorName;
+                    if(ImGui.Checkbox("Use the Character Filename as the Actor Name", ref useFilenameAsActorName))
+                    {
+                        _configurationService.Configuration.Library.UseFilenameAsActorName = useFilenameAsActorName;
+                        _configurationService.ApplyChange();
+                    }
                 }
 
                 DrawNPCAppearanceHack();

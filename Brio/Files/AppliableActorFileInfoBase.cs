@@ -1,4 +1,5 @@
-﻿using Brio.Entities;
+﻿using Brio.Config;
+using Brio.Entities;
 using Brio.Entities.Actor;
 using Brio.Library.Sources;
 using Brio.UI.Controls.Stateless;
@@ -9,10 +10,12 @@ public abstract class AppliableActorFileInfoBase<T> : JsonDocumentBaseFileInfo<T
     where T : class
 {
     private EntityManager _entityManager;
+    private ConfigurationService _configService;
 
-    public AppliableActorFileInfoBase(EntityManager entityManager)
+    public AppliableActorFileInfoBase(EntityManager entityManager, ConfigurationService configurationService)
     {
         _entityManager = entityManager;
+        _configService = configurationService;
     }
 
     public override bool InvokeDefaultAction(FileEntry fileEntry, object? args)
@@ -37,6 +40,9 @@ public abstract class AppliableActorFileInfoBase<T> : JsonDocumentBaseFileInfo<T
         {
             if(Load(fileEntry.FilePath) is T file)
             {
+                if (_configService.Configuration.Library.UseFilenameAsActorName) {
+                    actor.FriendlyName = fileEntry.Name;
+                }
                 Apply(file, actor, false);
             }
         });

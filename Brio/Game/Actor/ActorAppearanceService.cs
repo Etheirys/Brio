@@ -10,6 +10,7 @@ using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Hooking;
 using Dalamud.Plugin.Services;
 using FFXIVClientStructs.FFXIV.Client.Game.Character;
+using FFXIVClientStructs.FFXIV.Client.Game.Control;
 using FFXIVClientStructs.FFXIV.Client.Graphics.Scene;
 using System;
 using System.Collections.Generic;
@@ -41,7 +42,7 @@ public class ActorAppearanceService : IDisposable
     private readonly Hook<UpdateTintDelegate> _updateTintHook = null!;
 
     private unsafe delegate* unmanaged<DrawDataContainer*, byte, byte, void> _setFacewear;
-    private unsafe delegate* unmanaged<nint, LookAtTarget*, uint, nint, void> _updateLookAt;
+    private unsafe delegate* unmanaged<CharacterLookAtController*, LookAtTarget*, uint, nint, void> _updateLookAt;
 
     public bool CanTint => _configurationService.Configuration.Appearance.EnableTinting;
 
@@ -71,7 +72,7 @@ public class ActorAppearanceService : IDisposable
         _setFacewear = (delegate* unmanaged<DrawDataContainer*, byte, byte, void>)setFacewearAddress;
 
         var updateFaceTrackerAddress = sigScanner.ScanText("E8 ?? ?? ?? ?? 8B D7 48 8B CB E8 ?? ?? ?? ?? 41 ?? ?? 8B D7 48 ?? ?? 48 ?? ?? ?? ?? 48 83 ?? ?? 5F");
-        _updateLookAt = (delegate* unmanaged<nint, LookAtTarget*, uint, nint, void>)updateFaceTrackerAddress;
+        _updateLookAt = (delegate* unmanaged<CharacterLookAtController*, LookAtTarget*, uint, nint, void>)updateFaceTrackerAddress;
 
         var actorLookAtLoopAddress = sigScanner.ScanText("E8 ?? ?? ?? ?? 48 83 C3 08 48 83 EF 01 75 CF 48 ?? ?? ?? ?? 48");
         _actorLookAtLoop = hooks.HookFromAddress<ActorLookAtLoopDelegate>(actorLookAtLoopAddress, ActorLookAtLoopDetour);
@@ -87,7 +88,8 @@ public class ActorAppearanceService : IDisposable
     {
         if(_gPoseService.IsGPosing)
         {
-            var obj = _objectTable.CreateObjectReference((a1 - 0xD00));
+            var lookAtContainer = (ContainerInterface*)a1;
+            var obj = _objectTable.CreateObjectReference((nint)lookAtContainer->OwnerObject);
             if(obj is not null && obj.IsValid() && obj.IsGPose() && _lookAtHandles.ContainsKey(obj.GameObjectId))
             {
                 actorLook(obj, _lookAtHandles[obj.GameObjectId]);
@@ -122,12 +124,14 @@ public class ActorAppearanceService : IDisposable
         else if(lookAtDataHolder.LookatType == LookAtTargetMode.None)
             return;
 
+        var lookAtController = &((Character*)targetActor.Address)->LookAt.Controller;
+
         if(lookAtDataHolder.lookAtTargetType.HasFlag(LookAtTargetType.Eyes))
-            _updateLookAt(targetActor.Address + 0xD10, &lookAt.Eyes.LookAtTarget, (uint)LookEditType.Eyes, 0);
+            _updateLookAt(lookAtController, &lookAt.Eyes.LookAtTarget, (uint)LookEditType.Eyes, 0);
         if(lookAtDataHolder.lookAtTargetType.HasFlag(LookAtTargetType.Body))
-            _updateLookAt(targetActor.Address + 0xD10, &lookAt.Body.LookAtTarget, (uint)LookEditType.Body, 0);
+            _updateLookAt(lookAtController, &lookAt.Body.LookAtTarget, (uint)LookEditType.Body, 0);
         if(lookAtDataHolder.lookAtTargetType.HasFlag(LookAtTargetType.Head))
-            _updateLookAt(targetActor.Address + 0xD10, &lookAt.Head.LookAtTarget, (uint)LookEditType.Head, 0);
+            _updateLookAt(lookAtController, &lookAt.Head.LookAtTarget, (uint)LookEditType.Head, 0);
     }
 
     public unsafe void TESTactorlookClear(IGameObject gameobj)
@@ -146,22 +150,49 @@ public class ActorAppearanceService : IDisposable
 
     public unsafe void TESTactorlook(IGameObject gameobj)
     {
-        if(_lookAtHandles.TryGetValue(gameobj.GameObjectId, out var obj))
+        var camera = _virtualCameraManager?.CurrentCamera;
+
+        if(camera is null)
+            return;
+
+        _lookAtHandles.TryGetValue(gameobj.GameObjectId, out LookAtDataHolder? obj);
+
+        if(obj is null)
         {
-            obj.LookAtMode = LookMode.Position;
-            obj.lookAtTargetType = LookAtTargetType.All;
-            obj.LookatType = LookAtTargetMode.Camera;
+            obj = new LookAtDataHolder();
+            _lookAtHandles.Add(gameobj.GameObjectId, obj);
         }
-        else
+
+        obj.LookAtMode = LookMode.Position;
+        obj.lookAtTargetType = LookAtTargetType.All;
+        obj.LookatType = LookAtTargetMode.Camera;
+        obj.Target = new()
         {
-            _lookAtHandles.Add(gameobj.GameObjectId, new LookAtDataHolder
+            Body = new LookAtType
             {
-                Target = new(),
-                LookAtMode = LookMode.Position,
-                lookAtTargetType = LookAtTargetType.All,
-                LookatType = LookAtTargetMode.Camera
-            });
-        }
+                LookAtTarget = new LookAtTarget
+                {
+                    LookMode = (uint)LookMode.Position,
+                    Position = camera.RealPosition
+                }
+            },
+            Eyes = new LookAtType
+            {
+                LookAtTarget = new LookAtTarget
+                {
+                    LookMode = (uint)LookMode.Position,
+                    Position = camera.RealPosition
+                }
+            },
+            Head = new LookAtType
+            {
+                LookAtTarget = new LookAtTarget
+                {
+                    LookMode = (uint)LookMode.Position,
+                    Position = camera.RealPosition
+                }
+            },
+        };
     }
     public void RemoveFromLook(IGameObject gameobj)
     {

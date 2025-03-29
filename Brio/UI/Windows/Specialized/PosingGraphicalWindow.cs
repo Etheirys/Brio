@@ -364,6 +364,8 @@ public class PosingGraphicalWindow : Window, IDisposable
 
         var currentTransform = posing.ModelPosing.Transform;
 
+        Game.Posing.Skeletons.Bone? selectedBone = null;
+
         Matrix4x4? targetMatrix = selected.Match<Matrix4x4?>(
             (boneSelect) =>
             {
@@ -381,6 +383,7 @@ public class PosingGraphicalWindow : Window, IDisposable
                 if(charaBase == null)
                     return null;
 
+                selectedBone = bone;
                 return bone.LastTransform.ToMatrix() * new Transform()
                 {
                     Position = (Vector3)charaBase->CharacterBase.DrawObject.Object.Position,
@@ -410,7 +413,8 @@ public class PosingGraphicalWindow : Window, IDisposable
 
         if(ImBrioGizmo.DrawRotation(ref matrix, gizmoSize, _posingService.CoordinateMode == PosingCoordinateMode.World))
         {
-            _trackingMatrix = matrix;
+            if(!posing.ModelPosing.Freeze && !(selectedBone != null && selectedBone.Freeze))
+                _trackingMatrix = matrix;
         }
 
         if(_trackingMatrix.HasValue)

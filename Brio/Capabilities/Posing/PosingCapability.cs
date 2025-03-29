@@ -343,6 +343,21 @@ public class PosingCapability : ActorCharacterCapability
         ModelPosing.ExportModelPose(poseFile);
         return poseFile;
     }
+    public BonePoseInfoId? IsSelectedBone()
+    {
+        Game.Posing.Skeletons.Bone? realBone = null;
+        return Selected.Match<BonePoseInfoId?>(
+            bone =>
+            {
+                realBone = SkeletonPosing.GetBone(bone);
+                if (realBone != null && realBone.Skeleton.IsValid)
+                    return bone;
+                return null;
+            },
+            _ => null,
+            _ => null
+        );
+    }
 
     public record struct PoseStack(PoseInfo Info, Transform ModelTransform);
 }

@@ -1,11 +1,16 @@
-﻿using Brio.Capabilities.Camera;
+﻿using Brio.Capabilities.Actor;
+using Brio.Capabilities.Camera;
+using Brio.Config;
 using Brio.Entities.Camera;
+using Brio.Files;
 using Brio.Game.Camera;
+using Brio.Game.Cutscene;
 using Brio.UI.Controls.Core;
 using Brio.UI.Controls.Stateless;
 using Dalamud.Interface;
 using Dalamud.Interface.Utility.Raii;
 using ImGuiNET;
+using System.IO;
 using System.Numerics;
 
 namespace Brio.UI.Controls.Editors;
@@ -92,7 +97,7 @@ public static class CameraEditor
 
                     ImGui.SetNextItemWidth(width);
                     var rotation = camera.Rotation;
-                    if(ImGui.DragFloat3("Rotation", ref rotation, 0.001f))
+                    if(ImBrio.DragFloat2V3("Pan", ref rotation, -360, 360, "%.3f", true, ImGuiSliderFlags.AlwaysClamp))
                         camera.Rotation = rotation;
                 }
 
@@ -104,6 +109,21 @@ public static class CameraEditor
                     var fov = camera.FoV;
                     if(ImBrio.SliderAngle("##FoV", ref fov, -44, 120, "%.2f", ImGuiSliderFlags.AlwaysClamp))
                         camera.FoV = fov;
+                }
+
+                {
+                    ImBrio.Icon(FontAwesomeIcon.CameraRotate);
+
+                    ImGui.SameLine();
+
+                    float pivot = camera.PivotRotation;
+                    if(ImBrio.SliderAngle("##PivotRotation", ref pivot, -180, 180, "%.2f"))
+                        camera.PivotRotation = pivot;
+                   
+                    ImGui.SameLine();
+
+                    if(ImBrio.FontIconButtonRight("resetPivotRotation", FontAwesomeIcon.Undo, 1f, "Reset Pivot", camera.PivotRotation != 0))
+                        camera.PivotRotation = 0;
                 }
 
                 ImGui.Separator();
@@ -264,6 +284,136 @@ public static class CameraEditor
                     var delimit = camera.DelimitCamera;
                     if(ImGui.Checkbox("Delimit Camera", ref delimit))
                         camera.DelimitCamera = delimit;
+                }
+            }
+        }
+    }
+
+    //
+    private static float MaxItemWidth => ImGui.GetContentRegionAvail().X - ImGui.CalcTextSize("XXXXXXXXXXXXXXXXXX").X;
+    private static float LabelStart => MaxItemWidth + ImGui.GetCursorPosX() + (ImGui.GetStyle().FramePadding.X * 2f);
+
+    public unsafe static void DrawBrioCutscene(string id, BrioCameraCapability _cameraCapability, CutsceneManager _cutsceneManager, ConfigurationService _configService)
+    {
+        var cameraValues = _cameraCapability.CameraEntity.VirtualCamera.CutsceneCamValues;
+
+        ImGui.Text("Camera Path ");
+
+        ImGui.InputText(string.Empty, ref cameraValues.CameraPath, 0, ImGuiInputTextFlags.ReadOnly);
+
+        ImGui.SameLine();
+
+        if(ImGui.Button("Browse"))
+        {
+            UIManager.Instance.FileDialogManager.OpenFileDialog("Browse for XAT Camera File", "XAT Camera File {.xcp}",
+                (success, path) =>
+                {
+                    if(success)
+                    {
+                        cameraValues.CameraPath = path[0];
+
+                        string? folderPath = Path.GetDirectoryName(cameraValues.CameraPath);
+                        if(folderPath is not null)
+                        {
+                            _configService.Configuration.LastXATPath = folderPath;
+                            _configService.Save();
+
+                            _cutsceneManager.CameraPath = new XATCameraFile(new BinaryReader(File.OpenRead(cameraValues.CameraPath)));
+                        }
+                    }
+                    else
+                    {
+                        cameraValues.CameraPath = string.Empty;
+                        _cutsceneManager.CameraPath = null;
+                    }
+                }, 1, _configService.Configuration.LastXATPath, false);
+        }
+
+        ImGui.Separator();
+
+        using(ImRaii.Disabled(string.IsNullOrEmpty(cameraValues.CameraPath)))
+        {
+            ImGui.Checkbox("Enable FOV", ref _cutsceneManager.CameraSettings.EnableFOV);
+
+            ImGui.Separator();
+
+            ImGui.Text("Disabling FOV will make for a less accurate Camera, but might");
+            ImGui.Text("provide for an easer way to support more character sizes without");
+            ImGui.Text("changing the Camera's Scale & Offset!");
+
+            ImGui.Separator();
+
+            ImGui.InputFloat3("Camera Scale", ref _cutsceneManager.CameraSettings.Scale);
+            ImGui.InputFloat3("Camera Offset", ref _cutsceneManager.CameraSettings.Offset);
+
+            ImGui.Separator();
+
+            ImGui.Checkbox("Loop", ref _cutsceneManager.CameraSettings.Loop);
+
+            ImGui.Checkbox("Hide Brio On Play  (Press 'Shift + B' to Stop Cutscene)", ref _cutsceneManager.CloseWindowsOnPlay);
+
+            ImGui.Checkbox("###delay_Start", ref _cutsceneManager.DelayStart);
+            if(ImGui.IsItemHovered())
+                ImGui.SetTooltip("Start Delay");
+
+            ImGui.SameLine();
+            ImGui.SetNextItemWidth(MaxItemWidth);
+
+            using(ImRaii.Disabled(_cutsceneManager.DelayStart == false))
+            {
+                ImGui.InputInt($"###delay_Start_Chek", ref _cutsceneManager.DelayTime, 0, 0);
+            }
+
+            ImGui.SameLine();
+            ImGui.SetCursorPosX(LabelStart);
+            ImGui.Text("Start Delay");
+
+            ImGui.Separator();
+
+            ImGui.Checkbox("Start All Actors Animations On Play", ref _cutsceneManager.StartAllActorAnimationsOnPlay);
+
+            using(ImRaii.Disabled(_cutsceneManager.StartAllActorAnimationsOnPlay == false))
+            {
+                ImGui.Checkbox("###animation_delay_Start", ref _cutsceneManager.DelayAnimationStart);
+                if(ImGui.IsItemHovered())
+                    ImGui.SetTooltip("Animation Start Delay");
+
+                ImGui.SameLine();
+                ImGui.SetNextItemWidth(MaxItemWidth);
+
+                using(ImRaii.Disabled(_cutsceneManager.DelayAnimationStart == false))
+                {
+                    ImGui.InputInt($"###animation_delay_Start_Chek", ref _cutsceneManager.DelayAnimationTime, 0, 0);
+                }
+
+                ImGui.SameLine();
+                ImGui.SetCursorPosX(LabelStart);
+                ImGui.Text("Animation Delay");
+            }
+
+            ImGui.Separator();
+
+            ImGui.Text("The time-scale for the delay functions are in Milliseconds!");
+            ImGui.Text("1000 Milliseconds = 1 Second");
+
+            ImGui.Separator();
+
+            var isrunning = _cutsceneManager.IsRunning;
+            using(ImRaii.Disabled(isrunning))
+            {
+                if(ImGui.Button("Play"))
+                {
+                    _cutsceneManager.StartPlayback();
+                }
+            }
+
+            ImGui.SameLine();
+
+            using(ImRaii.Disabled(!isrunning))
+            {
+                if(ImGui.Button("Stop"))
+                {
+                    _cutsceneManager.StopPlayback();
                 }
             }
         }
