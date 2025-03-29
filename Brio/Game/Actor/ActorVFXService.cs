@@ -6,7 +6,7 @@ using Brio.Game.Actor.Extensions;
 
 namespace Brio.Game.Actor;
 
-internal unsafe class ActorVFXService : IDisposable
+public unsafe class ActorVFXService : IDisposable
 {
 
     private delegate* unmanaged<string, NativeGameObject*, NativeGameObject*, float, byte, ushort, byte, nint> _createActorVfx;
