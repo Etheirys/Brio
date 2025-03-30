@@ -52,17 +52,11 @@ public static class KeybindEditor
         if(!config.KeyBindings.ContainsKey(evt))
             config.KeyBindings.Add(evt, new KeyConfig(VirtualKey.NO_KEY));
 
-        return KeySelector(label, ref evt, config);
-    }
-
-    public static bool KeySelector(string label, ref InputAction evt, InputManagerConfiguration config)
-    {
         bool changed = false;
-        var bind = config.KeyBindings[evt];
-        ref var keyBind = ref bind;
+        KeyConfig keyBind = config.KeyBindings[evt];
 
         // Control
-        using(ImRaii.Disabled(keyBind.isCtrl))
+        using(ImRaii.Disabled(keyBind.key == VirtualKey.CONTROL))
         {
             bool control = keyBind.requireCtrl;
             if(ImGui.Checkbox($"##{label}_Control", ref control))
@@ -79,8 +73,7 @@ public static class KeybindEditor
 
         // Alt
         ImGui.SameLine();
-
-        using(ImRaii.Disabled(keyBind.isAlt))
+        using(ImRaii.Disabled(keyBind.key == VirtualKey.MENU))
         {
             bool alt = keyBind.requireAlt;
             if(ImGui.Checkbox($"##{label}_Alt", ref alt))
@@ -97,7 +90,7 @@ public static class KeybindEditor
 
         // Shift
         ImGui.SameLine();
-        using(ImRaii.Disabled(keyBind.isShift))
+        using(ImRaii.Disabled(keyBind.key == VirtualKey.SHIFT))
         {
             bool shift = keyBind.requireShift;
             if(ImGui.Checkbox($"##{label}_Shift", ref shift))
@@ -118,7 +111,7 @@ public static class KeybindEditor
         {
             config.ResetKeyToDefault(evt);
         }
-        
+
         if(ImGui.IsItemHovered())
         {
             ImGui.SetTooltip("Reset Key to Default");

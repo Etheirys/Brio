@@ -769,9 +769,12 @@ public class SettingsWindow : Window
                 _configurationService.ApplyChange();
             }
 
-            ImGui.EndDisabled();
+            if(enableKeybinds == false)
+            {
+                ImGui.EndDisabled();
+            }
 
-            if (ImGui.CollapsingHeader("Free Camera", ImGuiTreeNodeFlags.DefaultOpen))
+            if(ImGui.CollapsingHeader("Free Camera", ImGuiTreeNodeFlags.DefaultOpen))
             {
                 DrawKeyBind(InputAction.FreeCamera_Forward);
                 DrawKeyBind(InputAction.FreeCamera_Backward);
@@ -785,7 +788,7 @@ public class SettingsWindow : Window
                 DrawKeyBind(InputAction.FreeCamera_DecreaseCamMovement);
             }
 
-            if (enableKeybinds == false)
+            if(enableKeybinds == false)
             {
                 ImGui.BeginDisabled();
             }
