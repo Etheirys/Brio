@@ -75,6 +75,7 @@ public class PosingCapability : ActorCharacterCapability
     private readonly ConfigurationService _configurationService;
     private readonly PosingTransformWindow _overlayTransformWindow;
     private readonly IFramework _framework;
+    private readonly InputService _input;
     private readonly GameInputService _gameInputService;
 
     public PosingCapability(
@@ -84,7 +85,8 @@ public class PosingCapability : ActorCharacterCapability
         ConfigurationService configurationService,
         PosingTransformWindow overlayTransformWindow,
         IFramework framework,
-        GameInputService gameInputService)
+        GameInputService gameInputService,
+        InputService input)
         : base(parent)
     {
         Widget = new PosingWidget(this);
@@ -93,17 +95,26 @@ public class PosingCapability : ActorCharacterCapability
         _configurationService = configurationService;
         _overlayTransformWindow = overlayTransformWindow;
         _framework = framework;
+        _input = input;
         _gameInputService = gameInputService;
     }
 
     public override void OnEntitySelected()
     {
         base.OnEntitySelected();
+
+        _input.AddListener(KeyBindEvents.Posing_ToggleOverlay, ToggleOverlay);
+        _input.AddListener(KeyBindEvents.Posing_Undo, Undo);
+        _input.AddListener(KeyBindEvents.Posing_Redo, Redo);
     }
 
     public override void OnEntityDeselected()
     {
         base.OnEntityDeselected();
+
+        _input.RemoveListener(KeyBindEvents.Posing_ToggleOverlay, ToggleOverlay);
+        _input.RemoveListener(KeyBindEvents.Posing_Undo, Undo);
+        _input.RemoveListener(KeyBindEvents.Posing_Redo, Redo);
     }
 
     public void ClearSelection() => Selected = PosingSelectionType.None;
@@ -273,40 +284,6 @@ public class PosingCapability : ActorCharacterCapability
             Reconcile(reset);
     }
 
-    public static void FlipBone(Bone bone, BonePoseInfo poseInfo)
-    {
-        var newBoneTransform = bone.LastTransform;
-
-        // Convert to Euler (like the Gizmo)
-        var boneRotationEuler = bone.LastTransform.Rotation.ToEuler();
-        boneRotationEuler.X = 180 - boneRotationEuler.X;
-        boneRotationEuler.Y = -boneRotationEuler.Y;
-        var newBoneRotation = boneRotationEuler.ToQuaternion();
-
-        newBoneTransform.Rotation = newBoneRotation;
-
-        poseInfo.Apply(newBoneTransform, bone.LastRawTransform, TransformComponents.All, TransformComponents.All, poseInfo.DefaultIK, poseInfo.MirrorMode, true);
-    }
-
-    public void FlipBoneModel()
-    {
-        BonePoseInfoId? selectedIsBone = IsSelectedBone();
-        // Bone Flip
-        if(selectedIsBone.HasValue)
-        {
-            // Get current bone rotation data
-            var bone = SkeletonPosing.GetBone(selectedIsBone.Value);
-            if(bone != null)
-            {
-                var poseInfo = SkeletonPosing.PoseInfo.GetPoseInfo(bone);
-                FlipBone(bone, poseInfo);
-            }
-        } else
-        {
-            // Model Flip (TODO: Implement)
-        }
-    }
-
     public void Redo()
     {
         if(_redoStack.TryPop(out var redoStack))
@@ -369,18 +346,53 @@ public class PosingCapability : ActorCharacterCapability
     }
     public BonePoseInfoId? IsSelectedBone()
     {
-        Game.Posing.Skeletons.Bone? realBone = null;
+        Bone? realBone = null;
         return Selected.Match<BonePoseInfoId?>(
             bone =>
             {
                 realBone = SkeletonPosing.GetBone(bone);
-                if (realBone != null && realBone.Skeleton.IsValid)
+                if(realBone != null && realBone.Skeleton.IsValid)
                     return bone;
                 return null;
             },
             _ => null,
             _ => null
         );
+    }
+
+    public static void FlipBone(Bone bone, BonePoseInfo poseInfo)
+    {
+        var newBoneTransform = bone.LastTransform;
+
+        // Convert to Euler (like the Gizmo)
+        var boneRotationEuler = bone.LastTransform.Rotation.ToEuler();
+        boneRotationEuler.X = 180 - boneRotationEuler.X;
+        boneRotationEuler.Y = -boneRotationEuler.Y;
+        var newBoneRotation = boneRotationEuler.ToQuaternion();
+
+        newBoneTransform.Rotation = newBoneRotation;
+
+        poseInfo.Apply(newBoneTransform, bone.LastRawTransform, TransformComponents.All, TransformComponents.All, poseInfo.DefaultIK, poseInfo.MirrorMode, true);
+    }
+
+    public void FlipBoneModel()
+    {
+        BonePoseInfoId? selectedIsBone = IsSelectedBone();
+        // Bone Flip
+        if(selectedIsBone.HasValue)
+        {
+            // Get current bone rotation data
+            var bone = SkeletonPosing.GetBone(selectedIsBone.Value);
+            if(bone != null)
+            {
+                var poseInfo = SkeletonPosing.PoseInfo.GetPoseInfo(bone);
+                FlipBone(bone, poseInfo);
+            }
+        }
+        else
+        {
+            // Model Flip (TODO: Implement)
+        }
     }
 
     public record struct PoseStack(PoseInfo Info, Transform ModelTransform);
