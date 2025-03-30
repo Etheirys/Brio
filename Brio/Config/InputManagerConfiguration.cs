@@ -75,6 +75,7 @@ public class InputManagerConfiguration
     public bool Enable { get; set; } = true;
     public bool ShowPromptsInGPose { get; set; } = false;
     public bool EnableKeyHandlingOnKeyMod { get; set; } = true;
+    public bool FlipKeybindsPastNinety { get; set; } = true;
 
     public void ResetKeyToDefault(InputAction action)
     {

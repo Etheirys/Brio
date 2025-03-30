@@ -748,6 +748,13 @@ public class SettingsWindow : Window
                 _configurationService.ApplyChange();
             }
 
+            bool flipKeybindsPastNinety = _configurationService.Configuration.InputManager.FlipKeybindsPastNinety;
+            if(ImGui.Checkbox("Flip Free Camera Keybinds Past -90/90 Degrees", ref flipKeybindsPastNinety))
+            {
+                _configurationService.Configuration.InputManager.FlipKeybindsPastNinety = flipKeybindsPastNinety;
+                _configurationService.ApplyChange();
+            }
+
             ImGui.Separator();
 
             bool enableKeybinds = _configurationService.Configuration.InputManager.Enable;

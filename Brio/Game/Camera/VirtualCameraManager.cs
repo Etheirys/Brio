@@ -1,4 +1,5 @@
-﻿using Brio.Core;
+﻿using Brio.Config;
+using Brio.Core;
 using Brio.Entities;
 using Brio.Entities.Camera;
 using Brio.Game.GPose;
@@ -279,7 +280,7 @@ public class VirtualCameraManager : IDisposable
         // (Similar to XIV's Default Camera)
         if(InputManagerService.ActionKeysPressed(InputAction.FreeCamera_Left))
             if(CurrentCamera.IsFreeCamera)
-                if(CurrentCamera.PivotRotation < BrioUtilities.DegreesToRadians(-90) || CurrentCamera.PivotRotation > BrioUtilities.DegreesToRadians(90))
+                if(ConfigurationService.Instance.Configuration.InputManager.FlipKeybindsPastNinety && (CurrentCamera.PivotRotation < BrioUtilities.DegreesToRadians(-90) || CurrentCamera.PivotRotation > BrioUtilities.DegreesToRadians(90)))
                     leftRight += 1;
                 else
                     leftRight -= 1;
@@ -288,7 +289,7 @@ public class VirtualCameraManager : IDisposable
 
         if(InputManagerService.ActionKeysPressed(InputAction.FreeCamera_Right))
             if(CurrentCamera.IsFreeCamera)
-                if(CurrentCamera.PivotRotation < BrioUtilities.DegreesToRadians(-90) || CurrentCamera.PivotRotation > BrioUtilities.DegreesToRadians(90))
+                if(ConfigurationService.Instance.Configuration.InputManager.FlipKeybindsPastNinety && (CurrentCamera.PivotRotation < BrioUtilities.DegreesToRadians(-90) || CurrentCamera.PivotRotation > BrioUtilities.DegreesToRadians(90)))
                     leftRight -= 1;
                 else
                     leftRight += 1;
@@ -299,20 +300,20 @@ public class VirtualCameraManager : IDisposable
         // Invert logic around the 90 degree pivot points (like lateral movement)
         if(InputManagerService.ActionKeysPressed(InputAction.FreeCamera_Up) || InputManagerService.ActionKeysPressed(InputAction.FreeCamera_UpAlt))
             if(CurrentCamera.IsFreeCamera)
-                if(CurrentCamera.PivotRotation < BrioUtilities.DegreesToRadians(-90) || CurrentCamera.PivotRotation > BrioUtilities.DegreesToRadians(90))
-                    upDown += 1;
-                else
-                    upDown -= 1;
-            else
-                upDown += 1;
-        else if(InputManagerService.ActionKeysPressed(InputAction.FreeCamera_Down) || InputManagerService.ActionKeysPressed(InputAction.FreeCamera_DownAlt))
-            if(CurrentCamera.IsFreeCamera)
-                if(CurrentCamera.PivotRotation < BrioUtilities.DegreesToRadians(-90) || CurrentCamera.PivotRotation > BrioUtilities.DegreesToRadians(90))
+                if(ConfigurationService.Instance.Configuration.InputManager.FlipKeybindsPastNinety && (CurrentCamera.PivotRotation < BrioUtilities.DegreesToRadians(-90) || CurrentCamera.PivotRotation > BrioUtilities.DegreesToRadians(90)))
                     upDown -= 1;
                 else
                     upDown += 1;
             else
                 upDown -= 1;
+        else if(InputManagerService.ActionKeysPressed(InputAction.FreeCamera_Down) || InputManagerService.ActionKeysPressed(InputAction.FreeCamera_DownAlt))
+            if(CurrentCamera.IsFreeCamera)
+                if(ConfigurationService.Instance.Configuration.InputManager.FlipKeybindsPastNinety && (CurrentCamera.PivotRotation < BrioUtilities.DegreesToRadians(-90) || CurrentCamera.PivotRotation > BrioUtilities.DegreesToRadians(90)))
+                    upDown += 1;
+                else
+                    upDown -= 1;
+            else
+                upDown += 1;
 
         // Handle movement speed
         if(InputManagerService.ActionKeysPressed(InputAction.FreeCamera_IncreaseCamMovement))
