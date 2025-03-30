@@ -546,8 +546,8 @@ public class GearEditor()
 
         FacewearUnion facewearUnion = new FacewearId(appearance.Facewear);
         var (facewearId, facewearName, facewearIcon) = facewearUnion.Match(
-           glasses => ((byte)glasses.RowId, glasses.Name, (uint)glasses.Icon),
-           none => ((byte)0, "None", (uint)0x0)
+           glasses => ((ushort)glasses.RowId, glasses.Name, (uint)glasses.Icon),
+           none => ((ushort)0, "None", (uint)0x0)
        );
 
         using(ImRaii.PushId("facewear"))
@@ -574,7 +574,7 @@ public class GearEditor()
                     int value = facewearId;
                     if(ImGui.InputInt("##facewearid", ref value, 0, 0, ImGuiInputTextFlags.EnterReturnsTrue))
                     {
-                        appearance.Facewear = (byte)value;
+                        appearance.Facewear = (ushort)value;
                         didChange |= true;
                     }
                 }
@@ -587,7 +587,7 @@ public class GearEditor()
                     _facewearSelector.Draw();
                     if(_facewearSelector.SoftSelectionChanged && _facewearSelector.SoftSelected != null)
                     {
-                        appearance.Facewear = _facewearSelector.SoftSelected.Match(glasses => (byte)glasses.RowId, none => (byte)0);
+                        appearance.Facewear = _facewearSelector.SoftSelected.Match(glasses => (ushort)glasses.RowId, none => (ushort)0);
                         didChange |= true;
                     }
                     if(_gearSelector.SelectionChanged)
