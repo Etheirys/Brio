@@ -13,6 +13,8 @@ public class LibraryConfiguration
 
     public bool ReturnLibraryToLastLocation { get; set; } = true;
 
+    public bool UseFilenameAsActorName { get; set; } = false;
+
     public void ReEstablishDefaultPaths()
     {
         if(Files.Count <= 0)

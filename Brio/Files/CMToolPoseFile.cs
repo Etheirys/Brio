@@ -28,6 +28,7 @@
 // along with this program. If not, see <https://www.gnu.org/licenses/gpl-3.0>.
 
 using Brio.Capabilities.Posing;
+using Brio.Config;
 using Brio.Entities;
 using Brio.Entities.Actor;
 using Brio.Files.Converters;
@@ -56,8 +57,8 @@ public class CMToolPoseFileInfo : AppliableActorFileInfoBase<CMToolPoseFile>
     public override IDalamudTextureWrap Icon => ResourceProvider.Instance.GetResourceImage("Images.FileIcon_Pose.png");
     public override string Extension => ".cmp";
 
-    public CMToolPoseFileInfo(EntityManager entityManager, PosingService posingService)
-         : base(entityManager)
+    public CMToolPoseFileInfo(EntityManager entityManager, PosingService posingService, ConfigurationService configurationService)
+         : base(entityManager, configurationService)
     {
         _posingService = posingService;
     }
