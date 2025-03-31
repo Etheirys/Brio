@@ -8,14 +8,10 @@ public class KeyConfig(VirtualKey key, bool requireShift = false, bool requireCt
     public bool requireCtrl = requireCtrl;
     public bool requireAlt = requireAlt;
 
-    public bool isShift = key == VirtualKey.SHIFT;
-    public bool isCtrl = key == VirtualKey.CONTROL;
-    public bool isAlt = key == VirtualKey.MENU;
-
     public override string ToString()
     {
         string result = string.Empty;
-        if (requireCtrl)
+        if(requireCtrl)
         {
             result += "Ctrl+";
         }
@@ -29,10 +25,11 @@ public class KeyConfig(VirtualKey key, bool requireShift = false, bool requireCt
         }
 
         var fancy = key.GetFancyName();
-        if (fancy == "Control")
+        if(fancy == "Control")
         {
             result += "Ctrl";
-        } else
+        }
+        else
         {
             result += fancy;
         }
