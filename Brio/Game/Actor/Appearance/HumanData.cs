@@ -1,9 +1,13 @@
 ﻿using System;
+using System.Linq;
 namespace Brio.Game.Actor.Appearance;
 
 public class HumanData
 {
     private readonly uint[] _rawColors;
+
+    const int HairLength = 208;
+    const uint NeutralHair = 0xFFFFFFFF;
 
     public HumanData(byte[] buffer)
     {
@@ -24,12 +28,14 @@ public class HumanData
     public uint[] GetHairColors(Tribes tribe, Genders gender)
     {
         var start = GetTribeHairStartIndex(tribe, gender);
-        return _rawColors[start..(start + 192)];
+        return [.. _rawColors[start..(start + HairLength)].Where(x => x != NeutralHair)];
     }
+
+    public uint[] GetHairHighlightColors() => [.. _rawColors[256..(256+HairLength)].Where(x => x != NeutralHair)];
 
     public uint[] GetEyeColors() => _rawColors[0..192];
 
-    public uint[] GetHairHighlightColors() => _rawColors[256..448];
+    
 
     public uint[] GetFacepaintColors()
     {
