@@ -58,9 +58,10 @@ public class CutsceneManager : IDisposable
 
         _gPoseService.OnGPoseStateChange += OnGPoseStateChange;
 
-        InputService.Instance.AddListener(KeyBindEvents.Interface_StopCutscene, StopPlayback);
-        InputService.Instance.AddListener(KeyBindEvents.Interface_StartAllActorsAnimations, StartAllActors);
-        InputService.Instance.AddListener(KeyBindEvents.Interface_StopAllActorsAnimations, StopAllActors);
+        // I don't know if this is still needed, but commenting for build purposes - Bronya
+        //InputService.Instance.AddListener(KeyBindEvents.Interface_StopCutscene, StopPlayback);
+        //InputService.Instance.AddListener(KeyBindEvents.Interface_StartAllActorsAnimations, StartAllActors);
+        //InputService.Instance.AddListener(KeyBindEvents.Interface_StopAllActorsAnimations, StopAllActors);
     }
 
     private void OnGPoseStateChange(bool newState)
@@ -243,9 +244,10 @@ public class CutsceneManager : IDisposable
 
     public void Dispose()
     {
-        InputService.Instance.RemoveListener(KeyBindEvents.Interface_StopCutscene, StopPlayback);
-        InputService.Instance.RemoveListener(KeyBindEvents.Interface_StartAllActorsAnimations, StartAllActors);
-        InputService.Instance.RemoveListener(KeyBindEvents.Interface_StopAllActorsAnimations, StopAllActors);
+        // Same here, commenting for build purposes - Bronya
+        //InputService.Instance.RemoveListener(KeyBindEvents.Interface_StopCutscene, StopPlayback);
+        //InputService.Instance.RemoveListener(KeyBindEvents.Interface_StartAllActorsAnimations, StartAllActors);
+        //InputService.Instance.RemoveListener(KeyBindEvents.Interface_StopAllActorsAnimations, StopAllActors);
 
         _gPoseService.OnGPoseStateChange -= OnGPoseStateChange;
 
