@@ -25,7 +25,7 @@ namespace Brio.Capabilities.Posing
         public bool CharacterHasTail { get; private set; }
         public bool CharacterIsIVCS { get; private set; }
 
-        public IReadOnlyList<(Skeleton Skeleton, PoseInfoSlot Slot)> Skeletons => new[] { (CharacterSkeleton, PoseInfoSlot.Character), (MainHandSkeleton, PoseInfoSlot.MainHand), (OffHandSkeleton, PoseInfoSlot.OffHand) }.Where(s => s.Item1 != null).Cast<(Skeleton Skeleton, PoseInfoSlot Slot)>().ToList();
+        public IReadOnlyList<(Skeleton Skeleton, PoseInfoSlot Slot)> Skeletons => [.. new[] { (CharacterSkeleton, PoseInfoSlot.Character), (MainHandSkeleton, PoseInfoSlot.MainHand), (OffHandSkeleton, PoseInfoSlot.OffHand) }.Where(s => s.Item1 != null).Cast<(Skeleton Skeleton, PoseInfoSlot Slot)>()];
 
         public PoseInfo PoseInfo { get; set; } = new PoseInfo();
 
