@@ -56,7 +56,7 @@ public unsafe class SkeletonService : IDisposable
         _framework = framework;
 
 
-        var updateBonePhysicsAddress = "48 89 5C 24 ?? 48 89 6C 24 ?? 48 89 74 24 ?? 57 41 56 41 57 48 83 EC ?? 48 8B 79 ?? 45 33 FF";
+        var updateBonePhysicsAddress = "48 89 5C 24 ?? 48 89 6C 24 ?? 48 89 74 24 ?? 57 41 54 41 56 48 83 EC ?? 48 8B 59 ?? 45 33 E4";
         _updateBonePhysicsHook = hooking.HookFromAddress<UpdateBonePhysicsDelegate>(scanner.ScanText(updateBonePhysicsAddress), UpdateBonePhysicsDetour);
         _updateBonePhysicsHook.Enable();
 
