@@ -13,8 +13,6 @@ public struct BrioCharacterBase
 
     [FieldOffset(0x0D8)] public Attach Attach;
 
-
-    // TODO_7_3: updates below here
     [FieldOffset(0x290)] public Vector4 Tint;
 
     [FieldOffset(0x2A0)] public float ScaleFactor1;
