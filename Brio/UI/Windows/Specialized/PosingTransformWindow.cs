@@ -8,7 +8,7 @@ using Brio.UI.Controls.Stateless;
 using Dalamud.Interface;
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Interface.Windowing;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 using OneOf.Types;
 using System.Numerics;
 

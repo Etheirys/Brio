@@ -25,9 +25,10 @@ public class GameInputService : IDisposable
         _gPoseService = gPoseService;
         _virtualCameraService = virtualCameraService;
 
-        var inputHandleSig = "E8 ?? ?? ?? ?? 8B ?? ?? ?? ?? ?? 89 87 6C 35";
-        _handleInputHook = hooking.HookFromAddress<HandleInputDelegate>(scanner.ScanText(inputHandleSig), HandleInputDetour);
-        _handleInputHook.Enable();
+        // TODO_7_3
+        //var inputHandleSig = "E8 ?? ?? ?? ?? 8B ?? ?? ?? ?? ?? 89 87 6C 35";
+        // _handleInputHook = hooking.HookFromAddress<HandleInputDelegate>(scanner.ScanText(inputHandleSig), HandleInputDetour);
+        //_handleInputHook.Enable();
     }
 
     public unsafe void HandleInputDetour(IntPtr arg1, IntPtr arg2, IntPtr arg3, MouseFrame* mouseFrame, KeyboardFrame* keyboardFrame)
@@ -67,6 +68,7 @@ public class GameInputService : IDisposable
 
     public void Dispose()
     {
-        _handleInputHook.Dispose();
+        // TODO_7_3
+        //  _handleInputHook.Dispose();
     }
 }

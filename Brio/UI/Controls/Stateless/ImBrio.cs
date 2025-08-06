@@ -4,7 +4,7 @@ using Brio.UI.Theming;
 using Dalamud.Interface;
 using Dalamud.Interface.Textures.TextureWraps;
 using Dalamud.Interface.Utility.Raii;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 using System.Numerics;
 
 namespace Brio.UI.Controls.Stateless;
@@ -264,7 +264,7 @@ public static partial class ImBrio
             var totalSize = border.Size * scale + scaleOffsetTopLeft;
 
             ImGui.SetCursorPos(startPos + scaleOffsetTopLeft);
-            ImGui.Image(texture.ImGuiHandle, containedSize);
+            ImGui.Image(texture.Handle, containedSize);
 
             if(flags.HasFlag(ImGuiButtonFlags.MouseButtonLeft) || flags.HasFlag(ImGuiButtonFlags.MouseButtonRight) || flags.HasFlag(ImGuiButtonFlags.MouseButtonMiddle))
             {
@@ -281,7 +281,7 @@ public static partial class ImBrio
             }
 
             ImGui.SetCursorPos(startPos);
-            ImGui.Image(border.ImGuiHandle, totalSize);
+            ImGui.Image(border.Handle, totalSize);
 
             if(!string.IsNullOrEmpty(description))
             {

@@ -12,7 +12,7 @@ using Brio.UI.Controls.Stateless;
 using Dalamud.Interface;
 using Dalamud.Interface.Utility.Raii;
 using FFXIVClientStructs.FFXIV.Client.Graphics.Scene;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 using System;
 using System.IO;
 using System.Numerics;
@@ -102,7 +102,7 @@ public class ActionTimelineEditor(CutsceneManager cutsceneManager, GPoseService 
             var curPos = ImGui.GetCursorPos();
             ImGui.SetCursorPos(new Vector2(curPos.X - 30, curPos.Y + 2));
 
-            ImGui.ArrowButton("###animation_control_drop", ImGuiDir.Down);
+            ImGui.Button("▼###animation_control_drop");
         }
 
         ImGui.SameLine();
