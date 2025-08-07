@@ -133,10 +133,10 @@ public static partial class ImBrioGizmo
 
                         float angleChange = dragDelta / 200;
 
-                        if(InputService.IsKeyBindDown(KeyBindEvents.Interface_IncrementSmallModifier))
+                        if(InputManagerService.ActionKeysPressed(InputAction.Interface_IncrementSmallModifier))
                             angleChange /= 10;
 
-                        if(InputService.IsKeyBindDown(KeyBindEvents.Interface_IncrementLargeModifier))
+                        if(InputManagerService.ActionKeysPressed(InputAction.Interface_IncrementLargeModifier))
                             angleChange *= 10;
 
                         Quaternion rot = Quaternion.Identity;
@@ -184,10 +184,10 @@ public static partial class ImBrioGizmo
 
                         if(mouseWheel != 0)
                         {
-                            if(InputService.IsKeyBindDown(KeyBindEvents.Interface_IncrementSmallModifier))
+                            if(InputManagerService.ActionKeysPressed(InputAction.Interface_IncrementSmallModifier))
                                 mouseWheel /= 10;
 
-                            if(InputService.IsKeyBindDown(KeyBindEvents.Interface_IncrementLargeModifier))
+                            if(InputManagerService.ActionKeysPressed(InputAction.Interface_IncrementLargeModifier))
                                 mouseWheel *= 10;
 
                             Quaternion rot = Quaternion.Identity;

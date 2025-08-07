@@ -749,19 +749,26 @@ public class SettingsWindow : Window
             if(!tab.Success)
                 return;
 
-            bool enableKeyHandlingOnKeyMod = _configurationService.Configuration.Input.EnableKeyHandlingOnKeyMod;
-            if(ImGui.Checkbox("Consumed, [SPACE], [Shift], [Ctrl] & [Alt] keyboard input when moving a FreeCam", ref enableKeyHandlingOnKeyMod))
+            bool enableKeyHandlingOnKeyMod = _configurationService.Configuration.InputManager.EnableKeyHandlingOnKeyMod;
+            if(ImGui.Checkbox("Consume [SPACE], [Shift], [Ctrl] & [Alt] when moving a FreeCam", ref enableKeyHandlingOnKeyMod))
             {
-                _configurationService.Configuration.Input.EnableKeyHandlingOnKeyMod = enableKeyHandlingOnKeyMod;
+                _configurationService.Configuration.InputManager.EnableKeyHandlingOnKeyMod = enableKeyHandlingOnKeyMod;
+                _configurationService.ApplyChange();
+            }
+
+            bool flipKeybindsPastNinety = _configurationService.Configuration.InputManager.FlipKeyBindsPastNinety;
+            if(ImGui.Checkbox("Flip Free Camera Keybinds Past -90/90 Degrees", ref flipKeybindsPastNinety))
+            {
+                _configurationService.Configuration.InputManager.FlipKeyBindsPastNinety = flipKeybindsPastNinety;
                 _configurationService.ApplyChange();
             }
 
             ImGui.Separator();
 
-            bool enableKeybinds = _configurationService.Configuration.Input.EnableKeybinds;
+            bool enableKeybinds = _configurationService.Configuration.InputManager.Enable;
             if(ImGui.Checkbox("Enable keyboard shortcuts", ref enableKeybinds))
             {
-                _configurationService.Configuration.Input.EnableKeybinds = enableKeybinds;
+                _configurationService.Configuration.InputManager.Enable = enableKeybinds;
                 _configurationService.ApplyChange();
             }
 
@@ -770,31 +777,55 @@ public class SettingsWindow : Window
                 ImGui.BeginDisabled();
             }
 
-            bool showPrompts = _configurationService.Configuration.Input.ShowPromptsInGPose;
+            bool showPrompts = _configurationService.Configuration.InputManager.ShowPromptsInGPose;
             if(ImGui.Checkbox("Show prompts in GPose", ref showPrompts))
             {
-                _configurationService.Configuration.Input.ShowPromptsInGPose = showPrompts;
+                _configurationService.Configuration.InputManager.ShowPromptsInGPose = showPrompts;
                 _configurationService.ApplyChange();
+            }
+
+            if(enableKeybinds == false)
+            {
+                ImGui.EndDisabled();
+            }
+
+            if(ImGui.CollapsingHeader("Free Camera", ImGuiTreeNodeFlags.DefaultOpen))
+            {
+                DrawKeyBind(InputAction.FreeCamera_Forward);
+                DrawKeyBind(InputAction.FreeCamera_Backward);
+                DrawKeyBind(InputAction.FreeCamera_Left);
+                DrawKeyBind(InputAction.FreeCamera_Right);
+                DrawKeyBind(InputAction.FreeCamera_Up);
+                DrawKeyBind(InputAction.FreeCamera_UpAlt);
+                DrawKeyBind(InputAction.FreeCamera_Down);
+                DrawKeyBind(InputAction.FreeCamera_DownAlt);
+                DrawKeyBind(InputAction.FreeCamera_IncreaseCamMovement);
+                DrawKeyBind(InputAction.FreeCamera_DecreaseCamMovement);
+            }
+
+            if(enableKeybinds == false)
+            {
+                ImGui.BeginDisabled();
             }
 
             if(ImGui.CollapsingHeader("Interface", ImGuiTreeNodeFlags.DefaultOpen))
             {
-                DrawKeyBind(KeyBindEvents.Interface_ToggleBrioWindow);
-                DrawKeyBind(KeyBindEvents.Interface_IncrementSmallModifier);
-                DrawKeyBind(KeyBindEvents.Interface_IncrementLargeModifier);
+                DrawKeyBind(InputAction.Interface_ToggleBrioWindow);
+                DrawKeyBind(InputAction.Interface_IncrementSmallModifier);
+                DrawKeyBind(InputAction.Interface_IncrementLargeModifier);
             }
 
             if(ImGui.CollapsingHeader("Posing", ImGuiTreeNodeFlags.DefaultOpen))
             {
-                DrawKeyBind(KeyBindEvents.Posing_DisableGizmo);
-                DrawKeyBind(KeyBindEvents.Posing_DisableSkeleton);
-                DrawKeyBind(KeyBindEvents.Posing_HideOverlay);
-                DrawKeyBind(KeyBindEvents.Posing_ToggleOverlay);
-                DrawKeyBind(KeyBindEvents.Posing_Undo);
-                DrawKeyBind(KeyBindEvents.Posing_Redo);
-                DrawKeyBind(KeyBindEvents.Posing_Translate);
-                DrawKeyBind(KeyBindEvents.Posing_Rotate);
-                DrawKeyBind(KeyBindEvents.Posing_Scale);
+                DrawKeyBind(InputAction.Posing_DisableGizmo);
+                DrawKeyBind(InputAction.Posing_DisableSkeleton);
+                DrawKeyBind(InputAction.Posing_HideOverlay);
+                DrawKeyBind(InputAction.Posing_ToggleOverlay);
+                DrawKeyBind(InputAction.Posing_Undo);
+                DrawKeyBind(InputAction.Posing_Redo);
+                DrawKeyBind(InputAction.Posing_Translate);
+                DrawKeyBind(InputAction.Posing_Rotate);
+                DrawKeyBind(InputAction.Posing_Scale);
             }
 
             if(enableKeybinds == false)
@@ -804,11 +835,11 @@ public class SettingsWindow : Window
         }
     }
 
-    private void DrawKeyBind(KeyBindEvents evt)
+    private void DrawKeyBind(InputAction keyAction)
     {
-        string evtText = Localize.Get($"keys.{evt}") ?? evt.ToString();
+        string evtText = Localize.Get($"keys.{keyAction}") ?? keyAction.ToString();
 
-        if(KeybindEditor.KeySelector(evtText, evt, _configurationService.Configuration.Input))
+        if(KeybindEditor.KeySelector(evtText, keyAction, _configurationService.Configuration.InputManager))
         {
             _configurationService.ApplyChange();
         }

@@ -114,7 +114,7 @@ public class Brio : IDalamudPlugin
         serviceCollection.AddSingleton<ResourceProvider>();
         serviceCollection.AddSingleton<GameDataProvider>();
         serviceCollection.AddSingleton<WelcomeService>();
-        serviceCollection.AddSingleton<InputService>();
+        serviceCollection.AddSingleton<InputManagerService>();
         serviceCollection.AddSingleton<SceneService>();
         serviceCollection.AddSingleton<ProjectSystem>();
         serviceCollection.AddSingleton<AutoSaveService>();

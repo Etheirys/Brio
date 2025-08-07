@@ -1,9 +1,11 @@
-﻿using Brio.Core;
+﻿using Brio.Config;
+using Brio.Core;
 using Brio.Entities;
 using Brio.Entities.Camera;
 using Brio.Game.GPose;
 using Brio.Game.Input;
-using Dalamud.Game.ClientState.Keys;
+using Brio.Input;
+using FFXIVClientStructs.FFXIV.Client.UI;
 using Microsoft.Extensions.DependencyInjection;
 using Swan;
 using System;
@@ -234,9 +236,9 @@ public class VirtualCameraManager : IDisposable
     public Vector3 _forward;
     public Vector2 _lastMousePosition;
 
-    public unsafe void Update(MouseFrame* mouseFrame, KeyboardFrame* keyboardFrame)
+    public unsafe void Update(MouseFrame* mouseFrame)
     {
-        if((mouseFrame is null && keyboardFrame is null) || CurrentCamera is null)
+        if(mouseFrame is null || CurrentCamera is null)
         {
             return;
         }
@@ -256,7 +258,8 @@ public class VirtualCameraManager : IDisposable
         // Handle keyboard input
         //
 
-        if(FreeCamValues.IsMovementEnabled == false)
+        // This removes the purgatory function and prevent camera crazying out when typing with the camera enabled
+        if(FreeCamValues.IsMovementEnabled == false || RaptureAtkModule.Instance()->AtkModule.IsTextInputActive())
         {
             return;
         }
@@ -267,26 +270,26 @@ public class VirtualCameraManager : IDisposable
         var upDown = 0;
 
         // Check for forward and backward movement
-        if(keyboardFrame->IsKeyDown(VirtualKey.W, true))
+        if(InputManagerService.ActionKeysPressed(InputAction.FreeCamera_Forward))
             forwardBackward -= 1;
-        if(keyboardFrame->IsKeyDown(VirtualKey.S, true))
+        if(InputManagerService.ActionKeysPressed(InputAction.FreeCamera_Backward))
             forwardBackward += 1;
 
         // Check for lateral movement
         // Invert logic around the 90 degree pivot points
         // (Similar to XIV's Default Camera)
-        if(keyboardFrame->IsKeyDown(VirtualKey.A, true))
+        if(InputManagerService.ActionKeysPressed(InputAction.FreeCamera_Left))
             if(CurrentCamera.IsFreeCamera)
-                if(CurrentCamera.PivotRotation < BrioUtilities.DegreesToRadians(-90) || CurrentCamera.PivotRotation > BrioUtilities.DegreesToRadians(90))
+                if(ConfigurationService.Instance.Configuration.InputManager.FlipKeyBindsPastNinety && (CurrentCamera.PivotRotation < BrioUtilities.DegreesToRadians(-90) || CurrentCamera.PivotRotation > BrioUtilities.DegreesToRadians(90)))
                     leftRight += 1;
                 else
                     leftRight -= 1;
             else
                 leftRight += 1;
 
-        if(keyboardFrame->IsKeyDown(VirtualKey.D, true))
+        if(InputManagerService.ActionKeysPressed(InputAction.FreeCamera_Right))
             if(CurrentCamera.IsFreeCamera)
-                if(CurrentCamera.PivotRotation < BrioUtilities.DegreesToRadians(-90) || CurrentCamera.PivotRotation > BrioUtilities.DegreesToRadians(90))
+                if(ConfigurationService.Instance.Configuration.InputManager.FlipKeyBindsPastNinety && (CurrentCamera.PivotRotation < BrioUtilities.DegreesToRadians(-90) || CurrentCamera.PivotRotation > BrioUtilities.DegreesToRadians(90)))
                     leftRight -= 1;
                 else
                     leftRight += 1;
@@ -295,27 +298,27 @@ public class VirtualCameraManager : IDisposable
 
         // Handle vertical movement (up and down)
         // Invert logic around the 90 degree pivot points (like lateral movement)
-        if(keyboardFrame->IsKeyDown(VirtualKey.Q, true) || keyboardFrame->IsKeyDown(VirtualKey.CONTROL, true))
+        if(InputManagerService.ActionKeysPressed(InputAction.FreeCamera_Up) || InputManagerService.ActionKeysPressed(InputAction.FreeCamera_UpAlt))
             if(CurrentCamera.IsFreeCamera)
-                if(CurrentCamera.PivotRotation < BrioUtilities.DegreesToRadians(-90) || CurrentCamera.PivotRotation > BrioUtilities.DegreesToRadians(90))
-                    upDown += 1;
-                else
-                    upDown -= 1;
-            else
-                upDown += 1;
-        else if(keyboardFrame->IsKeyDown(VirtualKey.E, true) || keyboardFrame->IsKeyDown(VirtualKey.SPACE, true))
-            if(CurrentCamera.IsFreeCamera)
-                if(CurrentCamera.PivotRotation < BrioUtilities.DegreesToRadians(-90) || CurrentCamera.PivotRotation > BrioUtilities.DegreesToRadians(90))
+                if(ConfigurationService.Instance.Configuration.InputManager.FlipKeyBindsPastNinety && (CurrentCamera.PivotRotation < BrioUtilities.DegreesToRadians(-90) || CurrentCamera.PivotRotation > BrioUtilities.DegreesToRadians(90)))
                     upDown -= 1;
                 else
                     upDown += 1;
             else
                 upDown -= 1;
+        else if(InputManagerService.ActionKeysPressed(InputAction.FreeCamera_Down) || InputManagerService.ActionKeysPressed(InputAction.FreeCamera_DownAlt))
+            if(CurrentCamera.IsFreeCamera)
+                if(ConfigurationService.Instance.Configuration.InputManager.FlipKeyBindsPastNinety && (CurrentCamera.PivotRotation < BrioUtilities.DegreesToRadians(-90) || CurrentCamera.PivotRotation > BrioUtilities.DegreesToRadians(90)))
+                    upDown += 1;
+                else
+                    upDown -= 1;
+            else
+                upDown += 1;
 
         // Handle movement speed
-        if(keyboardFrame->IsKeyDown(VirtualKey.SHIFT, true))
+        if(InputManagerService.ActionKeysPressed(InputAction.FreeCamera_IncreaseCamMovement))
             _moveSpeed = CurrentCamera.FreeCamValues.MovementSpeed * 3;
-        else if(keyboardFrame->IsKeyDown(VirtualKey.MENU, true))
+        else if(InputManagerService.ActionKeysPressed(InputAction.FreeCamera_DecreaseCamMovement))
             _moveSpeed = CurrentCamera.FreeCamValues.MovementSpeed * 0.3f;
 
         _forward = Vector3.Transform(new Vector3(leftRight, upDown, forwardBackward),
