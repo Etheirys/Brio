@@ -40,11 +40,12 @@ public class GameInputService : IDisposable
         if(_virtualCameraService.CurrentCamera?.IsFreeCamera == true)
         {
             _virtualCameraService.Update(mouseFrame);
-        }
 
-        if(HandleAllKeys)
-        {
-            keyboardFrame->HandleAllKeys();
+            if(_virtualCameraService.CurrentCamera.FreeCamValues.IsMovementEnabled && 
+                Config.ConfigurationService.Instance.Configuration.InputManager.EnableKeyHandlingOnKeyMod)
+            {
+                keyboardFrame->HandleAllKeys();
+            }
         }
         else if(AllowEscape is false)
         {

@@ -56,12 +56,12 @@ public static class KeybindEditor
         KeyConfig keyBind = config.KeyBindings[evt];
 
         // Control
-        using(ImRaii.Disabled(keyBind.key == VirtualKey.CONTROL))
+        using(ImRaii.Disabled(keyBind.Key == VirtualKey.CONTROL))
         {
-            bool control = keyBind.requireCtrl;
+            bool control = keyBind.RequireCtrl;
             if(ImGui.Checkbox($"##{label}_Control", ref control))
             {
-                keyBind.requireCtrl = control;
+                keyBind.RequireCtrl = control;
                 changed = true;
             }
 
@@ -73,7 +73,7 @@ public static class KeybindEditor
 
         // Alt
         ImGui.SameLine();
-        using(ImRaii.Disabled(keyBind.key == VirtualKey.MENU))
+        using(ImRaii.Disabled(keyBind.Key == VirtualKey.MENU))
         {
             bool alt = keyBind.requireAlt;
             if(ImGui.Checkbox($"##{label}_Alt", ref alt))
@@ -90,7 +90,7 @@ public static class KeybindEditor
 
         // Shift
         ImGui.SameLine();
-        using(ImRaii.Disabled(keyBind.key == VirtualKey.SHIFT))
+        using(ImRaii.Disabled(keyBind.Key == VirtualKey.SHIFT))
         {
             bool shift = keyBind.requireShift;
             if(ImGui.Checkbox($"##{label}_Shift", ref shift))
@@ -119,11 +119,11 @@ public static class KeybindEditor
 
         // Key
         ImGui.SameLine();
-        int currentIndex = virtualKeys.IndexOf(keyBind.key);
+        int currentIndex = virtualKeys.IndexOf(keyBind.Key);
         ImGui.SetNextItemWidth(100);
         if(ImGui.Combo(label, ref currentIndex, virtualKeyNames, virtualKeyNames.Length))
         {
-            keyBind.key = virtualKeys[currentIndex];
+            keyBind.Key = virtualKeys[currentIndex];
             changed = true;
         }
 

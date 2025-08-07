@@ -3,15 +3,15 @@
 namespace Brio.Input;
 public class KeyConfig(VirtualKey key, bool requireShift = false, bool requireCtrl = false, bool requireAlt = false)
 {
-    public VirtualKey key = key;
+    public VirtualKey Key = key;
     public bool requireShift = requireShift;
-    public bool requireCtrl = requireCtrl;
+    public bool RequireCtrl = requireCtrl;
     public bool requireAlt = requireAlt;
 
     public override string ToString()
     {
         string result = string.Empty;
-        if(requireCtrl)
+        if(RequireCtrl)
         {
             result += "Ctrl+";
         }
@@ -24,7 +24,7 @@ public class KeyConfig(VirtualKey key, bool requireShift = false, bool requireCt
             result += "Shift+";
         }
 
-        var fancy = key.GetFancyName();
+        var fancy = Key.GetFancyName();
         if(fancy == "Control")
         {
             result += "Ctrl";

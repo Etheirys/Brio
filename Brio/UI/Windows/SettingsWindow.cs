@@ -742,16 +742,16 @@ public class SettingsWindow : Window
                 return;
 
             bool enableKeyHandlingOnKeyMod = _configurationService.Configuration.InputManager.EnableKeyHandlingOnKeyMod;
-            if(ImGui.Checkbox("Consumed, [SPACE], [Shift], [Ctrl] & [Alt] keyboard input when moving a FreeCam", ref enableKeyHandlingOnKeyMod))
+            if(ImGui.Checkbox("Consume [SPACE], [Shift], [Ctrl] & [Alt] when moving a FreeCam", ref enableKeyHandlingOnKeyMod))
             {
                 _configurationService.Configuration.InputManager.EnableKeyHandlingOnKeyMod = enableKeyHandlingOnKeyMod;
                 _configurationService.ApplyChange();
             }
 
-            bool flipKeybindsPastNinety = _configurationService.Configuration.InputManager.FlipKeybindsPastNinety;
+            bool flipKeybindsPastNinety = _configurationService.Configuration.InputManager.FlipKeyBindsPastNinety;
             if(ImGui.Checkbox("Flip Free Camera Keybinds Past -90/90 Degrees", ref flipKeybindsPastNinety))
             {
-                _configurationService.Configuration.InputManager.FlipKeybindsPastNinety = flipKeybindsPastNinety;
+                _configurationService.Configuration.InputManager.FlipKeyBindsPastNinety = flipKeybindsPastNinety;
                 _configurationService.ApplyChange();
             }
 

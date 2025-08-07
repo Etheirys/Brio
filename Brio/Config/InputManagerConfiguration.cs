@@ -74,16 +74,16 @@ public class InputManagerConfiguration
 
     public bool Enable { get; set; } = true;
     public bool ShowPromptsInGPose { get; set; } = false;
-    public bool EnableKeyHandlingOnKeyMod { get; set; } = true;
-    public bool FlipKeybindsPastNinety { get; set; } = true;
+    public bool EnableKeyHandlingOnKeyMod { get; set; } = false;
+    public bool FlipKeyBindsPastNinety { get; set; } = true;
 
     public void ResetKeyToDefault(InputAction action)
     {
         if(KeyBindings.TryGetValue(action, out KeyConfig? value))
         {
-            value.key = _defaultKeyBindings[action].key;
+            value.Key = _defaultKeyBindings[action].Key;
             value.requireShift = _defaultKeyBindings[action].requireShift;
-            value.requireCtrl = _defaultKeyBindings[action].requireCtrl;
+            value.RequireCtrl = _defaultKeyBindings[action].RequireCtrl;
             value.requireAlt = _defaultKeyBindings[action].requireAlt;
         }
     }
