@@ -3,7 +3,7 @@ using Brio.Game.Actor.Appearance;
 using Brio.Game.Actor.Interop;
 using Brio.UI.Controls.Stateless;
 using Dalamud.Interface;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 
 namespace Brio.UI.Controls.Editors;
 

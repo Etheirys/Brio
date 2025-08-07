@@ -3,7 +3,7 @@ using Brio.Game.GPose;
 using Brio.Input;
 using Brio.Resources;
 using Dalamud.Interface.Windowing;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 using System;
 
 namespace Brio.UI.Windows.Specialized;

@@ -1,4 +1,4 @@
-﻿using ImGuiNET;
+﻿using Dalamud.Bindings.ImGui;
 
 namespace Brio.UI.Controls.Stateless;
 public static partial class ImBrio

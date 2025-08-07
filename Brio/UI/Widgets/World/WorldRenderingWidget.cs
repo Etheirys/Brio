@@ -1,6 +1,6 @@
 ﻿using Brio.Capabilities.World;
 using Brio.UI.Widgets.Core;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 
 namespace Brio.UI.Widgets.World;
 
