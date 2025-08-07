@@ -4,6 +4,14 @@ To open this window again click `Information` on the Scene Manager then -> `View
 --------------------------------------------------------------------------------------------------------------------------------------------------------
 	 ---> Brio, Versions 0.5.1 <--- 7.2 Support 
 ---------------------------------------------------------------------------------------------------------------------------------------------------------
+	
+	--- Brio, Versions 0.5.1.1 --- 
+
+- You can now double-click and Actor or Camera to rename them (Thanks @Bronya-Rand)
+
+- Fixed new Facewear being unable to be equipped
+
+	--- Brio, Versions 0.5.1 --- 
 
 - Update Brio to support FFXIV 7.2 (Thanks for the help Asgard!)
 

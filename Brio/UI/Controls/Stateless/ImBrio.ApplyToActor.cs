@@ -5,7 +5,7 @@ using Brio.Game.Actor;
 using Brio.Game.Actor.Extensions;
 using Brio.Game.Core;
 using Dalamud.Interface.Utility.Raii;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 using System;
 
 namespace Brio.UI.Controls.Stateless;

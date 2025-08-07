@@ -10,5 +10,5 @@ public unsafe struct BrioDrawData
     public DrawDataContainer DawData;
 
     [FieldOffset(0x1D0)]
-    public byte Facewear;
+    public ushort Facewear;
 }

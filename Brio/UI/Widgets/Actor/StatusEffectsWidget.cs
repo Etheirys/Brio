@@ -6,7 +6,7 @@ using Brio.UI.Widgets.Core;
 using Dalamud.Interface;
 using Dalamud.Interface.Textures.TextureWraps;
 using Dalamud.Interface.Utility.Raii;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 using System.Linq;
 using System.Numerics;
 
@@ -51,7 +51,7 @@ public class StatusEffectsWidget(StatusEffectCapability capability) : Widget<Sta
                     var position = ImGui.GetCursorPos();
                     bool wasSelected = ImGui.Selectable($"###status_effects_{status.RowId}", selected, ImGuiSelectableFlags.None, new Vector2(0, desiredHeight));
                     ImGui.SetCursorPos(position);
-                    ImGui.Image(tex.ImGuiHandle, iconSize);
+                    ImGui.Image(tex.Handle, iconSize);
                     ImGui.SameLine();
                     ImGui.Text($"{status.Name.ExtractText()}\n{status.RowId}");
 

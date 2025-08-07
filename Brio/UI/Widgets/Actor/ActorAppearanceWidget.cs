@@ -9,7 +9,7 @@ using Brio.UI.Widgets.Core;
 using Dalamud.Interface;
 using Dalamud.Interface.Utility.Raii;
 using FFXIVClientStructs.FFXIV.Client.Game.Character;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 using System.Numerics;
 
 namespace Brio.UI.Widgets.Actor;
@@ -114,7 +114,7 @@ public class ActorAppearanceWidget(ActorAppearanceCapability capability) : Widge
                     ImGui.Text(description);
 
                     ImGui.SetNextItemWidth(ImGui.CalcTextSize("XXXXX").X);
-                    if(ImGui.InputInt("##id", ref equipId, 0, 0, ImGuiInputTextFlags.EnterReturnsTrue))
+                    if(ImGui.InputInt("##id", ref equipId, 0, 0, default, ImGuiInputTextFlags.EnterReturnsTrue))
                     {
                         equip.Id = (ushort)equipId;
                         didChange |= true;
@@ -123,7 +123,7 @@ public class ActorAppearanceWidget(ActorAppearanceCapability capability) : Widge
                     ImGui.SameLine();
 
                     ImGui.SetNextItemWidth(ImGui.CalcTextSize("XXXXX").X);
-                    if(ImGui.InputInt("##type", ref equipType, 0, 0, ImGuiInputTextFlags.EnterReturnsTrue))
+                    if(ImGui.InputInt("##type", ref equipType, 0, 0, default, ImGuiInputTextFlags.EnterReturnsTrue))
                     {
                         equip.Type = (ushort)equipType;
                         didChange |= true;
@@ -132,7 +132,7 @@ public class ActorAppearanceWidget(ActorAppearanceCapability capability) : Widge
                     ImGui.SameLine();
 
                     ImGui.SetNextItemWidth(ImGui.CalcTextSize("XXXXX").X);
-                    if(ImGui.InputInt("##variant", ref equipVariant, 0, 0, ImGuiInputTextFlags.EnterReturnsTrue))
+                    if(ImGui.InputInt("##variant", ref equipVariant, 0, 0, default, ImGuiInputTextFlags.EnterReturnsTrue))
                     {
                         equip.Variant = (byte)equipVariant;
                         didChange |= true;

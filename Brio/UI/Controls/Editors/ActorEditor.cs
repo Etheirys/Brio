@@ -2,7 +2,7 @@
 using Brio.Entities.Actor;
 using Brio.UI.Controls.Core;
 using Dalamud.Interface.Utility.Raii;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 
 namespace Brio.UI.Controls.Editors;
 

@@ -9,7 +9,7 @@ using Brio.UI.Windows;
 using Dalamud.Interface;
 using Dalamud.Interface.Textures.TextureWraps;
 using Dalamud.Interface.Utility.Raii;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 using System;
 using System.Numerics;
 

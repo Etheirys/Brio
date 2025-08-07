@@ -15,7 +15,7 @@ using Brio.UI.Controls.Stateless;
 using Dalamud.Interface;
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Interface.Windowing;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 using OneOf.Types;
 using System;
 using System.Collections.Generic;
@@ -801,7 +801,7 @@ public class PosingGraphicalWindow : Window, IDisposable
             imageSizeToFit = new Vector2(available.Y * aspectRatio, available.Y);
         }
 
-        ImGui.Image(img.ImGuiHandle, imageSizeToFit);
+        ImGui.Image(img.Handle, imageSizeToFit);
 
         var scaleX = imageSizeToFit.X / imageSize.X;
         var scaleY = imageSizeToFit.Y / imageSize.Y;

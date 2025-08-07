@@ -1,7 +1,7 @@
 ﻿using Brio.Capabilities.Posing;
 using Brio.Game.Posing;
 using Dalamud.Interface.Utility.Raii;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 
 namespace Brio.UI.Controls.Editors;
 public class BoneIKEditor

@@ -17,7 +17,7 @@ using Brio.UI.Controls.Editors;
 using Brio.UI.Windows;
 using Dalamud.Interface;
 using Dalamud.Interface.Utility.Raii;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 using MessagePack;
 using OneOf;
 using System;

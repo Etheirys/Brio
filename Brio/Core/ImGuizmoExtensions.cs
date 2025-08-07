@@ -1,6 +1,6 @@
 ﻿using Brio.Input;
-using ImGuiNET;
-using ImGuizmoNET;
+using Dalamud.Bindings.ImGui;
+using Dalamud.Bindings.ImGuizmo;
 using System.Numerics;
 
 namespace Brio.Core;
@@ -24,17 +24,17 @@ public static class ImGuizmoExtensions
             if(largeIncrement)
                 mouseWheel *= 10;
 
-            if(ImGuizmo.IsOver(OPERATION.ROTATE_X))
+            if(ImGuizmo.IsOver(ImGuizmoOperation.RotateX))
             {
                 matrix = Matrix4x4.CreateRotationX(mouseWheel) * matrix;
                 return true;
             }
-            else if(ImGuizmo.IsOver(OPERATION.ROTATE_Y))
+            else if(ImGuizmo.IsOver(ImGuizmoOperation.RotateY))
             {
                 matrix = Matrix4x4.CreateRotationY(mouseWheel) * matrix;
                 return true;
             }
-            else if(ImGuizmo.IsOver(OPERATION.ROTATE_Z))
+            else if(ImGuizmo.IsOver(ImGuizmoOperation.RotateZ))
             {
                 matrix = Matrix4x4.CreateRotationZ(mouseWheel) * matrix;
                 return true;
