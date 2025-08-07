@@ -1,6 +1,6 @@
 ﻿using Dalamud.Interface;
 using Dalamud.Interface.Utility.Raii;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 using System.Numerics;
 
 namespace Brio.UI.Controls.Stateless;
@@ -66,7 +66,7 @@ public static partial class ImBrio
             if(popup.Success)
             {
                 ImGui.SetNextItemWidth(-1);
-                wasChanged |= ImGui.InputInt($"##{id}_index", ref selectedId, 1, 1, ImGuiInputTextFlags.EnterReturnsTrue);
+                wasChanged |= ImGui.InputInt($"##{id}_index", ref selectedId, 1, 1, default,ImGuiInputTextFlags.EnterReturnsTrue);
                 wasChanged |= DrawIconSelector(id, entries, ref selectedId, columns, iconSize, fallbackImage, bitField);
 
                 if(ImGui.IsMouseDoubleClicked(ImGuiMouseButton.Left))

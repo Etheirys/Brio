@@ -1,7 +1,7 @@
 ﻿using Brio.Config;
 using Dalamud.Game.ClientState.Keys;
 using Dalamud.Interface.Utility.Raii;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 using System.Collections.Generic;
 
 namespace Brio.Input;

@@ -2,7 +2,7 @@
 using Brio.Game.Actor.Extensions;
 using Brio.UI.Widgets.Core;
 using Dalamud.Interface.Utility.Raii;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 
 namespace Brio.UI.Widgets.Actor;
 

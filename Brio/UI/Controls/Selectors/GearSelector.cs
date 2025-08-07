@@ -3,7 +3,7 @@ using Brio.Resources;
 using Brio.Resources.Extra;
 using Brio.UI.Controls.Stateless;
 using FFXIVClientStructs.FFXIV.Client.Game.Character;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 using System;
 using System.Numerics;
 

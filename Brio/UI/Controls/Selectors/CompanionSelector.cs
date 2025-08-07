@@ -1,7 +1,7 @@
 ﻿using Brio.Game.Types;
 using Brio.Resources;
 using Brio.UI.Controls.Stateless;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 using OneOf.Types;
 using System.Numerics;
 

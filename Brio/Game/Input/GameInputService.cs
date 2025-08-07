@@ -25,7 +25,7 @@ public class GameInputService : IDisposable
         _gPoseService = gPoseService;
         _virtualCameraService = virtualCameraService;
 
-        var inputHandleSig = "E8 ?? ?? ?? ?? 8B ?? ?? ?? ?? ?? 89 87 6C 35";
+        var inputHandleSig = "E8 ?? ?? ?? ?? ?? 8B ?? ?? ?? ?? 8B 87 ?? ?? ?? ?? 89 45";
         _handleInputHook = hooking.HookFromAddress<HandleInputDelegate>(scanner.ScanText(inputHandleSig), HandleInputDetour);
         _handleInputHook.Enable();
     }
@@ -59,6 +59,7 @@ public class GameInputService : IDisposable
 
     public void Dispose()
     {
+        // TODO_7_3
         _handleInputHook.Dispose();
     }
 }

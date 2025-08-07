@@ -1,6 +1,6 @@
 ﻿using Brio.Resources;
 using Dalamud.Interface.Textures.TextureWraps;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 using Lumina.Excel.Sheets;
 using System;
 using System.Numerics;
@@ -54,7 +54,7 @@ public class StatusEffectSelector(string id) : Selector<StatusEffectSelectorHold
         float ratio = tex.Size.X / tex.Size.Y;
         Vector2 iconSize = new(EntrySize * ratio, EntrySize);
 
-        ImGui.Image(tex.ImGuiHandle, iconSize);
+        ImGui.Image(tex.Handle, iconSize);
         ImGui.SameLine();
         ImGui.Text($"{item.Name.ExtractText()}\n{item.RowId}\nVFX: {item.VFX.RowId} / Hit: {item.HitEffect.RowId}");
     }

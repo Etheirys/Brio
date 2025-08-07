@@ -3,7 +3,7 @@ using Brio.Input;
 using Brio.UI.Controls.Core;
 using Dalamud.Interface;
 using Dalamud.Interface.Utility.Raii;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 using System.Collections.Generic;
 using System.Numerics;
 
@@ -172,7 +172,7 @@ public static partial class ImBrio
 
         float buttonWidth = 32;
         ImGui.SetNextItemWidth(buttonWidth);
-        if(ImGui.ArrowButton($"##{label}_decrease", ImGuiDir.Left))
+        if(ImGui.Button($"◀##{label}_decrease"))
         {
             value -= step;
             changed = true;
@@ -210,7 +210,7 @@ public static partial class ImBrio
 
         ImGui.SameLine();
         ImGui.SetNextItemWidth(buttonWidth);
-        if(ImGui.ArrowButton($"##{label}_increase", ImGuiDir.Right))
+        if(ImGui.Button($"▶##{label}_increase"))
         {
             value += step;
             changed = true;
@@ -241,7 +241,7 @@ public static partial class ImBrio
 
         float buttonWidth = 32;
         ImGui.SetNextItemWidth(buttonWidth);
-        if(ImGui.ArrowButton($"##{label}_decrease", ImGuiDir.Left))
+        if(ImGui.Button($"◀##{label}_decrease"))
         {
             if (value - step <= min)
             {
@@ -313,7 +313,7 @@ public static partial class ImBrio
 
         ImGui.SameLine();
         ImGui.SetNextItemWidth(buttonWidth);
-        if(ImGui.ArrowButton($"##{label}_increase", ImGuiDir.Right))
+        if(ImGui.Button($"▶##{label}_increase"))
         {
             if(value + step >= max)
             {

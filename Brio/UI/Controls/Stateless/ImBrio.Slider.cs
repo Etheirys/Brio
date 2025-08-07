@@ -1,6 +1,6 @@
 ﻿using Brio.Core;
 using Brio.Input;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 using System.Numerics;
 
 namespace Brio.UI.Controls.Stateless;
@@ -52,7 +52,7 @@ public static partial class ImBrio
             step *= 10;
 
 
-        if(ImGui.ArrowButton($"##{label}_decrease", ImGuiDir.Left))
+        if(ImGui.Button($"◀##{label}_decrease"))
         {
             value -= isAngle ? step * MathHelpers.DegreesToRadians : step;
             changed = true;
@@ -91,7 +91,7 @@ public static partial class ImBrio
         }
 
         ImGui.SameLine();
-        if(ImGui.ArrowButton($"##{label}_increase", ImGuiDir.Right))
+        if(ImGui.Button($"▶##{label}_increase"))
         {
             value += isAngle ? step * MathHelpers.DegreesToRadians : step;
             changed = true;
