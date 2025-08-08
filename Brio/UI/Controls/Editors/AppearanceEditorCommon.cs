@@ -67,7 +67,7 @@ public static class AppearanceEditorCommon
 
         if(ImBrio.FontIconButton(FontAwesomeIcon.TheaterMasks, new Vector2(25)))
         {
-            capability.GlamourerService.OpenGlam();
+            capability.GlamourerService.OpenGlamourer();
         }
 
         if(ImGui.IsItemHovered())
@@ -115,7 +115,7 @@ public static class AppearanceEditorCommon
 
         if(ImGui.Button("C+", new Vector2(25)))
         {
-
+            capability.CustomizePlusService.OpenCustomizePlus();
         }
 
         if(ImGui.IsItemHovered())

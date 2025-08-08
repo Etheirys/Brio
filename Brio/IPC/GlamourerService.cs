@@ -75,7 +75,7 @@ public class GlamourerService : BrioIPC
         _configurationService.OnConfigurationChanged += OnConfigurationChanged;
     }
 
-    public void OpenGlam()
+    public void OpenGlamourer()
     {
         _commandManager.ProcessCommand("/glamourer");
     }
