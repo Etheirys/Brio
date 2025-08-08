@@ -67,7 +67,7 @@ public static class AppearanceEditorCommon
 
         if(ImBrio.FontIconButton(FontAwesomeIcon.TheaterMasks, new Vector2(25)))
         {
-
+            capability.GlamourerService.OpenGlam();
         }
 
         if(ImGui.IsItemHovered())

@@ -6,10 +6,10 @@ using Brio.UI.Controls.Core;
 using Brio.UI.Controls.Editors;
 using Brio.UI.Controls.Stateless;
 using Brio.Web;
+using Dalamud.Bindings.ImGui;
 using Dalamud.Interface;
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Interface.Windowing;
-using Dalamud.Bindings.ImGui;
 using System;
 using System.Numerics;
 
@@ -44,7 +44,7 @@ public class SettingsWindow : Window
         _mareService = mareService;
         _customizePlusService = customizePlusService;
 
-        Size = new Vector2(450, 450);
+        Size = new Vector2(500, 550);
     }
 
     private bool _isModal = false;
@@ -69,6 +69,7 @@ public class SettingsWindow : Window
         _libraryPadding = null;
     }
 
+    int selected;
     public override void Draw()
     {
         using(ImRaii.PushId("brio_settings"))
@@ -84,17 +85,36 @@ public class SettingsWindow : Window
             }
             else
             {
-                using(var tab = ImRaii.TabBar("###brio_settings_tabs"))
+                ImBrio.ToggleButtonStrip("settings_filters_selector", new Vector2(ImBrio.GetRemainingWidth(), ImBrio.GetLineHeight()), ref selected, ["General", "IPC", "Posing", "Library", "Auto-Save", "Input", "Advanced"]);
+
+                using(var child = ImRaii.Child("###settingsPane"))
                 {
-                    if(tab.Success)
+                   if (child.Success)
                     {
-                        DrawGeneralTab();
-                        DrawIPCTab();
-                        DrawPosingTab();
-                        DrawLibraryTab();
-                        DrawSceneTab();
-                        DrawKeysTab();
-                        DrawAdvancedTab();
+                        switch(selected)
+                        {
+                            case 0:
+                                DrawGeneralTab();
+                                break;
+                            case 1:
+                                DrawIPCTab();
+                                break;
+                            case 2:
+                                DrawPosingTab();
+                                break;
+                            case 3:
+                                DrawLibraryTab();
+                                break;
+                            case 4:
+                                DrawSceneTab();
+                                break;
+                            case 5:
+                                DrawKeysTab();
+                                break;
+                            case 6:
+                                DrawAdvancedTab();
+                                break;
+                        }
                     }
                 }
             }
@@ -103,47 +123,41 @@ public class SettingsWindow : Window
 
     private void DrawGeneralTab()
     {
-        using(var tab = ImRaii.TabItem("General"))
+        if(ImGui.CollapsingHeader("Window", ImGuiTreeNodeFlags.DefaultOpen))
         {
-            if(tab.Success)
+            DrawOpenBrioSetting();
+            DrawHideSettings();
+        }
+
+        if(ImGui.CollapsingHeader("Library", ImGuiTreeNodeFlags.DefaultOpen))
+        {
+            bool useLibraryWhenImporting = _configurationService.Configuration.UseLibraryWhenImporting;
+            if(ImGui.Checkbox("Use the Library when importing a file", ref useLibraryWhenImporting))
             {
-                if(ImGui.CollapsingHeader("Window", ImGuiTreeNodeFlags.DefaultOpen))
-                {
-                    DrawOpenBrioSetting();
-                    DrawHideSettings();
-                }
-
-                if(ImGui.CollapsingHeader("Library", ImGuiTreeNodeFlags.DefaultOpen))
-                {
-                    bool useLibraryWhenImporting = _configurationService.Configuration.UseLibraryWhenImporting;
-                    if(ImGui.Checkbox("Use the Library when importing a file", ref useLibraryWhenImporting))
-                    {
-                        _configurationService.Configuration.UseLibraryWhenImporting = useLibraryWhenImporting;
-                        _configurationService.ApplyChange();
-                    }
-
-                    bool returnToLastLocation = _configurationService.Configuration.Library.ReturnLibraryToLastLocation;
-                    if(ImGui.Checkbox("Open Library to the last Location I was previously", ref returnToLastLocation))
-                    {
-                        _configurationService.Configuration.Library.ReturnLibraryToLastLocation = returnToLastLocation;
-                        _configurationService.ApplyChange();
-                    }
-
-                    bool useFilenameAsActorName = _configurationService.Configuration.Library.UseFilenameAsActorName;
-                    if(ImGui.Checkbox("Use the Character Filename as the Actor Name", ref useFilenameAsActorName))
-                    {
-                        _configurationService.Configuration.Library.UseFilenameAsActorName = useFilenameAsActorName;
-                        _configurationService.ApplyChange();
-                    }
-                }
-
-                DrawNPCAppearanceHack();
-
-                if(ImGui.CollapsingHeader("Display", ImGuiTreeNodeFlags.DefaultOpen))
-                {
-                    DrawDisplaySettings();
-                }
+                _configurationService.Configuration.UseLibraryWhenImporting = useLibraryWhenImporting;
+                _configurationService.ApplyChange();
             }
+
+            bool returnToLastLocation = _configurationService.Configuration.Library.ReturnLibraryToLastLocation;
+            if(ImGui.Checkbox("Open Library to the last Location I was previously", ref returnToLastLocation))
+            {
+                _configurationService.Configuration.Library.ReturnLibraryToLastLocation = returnToLastLocation;
+                _configurationService.ApplyChange();
+            }
+
+            bool useFilenameAsActorName = _configurationService.Configuration.Library.UseFilenameAsActorName;
+            if(ImGui.Checkbox("Use the Character Filename as the Actor Name", ref useFilenameAsActorName))
+            {
+                _configurationService.Configuration.Library.UseFilenameAsActorName = useFilenameAsActorName;
+                _configurationService.ApplyChange();
+            }
+        }
+
+        DrawNPCAppearanceHack();
+
+        if(ImGui.CollapsingHeader("Display", ImGuiTreeNodeFlags.DefaultOpen))
+        {
+            DrawDisplaySettings();
         }
     }
 
@@ -218,25 +232,13 @@ public class SettingsWindow : Window
 
     private void DrawSceneTab()
     {
-        using(var tab = ImRaii.TabItem("Auto-Save"))
-        {
-            if(tab.Success)
-            {
-                DrawImportScene();
-            }
-        }
+        DrawImportScene();
     }
 
     private void DrawIPCTab()
     {
-        using(var tab = ImRaii.TabItem("IPC"))
-        {
-            if(tab.Success)
-            {
-                DrawBrioIPC();
-                DrawThirdPartyIPC();
-            }
-        }
+        DrawBrioIPC();
+        DrawThirdPartyIPC();
     }
 
     private void DrawThirdPartyIPC()
@@ -491,15 +493,9 @@ public class SettingsWindow : Window
 
     private void DrawPosingTab()
     {
-        using(var tab = ImRaii.TabItem("Posing"))
-        {
-            if(tab.Success)
-            {
-                DrawPosingGeneralSection();
-                DrawGPoseSection();
-                DrawOverlaySection();
-            }
-        }
+        DrawPosingGeneralSection();
+        DrawGPoseSection();
+        DrawOverlaySection();
     }
 
     private void DrawGPoseSection()
@@ -675,26 +671,19 @@ public class SettingsWindow : Window
     bool resetSettings = false;
     private void DrawAdvancedTab()
     {
-        using(var tab = ImRaii.TabItem("Advanced"))
+        DrawEnvironmentSection();
+
+        if(ImGui.CollapsingHeader("Brio", ImGuiTreeNodeFlags.DefaultOpen))
         {
-            if(tab.Success)
+            ImGui.Checkbox("Enable [ Reset Settings to Default ] Button", ref resetSettings);
+
+            using(ImRaii.Disabled(!resetSettings))
             {
-                DrawEnvironmentSection();
-
-                if(ImGui.CollapsingHeader("Brio", ImGuiTreeNodeFlags.DefaultOpen))
+                if(ImGui.Button("Reset Settings to Default", new(170, 0)))
                 {
-                    ImGui.Checkbox("Enable [ Reset Settings to Default ] Button", ref resetSettings);
-
-                    using(ImRaii.Disabled(!resetSettings))
-                    {
-                        if(ImGui.Button("Reset Settings to Default", new(170, 0)))
-                        {
-                            _configurationService.Reset();
-                            resetSettings = false;
-                        }
-                    }
+                    _configurationService.Reset();
+                    resetSettings = false;
                 }
-
             }
         }
     }
@@ -728,13 +717,7 @@ public class SettingsWindow : Window
 
     private void DrawLibraryTab()
     {
-        using(var tab = ImRaii.TabItem("Library"))
-        {
-            if(tab.Success)
-            {
-                DrawLibrarySection();
-            }
-        }
+        DrawLibrarySection();
     }
 
     private void DrawLibrarySection()
@@ -744,94 +727,81 @@ public class SettingsWindow : Window
 
     private void DrawKeysTab()
     {
-        using(var tab = ImRaii.TabItem("Key Binds"))
+        bool enableKeyHandlingOnKeyMod = _configurationService.Configuration.InputManager.EnableKeyHandlingOnKeyMod;
+        if(ImGui.Checkbox("Consume [SPACE], [Shift], [Ctrl] & [Alt] when moving a FreeCam", ref enableKeyHandlingOnKeyMod))
         {
-            if(!tab.Success)
-                return;
+            _configurationService.Configuration.InputManager.EnableKeyHandlingOnKeyMod = enableKeyHandlingOnKeyMod;
+            _configurationService.ApplyChange();
+        }
 
-            bool enableKeyHandlingOnKeyMod = _configurationService.Configuration.InputManager.EnableKeyHandlingOnKeyMod;
-            if(ImGui.Checkbox("Consume [SPACE], [Shift], [Ctrl] & [Alt] when moving a FreeCam", ref enableKeyHandlingOnKeyMod))
-            {
-                _configurationService.Configuration.InputManager.EnableKeyHandlingOnKeyMod = enableKeyHandlingOnKeyMod;
-                _configurationService.ApplyChange();
-            }
+        bool flipKeybindsPastNinety = _configurationService.Configuration.InputManager.FlipKeyBindsPastNinety;
+        if(ImGui.Checkbox("Flip Free Camera Keybinds Past -90/90 Degrees", ref flipKeybindsPastNinety))
+        {
+            _configurationService.Configuration.InputManager.FlipKeyBindsPastNinety = flipKeybindsPastNinety;
+            _configurationService.ApplyChange();
+        }
 
-            bool flipKeybindsPastNinety = _configurationService.Configuration.InputManager.FlipKeyBindsPastNinety;
-            if(ImGui.Checkbox("Flip Free Camera Keybinds Past -90/90 Degrees", ref flipKeybindsPastNinety))
-            {
-                _configurationService.Configuration.InputManager.FlipKeyBindsPastNinety = flipKeybindsPastNinety;
-                _configurationService.ApplyChange();
-            }
+        bool enableKeybinds = _configurationService.Configuration.InputManager.Enable;
+        if(ImGui.Checkbox("Enable keyboard shortcuts", ref enableKeybinds))
+        {
+            _configurationService.Configuration.InputManager.Enable = enableKeybinds;
+            _configurationService.ApplyChange();
+        }
 
-            ImGui.Separator();
+        bool showPrompts = _configurationService.Configuration.InputManager.ShowPromptsInGPose;
+        if(ImGui.Checkbox("Show prompts in GPose", ref showPrompts))
+        {
+            _configurationService.Configuration.InputManager.ShowPromptsInGPose = showPrompts;
+            _configurationService.ApplyChange();
+        }
 
-            bool enableKeybinds = _configurationService.Configuration.InputManager.Enable;
-            if(ImGui.Checkbox("Enable keyboard shortcuts", ref enableKeybinds))
-            {
-                _configurationService.Configuration.InputManager.Enable = enableKeybinds;
-                _configurationService.ApplyChange();
-            }
+        if(enableKeybinds == false)
+        {
+            ImGui.EndDisabled();
+        }
 
-            if(enableKeybinds == false)
-            {
-                ImGui.BeginDisabled();
-            }
+        if(ImGui.CollapsingHeader("Free Camera", ImGuiTreeNodeFlags.DefaultOpen))
+        {
+            DrawKeyBind(InputAction.FreeCamera_Forward);
+            DrawKeyBind(InputAction.FreeCamera_Backward);
+            DrawKeyBind(InputAction.FreeCamera_Left);
+            DrawKeyBind(InputAction.FreeCamera_Right);
+            DrawKeyBind(InputAction.FreeCamera_Up);
+            DrawKeyBind(InputAction.FreeCamera_UpAlt);
+            DrawKeyBind(InputAction.FreeCamera_Down);
+            DrawKeyBind(InputAction.FreeCamera_DownAlt);
+            DrawKeyBind(InputAction.FreeCamera_IncreaseCamMovement);
+            DrawKeyBind(InputAction.FreeCamera_DecreaseCamMovement);
+        }
 
-            bool showPrompts = _configurationService.Configuration.InputManager.ShowPromptsInGPose;
-            if(ImGui.Checkbox("Show prompts in GPose", ref showPrompts))
-            {
-                _configurationService.Configuration.InputManager.ShowPromptsInGPose = showPrompts;
-                _configurationService.ApplyChange();
-            }
+        if(enableKeybinds == false)
+        {
+            ImGui.BeginDisabled();
+        }
 
-            if(enableKeybinds == false)
-            {
-                ImGui.EndDisabled();
-            }
+        if(ImGui.CollapsingHeader("Interface", ImGuiTreeNodeFlags.DefaultOpen))
+        {
+            DrawKeyBind(InputAction.Interface_ToggleBrioWindow);
+            DrawKeyBind(InputAction.Interface_IncrementSmallModifier);
+            DrawKeyBind(InputAction.Interface_IncrementLargeModifier);
+        }
 
-            if(ImGui.CollapsingHeader("Free Camera", ImGuiTreeNodeFlags.DefaultOpen))
-            {
-                DrawKeyBind(InputAction.FreeCamera_Forward);
-                DrawKeyBind(InputAction.FreeCamera_Backward);
-                DrawKeyBind(InputAction.FreeCamera_Left);
-                DrawKeyBind(InputAction.FreeCamera_Right);
-                DrawKeyBind(InputAction.FreeCamera_Up);
-                DrawKeyBind(InputAction.FreeCamera_UpAlt);
-                DrawKeyBind(InputAction.FreeCamera_Down);
-                DrawKeyBind(InputAction.FreeCamera_DownAlt);
-                DrawKeyBind(InputAction.FreeCamera_IncreaseCamMovement);
-                DrawKeyBind(InputAction.FreeCamera_DecreaseCamMovement);
-            }
+        if(ImGui.CollapsingHeader("Posing", ImGuiTreeNodeFlags.DefaultOpen))
+        {
+            DrawKeyBind(InputAction.Posing_DisableGizmo);
+            DrawKeyBind(InputAction.Posing_DisableSkeleton);
+            DrawKeyBind(InputAction.Posing_HideOverlay);
+            DrawKeyBind(InputAction.Posing_ToggleOverlay);
+            DrawKeyBind(InputAction.Posing_Undo);
+            DrawKeyBind(InputAction.Posing_Redo);
+            DrawKeyBind(InputAction.Posing_Translate);
+            DrawKeyBind(InputAction.Posing_Rotate);
+            DrawKeyBind(InputAction.Posing_Scale);
+        }
 
-            if(enableKeybinds == false)
-            {
-                ImGui.BeginDisabled();
-            }
-
-            if(ImGui.CollapsingHeader("Interface", ImGuiTreeNodeFlags.DefaultOpen))
-            {
-                DrawKeyBind(InputAction.Interface_ToggleBrioWindow);
-                DrawKeyBind(InputAction.Interface_IncrementSmallModifier);
-                DrawKeyBind(InputAction.Interface_IncrementLargeModifier);
-            }
-
-            if(ImGui.CollapsingHeader("Posing", ImGuiTreeNodeFlags.DefaultOpen))
-            {
-                DrawKeyBind(InputAction.Posing_DisableGizmo);
-                DrawKeyBind(InputAction.Posing_DisableSkeleton);
-                DrawKeyBind(InputAction.Posing_HideOverlay);
-                DrawKeyBind(InputAction.Posing_ToggleOverlay);
-                DrawKeyBind(InputAction.Posing_Undo);
-                DrawKeyBind(InputAction.Posing_Redo);
-                DrawKeyBind(InputAction.Posing_Translate);
-                DrawKeyBind(InputAction.Posing_Rotate);
-                DrawKeyBind(InputAction.Posing_Scale);
-            }
-
-            if(enableKeybinds == false)
-            {
-                ImGui.EndDisabled();
-            }
+        if(enableKeybinds == false)
+        {
+            ImGui.EndDisabled();
         }
     }
 

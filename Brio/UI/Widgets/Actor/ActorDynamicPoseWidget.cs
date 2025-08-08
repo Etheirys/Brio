@@ -23,10 +23,12 @@ public class ActorDynamicPoseWidget(ActorDynamicPoseCapability capability) : Wid
     public override void DrawBody()
     {
 
-
-
         ImGui.Separator();
-        ImBrio.ToggleButtonStrip("DynamicFaceControlSelector", new Vector2(ImBrio.GetRemainingWidth(), ImBrio.GetLineHeight()), ref selected, ["Eyes", "Body", "Head"]);
+
+        if(ImBrio.ToggleButtonStrip("DynamicFaceControlSelector", new Vector2(ImBrio.GetRemainingWidth(), ImBrio.GetLineHeight()), ref selected, ["Eyes", "Body", "Head"]))
+        {
+
+        }
 
         switch(selected)
         {
