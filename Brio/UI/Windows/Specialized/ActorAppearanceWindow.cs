@@ -9,7 +9,7 @@ using Brio.UI.Controls.Stateless;
 using Dalamud.Interface;
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Interface.Windowing;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 using System;
 using System.Numerics;
 
@@ -41,7 +41,7 @@ public class ActorAppearanceWindow : Window, IDisposable
 
         SizeConstraints = new WindowSizeConstraints
         {
-            MinimumSize = new Vector2(970, 720),
+            MinimumSize = new Vector2(500, 610),
             MaximumSize = new Vector2(8000, 3000)
         };
 
@@ -63,6 +63,7 @@ public class ActorAppearanceWindow : Window, IDisposable
         return base.DrawConditions();
     }
 
+    int selected = 0;
 
     public unsafe override void Draw()
     {
@@ -81,74 +82,70 @@ public class ActorAppearanceWindow : Window, IDisposable
         var originalAppearance = _capability.OriginalAppearance;
 
         float windowWidth = ImGui.GetWindowWidth();
-        float customizeWidth = windowWidth * 0.3f;
+        float customizeWidth = windowWidth - 13;
 
         bool shouldSetAppearance = false;
 
-        try
+        DrawHeader();
+
+        ImBrio.ToggleButtonStrip("appearance_filters_selector", new Vector2(ImBrio.GetRemainingWidth(), ImBrio.GetLineHeight()), ref selected, ["Equipment", "Customize"]);
+
+        if(selected == 1)
         {
-            using(var customizeChild = ImRaii.Child("leftpane", new Vector2(customizeWidth, -1), true, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse))
+            try
             {
-                if(customizeChild.Success)
+                using(var customizeChild = ImRaii.Child("leftpane", new Vector2(customizeWidth, -1), true, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse))
                 {
-                    shouldSetAppearance |= _customizeEditor.DrawCustomize(ref currentAppearance, originalAppearance, _capability);
-                }
-            }
-        }
-        catch(Exception ex) { Brio.Log.Error(ex, "Error drawing customize pane"); }
-
-        ImGui.SameLine();
-
-        using(var gearChild = ImRaii.Child("rightpane", new Vector2(ImGui.GetContentRegionAvail().X, -1), true, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse))
-        {
-            float sectionWidth = ImGui.GetContentRegionAvail().X / 3f - ImGui.GetStyle().FramePadding.X;
-
-            if(gearChild.Success)
-            {
-                shouldSetAppearance |= _gearEditor.DrawGear(ref currentAppearance, originalAppearance, _capability);
-            }
-
-            using(var extendedChild = ImRaii.Child("extended", new Vector2(sectionWidth, -1), true))
-            {
-                if(extendedChild.Success)
-                {
-                    shouldSetAppearance |= _extendedAppearanceEditor.Draw(ref currentAppearance, originalAppearance, _capability.CanTint);
-                }
-            }
-
-            ImGui.SameLine();
-
-            using(var shaderChild = ImRaii.Child("shaders", new Vector2(sectionWidth, -1), true, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse))
-            {
-                if(shaderChild.Success)
-                {
-                    var shaderParams = capability.Character.GetShaderParams();
-                    if(shaderParams != null)
+                    if(customizeChild.Success)
                     {
-                        shouldSetAppearance |= _modelShaderEditor.Draw(*shaderParams, ref _capability._modelShaderOverride, _capability);
+                        shouldSetAppearance |= _customizeEditor.DrawCustomize(ref currentAppearance, originalAppearance, _capability);
                     }
                 }
             }
-
-            ImGui.SameLine();
-
-            using(var optionsChild = ImRaii.Child("options", new Vector2(-1, -1), true, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse))
+            catch(Exception ex) { Brio.Log.Error(ex, "Error drawing customize pane"); }
+        }
+        else
+        {
+            using(var gearChild = ImRaii.Child("rightpane", new Vector2(ImGui.GetContentRegionAvail().X, -1), true, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse))
             {
-                if(optionsChild.Success)
+                float sectionWidth = ImGui.GetContentRegionAvail().X / 2f - ImGui.GetStyle().FramePadding.X + 2;
+
+                if(gearChild.Success)
                 {
-                    DrawOptions();
+                    shouldSetAppearance |= _gearEditor.DrawGear(ref currentAppearance, originalAppearance, _capability);
+                }
+
+                using(var extendedChild = ImRaii.Child("extended", new Vector2(sectionWidth, -1), true))
+                {
+                    if(extendedChild.Success)
+                    {
+                        shouldSetAppearance |= _extendedAppearanceEditor.Draw(ref currentAppearance, originalAppearance, _capability.CanTint);
+                    }
+                }
+
+                ImGui.SameLine();
+
+                using(var shaderChild = ImRaii.Child("shaders", new Vector2(sectionWidth, -1), true, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse))
+                {
+                    if(shaderChild.Success)
+                    {
+                        var shaderParams = capability.Character.GetShaderParams();
+                        if(shaderParams != null)
+                        {
+                            shouldSetAppearance |= _modelShaderEditor.Draw(*shaderParams, ref _capability._modelShaderOverride, _capability);
+                        }
+                    }
                 }
             }
         }
 
         if(shouldSetAppearance)
             _ = capability.SetAppearance(currentAppearance, AppearanceImportOptions.All);
-
     }
 
-    private void DrawOptions()
+    private void DrawHeader()
     {
-        var buttonSize = new Vector2(ImGui.GetContentRegionAvail().X / 2.0f - ImGui.GetStyle().FramePadding.X, 0);
+        var buttonSize = new Vector2(ImGui.GetContentRegionAvail().X / 5.0f - ImGui.GetStyle().FramePadding.X, 0);
 
         using(ImRaii.Disabled(!_capability.IsAppearanceOverridden))
         {
@@ -161,6 +158,7 @@ public class ActorAppearanceWindow : Window, IDisposable
         if(ImGui.Button("Redraw", buttonSize))
             _ = _capability.Redraw();
 
+        ImGui.SameLine();
         if(ImGui.Button("Load NPC", buttonSize))
         {
             AppearanceEditorCommon.ResetNPCSelector();
@@ -189,11 +187,10 @@ public class ActorAppearanceWindow : Window, IDisposable
 
         DrawImportOptions();
 
-        ImGui.Separator();
 
-        AppearanceEditorCommon.DrawPenumbraCollectionSwitcher(_capability);
+        //ImGui.Separator();
 
-
+        //AppearanceEditorCommon.DrawPenumbraCollectionSwitcher(_capability);
     }
 
     private void DrawImportOptions()

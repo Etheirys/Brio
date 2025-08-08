@@ -16,7 +16,7 @@ using Dalamud.Interface;
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Interface.Windowing;
 using Dalamud.Plugin.Services;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -388,7 +388,7 @@ public class LibraryWindow : Window
                     float mouseWheel = ImGui.GetIO().MouseWheel * 10;
                     // TODO: replace this ctrl listener with the new key bind system when it is merged
                     // as ImGUI ctrl support is _spotty_
-                    if(InputService.IsKeyBindDown(KeyBindEvents.Interface_IncrementSmallModifier) && mouseWheel != 0)
+                    if(InputManagerService.ActionKeysPressed(InputAction.Interface_IncrementSmallModifier) && mouseWheel != 0)
                     {
                         float val = _configurationService.Configuration.Library.IconSize;
                         val = Math.Clamp(val + mouseWheel, MinEntrySize, MaxEntrySize);
@@ -787,7 +787,7 @@ public class LibraryWindow : Window
 
                             using(ImRaii.PushColor(ImGuiCol.FrameBg, 0x000000))
                             {
-                                if(ImGui.InputText("###library_search_input", ref _searchText, 256,
+                                if(ImGui.InputText("###library_search_input", ref _searchText,  256, 
                                     ImGuiInputTextFlags.NoHorizontalScroll | ImGuiInputTextFlags.NoUndoRedo
                                     | ImGuiInputTextFlags.CallbackAlways,
                                     OnSearchFunc))
@@ -837,7 +837,7 @@ public class LibraryWindow : Window
         _searchTextNeedsClear = true;
     }
 
-    private unsafe int OnSearchFunc(ImGuiInputTextCallbackData* data)
+    private int OnSearchFunc(ref ImGuiInputTextCallbackData data)
     {
         if(_searchTextNeedsClear)
         {
@@ -845,12 +845,12 @@ public class LibraryWindow : Window
             _searchText = string.Empty;
 
             // clear the search input buffer
-            data->BufTextLen = 0;
-            data->BufSize = 0;
-            data->CursorPos = 0;
-            data->SelectionStart = 0;
-            data->SelectionEnd = 0;
-            data->BufDirty = 1;
+            data.BufTextLen = 0;
+            data.BufSize = 0;
+            data.CursorPos = 0;
+            data.SelectionStart = 0;
+            data.SelectionEnd = 0;
+            data.BufDirty = 1;
         }
 
         return 1;

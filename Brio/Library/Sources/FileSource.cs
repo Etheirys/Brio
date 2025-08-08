@@ -6,7 +6,7 @@ using Brio.UI;
 using Brio.UI.Controls.Stateless;
 using Dalamud.Interface;
 using Dalamud.Interface.Textures.TextureWraps;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 using System;
 using System.Diagnostics;
 using System.IO;
@@ -246,7 +246,7 @@ public class FileEntry : ItemEntryBase
         if(_isPreviewImageDisposed)
             return null;
 
-        if(_previewImage == null || _previewImage.ImGuiHandle == 0)
+        if(_previewImage == null || _previewImage.Handle == 0)
         {
             try
             {

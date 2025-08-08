@@ -10,8 +10,8 @@ using Brio.UI.Controls.Editors;
 using Dalamud.Interface.Utility;
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Interface.Windowing;
-using ImGuiNET;
-using ImGuizmoNET;
+using Dalamud.Bindings.ImGui;
+using Dalamud.Bindings.ImGuizmo;
 using OneOf.Types;
 using System;
 using System.Collections.Generic;
@@ -487,9 +487,9 @@ public class PosingOverlayWindow : Window, IDisposable
         public bool HoveringGizmo = ImGuizmo.IsOver();
         public bool AnyActive = ImGui.IsAnyItemActive();
         public bool AnyWindowHovered = ImGui.IsWindowHovered(ImGuiHoveredFlags.AnyWindow);
-        public bool UserDisablingSkeleton = InputService.IsKeyBindDown(KeyBindEvents.Posing_DisableSkeleton);
-        public bool UserDisablingGizmo = InputService.IsKeyBindDown(KeyBindEvents.Posing_DisableGizmo);
-        public bool UserHidingOverlay = InputService.IsKeyBindDown(KeyBindEvents.Posing_HideOverlay);
+        public bool UserDisablingSkeleton = InputManagerService.ActionKeysPressed(InputAction.Posing_DisableSkeleton);
+        public bool UserDisablingGizmo = InputManagerService.ActionKeysPressed(InputAction.Posing_DisableGizmo);
+        public bool UserHidingOverlay = InputManagerService.ActionKeysPressed(InputAction.Posing_HideOverlay);
 
 
         public bool AnythingBusy => PopupOpen || UsingGizmo || AnyActive || AnyWindowHovered;

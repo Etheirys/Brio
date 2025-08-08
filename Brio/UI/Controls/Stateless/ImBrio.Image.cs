@@ -1,5 +1,5 @@
 ﻿using Dalamud.Interface.Textures.TextureWraps;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 using System;
 using System.Numerics;
 
@@ -14,7 +14,7 @@ public static partial class ImBrio
 
     public static void ImageFit(IDalamudTextureWrap texture, Vector2 size)
     {
-        if(texture.ImGuiHandle == 0)
+        if(texture.Handle == 0)
             return;
 
         float widthScale = 0;
@@ -36,19 +36,19 @@ public static partial class ImBrio
         ImGui.SetCursorPosX(ImGui.GetCursorPosX() + offsetX);
         ImGui.SetCursorPosY(ImGui.GetCursorPosY() + offsetY);
 
-        ImGui.Image(texture.ImGuiHandle, new(fitWidth, fitHeight));
+        ImGui.Image(texture.Handle, new(fitWidth, fitHeight));
     }
 
     public static void ImageRotated(IDalamudTextureWrap texture, float angle)
     {
-        if(texture.ImGuiHandle == 0)
+        if(texture.Handle == 0)
             return;
 
         Vector2 center = ImGui.GetCursorScreenPos() + (texture.Size / 2);
-        ImageRotated(texture.ImGuiHandle, center, texture.Size, angle);
+        ImageRotated(texture.Handle, center, texture.Size, angle);
     }
 
-    public static void ImageRotated(nint tex_id, Vector2 center, Vector2 size, float angle)
+    public static void ImageRotated(ImTextureID tex_id, Vector2 center, Vector2 size, float angle)
     {
         float cos_a = (float)Math.Cos(angle);
         float sin_a = (float)Math.Sin(angle);

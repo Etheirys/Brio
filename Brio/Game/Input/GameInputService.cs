@@ -25,7 +25,7 @@ public class GameInputService : IDisposable
         _gPoseService = gPoseService;
         _virtualCameraService = virtualCameraService;
 
-        var inputHandleSig = "E8 ?? ?? ?? ?? 8B ?? ?? ?? ?? ?? 89 87 6C 35";
+        var inputHandleSig = "E8 ?? ?? ?? ?? ?? 8B ?? ?? ?? ?? 8B 87 ?? ?? ?? ?? 89 45";
         _handleInputHook = hooking.HookFromAddress<HandleInputDelegate>(scanner.ScanText(inputHandleSig), HandleInputDetour);
         _handleInputHook.Enable();
     }
@@ -39,20 +39,13 @@ public class GameInputService : IDisposable
 
         if(_virtualCameraService.CurrentCamera?.IsFreeCamera == true)
         {
-            _virtualCameraService.Update(mouseFrame, keyboardFrame);
+            _virtualCameraService.Update(mouseFrame);
 
-            if(_virtualCameraService.CurrentCamera.FreeCamValues.IsMovementEnabled && Config.ConfigurationService.Instance.Configuration.Input.EnableKeyHandlingOnKeyMod)
+            if(_virtualCameraService.CurrentCamera.FreeCamValues.IsMovementEnabled && 
+                Config.ConfigurationService.Instance.Configuration.InputManager.EnableKeyHandlingOnKeyMod)
             {
-                if(keyboardFrame->IsKeyDown(VirtualKey.CONTROL, true) || keyboardFrame->IsKeyDown(VirtualKey.SHIFT, true) || keyboardFrame->IsKeyDown(VirtualKey.MENU, true) || keyboardFrame->IsKeyDown(VirtualKey.SPACE, true))
-                {
-                    keyboardFrame->HandleAllKeys();
-                }
+                keyboardFrame->HandleAllKeys();
             }
-        }
-
-        if(HandleAllKeys)
-        {
-            keyboardFrame->HandleAllKeys();
         }
         else if(AllowEscape is false)
         {
@@ -67,6 +60,7 @@ public class GameInputService : IDisposable
 
     public void Dispose()
     {
+        // TODO_7_3
         _handleInputHook.Dispose();
     }
 }

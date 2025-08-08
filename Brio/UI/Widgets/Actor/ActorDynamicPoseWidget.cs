@@ -3,7 +3,7 @@ using Brio.UI.Controls.Selectors;
 using Brio.UI.Controls.Stateless;
 using Brio.UI.Widgets.Core;
 using Dalamud.Interface;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 using System.Numerics;
 
 namespace Brio.UI.Widgets.Actor;
@@ -23,10 +23,12 @@ public class ActorDynamicPoseWidget(ActorDynamicPoseCapability capability) : Wid
     public override void DrawBody()
     {
 
-
-
         ImGui.Separator();
-        ImBrio.ToggleButtonStrip("DynamicFaceControlSelector", new Vector2(ImBrio.GetRemainingWidth(), ImBrio.GetLineHeight()), ref selected, ["Eyes", "Body", "Head"]);
+
+        if(ImBrio.ToggleButtonStrip("DynamicFaceControlSelector", new Vector2(ImBrio.GetRemainingWidth(), ImBrio.GetLineHeight()), ref selected, ["Eyes", "Body", "Head"]))
+        {
+
+        }
 
         switch(selected)
         {

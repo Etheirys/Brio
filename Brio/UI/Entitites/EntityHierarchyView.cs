@@ -5,7 +5,7 @@ using Brio.UI.Theming;
 using Brio.UI.Widgets.Core;
 using Dalamud.Interface;
 using Dalamud.Interface.Utility.Raii;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 using System.Numerics;
 
 namespace Brio.UI.Entitites;
@@ -65,13 +65,16 @@ public class EntityHierarchyView(EntityManager entityManager, GPoseService gPose
                 {
                     Select(entity);
                 }
+                if(ImGui.IsItemHovered())
+                {
+                    if(entity.Flags.HasFlag(EntityFlags.AllowDoubleClick) && ImGui.IsMouseDoubleClicked(ImGuiMouseButton.Left))
+                    {
+                        entity.OnDoubleClick();
+                    }
+                }
                 if(ImGui.IsItemClicked(ImGuiMouseButton.Right))
                 {
                     ImGui.OpenPopup($"context_popup{entity.Id}");
-                }
-                if (entity.Flags.HasFlag(EntityFlags.AllowDoubleClick) && ImGui.IsMouseDoubleClicked(ImGuiMouseButton.Left) && ImGui.IsItemHovered())
-                {
-                    entity.OnDoubleClick();
                 }
 
                 ImGui.SetCursorPos(invsButtonPos);

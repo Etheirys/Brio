@@ -1,6 +1,6 @@
 ﻿using Brio.Core;
 using Brio.Input;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 using System.Numerics;
 
 namespace Brio.UI.Controls.Stateless;
@@ -43,16 +43,16 @@ public static partial class ImBrio
         if(max < min)
             step = -step;
 
-        var smallIncrement = InputService.IsKeyBindDown(KeyBindEvents.Interface_IncrementSmallModifier);
+        var smallIncrement = InputManagerService.ActionKeysPressed(InputAction.Interface_IncrementSmallModifier);
         if(smallIncrement)
             step /= 10;
 
-        bool largeIncrement = InputService.IsKeyBindDown(KeyBindEvents.Interface_IncrementLargeModifier);
+        bool largeIncrement = InputManagerService.ActionKeysPressed(InputAction.Interface_IncrementLargeModifier);
         if(largeIncrement)
             step *= 10;
 
 
-        if(ImGui.ArrowButton($"##{label}_decrease", ImGuiDir.Left))
+        if(ImGui.Button($"◀##{label}_decrease"))
         {
             value -= isAngle ? step * MathHelpers.DegreesToRadians : step;
             changed = true;
@@ -91,7 +91,7 @@ public static partial class ImBrio
         }
 
         ImGui.SameLine();
-        if(ImGui.ArrowButton($"##{label}_increase", ImGuiDir.Right))
+        if(ImGui.Button($"▶##{label}_increase"))
         {
             value += isAngle ? step * MathHelpers.DegreesToRadians : step;
             changed = true;

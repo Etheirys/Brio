@@ -75,7 +75,6 @@ public class PosingCapability : ActorCharacterCapability
     private readonly ConfigurationService _configurationService;
     private readonly PosingTransformWindow _overlayTransformWindow;
     private readonly IFramework _framework;
-    private readonly InputService _input;
     private readonly GameInputService _gameInputService;
 
     public PosingCapability(
@@ -85,8 +84,7 @@ public class PosingCapability : ActorCharacterCapability
         ConfigurationService configurationService,
         PosingTransformWindow overlayTransformWindow,
         IFramework framework,
-        GameInputService gameInputService,
-        InputService input)
+        GameInputService gameInputService)
         : base(parent)
     {
         Widget = new PosingWidget(this);
@@ -95,26 +93,17 @@ public class PosingCapability : ActorCharacterCapability
         _configurationService = configurationService;
         _overlayTransformWindow = overlayTransformWindow;
         _framework = framework;
-        _input = input;
         _gameInputService = gameInputService;
     }
 
     public override void OnEntitySelected()
     {
         base.OnEntitySelected();
-
-        _input.AddListener(KeyBindEvents.Posing_ToggleOverlay, ToggleOverlay);
-        _input.AddListener(KeyBindEvents.Posing_Undo, Undo);
-        _input.AddListener(KeyBindEvents.Posing_Redo, Redo);
     }
 
     public override void OnEntityDeselected()
     {
         base.OnEntityDeselected();
-
-        _input.RemoveListener(KeyBindEvents.Posing_ToggleOverlay, ToggleOverlay);
-        _input.RemoveListener(KeyBindEvents.Posing_Undo, Undo);
-        _input.RemoveListener(KeyBindEvents.Posing_Redo, Redo);
     }
 
     public void ClearSelection() => Selected = PosingSelectionType.None;

@@ -1,6 +1,6 @@
 ﻿using Brio.Config;
 using Brio.UI.Windows;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 using System.Numerics;
 
 namespace Brio.Core;

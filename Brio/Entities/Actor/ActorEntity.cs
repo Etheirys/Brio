@@ -10,7 +10,7 @@ using Brio.UI.Theming;
 using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Interface;
 using Dalamud.Interface.Utility.Raii;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 
@@ -83,7 +83,7 @@ namespace Brio.Entities.Actor
         {
             AddCapability(ActivatorUtilities.CreateInstance<ActorLifetimeCapability>(_serviceProvider, this));
             AddCapability(ActivatorUtilities.CreateInstance<ActorAppearanceCapability>(_serviceProvider, this));
-            //AddCapability(ActivatorUtilities.CreateInstance<ActorDynamicPoseCapability>(_serviceProvider, this));
+            AddCapability(ActivatorUtilities.CreateInstance<ActorDynamicPoseCapability>(_serviceProvider, this));
 
             AddCapability(ActivatorUtilities.CreateInstance<SkeletonPosingCapability>(_serviceProvider, this));
             AddCapability(ActivatorUtilities.CreateInstance<ModelPosingCapability>(_serviceProvider, this));

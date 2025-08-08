@@ -15,6 +15,7 @@ using Brio.Config;
 using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Ipc;
+using Dalamud.Plugin.Services;
 using System;
 using System.Collections.Generic;
 
@@ -41,6 +42,7 @@ public class CustomizePlusService : BrioIPC
 
     private readonly ConfigurationService _configurationService;
     private readonly IDalamudPluginInterface _pluginInterface;
+    private readonly ICommandManager _commandManager;
 
     private readonly ICallGateSubscriber<ushort, string, (int, Guid?)> _customizeplusSetTemporaryProfile;
     private readonly ICallGateSubscriber<IList<IPCProfileDataTuple>> _customizeplusGetAllProfiles;
@@ -50,10 +52,11 @@ public class CustomizePlusService : BrioIPC
     private readonly ICallGateSubscriber<(int, int)> _customizeplusApiVersion;
     private readonly ICallGateSubscriber<bool> _customizeplusIsValid;
 
-    public CustomizePlusService(IDalamudPluginInterface pluginInterface, ConfigurationService configurationService)
+    public CustomizePlusService(IDalamudPluginInterface pluginInterface, ICommandManager commandManager, ConfigurationService configurationService)
     {
         _pluginInterface = pluginInterface;
         _configurationService = configurationService;
+        _commandManager = commandManager;
 
         _customizeplusApiVersion = _pluginInterface.GetIpcSubscriber<(int, int)>("CustomizePlus.General.GetApiVersion");
         _customizeplusIsValid = _pluginInterface.GetIpcSubscriber<bool>("CustomizePlus.General.IsValid");
@@ -67,6 +70,11 @@ public class CustomizePlusService : BrioIPC
 
         _configurationService.OnConfigurationChanged += OnConfigurationChanged;
         OnConfigurationChanged();
+    }
+
+    public void OpenCustomizePlus()
+    {
+        _commandManager.ProcessCommand("/c+");
     }
 
     public bool RemoveTemporaryProfile(IGameObject? character)

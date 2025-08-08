@@ -5,7 +5,7 @@ using Brio.UI.Controls.Stateless;
 using Brio.UI.Widgets.Core;
 using Dalamud.Interface;
 using Dalamud.Interface.Utility.Raii;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 using System.Numerics;
 
 namespace Brio.UI.Widgets.World;
@@ -38,7 +38,7 @@ public class WeatherWidget(WeatherCapability weatherCapability) : Widget<Weather
         var startAt = ImGui.GetCursorPos();
 
         ImGui.SetNextItemWidth(-((ImGui.GetStyle().FramePadding.X * 2) + ImGui.CalcTextSize("XXX").X));
-        ImGui.InputInt("###current_weather_input", ref currentWeather, 0, 0, ImGuiInputTextFlags.EnterReturnsTrue);
+        ImGui.InputInt("###current_weather_input", ref currentWeather, 0, 0, default, ImGuiInputTextFlags.EnterReturnsTrue);
 
         ImGui.SameLine();
         unlockPos = ImGui.GetCursorPos();

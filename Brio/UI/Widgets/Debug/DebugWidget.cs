@@ -2,7 +2,7 @@
 using Brio.UI.Widgets.Core;
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Plugin.Services;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 
 namespace Brio.UI.Widgets.Debug;
 

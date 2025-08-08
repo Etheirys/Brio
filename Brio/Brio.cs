@@ -114,7 +114,7 @@ public class Brio : IDalamudPlugin
         serviceCollection.AddSingleton<ResourceProvider>();
         serviceCollection.AddSingleton<GameDataProvider>();
         serviceCollection.AddSingleton<WelcomeService>();
-        serviceCollection.AddSingleton<InputService>();
+        serviceCollection.AddSingleton<InputManagerService>();
         serviceCollection.AddSingleton<SceneService>();
         serviceCollection.AddSingleton<ProjectSystem>();
         serviceCollection.AddSingleton<AutoSaveService>();
@@ -138,6 +138,7 @@ public class Brio : IDalamudPlugin
         serviceCollection.AddSingleton<ActorSpawnService>();
         serviceCollection.AddSingleton<ActorRedrawService>();
         serviceCollection.AddSingleton<ActorAppearanceService>();
+        serviceCollection.AddSingleton<ActorVFXService>();
         serviceCollection.AddSingleton<ActionTimelineService>();
         serviceCollection.AddSingleton<GPoseService>();
         serviceCollection.AddSingleton<CommandHandlerService>();

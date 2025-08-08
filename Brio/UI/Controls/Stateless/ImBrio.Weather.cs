@@ -1,5 +1,5 @@
 ﻿using Brio.Game.Types;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 using System.Numerics;
 
 namespace Brio.UI.Controls.Stateless;
