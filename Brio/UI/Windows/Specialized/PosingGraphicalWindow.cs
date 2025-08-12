@@ -787,10 +787,7 @@ public class PosingGraphicalWindow : Window, IDisposable
 
     private static void DrawImage(string image, out Vector2 imageSizeToFit, out Vector2 scalingFactors)
     {
-        var img = ResourceProvider.Instance.GetResourceImage(image);
-
-        if(img is null)
-            throw new NullReferenceException("img can not be null!");
+        var img = ResourceProvider.Instance.GetResourceImage(image) ?? throw new NullReferenceException("image can not be null!");
 
         var available = ImGui.GetContentRegionAvail() - (ImGui.GetStyle().FramePadding * 2f);
         var imageSize = new Vector2(img.Width, img.Height);
