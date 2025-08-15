@@ -1,5 +1,8 @@
 name: Build Brio - Dalamud Staging
 
+permissions:
+  contents: read
+
 on:
   push:
     branches: 
