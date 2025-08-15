@@ -36,33 +36,36 @@ public static partial class ImBrio
         bool changed = false;
         float buttonWidth = (size.X / options.Length);
 
-        ImGui.PushStyleColor(ImGuiCol.ChildBg, ImGui.GetColorU32(ImGuiCol.Tab));
-        ImGui.PushStyleVar(ImGuiStyleVar.ChildRounding, ImGui.GetStyle().FrameRounding);
-        if(ImGui.BeginChild(id, size))
+        using(ImRaii.PushColor(ImGuiCol.ChildBg, ImGui.GetColorU32(ImGuiCol.Tab)))
         {
-            ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, new Vector2(0, 0));
-
-            for(int i = 0; i < options.Length; i++)
+            using(ImRaii.PushStyle(ImGuiStyleVar.ChildRounding, ImGui.GetStyle().FrameRounding))
             {
-                if(i > 0)
-                    ImGui.SameLine();
-
-                bool val = i == selected;
-                ToggleButton($"{options[i]}##{id}", new(buttonWidth, size.Y), ref val, false);
-
-                if(val && i != selected)
+                using(var child = ImRaii.Child(id, size))
                 {
-                    selected = i;
-                    changed = true;
+                    if(child.Success)
+                    {
+                        using(ImRaii.PushStyle(ImGuiStyleVar.ItemSpacing, new Vector2(0, 0)))
+                        {
+                            for(int i = 0; i < options.Length; i++)
+                            {
+                                if(i > 0)
+                                    ImGui.SameLine();
+
+                                bool val = i == selected;
+                                ToggleButton($"{options[i]}##{id}", new(buttonWidth, size.Y), ref val, false);
+
+                                if(val && i != selected)
+                                {
+                                    selected = i;
+                                    changed = true;
+                                }
+                            }
+                        }
+                    }
                 }
             }
-
-            ImGui.PopStyleVar();
-            ImGui.EndChild();
         }
 
-        ImGui.PopStyleVar();
-        ImGui.PopStyleColor();
         return changed;
     }
 }
