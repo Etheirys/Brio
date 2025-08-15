@@ -12,6 +12,9 @@ public class ActorDebugWidget(ActorDebugCapability capability) : Widget<ActorDeb
 
     public override WidgetFlags Flags => Capability.IsDebug ? WidgetFlags.DrawBody : WidgetFlags.None;
 
+    // TODO: Store this properly in a list or whatever so it can be cleaned up
+    private static nint _spawnedGoopInstance;
+
     public unsafe override void DrawBody()
     {
         using(var tabBar = ImRaii.TabBar("###debug_tabs"))
@@ -63,6 +66,25 @@ public class ActorDebugWidget(ActorDebugCapability capability) : Widget<ActorDeb
                     }
                 }
 
+                using(var vfxTab = ImRaii.TabItem("Goop Demo"))
+                {
+                    if(vfxTab.Success)
+                    {
+                        if(ImGui.Button("Create Goop"))
+                        {
+                            // TODO: Store this properly in a list or whatever so it can be cleaned up
+                            _spawnedGoopInstance = Capability.VFXService.CreateActorVFX("vfx/common/eff/c0101_stlp_mim_gre_c0r1.avfx", Capability.GameObject);
+
+                        }
+
+                        if(ImGui.Button("Destroy Goop"))
+                        {
+                            Capability.VFXService.DestroyVFX(_spawnedGoopInstance);
+                            _spawnedGoopInstance = 0;
+                        }
+                    }
+                }
+
                 using(var infoTab = ImRaii.TabItem("GameObject"))
                 {
                     if(infoTab.Success)
@@ -70,7 +92,6 @@ public class ActorDebugWidget(ActorDebugCapability capability) : Widget<ActorDeb
                         Dalamud.Utility.Util.ShowGameObjectStruct(Capability.GameObject, true);
                     }
                 }
-
             }
         }
     }

@@ -16,11 +16,11 @@ public static class ImGuizmoExtensions
 
         if(mouseWheel != 0)
         {
-            bool smallIncrement = InputService.IsKeyBindDown(KeyBindEvents.Interface_IncrementSmallModifier);
+            bool smallIncrement = InputManagerService.ActionKeysPressed(InputAction.Interface_IncrementSmallModifier);
             if(smallIncrement)
                 mouseWheel /= 10;
 
-            bool largeIncrement = InputService.IsKeyBindDown(KeyBindEvents.Interface_IncrementLargeModifier);
+            bool largeIncrement = InputManagerService.ActionKeysPressed(InputAction.Interface_IncrementLargeModifier);
             if(largeIncrement)
                 mouseWheel *= 10;
 

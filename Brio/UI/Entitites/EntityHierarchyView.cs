@@ -41,11 +41,14 @@ public class EntityHierarchyView(EntityManager entityManager, GPoseService gPose
         }
     }
 
-    private void DrawEntity(Entity entity, EntityId? selectedEntityId, float lastOffset = 0, bool isChild = false)
+    private void DrawEntity(Entity entity, EntityId? selectedEntityId, float lastOffset = 0)
     {
         bool isSelected = false;
         bool hasChildren = false;
+        bool hasOffset = false;
 
+        if(lastOffset > 0)
+            hasOffset = true;
         if(entity.Children.Count > 0)
             hasChildren = true;
         if(selectedEntityId != null && entity.Id.Equals(selectedEntityId))
@@ -57,14 +60,22 @@ public class EntityHierarchyView(EntityManager entityManager, GPoseService gPose
             {
                 var invsButtonPos = ImGui.GetCursorPos();
                 float width = buttonWidth;
+
                 if(entity.ContextButtonCount >= 2)
                 {
                     width -= 30 - entity.ContextButtonCount;
                 }
+
                 if(ImGui.Button($"###{entity.Id}_invs_button", new(width, 0)))
                 {
                     Select(entity);
                 }
+
+                if(ImGui.IsItemClicked(ImGuiMouseButton.Right))
+                {
+                    ImGui.OpenPopup($"context_popup{entity.Id}");
+                }
+
                 if(ImGui.IsItemHovered())
                 {
                     if(entity.Flags.HasFlag(EntityFlags.AllowDoubleClick) && ImGui.IsMouseDoubleClicked(ImGuiMouseButton.Left))
@@ -72,15 +83,11 @@ public class EntityHierarchyView(EntityManager entityManager, GPoseService gPose
                         entity.OnDoubleClick();
                     }
                 }
-                if(ImGui.IsItemClicked(ImGuiMouseButton.Right))
-                {
-                    ImGui.OpenPopup($"context_popup{entity.Id}");
-                }
 
                 ImGui.SetCursorPos(invsButtonPos);
             }
 
-            if(lastOffset > 0)
+            if(hasOffset)
             {
                 var curPos = ImGui.GetCursorPos();
 
