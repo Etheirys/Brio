@@ -103,9 +103,8 @@ public class Skeleton : IDisposable
                     // Single-root partials are mapped by connected bone indices
                     var parentBone = Partials[0].GetOrCreateBone(partial->ConnectedParentBoneIndex);
                     var bone = newPartial.GetOrCreateBone(partial->ConnectedBoneIndex);
-
+                
                     bone.Parent = parentBone;
-                    parentBone.Children.Add(bone);
                     if(!parentBone.Children.Contains(bone))
                         parentBone.Children.Add(bone);
                 }
@@ -114,8 +113,8 @@ public class Skeleton : IDisposable
                     // Multi-root partials are mapped through their names
                     foreach(Bone bone in newPartial.RootBones)
                     {
-                        var parentBone = GetFirstVisibleBone(bone.Name);
-                        if(parentBone != null && bone != parentBone)
+                        var parentBone = Partials[0].GetBone(bone.Name);
+                        if(parentBone != null)
                         {
                             bone.Parent = parentBone;
                             if(!parentBone.Children.Contains(bone))
