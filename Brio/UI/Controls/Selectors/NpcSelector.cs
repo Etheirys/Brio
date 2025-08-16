@@ -153,68 +153,67 @@ public class NpcSelector(string id) : Selector<NpcSelectorEntry>(id)
     protected override int Compare(NpcSelectorEntry itemA, NpcSelectorEntry itemB)
     {
         // Mounts
-        if(itemA.Appearance.Value is Mount && itemB.Appearance.Value is not Mount)
+        if(itemA?.Appearance?.Value is Mount && itemB?.Appearance?.Value is not Mount)
             return -1;
-
-        if(itemA.Appearance.Value is not Mount && itemB.Appearance.Value is Mount)
+        if(itemA?.Appearance?.Value is not Mount && itemB?.Appearance?.Value is Mount)
             return 1;
 
         // Companions
-        if(itemA.Appearance.Value is Companion && itemB.Appearance.Value is not Companion)
+        if(itemA?.Appearance?.Value is Companion && itemB?.Appearance?.Value is not Companion)
             return -1;
-
-        if(itemA.Appearance.Value is not Companion && itemB.Appearance.Value is Companion)
+        if(itemA?.Appearance?.Value is not Companion && itemB?.Appearance?.Value is Companion)
             return 1;
 
         // Event NPCs
-        if(itemA.Appearance.Value is ENpcBase && itemB.Appearance.Value is not ENpcBase)
+        if(itemA?.Appearance?.Value is ENpcBase && itemB?.Appearance?.Value is not ENpcBase)
             return -1;
-
-        if(itemA.Appearance.Value is not ENpcBase && itemB.Appearance.Value is ENpcBase)
+        if(itemA?.Appearance?.Value is not ENpcBase && itemB?.Appearance?.Value is ENpcBase)
             return 1;
 
-        // Then Battle NPCs
-        if(itemA.Appearance.Value is BNpcBase && itemB.Appearance.Value is not BNpcBase)
+        // Battle NPCs
+        if(itemA?.Appearance?.Value is BNpcBase && itemB?.Appearance?.Value is not BNpcBase)
             return -1;
-
-        if(itemA.Appearance.Value is not BNpcBase && itemB.Appearance.Value is BNpcBase)
+        if(itemA?.Appearance?.Value is not BNpcBase && itemB?.Appearance?.Value is BNpcBase)
             return 1;
 
         // Ornaments
-        if(itemA.Appearance.Value is Ornament && itemB.Appearance.Value is not Ornament)
+        if(itemA?.Appearance?.Value is Ornament && itemB?.Appearance?.Value is not Ornament)
             return -1;
-
-        if(itemA.Appearance.Value is not Ornament && itemB.Appearance.Value is Ornament)
+        if(itemA?.Appearance?.Value is not Ornament && itemB?.Appearance?.Value is Ornament)
             return 1;
 
-        // Move unknown names down
-        if(itemA.Name.StartsWith("B:") && !itemB.Name.StartsWith("B:"))
-            return 1;
+        string nameA = itemA?.Name ?? string.Empty;
+        string nameB = itemB?.Name ?? string.Empty;
 
-        if(!itemA.Name.StartsWith("B:") && itemB.Name.StartsWith("B:"))
-            return 1;
+        try
+        {
+            // Move unknown names down
+            string[] prefixes = ["B:", "E:", "N:"];
+            for(int i = 0; i < prefixes.Length; i++)
+            {
+                var prefix = prefixes[i];
+                bool aHas = nameA.StartsWith(prefix, StringComparison.Ordinal);
+                bool bHas = nameB.StartsWith(prefix, StringComparison.Ordinal);
+                if(aHas && !bHas)
+                    return 1;
+                if(!aHas && bHas)
+                    return 1;
+            }
 
-        if(itemA.Name.StartsWith("E:") && !itemB.Name.StartsWith("E:"))
-            return 1;
+            // Blank string to bottom
+            if(string.IsNullOrWhiteSpace(nameA) && !string.IsNullOrWhiteSpace(nameB))
+                return 1;
 
-        if(!itemA.Name.StartsWith("E:") && itemB.Name.StartsWith("E:"))
-            return 1;
+            if(!string.IsNullOrWhiteSpace(nameA) && string.IsNullOrWhiteSpace(nameB))
+                return -1;
 
-        if(itemA.Name.StartsWith("N:") && !itemB.Name.StartsWith("N:"))
-            return 1;
-
-        if(!itemA.Name.StartsWith("N:") && itemB.Name.StartsWith("N:"))
-            return 1;
-
-        // Blank string to bottom
-        if(string.IsNullOrWhiteSpace(itemA.Name) && !string.IsNullOrWhiteSpace(itemB.Name))
-            return 1;
-
-        if(!string.IsNullOrWhiteSpace(itemA.Name) && string.IsNullOrWhiteSpace(itemB.Name))
-            return -1;
-
-        // Alphabetical
-        return string.Compare(itemA.Name, itemB.Name, StringComparison.InvariantCultureIgnoreCase);
+            // Alphabetical
+            return string.Compare(nameA, nameB, StringComparison.InvariantCultureIgnoreCase);
+        }
+        catch
+        {
+            return 0; // Fallback to equality
+        }
     }
 
     public record class NpcSelectorEntry(string Name, uint Icon, ActorAppearanceUnion Appearance);

@@ -5,9 +5,11 @@ To open this window again click `Information` on the Scene Manager then -> `View
 	 ---> Brio, Versions 0.5.2 <--- 7.3 Support 
 ---------------------------------------------------------------------------------------------------------------------------------------------------------
 
---- Brio, Versions 0.5.2.1 --- 
+--- Brio, Versions 0.5.2.2 --- 
 
-- Fix ImGUI assertion errors
+- Fixed a rare crash 
+
+- Fixed ImGUI assertion errors
 
 - Disabled double click on actors and camera to rename them to fix a bug (temporarily) 
 
