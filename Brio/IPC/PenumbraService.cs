@@ -116,5 +116,6 @@ public class PenumbraService : BrioIPC
         _configurationService.OnConfigurationChanged -= OnConfigurationChanged;
         _penumbraInitializedSubscriber.Dispose();
         _penumbraDisposedSubscriber.Dispose();
+        _penumbraRedrawEvent.Dispose();
     }
 }
