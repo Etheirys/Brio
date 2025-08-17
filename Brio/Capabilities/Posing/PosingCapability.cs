@@ -5,6 +5,7 @@ using Brio.Entities.Actor;
 using Brio.Files;
 using Brio.Game.Input;
 using Brio.Game.Posing;
+using Brio.Game.Posing.Skeletons;
 using Brio.Input;
 using Brio.Resources;
 using Brio.UI.Widgets.Posing;
@@ -334,18 +335,53 @@ public class PosingCapability : ActorCharacterCapability
     }
     public BonePoseInfoId? IsSelectedBone()
     {
-        Game.Posing.Skeletons.Bone? realBone = null;
+        Bone? realBone = null;
         return Selected.Match<BonePoseInfoId?>(
             bone =>
             {
                 realBone = SkeletonPosing.GetBone(bone);
-                if (realBone != null && realBone.Skeleton.IsValid)
+                if(realBone != null && realBone.Skeleton.IsValid)
                     return bone;
                 return null;
             },
             _ => null,
             _ => null
         );
+    }
+
+    public static void FlipBone(Bone bone, BonePoseInfo poseInfo)
+    {
+        var newBoneTransform = bone.LastTransform;
+
+        // Convert to Euler (like the Gizmo)
+        var boneRotationEuler = bone.LastTransform.Rotation.ToEuler();
+        boneRotationEuler.X = 180 - boneRotationEuler.X;
+        boneRotationEuler.Y = -boneRotationEuler.Y;
+        var newBoneRotation = boneRotationEuler.ToQuaternion();
+
+        newBoneTransform.Rotation = newBoneRotation;
+
+        poseInfo.Apply(newBoneTransform, bone.LastRawTransform, TransformComponents.All, TransformComponents.All, poseInfo.DefaultIK, poseInfo.MirrorMode, true);
+    }
+
+    public void FlipBoneModel()
+    {
+        BonePoseInfoId? selectedIsBone = IsSelectedBone();
+        // Bone Flip
+        if(selectedIsBone.HasValue)
+        {
+            // Get current bone rotation data
+            var bone = SkeletonPosing.GetBone(selectedIsBone.Value);
+            if(bone != null)
+            {
+                var poseInfo = SkeletonPosing.PoseInfo.GetPoseInfo(bone);
+                FlipBone(bone, poseInfo);
+            }
+        }
+        else
+        {
+            // Model Flip (TODO: Implement)
+        }
     }
 
     public record struct PoseStack(PoseInfo Info, Transform ModelTransform);
