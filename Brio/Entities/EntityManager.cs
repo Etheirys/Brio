@@ -47,6 +47,8 @@ public unsafe partial class EntityManager(IServiceProvider serviceProvider, Conf
     {
         _worldEntity = ActivatorUtilities.CreateInstance<WorldEntity>(_serviceProvider);
         _entityMap[_worldEntity.Id] = _worldEntity;
+      
+        RefreshDebugEntity();
 
         var environmentEntity = ActivatorUtilities.CreateInstance<EnvironmentEntity>(_serviceProvider);
         AttachEntity(environmentEntity, _worldEntity);
@@ -57,8 +59,6 @@ public unsafe partial class EntityManager(IServiceProvider serviceProvider, Conf
         var defaultCameraEntity = ActivatorUtilities.CreateInstance<CameraEntity>(_serviceProvider, 0, CameraType.Default);
         defaultCameraEntity.VirtualCamera.SaveCameraState();
         AttachEntity(defaultCameraEntity, cameraContainerEntity);
-
-        RefreshDebugEntity();
     }
 
     public void AttachEntity(Entity entity, Entity? parent, bool autoDetach = false)

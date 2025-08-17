@@ -12,6 +12,7 @@ using Dalamud.Plugin.Services;
 using FFXIVClientStructs.FFXIV.Client.Game.Character;
 using FFXIVClientStructs.FFXIV.Client.Game.Control;
 using FFXIVClientStructs.FFXIV.Client.Graphics.Scene;
+using InteropGenerator.Runtime;
 using System;
 using System.Collections.Generic;
 using System.Numerics;
@@ -68,7 +69,7 @@ public class ActorAppearanceService : IDisposable
         _updateTintHook = hooks.HookFromAddress<UpdateTintDelegate>((nint)updateTintHookAddress, UpdateTintDetour);
         _updateTintHook.Enable();
 
-        var setFacewearAddress = sigScanner.ScanText("e8 ?? ?? ?? ?? ff c3 48 8D ?? ?? ?? ?? ?? ?? ?? 0f");
+        var setFacewearAddress = sigScanner.ScanText("E8 ?? ?? ?? ?? FF C3 48 8D ?? ?? ?? ?? ?? ?? ?? 0F");
         _setFacewear = (delegate* unmanaged<DrawDataContainer*, byte, ushort, void>)setFacewearAddress;
 
         var updateFaceTrackerAddress = sigScanner.ScanText("E8 ?? ?? ?? ?? 8B D7 48 8B CB E8 ?? ?? ?? ?? 41 ?? ?? 8B D7 48 ?? ?? 48 ?? ?? ?? ?? 48 83 ?? ?? 5F");
