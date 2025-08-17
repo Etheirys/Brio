@@ -78,11 +78,11 @@ public class Skeleton : IDisposable
                             {
                                 RootPartial = newPartial;
                                 RootBone = bone;
-                                bone.IsPartialRoot = true;
                                 bone.IsSkeletonRoot = true;
                             }
 
-                            newPartial.RootBone = bone;
+                            bone.IsPartialRoot = true;
+                            newPartial.RootBones.Add(bone);
                         }
                         else
                         {
@@ -98,16 +98,29 @@ public class Skeleton : IDisposable
 
             if(partialIdx != 0)
             {
-                if(partial->ConnectedBoneIndex >= 0 && partial->ConnectedParentBoneIndex >= 0)
+                if(newPartial.RootBones.Count == 1)
                 {
-                    var parent = Partials[0].GetOrCreateBone(partial->ConnectedParentBoneIndex);
-                    var child = newPartial.GetOrCreateBone(partial->ConnectedBoneIndex);
-                    child.IsPartialRoot = true;
-                    newPartial.ParentBone = parent;
-                    newPartial.RootBone = child;
-
-                    parent.Children.Add(child);
-                    child.Parent = parent;
+                    // Single-root partials are mapped by connected bone indices
+                    var parentBone = Partials[0].GetOrCreateBone(partial->ConnectedParentBoneIndex);
+                    var bone = newPartial.GetOrCreateBone(partial->ConnectedBoneIndex);
+                
+                    bone.Parent = parentBone;
+                    if(!parentBone.Children.Contains(bone))
+                        parentBone.Children.Add(bone);
+                }
+                else
+                {
+                    // Multi-root partials are mapped through their names
+                    foreach(Bone bone in newPartial.RootBones)
+                    {
+                        var parentBone = Partials[0].GetBone(bone.Name);
+                        if(parentBone != null)
+                        {
+                            bone.Parent = parentBone;
+                            if(!parentBone.Children.Contains(bone))
+                                parentBone.Children.Add(bone);
+                        }
+                    }
                 }
             }
         }
