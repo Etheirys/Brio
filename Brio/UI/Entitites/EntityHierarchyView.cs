@@ -71,18 +71,19 @@ public class EntityHierarchyView(EntityManager entityManager, GPoseService gPose
                     Select(entity);
                 }
 
+                //if(ImGui.IsItemHovered())
+                //{
+                //    if(entity.Flags.HasFlag(EntityFlags.AllowDoubleClick) && ImGui.IsMouseDoubleClicked(ImGuiMouseButton.Left))
+                //    {
+                //        entity.OnDoubleClick();
+                //    }
+                //}
+
                 if(ImGui.IsItemClicked(ImGuiMouseButton.Right))
                 {
                     ImGui.OpenPopup($"context_popup{entity.Id}");
                 }
 
-                if(ImGui.IsItemHovered())
-                {
-                    if(entity.Flags.HasFlag(EntityFlags.AllowDoubleClick) && ImGui.IsMouseDoubleClicked(ImGuiMouseButton.Left))
-                    {
-                        entity.OnDoubleClick();
-                    }
-                }
 
                 ImGui.SetCursorPos(invsButtonPos);
             }

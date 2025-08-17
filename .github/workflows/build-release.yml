@@ -1,5 +1,8 @@
 name: Build Brio - Dalamud Release
 
+permissions:
+  contents: read
+  
 on:
   push:
     branches: 

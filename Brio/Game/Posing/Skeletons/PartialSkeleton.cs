@@ -16,9 +16,7 @@ public unsafe class PartialSkeleton(Skeleton skeleton, int id)
 
     private readonly Dictionary<int, Bone> _bones = [];
 
-    public Bone? ParentBone { get; set; }
-
-    public Bone RootBone { get; set; } = null!;
+    public List<Bone> RootBones { get; set; } = [];
 
     public IReadOnlyDictionary<int, Bone> Bones => _bones;
 
