@@ -95,7 +95,7 @@ public class EntityHierarchyView(EntityManager entityManager, GPoseService gPose
                 lastOffset += offsetWidth;
             }
 
-            using(ImRaii.PushColor(ImGuiCol.Button, TheameManager.CurrentTheame.Accent.AccentColor, isSelected))
+            using(ImRaii.PushColor(ImGuiCol.Button, ThemeManager.CurrentTheme.Accent.AccentColor, isSelected))
             {
                 using(ImRaii.Disabled(true))
                 {

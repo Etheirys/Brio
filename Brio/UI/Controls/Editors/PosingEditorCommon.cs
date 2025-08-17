@@ -195,7 +195,7 @@ public static class PosingEditorCommon
                 var ik = bonePose.DefaultIK;
                 bool enabled = ik.Enabled && BrioStyle.EnableStyle;
 
-                using(ImRaii.PushColor(ImGuiCol.Button, TheameManager.CurrentTheame.Accent.AccentColor, enabled))
+                using(ImRaii.PushColor(ImGuiCol.Button, ThemeManager.CurrentTheme.Accent.AccentColor, enabled))
                 {
                     if(ImGui.Button("IK", buttonSize))
                         ImGui.OpenPopup("transform_ik_popup");

@@ -441,7 +441,7 @@ public class LibraryWindow : Window
                             var config = ConfigurationService.Instance.Configuration;
                             bool isFavorite = config.Library.Favorites.Contains(ieb.Identifier);
 
-                            using(ImRaii.PushColor(ImGuiCol.Text, isFavorite ? TheameManager.CurrentTheame.Accent.AccentColor : UIConstants.ToggleButtonInactive))
+                            using(ImRaii.PushColor(ImGuiCol.Text, isFavorite ? ThemeManager.CurrentTheme.Accent.AccentColor : UIConstants.ToggleButtonInactive))
                             {
                                 if(ImBrio.FontIconButton(FontAwesomeIcon.Heart))
                                 {
