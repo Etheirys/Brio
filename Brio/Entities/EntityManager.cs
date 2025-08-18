@@ -1,4 +1,5 @@
 ﻿using Brio.Capabilities.Core;
+using Brio.Capabilities.Posing;
 using Brio.Config;
 using Brio.Entities.Actor;
 using Brio.Entities.Camera;
@@ -21,7 +22,12 @@ public unsafe partial class EntityManager(IServiceProvider serviceProvider, Conf
 
     public Entity? RootEntity => _worldEntity;
 
-    public EntityId? SelectedEntityId { get; private set; }
+    private readonly List<EntityId> _selectedEntities = [];
+
+    public IReadOnlyList<EntityId> SelectedEntityIds => _selectedEntities.AsReadOnly();
+
+    // Primary selected entity id (first in the multi-selection list)
+    public EntityId? SelectedEntityId => _selectedEntities.Count > 0 ? _selectedEntities[0] : (EntityId?)null;
 
     public Entity? SelectedEntity
     {
@@ -47,7 +53,7 @@ public unsafe partial class EntityManager(IServiceProvider serviceProvider, Conf
     {
         _worldEntity = ActivatorUtilities.CreateInstance<WorldEntity>(_serviceProvider);
         _entityMap[_worldEntity.Id] = _worldEntity;
-      
+
         RefreshDebugEntity();
 
         var environmentEntity = ActivatorUtilities.CreateInstance<EnvironmentEntity>(_serviceProvider);
@@ -139,9 +145,16 @@ public unsafe partial class EntityManager(IServiceProvider serviceProvider, Conf
 
     public void SetSelectedEntity(EntityId? id)
     {
-        SelectedEntity?.OnDeselected();
+        // Clear previous selection and select single id
+        foreach(var eId in _selectedEntities.ToArray())
+        {
+            if(TryGetEntity(eId, out var ent))
+                ent.OnDeselected();
+        }
 
-        SelectedEntityId = id;
+        _selectedEntities.Clear();
+        if(id.HasValue)
+            _selectedEntities.Add(id.Value);
 
         SelectedEntity?.OnSelected();
     }
@@ -151,9 +164,44 @@ public unsafe partial class EntityManager(IServiceProvider serviceProvider, Conf
         SetSelectedEntity(new EntityId(go));
     }
 
+    public void AddSelectedEntity(EntityId id)
+    {
+        // If already the only selection, nothing to do
+        if(_selectedEntities.Contains(id))
+            return;
+
+        // Deselect nothing; only call OnSelected for the entity being added
+        if(TryGetEntity(id, out var ent))
+        {
+            _selectedEntities.Add(id);
+            ent.OnSelected();
+        }
+    }
+
+    public void RemoveSelectedEntity(EntityId id)
+    {
+        if(_selectedEntities.Contains(id))
+        {
+            if(TryGetEntity(id, out var ent))
+                ent.OnDeselected();
+
+            _selectedEntities.Remove(id);
+        }
+    }
+
+    public void ClearSelectedEntities()
+    {
+        foreach(var eId in _selectedEntities.ToArray())
+        {
+            if(TryGetEntity(eId, out var ent))
+                ent.OnDeselected();
+        }
+        _selectedEntities.Clear();
+    }
+
     public bool SelectedHasCapability<T>(bool considerChildren = false, bool considerParents = true) where T : Capability
     {
-        return TryGetCapabilitiesFromSelectedEntity<T>(out _, considerChildren, considerParents);
+        return TryGetCapabilitiesFromSelectedEntities<T>(out _, considerChildren, considerParents);
     }
 
     public IEnumerable<ActorEntity> TryGetAllActors()
@@ -207,6 +255,26 @@ public unsafe partial class EntityManager(IServiceProvider serviceProvider, Conf
         }
 
         return false;
+    }
+
+    public bool TryGetCapabilitiesFromSelectedEntities<T>([MaybeNullWhen(false)] out IEnumerable<T> capabilities, bool considerChildren = false, bool considerParents = true) where T : Capability
+    {
+        var results = new List<T>();
+        capabilities = results;
+
+        foreach(var id in _selectedEntities)
+        {
+            if(!TryGetEntity(id, out var entity))
+                continue;
+
+            if(!entity.IsAttached)
+                continue;
+
+            if(entity.TryGetCapabilities<T>(out var caps, considerChildren, considerParents))
+                results.AddRange(caps);
+        }
+
+        return results.Count != 0;
     }
 
     private void RefreshDebugEntity()

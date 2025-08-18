@@ -1,4 +1,5 @@
-﻿using Brio.Config;
+﻿using Brio.Capabilities.Posing;
+using Brio.Config;
 using Brio.Entities;
 using Brio.Game.Core;
 using Brio.Game.GPose;
@@ -7,10 +8,11 @@ using Brio.Input;
 using Brio.UI.Controls.Core;
 using Brio.UI.Controls.Stateless;
 using Brio.UI.Entitites;
+using Brio.UI.Theming;
+using Dalamud.Bindings.ImGui;
 using Dalamud.Interface;
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Interface.Windowing;
-using Dalamud.Bindings.ImGui;
 using System;
 using System.Numerics;
 
@@ -28,6 +30,7 @@ public class MainWindow : Window, IDisposable
     private readonly ProjectWindow _projectWindow;
     private readonly GPoseService _gPoseService;
     private readonly AutoSaveService _autoSaveService;
+    private readonly GroupedHistoryService _groupedUndoService;
 
     public MainWindow(
         ConfigurationService configService,
@@ -35,6 +38,7 @@ public class MainWindow : Window, IDisposable
         InfoWindow infoWindow,
         LibraryWindow libraryWindow,
         EntityManager entityManager,
+        GroupedHistoryService groupedUndoService,
         SceneService sceneService,
         GPoseService gPoseService,
         ProjectWindow projectWindow,
@@ -50,7 +54,8 @@ public class MainWindow : Window, IDisposable
         _infoWindow = infoWindow;
         _entityManager = entityManager;
         _gPoseService = gPoseService;
-        _entitySelector = new(_entityManager, _gPoseService);
+        _groupedUndoService = groupedUndoService;
+        _entitySelector = new(_entityManager, _gPoseService, _groupedUndoService);
         _sceneService = sceneService;
         _projectWindow = projectWindow;
         _autoSaveService = autoSaveService;
@@ -77,11 +82,20 @@ public class MainWindow : Window, IDisposable
         if(rootEntity is null)
             return;
 
+
         using(var container = ImRaii.Child("###entity_hierarchy_container", new Vector2(-1, ImGui.GetTextLineHeight() * 18f), true))
         {
             if(container.Success)
             {
                 _entitySelector.Draw(rootEntity);
+                          
+                if(_entityManager.SelectedEntityIds.Count > 1)
+                {
+                    using(var color = ImRaii.PushColor(ImGuiCol.Text, ThemeManager.CurrentTheme.Accent.AccentColor))
+                    {
+                        ImGui.Text($"{_entityManager.SelectedEntityIds.Count} selected");
+                    }
+                }
             }
         }
 

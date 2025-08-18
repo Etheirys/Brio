@@ -3,9 +3,9 @@ using Brio.Capabilities.Posing;
 using Brio.UI.Controls.Editors;
 using Brio.UI.Controls.Stateless;
 using Brio.UI.Widgets.Core;
+using Dalamud.Bindings.ImGui;
 using Dalamud.Interface;
 using Dalamud.Interface.Utility.Raii;
-using Dalamud.Bindings.ImGui;
 using System.Numerics;
 
 namespace Brio.UI.Widgets.Posing;
@@ -69,14 +69,14 @@ public class PosingWidget(PosingCapability capability) : Widget<PosingCapability
 
         ImGui.SameLine();
 
-        if(ImBrio.FontIconButton("undo", FontAwesomeIcon.Backward, "Undo", Capability.HasUndoStack))
+        if(ImBrio.FontIconButton("undo", FontAwesomeIcon.Backward, "Undo", Capability.CanUndo))
         {
             Capability.Undo();
         }
 
         ImGui.SameLine();
 
-        if(ImBrio.FontIconButton("redo", FontAwesomeIcon.Forward, "Redo", Capability.HasRedoStack))
+        if(ImBrio.FontIconButton("redo", FontAwesomeIcon.Forward, "Redo", Capability.CanRedo))
         {
             Capability.Redo();
         }

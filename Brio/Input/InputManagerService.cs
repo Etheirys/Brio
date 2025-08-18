@@ -40,21 +40,21 @@ public class InputManagerService
             if(value.Key == VirtualKey.NO_KEY)
                 return false;
 
-            if(value.RequireCtrl)
+            if(value.RequireCtrl || action is InputAction.Brio_Ctrl)
             {
                 if(Instance.IsKeyDown(VirtualKey.CONTROL) && Instance.IsKeyDown(value.Key))
                 {
                     return true;
                 }
             }
-            else if(value.requireShift)
+            else if(value.requireShift || action is InputAction.Brio_Shift)
             {
                 if(Instance.IsKeyDown(VirtualKey.SHIFT) && Instance.IsKeyDown(value.Key))
                 {
                     return true;
                 }
             }
-            else if(value.requireAlt)
+            else if(value.requireAlt || action is InputAction.Brio_Alt)
             {
                 if(Instance.IsKeyDown(VirtualKey.MENU) && Instance.IsKeyDown(value.Key))
                 {

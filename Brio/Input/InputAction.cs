@@ -10,6 +10,8 @@ public enum InputAction
     Interface_StartAllActorsAnimations,
     Interface_StopAllActorsAnimations,
 
+    Interface_SelectAllActors,
+
     // Posing
     Posing_ToggleOverlay,
     Posing_Undo,
@@ -33,7 +35,11 @@ public enum InputAction
     FreeCamera_Down,
     FreeCamera_DownAlt,
     FreeCamera_IncreaseCamMovement,
-    FreeCamera_DecreaseCamMovement
+    FreeCamera_DecreaseCamMovement,
+
+    Brio_Ctrl,
+    Brio_Alt,
+    Brio_Shift
 }
 
 public enum InputOverlayAction

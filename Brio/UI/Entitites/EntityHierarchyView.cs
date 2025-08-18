@@ -1,21 +1,26 @@
-﻿using Brio.Entities;
+﻿using Brio.Capabilities.Posing;
+using Brio.Entities;
 using Brio.Entities.Core;
 using Brio.Game.GPose;
+using Brio.Input;
 using Brio.UI.Theming;
 using Brio.UI.Widgets.Core;
+using Dalamud.Bindings.ImGui;
 using Dalamud.Interface;
 using Dalamud.Interface.Utility.Raii;
-using Dalamud.Bindings.ImGui;
+using System.Collections.Generic;
+using System.Linq;
 using System.Numerics;
 
 namespace Brio.UI.Entitites;
 
-public class EntityHierarchyView(EntityManager entityManager, GPoseService gPoseService)
+public class EntityHierarchyView(EntityManager entityManager, GPoseService gPoseService, GroupedHistoryService groupedUndoService)
 {
     private readonly float buttonWidth = ImGui.GetTextLineHeight() * 13f;
     private readonly float offsetWidth = 16f;
 
     private EntityId? _lastSelectedId;
+    private Entity? _lastSelectedEntityRef;
 
     public void Draw(Entity root)
     {
@@ -28,6 +33,15 @@ public class EntityHierarchyView(EntityManager entityManager, GPoseService gPose
         {
             // The change must have come from outside of this control
             _lastSelectedId = selectedEntityId;
+        }
+
+        if(InputManagerService.ActionKeysPressed(InputAction.Interface_SelectAllActors))
+        {
+            entityManager.ClearSelectedEntities();
+            foreach(var e in entityManager.TryGetAllActors())
+            {
+                entityManager.AddSelectedEntity(e.Id);
+            }
         }
 
         using(ImRaii.PushId($"entity_hierarchy_{root.Id}"))
@@ -47,12 +61,17 @@ public class EntityHierarchyView(EntityManager entityManager, GPoseService gPose
         bool hasChildren = false;
         bool hasOffset = false;
 
+        bool isMutiSelected = false;
+
         if(lastOffset > 0)
             hasOffset = true;
         if(entity.Children.Count > 0)
             hasChildren = true;
         if(selectedEntityId != null && entity.Id.Equals(selectedEntityId))
             isSelected = true;
+
+        if(entityManager.SelectedEntityIds.Contains(entity.Id))
+            isMutiSelected = true;
 
         using(ImRaii.PushColor(ImGuiCol.ButtonActive, 0))
         {
@@ -68,7 +87,24 @@ public class EntityHierarchyView(EntityManager entityManager, GPoseService gPose
 
                 if(ImGui.Button($"###{entity.Id}_invs_button", new(width, 0)))
                 {
-                    Select(entity);
+                    var io = ImGui.GetIO();
+
+                    // Ctrl+Click toggles selection
+                    if(InputManagerService.ActionKeysPressed(InputAction.Brio_Ctrl))
+                    {
+                        if(entityManager.SelectedEntityIds.Contains(entity.Id))
+                            entityManager.RemoveSelectedEntity(entity.Id);
+                        else
+                            entityManager.AddSelectedEntity(entity.Id);
+
+                        _lastSelectedEntityRef = entity;
+                    }
+                    else
+                    {
+                        groupedUndoService.Clear();
+
+                        Select(entity);
+                    }
                 }
 
                 //if(ImGui.IsItemHovered())
@@ -96,7 +132,7 @@ public class EntityHierarchyView(EntityManager entityManager, GPoseService gPose
                 lastOffset += offsetWidth;
             }
 
-            using(ImRaii.PushColor(ImGuiCol.Button, ThemeManager.CurrentTheme.Accent.AccentColor, isSelected))
+            using(ImRaii.PushColor(ImGuiCol.Button, ThemeManager.CurrentTheme.Accent.AccentColor, isSelected || isMutiSelected))
             {
                 using(ImRaii.Disabled(true))
                 {

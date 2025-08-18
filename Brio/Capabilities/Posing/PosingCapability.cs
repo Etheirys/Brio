@@ -1,12 +1,12 @@
 ﻿using Brio.Capabilities.Actor;
 using Brio.Config;
 using Brio.Core;
+using Brio.Entities;
 using Brio.Entities.Actor;
 using Brio.Files;
 using Brio.Game.Input;
 using Brio.Game.Posing;
 using Brio.Game.Posing.Skeletons;
-using Brio.Input;
 using Brio.Resources;
 using Brio.UI.Widgets.Posing;
 using Brio.UI.Windows.Specialized;
@@ -46,8 +46,8 @@ public class PosingCapability : ActorCharacterCapability
         }
     }
 
-    public bool HasUndoStack => _undoStack.Count > 1;
-    public bool HasRedoStack => _redoStack.Any();
+    public bool CanUndo => _undoStack.Count is not 0 and not 1 || _groupedUndoService.CanUndo;
+    public bool CanRedo => _redoStack.Count > 0 || _groupedUndoService.CanRedo;
     public bool HasIKApplied => SkeletonPosing.PoseInfo.HasIKStacks;
 
     private Stack<PoseStack> _undoStack = [];
@@ -76,11 +76,15 @@ public class PosingCapability : ActorCharacterCapability
     private readonly PosingTransformWindow _overlayTransformWindow;
     private readonly IFramework _framework;
     private readonly GameInputService _gameInputService;
+    private readonly GroupedHistoryService _groupedUndoService;
+    private readonly EntityManager _entityManager;
 
     public PosingCapability(
         ActorEntity parent,
         PosingOverlayWindow window,
+        GroupedHistoryService groupedUndoService,
         PosingService posingService,
+        EntityManager entityManager,
         ConfigurationService configurationService,
         PosingTransformWindow overlayTransformWindow,
         IFramework framework,
@@ -92,7 +96,9 @@ public class PosingCapability : ActorCharacterCapability
         _posingService = posingService;
         _configurationService = configurationService;
         _overlayTransformWindow = overlayTransformWindow;
+        _entityManager = entityManager;
         _framework = framework;
+        _groupedUndoService = groupedUndoService;
         _gameInputService = gameInputService;
     }
 
@@ -275,6 +281,12 @@ public class PosingCapability : ActorCharacterCapability
 
     public void Redo()
     {
+        if(_entityManager.SelectedEntityIds.Count > 1)
+        {
+            _groupedUndoService.Redo();
+            return;
+        }
+
         if(_redoStack.TryPop(out var redoStack))
         {
             _undoStack.Push(redoStack);
@@ -285,6 +297,12 @@ public class PosingCapability : ActorCharacterCapability
 
     public void Undo()
     {
+        if(_entityManager.SelectedEntityIds.Count > 1)
+        {
+            _groupedUndoService.Undo();
+            return;
+        }
+
         if(_undoStack.TryPop(out var undoStack))
             _redoStack.Push(undoStack);
 

@@ -1,6 +1,6 @@
-﻿using System.Collections.Generic;
-using Brio.Input;
+﻿using Brio.Input;
 using Dalamud.Game.ClientState.Keys;
+using System.Collections.Generic;
 
 namespace Brio.Config;
 
@@ -15,6 +15,8 @@ public class InputManagerConfiguration
         { InputAction.Interface_StopCutscene, new KeyConfig(VirtualKey.B, true) },
         { InputAction.Interface_StartAllActorsAnimations, new KeyConfig(VirtualKey.N, true) },
         { InputAction.Interface_StopAllActorsAnimations, new KeyConfig(VirtualKey.M, true) },
+
+        { InputAction.Interface_SelectAllActors, new KeyConfig(VirtualKey.A, false, true) },
 
         { InputAction.Posing_ToggleOverlay, new KeyConfig(VirtualKey.O, false, true, false) },
         { InputAction.Posing_Undo, new KeyConfig(VirtualKey.Z, false, true, false) },
@@ -36,8 +38,12 @@ public class InputManagerConfiguration
         { InputAction.FreeCamera_Down, new KeyConfig(VirtualKey.CONTROL) },
         { InputAction.FreeCamera_DownAlt, new KeyConfig(VirtualKey.E) },
         { InputAction.FreeCamera_IncreaseCamMovement, new KeyConfig(VirtualKey.SHIFT) },
-        { InputAction.FreeCamera_DecreaseCamMovement, new KeyConfig(VirtualKey.MENU) }
-    };
+        { InputAction.FreeCamera_DecreaseCamMovement, new KeyConfig(VirtualKey.MENU) },
+
+        { InputAction.Brio_Alt, new KeyConfig(VirtualKey.MENU) },
+        { InputAction.Brio_Ctrl, new KeyConfig(VirtualKey.CONTROL) },
+        { InputAction.Brio_Shift, new KeyConfig(VirtualKey.SHIFT) }
+};
     public Dictionary<InputAction, KeyConfig> KeyBindings { get; set; } = new()
     {
         { InputAction.Interface_ToggleBrioWindow, new KeyConfig(VirtualKey.B, false, true, false) },
@@ -47,6 +53,8 @@ public class InputManagerConfiguration
         { InputAction.Interface_StopCutscene, new KeyConfig(VirtualKey.B, true) },
         { InputAction.Interface_StartAllActorsAnimations, new KeyConfig(VirtualKey.N, true) },
         { InputAction.Interface_StopAllActorsAnimations, new KeyConfig(VirtualKey.M, true) },
+
+        { InputAction.Interface_SelectAllActors, new KeyConfig(VirtualKey.A, false, true) },
 
         { InputAction.Posing_ToggleOverlay, new KeyConfig(VirtualKey.O, false, true, false) },
         { InputAction.Posing_Undo, new KeyConfig(VirtualKey.Z, false, true, false) },
@@ -69,7 +77,11 @@ public class InputManagerConfiguration
         { InputAction.FreeCamera_Down, new KeyConfig(VirtualKey.CONTROL) },
         { InputAction.FreeCamera_DownAlt, new KeyConfig(VirtualKey.E) },
         { InputAction.FreeCamera_IncreaseCamMovement, new KeyConfig(VirtualKey.SHIFT) },
-        { InputAction.FreeCamera_DecreaseCamMovement, new KeyConfig(VirtualKey.MENU) }
+        { InputAction.FreeCamera_DecreaseCamMovement, new KeyConfig(VirtualKey.MENU) },
+
+        { InputAction.Brio_Alt, new KeyConfig(VirtualKey.MENU) },
+        { InputAction.Brio_Ctrl, new KeyConfig(VirtualKey.CONTROL) },
+        { InputAction.Brio_Shift, new KeyConfig(VirtualKey.SHIFT) }
     };
 
     public bool Enable { get; set; } = true;

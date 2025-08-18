@@ -7,10 +7,10 @@ using Brio.Input;
 using Brio.UI.Controls.Core;
 using Brio.UI.Controls.Editors;
 using Brio.UI.Controls.Stateless;
+using Dalamud.Bindings.ImGui;
 using Dalamud.Interface;
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Interface.Windowing;
-using Dalamud.Bindings.ImGui;
 using OneOf.Types;
 using System.Numerics;
 
@@ -20,6 +20,7 @@ public class PosingOverlayToolbarWindow : Window
 {
     private readonly PosingOverlayWindow _overlayWindow;
     private readonly EntityManager _entityManager;
+    private readonly GroupedHistoryService _groupedUndoService;
     private readonly PosingTransformWindow _overlayTransformWindow;
     private readonly PosingService _posingService;
     private readonly ConfigurationService _configurationService;
@@ -31,7 +32,7 @@ public class PosingOverlayToolbarWindow : Window
 
     private const string _boneFilterPopupName = "bone_filter_popup";
 
-    public PosingOverlayToolbarWindow(PosingOverlayWindow overlayWindow, GameInputService gameInputService, EntityManager entityManager, PosingTransformWindow overlayTransformWindow, PosingService posingService, ConfigurationService configurationService) : base($"Brio - Overlay###brio_posing_overlay_toolbar_window", ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoCollapse)
+    public PosingOverlayToolbarWindow(PosingOverlayWindow overlayWindow, GroupedHistoryService groupedUndoService, GameInputService gameInputService, EntityManager entityManager, PosingTransformWindow overlayTransformWindow, PosingService posingService, ConfigurationService configurationService) : base($"Brio - Overlay###brio_posing_overlay_toolbar_window", ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoCollapse)
     {
         Namespace = "brio_posing_overlay_toolbar_namespace";
 
@@ -40,6 +41,7 @@ public class PosingOverlayToolbarWindow : Window
         _overlayTransformWindow = overlayTransformWindow;
         _posingService = posingService;
         _configurationService = configurationService;
+        _groupedUndoService = groupedUndoService;
         _gameInputService = gameInputService;
 
         ShowCloseButton = false;
@@ -95,7 +97,7 @@ public class PosingOverlayToolbarWindow : Window
         {
             _gameInputService.AllowEscape = false;
 
-            if(InputManagerService.ActionKeysPressed(InputAction.Posing_Esc)) 
+            if(InputManagerService.ActionKeysPressed(InputAction.Posing_Esc))
             {
                 posing.ClearSelection();
             }
@@ -289,10 +291,12 @@ public class PosingOverlayToolbarWindow : Window
 
         using(ImRaii.PushFont(UiBuilder.IconFont))
         {
-            using(ImRaii.Disabled(!posing.HasUndoStack))
+            using(ImRaii.Disabled(!posing.CanUndo))
             {
                 if(ImGui.Button($"{FontAwesomeIcon.Backward.ToIconString()}###undo_pose", new Vector2(buttonSize)))
+                {
                     posing.Undo();
+                }
             }
         }
         if(ImGui.IsItemHovered())
@@ -302,10 +306,12 @@ public class PosingOverlayToolbarWindow : Window
 
         using(ImRaii.PushFont(UiBuilder.IconFont))
         {
-            using(ImRaii.Disabled(!posing.HasRedoStack))
+            using(ImRaii.Disabled(!posing.CanRedo))
             {
                 if(ImGui.Button($"{FontAwesomeIcon.Forward.ToIconString()}###redo_pose", new Vector2(buttonSize)))
+                {
                     posing.Redo();
+                }
             }
         }
         if(ImGui.IsItemHovered())
