@@ -11,8 +11,8 @@ public class GroupedHistoryService(EntityManager entityManager)
 {
     private readonly EntityManager _entityManager = entityManager;
 
-    private readonly Stack<GroupEntry> _undo = new();
-    private readonly Stack<GroupEntry> _redo = new();
+    private readonly Stack<GroupEntry> _undo = [];
+    private readonly Stack<GroupEntry> _redo = [];
 
     public void Snapshot(IEnumerable<(EntityId id, PoseInfo info, Transform model)> entries)
     {
