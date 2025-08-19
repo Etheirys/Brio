@@ -44,10 +44,16 @@ public class GameInputService : IDisposable
             if(_virtualCameraService.CurrentCamera.FreeCamValues.IsMovementEnabled && 
                 Config.ConfigurationService.Instance.Configuration.InputManager.EnableKeyHandlingOnKeyMod)
             {
-                keyboardFrame->HandleAllKeys();
+                for(int i = 0; i < KeyboardFrame.KeyStateLength; i++)
+                {
+                    if(i == (int)VirtualKey.ESCAPE)
+                        continue;
+                    keyboardFrame->KeyState[i] = 0;
+                }
             }
         }
-        else if(AllowEscape is false)
+
+        if(AllowEscape is false)
         {
             keyboardFrame->HandleKey(VirtualKey.ESCAPE);
         }
