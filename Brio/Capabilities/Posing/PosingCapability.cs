@@ -16,6 +16,7 @@ using OneOf.Types;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 
 namespace Brio.Capabilities.Posing;
 
@@ -394,6 +395,9 @@ public class PosingCapability : ActorCharacterCapability
             {
                 var poseInfo = SkeletonPosing.PoseInfo.GetPoseInfo(bone);
                 FlipBone(bone, poseInfo);
+             
+                // record change for undo
+                Snapshot(reset: false);
             }
         }
         else
