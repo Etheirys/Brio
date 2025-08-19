@@ -7,6 +7,7 @@ using Brio.Input;
 using Brio.UI.Controls.Core;
 using Brio.UI.Controls.Editors;
 using Brio.UI.Controls.Stateless;
+using Brio.UI.Theming;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface;
 using Dalamud.Interface.Utility.Raii;
@@ -254,11 +255,22 @@ public class PosingOverlayToolbarWindow : Window
         if(ImGui.IsItemHovered())
             ImGui.SetTooltip("Select Parent");
 
+        // IK RED
+        bool enabled = false;
+        if(posing.Selected.Value is BonePoseInfoId boneId)
+        {
+            var bonePose = posing.SkeletonPosing.GetBonePose(boneId);
+            var ik = bonePose.DefaultIK;
+            enabled = ik.Enabled && BrioStyle.EnableStyle;
+        }
 
         using(ImRaii.Disabled(!(bone?.EligibleForIK == true)))
         {
-            if(ImGui.Button($"IK###bone_ik", new Vector2(buttonSize)))
-                ImGui.OpenPopup("overlay_bone_ik");
+            using(ImRaii.PushColor(ImGuiCol.Button, ThemeManager.CurrentTheme.Accent.AccentColor, enabled))
+            {
+                if(ImGui.Button($"IK###bone_ik", new Vector2(buttonSize)))
+                    ImGui.OpenPopup("overlay_bone_ik");
+            }
         }
         if(ImGui.IsItemHovered())
             ImGui.SetTooltip("Inverse Kinematics");
