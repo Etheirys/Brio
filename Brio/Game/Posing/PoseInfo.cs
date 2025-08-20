@@ -77,7 +77,7 @@ public class BonePoseInfo(BonePoseInfoId id, PoseInfo parent)
 
     private readonly List<BonePoseTransformInfo> _stacks = [];
 
-    public bool HasStacks => _stacks.Any();
+    public bool HasStacks => _stacks.Count != 0;
 
     public Transform? Apply(Transform transform, Transform? original = null, TransformComponents? propagation = null, TransformComponents applyTo = TransformComponents.All, BoneIKInfo? ikInfo = null, PoseMirrorMode? mirrorMode = null, bool forceNewStack = false)
     {
