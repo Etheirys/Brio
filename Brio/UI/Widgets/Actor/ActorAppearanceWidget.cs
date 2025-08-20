@@ -69,7 +69,6 @@ public class ActorAppearanceWidget(ActorAppearanceCapability capability) : Widge
     {
         bool didChange = false;
 
-        //var resetTo = ImGui.GetCursorPos();
         bool equipChanged = !currentAppearance.Equipment.Equals(originalAppearance.Equipment) || !currentAppearance.Weapons.Equals(originalAppearance.Weapons) || !currentAppearance.Runtime.Equals(originalAppearance.Runtime);
         if(ImBrio.FontIconButtonRight("reset_equipment", FontAwesomeIcon.Undo, 1, "Reset Equipment", equipChanged))
         {
@@ -78,7 +77,6 @@ public class ActorAppearanceWidget(ActorAppearanceCapability capability) : Widge
             currentAppearance.Runtime = originalAppearance.Runtime;
             didChange |= true;
         }
-        //ImGui.SetCursorPos(resetTo);
 
         return didChange;
     }

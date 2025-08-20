@@ -16,7 +16,7 @@ public class GearEditor()
 {
     private WeaponModelId BlankItem = new() { Id = 0, Type = 0 };
 
-    private Vector2 IconSize => new(ImGui.GetTextLineHeight() * 3.9f);
+    private Vector2 IconSize => new(ImGui.GetTextLineHeight() * 3.3f);
 
     private ActorAppearanceCapability _capability = null!;
 
@@ -58,7 +58,7 @@ public class GearEditor()
 
         ImGui.Spacing();
 
-        var slotSizes = ImGui.GetContentRegionAvail() / new Vector2(2, 1.32f);
+        var slotSizes = ImGui.GetContentRegionAvail() / new Vector2(2, 1f);
 
         using(var leftGearGroup = ImRaii.Child("leftGearGroup", slotSizes))
         {
@@ -169,6 +169,8 @@ public class GearEditor()
 
         using(ImRaii.PushId(slot.ToString()))
         {
+            ImGui.Text($"{slot}: {model?.Name ?? "Unknown"}");
+
             if(ImBrio.BorderedGameIcon("##icon", model?.Icon ?? 0, fallback, size: IconSize))
             {
                 _gearSelector.SetGearSelect(model, slot);
@@ -181,10 +183,6 @@ public class GearEditor()
             {
                 if(group.Success)
                 {
-                    string description = $"{slot}: {model?.Name ?? "Unknown"}";
-
-                    ImGui.Text(description);
-
                     ImGui.SetNextItemWidth(ImGui.CalcTextSize("XXXXX").X);
                     if(ImGui.InputInt("##id", ref equipId, 0, 0, default, ImGuiInputTextFlags.EnterReturnsTrue))
                     {
@@ -315,6 +313,8 @@ public class GearEditor()
 
         using(ImRaii.PushId(slot.ToString()))
         {
+            ImGui.Text($"{slot}: {model?.Name ?? "Unknown"}");
+
             if(ImBrio.BorderedGameIcon("##icon", model?.Icon ?? 0, fallback, size: IconSize))
             {
                 _gearSelector.SetGearSelect(model, _weaponSlots);
@@ -327,10 +327,6 @@ public class GearEditor()
             {
                 if(group.Success)
                 {
-                    string description = $"{slot}: {model?.Name ?? "Unknown"}";
-
-                    ImGui.Text(description);
-
                     ImGui.SetNextItemWidth(ImGui.CalcTextSize("XXXXX").X);
                     if(ImGui.InputInt("##id", ref equipId, 0, 0, default, ImGuiInputTextFlags.EnterReturnsTrue))
                     {
@@ -466,6 +462,8 @@ public class GearEditor()
 
         using(ImRaii.PushId(slot.ToString()))
         {
+            ImGui.Text($"{slot}: {model?.Name ?? "Unknown"}");
+          
             if(ImBrio.BorderedGameIcon("##icon", model?.Icon ?? 0, fallback, size: IconSize))
             {
                 _gearSelector.SetGearSelect(model, _propSlots);
@@ -478,9 +476,6 @@ public class GearEditor()
             {
                 if(group.Success)
                 {
-                    string description = $"{slot}: {model?.Name ?? "Unknown"}";
-
-                    ImGui.Text(description);
 
                     ImGui.SetNextItemWidth(ImGui.CalcTextSize("XXXXX").X);
                     if(ImGui.InputInt("##id", ref equipId, 0, 0, default, ImGuiInputTextFlags.EnterReturnsTrue))
@@ -537,12 +532,11 @@ public class GearEditor()
         return didChange;
     }
 
-
     private bool DrawFacewearSlot(ref ActorAppearance appearance)
     {
         bool didChange = false;
 
-        Vector2 faceIconSize = new Vector2(ImGui.GetTextLineHeight() * 2.3f);
+        Vector2 faceIconSize = new(ImGui.GetTextLineHeight() * 2.0f);
 
         FacewearUnion facewearUnion = new FacewearId(appearance.Facewear);
         var (facewearId, facewearName, facewearIcon) = facewearUnion.Match(
@@ -552,6 +546,8 @@ public class GearEditor()
 
         using(ImRaii.PushId("facewear"))
         {
+            ImGui.Text($"Facewear: {facewearName}");
+
             if(ImBrio.BorderedGameIcon("##icon", facewearIcon, "Images.Facewear.png", size: faceIconSize))
             {
                 _facewearSelector.Select(facewearUnion, true);
@@ -566,9 +562,6 @@ public class GearEditor()
             {
                 if(group.Success)
                 {
-                    string description = $"Facewear: {facewearName}";
-
-                    ImGui.Text(description);
 
                     ImGui.SetNextItemWidth(ImGui.CalcTextSize("XXXXX").X);
                     int value = facewearId;
