@@ -42,7 +42,7 @@ public class ActorAppearanceService : IDisposable
     private unsafe delegate nint UpdateTintDelegate(nint charaBase, nint tint);
     private readonly Hook<UpdateTintDelegate> _updateTintHook = null!;
 
-    private unsafe delegate* unmanaged<DrawDataContainer*, byte, ushort, void> _setFacewear;
+    private unsafe delegate* unmanaged<DrawDataContainer*, ushort, ushort, void> _setFacewear;
     private unsafe delegate* unmanaged<CharacterLookAtController*, LookAtTarget*, uint, nint, void> _updateLookAt;
 
     public bool CanTint => _configurationService.Configuration.Appearance.EnableTinting;
@@ -70,7 +70,7 @@ public class ActorAppearanceService : IDisposable
         _updateTintHook.Enable();
 
         var setFacewearAddress = sigScanner.ScanText("E8 ?? ?? ?? ?? FF C3 48 8D ?? ?? ?? ?? ?? ?? ?? 0F");
-        _setFacewear = (delegate* unmanaged<DrawDataContainer*, byte, ushort, void>)setFacewearAddress;
+        _setFacewear = (delegate* unmanaged<DrawDataContainer*, ushort, ushort, void>)setFacewearAddress;
 
         var updateFaceTrackerAddress = sigScanner.ScanText("E8 ?? ?? ?? ?? 8B D7 48 8B CB E8 ?? ?? ?? ?? 41 ?? ?? 8B D7 48 ?? ?? 48 ?? ?? ?? ?? 48 83 ?? ?? 5F");
         _updateLookAt = (delegate* unmanaged<CharacterLookAtController*, LookAtTarget*, uint, nint, void>)updateFaceTrackerAddress;
@@ -108,7 +108,7 @@ public class ActorAppearanceService : IDisposable
         lookAt.Head.LookAtTarget.LookMode = (uint)lookAtDataHolder.LookAtMode;
         lookAt.Body.LookAtTarget.LookMode = (uint)lookAtDataHolder.LookAtMode;
 
-        if(lookAtDataHolder.LookatType == LookAtTargetMode.Camera)
+        if(lookAtDataHolder.LookAtType == LookAtTargetMode.Camera)
         {
             var camera = _virtualCameraManager?.CurrentCamera;
 
@@ -122,7 +122,7 @@ public class ActorAppearanceService : IDisposable
             if(lookAtDataHolder.lookAtTargetType.HasFlag(LookAtTargetType.Head))
                 lookAt.Body.LookAtTarget.Position = camera.RealPosition;
         }
-        else if(lookAtDataHolder.LookatType == LookAtTargetMode.None)
+        else if(lookAtDataHolder.LookAtType == LookAtTargetMode.None)
             return;
 
         var lookAtController = &((Character*)targetActor.Address)->LookAt.Controller;
@@ -141,7 +141,7 @@ public class ActorAppearanceService : IDisposable
         {
             obj.LookAtMode = LookMode.None;
             obj.lookAtTargetType = LookAtTargetType.All;
-            obj.LookatType = LookAtTargetMode.None;
+            obj.LookAtType = LookAtTargetMode.None;
         }
         else
         {
@@ -166,7 +166,7 @@ public class ActorAppearanceService : IDisposable
 
         obj.LookAtMode = LookMode.Position;
         obj.lookAtTargetType = LookAtTargetType.All;
-        obj.LookatType = LookAtTargetMode.Camera;
+        obj.LookAtType = LookAtTargetMode.Camera;
         obj.Target = new()
         {
             Body = new LookAtType
@@ -293,7 +293,7 @@ public class ActorAppearanceService : IDisposable
                                 else
                                 {
                                     Buffer.MemoryCopy(existingAppearance.Equipment.Data, ptr + 32, 80, 80);
-                                }
+                                                                  }
 
                                 var didUpdate = human->Human.UpdateDrawData(ptr, false);
                                 needsRedraw |= !didUpdate;
@@ -325,7 +325,7 @@ public class ActorAppearanceService : IDisposable
                 {
                     if(needsRedraw)
                     {
-                        character.BrioDrawData()->Facewear = appearance.Facewear;
+                        appearance.Facewear = native->DrawData.GlassesIds[0];
                     }
                     else
                     {
@@ -484,7 +484,7 @@ public class ActorAppearanceService : IDisposable
 
 public record class LookAtDataHolder
 {
-    public LookAtTargetMode LookatType;
+    public LookAtTargetMode LookAtType;
 
     public LookAtTargetType lookAtTargetType;
     public LookMode LookAtMode;

@@ -32,7 +32,7 @@ public struct ActorAppearance()
             actorAppearance.Equipment = *(ActorEquipment*)slot;
         }
 
-        actorAppearance.Facewear = character.BrioDrawData()->Facewear;
+        actorAppearance.Facewear = native->DrawData.GlassesIds[0]; //character.BrioDrawData()->Facewear;
 
         actorAppearance.Customize = *(ActorCustomize*)&native->DrawData.CustomizeData;
 
