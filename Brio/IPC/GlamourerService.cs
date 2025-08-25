@@ -34,6 +34,7 @@ public class GlamourerService : BrioIPC
     private readonly IDalamudPluginInterface _pluginInterface;
     private readonly ActorRedrawService _redrawService;
     private readonly IFramework _framework;
+    private readonly ICommandManager _commandManager;
 
     //
     //
@@ -52,12 +53,13 @@ public class GlamourerService : BrioIPC
     public readonly uint BrioKey = 0x11625;
     private readonly uint _unlock = 0x6D617265; // From MareSynchronos's IpcCallerGlamourer.cs
 
-    public GlamourerService(IDalamudPluginInterface pluginInterface, ConfigurationService configurationService, IFramework framework, ActorRedrawService redrawService)
+    public GlamourerService(IDalamudPluginInterface pluginInterface, ConfigurationService configurationService, IFramework framework, ICommandManager  commandManager, ActorRedrawService redrawService)
     {
         _pluginInterface = pluginInterface;
         _configurationService = configurationService;
         _framework = framework;
         _redrawService = redrawService;
+        _commandManager = commandManager;
 
         _glamourerInitializedSubscriber = Glamourer.Api.IpcSubscribers.Initialized.Subscriber(pluginInterface, OnConfigurationChanged);
 
@@ -71,6 +73,11 @@ public class GlamourerService : BrioIPC
         OnConfigurationChanged();
 
         _configurationService.OnConfigurationChanged += OnConfigurationChanged;
+    }
+
+    public void OpenGlamourer()
+    {
+        _commandManager.ProcessCommand("/glamourer");
     }
 
     public bool CheckForLock(IGameObject? character)

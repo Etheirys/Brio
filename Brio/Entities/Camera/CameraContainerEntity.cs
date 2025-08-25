@@ -16,7 +16,6 @@ namespace Brio.Entities.Camera;
 
 public class CameraContainerEntity(IServiceProvider provider) : Entity("cameras", provider)
 {
-    private readonly GPoseService _gPoseService = provider.GetRequiredService<GPoseService>();
     private readonly VirtualCameraManager _virtualCameraManager = provider.GetRequiredService<VirtualCameraManager>();
     private readonly GameInputService _gameInputService = provider.GetRequiredService<GameInputService>();
 
@@ -28,17 +27,14 @@ public class CameraContainerEntity(IServiceProvider provider) : Entity("cameras"
 
     public override void DrawContextButton()
     {
-        using(ImRaii.Disabled(_gPoseService.IsGPosing == false))
+        using(ImRaii.PushColor(ImGuiCol.Button, ThemeManager.CurrentTheme.Accent.AccentColor))
         {
-            using(ImRaii.PushColor(ImGuiCol.Button, TheameManager.CurrentTheame.Accent.AccentColor))
+            string toolTip = $"New Camera";
+            if(ImBrio.FontIconButtonRight($"###{Id}_cameras_contextButton", FontAwesomeIcon.Plus, 1f, toolTip, bordered: false))
             {
-                string toolTip = $"New Camera";
-                if(ImBrio.FontIconButtonRight($"###{Id}_cameras_contextButton", FontAwesomeIcon.Plus, 1f, toolTip, bordered: false))
-                {
-                    ImGui.OpenPopup("DrawSpawnMenuPopup");
-                }
-                CameraEditor.DrawSpawnMenu(_virtualCameraManager);
+                ImGui.OpenPopup("DrawSpawnMenuPopup");
             }
+            CameraEditor.DrawSpawnMenu(_virtualCameraManager);
         }
     }
 

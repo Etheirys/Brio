@@ -162,14 +162,14 @@ public static partial class ImBrio
 
     public static bool ToggelButton(string lable, bool isToggled, uint toggledColor = 0, string hoverText = "")
     {
-        if(toggledColor == 0) toggledColor = TheameManager.CurrentTheame.Accent.AccentColor;
+        if(toggledColor == 0) toggledColor = ThemeManager.CurrentTheme.Accent.AccentColor;
 
         return ToggelButton(lable, Vector2.Zero, isToggled, toggledColor, hoverText);
     }
 
     public static bool ToggelButton(string lable, Vector2 size, bool isToggled, uint toggledColor = 0, string hoverText = "")
     {
-        if(toggledColor == 0) toggledColor = TheameManager.CurrentTheame.Accent.AccentColor;
+        if(toggledColor == 0) toggledColor = ThemeManager.CurrentTheme.Accent.AccentColor;
 
         if(isToggled)
             ImGui.PushStyleColor(ImGuiCol.Button, toggledColor);
@@ -192,7 +192,7 @@ public static partial class ImBrio
     {
         var clicked = false;
 
-        if(toggledColor == 0) toggledColor = TheameManager.CurrentTheame.Accent.AccentColor;
+        if(toggledColor == 0) toggledColor = ThemeManager.CurrentTheme.Accent.AccentColor;
 
         if(isToggled)
             ImGui.PushStyleColor(ImGuiCol.Button, toggledColor);

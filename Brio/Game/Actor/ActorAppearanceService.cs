@@ -12,6 +12,7 @@ using Dalamud.Plugin.Services;
 using FFXIVClientStructs.FFXIV.Client.Game.Character;
 using FFXIVClientStructs.FFXIV.Client.Game.Control;
 using FFXIVClientStructs.FFXIV.Client.Graphics.Scene;
+using InteropGenerator.Runtime;
 using System;
 using System.Collections.Generic;
 using System.Numerics;

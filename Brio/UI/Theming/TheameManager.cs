@@ -2,17 +2,17 @@
 
 namespace Brio.UI.Theming;
 
-public static class TheameManager
+public static class ThemeManager
 {
 
-    public static Theame CurrentTheame { get; set; }
+    public static Theme CurrentTheme { get; set; }
 
-    static TheameManager()
+    static ThemeManager()
     {
-        CurrentTheame = new Theame
+        CurrentTheme = new Theme
         {
             Name = "Default",
-            Accent = new TheameAccent
+            Accent = new ThemeAccent
             {
                 AccentColor = SetColor(new Vector4(98, 75, 224, 255)),
                 AccentColorLight = SetColor(new Vector4(98, 75, 224, 255)),
@@ -25,7 +25,7 @@ public static class TheameManager
                 AccentTabActive = SetColor(new Vector4(98, 75, 224, 255)),
                 AccentTabUnfocusedActive = SetColor(new Vector4(73, 48, 205, 255)),
             },
-            Core = new TheameCore
+            Core = new ThemeCore
             {
 
             }
@@ -43,16 +43,16 @@ public static class TheameManager
     }
 }
 
-public record class Theame
+public record class Theme
 {
     public required string Name;
 
-    public required TheameAccent Accent;
+    public required ThemeAccent Accent;
 
-    public required TheameCore Core;
+    public required ThemeCore Core;
 }
 
-public record class TheameAccent
+public record class ThemeAccent
 {
     public uint AccentColor = 0;
     public uint AccentColorLight;
@@ -67,7 +67,7 @@ public record class TheameAccent
     public uint AccentTabUnfocusedActive;
 }
 
-public record class TheameCore
+public record class ThemeCore
 {
     public uint Text;
 }

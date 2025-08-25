@@ -95,7 +95,7 @@ public class PosingOverlayToolbarWindow : Window
         {
             _gameInputService.AllowEscape = false;
 
-            if(InputService.IsKeyBindDown(KeyBindEvents.Poseing_Esc))
+            if(InputManagerService.ActionKeysPressed(InputAction.Posing_Esc)) 
             {
                 posing.ClearSelection();
             }
@@ -168,7 +168,7 @@ public class PosingOverlayToolbarWindow : Window
         {
             using(ImRaii.PushFont(UiBuilder.IconFont))
             {
-                if(ImGui.Button($"{FontAwesomeIcon.ArrowsUpDownLeftRight.ToIconString()}###select_position", new Vector2(buttonOperationSize)) || InputService.IsKeyBindDown(KeyBindEvents.Posing_Translate))
+                if(ImGui.Button($"{FontAwesomeIcon.ArrowsUpDownLeftRight.ToIconString()}###select_position", new Vector2(buttonOperationSize)) || InputManagerService.ActionKeysPressed(InputAction.Posing_Translate))
                     _posingService.Operation = PosingOperation.Translate;
             }
         }
@@ -182,7 +182,7 @@ public class PosingOverlayToolbarWindow : Window
         {
             using(ImRaii.PushFont(UiBuilder.IconFont))
             {
-                if(ImGui.Button($"{FontAwesomeIcon.ArrowsSpin.ToIconString()}###select_rotate", new Vector2(buttonOperationSize)) || InputService.IsKeyBindDown(KeyBindEvents.Posing_Rotate))
+                if(ImGui.Button($"{FontAwesomeIcon.ArrowsSpin.ToIconString()}###select_rotate", new Vector2(buttonOperationSize)) || InputManagerService.ActionKeysPressed(InputAction.Posing_Rotate))
                     _posingService.Operation = PosingOperation.Rotate;
             }
         }
@@ -195,7 +195,7 @@ public class PosingOverlayToolbarWindow : Window
         {
             using(ImRaii.PushFont(UiBuilder.IconFont))
             {
-                if(ImGui.Button($"{FontAwesomeIcon.ExpandAlt.ToIconString()}###select_scale", new Vector2(buttonOperationSize)) || InputService.IsKeyBindDown(KeyBindEvents.Posing_Scale))
+                if(ImGui.Button($"{FontAwesomeIcon.ExpandAlt.ToIconString()}###select_scale", new Vector2(buttonOperationSize)) || InputManagerService.ActionKeysPressed(InputAction.Posing_Scale))
                     _posingService.Operation = PosingOperation.Scale;
             }
         }
@@ -208,7 +208,7 @@ public class PosingOverlayToolbarWindow : Window
         {
             using(ImRaii.PushFont(UiBuilder.IconFont))
             {
-                if(ImGui.Button($"{FontAwesomeIcon.Cubes.ToIconString()}###select_universal", new Vector2(buttonOperationSize)) || InputService.IsKeyBindDown(KeyBindEvents.Posing_Universal))
+                if(ImGui.Button($"{FontAwesomeIcon.Cubes.ToIconString()}###select_universal", new Vector2(buttonOperationSize)) || InputManagerService.ActionKeysPressed(InputAction.Posing_Universal))
                 {
                     _posingService.Operation = PosingOperation.Universal;
                 }

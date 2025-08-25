@@ -112,7 +112,7 @@ public class CameraEntity(IServiceProvider provider, int cameraID, CameraType ca
 
             string toolTip = $"Set as Active Camera";
 
-            using(ImRaii.PushColor(ImGuiCol.Text, TheameManager.CurrentTheame.Accent.AccentColor, VirtualCamera.IsActiveCamera))
+            using(ImRaii.PushColor(ImGuiCol.Text, ThemeManager.CurrentTheme.Accent.AccentColor, VirtualCamera.IsActiveCamera))
             {
                 if(ImBrio.FontIconButtonRight($"###{Id}_camera_contextButton", FontAwesomeIcon.LocationCrosshairs, 1f, toolTip, bordered: false))
                 {
