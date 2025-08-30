@@ -29,7 +29,6 @@
 		<PackageReference Include="OneOf" Version="3.0.271" />
 		<PackageReference Include="OneOf.SourceGenerator" Version="3.0.271" />
 		<PackageReference Include="Penumbra.Api" Version="5.12.0" />
-		<PackageReference Include="Penumbra.String" Version="1.0.5" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -39,7 +38,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <PackageReference Update="DalamudPackager" Version="13.0.0" />
+	  <PackageReference Update="DalamudPackager" Version="13.1.0" />
 	</ItemGroup>
 
 </Project>
