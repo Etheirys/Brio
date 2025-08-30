@@ -52,8 +52,6 @@ public class ActorRedrawService(IFramework framework, IObjectTable objectTable)
         {
             DisableDraw(go);
 
-            ActorRedrawEvent?.Invoke(go, RedrawStage.Before);
-
             _ = DrawWhenReady(go);
 
             var start = DateTime.Now;
@@ -62,8 +60,6 @@ public class ActorRedrawService(IFramework framework, IObjectTable objectTable)
                 if(await _framework.RunOnFrameworkThread(() => IsDrawing(go)))
                 {
                     Brio.Log.Debug($"Brio redraw complete on gameobject {go.ObjectIndex}.");
-
-                    ActorRedrawEvent?.Invoke(go, RedrawStage.After);
 
                     return;
                 }

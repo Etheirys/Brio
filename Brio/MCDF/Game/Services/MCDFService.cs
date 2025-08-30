@@ -229,7 +229,7 @@ public class MCDFService
         {
             DataApplicationProgress = "Reverting previous Application";
 
-            await _actorAppearanceService.RevertMCDF(tempHandler.GameObject).ConfigureAwait(false);
+            //await _actorAppearanceService.RevertMCDF(tempHandler.GameObject).ConfigureAwait(false);
 
             await Task.Delay(TimeSpan.FromSeconds(3)).ConfigureAwait(false);
 

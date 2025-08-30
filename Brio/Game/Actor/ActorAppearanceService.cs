@@ -216,6 +216,8 @@ public class ActorAppearanceService : IDisposable
 
     public async Task<RedrawResult> Redraw(ICharacter character)
     {
+        await RevertMCDF(character);
+
         var appearance = GetActorAppearance(character);
         return await SetCharacterAppearance(character, appearance, AppearanceImportOptions.All, true);
     }
@@ -491,8 +493,11 @@ public class ActorAppearanceService : IDisposable
         _customizePlusService.SetProfile(obj, "{}");
         _customizePlusService.RemoveTemporaryProfile(obj);
 
-        //await _actorRedrawService.RedrawAndWait(obj).ConfigureAwait(false);
-        await _penumbraService.Redraw(obj).ConfigureAwait(false);
+        if(obj.Address != nint.Zero)
+        {
+            await _actorRedrawService.RedrawAndWait(obj).ConfigureAwait(false);
+            await _penumbraService.Redraw(obj).ConfigureAwait(false);
+        }
     }
 
     public void Dispose()
