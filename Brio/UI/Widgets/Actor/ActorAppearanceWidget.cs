@@ -6,10 +6,10 @@ using Brio.UI.Controls.Editors;
 using Brio.UI.Controls.Selectors;
 using Brio.UI.Controls.Stateless;
 using Brio.UI.Widgets.Core;
+using Dalamud.Bindings.ImGui;
 using Dalamud.Interface;
 using Dalamud.Interface.Utility.Raii;
 using FFXIVClientStructs.FFXIV.Client.Game.Character;
-using Dalamud.Bindings.ImGui;
 using System.Numerics;
 
 namespace Brio.UI.Widgets.Actor;
@@ -181,13 +181,29 @@ public class ActorAppearanceWidget(ActorAppearanceCapability capability) : Widge
 
         ImGui.SameLine();
 
-        if(Capability.CanMcdf)
+        using(ImRaii.Disabled(Capability.CanMCDF is false))
         {
-            if(ImBrio.FontIconButton("load_mcdf", FontAwesomeIcon.CloudDownloadAlt, "Load Mare Synchronos MCDF"))
+            using(ImRaii.Disabled(Capability.IsSelf))
             {
-                FileUIHelpers.ShowImportMCDFModal(Capability);
+                if(ImBrio.FontIconButton("load_mcdf", FontAwesomeIcon.CloudDownloadAlt, "Load MCDF"))
+                {
+                    FileUIHelpers.ShowImportMCDFModal(Capability);
+                }
+                ImGui.SameLine();
             }
-            ImGui.SameLine();
+            if(Capability.IsSelf)
+                ImBrio.AttachToolTip("Can not load a MCDF on your Player Character. Spawn an Actor to load a MCDF.");
+
+            using(ImRaii.Disabled(Capability.HasMCDF))
+            {
+                if(ImBrio.FontIconButton("save_mcdf", FontAwesomeIcon.CloudUploadAlt, "Save MCDF"))
+                {
+                    FileUIHelpers.ShowExportMCDFModal(Capability);
+                }
+                ImGui.SameLine();
+            }
+            if(Capability.HasMCDF)
+                ImBrio.AttachToolTip("Can not save a MCDF of a Actor that has a MCDF loaded. Reset this Actor to save a MCDF.");
         }
 
         if(ImBrio.FontIconButton("advanced_appearance", FontAwesomeIcon.UserEdit, "Advanced"))

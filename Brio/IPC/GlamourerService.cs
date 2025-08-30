@@ -1,10 +1,15 @@
 ﻿using Brio.Config;
+using Brio.Core;
 using Brio.Game.Actor;
+using Brio.Game.Core;
 using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
+using Glamourer.Api.Helpers;
+using Glamourer.Api.IpcSubscribers;
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Brio.IPC;
@@ -34,39 +39,57 @@ public class GlamourerService : BrioIPC
     private readonly IDalamudPluginInterface _pluginInterface;
     private readonly ActorRedrawService _redrawService;
     private readonly IFramework _framework;
+    private readonly IObjectTable _gameObjects;
+    private readonly DalamudService _dalamudService;
 
     //
     //
 
-    private readonly Glamourer.Api.Helpers.EventSubscriber _glamourerInitializedSubscriber;
+    private readonly EventSubscriber _glamourerInitializedSubscriber;
 
-    private readonly Glamourer.Api.IpcSubscribers.RevertState _glamourerRevertCharacter;
-    private readonly Glamourer.Api.IpcSubscribers.ApiVersion _glamourerApiVersion;
-    private readonly Glamourer.Api.IpcSubscribers.GetState _glamourerGetState;
+    private readonly ApiVersion _glamourerApiVersion;
 
-    private readonly Glamourer.Api.IpcSubscribers.GetDesignList _glamourerGetDesignList;
-    private readonly Glamourer.Api.IpcSubscribers.ApplyDesign _glamourerApplyDesign;
+    private readonly GetState _glamourerGetState;
+    private readonly ApplyState _glamourerApplyState;
+    private readonly RevertState _glamourerRevertCharacter;
+    private readonly RevertStateName _glamourerRevertByName;
+    private readonly GetStateBase64? _glamourerGetAllCustomization;
+
+    private readonly UnlockState _glamourerUnlock;
+    private readonly UnlockStateName _glamourerUnlockByName;
+
+    private readonly GetDesignList _glamourerGetDesignList;
+    private readonly ApplyDesign _glamourerApplyDesign;
 
     //
 
     public readonly uint BrioKey = 0x11625;
-    private readonly uint _unlock = 0x6D617265; // From MareSynchronos's IpcCallerGlamourer.cs
+    private readonly uint LockCode = 0x6D617265;
 
-    public GlamourerService(IDalamudPluginInterface pluginInterface, ConfigurationService configurationService, IFramework framework, ActorRedrawService redrawService)
+    public GlamourerService(IDalamudPluginInterface pluginInterface, IObjectTable gameObjects, DalamudService dalamudService, ConfigurationService configurationService, IFramework framework, ActorRedrawService redrawService)
     {
         _pluginInterface = pluginInterface;
         _configurationService = configurationService;
         _framework = framework;
         _redrawService = redrawService;
+        _dalamudService = dalamudService;
+        _gameObjects = gameObjects;
 
-        _glamourerInitializedSubscriber = Glamourer.Api.IpcSubscribers.Initialized.Subscriber(pluginInterface, OnConfigurationChanged);
+        _glamourerInitializedSubscriber = Initialized.Subscriber(pluginInterface, OnConfigurationChanged);
 
-        _glamourerApiVersion = new Glamourer.Api.IpcSubscribers.ApiVersion(pluginInterface);
-        _glamourerRevertCharacter = new Glamourer.Api.IpcSubscribers.RevertState(pluginInterface);
-        _glamourerGetState = new Glamourer.Api.IpcSubscribers.GetState(pluginInterface);
+        _glamourerApiVersion = new ApiVersion(pluginInterface);
 
-        _glamourerGetDesignList = new Glamourer.Api.IpcSubscribers.GetDesignList(pluginInterface);
-        _glamourerApplyDesign = new Glamourer.Api.IpcSubscribers.ApplyDesign(pluginInterface);
+        _glamourerGetState = new GetState(pluginInterface);
+        _glamourerApplyState = new ApplyState(pluginInterface);
+        _glamourerRevertCharacter = new RevertState(pluginInterface);
+
+        _glamourerRevertByName = new RevertStateName(pluginInterface);
+        _glamourerGetAllCustomization = new GetStateBase64(pluginInterface);
+        _glamourerUnlock = new UnlockState(pluginInterface);
+        _glamourerUnlockByName = new UnlockStateName(pluginInterface);
+
+        _glamourerGetDesignList = new GetDesignList(pluginInterface);
+        _glamourerApplyDesign = new ApplyDesign(pluginInterface);
 
         OnConfigurationChanged();
 
@@ -92,7 +115,7 @@ public class GlamourerService : BrioIPC
 
         Brio.Log.Debug("Starting glamourer UnlockAndRevert...");
 
-        var success = _glamourerRevertCharacter.Invoke(character!.ObjectIndex, _unlock);
+        var success = _glamourerRevertCharacter.Invoke(character!.ObjectIndex, LockCode);
 
         if(success == Glamourer.Api.Enums.GlamourerApiEc.InvalidKey)
         {
@@ -148,6 +171,71 @@ public class GlamourerService : BrioIPC
         return _glamourerGetDesignList.Invoke();
     }
 
+    public async Task RevertByNameAsync(string name, Guid applicationId)
+    {
+        if((!IsAvailable) || _dalamudService.IsZoning) return;
+
+        await _framework.RunOnFrameworkThread(() =>
+        {
+            RevertByName(name, applicationId);
+
+        }).ConfigureAwait(false);
+    }
+  
+    public async Task ApplyAllAsync(IGameObject? character, string? customization, Guid applicationId)
+    {
+        if(IsAvailable == false || string.IsNullOrEmpty(customization)) return;
+
+        try
+        {
+            Brio.Log.Debug("[{appid}] Calling on IPC: GlamourerApplyAll", applicationId);
+            _glamourerApplyState.Invoke(customization, character!.ObjectIndex, LockCode);
+        }
+        catch(Exception ex)
+        {
+            Brio.Log.Debug(ex, "[{appid}] Failed to apply Glamourer data", applicationId);
+        }
+    }
+
+    public void RevertByName(string name, Guid applicationId)
+    {
+        if((IsAvailable) || _dalamudService.IsZoning) return;
+
+        try
+        {
+            Brio.Log.Debug("[{appid}] Calling On IPC: GlamourerRevertByName", applicationId);
+            _glamourerRevertByName.Invoke(name, LockCode);
+            Brio.Log.Debug("[{appid}] Calling On IPC: GlamourerUnlockName", applicationId);
+            _glamourerUnlockByName.Invoke(name, LockCode);
+        }
+        catch(Exception ex)
+        {
+            Brio.Log.Warning(ex, "Error during Glamourer RevertByName");
+        }
+    }
+  
+    public async Task<string> GetCharacterCustomizationAsync(IntPtr character)
+    {
+        if(IsAvailable == false) return string.Empty;
+
+        try
+        {
+            return await _framework.RunOnFrameworkThread(() =>
+            {
+                var gameObj = _gameObjects.CreateObjectReference(character);
+                if(gameObj is ICharacter c)
+                {
+                    return _glamourerGetAllCustomization!.Invoke(c.ObjectIndex).Item2 ?? string.Empty;
+                }
+                return string.Empty;
+            }).ConfigureAwait(false);
+        }
+        catch
+        {
+            return string.Empty;
+        }
+    }
+
     public bool ApplyDesign(Guid design, IGameObject? character)
     {
         if(IsAvailable == false || character is null)
@@ -166,5 +254,7 @@ public class GlamourerService : BrioIPC
         _configurationService.OnConfigurationChanged -= OnConfigurationChanged;
 
         _glamourerInitializedSubscriber.Dispose();
+
+        GC.SuppressFinalize(this);
     }
 }

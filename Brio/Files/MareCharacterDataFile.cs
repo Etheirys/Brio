@@ -16,12 +16,11 @@ public class MareCharacterDataFileInfo : AppliableActorFileInfoBase<MareCharacte
     {
     }
 
-    public override string Name => "Mare Character Data";
+    public override string Name => "MCDF";
     public override IDalamudTextureWrap Icon => ResourceProvider.Instance.GetResourceImage("Images.FileIcon_Mcdf.png");
     public override string Extension => ".mcdf";
 
-    // No support for actually loading an mcdf, as that's handled by IPC-ing to Mare.
-    // But this class is used for the library tags, so lets just fake it with an empty file. =)
+    // Mare died, Brio can now load MCDF's
     public override object? Load(string filePath) => new MareCharacterDataFile(filePath);
 
     protected override void Apply(MareCharacterDataFile file, ActorEntity actor, bool asExpression = false)
@@ -29,7 +28,7 @@ public class MareCharacterDataFileInfo : AppliableActorFileInfoBase<MareCharacte
         ActorAppearanceCapability? capability;
         if(actor.TryGetCapability<ActorAppearanceCapability>(out capability) && capability != null)
         {
-            capability.LoadMcdf(file.GetPath());
+            _ = capability.LoadMcdf(file.GetPath());
         }
     }
 }
@@ -55,6 +54,6 @@ public class MareCharacterDataFile : IFileMetadata
 
     public void GetAutoTags(ref TagCollection tags)
     {
-        tags.Add("Mare Synchronos");
+        tags.Add("MCDF");
     }
 }

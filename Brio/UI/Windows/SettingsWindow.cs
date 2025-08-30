@@ -23,7 +23,6 @@ public class SettingsWindow : Window
     private readonly WebService _webService;
     private readonly BrioIPCService _brioIPCService;
     private readonly CustomizePlusService _customizePlusService;
-    private readonly MareService _mareService;
 
     public SettingsWindow(
         ConfigurationService configurationService,
@@ -31,8 +30,7 @@ public class SettingsWindow : Window
         GlamourerService glamourerService,
         WebService webService,
         CustomizePlusService customizePlusService,
-        BrioIPCService brioIPCService,
-        MareService mareService) : base($"{Brio.Name} Settings###brio_settings_window", ImGuiWindowFlags.NoResize)
+        BrioIPCService brioIPCService) : base($"{Brio.Name} Settings###brio_settings_window", ImGuiWindowFlags.NoResize)
     {
         Namespace = "brio_settings_namespace";
 
@@ -41,7 +39,6 @@ public class SettingsWindow : Window
         _glamourerService = glamourerService;
         _webService = webService;
         _brioIPCService = brioIPCService;
-        _mareService = mareService;
         _customizePlusService = customizePlusService;
 
         Size = new Vector2(450, 450);
@@ -311,29 +308,6 @@ public class SettingsWindow : Window
                             _glamourerService.CheckStatus(true);
                         }
                     }
-
-                    bool enableMare = _configurationService.Configuration.IPC.AllowMareIntegration;
-
-                    if(ImGui.Checkbox("Allow Mare Synchronos Integration", ref enableMare))
-                    {
-                        _configurationService.Configuration.IPC.AllowMareIntegration = enableMare;
-                        _configurationService.ApplyChange();
-                        _mareService.CheckStatus(true);
-                    }
-
-                    var mareStatus = _mareService.CheckStatus();
-                    using(ImRaii.Disabled(!enableMare))
-                    {
-                        ImGui.Text($"Mare Synchronos Status: {mareStatus}");
-                        ImGui.SameLine();
-                        if(ImBrio.FontIconButton("refresh_mare", FontAwesomeIcon.Sync, "Refresh Mare Synchronos Status"))
-                        {
-                            _mareService.CheckStatus(true);
-                        }
-                    }
-
-                    _glamourerService.Disabled = !enablePenumbra;
-                    _mareService.Disabled = _glamourerService.Disabled;
                 }
             }
         }

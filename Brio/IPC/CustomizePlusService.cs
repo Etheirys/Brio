@@ -15,8 +15,14 @@ using Brio.Config;
 using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Ipc;
+using Dalamud.Plugin.Services;
+using Dalamud.Utility;
+using FFXIVClientStructs.FFXIV.Client.Game.Object;
+using FFXIVClientStructs.FFXIV.Client.System.Framework;
 using System;
 using System.Collections.Generic;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace Brio.IPC;
 
@@ -41,6 +47,8 @@ public class CustomizePlusService : BrioIPC
 
     private readonly ConfigurationService _configurationService;
     private readonly IDalamudPluginInterface _pluginInterface;
+    private readonly IObjectTable _gameObjects;
+    private readonly IFramework _framework;
 
     private readonly ICallGateSubscriber<ushort, string, (int, Guid?)> _customizeplusSetTemporaryProfile;
     private readonly ICallGateSubscriber<IList<IPCProfileDataTuple>> _customizeplusGetAllProfiles;
@@ -50,10 +58,12 @@ public class CustomizePlusService : BrioIPC
     private readonly ICallGateSubscriber<(int, int)> _customizeplusApiVersion;
     private readonly ICallGateSubscriber<bool> _customizeplusIsValid;
 
-    public CustomizePlusService(IDalamudPluginInterface pluginInterface, ConfigurationService configurationService)
+    public CustomizePlusService(IDalamudPluginInterface pluginInterface, IObjectTable gameObjects, ConfigurationService configurationService, IFramework framework)
     {
         _pluginInterface = pluginInterface;
         _configurationService = configurationService;
+        _framework = framework;
+        _gameObjects = gameObjects;
 
         _customizeplusApiVersion = _pluginInterface.GetIpcSubscriber<(int, int)>("CustomizePlus.General.GetApiVersion");
         _customizeplusIsValid = _pluginInterface.GetIpcSubscriber<bool>("CustomizePlus.General.IsValid");
@@ -117,6 +127,52 @@ public class CustomizePlusService : BrioIPC
             return [];
 
         return _customizeplusGetAllProfiles.InvokeFunc();
+    }
+
+    public async Task<Guid?> SetBodyScaleAsync(IGameObject gameObj, string scale)
+    {
+        if(IsAvailable == false) return null;
+
+        return await _framework.RunOnFrameworkThread(() =>
+        {
+            if(gameObj is ICharacter c)
+            {
+                string decodedScale = Encoding.UTF8.GetString(Convert.FromBase64String(scale));
+                if(scale.IsNullOrEmpty())
+                {
+                    _customizeplusDeleteTemporaryProfile!.InvokeFunc(c.ObjectIndex);
+                    return null;
+                }
+                else
+                {
+                    var result = _customizeplusSetTemporaryProfile!.InvokeFunc(c.ObjectIndex, decodedScale);
+                    return result.Item2;
+                }
+            }
+
+            return null;
+        }).ConfigureAwait(false);
+    }
+    
+    public async Task<string?> GetScaleAsync(nint character)
+    {
+        if(IsAvailable == false) return null;
+
+        var scale = await _framework.RunOnFrameworkThread(() =>
+        {
+            var gameObj = _gameObjects.CreateObjectReference(character);
+            if(gameObj is ICharacter c)
+            {
+                var res = _customizeplusGetActiveProfileId.InvokeFunc(c.ObjectIndex);
+                Brio.Log.Debug("CustomizePlus GetActiveProfile returned {err}", res.Item1);
+                if(res.Item1 != 0 || res.Item2 == null) return string.Empty;
+                return _customizeplusGetProfileById.InvokeFunc(res.Item2.Value).Item2;
+            }
+
+            return string.Empty;
+        }).ConfigureAwait(false);
+        if(string.IsNullOrEmpty(scale)) return string.Empty;
+        return Convert.ToBase64String(Encoding.UTF8.GetBytes(scale));
     }
 
     private void OnConfigurationChanged()

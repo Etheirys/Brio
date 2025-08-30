@@ -23,6 +23,8 @@ using OneOf;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using Dalamud.Utility;
+using System.Threading.Tasks;
 
 namespace Brio.UI.Controls.Stateless;
 
@@ -283,7 +285,7 @@ public class FileUIHelpers
     {
         List<Type> types = [typeof(ActorAppearanceUnion), typeof(AnamnesisCharaFile)];
 
-        if(capability.CanMcdf)
+        if(capability.CanMCDF)
             types.Add(typeof(MareCharacterDataFile));
 
         TypeFilter filter = new TypeFilter("Characters", [.. types]);
@@ -307,7 +309,7 @@ public class FileUIHelpers
                 }
                 else if(r is MareCharacterDataFile mareFile)
                 {
-                    capability.LoadMcdf(mareFile.GetPath());
+                    _ = capability.LoadMcdf(mareFile.GetPath());
                 }
             });
 
@@ -331,7 +333,7 @@ public class FileUIHelpers
                 }
                 else if(r is MareCharacterDataFile mareFile)
                 {
-                    capability.LoadMcdf(mareFile.GetPath());
+                    _ = capability.LoadMcdf(mareFile.GetPath());
                 }
             });
         }
@@ -362,7 +364,7 @@ public class FileUIHelpers
 
     public static void ShowImportMCDFModal(ActorAppearanceCapability capability)
     {
-        UIManager.Instance.FileDialogManager.OpenFileDialog("Import MCDF File###import_character_window", "Mare Character Data File (*.mcdf){.mcdf}",
+        UIManager.Instance.FileDialogManager.OpenFileDialog("Import MCDF File###import_mcdf_window", "Mare Character Data File (*.mcdf){.mcdf}",
                  (success, paths) =>
                  {
                      if(success && paths.Count == 1)
@@ -374,9 +376,32 @@ public class FileUIHelpers
                              ConfigurationService.Instance.Configuration.LastMCDFPath = directory;
                              ConfigurationService.Instance.Save();
                          }
-                         capability.LoadMcdf(path);
+                         _ = capability.LoadMcdf(path);
                      }
                  }, 1, ConfigurationService.Instance.Configuration.LastMCDFPath, true);
+    }
+
+    public static void ShowExportMCDFModal(ActorAppearanceCapability capability)
+    {
+        UIManager.Instance.FileDialogManager.SaveFileDialog("Export MCDF File###export_mcdf_window", "Mare Character Data File (*.mcdf){.mcdf}", "mcdf", "{.mcdf}",
+                 (success, path) =>
+                 {
+                     if(success && !path.IsNullOrEmpty())
+                     {
+                         Brio.Log.Info("Exporting MCDF...");
+                         if(!path.EndsWith(".mcdf"))
+                             path += ".mcdf";
+                    
+                         var directory = Path.GetDirectoryName(path);
+                         if(directory is not null)
+                         {
+                             ConfigurationService.Instance.Configuration.MCDF.LastSavedCharaDataLocation = directory;
+                             ConfigurationService.Instance.Save();
+                         }
+
+                         _ = capability.SaveMcdf(path, string.Empty);
+                     }
+                 }, ConfigurationService.Instance.Configuration.MCDF.LastSavedCharaDataLocation, true);
     }
 
     public static void ShowExportSceneModal(EntityManager entityManager, SceneService sceneService)

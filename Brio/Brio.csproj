@@ -23,11 +23,13 @@
 	<ItemGroup>
 		<PackageReference Include="EmbedIO" Version="3.5.2" />
 		<PackageReference Include="Glamourer.Api" Version="2.6.0" />
+		<PackageReference Include="K4os.Compression.LZ4.Legacy" Version="1.3.8" />
 		<PackageReference Include="MessagePack" Version="3.1.4" />
 		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.8" />
 		<PackageReference Include="OneOf" Version="3.0.271" />
 		<PackageReference Include="OneOf.SourceGenerator" Version="3.0.271" />
-		<PackageReference Include="Penumbra.Api" Version="5.10.0" />
+		<PackageReference Include="Penumbra.Api" Version="5.12.0" />
+		<PackageReference Include="Penumbra.String" Version="1.0.5" />
 	</ItemGroup>
 
 	<ItemGroup>

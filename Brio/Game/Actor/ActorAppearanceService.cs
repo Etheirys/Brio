@@ -1,8 +1,10 @@
 ﻿using Brio.Config;
+using Brio.Core;
 using Brio.Entities;
 using Brio.Game.Actor.Appearance;
 using Brio.Game.Actor.Extensions;
 using Brio.Game.Camera;
+using Brio.Game.Core;
 using Brio.Game.GPose;
 using Brio.IPC;
 using Dalamud.Game;
@@ -31,6 +33,10 @@ public class ActorAppearanceService : IDisposable
     private readonly VirtualCameraManager _virtualCameraManager;
     private readonly EntityManager _entityManager;
     private readonly IObjectTable _objectTable;
+    private readonly PenumbraService _penumbraService;
+    private readonly CustomizePlusService _customizePlusService;
+    private readonly ActorRedrawService _actorRedrawService;
+    private readonly DalamudService _dalamudService;
 
     private delegate byte EnforceKindRestrictionsDelegate(nint a1, nint a2);
     private readonly Hook<EnforceKindRestrictionsDelegate> _enforceKindRestrictionsHook = null!;
@@ -46,15 +52,20 @@ public class ActorAppearanceService : IDisposable
 
     public bool CanTint => _configurationService.Configuration.Appearance.EnableTinting;
 
-    public unsafe ActorAppearanceService(GPoseService gPoseService, VirtualCameraManager virtualCameraManager, IObjectTable objectTable, ConfigurationService configurationService, ActorRedrawService redrawService, GlamourerService glamourerService, EntityManager entityManager, ISigScanner sigScanner, IGameInteropProvider hooks)
+    public unsafe ActorAppearanceService(GPoseService gPoseService, VirtualCameraManager virtualCameraManager,
+        IObjectTable objectTable, CustomizePlusService customizePlusService, PenumbraService penumbraService, ActorRedrawService actorRedrawService, DalamudService dalamudService, ConfigurationService configurationService, ActorRedrawService redrawService, GlamourerService glamourerService, EntityManager entityManager, ISigScanner sigScanner, IGameInteropProvider hooks)
     {
         _gPoseService = gPoseService;
         _configurationService = configurationService;
         _redrawService = redrawService;
         _glamourerService = glamourerService;
+        _customizePlusService = customizePlusService;
         _entityManager = entityManager;
         _objectTable = objectTable;
         _virtualCameraManager = virtualCameraManager;
+        _penumbraService = penumbraService;
+        _actorRedrawService = actorRedrawService;
+        _dalamudService = dalamudService;
 
         var enforceKindRestrictionsAddress = sigScanner.ScanText("E8 ?? ?? ?? ?? 41 B0 ?? 48 8B D6 48 8B");
         _enforceKindRestrictionsHook = hooks.HookFromAddress<EnforceKindRestrictionsDelegate>(enforceKindRestrictionsAddress, EnforceKindRestrictionsDetour);
@@ -372,7 +383,7 @@ public class ActorAppearanceService : IDisposable
         RedrawResult redrawResult = RedrawResult.Optmized;
 
         if(needsRedraw)
-            redrawResult = await _redrawService.RedrawActor(character);
+            redrawResult = await _redrawService.Redraw(character);
 
         if(glamourerReset)
             await _glamourerService.RevertCharacter(character);
@@ -470,6 +481,19 @@ public class ActorAppearanceService : IDisposable
             return 0;
 
         return _updateTintHook.Original(charaBase, tint);
+    }
+
+    public async Task RevertMCDF(IGameObject obj)
+    {
+        if(obj.Address == nint.Zero || _gPoseService.IsGPosing is false) return;
+
+        await _glamourerService.UnlockAndRevertCharacter(obj).ConfigureAwait(false);
+
+        _customizePlusService.SetProfile(obj, "{}");
+        _customizePlusService.RemoveTemporaryProfile(obj);
+
+        //await _actorRedrawService.RedrawAndWait(obj).ConfigureAwait(false);
+        await _penumbraService.Redraw(obj).ConfigureAwait(false);
     }
 
     public void Dispose()

@@ -13,6 +13,7 @@ using Brio.IPC;
 using Brio.Resources;
 using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Plugin.Services;
+using FFXIVClientStructs.FFXIV.Client.Game.Object;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
@@ -213,6 +214,8 @@ public class ActorSpawnService : IDisposable
         if(go is null)
             return false;
 
+        _ = _actorAppearanceService.RevertMCDF(go);
+
         _actorAppearanceService.RemoveFromLook(go);
 
         if(_glamourerService.CheckForLock(go))
@@ -325,7 +328,7 @@ public class ActorSpawnService : IDisposable
             outCharacter = (ICharacter)character;
         }
 
-        if(_gPoseService.IsGPosing && _targetService.GPoseTarget == null)
+        if(_gPoseService.IsGPosing && _targetService.HasGPoseTarget)
             _targetService.GPoseTarget = outCharacter;
 
         return true;

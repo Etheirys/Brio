@@ -22,6 +22,8 @@ public class DalamudServices
     [PluginService] public IPluginLog Log { get; private set; } = null!;
     [PluginService] public IChatGui ChatGui { get; private set; } = null!;
     [PluginService] public IKeyState KeyState { get; private set; } = null!;
+    [PluginService] public ICondition Conditions { get; private set; } = null!;
+    [PluginService] public IGameConfig GameConfig { get; private set; } = null!;
 
 
     public DalamudServices(IDalamudPluginInterface pluginInterface)
