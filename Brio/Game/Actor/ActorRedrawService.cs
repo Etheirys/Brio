@@ -55,21 +55,21 @@ public class ActorRedrawService(IFramework framework, IObjectTable objectTable)
             ActorRedrawEvent?.Invoke(go, RedrawStage.Before);
 
             _ = DrawWhenReady(go);
-            
-            var start = DateTime.Now;         
+
+            var start = DateTime.Now;
             do
             {
                 if(await _framework.RunOnFrameworkThread(() => IsDrawing(go)))
                 {
                     Brio.Log.Debug($"Brio redraw complete on gameobject {go.ObjectIndex}.");
-                   
+
                     ActorRedrawEvent?.Invoke(go, RedrawStage.After);
 
                     return;
                 }
 
                 await Task.Delay(200);
-            } while(go.IsValid() && (DateTime.Now - start).TotalSeconds < 3);        
+            } while(go.IsValid() && (DateTime.Now - start).TotalSeconds < 3);
         }
         catch(Exception e)
         {

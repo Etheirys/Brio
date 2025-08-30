@@ -13,7 +13,6 @@ using Brio.IPC;
 using Brio.MCDF.Game.Services;
 using Brio.Resources;
 using Brio.UI.Widgets.Actor;
-using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Plugin.Services;
 using FFXIVClientStructs.FFXIV.Client.Game.Character;
 using System;
