@@ -213,6 +213,8 @@ public class ActorSpawnService : IDisposable
         if(go is null)
             return false;
 
+        _ = _actorAppearanceService.RevertMCDF(go);
+
         _actorAppearanceService.RemoveFromLook(go);
 
         if(_glamourerService.CheckForLock(go))
@@ -325,7 +327,7 @@ public class ActorSpawnService : IDisposable
             outCharacter = (ICharacter)character;
         }
 
-        if(_gPoseService.IsGPosing && _targetService.GPoseTarget == null)
+        if(_gPoseService.IsGPosing && _targetService.HasGPoseTarget)
             _targetService.GPoseTarget = outCharacter;
 
         return true;

@@ -22,7 +22,7 @@ public class ActorWebController(IFramework framework, ActorSpawnService actorSpa
         Brio.Log.Debug("Received redraw request on WebAPI");
         try
         {
-            var result = await _framework.RunOnTick(async () => await _redrawService.RedrawActor(data.ObjectIndex));
+            var result = await _framework.RunOnTick(async () => await _redrawService.RedrawObjectByIndex(data.ObjectIndex));
             return result.ToString();
         }
         catch

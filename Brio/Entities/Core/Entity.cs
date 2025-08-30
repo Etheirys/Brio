@@ -44,10 +44,14 @@ public abstract class Entity : IDisposable
     public virtual bool IsAttached => Parent != null;
     public virtual EntityFlags Flags => EntityFlags.DefaultOpen;
 
-    public virtual int ContextButtonCount => 1;
-    public virtual bool IsIPCControlled => false;
-    public virtual bool IsLocked => false;
+    public virtual int ContextButtonCount => 0;
 
+    public virtual bool IsLoading { get; set; } = false;
+    public virtual bool IsLocked { get; set; } = false;
+
+    public virtual string LoadingDescription { get; set; } = string.Empty;
+
+    public virtual bool IsDisabled { get; set; } = false;
 
     protected List<Entity> _children = [];
 

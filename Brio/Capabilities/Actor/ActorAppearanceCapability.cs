@@ -1,13 +1,16 @@
 ﻿using Brio.Core;
 using Brio.Entities.Actor;
+using Brio.Entities.Core;
 using Brio.Files;
 using Brio.Game.Actor;
 using Brio.Game.Actor.Appearance;
 using Brio.Game.Actor.Extensions;
 using Brio.Game.Actor.Interop;
+using Brio.Game.Core;
 using Brio.Game.GPose;
 using Brio.Game.Types;
 using Brio.IPC;
+using Brio.MCDF.Game.Services;
 using Brio.Resources;
 using Brio.UI.Widgets.Actor;
 using Dalamud.Plugin.Services;
@@ -20,12 +23,14 @@ namespace Brio.Capabilities.Actor;
 public class ActorAppearanceCapability : ActorCharacterCapability
 {
     private readonly ActorAppearanceService _actorAppearanceService;
+    private readonly TargetService _targetService;
     private readonly PenumbraService _penumbraService;
     private readonly CustomizePlusService _customizePlusService;
     private readonly GlamourerService _glamourerService;
-    private readonly MareService _mareService;
+
     private readonly GPoseService _gposeService;
     private readonly IFramework _framework;
+    private readonly MCDFService _mCDFService;
 
     public string CurrentCollection => _penumbraService.GetCollectionForObject(Character);
     public PenumbraService PenumbraService => _penumbraService;
@@ -46,7 +51,7 @@ public class ActorAppearanceCapability : ActorCharacterCapability
 
 
     private ActorAppearance? _originalAppearance = null;
-    public bool IsAppearanceOverridden => _originalAppearance.HasValue;
+    public bool IsAppearanceOverridden => _originalAppearance.HasValue || HasMCDF || IsDesignOverridden || IsProfileOverridden | IsCollectionOverridden;
 
     public bool HasPenumbraIntegration => _penumbraService.IsAvailable;
     public bool HasGlamourerIntegration => _glamourerService.IsAvailable;
@@ -62,19 +67,24 @@ public class ActorAppearanceCapability : ActorCharacterCapability
 
     public bool CanTint => _actorAppearanceService.CanTint;
 
-    public bool CanMcdf => _mareService.IsAvailable;
+    public bool HasMCDF;
+    public bool CanMCDF => _mCDFService.IsIPCAvailable;
+    public bool IsSelf => _targetService.IsSelf(GameObject);
 
     public bool IsHidden => CurrentAppearance.ExtendedAppearance.Transparency == 0;
 
-    public ActorAppearanceCapability(ActorEntity parent, IFramework framework, ActorAppearanceService actorAppearanceService, CustomizePlusService customizePlusService, PenumbraService penumbraService, GlamourerService glamourerService, MareService mareService, GPoseService gPoseService) : base(parent)
+    public ActorAppearanceCapability(ActorEntity parent, MCDFService mCDFService, IFramework framework, ActorAppearanceService actorAppearanceService,
+        CustomizePlusService customizePlusService, PenumbraService penumbraService, TargetService targetService, GlamourerService glamourerService,
+        GPoseService gPoseService) : base(parent)
     {
         _actorAppearanceService = actorAppearanceService;
         _penumbraService = penumbraService;
         _glamourerService = glamourerService;
-        _mareService = mareService;
         _gposeService = gPoseService;
         _customizePlusService = customizePlusService;
         _framework = framework;
+        _mCDFService = mCDFService;
+        _targetService = targetService;
 
         Widget = new ActorAppearanceWidget(this);
 
@@ -82,9 +92,38 @@ public class ActorAppearanceCapability : ActorCharacterCapability
         _penumbraService.OnPenumbraRedraw += OnPenumbraRedraw;
     }
 
-    public bool LoadMcdf(string path)
+    public async Task LoadMcdf(string path)
     {
-        return _mareService.LoadMcdfAsync(path, GameObject);
+        try
+        {
+            Entity.LoadingDescription = "Loading MCDF...";
+            Entity.IsLoading = true;
+
+            await _mCDFService.LoadMCDFHeader(path);
+            await _mCDFService.ApplyMCDF(GameObject);
+
+            HasMCDF = true;
+            Entity.IsLoading = false;
+        }
+        catch(Exception ex)
+        {
+            Brio.Log.Warning(ex, "Exception while Loading MCDF");
+        }
+    }
+
+    public async Task SaveMcdf(string path, string dis)
+    {
+        try
+        {
+            Entity.LoadingDescription = "Saving MCDF...";
+            Entity.IsLoading = true;
+            await _mCDFService.SaveMCDF(path, dis, GameObject);
+            Entity.IsLoading = false;
+        }
+        catch(Exception ex)
+        {
+            Brio.Log.Warning(ex, "Exception while Loading MCDF");
+        }
     }
 
     public void SetCollection(Guid collection)
@@ -121,6 +160,7 @@ public class ActorAppearanceCapability : ActorCharacterCapability
     {
         if(IsDesignOverridden)
         {
+            HasMCDF = false;
             IsDesignOverridden = false;
             _glamourerService.RevertCharacter(Character);
 
@@ -293,7 +333,6 @@ public class ActorAppearanceCapability : ActorCharacterCapability
         return SetAppearance(appearance, AppearanceImportOptions.Gear);
     }
 
-
     public async Task Redraw()
     {
         await _actorAppearanceService.Redraw(Character);
@@ -310,6 +349,18 @@ public class ActorAppearanceCapability : ActorCharacterCapability
 
     public async Task ResetAppearance()
     {
+        if(HasMCDF)
+        {
+            _ = _actorAppearanceService.RevertMCDF(GameObject);
+            HasMCDF = false;
+        }
+        else
+        {
+            ResetDesign();
+            ResetCollection();
+            ResetProfile();
+        }
+
         _modelShaderOverride.Reset();
         if(_originalAppearance.HasValue)
         {

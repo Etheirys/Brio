@@ -16,6 +16,8 @@ using Brio.Input;
 using Brio.IPC;
 using Brio.Library;
 using Brio.Library.Sources;
+using Brio.MCDF.Game.FileCache;
+using Brio.MCDF.Game.Services;
 using Brio.Resources;
 using Brio.UI;
 using Brio.UI.Windows;
@@ -107,9 +109,12 @@ public class Brio : IDalamudPlugin
         serviceCollection.AddSingleton(dalamudServices.Log);
         serviceCollection.AddSingleton(dalamudServices.ChatGui);
         serviceCollection.AddSingleton(dalamudServices.KeyState);
+        serviceCollection.AddSingleton(dalamudServices.Conditions);
+        serviceCollection.AddSingleton(dalamudServices.GameConfig);
 
         // Core / Misc
         serviceCollection.AddSingleton<EventBus>();
+        serviceCollection.AddSingleton<DalamudService>();
         serviceCollection.AddSingleton<ConfigurationService>();
         serviceCollection.AddSingleton<ResourceProvider>();
         serviceCollection.AddSingleton<GameDataProvider>();
@@ -118,12 +123,14 @@ public class Brio : IDalamudPlugin
         serviceCollection.AddSingleton<SceneService>();
         serviceCollection.AddSingleton<ProjectSystem>();
         serviceCollection.AddSingleton<AutoSaveService>();
+        serviceCollection.AddSingleton<FileCacheService>();
+        serviceCollection.AddSingleton<MCDFService>();
+        serviceCollection.AddSingleton<TransientResourceService>();
 
         // IPC
         serviceCollection.AddSingleton<BrioIPCService>();
         serviceCollection.AddSingleton<PenumbraService>();
         serviceCollection.AddSingleton<GlamourerService>();
-        serviceCollection.AddSingleton<MareService>();
         serviceCollection.AddSingleton<CustomizePlusService>();
 
         // Web

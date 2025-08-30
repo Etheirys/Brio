@@ -43,7 +43,6 @@ public class UIManager : IDisposable
 
     private readonly PenumbraService _penumbraService;
     private readonly GlamourerService _glamourerService;
-    private readonly MareService _mareService;
 
     private readonly WindowSystem _windowSystem;
 
@@ -87,8 +86,7 @@ public class UIManager : IDisposable
             CameraWindow cameraWindow,
 
             PenumbraService penumbraService,
-            GlamourerService glamourerService,
-            MareService mareService
+            GlamourerService glamourerService
         )
     {
         Instance = this;
@@ -118,7 +116,6 @@ public class UIManager : IDisposable
 
         _penumbraService = penumbraService;
         _glamourerService = glamourerService;
-        _mareService = mareService;
 
         _windowSystem = new(Brio.Name);
 
