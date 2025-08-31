@@ -7,13 +7,14 @@ using Dalamud.Interface;
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Bindings.ImGui;
 using System.Numerics;
+using Dalamud.Interface.Utility;
 
 namespace Brio.UI.Entitites;
 
 public class EntityHierarchyView(EntityManager entityManager, GPoseService gPoseService)
 {
-    private readonly float buttonWidth = ImGui.GetTextLineHeight() * 13f;
-    private readonly float offsetWidth = 16f;
+    private float buttonWidth => ImGui.GetWindowContentRegionMax().X;
+    private readonly float offsetWidth = 18f;
 
     private EntityId? _lastSelectedId;
 
@@ -41,11 +42,16 @@ public class EntityHierarchyView(EntityManager entityManager, GPoseService gPose
         }
     }
 
-    private void DrawEntity(Entity entity, EntityId? selectedEntityId, float lastOffset = 0, bool isChild = false)
+    private void DrawEntity(Entity entity, EntityId? selectedEntityId, float lastOffset = 0)
     {
         bool isSelected = false;
         bool hasChildren = false;
+        bool hasOffset = false;
 
+        bool isMutiSelected = false;
+
+        if(lastOffset > 0)
+            hasOffset = true;
         if(entity.Children.Count > 0)
             hasChildren = true;
         if(selectedEntityId != null && entity.Id.Equals(selectedEntityId))
@@ -56,31 +62,37 @@ public class EntityHierarchyView(EntityManager entityManager, GPoseService gPose
             using(ImRaii.PushColor(ImGuiCol.Button, 0))
             {
                 var invsButtonPos = ImGui.GetCursorPos();
+
                 float width = buttonWidth;
-                if(entity.ContextButtonCount >= 2)
+
+                if(entity.ContextButtonCount >= 1)
+                    width -= ((30 * ImGuiHelpers.GlobalScale) * entity.ContextButtonCount);
+                else
+                    width -= 5;
+
+                if(ImGui.Button($"###{entity.Id}_invs_button", new(width, 24 * ImGuiHelpers.GlobalScale)))
                 {
-                    width -= 30 - entity.ContextButtonCount;
+                    var io = ImGui.GetIO();
+
                 }
-                if(ImGui.Button($"###{entity.Id}_invs_button", new(width, 0)))
+
+                if(ImGui.IsItemHovered())
                 {
-                    Select(entity);
+                    if(entity.Flags.HasFlag(EntityFlags.AllowDoubleClick) && ImGui.IsMouseDoubleClicked(ImGuiMouseButton.Left))
+                    {
+                        entity.OnDoubleClick();
+                    }
                 }
-                //if(ImGui.IsItemHovered())
-                //{
-                //    if(entity.Flags.HasFlag(EntityFlags.AllowDoubleClick) && ImGui.IsMouseDoubleClicked(ImGuiMouseButton.Left))
-                //    {
-                //        entity.OnDoubleClick();
-                //    }
-                //}
                 if(ImGui.IsItemClicked(ImGuiMouseButton.Right))
                 {
                     ImGui.OpenPopup($"context_popup{entity.Id}");
                 }
 
+
                 ImGui.SetCursorPos(invsButtonPos);
             }
 
-            if(lastOffset > 0)
+            if(hasOffset)
             {
                 var curPos = ImGui.GetCursorPos();
 
@@ -88,7 +100,7 @@ public class EntityHierarchyView(EntityManager entityManager, GPoseService gPose
                 lastOffset += offsetWidth;
             }
 
-            using(ImRaii.PushColor(ImGuiCol.Button, TheameManager.CurrentTheame.Accent.AccentColor, isSelected))
+            using(ImRaii.PushColor(ImGuiCol.Button, TheameManager.CurrentTheame.Accent.AccentColor, isSelected || isMutiSelected))
             {
                 using(ImRaii.Disabled(true))
                 {
