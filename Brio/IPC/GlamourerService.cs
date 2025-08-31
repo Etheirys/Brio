@@ -67,7 +67,7 @@ public class GlamourerService : BrioIPC
     public readonly uint BrioKey = 0x11625;
     private readonly uint LockCode = 0x6D617265;
 
-    public GlamourerService(IDalamudPluginInterface pluginInterface, IObjectTable gameObjects, DalamudService dalamudService, ConfigurationService configurationService, IFramework framework, ActorRedrawService redrawService)
+    public GlamourerService(IDalamudPluginInterface pluginInterface, IObjectTable gameObjects, ICommandManager commandManager, DalamudService dalamudService, ConfigurationService configurationService, IFramework framework, ActorRedrawService redrawService)
     {
         _pluginInterface = pluginInterface;
         _configurationService = configurationService;

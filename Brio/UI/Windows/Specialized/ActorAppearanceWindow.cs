@@ -172,7 +172,7 @@ public class ActorAppearanceWindow : Window, IDisposable
 
         ImGui.SameLine();
 
-        if(_capability.CanMcdf)
+        if(_capability.CanMCDF)
         {
             if(ImBrio.FontIconButton("adv_load_mcdf", FontAwesomeIcon.CloudDownloadAlt, "Load Mare Synchronos MCDF"))
             {
