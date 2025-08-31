@@ -1,5 +1,5 @@
-﻿using Brio.Capabilities.Posing;
-using Brio.Config;
+﻿using Brio.Config;
+using Brio.Core;
 using Brio.Entities;
 using Brio.Game.Core;
 using Brio.Game.GPose;
@@ -30,7 +30,7 @@ public class MainWindow : Window, IDisposable
     private readonly ProjectWindow _projectWindow;
     private readonly GPoseService _gPoseService;
     private readonly AutoSaveService _autoSaveService;
-    private readonly GroupedHistoryService _groupedUndoService;
+    private readonly HistoryService _groupedUndoService;
 
     public MainWindow(
         ConfigurationService configService,
@@ -38,7 +38,7 @@ public class MainWindow : Window, IDisposable
         InfoWindow infoWindow,
         LibraryWindow libraryWindow,
         EntityManager entityManager,
-        GroupedHistoryService groupedUndoService,
+        HistoryService groupedUndoService,
         SceneService sceneService,
         GPoseService gPoseService,
         ProjectWindow projectWindow,

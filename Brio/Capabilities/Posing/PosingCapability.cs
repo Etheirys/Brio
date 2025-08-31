@@ -77,13 +77,13 @@ public class PosingCapability : ActorCharacterCapability
     private readonly PosingTransformWindow _overlayTransformWindow;
     private readonly IFramework _framework;
     private readonly GameInputService _gameInputService;
-    private readonly GroupedHistoryService _groupedUndoService;
+    private readonly HistoryService _groupedUndoService;
     private readonly EntityManager _entityManager;
 
     public PosingCapability(
         ActorEntity parent,
         PosingOverlayWindow window,
-        GroupedHistoryService groupedUndoService,
+        HistoryService groupedUndoService,
         PosingService posingService,
         EntityManager entityManager,
         ConfigurationService configurationService,

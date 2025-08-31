@@ -1,13 +1,13 @@
-using Brio.Core;
+using Brio.Capabilities.Posing;
 using Brio.Entities;
 using Brio.Entities.Core;
 using Brio.Game.Posing;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Brio.Capabilities.Posing;
+namespace Brio.Core;
 
-public class GroupedHistoryService(EntityManager entityManager)
+public class HistoryService(EntityManager entityManager)
 {
     private readonly EntityManager _entityManager = entityManager;
 
@@ -18,7 +18,7 @@ public class GroupedHistoryService(EntityManager entityManager)
     {
         var group = new GroupEntry
         {
-            Entries = [.. entries.Select(e => new HistoryEntityEntry(e.id, e.info.Clone(), e.model))]
+            Entries = [.. entries.Select(e => new HistoryEntry(e.id, e.info.Clone(), e.model))]
         };
 
         _undo.Push(group);
@@ -34,7 +34,7 @@ public class GroupedHistoryService(EntityManager entityManager)
             return;
 
         var pop = _undo.Pop();
-        var inverse = new GroupEntry { Entries = new List<HistoryEntityEntry>() };
+        var inverse = new GroupEntry { Entries = new List<HistoryEntry>() };
 
         foreach(var e in pop.Entries)
         {
@@ -45,7 +45,7 @@ public class GroupedHistoryService(EntityManager entityManager)
                 continue;
 
             // save current as inverse
-            inverse.Entries.Add(new HistoryEntityEntry(e.Id, cap.SkeletonPosing.PoseInfo.Clone(), cap.ModelPosing.Transform));
+            inverse.Entries.Add(new HistoryEntry(e.Id, cap.SkeletonPosing.PoseInfo.Clone(), cap.ModelPosing.Transform));
 
             // apply stored
             cap.SkeletonPosing.PoseInfo = e.Info.Clone();
@@ -61,7 +61,7 @@ public class GroupedHistoryService(EntityManager entityManager)
             return;
 
         var pop = _redo.Pop();
-        var inverse = new GroupEntry { Entries = new List<HistoryEntityEntry>() };
+        var inverse = new GroupEntry { Entries = new List<HistoryEntry>() };
 
         foreach(var e in pop.Entries)
         {
@@ -71,7 +71,7 @@ public class GroupedHistoryService(EntityManager entityManager)
             if(!entity.TryGetCapability<PosingCapability>(out var cap))
                 continue;
 
-            inverse.Entries.Add(new HistoryEntityEntry(e.Id, cap.SkeletonPosing.PoseInfo.Clone(), cap.ModelPosing.Transform));
+            inverse.Entries.Add(new HistoryEntry(e.Id, cap.SkeletonPosing.PoseInfo.Clone(), cap.ModelPosing.Transform));
 
             cap.SkeletonPosing.PoseInfo = e.Info.Clone();
             cap.ModelPosing.Transform = e.ModelTransform;
@@ -88,8 +88,8 @@ public class GroupedHistoryService(EntityManager entityManager)
 
     private class GroupEntry
     {
-        public List<HistoryEntityEntry> Entries = [];
+        public List<HistoryEntry> Entries = [];
     }
 
-    private record class HistoryEntityEntry(EntityId Id, PoseInfo Info, Transform ModelTransform);
+    private record class HistoryEntry(EntityId Id, PoseInfo Info, Transform ModelTransform);
 }

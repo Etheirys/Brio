@@ -1,4 +1,4 @@
-﻿using Brio.Capabilities.Posing;
+﻿using Brio.Core;
 using Brio.Entities;
 using Brio.Entities.Core;
 using Brio.Game.GPose;
@@ -14,7 +14,7 @@ using System.Numerics;
 
 namespace Brio.UI.Entitites;
 
-public class EntityHierarchyView(EntityManager entityManager, GPoseService gPoseService, GroupedHistoryService groupedUndoService)
+public class EntityHierarchyView(EntityManager entityManager, GPoseService gPoseService, HistoryService groupedUndoService)
 {
     private readonly float buttonWidth = ImGui.GetTextLineHeight() * 13f;
     private readonly float offsetWidth = 16f;

@@ -29,7 +29,7 @@ public class PosingOverlayWindow : Window, IDisposable
     private readonly ConfigurationService _configurationService;
     private readonly PosingService _posingService;
     private readonly GPoseService _gPoseService;
-    private readonly GroupedHistoryService _groupedUndoService;
+    private readonly HistoryService _groupedUndoService;
 
     private List<ClickableItem> _selectingFrom = [];
     private Transform? _trackingTransform;
@@ -39,7 +39,7 @@ public class PosingOverlayWindow : Window, IDisposable
     private const int _gizmoId = 142857;
     private const string _boneSelectPopupName = "brio_bone_select_popup";
 
-    public PosingOverlayWindow(EntityManager entityManager, CameraService cameraService, GroupedHistoryService groupedUndoService, ConfigurationService configService, PosingService posingService, GPoseService gPoseService)
+    public PosingOverlayWindow(EntityManager entityManager, CameraService cameraService, HistoryService groupedUndoService, ConfigurationService configService, PosingService posingService, GPoseService gPoseService)
         : base("##brio_posing_overlay_window", ImGuiWindowFlags.AlwaysAutoResize, true)
     {
         Namespace = "brio_posing_overlay_namespace";

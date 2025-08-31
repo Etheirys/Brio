@@ -1,5 +1,4 @@
-﻿using Brio.Capabilities.Posing;
-using Brio.Config;
+﻿using Brio.Config;
 using Brio.Core;
 using Brio.Entities;
 using Brio.Files;
@@ -119,7 +118,7 @@ public class Brio : IDalamudPlugin
         serviceCollection.AddSingleton<SceneService>();
         serviceCollection.AddSingleton<ProjectSystem>();
         serviceCollection.AddSingleton<AutoSaveService>();
-        serviceCollection.AddSingleton<GroupedHistoryService>();
+        serviceCollection.AddSingleton<HistoryService>();
 
         // IPC
         serviceCollection.AddSingleton<BrioIPCService>();
