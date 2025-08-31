@@ -1,6 +1,7 @@
-﻿using Dalamud.Interface;
+﻿using Dalamud.Bindings.ImGui;
+using Dalamud.Interface;
+using Dalamud.Interface.Utility;
 using Dalamud.Interface.Utility.Raii;
-using Dalamud.Bindings.ImGui;
 
 namespace Brio.UI.Controls.Stateless;
 public static partial class ImBrio
@@ -31,7 +32,7 @@ public static partial class ImBrio
         ImGui.PushStyleColor(ImGuiCol.ButtonActive, 0);
         using(ImRaii.PushFont(UiBuilder.IconFont))
         {
-            ImGui.Button(icon.ToIconString(), new(25, 0));
+            ImGui.Button(icon.ToIconString(), new(25 * ImGuiHelpers.GlobalScale, 0));
         }
         ImGui.PopStyleColor();
         ImGui.PopStyleColor();

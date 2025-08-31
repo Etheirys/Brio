@@ -6,6 +6,7 @@ using Brio.UI.Theming;
 using Brio.UI.Widgets.Core;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface;
+using Dalamud.Interface.Utility;
 using Dalamud.Interface.Utility.Raii;
 using System.Numerics;
 
@@ -60,11 +61,11 @@ public class EntityHierarchyView(EntityManager entityManager, GPoseService gPose
               
                 float width = buttonWidth;
                 if(entity.ContextButtonCount >= 1)
-                    width -= (30 * entity.ContextButtonCount);
+                    width -= ((30 * ImGuiHelpers.GlobalScale) * entity.ContextButtonCount);
                 else
                     width -= 5;
 
-                if(ImGui.Button($"###{entity.Id}_invs_button", new(width, 24)))
+                if(ImGui.Button($"###{entity.Id}_invs_button", new(width, 24 * ImGuiHelpers.GlobalScale)))
                 {
                     Select(entity);
                 }

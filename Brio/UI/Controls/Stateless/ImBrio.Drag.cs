@@ -1,9 +1,10 @@
 ﻿using Brio.Core;
 using Brio.Input;
 using Brio.UI.Controls.Core;
-using Dalamud.Interface;
-using Dalamud.Interface.Utility.Raii;
 using Dalamud.Bindings.ImGui;
+using Dalamud.Interface;
+using Dalamud.Interface.Utility;
+using Dalamud.Interface.Utility.Raii;
 using System.Collections.Generic;
 using System.Numerics;
 
@@ -28,7 +29,7 @@ public static partial class ImBrio
             {
                 using(ImRaii.PushColor(ImGuiCol.Button, UIConstants.Transparent))
                 {
-                    if(Button($"{label}##Button", icon, new Vector2(25)))
+                    if(Button($"{label}##Button", icon, new Vector2(25 * ImGuiHelpers.GlobalScale)))
                     {
                         if(isExpanded)
                         {
@@ -58,8 +59,6 @@ public static partial class ImBrio
 
         if(isExpanded && enableExpanded)
         {
-            float height = (GetLineHeight()) * 3 + (ImGui.GetStyle().ItemSpacing.Y * 2) + (ImGui.GetStyle().WindowPadding.Y * 2);
-
             ImGui.PushStyleColor(ImGuiCol.FrameBg, UIConstants.GizmoBlue);
 
             float x = vectorValue.X;
@@ -84,11 +83,6 @@ public static partial class ImBrio
             active |= panyActive |= ranyActive |= sanyActive;
 
             ImGui.PopStyleColor();
-
-            //if(ImGui.BeginChild($"###{label}_child", new Vector2(GetRemainingWidth(), height), false))
-            //{
-            //    ImGui.EndChild();
-            //}
         }
 
         return (active, changed);
@@ -239,7 +233,7 @@ public static partial class ImBrio
         if(InputService.IsKeyBindDown(KeyBindEvents.Interface_IncrementLargeModifier))
             step *= 10;
 
-        float buttonWidth = 32;
+        float buttonWidth = 32 * ImGuiHelpers.GlobalScale;
         ImGui.SetNextItemWidth(buttonWidth);
         if(ImGui.Button($"◀##{label}_decrease"))
         {

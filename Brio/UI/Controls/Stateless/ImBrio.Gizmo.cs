@@ -1,8 +1,8 @@
 ﻿using Brio.Game.Camera;
 using Brio.Input;
+using Dalamud.Bindings.ImGui;
 using Dalamud.Interface.Utility.Raii;
 using FFXIVClientStructs.FFXIV.Client.Game.Control;
-using Dalamud.Bindings.ImGui;
 using System;
 using System.Numerics;
 
@@ -299,19 +299,19 @@ public static partial class ImBrioGizmo
         public uint LockedAxisForegroundColor = 0xFFFFFFFF;
         public uint LockedAxisBackgroundColor = 0x10FFFFFF;
 
-        public uint[] AxisForegroundColors = new uint[3]
-        {
+        public uint[] AxisForegroundColors =
+        [
             0xFF3333FF,
             0xFF33FF33,
             0xFFFF3333,
-        };
+        ];
 
-        public uint[] AxisBackgroundColors = new uint[3]
-        {
+        public uint[] AxisBackgroundColors =
+        [
             0x103333FF,
             0x1033FF33,
             0x10FF3333,
-        };
+        ];
 
         public Style()
         {
