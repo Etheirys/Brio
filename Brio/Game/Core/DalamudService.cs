@@ -1,9 +1,9 @@
 ﻿using Dalamud.Game.ClientState.Conditions;
 using Dalamud.Game.ClientState.Objects.SubKinds;
+using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Plugin.Services;
 using Dalamud.Utility;
 using System;
-using System.IO;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 
@@ -28,7 +28,7 @@ public class DalamudService : IDisposable
         _framework = framework;
         _gameConfig = gameConfig;
         _dataManager = dataManager;
-       
+
         IsWine = Util.IsWine();
 
         _framework.Update += FrameworkOnUpdate;
@@ -36,7 +36,7 @@ public class DalamudService : IDisposable
 
     public bool IsInCutscene { get; private set; } = false;
     public bool IsZoning => _condition[ConditionFlag.BetweenAreas] || _condition[ConditionFlag.BetweenAreas51];
- 
+
     public bool HasModifiedGameFiles => _dataManager.HasModifiedGameDataFiles;
     public bool IsLodEnabled { get; private set; }
     public uint ClassJobId => _classJobId!.Value;
@@ -88,6 +88,16 @@ public class DalamudService : IDisposable
     public string GetPlayerName()
     {
         return _clientState.LocalPlayer?.Name.ToString() ?? "--";
+    }
+
+    public bool IsObjectPresent(IGameObject? obj)
+    {
+        return obj != null && obj.IsValid();
+    }
+
+    public async Task<bool> IsObjectPresentAsync(IGameObject? obj)
+    {
+        return await RunOnFrameworkThread(() => IsObjectPresent(obj)).ConfigureAwait(false);
     }
 
     public async Task<string> GetPlayerNameAsync()

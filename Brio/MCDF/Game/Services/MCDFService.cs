@@ -223,15 +223,16 @@ public class MCDFService
     private async Task ApplyDataAsync(Guid applicationId, (string Name, IGameObject GameObject) tempHandler, bool isSelf, string UID,
         Dictionary<string, string> modPaths, string? manipData, string? glamourerData, string? customizeData, CancellationToken token)
     {
-        Guid? cPlusId = null;
         Guid penumbraCollection;
         try
         {
             DataApplicationProgress = "Reverting previous Application";
 
-            //await _actorAppearanceService.RevertMCDF(tempHandler.GameObject).ConfigureAwait(false);
+            await _penumbraService.Redraw(tempHandler.GameObject);
+            await _glamourerService.UnlockAndRevertCharacter(tempHandler.GameObject);
+            _customizePlusService.SetProfile(tempHandler.GameObject, "{}");
 
-            await Task.Delay(TimeSpan.FromSeconds(3)).ConfigureAwait(false);
+            await Task.Delay(TimeSpan.FromSeconds(3), token).ConfigureAwait(false);
 
             DataApplicationProgress = "Applying Penumbra information";
 
@@ -361,19 +362,6 @@ public class MCDFService
 
     public async Task<API.Data.CharacterData?> CreatePlayerData(IGameObject gameObject)
     {
-        //var chara = await _dalamudUtilService.GetPlayerCharacterAsync().ConfigureAwait(false);
-        //if(_dalamudUtilService.IsInGpose)
-        //{
-        //    chara = (IPlayerCharacter?)(await _dalamudUtilService.GetGposeCharacterFromObjectTableByNameAsync(chara.Name.TextValue, _dalamudUtilService.IsInGpose).ConfigureAwait(false));
-        //}
-
-        //if(chara == null)
-        //    return null;
-
-        //using var tempHandler = await _gameObjectHandlerFactory.Create(ObjectKind.Player,
-        //                () => _dalamudUtilService.GetCharacterFromObjectTableByIndex(chara.ObjectIndex)?.Address ?? IntPtr.Zero, isWatched: false).ConfigureAwait(false);
-
-
         CharacterDataEX newCdata = new();
         var fragment = await BuildCharacterData(gameObject, CancellationToken.None).ConfigureAwait(false);
        
@@ -468,14 +456,14 @@ public class MCDFService
         Brio.Log.Verbose("Building character data for {obj}", playerRelatedObject);
 
         // wait until chara is not drawing and present so nothing spontaneously explodes
-        //await _dalamudUtil.WaitWhileCharacterIsDrawing(_logger, playerRelatedObject, Guid.NewGuid(), 30000, ct: ct).ConfigureAwait(false);
-        //int totalWaitTime = 10000;
-        //while(!await _dalamudUtil.IsObjectPresentAsync(await _dalamudUtil.CreateGameObjectAsync(playerRelatedObject.Address).ConfigureAwait(false)).ConfigureAwait(false) && totalWaitTime > 0)
-        //{
-        //    _logger.LogTrace("Character is null but it shouldn't be, waiting");
-        //    await Task.Delay(50, ct).ConfigureAwait(false);
-        //    totalWaitTime -= 50;
-        //}
+        await _actorRedrawService.WaitForDrawing(playerRelatedObject).ConfigureAwait(false);
+        int totalWaitTime = 10000;
+        while(!await _dalamudService.IsObjectPresentAsync(playerRelatedObject).ConfigureAwait(false) && totalWaitTime > 0)
+        {
+            Brio.Log.Debug("Character is null but it shouldn't be, waiting");
+            await Task.Delay(50, ct).ConfigureAwait(false);
+            totalWaitTime -= 50;
+        }
 
         ct.ThrowIfCancellationRequested();
 
