@@ -5,6 +5,12 @@ To open this window again click `Information` on the Scene Manager then -> `View
 	 ---> Brio, Versions 0.5.3 <--- That damned boat
 ---------------------------------------------------------------------------------------------------------------------------------------------------------
 
+--- Brio, Versions 0.5.3.1 --- 
+
+- Fix being able to select things in the Scene Manager (AHAHH)
+
+--- Brio, Versions 0.5.3 --- 
+
 - Added Moonfire Faire festival's 2024 & 2025 to the festival list
 
 - Fixed an issue where you could sometimes not interact with the Scene Manager

@@ -48,8 +48,6 @@ public class EntityHierarchyView(EntityManager entityManager, GPoseService gPose
         bool hasChildren = false;
         bool hasOffset = false;
 
-        bool isMutiSelected = false;
-
         if(lastOffset > 0)
             hasOffset = true;
         if(entity.Children.Count > 0)
@@ -72,10 +70,8 @@ public class EntityHierarchyView(EntityManager entityManager, GPoseService gPose
 
                 if(ImGui.Button($"###{entity.Id}_invs_button", new(width, 24 * ImGuiHelpers.GlobalScale)))
                 {
-                    var io = ImGui.GetIO();
-
+                    Select(entity);
                 }
-
                 if(ImGui.IsItemHovered())
                 {
                     if(entity.Flags.HasFlag(EntityFlags.AllowDoubleClick) && ImGui.IsMouseDoubleClicked(ImGuiMouseButton.Left))
@@ -100,7 +96,7 @@ public class EntityHierarchyView(EntityManager entityManager, GPoseService gPose
                 lastOffset += offsetWidth;
             }
 
-            using(ImRaii.PushColor(ImGuiCol.Button, TheameManager.CurrentTheame.Accent.AccentColor, isSelected || isMutiSelected))
+            using(ImRaii.PushColor(ImGuiCol.Button, TheameManager.CurrentTheame.Accent.AccentColor, isSelected))
             {
                 using(ImRaii.Disabled(true))
                 {
