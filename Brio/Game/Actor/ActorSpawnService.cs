@@ -212,10 +212,10 @@ public class ActorSpawnService : IDisposable
     {
         if(go is null)
             return false;
+    
+        _actorAppearanceService.RemoveFromLook(go);
 
         _ = _actorAppearanceService.RevertMCDF(go);
-
-        _actorAppearanceService.RemoveFromLook(go);
 
         if(_glamourerService.CheckForLock(go))
             _glamourerService.UnlockAndRevertCharacter(go);
@@ -244,6 +244,30 @@ public class ActorSpawnService : IDisposable
         var com = ClientObjectManager.Instance();
         foreach(var idx in indexes)
         {
+            var obj = com->GetObjectByIndex(idx);
+            if(obj != null)
+            {
+                try
+                {
+                    var go = _objectTable.CreateObjectReference((nint)obj);
+
+                    if(go is not null)
+                    {
+                        _actorAppearanceService.RemoveFromLook(go);
+                
+                        _ = _actorAppearanceService.RevertMCDF(go);
+
+                        if(_glamourerService.CheckForLock(go))
+                            _glamourerService.UnlockAndRevertCharacter(go);
+
+                        _customizePlusService.RemoveTemporaryProfile(go);
+                    }
+                }
+                catch(Exception ex)
+                {
+                    Brio.Log.Warning(ex, $"Exception while destroying all the created objects idx:{idx}");
+                }
+            }
             com->DeleteObjectByIndex(idx, 0);
         }
         _createdIndexes.Clear();
@@ -374,6 +398,8 @@ public class ActorSpawnService : IDisposable
         _clientState.TerritoryChanged -= OnTerritoryChanged;
 
         DestroyAllCreated();
+
+        GC.SuppressFinalize(this);
     }
 }
 
