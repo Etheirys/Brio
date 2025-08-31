@@ -161,7 +161,6 @@ public class FileEntry : ItemEntryBase
     private string _name;
     private FileTypeInfoBase _fileInfo;
     private IDalamudTextureWrap? _previewImage;
-    private bool _isPreviewImageDisposed;
     private string? _description;
     private string? _author;
     private string? _version;
@@ -223,8 +222,8 @@ public class FileEntry : ItemEntryBase
 
             if(!value)
             {
-                _isPreviewImageDisposed = true;
                 _previewImage?.Dispose();
+                _previewImage = null;
             }
         }
     }
@@ -243,27 +242,25 @@ public class FileEntry : ItemEntryBase
 
     private IDalamudTextureWrap? GetPreviewImage()
     {
-        if(_isPreviewImageDisposed)
-            return null;
+        if(_previewImage != null)
+            return _previewImage;
 
-        if(_previewImage == null || _previewImage.Handle == 0)
+        try
         {
-            try
+            if(_fileInfo?.IsFileType<JsonDocumentBase>() == true)
             {
-                if(_fileInfo?.IsFileType<JsonDocumentBase>() == true)
+                JsonDocumentBase? file = _fileInfo.Load(FilePath) as JsonDocumentBase;
+                if(file != null && file.Base64Image != null)
                 {
-                    JsonDocumentBase? file = _fileInfo.Load(FilePath) as JsonDocumentBase;
-                    if(file != null && file.Base64Image != null)
-                    {
-                        byte[] imgData = Convert.FromBase64String(file.Base64Image);
-                        _previewImage = UIManager.Instance.LoadImage(imgData);
-                        return _previewImage;
-                    }
+                    byte[] imgData = Convert.FromBase64String(file.Base64Image);
+                    _previewImage = UIManager.Instance.LoadImage(imgData);
                 }
             }
-            catch(Exception)
-            {
-            }
+        }
+        catch(Exception)
+        {
+            _previewImage?.Dispose();
+            _previewImage = null;
         }
 
         return _previewImage;
@@ -272,7 +269,6 @@ public class FileEntry : ItemEntryBase
     public override void Dispose()
     {
         base.Dispose();
-        _isPreviewImageDisposed = true;
         _previewImage?.Dispose();
     }
 

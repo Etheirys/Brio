@@ -46,8 +46,6 @@ public class LibraryWindow : Window
 
     private readonly ConfigurationService _configurationService;
     private readonly LibraryManager _libraryManager;
-    private readonly IPluginLog _log;
-    private readonly IServiceProvider _serviceProvider;
     private readonly GPoseService _gPoseService;
     private readonly PosingService _posingService;
     private readonly IFramework _frameworkService;
@@ -96,15 +94,13 @@ public class LibraryWindow : Window
     private Action<object>? _modalCallback;
 
     public LibraryWindow(
-        IPluginLog log,
         GPoseService gPoseService,
         EntityManager entityManager,
         ConfigurationService configurationService,
         LibraryManager libraryManager,
         PosingService posingService,
         IFramework frameworkService,
-        SettingsWindow settingsWindow,
-        IServiceProvider serviceProvider)
+        SettingsWindow settingsWindow)
         : base($"{Brio.Name} Library###brio_library_window")
     {
         this.Namespace = "brio_library_namespace";
@@ -116,10 +112,8 @@ public class LibraryWindow : Window
         };
         this.SizeConstraints = constraints;
 
-        _log = log;
         _configurationService = configurationService;
         _libraryManager = libraryManager;
-        _serviceProvider = serviceProvider;
         _gPoseService = gPoseService;
         _frameworkService = frameworkService;
         _posingService = posingService;

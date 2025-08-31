@@ -45,6 +45,8 @@ namespace Brio.Entities.Actor
 
         public override EntityFlags Flags => EntityFlags.AllowDoubleClick | EntityFlags.HasContextButton | EntityFlags.DefaultOpen;
 
+        public override int ContextButtonCount => 1;
+
         public bool IsProp => ActorType == ActorType.Prop;
 
         public ActorType ActorType => GetActorType();

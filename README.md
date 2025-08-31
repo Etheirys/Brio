@@ -70,6 +70,7 @@ Brio wouldn't be possible without the tireless work of many devs across many pro
 
 A special thanks goes to:
 * [Anamnesis](https://github.com/imchillin/Anamnesis)
+* [darkarchon](https://github.com/rootdarkarchon)
 * [Ktisis](https://github.com/ktisis-tools/Ktisis)
 * [Dalamud](https://github.com/goatcorp/Dalamud/)
 * [Penumbra](https://github.com/xivdev/Penumbra)

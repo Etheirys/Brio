@@ -14,19 +14,18 @@ public class ActorRedrawService(IFramework framework, IObjectTable objectTable)
     public event ActorRedrawEventDelegate? ActorRedrawEvent;
 
     private readonly IFramework _framework = framework;
-
     private readonly IObjectTable _objectTable = objectTable;
 
-    public Task<RedrawResult> RedrawActor(int objectIndex)
+    public Task<RedrawResult> RedrawObjectByIndex(int objectIndex)
     {
         var actor = _objectTable[objectIndex];
         if(actor == null)
             return Task.FromResult(RedrawResult.Failed);
 
-        return RedrawActor(actor);
+        return Redraw(actor);
     }
 
-    public async Task<RedrawResult> RedrawActor(IGameObject go)
+    public async Task<RedrawResult> Redraw(IGameObject go)
     {
         Brio.Log.Debug($"Beginning Brio redraw on gameobject {go.ObjectIndex}...");
         DisableDraw(go);
@@ -44,6 +43,41 @@ public class ActorRedrawService(IFramework framework, IObjectTable objectTable)
             Brio.Log.Error(e, $"Brio redraw failed on gameobject {go.ObjectIndex}.");
             return RedrawResult.Failed;
         }
+    }
+
+    public async Task RedrawAndWait(IGameObject go)
+    {
+        Brio.Log.Debug($"Beginning Brio redraw on gameobject {go.ObjectIndex}...");
+        try
+        {
+            DisableDraw(go);
+
+            _ = DrawWhenReady(go);
+
+            var start = DateTime.Now;
+            do
+            {
+                if(await _framework.RunOnFrameworkThread(() => IsDrawing(go)))
+                {
+                    Brio.Log.Debug($"Brio redraw complete on gameobject {go.ObjectIndex}.");
+
+                    return;
+                }
+
+                await Task.Delay(200);
+            } while(go.IsValid() && (DateTime.Now - start).TotalSeconds < 3);
+        }
+        catch(Exception e)
+        {
+            Brio.Log.Error(e, $"Brio redraw failed on gameobject {go.ObjectIndex}.");
+        }
+    }
+
+    public unsafe bool IsDrawing(IGameObject go)
+    {
+        var native = go.Native();
+        if(native is null) return false;
+        return native->RenderFlags == 0x00;
     }
 
     public unsafe void DisableDraw(IGameObject go)

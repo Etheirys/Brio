@@ -44,7 +44,7 @@ public class MainWindow : Window, IDisposable
         ProjectWindow projectWindow,
         AutoSaveService autoSaveService
         )
-        : base($"{Brio.Name} Scene Manager [{configService.Version}]###brio_main_window", ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.AlwaysAutoResize)
+        : base($"BRIO [{configService.Version}]###brio_main_window", ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.AlwaysAutoResize)
     {
         Namespace = "brio_main_namespace";
 

@@ -15,12 +15,13 @@ namespace Brio.Entities.Actor;
 public class ActorContainerEntity(IServiceProvider provider) : Entity("actorContainer", provider)
 {
     private readonly GPoseService _gPoseService = provider.GetRequiredService<GPoseService>();
-    private readonly EntityManager _entityManager = provider.GetRequiredService<EntityManager>();
 
     public override string FriendlyName => "Actors";
     public override FontAwesomeIcon Icon => FontAwesomeIcon.Users;
 
     public override EntityFlags Flags => EntityFlags.HasContextButton;
+
+    public override int ContextButtonCount => 1;
 
     public override void OnAttached()
     {

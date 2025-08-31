@@ -1,15 +1,19 @@
 ﻿using Brio.Resources;
 using Brio.UI.Controls.Core;
 using Brio.UI.Theming;
+using Dalamud.Bindings.ImGui;
 using Dalamud.Interface;
 using Dalamud.Interface.Textures.TextureWraps;
+using Dalamud.Interface.Utility;
 using Dalamud.Interface.Utility.Raii;
-using Dalamud.Bindings.ImGui;
+using System;
 using System.Numerics;
 
 namespace Brio.UI.Controls.Stateless;
 public static partial class ImBrio
 {
+    public const string TooltipSeparator = "--SEP--";
+
     public static void FontIcon(FontAwesomeIcon icon)
     {
         using(ImRaii.PushFont(UiBuilder.IconFont))
@@ -50,7 +54,7 @@ public static partial class ImBrio
 
         using(ImRaii.PushFont(UiBuilder.IconFont))
         {
-            if(ImGui.Button($"{icon.ToIconString()}###{id}", new Vector2(25)))
+            if(ImGui.Button($"{icon.ToIconString()}###{id}", new Vector2(25 * ImGuiHelpers.GlobalScale)))
                 wasClicked = true;
         }
 
@@ -87,7 +91,7 @@ public static partial class ImBrio
 
         using(ImRaii.PushFont(UiBuilder.IconFont))
         {
-            if(ImGui.Button($"{icon.ToIconString()}###{id}", new Vector2(25)))
+            if(ImGui.Button($"{icon.ToIconString()}###{id}", new Vector2(25 * ImGuiHelpers.GlobalScale)))
                 wasClicked = true;
         }
 
@@ -143,12 +147,16 @@ public static partial class ImBrio
                 if(ImGui.IsItemHovered())
                     ImGui.SetTooltip(hoverText);
             }
-
-            ImGui.SetCursorPos(startPos + ImGui.GetStyle().FramePadding);
-            using(ImRaii.PushFont(UiBuilder.IconFont))
+        
+            if(icon != FontAwesomeIcon.None)
             {
-                ImGui.Text(icon.ToIconString());
-            }
+                ImGui.SetCursorPos(startPos + ImGui.GetStyle().FramePadding);
+                using(ImRaii.PushFont(UiBuilder.IconFont))
+                {
+
+                    ImGui.Text(icon.ToIconString());
+                }
+            }   
 
             size.Y = 1;
 
@@ -174,7 +182,7 @@ public static partial class ImBrio
         if(isToggled)
             ImGui.PushStyleColor(ImGuiCol.Button, toggledColor);
 
-        bool clicked = ImGui.Button(lable, size);
+        bool clicked = ImGui.Button(lable, size * ImGuiHelpers.GlobalScale);
 
         if(isToggled)
             ImGui.PopStyleColor();
@@ -204,7 +212,7 @@ public static partial class ImBrio
 
         using(ImRaii.PushFont(UiBuilder.IconFont))
         {
-            if(ImGui.Button($"{icon.ToIconString()}###{id}", size))
+            if(ImGui.Button($"{icon.ToIconString()}###{id}", size * ImGuiHelpers.GlobalScale))
                 clicked = true;
         }
 
@@ -290,6 +298,30 @@ public static partial class ImBrio
             }
 
             return result;
+        }
+    }
+
+    public static void AttachToolTip(string text)
+    {
+        if(ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled))
+        {
+            ImGui.BeginTooltip();
+            ImGui.PushTextWrapPos(ImGui.GetFontSize() * 35f);
+            if(text.Contains(TooltipSeparator, StringComparison.Ordinal))
+            {
+                var splitText = text.Split(TooltipSeparator, StringSplitOptions.RemoveEmptyEntries);
+                for(int i = 0; i < splitText.Length; i++)
+                {
+                    ImGui.TextUnformatted(splitText[i]);
+                    if(i != splitText.Length - 1) ImGui.Separator();
+                }
+            }
+            else
+            {
+                ImGui.TextUnformatted(text);
+            }
+            ImGui.PopTextWrapPos();
+            ImGui.EndTooltip();
         }
     }
 }

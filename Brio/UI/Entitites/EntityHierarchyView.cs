@@ -3,6 +3,7 @@ using Brio.Entities;
 using Brio.Entities.Core;
 using Brio.Game.GPose;
 using Brio.Input;
+using Brio.UI.Controls.Stateless;
 using Brio.UI.Theming;
 using Brio.UI.Widgets.Core;
 using Dalamud.Bindings.ImGui;
@@ -10,14 +11,15 @@ using Dalamud.Interface;
 using Dalamud.Interface.Utility.Raii;
 using System.Collections.Generic;
 using System.Linq;
+using Dalamud.Interface.Utility;
 using System.Numerics;
 
 namespace Brio.UI.Entitites;
 
 public class EntityHierarchyView(EntityManager entityManager, GPoseService gPoseService, HistoryService groupedUndoService)
 {
-    private readonly float buttonWidth = ImGui.GetTextLineHeight() * 13f;
-    private readonly float offsetWidth = 16f;
+    private float buttonWidth => ImGui.GetWindowContentRegionMax().X;
+    private readonly float offsetWidth = 18f;
 
     private EntityId? _lastSelectedId;
     private Entity? _lastSelectedEntityRef;
@@ -78,14 +80,15 @@ public class EntityHierarchyView(EntityManager entityManager, GPoseService gPose
             using(ImRaii.PushColor(ImGuiCol.Button, 0))
             {
                 var invsButtonPos = ImGui.GetCursorPos();
+              
                 float width = buttonWidth;
 
-                if(entity.ContextButtonCount >= 2)
-                {
-                    width -= 30 - entity.ContextButtonCount;
-                }
+                if(entity.ContextButtonCount >= 1)
+                    width -= ((30 * ImGuiHelpers.GlobalScale) * entity.ContextButtonCount);
+                else
+                    width -= 5;
 
-                if(ImGui.Button($"###{entity.Id}_invs_button", new(width, 0)))
+                if(ImGui.Button($"###{entity.Id}_invs_button", new(width, 24 * ImGuiHelpers.GlobalScale)))
                 {
                     var io = ImGui.GetIO();
 
@@ -107,14 +110,13 @@ public class EntityHierarchyView(EntityManager entityManager, GPoseService gPose
                     }
                 }
 
-                //if(ImGui.IsItemHovered())
-                //{
-                //    if(entity.Flags.HasFlag(EntityFlags.AllowDoubleClick) && ImGui.IsMouseDoubleClicked(ImGuiMouseButton.Left))
-                //    {
-                //        entity.OnDoubleClick();
-                //    }
-                //}
-
+                if(ImGui.IsItemHovered())
+                {
+                    if(entity.Flags.HasFlag(EntityFlags.AllowDoubleClick) && ImGui.IsMouseDoubleClicked(ImGuiMouseButton.Left))
+                    {
+                        entity.OnDoubleClick();
+                    }
+                }
                 if(ImGui.IsItemClicked(ImGuiMouseButton.Right))
                 {
                     ImGui.OpenPopup($"context_popup{entity.Id}");

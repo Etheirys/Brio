@@ -1,19 +1,26 @@
 ﻿using Brio.Config;
+using Brio.Core;
 using Brio.Entities;
 using Brio.Entities.Actor;
+using Brio.Game.GPose;
 using Dalamud.Game.ClientState.Objects;
+using Dalamud.Game.ClientState.Objects.Enums;
 using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Plugin.Services;
 using System;
+using System.Threading.Tasks;
+using System.Xml.Linq;
 
 namespace Brio.Game.Core;
 
-public class TargetService : IDisposable
+public unsafe class TargetService : IDisposable
 {
     private readonly EntityManager _entityManager;
     private readonly ITargetManager _targetManager;
     private readonly IFramework _framework;
     private readonly ConfigurationService _configService;
+    private readonly GPoseService _gPoseService;
+    private readonly DalamudService _dalamudService;
 
     public IGameObject? BrioTarget
     {
@@ -30,6 +37,8 @@ public class TargetService : IDisposable
         }
     }
 
+    public bool HasGPoseTarget => GPoseTarget is not null;
+
     public IGameObject? GPoseTarget
     {
         get => _targetManager.GPoseTarget;
@@ -39,13 +48,14 @@ public class TargetService : IDisposable
     private nint _lastBrioTarget = 0;
     private nint _lastGPoseTarget = 0;
 
-
-    public TargetService(EntityManager entityManager, ITargetManager targetManager, IFramework framework, ConfigurationService configService)
+    public TargetService(EntityManager entityManager, DalamudService dalamudService, GPoseService gPoseService, ITargetManager targetManager, IFramework framework, ConfigurationService configService)
     {
         _entityManager = entityManager;
         _targetManager = targetManager;
         _framework = framework;
         _configService = configService;
+        _gPoseService = gPoseService;
+        _dalamudService = dalamudService;
 
         _framework.Update += OnFrameworkUpdate;
     }
@@ -70,8 +80,31 @@ public class TargetService : IDisposable
         _lastGPoseTarget = currentGPoseAddr;
     }
 
+
+    public bool IsSelf(IGameObject gameObject)
+    {
+        var playerChar = _dalamudService.GetPlayerCharacter();
+        return playerChar is not null && gameObject is not null && string.Equals(playerChar.Name.TextValue, gameObject.Name.TextValue, StringComparison.Ordinal);
+    }
+
+    public (bool CanApply, string TargetName, IGameObject GameObject) CanApplyMCDFToTarget()
+    {
+        var targetName = "Invalid Target";
+        var canApply = _gPoseService.IsGPosing && HasGPoseTarget 
+            && GPoseTarget!.ObjectKind == ObjectKind.Player;
+       
+        if(canApply)
+        {
+            targetName = GPoseTarget!.Name.TextValue;
+        }
+
+        return (canApply, targetName, GPoseTarget!);
+    }
+
     public void Dispose()
     {
         _framework.Update -= OnFrameworkUpdate;
+
+        GC.SuppressFinalize(this);
     }
 }

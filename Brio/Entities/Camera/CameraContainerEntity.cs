@@ -23,6 +23,8 @@ public class CameraContainerEntity(IServiceProvider provider) : Entity("cameras"
 
     public override FontAwesomeIcon Icon => FontAwesomeIcon.Camera;
 
+    public override int ContextButtonCount => 1;
+
     public override EntityFlags Flags => EntityFlags.DefaultOpen | EntityFlags.HasContextButton;
 
     public override void DrawContextButton()

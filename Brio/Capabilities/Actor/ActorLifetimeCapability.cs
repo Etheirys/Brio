@@ -13,12 +13,14 @@ public class ActorLifetimeCapability : ActorCapability
     private readonly TargetService _targetService;
 
     private readonly ActorSpawnService _actorSpawnService;
+    private readonly ActorAppearanceService _actorAppearanceService;
     private readonly EntityManager _entityManager;
-    public ActorLifetimeCapability(ActorEntity parent, TargetService targetService, ActorSpawnService actorSpawnService, EntityManager entityManager) : base(parent)
+    public ActorLifetimeCapability(ActorEntity parent, TargetService targetService, ActorAppearanceService actorAppearanceService, ActorSpawnService actorSpawnService, EntityManager entityManager) : base(parent)
     {
         _targetService = targetService;
         _actorSpawnService = actorSpawnService;
         _entityManager = entityManager;
+        _actorAppearanceService = actorAppearanceService;
 
         Widget = new ActorLifetimeWidget(this);
     }

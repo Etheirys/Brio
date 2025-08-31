@@ -7,8 +7,7 @@ using GameCamera = FFXIVClientStructs.FFXIV.Client.Game.Camera;
 [StructLayout(LayoutKind.Explicit, Size = 0x2B0)]
 public struct BrioCamera
 {
-    [FieldOffset(0x0)]
-    public GameCamera Camera;
+    [FieldOffset(0x000)] public GameCamera Camera;
 
     [FieldOffset(0x13C)] public float FoV;
 

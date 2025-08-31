@@ -1,4 +1,5 @@
 ﻿using Dalamud.Bindings.ImGui;
+using Dalamud.Interface.Utility;
 using Dalamud.Interface.Utility.Raii;
 using System.Numerics;
 
@@ -19,7 +20,7 @@ public static partial class ImBrio
         {
             ImGui.PushStyleColor(ImGuiCol.Button, ImGui.GetColorU32(selected ? ImGuiCol.TabActive : ImGuiCol.Tab));
 
-            if(ImGui.Button(label, size))
+            if(ImGui.Button(label, size * ImGuiHelpers.GlobalScale))
             {
                 selected = !selected;
                 clicked = true;

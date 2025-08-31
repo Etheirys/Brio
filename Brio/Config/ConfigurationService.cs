@@ -14,6 +14,8 @@ public class ConfigurationService : IDisposable
 
     public static ConfigurationService Instance { get; private set; } = null!;
 
+    public string ConfigDirectory => _pluginInterface.ConfigDirectory.FullName;
+
     public ConfigurationService(IDalamudPluginInterface pluginInterface)
     {
         Instance = this;
