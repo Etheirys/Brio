@@ -17,7 +17,7 @@ public unsafe class FestivalService : IDisposable
 
     public readonly IReadOnlyDictionary<uint, FestivalEntry> FestivalList;
 
-    public bool HasMoreSlots => EngineActiveFestivals.Any();
+    public bool HasMoreSlots => EngineActiveFestivals.Length != 0;
     public bool HasOverride => _originalState != null;
     public bool CanModify => _gPoseService.IsGPosing;
 
@@ -31,7 +31,7 @@ public unsafe class FestivalService : IDisposable
     private readonly Queue<uint[]> _pendingChanges = new();
     private uint[]? _originalState;
 
-    // TODO: Handle festival subid properly
+    // TODO: Handle festival subid properly (I wonder want this meant (KEN)) 
 
     public uint[] EngineActiveFestivals
     {
@@ -43,7 +43,6 @@ public unsafe class FestivalService : IDisposable
             {
                 fixed(GameMain.Festival* festival = &engineFestivals[i])
                     activeFestivals[i] = *((uint*)festival);
-
             }
 
             return activeFestivals;
@@ -57,6 +56,7 @@ public unsafe class FestivalService : IDisposable
         _framework = framework;
         _gPoseService = gPoseService;
         _resourceProvider = resourceProvider;
+
         FestivalList = BuildFestivalList(gameDataProvider);
 
         _framework.Update += OnFrameworkUpdate;
@@ -71,10 +71,9 @@ public unsafe class FestivalService : IDisposable
         {
             var pending = _pendingChanges.Dequeue();
             if(pending != null)
-                publicApply(pending);
+                PublicApply(pending);
         }
     }
-
 
     public bool AddFestival(uint festival)
     {
@@ -126,18 +125,18 @@ public unsafe class FestivalService : IDisposable
         {
             if(tryThisFrame)
             {
-                publicApply(_originalState, false);
+                PublicApply(_originalState, false);
             }
             else
             {
-                _pendingChanges.Enqueue(_originalState.ToArray());
+                _pendingChanges.Enqueue([.. _originalState]);
             }
 
             _originalState = null;
         }
     }
 
-    private void publicApply(uint[] festivals, bool applyNow = true)
+    private void PublicApply(uint[] festivals, bool applyNow = true)
     {
         if(applyNow)
         {
@@ -151,8 +150,7 @@ public unsafe class FestivalService : IDisposable
 
     private void SnapshotFestivalsIfNeeded()
     {
-        if(_originalState == null)
-            _originalState = EngineActiveFestivals.ToArray();
+        _originalState ??= [.. EngineActiveFestivals];
     }
 
     private bool CheckFestivalRestrictions(uint festivalId, bool showError = true)
@@ -176,7 +174,6 @@ public unsafe class FestivalService : IDisposable
 
                         return false;
                     }
-
                 }
             }
         }
@@ -240,9 +237,12 @@ public unsafe class FestivalService : IDisposable
     public void Dispose()
     {
         ResetFestivals(true);
+
         _framework.Update -= OnFrameworkUpdate;
         _gPoseService.OnGPoseStateChange -= OnGPoseStateChanged;
         _clientState.TerritoryChanged -= OnTerritoryChanged;
+
+        GC.SuppressFinalize(this);
     }
 
     private class FestivalFileEntry
@@ -257,7 +257,7 @@ public unsafe class FestivalService : IDisposable
     {
         public string Reason { get; set; } = string.Empty;
         public ushort TerritoryType { get; set; }
-        public FestivalAreaExclusionBoundary[] Polygon { get; set; } = Array.Empty<FestivalAreaExclusionBoundary>();
+        public FestivalAreaExclusionBoundary[] Polygon { get; set; } = [];
     }
 
     public class FestivalAreaExclusionBoundary
