@@ -236,6 +236,7 @@ public class MCDFService
             DataApplicationProgress = "Reverting previous Application";
           
             await _penumbraService.Redraw(tempHandler.GameObject);
+            await _actorRedrawService.RedrawAndWait(tempHandler.GameObject);
 
             await _glamourerService.UnlockAndRevertCharacter(tempHandler.GameObject);
             await _glamourerService.UnlockAndRevertCharacterByName(tempHandler.Name);

@@ -140,8 +140,6 @@ public class UpdateWindow : Window
 
                 if(CollapsingHeader(" v0.6.0 – September ?? 2025", "  -  MCDFs, Dynamic Face Control, & ????? ", new Vector4(0.5f, 0.9f, 0.5f, 1.0f), true))
                 {
-                    DrawFeatureSection("\uf302", "Character Gallery", new Vector4(0.9f, 0.6f, 0.9f, 1.0f));
-
                     ImGui.BulletText("Update Brio to support FFXIV 7.3 (Thanks for the help Asgard!");
                     ImGui.BulletText("Update Brio to support FFXIV 7.3 (Thanks for the help Asgard!");
                     ImGui.BulletText("Update Brio to support FFXIV 7.3 (Thanks for the help Asgard!");
@@ -151,8 +149,6 @@ public class UpdateWindow : Window
                
                 if(CollapsingHeader(" v0.5.3 – August ?? 2025", "  -  ????? ", new Vector4(0.5f, 0.9f, 0.5f, 1.0f), false))
                 {
-                    DrawFeatureSection("\uf302", "Character Gallery", new Vector4(0.9f, 0.6f, 0.9f, 1.0f));
-
                     ImGui.BulletText("Update Brio to support FFXIV 7.3 (Thanks for the help Asgard!");
                     ImGui.BulletText("Update Brio to support FFXIV 7.3 (Thanks for the help Asgard!");
                     ImGui.BulletText("Update Brio to support FFXIV 7.3 (Thanks for the help Asgard!");
@@ -163,8 +159,6 @@ public class UpdateWindow : Window
               
                 if(CollapsingHeader(" v0.5.2 – August ?? 2025", "  - 7.3 Support  ", new Vector4(0.5f, 0.9f, 0.5f, 1.0f), false))
                 {
-                    DrawFeatureSection("\uf302", "Character Gallery", new Vector4(0.9f, 0.6f, 0.9f, 1.0f));
-
                     ImGui.BulletText("Fixed a rare crash ");
                     ImGui.BulletText("Fixed ImGUI assertion errors");
                     ImGui.BulletText("Disabled double click on actors and camera to rename them to fix a bug (temporarily) ");
@@ -175,8 +169,6 @@ public class UpdateWindow : Window
 
                 if(CollapsingHeader(" v0.5.1 – March ?? 2025", "  -  ????? ", new Vector4(0.5f, 0.9f, 0.5f, 1.0f), false))
                 {
-                    DrawFeatureSection("\uf302", "Character Gallery", new Vector4(0.9f, 0.6f, 0.9f, 1.0f));
-
                     ImGui.BulletText("Update Brio to support FFXIV 7.3 (Thanks for the help Asgard!");
                     ImGui.BulletText("Update Brio to support FFXIV 7.3 (Thanks for the help Asgard!");
                     ImGui.BulletText("Update Brio to support FFXIV 7.3 (Thanks for the help Asgard!");
@@ -196,6 +188,11 @@ public class UpdateWindow : Window
             this.IsOpen = false;
         }
     }
+
+    //
+    // some code found here is modified and CharacterSelect+
+    // https://github.com/IcarusXIV/Character-Select- (link is includes the -)
+    //
 
     private static void DrawBackground(Vector2 headerStart, Vector2 headerEnd)
     {
@@ -222,7 +219,8 @@ public class UpdateWindow : Window
         return isOpen;
     }
 
-    private static void DrawFeatureSection(string icon, string title, Vector4 accentColor)
+  
+    private static void DrawFeature(string icon, string title, Vector4 accentColor)
     {
         var drawList = ImGui.GetWindowDrawList();
         var startPos = ImGui.GetCursorScreenPos();
@@ -233,7 +231,6 @@ public class UpdateWindow : Window
         drawList.AddRectFilled(backgroundMin, backgroundMax, ImGui.GetColorU32(new Vector4(0.12f, 0.12f, 0.15f, 0.6f)), 4f);
         drawList.AddRectFilled(backgroundMin, backgroundMin + new Vector2(3, backgroundMax.Y - backgroundMin.Y), ImGui.GetColorU32(accentColor), 2f);
 
-        //ImGui.SetCursorPosX(ImGui.GetCursorPosX() + 1);
         ImGui.Spacing();
         using(ImRaii.PushFont(UiBuilder.IconFont))
         {

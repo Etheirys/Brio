@@ -37,24 +37,24 @@ public class FileUIHelpers
         {
             using(ImRaii.PushColor(ImGuiCol.Button, UIConstants.Transparent))
             {
-                if(ImGui.Button("Save/Load Project"))
-                {
-                    projectWindow.IsOpen = true;
-                }
-                if(ImGui.IsItemHovered())
-                    ImGui.SetTooltip("Save or Load this Scene");
-
-                if(ImGui.Button("View Auto-Saves"))
-                {
-                    autoSaveService.ShowAutoSaves();
-                }
-                if(ImGui.IsItemHovered())
-                    ImGui.SetTooltip("View Scene Auto-Saves");
-
-                ImGui.Separator();
-
                 using(ImRaii.Disabled(true))
                 {
+                    if(ImGui.Button("Save/Load Project"))
+                    {
+                        projectWindow.IsOpen = true;
+                    }
+                    if(ImGui.IsItemHovered())
+                        ImGui.SetTooltip("Save or Load this Scene");
+
+                    if(ImGui.Button("View Auto-Saves"))
+                    {
+                        autoSaveService.ShowAutoSaves();
+                    }
+                    if(ImGui.IsItemHovered())
+                        ImGui.SetTooltip("View Scene Auto-Saves");
+
+                    ImGui.Separator();
+
                     if(ImGui.Button("Export Scene"))
                     {
                         ShowExportSceneModal(entityManager, sceneService);

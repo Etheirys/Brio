@@ -2,6 +2,7 @@
 using Brio.UI.Controls.Stateless;
 using Brio.UI.Widgets.Core;
 using Dalamud.Bindings.ImGui;
+using Dalamud.Interface.Utility.Raii;
 using System.Numerics;
 
 namespace Brio.UI.Widgets.Actor;
@@ -25,40 +26,44 @@ public class ActorDynamicPoseWidget(ActorDynamicPoseCapability capability) : Wid
     bool enable;
     public override void DrawBody()
     {
-        if(ImBrio.ToggelButton("Enable Face Control", enable))
+        using(ImRaii.Disabled(true))
         {
-            enable = !enable;
 
-            if(enable)
-                Capability.TESTactorlook();
-            else
-                Capability.TESTactorlookClear();
+            if(ImBrio.ToggelButton("Enable Face Control", enable))
+            {
+                enable = !enable;
+
+                if(enable)
+                    Capability.TESTactorlook();
+                else
+                    Capability.TESTactorlookClear();
+            }
+
+            ImGui.Separator();
+
+            ImBrio.ToggleButtonStrip("DynamicFaceControlSelector", new Vector2(ImBrio.GetRemainingWidth(), ImBrio.GetLineHeight()), ref selected, ["Camera", "Position", "Actor"]);
+
+            switch(selected)
+            {
+                case 0:
+
+                    break;
+                case 1:
+
+                    break;
+                case 2:
+
+                    break;
+            }
+
+            var size = ImBrio.GetRemainingWidth() / 3;
+
+            ImBrio.ToggleLock("Eyes", size, ref eyes, ref eyesLock, disableOnLock: true);
+            ImGui.SameLine();
+            ImBrio.ToggleLock("Body", size, ref body, ref bodyLock, disableOnLock: true);
+            ImGui.SameLine();
+            ImBrio.ToggleLock("Head", size, ref head, ref headLock, disableOnLock: true);
         }
-
-        ImGui.Separator();
-
-        ImBrio.ToggleButtonStrip("DynamicFaceControlSelector", new Vector2(ImBrio.GetRemainingWidth(), ImBrio.GetLineHeight()), ref selected, ["Camera", "Position", "Actor"]);
-
-        switch(selected)
-        {
-            case 0:
-
-                break;
-            case 1:
-
-                break;
-            case 2:
-
-                break;
-        }
-
-        var size = ImBrio.GetRemainingWidth() / 3;
-
-        ImBrio.ToggleLock("Eyes", size, ref eyes, ref eyesLock, disableOnLock: true);
-        ImGui.SameLine();
-        ImBrio.ToggleLock("Body", size, ref body, ref bodyLock, disableOnLock: true);
-        ImGui.SameLine();
-        ImBrio.ToggleLock("Head", size, ref head, ref headLock, disableOnLock: true);
 
     }
 
