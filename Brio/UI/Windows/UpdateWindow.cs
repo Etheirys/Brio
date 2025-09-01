@@ -128,7 +128,7 @@ public class UpdateWindow : Window
         using(var c = ImRaii.Child("###brio_update_text", new Vector2(ImGui.GetWindowHeight() - 55 * ImGuiHelpers.GlobalScale, ImBrio.GetRemainingHeight() - 35f), false, Flags = ImGuiWindowFlags.NoSavedSettings | ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoCollapse))
             if(c.Success)
             {
-                ImGui.Text("To open this window again click `Information` on the Scene Manager then -> `View the Changelog`");
+                ImGui.Text("To open this window again click on the `Information` button on the Scene Manager!");
 
                 if(_scrollToTop)
                 {
@@ -140,43 +140,69 @@ public class UpdateWindow : Window
 
                 if(CollapsingHeader(" v0.6.0 – September ?? 2025", "  -  MCDFs, Dynamic Face Control, & ????? ", new Vector4(0.5f, 0.9f, 0.5f, 1.0f), true))
                 {
-                    ImGui.BulletText("Update Brio to support FFXIV 7.3 (Thanks for the help Asgard!");
-                    ImGui.BulletText("Update Brio to support FFXIV 7.3 (Thanks for the help Asgard!");
-                    ImGui.BulletText("Update Brio to support FFXIV 7.3 (Thanks for the help Asgard!");
-                    ImGui.BulletText("Update Brio to support FFXIV 7.3 (Thanks for the help Asgard!");
-                    ImGui.BulletText("Update Brio to support FFXIV 7.3 (Thanks for the help Asgard!");
+                    ImGui.BulletText("Lorem ipsum dolor sit amet, consectetur adipiscing elit.");
+                    ImGui.BulletText("Nullam vitae vulputate felis, in eleifend mi. Integer sollicitudin et turpis vel");
+                    ImGui.BulletText("Nulla turpis odio, sodales efficitur convallis a, volutpat vel augue.");
+                    ImGui.BulletText("Cras ac dictum eros, at tristique nisi. Cras at dictum leo. Morbi");
+                    ImGui.BulletText("vestibulum a tellus. Vestibulum lacus ante, fringilla non nulla id, mattis placerat nisl.");
                 }
                
-                if(CollapsingHeader(" v0.5.3 – August ?? 2025", "  -  ????? ", new Vector4(0.5f, 0.9f, 0.5f, 1.0f), false))
+                if(CollapsingHeader(" v0.5.3 – August 30 2025", "  -  That damned boat ", new Vector4(0.75f, 0.75f, 0.85f, 1.0f), false))
                 {
-                    ImGui.BulletText("Update Brio to support FFXIV 7.3 (Thanks for the help Asgard!");
-                    ImGui.BulletText("Update Brio to support FFXIV 7.3 (Thanks for the help Asgard!");
-                    ImGui.BulletText("Update Brio to support FFXIV 7.3 (Thanks for the help Asgard!");
-                    ImGui.BulletText("Update Brio to support FFXIV 7.3 (Thanks for the help Asgard!");
-                    ImGui.BulletText("Update Brio to support FFXIV 7.3 (Thanks for the help Asgard!");
+                    DrawFeature(FontAwesomeIcon.None, "0.5.3.1", new Vector4(0.5f, 0.9f, 0.5f, 1.0f));
+
+                    ImGui.BulletText("- Fix being able to select things in the Scene Manager (AHAHH)");
+
+                    DrawFeature(FontAwesomeIcon.None, "0.5.3", new Vector4(0.5f, 0.9f, 0.5f, 1.0f));
+
+                    ImGui.BulletText("Added Moonfire Faire festival's 2024 & 2025 to the festival list");
+                    ImGui.BulletText("Fixed an issue where you could sometimes not interact with the Scene Manager");
+                    ImGui.BulletText("Reenable double click to rename an actor ");
+                    ImGui.BulletText("Facewear now properly displays in the advance appearance window (Thank you sparqle)");
+                    ImGui.BulletText("Fixed an issue where, certain clothing did not parent skeletons correctly (Thank you sparqle)");
+                    ImGui.BulletText("Fix pose preview image not shown on second viewing in the Library (Thank you sparqle)");
               
                 }
               
-                if(CollapsingHeader(" v0.5.2 – August ?? 2025", "  - 7.3 Support  ", new Vector4(0.5f, 0.9f, 0.5f, 1.0f), false))
+                if(CollapsingHeader(" v0.5.2 – August 15 2025", "  - 7.3 Support  ", new Vector4(0.75f, 0.75f, 0.85f, 1.0f), false))
                 {
+                    DrawFeature(FontAwesomeIcon.None, "0.5.2.2", new Vector4(0.5f, 0.9f, 0.5f, 1.0f));
+
                     ImGui.BulletText("Fixed a rare crash ");
                     ImGui.BulletText("Fixed ImGUI assertion errors");
                     ImGui.BulletText("Disabled double click on actors and camera to rename them to fix a bug (temporarily) ");
+             
+                    DrawFeature(FontAwesomeIcon.None, "0.5.2", new Vector4(0.5f, 0.9f, 0.5f, 1.0f));
+                   
                     ImGui.BulletText("Update Brio to support FFXIV 7.3 (Thanks for the help Asgard!)");
-                    ImGui.BulletText("Update Brio to support FFXIV 7.3 (Thanks for the help Asgard!");
-
                 }
 
-                if(CollapsingHeader(" v0.5.1 – March ?? 2025", "  -  ????? ", new Vector4(0.5f, 0.9f, 0.5f, 1.0f), false))
+                if(CollapsingHeader(" v0.5.1 – March 27 2025", "  - 7.2 Support ", new Vector4(0.75f, 0.75f, 0.85f, 1.0f), false))
                 {
-                    ImGui.BulletText("Update Brio to support FFXIV 7.3 (Thanks for the help Asgard!");
-                    ImGui.BulletText("Update Brio to support FFXIV 7.3 (Thanks for the help Asgard!");
-                    ImGui.BulletText("Update Brio to support FFXIV 7.3 (Thanks for the help Asgard!");
-                    ImGui.BulletText("Update Brio to support FFXIV 7.3 (Thanks for the help Asgard!");
-                    ImGui.BulletText("Update Brio to support FFXIV 7.3 (Thanks for the help Asgard!");
+                    DrawFeature(FontAwesomeIcon.None, "0.5.1.1", new Vector4(0.5f, 0.9f, 0.5f, 1.0f));
+                 
+                    ImGui.BulletText("You can now double-click and Actor or Camera to rename them (Thanks @Bronya-Rand)");
 
+                    DrawFeature(FontAwesomeIcon.None, "0.5.1", new Vector4(0.5f, 0.9f, 0.5f, 1.0f));
 
+                    ImGui.BulletText("Fixed new Facewear being unable to be equipped");
+                    ImGui.BulletText("Added the ability to rotate Free Cameras! (Thanks @Bronya-Rand)");
+
+                    ImGui.BulletText("Fixed saving a project with props or mounts would cause the project not to load (Thanks @Bronya-Rand)");
+                    ImGui.BulletText("Fixed the formant of `Time of Day` slider in Environment so it can be edited");
+                    ImGui.BulletText("Fixed a crash when training your chocobo ");
+                    ImGui.BulletText("Fixed a crash when in certain cutscenes");
+                    ImGui.BulletText("Fixed the camera from snaping on gpose enter/exit");
+                    ImGui.BulletText("Fixed a potential memory leak ");
                 }
+
+                ImGui.Spacing();
+                ImGui.Spacing();
+                ImGui.Spacing();
+                ImGui.Spacing();
+                ImGui.Spacing();
+                ImGui.Spacing();
+                ImGui.Spacing();
             }
 
         // 
@@ -220,7 +246,7 @@ public class UpdateWindow : Window
     }
 
   
-    private static void DrawFeature(string icon, string title, Vector4 accentColor)
+    private static void DrawFeature(FontAwesomeIcon icon, string title, Vector4 accentColor)
     {
         var drawList = ImGui.GetWindowDrawList();
         var startPos = ImGui.GetCursorScreenPos();
@@ -232,10 +258,7 @@ public class UpdateWindow : Window
         drawList.AddRectFilled(backgroundMin, backgroundMin + new Vector2(3, backgroundMax.Y - backgroundMin.Y), ImGui.GetColorU32(accentColor), 2f);
 
         ImGui.Spacing();
-        using(ImRaii.PushFont(UiBuilder.IconFont))
-        {
-            ImGui.Text(icon);
-        }
+        ImBrio.Icon(icon);
         ImGui.SameLine();
         ImGui.TextColored(accentColor, title);
         ImGui.Spacing();
