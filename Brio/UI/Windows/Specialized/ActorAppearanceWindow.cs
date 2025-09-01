@@ -6,11 +6,11 @@ using Brio.Game.Actor.Extensions;
 using Brio.Game.GPose;
 using Brio.UI.Controls.Editors;
 using Brio.UI.Controls.Stateless;
+using Brio.UI.Entitites;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface;
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Interface.Windowing;
-using FFXIVClientStructs.FFXIV.Client.Game;
 using System;
 using System.Numerics;
 
@@ -68,13 +68,28 @@ public class ActorAppearanceWindow : Window, IDisposable
     bool isAdvancedMenuOpen = true;
     public unsafe override void Draw()
     {
-        if(!_entityManager.TryGetCapabilityFromSelectedEntity<ActorAppearanceCapability>(out var capability, considerParents: true))
+        if(!_entityManager.TryGetCapabilityFromSelectedEntity<ActorAppearanceCapability>(out ActorAppearanceCapability? capability, considerParents: true))
             return;
 
         _capability = capability;
 
         WindowName = $"{Brio.Name} - Appearance - {capability.Entity.FriendlyName}###brio_character_editor_window";
 
+        using(ImRaii.Disabled(capability.Entity.IsLoading))
+        {
+            DrawHeader();
+
+            DrawBody(capability);
+        }
+
+        if(capability.Entity.IsLoading)
+        {
+            EntityHelpers.DrawSpinner();
+        }
+    }
+
+    public unsafe void DrawBody(ActorAppearanceCapability? actorAppearance)
+    {
         var currentAppearance = _capability.CurrentAppearance;
         var originalAppearance = _capability.OriginalAppearance;
 
@@ -82,8 +97,6 @@ public class ActorAppearanceWindow : Window, IDisposable
         float customizeWidth = windowWidth - 13;
 
         bool shouldSetAppearance = false;
-
-        DrawHeader();
 
         ImBrio.ToggleButtonStrip("appearance_filters_selector", new Vector2(ImBrio.GetRemainingWidth(), ImBrio.GetLineHeight()), ref selected, ["Equipment", "Customize"]);
 
@@ -110,7 +123,7 @@ public class ActorAppearanceWindow : Window, IDisposable
 
                     ImGui.SameLine();
 
-                    var shaderParams = capability.Character.GetShaderParams();
+                    var shaderParams = actorAppearance!.Character.GetShaderParams();
                     using(var shaderChild = ImRaii.Child("shaders", new Vector2(sectionWidth, -1), true, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse))
                     {
                         if(shaderChild.Success && shaderParams is not null)
@@ -135,7 +148,7 @@ public class ActorAppearanceWindow : Window, IDisposable
 
         if(shouldSetAppearance)
         {
-            _ = capability.SetAppearance(currentAppearance, AppearanceImportOptions.All);
+            _ = actorAppearance?.SetAppearance(currentAppearance, AppearanceImportOptions.All);
         }
     }
 
@@ -164,7 +177,7 @@ public class ActorAppearanceWindow : Window, IDisposable
 
         using(ImRaii.Disabled(!_capability.HasPenumbraIntegration))
         {
-            if(ImBrio.FontIconButton("toggle_adv_bar", FontAwesomeIcon.Hammer, "Toggle Advanced Menu"))
+            if(ImBrio.FontIconButton("toggle_adv_bar", isAdvancedMenuOpen ? FontAwesomeIcon.ArrowUp : FontAwesomeIcon.ArrowDown, "Toggle Advanced Menu"))
             {
                 isAdvancedMenuOpen = !isAdvancedMenuOpen;
             }
@@ -172,16 +185,30 @@ public class ActorAppearanceWindow : Window, IDisposable
 
         ImGui.SameLine();
 
-        if(_capability.CanMCDF)
+        using(ImRaii.Disabled(_capability.CanMCDF is false))
         {
-            if(ImBrio.FontIconButton("adv_load_mcdf", FontAwesomeIcon.CloudDownloadAlt, "Load Mare Synchronos MCDF"))
+            using(ImRaii.Disabled(_capability.IsSelf))
             {
-                FileUIHelpers.ShowImportMCDFModal(_capability);
+                if(ImBrio.FontIconButton("load_mcdf", FontAwesomeIcon.CloudDownloadAlt, "Load MCDF"))
+                {
+                    FileUIHelpers.ShowImportMCDFModal(_capability);
+                }
+                ImGui.SameLine();
             }
-            ImGui.SameLine();
-        }
+            if(_capability.IsSelf)
+                ImBrio.AttachToolTip("Can not load a MCDF on your Player Character. Spawn an Actor to load a MCDF.");
 
-        ImGui.SameLine();
+            using(ImRaii.Disabled(_capability.HasMCDF))
+            {
+                if(ImBrio.FontIconButton("save_mcdf", FontAwesomeIcon.CloudUploadAlt, "Save MCDF"))
+                {
+                    FileUIHelpers.ShowExportMCDFModal(_capability);
+                }
+                ImGui.SameLine();
+            }
+            if(_capability.HasMCDF)
+                ImBrio.AttachToolTip("Can not save a MCDF of a Actor that has a MCDF loaded. Reset this Actor to save a MCDF.");
+        }
 
         if(ImBrio.FontIconButtonRight("import", FontAwesomeIcon.FileDownload, 2, "Import Character"))
             FileUIHelpers.ShowImportCharacterModal(_capability, _importOptions);
@@ -280,5 +307,7 @@ public class ActorAppearanceWindow : Window, IDisposable
     public void Dispose()
     {
         _gPoseService.OnGPoseStateChange -= OnGPoseStateChanged;
+
+        GC.SuppressFinalize(this);
     }
 }

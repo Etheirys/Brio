@@ -10,6 +10,7 @@ using Brio.Game.GPose;
 using Brio.Game.Posing;
 using Brio.Game.Types;
 using Brio.IPC;
+using Brio.MCDF.Game.Services;
 using Brio.Resources;
 using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Plugin.Services;
@@ -36,10 +37,15 @@ public class ActorSpawnService : IDisposable
     private readonly PosingService _posingService;
     private readonly ActorAppearanceService _actorAppearanceService;
     private readonly CustomizePlusService _customizePlusService;
+    private readonly ActorLookAtService _actorLookAtService;
+    private readonly CharacterHandlerService _characterHandlerService;
 
     private readonly Dictionary<ushort, SpawnFlags> _createdIndexes = [];
 
-    public unsafe ActorSpawnService(ObjectMonitorService monitorService, CustomizePlusService customizePlusService, ActorAppearanceService actorAppearanceService, PosingService posingService, GlamourerService glamourerService, EntityManager entityManager, IObjectTable objectTable, IClientState clientState, IFramework framework, GPoseService gPoseService, ActorRedrawService actorRedrawService, TargetService targetService)
+    public unsafe ActorSpawnService(ObjectMonitorService monitorService, CustomizePlusService customizePlusService, ActorLookAtService actorLookAtService, CharacterHandlerService characterHandlerService,
+        ActorAppearanceService actorAppearanceService, PosingService posingService, GlamourerService glamourerService,
+        EntityManager entityManager, IObjectTable objectTable, IClientState clientState, IFramework framework,
+        GPoseService gPoseService, ActorRedrawService actorRedrawService, TargetService targetService)
     {
         _monitorService = monitorService;
         _objectTable = objectTable;
@@ -53,6 +59,9 @@ public class ActorSpawnService : IDisposable
         _posingService = posingService;
         _actorAppearanceService = actorAppearanceService;
         _customizePlusService = customizePlusService;
+
+        _actorLookAtService = actorLookAtService;
+        _characterHandlerService = characterHandlerService;
 
         _monitorService.CharacterDestroyed += OnCharacterDestroyed;
         _gPoseService.OnGPoseStateChange += OnGPoseStateChanged;
@@ -212,17 +221,8 @@ public class ActorSpawnService : IDisposable
     {
         if(go is null)
             return false;
-    
-        _actorAppearanceService.RemoveFromLook(go);
-
-        _ = _actorAppearanceService.RevertMCDF(go);
-
-        if(_glamourerService.CheckForLock(go))
-            _glamourerService.UnlockAndRevertCharacter(go);
-
-        _customizePlusService.RemoveTemporaryProfile(go);
-
-        Brio.Log.Debug($"Destroying gameobject: {go.ObjectIndex}...");
+     
+        CleanObject(go);
 
         var com = ClientObjectManager.Instance();
         var native = go.Native();
@@ -250,18 +250,8 @@ public class ActorSpawnService : IDisposable
                 try
                 {
                     var go = _objectTable.CreateObjectReference((nint)obj);
-
-                    if(go is not null)
-                    {
-                        _actorAppearanceService.RemoveFromLook(go);
-                
-                        _ = _actorAppearanceService.RevertMCDF(go);
-
-                        if(_glamourerService.CheckForLock(go))
-                            _glamourerService.UnlockAndRevertCharacter(go);
-
-                        _customizePlusService.RemoveTemporaryProfile(go);
-                    }
+                  
+                    CleanObject(go);
                 }
                 catch(Exception ex)
                 {
@@ -271,6 +261,17 @@ public class ActorSpawnService : IDisposable
             com->DeleteObjectByIndex(idx, 0);
         }
         _createdIndexes.Clear();
+    }
+
+    public void CleanObject(IGameObject go)
+    {
+        if(go is  null) return;
+
+        Brio.Log.Debug($"Destroying gameobject: {go.ObjectIndex}...");
+
+        _actorLookAtService.RemoveFromLook(go);
+
+        _ = _characterHandlerService.Revert(go);
     }
 
     public void DestroyCompanion(ICharacter character)

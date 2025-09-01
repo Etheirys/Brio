@@ -26,6 +26,8 @@ public class UIManager : IDisposable
     private readonly InfoWindow _infoWindow;
     private readonly ProjectWindow _projectWindow;
     private readonly UpdateWindow _updateWindow;
+    private readonly AutoSaveWindow _autoSaveWindow;
+    private readonly MCDFWindow _mCDFWindow;
     private readonly LibraryWindow _libraryWindow;
     private readonly ActorAppearanceWindow _actorAppearanceWindow;
     private readonly ActionTimelineWindow _actionTimelineWindow;
@@ -84,6 +86,8 @@ public class UIManager : IDisposable
             PosingTransformWindow overlayTransformWindow,
             PosingGraphicalWindow graphicalWindow,
             CameraWindow cameraWindow,
+            AutoSaveWindow autoSaveWindow,
+            MCDFWindow mCDFWindow,
 
             PenumbraService penumbraService,
             GlamourerService glamourerService
@@ -111,6 +115,8 @@ public class UIManager : IDisposable
         _overlayTransformWindow = overlayTransformWindow;
         _graphicalWindow = graphicalWindow;
         _cameraWindow = cameraWindow;
+        _autoSaveWindow = autoSaveWindow;
+        _mCDFWindow = mCDFWindow;
 
         _framework = framework;
 
@@ -133,6 +139,8 @@ public class UIManager : IDisposable
         _windowSystem.AddWindow(_overlayTransformWindow);
         _windowSystem.AddWindow(_graphicalWindow);
         _windowSystem.AddWindow(_cameraWindow);
+        _windowSystem.AddWindow(_autoSaveWindow);
+        _windowSystem.AddWindow(_mCDFWindow);
 
         _gPoseService.OnGPoseStateChange += OnGPoseStateChange;
         _configurationService.OnConfigurationChanged += ApplySettings;
@@ -250,6 +258,8 @@ public class UIManager : IDisposable
         _windowSystem.RemoveAllWindows();
 
         Instance = null!;
+
+        GC.SuppressFinalize(this);
     }
 
     public IDalamudTextureWrap LoadImage(byte[] data)

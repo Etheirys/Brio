@@ -38,6 +38,8 @@ public class MCDFService
     private readonly ActorAppearanceService _actorAppearanceService;
     private readonly TransientResourceService _transientResourceService;
 
+    private readonly CharacterHandlerService _characterHandlerService;
+
     private readonly PenumbraService _penumbraService;
     private readonly GlamourerService _glamourerService;
     private readonly CustomizePlusService _customizePlusService;
@@ -51,10 +53,12 @@ public class MCDFService
     public string DataApplicationProgress { get; private set; } = string.Empty;
 
     //
-  
+
+
+
     private int _globalFileCounter = 0;
 
-    public MCDFService(IFramework framework, ActorAppearanceService actorAppearanceService, ConfigurationService configurationService, FileCacheService fileCacheService, TargetService targetService, ActorRedrawService actorRedrawService, DalamudService dalamudService,
+    public MCDFService(IFramework framework, CharacterHandlerService characterHandlerService, ActorAppearanceService actorAppearanceService, ConfigurationService configurationService, FileCacheService fileCacheService, TargetService targetService, ActorRedrawService actorRedrawService, DalamudService dalamudService,
         PenumbraService penumbraService, TransientResourceService transientResourceService, GlamourerService glamourerService, CustomizePlusService customizePlusService)
     {
         _framework = framework;
@@ -65,6 +69,8 @@ public class MCDFService
         _actorRedrawService = actorRedrawService;
         _actorAppearanceService = actorAppearanceService;
         _transientResourceService = transientResourceService;
+
+        _characterHandlerService = characterHandlerService;
 
         _penumbraService = penumbraService;
         _glamourerService = glamourerService;
@@ -87,7 +93,7 @@ public class MCDFService
         if(canApply.CanApply)
             _ = ApplyMCDF(canApply.GameObject);
     }
-  
+
     // Load
 
     public async Task ApplyMCDF(IGameObject gameObject)
@@ -223,13 +229,17 @@ public class MCDFService
     private async Task ApplyDataAsync(Guid applicationId, (string Name, IGameObject GameObject) tempHandler, bool isSelf, string UID,
         Dictionary<string, string> modPaths, string? manipData, string? glamourerData, string? customizeData, CancellationToken token)
     {
+        Guid? cPlusId = null;
         Guid penumbraCollection;
         try
         {
             DataApplicationProgress = "Reverting previous Application";
-
+          
             await _penumbraService.Redraw(tempHandler.GameObject);
+
             await _glamourerService.UnlockAndRevertCharacter(tempHandler.GameObject);
+            await _glamourerService.UnlockAndRevertCharacterByName(tempHandler.Name);
+
             _customizePlusService.SetProfile(tempHandler.GameObject, "{}");
 
             await Task.Delay(TimeSpan.FromSeconds(3), token).ConfigureAwait(false);
@@ -259,26 +269,27 @@ public class MCDFService
             if(!string.IsNullOrEmpty(customizeData))
             {
                 Brio.Log.Debug($"{DataApplicationProgress}");
-                await _customizePlusService.SetBodyScaleAsync(tempHandler.GameObject, customizeData).ConfigureAwait(false);
+                cPlusId =  await _customizePlusService.SetBodyScaleAsync(tempHandler.GameObject, customizeData).ConfigureAwait(false);
             }
             else
             {
                 Brio.Log.Debug($"{DataApplicationProgress} IsNullOrEmpty");
-                await _customizePlusService.SetBodyScaleAsync(tempHandler.GameObject, Convert.ToBase64String(Encoding.UTF8.GetBytes("{}"))).ConfigureAwait(false);
+                cPlusId = await _customizePlusService.SetBodyScaleAsync(tempHandler.GameObject, Convert.ToBase64String(Encoding.UTF8.GetBytes("{}"))).ConfigureAwait(false);
             }
+
+            _characterHandlerService.CharacterHandler.Add(new CharacterHolder(tempHandler.GameObject, cPlusId, tempHandler.Name));
         }
         finally
         {
             if(token.IsCancellationRequested)
             {
                 DataApplicationProgress = "Application aborted. Reverting Character...";
-                await _actorAppearanceService.RevertMCDF(tempHandler.GameObject).ConfigureAwait(false);
+                await _characterHandlerService.RevertMCDF(new CharacterHolder(tempHandler.GameObject, cPlusId, tempHandler.Name)).ConfigureAwait(false);
             }
 
             DataApplicationProgress = string.Empty;
         }
     }
-
 
     // Save
 
@@ -463,6 +474,14 @@ public class MCDFService
             Brio.Log.Debug("Character is null but it shouldn't be, waiting");
             await Task.Delay(50, ct).ConfigureAwait(false);
             totalWaitTime -= 50;
+        }
+
+        if(_glamourerService.CheckForLock(playerRelatedObject))
+        {
+            Brio.Log.Information("Unable to apply MCDF, Actor is Locked by Glamourer");
+            Brio.NotifyError("Unable to apply MCDF, Actor is Locked by Glamourer");
+
+            throw new Exception("Glamourer has Lock");
         }
 
         ct.ThrowIfCancellationRequested();

@@ -1,17 +1,25 @@
 ﻿using Brio.Config;
+using Brio.Game.GPose;
 using Brio.UI.Windows;
 using Dalamud.Bindings.ImGui;
+using System;
 using System.Numerics;
 
 namespace Brio.Core;
 
-public class WelcomeService
+public class WelcomeService : IDisposable
 {
-    public WelcomeService(ConfigurationService configService, MainWindow mainWindow, InfoWindow infoWindow, UpdateWindow updateWindow)
+    private readonly GPoseService _gPoseService;
+    private readonly UpdateWindow _updateWindow;
+
+    public WelcomeService(ConfigurationService configService, MainWindow mainWindow, UpdateWindow updateWindow, GPoseService gPoseService)
     {
+        _gPoseService = gPoseService;
+        _updateWindow = updateWindow;
+
         if(configService.Configuration.PopupKey == -1) // New User
         {
-            infoWindow.IsOpen = true;
+            updateWindow.IsOpen = true;
             configService.Configuration.PopupKey = Configuration.CurrentPopupKey;
         }
         else if(configService.Configuration.PopupKey != Configuration.CurrentPopupKey)
@@ -45,7 +53,7 @@ public class WelcomeService
 
         if(configService.Configuration.Version <= 2)
         {
-            infoWindow.IsOpen = true;
+            updateWindow.IsOpen = true;
 
             configService.Configuration.Version = Configuration.CurrentVersion;
         }
@@ -54,5 +62,21 @@ public class WelcomeService
 
         #endregion
 
+        _gPoseService.OnGPoseStateChange += GPoseService_OnGPoseStateChange;
+    }
+
+    private void GPoseService_OnGPoseStateChange(bool newState)
+    {
+        if(newState)
+        {
+            ImGui.SetNextWindowPos(new Vector2((ImGui.GetIO().DisplaySize.X / 2) - 710, (ImGui.GetIO().DisplaySize.Y / 2) - 745));
+            _updateWindow.IsOpen = true;
+        }
+    }
+
+    public void Dispose()
+    {
+        _gPoseService.OnGPoseStateChange -= GPoseService_OnGPoseStateChange;
+        GC.SuppressFinalize(this);
     }
 }

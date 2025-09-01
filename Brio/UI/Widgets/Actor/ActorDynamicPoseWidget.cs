@@ -1,8 +1,6 @@
 ﻿using Brio.Capabilities.Actor;
-using Brio.UI.Controls.Selectors;
 using Brio.UI.Controls.Stateless;
 using Brio.UI.Widgets.Core;
-using Dalamud.Interface;
 using Dalamud.Bindings.ImGui;
 using System.Numerics;
 
@@ -18,17 +16,28 @@ public class ActorDynamicPoseWidget(ActorDynamicPoseCapability capability) : Wid
     bool body;
     bool head;
 
+    bool eyesLock;
+    bool bodyLock;
+    bool headLock;
+
     int selected;
 
+    bool enable;
     public override void DrawBody()
     {
+        if(ImBrio.ToggelButton("Enable Face Control", enable))
+        {
+            enable = !enable;
+
+            if(enable)
+                Capability.TESTactorlook();
+            else
+                Capability.TESTactorlookClear();
+        }
 
         ImGui.Separator();
 
-        if(ImBrio.ToggleButtonStrip("DynamicFaceControlSelector", new Vector2(ImBrio.GetRemainingWidth(), ImBrio.GetLineHeight()), ref selected, ["Eyes", "Body", "Head"]))
-        {
-
-        }
+        ImBrio.ToggleButtonStrip("DynamicFaceControlSelector", new Vector2(ImBrio.GetRemainingWidth(), ImBrio.GetLineHeight()), ref selected, ["Camera", "Position", "Actor"]);
 
         switch(selected)
         {
@@ -43,28 +52,13 @@ public class ActorDynamicPoseWidget(ActorDynamicPoseCapability capability) : Wid
                 break;
         }
 
-        if(ImBrio.ToggelButton("eyes", eyes))
-        {
-            eyes = !eyes;
-        }
-        ImGui.SameLine();
-        if(ImBrio.ToggelButton("body", body))
-        {
-            body = !body;
-        }
-        ImGui.SameLine();
-        if(ImBrio.ToggelButton("head", head))
-        {
-            head = !head;
-        }
+        var size = ImBrio.GetRemainingWidth() / 3;
 
-        if(ImBrio.FontIconButton("agc_appearance", FontAwesomeIcon.ArrowsToEye, "A Advanced"))
-            Capability.TESTactorlook();
-
+        ImBrio.ToggleLock("Eyes", size, ref eyes, ref eyesLock, disableOnLock: true);
         ImGui.SameLine();
-
-        if(ImBrio.FontIconButton("agcc_appearance", FontAwesomeIcon.ArrowsToEye, "C Advanced"))
-            Capability.TESTactorlookClear();
+        ImBrio.ToggleLock("Body", size, ref body, ref bodyLock, disableOnLock: true);
+        ImGui.SameLine();
+        ImBrio.ToggleLock("Head", size, ref head, ref headLock, disableOnLock: true);
 
     }
 

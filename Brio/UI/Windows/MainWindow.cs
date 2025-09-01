@@ -4,7 +4,6 @@ using Brio.Entities;
 using Brio.Game.Core;
 using Brio.Game.GPose;
 using Brio.Game.Scene;
-using Brio.Input;
 using Brio.UI.Controls.Core;
 using Brio.UI.Controls.Stateless;
 using Brio.UI.Entitites;
@@ -21,7 +20,7 @@ namespace Brio.UI.Windows;
 public class MainWindow : Window, IDisposable
 {
     private readonly SettingsWindow _settingsWindow;
-    private readonly InfoWindow _infoWindow;
+    private readonly UpdateWindow _infoWindow;
     private readonly LibraryWindow _libraryWindow;
     private readonly ConfigurationService _configurationService;
     private readonly EntityManager _entityManager;
@@ -35,7 +34,7 @@ public class MainWindow : Window, IDisposable
     public MainWindow(
         ConfigurationService configService,
         SettingsWindow settingsWindow,
-        InfoWindow infoWindow,
+        UpdateWindow infoWindow,
         LibraryWindow libraryWindow,
         EntityManager entityManager,
         HistoryService groupedUndoService,
@@ -44,7 +43,7 @@ public class MainWindow : Window, IDisposable
         ProjectWindow projectWindow,
         AutoSaveService autoSaveService
         )
-        : base($"BRIO [{configService.Version}]###brio_main_window", ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.AlwaysAutoResize)
+        : base($"BRIO DEV [{configService.Version}]###brio_main_window", ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.AlwaysAutoResize)
     {
         Namespace = "brio_main_namespace";
 
@@ -62,7 +61,7 @@ public class MainWindow : Window, IDisposable
 
         SizeConstraints = new WindowSizeConstraints
         {
-            MaximumSize = new Vector2(270, 1030),
+            MaximumSize = new Vector2(270, 1230),
             MinimumSize = new Vector2(270, 200)
         };
     }
@@ -82,19 +81,16 @@ public class MainWindow : Window, IDisposable
         if(rootEntity is null)
             return;
 
-
         using(var container = ImRaii.Child("###entity_hierarchy_container", new Vector2(-1, ImGui.GetTextLineHeight() * 18f), true))
         {
             if(container.Success)
             {
                 _entitySelector.Draw(rootEntity);
-                          
+
                 if(_entityManager.SelectedEntityIds.Count > 1)
                 {
-                    using(var color = ImRaii.PushColor(ImGuiCol.Text, ThemeManager.CurrentTheme.Accent.AccentColor))
-                    {
-                        ImGui.Text($"{_entityManager.SelectedEntityIds.Count} selected");
-                    }
+                    using var color = ImRaii.PushColor(ImGuiCol.Text, ThemeManager.CurrentTheme.Accent.AccentColor);
+                    ImGui.Text($"{_entityManager.SelectedEntityIds.Count} selected");
                 }
             }
         }
@@ -154,11 +150,12 @@ public class MainWindow : Window, IDisposable
             ImGui.SetTooltip("Settings");
 
         //
+
         FileUIHelpers.DrawProjectPopup(_sceneService, _entityManager, _projectWindow, _autoSaveService);
     }
 
     public void Dispose()
     {
-
+        GC.SuppressFinalize(this);
     }
 }

@@ -28,6 +28,8 @@ public class ActorAppearanceCapability : ActorCharacterCapability
     private readonly CustomizePlusService _customizePlusService;
     private readonly GlamourerService _glamourerService;
 
+    private readonly CharacterHandlerService _characterHandlerService;
+
     private readonly GPoseService _gposeService;
     private readonly IFramework _framework;
     private readonly MCDFService _mCDFService;
@@ -73,7 +75,7 @@ public class ActorAppearanceCapability : ActorCharacterCapability
 
     public bool IsHidden => CurrentAppearance.ExtendedAppearance.Transparency == 0;
 
-    public ActorAppearanceCapability(ActorEntity parent, MCDFService mCDFService, IFramework framework, ActorAppearanceService actorAppearanceService,
+    public ActorAppearanceCapability(ActorEntity parent,CharacterHandlerService characterHandlerService, MCDFService mCDFService, IFramework framework, ActorAppearanceService actorAppearanceService,
         CustomizePlusService customizePlusService, PenumbraService penumbraService, TargetService targetService, GlamourerService glamourerService,
         GPoseService gPoseService) : base(parent)
     {
@@ -85,6 +87,7 @@ public class ActorAppearanceCapability : ActorCharacterCapability
         _framework = framework;
         _mCDFService = mCDFService;
         _targetService = targetService;
+        _characterHandlerService = characterHandlerService;
 
         Widget = new ActorAppearanceWidget(this);
 
@@ -139,7 +142,7 @@ public class ActorAppearanceCapability : ActorCharacterCapability
         if(!IsCollectionOverridden)
             _oldCollection = old.ToString();
 
-        _ = _actorAppearanceService.Redraw(Character);
+        _ = _actorAppearanceService.Redraw(Character, HasMCDF);
     }
     public void ResetCollection()
     {
@@ -147,7 +150,7 @@ public class ActorAppearanceCapability : ActorCharacterCapability
         {
             _penumbraService.SetCollectionForObject(Character, Guid.Parse(_oldCollection!));
             _oldCollection = null;
-            _ = _actorAppearanceService.Redraw(Character);
+            _ = _actorAppearanceService.Redraw(Character, HasMCDF);
         }
     }
 
@@ -334,8 +337,9 @@ public class ActorAppearanceCapability : ActorCharacterCapability
     }
 
     public async Task Redraw()
-    {
-        await _actorAppearanceService.Redraw(Character);
+    {           
+        await _actorAppearanceService.Redraw(Character, HasMCDF);
+
         ApplyShaderOverride();
 
         if(Entity is ActorEntity actor && actor.IsProp == true)
@@ -351,7 +355,7 @@ public class ActorAppearanceCapability : ActorCharacterCapability
     {
         if(HasMCDF)
         {
-            _ = _actorAppearanceService.RevertMCDF(GameObject);
+            _ = _characterHandlerService.Revert(GameObject);
             HasMCDF = false;
         }
         else

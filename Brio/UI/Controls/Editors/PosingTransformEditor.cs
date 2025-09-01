@@ -55,12 +55,12 @@ public class PosingTransformEditor
 
                     using(ImRaii.Disabled(isBone == false))
                     {
-                        if(ImBrio.FontIconButton("flipBoneModelButton", FontAwesomeIcon.Repeat, "Flip Bone"))
-                        {
-                            posingCapability.FlipBoneModel();
-                        }
+                        //if(ImBrio.FontIconButton("flipBoneModelButton", FontAwesomeIcon.Repeat, "Flip Bone"))
+                        //{
+                        //    posingCapability.FlipBoneModel();
+                        //}
 
-                        ImGui.SameLine();
+                        //ImGui.SameLine();
 
                         if(ImBrio.FontIconButton("propagate", FontAwesomeIcon.Compress, "Propagate", realBone?.EligibleForIK == true))
                             ImGui.OpenPopup("transform_propagate_popup");

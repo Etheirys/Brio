@@ -127,6 +127,8 @@ public class Brio : IDalamudPlugin
         serviceCollection.AddSingleton<FileCacheService>();
         serviceCollection.AddSingleton<MCDFService>();
         serviceCollection.AddSingleton<TransientResourceService>();
+        serviceCollection.AddSingleton<ActorLookAtService>();
+        serviceCollection.AddSingleton<CharacterHandlerService>();
 
         // IPC
         serviceCollection.AddSingleton<BrioIPCService>();
@@ -163,7 +165,8 @@ public class Brio : IDalamudPlugin
         serviceCollection.AddSingleton<PhysicsService>();
         serviceCollection.AddSingleton<GameInputService>();
         serviceCollection.AddSingleton<VirtualCameraManager>();
-
+        serviceCollection.AddSingleton<AutoSaveWindow>();
+        serviceCollection.AddSingleton<MCDFWindow>();
         serviceCollection.AddSingleton<CutsceneManager>();
 
         // Library

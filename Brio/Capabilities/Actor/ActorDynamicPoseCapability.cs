@@ -6,11 +6,13 @@ using Brio.UI.Widgets.Actor;
 namespace Brio.Capabilities.Actor;
 public class ActorDynamicPoseCapability : ActorCharacterCapability
 {
+    private readonly ActorLookAtService _actorLookAtService;
     private readonly ActorAppearanceService _actorAppearanceService;
     private readonly GPoseService _gposeService;
 
-    public ActorDynamicPoseCapability(ActorEntity parent, ActorAppearanceService actorAppearanceService, GPoseService gPoseService) : base(parent)
+    public ActorDynamicPoseCapability(ActorEntity parent, ActorLookAtService actorLookAtService, ActorAppearanceService actorAppearanceService, GPoseService gPoseService) : base(parent)
     {
+        _actorLookAtService = actorLookAtService;
         _actorAppearanceService = actorAppearanceService;
         _gposeService = gPoseService;
 
@@ -19,12 +21,12 @@ public class ActorDynamicPoseCapability : ActorCharacterCapability
 
     public unsafe void TESTactorlook()
     {
-        _actorAppearanceService.TESTactorlook(GameObject);
+        _actorLookAtService.TESTactorlook(GameObject);
     }
 
     public unsafe void TESTactorlookClear()
     {
-        _actorAppearanceService.TESTactorlookClear(GameObject);
+        _actorLookAtService.TESTactorlookClear(GameObject);
     }
 
 }

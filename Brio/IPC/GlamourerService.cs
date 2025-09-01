@@ -5,6 +5,8 @@ using Brio.Game.Core;
 using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
+using Dalamud.Utility;
+using FFXIVClientStructs.FFXIV.Client.Game.Character;
 using Glamourer.Api.Helpers;
 using Glamourer.Api.IpcSubscribers;
 using System;
@@ -113,6 +115,29 @@ public class GlamourerService : BrioIPC
         Brio.Log.Verbose("Glamourer CheckForLock... " + key);
 
         return key == Glamourer.Api.Enums.GlamourerApiEc.InvalidKey;
+    }
+
+
+    public Task UnlockAndRevertCharacterByName(string name)
+    {
+        if(IsAvailable == false || name.IsNullOrEmpty())
+            return Task.CompletedTask;
+
+        Brio.Log.Debug("Starting glamourer UnlockAndRevertByName...");
+
+        var success = _glamourerUnlockByName.Invoke(name, LockCode);
+      
+        if(success == Glamourer.Api.Enums.GlamourerApiEc.InvalidKey)
+        {
+            var success2 = _glamourerUnlockByName.Invoke(name, BrioKey);
+            if(success2 == Glamourer.Api.Enums.GlamourerApiEc.InvalidKey)
+            {
+                Brio.Log.Fatal("Glamourer revert failed! Please report this to the Brio Devs!");
+                return Task.CompletedTask;
+            }
+        }
+
+        return Task.CompletedTask;
     }
 
     public Task UnlockAndRevertCharacter(IGameObject? character)

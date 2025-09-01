@@ -17,8 +17,6 @@ using Dalamud.Plugin;
 using Dalamud.Plugin.Ipc;
 using Dalamud.Plugin.Services;
 using Dalamud.Utility;
-using FFXIVClientStructs.FFXIV.Client.Game.Object;
-using FFXIVClientStructs.FFXIV.Client.System.Framework;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -56,15 +54,18 @@ public class CustomizePlusService : BrioIPC
     private readonly ICallGateSubscriber<ushort, (int, Guid?)> _customizeplusGetActiveProfileId;
     private readonly ICallGateSubscriber<Guid, (int, string?)> _customizeplusGetProfileById;
     private readonly ICallGateSubscriber<ushort, int> _customizeplusDeleteTemporaryProfile;
+    private readonly ICallGateSubscriber<Guid, int> _customizePlusDeleteByUniqueId;
     private readonly ICallGateSubscriber<(int, int)> _customizeplusApiVersion;
     private readonly ICallGateSubscriber<bool> _customizeplusIsValid;
 
-    public CustomizePlusService(IDalamudPluginInterface pluginInterface, IObjectTable gameObjects, ConfigurationService configurationService, IFramework framework)
+
+    public CustomizePlusService(IDalamudPluginInterface pluginInterface, ICommandManager commandManager, IObjectTable gameObjects, ConfigurationService configurationService, IFramework framework)
     {
         _pluginInterface = pluginInterface;
         _configurationService = configurationService;
         _framework = framework;
         _gameObjects = gameObjects;
+        _commandManager = commandManager;
 
         _customizeplusApiVersion = _pluginInterface.GetIpcSubscriber<(int, int)>("CustomizePlus.General.GetApiVersion");
         _customizeplusIsValid = _pluginInterface.GetIpcSubscriber<bool>("CustomizePlus.General.IsValid");
@@ -75,6 +76,8 @@ public class CustomizePlusService : BrioIPC
         _customizeplusGetAllProfiles = _pluginInterface.GetIpcSubscriber<IList<IPCProfileDataTuple>>("CustomizePlus.Profile.GetList");
         _customizeplusGetActiveProfileId = _pluginInterface.GetIpcSubscriber<ushort, (int, Guid?)>("CustomizePlus.Profile.GetActiveProfileIdOnCharacter");
         _customizeplusGetProfileById = _pluginInterface.GetIpcSubscriber<Guid, (int, string?)>("CustomizePlus.Profile.GetByUniqueId");
+       
+        _customizePlusDeleteByUniqueId = _pluginInterface.GetIpcSubscriber<Guid, int>("CustomizePlus.Profile.DeleteTemporaryProfileByUniqueId");
 
         _configurationService.OnConfigurationChanged += OnConfigurationChanged;
         OnConfigurationChanged();
@@ -93,6 +96,16 @@ public class CustomizePlusService : BrioIPC
         _customizeplusDeleteTemporaryProfile.InvokeFunc(character!.ObjectIndex);
 
         return true;
+    }
+
+    public async Task RevertByIdAsync(Guid? profileId)
+    {
+        if(IsAvailable == false || profileId == null) return;
+
+        await _framework.RunOnFrameworkThread(() =>
+        {
+            _ = _customizePlusDeleteByUniqueId.InvokeFunc(profileId.Value);
+        }).ConfigureAwait(false);
     }
 
     public (string?, Guid?) GetActiveProfile(IGameObject? character)

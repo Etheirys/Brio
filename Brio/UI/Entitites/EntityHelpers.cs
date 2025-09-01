@@ -8,7 +8,6 @@ namespace Brio.UI.Entitites;
 
 public static class EntityHelpers
 {
-    private static float spinnerAngle = 0;
     public static void DrawEntitySection(Entity? entity)
     {
         if(entity is not null && entity.IsAttached)
@@ -17,11 +16,7 @@ public static class EntityHelpers
 
             if(entity.IsLoading)
             {
-                var cursor = ImGui.GetCursorPos();
-                ImGui.SetCursorPosX((ImGui.GetWindowWidth() / 2) - 24);
-                ImGui.SetCursorPosY((ImGui.GetWindowHeight() / 2) - 24);
-                ImBrio.Spinner(ref spinnerAngle);
-                ImGui.SetCursorPos(cursor);
+                DrawSpinner();
             }
 
             using(ImRaii.Disabled(entity.IsLoading))
@@ -37,5 +32,15 @@ public static class EntityHelpers
                 }
             }
         }
+    }
+
+    private static float spinnerAngle = 0;
+    public static void DrawSpinner()
+    {
+        var cursor = ImGui.GetCursorPos();
+        ImGui.SetCursorPosX((ImGui.GetWindowWidth() / 2) - 24);
+        ImGui.SetCursorPosY((ImGui.GetWindowHeight() / 2) - 24);
+        ImBrio.Spinner(ref spinnerAngle);
+        ImGui.SetCursorPos(cursor);
     }
 }

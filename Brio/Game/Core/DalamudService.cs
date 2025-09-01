@@ -4,6 +4,7 @@ using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Plugin.Services;
 using Dalamud.Utility;
 using System;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 
@@ -18,16 +19,18 @@ public class DalamudService : IDisposable
     private readonly IClientState _clientState;
     private readonly IGameConfig _gameConfig;
     private readonly IDataManager _dataManager;
+    private readonly IObjectTable _objectTable;
 
     private uint? _classJobId = 0;
 
-    public DalamudService(ICondition condition, IClientState clientState, IGameConfig gameConfig, IDataManager dataManager, IFramework framework)
+    public DalamudService(ICondition condition, IObjectTable gameObjects, IClientState clientState, IGameConfig gameConfig, IDataManager dataManager, IFramework framework)
     {
         _condition = condition;
         _clientState = clientState;
         _framework = framework;
         _gameConfig = gameConfig;
         _dataManager = dataManager;
+        _objectTable = gameObjects;
 
         IsWine = Util.IsWine();
 
@@ -112,6 +115,12 @@ public class DalamudService : IDisposable
     public IPlayerCharacter GetPlayerCharacter()
     {
         return _clientState.LocalPlayer!;
+    }
+
+    public ICharacter? GetGposeCharacterFromObjectTableByName(string name, bool onlyGposeCharacters = false)
+    {
+       return (ICharacter?)_objectTable
+            .FirstOrDefault(i => (!onlyGposeCharacters || i.ObjectIndex >= 200) && string.Equals(i.Name.ToString(), name, StringComparison.Ordinal));
     }
 
     public async Task<T> RunOnFrameworkThread<T>(Func<T> func, [CallerMemberName] string callerMember = "", [CallerFilePath] string callerFilePath = "", [CallerLineNumber] int callerLineNumber = 0)
