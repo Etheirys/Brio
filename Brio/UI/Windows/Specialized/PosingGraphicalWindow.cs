@@ -27,6 +27,9 @@ namespace Brio.UI.Windows.Specialized;
 
 public class PosingGraphicalWindow : Window, IDisposable
 {
+    static bool _hasPushedScale = false;
+    static float _lastGlobalScale;
+
     private const float RightPanelWidth = 250;
 
     private readonly GraphicalPosePositionFile _posePositions;
@@ -90,7 +93,23 @@ public class PosingGraphicalWindow : Window, IDisposable
             x->DesiredSize.Y = x->DesiredSize.X * 0.5f;
         });
 
+        if(_configurationService.Configuration.Appearance.EnableBrioScale)
+        {
+            var imIO = ImGui.GetIO();
+            _lastGlobalScale = imIO.FontGlobalScale;
+            imIO.FontGlobalScale = 1f;
+            _hasPushedScale = true;
+        }
+
         base.PreDraw();
+    }
+
+    public override void PostDraw()
+    {
+        if(_hasPushedScale)
+            ImGui.GetIO().FontGlobalScale = _lastGlobalScale;
+
+        base.PostDraw();
     }
 
     public override void Draw()
@@ -461,7 +480,40 @@ public class PosingGraphicalWindow : Window, IDisposable
                         cap.ModelPosing.Transform += delta;
                     }
                 },
-                _ => { }
+                _ => 
+                {
+                    // On first application while starting a gizmo drag, capture before-states for grouped undo
+                    if(_groupedSnapshotPending == null && ImBrioGizmo.IsUsing())
+                    {
+                        var list = new List<(EntityId, PoseInfo, Transform)>();
+                        foreach(var id in _entityManager.SelectedEntityIds)
+                        {
+                            if(!_entityManager.TryGetEntity(id, out var ent))
+                                continue;
+
+                            if(!ent.TryGetCapability<PosingCapability>(out var cap))
+                                continue;
+
+                            list.Add((id, cap.SkeletonPosing.PoseInfo.Clone(), cap.ModelPosing.Transform));
+                        }
+                        _groupedSnapshotPending = list;
+                    }
+
+                    // apply delta to all selected entities
+                    foreach(var id in _entityManager.SelectedEntityIds)
+                    {
+                        if(!_entityManager.TryGetEntity(id, out var ent))
+                            continue;
+
+                        if(!ent.TryGetCapability<PosingCapability>(out var cap))
+                            continue;
+
+                        if(cap.ModelPosing.Freeze)
+                            continue;
+
+                        cap.ModelPosing.Transform += delta;
+                    }
+                }
             );
         }
 
