@@ -6,52 +6,47 @@ using Dalamud.Interface;
 using Dalamud.Interface.Utility;
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Interface.Windowing;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
 using System.Numerics;
-using System.Text;
 
 namespace Brio.UI.Windows;
 
 public class UpdateWindow : Window
 {
-    private readonly ConfigurationService _configurationService;
-    private readonly List<string> _changelogTest = [];
-
-    private float _closeButtonWidth => 310f * ImGuiHelpers.GlobalScale;
-   
     //
     // Some code found here is inspired by CharacterSelect+
     //
 
-    // Welcome to {Brio.Name} version [{configurationService.Version}] 
-    public UpdateWindow(ConfigurationService configurationService) : base($"###brio_welcomewindow", ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoDocking | ImGuiWindowFlags.NoTitleBar | ImGuiWindowFlags.NoDecoration)
+    private readonly ConfigurationService _configurationService;
+    private readonly ImBrioText _imBrioText;
+
+    private bool _scrollToTop = false;
+    private float _closeButtonWidth => 310f * ImGuiHelpers.GlobalScale;
+
+    public UpdateWindow(ConfigurationService configurationService, ImBrioText imBrioText) : base($"###brio_welcomewindow", ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoDocking | ImGuiWindowFlags.NoTitleBar | ImGuiWindowFlags.NoDecoration)
     {
         Namespace = "brio_welcomewindow_namespace";
 
         _configurationService = configurationService;
-   
+        _imBrioText = imBrioText;
+
         Size = new Vector2(710, 745);
 
         ShowCloseButton = false;
         AllowClickthrough = false;
         AllowPinning = false;
-
-        var logStream = ResourceProvider.Instance.GetRawResourceStream("Data.Changelog.txt");
-
-        using var streamReader = new StreamReader(logStream, Encoding.UTF8, true, 128);
-        string? line;
-        while((line = streamReader.ReadLine()) is not null)
-        {
-            _changelogTest.Add(line);
-        }
     }
 
-    bool _scrollToTop = false;
     public override void OnOpen()
     {
         _scrollToTop = true;
+    }
+
+    public override void PreDraw()
+    {
+        ImGui.SetNextWindowPos(new Vector2((ImGui.GetIO().DisplaySize.X - Size!.Value.X) / 2, (ImGui.GetIO().DisplaySize.Y - Size!.Value.Y) / 2), ImGuiCond.Appearing);
+
+        base.PreDraw();
     }
 
     public override void Draw()
@@ -62,7 +57,7 @@ public class UpdateWindow : Window
         var headerWidth = 1000f - (windowPadding.X * 2) * ImGuiHelpers.GlobalScale;
         var headerHeight = 500f * ImGuiHelpers.GlobalScale;
 
-        var headerStart = windowPos - new Vector2(0, 0);
+        var headerStart = windowPos - new Vector2(-1, 0);
 
         //
 
@@ -74,6 +69,7 @@ public class UpdateWindow : Window
         var scaledHeight = scaledWidth / imageAspect;
 
         var imagePos = headerStart;
+        
 
         var drawList = ImGui.GetWindowDrawList();
         drawList.AddImage(image.Handle, imagePos, imagePos + new Vector2(scaledWidth, scaledHeight));
@@ -82,6 +78,11 @@ public class UpdateWindow : Window
         var headerEnd = headerStart + new Vector2(headerWidth, headerHeight);
 
         DrawBackground(headerStart, headerEnd);
+
+        //ImGui.SetCursorPos(new Vector2((ImGui.GetWindowSize().X / 2) - (80 * ImGuiHelpers.GlobalScale), ImGui.GetCursorPosY() - 10));
+
+        //using(ImRaii.PushColor(ImGuiCol.Text, new Vector4(0.75f, 0.75f, 0.85f, 1.0f)))
+        //    _imBrioText.BigText("Welcome to BRIO v0.6.0", new Vector4(200, 100, 200, 80));
 
         ImGui.SetCursorScreenPos(headerStart);
 
@@ -95,31 +96,27 @@ public class UpdateWindow : Window
 
         ImGui.SetCursorPosY(ImGui.GetCursorPosY() + 10);
 
-        ImGui.PushStyleColor(ImGuiCol.Button, new Vector4(0, 224, 148, 200) / 255);
-        if(ImGui.Button("Support on KoFi", buttonSize))
+        using(ImRaii.PushColor(ImGuiCol.Button, new Vector4(0, 224, 148, 200) / 255))
+            if(ImGui.Button("Support on KoFi", buttonSize))
             Process.Start(new ProcessStartInfo { FileName = "https://ko-fi.com/minmoosexiv", UseShellExecute = true });
-        ImGui.PopStyleColor();
         ImGui.SameLine();
 
-        ImGui.PushStyleColor(ImGuiCol.Button, new Vector4(65, 90, 240, 200) / 255);
-        if(ImGui.Button("Brio Community Discord", buttonSize))
+        using(ImRaii.PushColor(ImGuiCol.Button, new Vector4(65, 90, 240, 200) / 255))
+            if(ImGui.Button("Brio Community Discord", buttonSize))
             Process.Start(new ProcessStartInfo { FileName = "https://discord.gg/GCb4srgEaH ", UseShellExecute = true });
-        ImGui.PopStyleColor();
         ImGui.SameLine();
 
-        ImGui.PushStyleColor(ImGuiCol.Button, new Vector4(96, 108, 246, 200) / 255);
-        if(ImGui.Button("Aetherworks Discord", buttonSize))
+        using(ImRaii.PushColor(ImGuiCol.Button, new Vector4(96, 108, 246, 200) / 255))
+            if(ImGui.Button("Aetherworks Discord", buttonSize))
             Process.Start(new ProcessStartInfo { FileName = "https://discord.gg/KvGJCCnG8t", UseShellExecute = true });
-        ImGui.PopStyleColor();
         ImGui.SameLine();
 
-        ImGui.PushStyleColor(ImGuiCol.Button, new Vector4(29, 161, 242, 200) / 255);
-        if(ImGui.Button("More Links", buttonSize))
+        using(ImRaii.PushColor(ImGuiCol.Button, new Vector4(29, 161, 242, 200) / 255))
+            if(ImGui.Button("More Links", buttonSize))
             Process.Start(new ProcessStartInfo { FileName = "https://etheirystools.carrd.co", UseShellExecute = true });
-        ImGui.PopStyleColor();
 
         ImGui.SetCursorPosY(ImGui.GetCursorPosY() + 10);
-   
+
         ImGui.TextColored(new Vector4(0.4f, 0.9f, 0.4f, 1.0f), $"Whats New in Brio v0.6.0");
         ImGui.SameLine();
         ImGui.TextColored(new Vector4(0.75f, 0.75f, 0.85f, 1.0f), $"  -  MCDFs, Dynamic Face Control, & ?????");
@@ -146,7 +143,7 @@ public class UpdateWindow : Window
                     ImGui.BulletText("Cras ac dictum eros, at tristique nisi. Cras at dictum leo. Morbi");
                     ImGui.BulletText("vestibulum a tellus. Vestibulum lacus ante, fringilla non nulla id, mattis placerat nisl.");
                 }
-               
+
                 if(CollapsingHeader(" v0.5.3 – August 30 2025", "  -  That damned boat ", new Vector4(0.75f, 0.75f, 0.85f, 1.0f), false))
                 {
                     DrawFeature(FontAwesomeIcon.None, "0.5.3.1", new Vector4(0.5f, 0.9f, 0.5f, 1.0f));
@@ -161,9 +158,9 @@ public class UpdateWindow : Window
                     ImGui.BulletText("Facewear now properly displays in the advance appearance window (Thank you sparqle)");
                     ImGui.BulletText("Fixed an issue where, certain clothing did not parent skeletons correctly (Thank you sparqle)");
                     ImGui.BulletText("Fix pose preview image not shown on second viewing in the Library (Thank you sparqle)");
-              
+
                 }
-              
+
                 if(CollapsingHeader(" v0.5.2 – August 15 2025", "  - 7.3 Support  ", new Vector4(0.75f, 0.75f, 0.85f, 1.0f), false))
                 {
                     DrawFeature(FontAwesomeIcon.None, "0.5.2.2", new Vector4(0.5f, 0.9f, 0.5f, 1.0f));
@@ -171,16 +168,16 @@ public class UpdateWindow : Window
                     ImGui.BulletText("Fixed a rare crash ");
                     ImGui.BulletText("Fixed ImGUI assertion errors");
                     ImGui.BulletText("Disabled double click on actors and camera to rename them to fix a bug (temporarily) ");
-             
+
                     DrawFeature(FontAwesomeIcon.None, "0.5.2", new Vector4(0.5f, 0.9f, 0.5f, 1.0f));
-                   
+
                     ImGui.BulletText("Update Brio to support FFXIV 7.3 (Thanks for the help Asgard!)");
                 }
 
                 if(CollapsingHeader(" v0.5.1 – March 27 2025", "  - 7.2 Support ", new Vector4(0.75f, 0.75f, 0.85f, 1.0f), false))
                 {
                     DrawFeature(FontAwesomeIcon.None, "0.5.1.1", new Vector4(0.5f, 0.9f, 0.5f, 1.0f));
-                 
+
                     ImGui.BulletText("You can now double-click and Actor or Camera to rename them (Thanks @Bronya-Rand)");
 
                     DrawFeature(FontAwesomeIcon.None, "0.5.1", new Vector4(0.5f, 0.9f, 0.5f, 1.0f));
@@ -216,7 +213,7 @@ public class UpdateWindow : Window
     }
 
     //
-    // some code found here is modified and CharacterSelect+
+    // some code found here is modified and from CharacterSelect+
     // https://github.com/IcarusXIV/Character-Select- (link is includes the -)
     //
 
@@ -245,7 +242,6 @@ public class UpdateWindow : Window
         return isOpen;
     }
 
-  
     private static void DrawFeature(FontAwesomeIcon icon, string title, Vector4 accentColor)
     {
         var drawList = ImGui.GetWindowDrawList();
