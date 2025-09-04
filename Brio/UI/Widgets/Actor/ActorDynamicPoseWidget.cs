@@ -15,7 +15,7 @@ public class ActorDynamicPoseWidget(ActorDynamicPoseCapability capability) : Wid
     public override string HeaderName => "Dynamic Face Control";
 
     public override WidgetFlags Flags => Capability.Actor.IsProp ? WidgetFlags.CanHide :
-        WidgetFlags.DefaultOpen | WidgetFlags.DrawBody | WidgetFlags.HasAdvanced;
+        WidgetFlags.DefaultOpen | WidgetFlags.DrawBody;
 
     bool eyes;
     bool body;
