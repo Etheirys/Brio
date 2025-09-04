@@ -18,12 +18,12 @@ public static partial class ImBrio
         {
             using(ImRaii.PushStyle(ImGuiStyleVar.ChildRounding, ImGui.GetStyle().FrameRounding))
             {
-                using var child = ImRaii.Child($"###{label}_child", new Vector2((size - 2.3f) * ImGuiHelpers.GlobalScale, 25 * ImGuiHelpers.GlobalScale));
+                using var child = ImRaii.Child($"###{label}_child", new Vector2((size - 2.3f), 25 ), false, ImGuiWindowFlags.NoScrollbar);
 
                 if(child.Success)
                 {
                     using(ImRaii.Disabled(locked && disableOnLock))
-                        if(ToggelButton($"{label}###toggleButton", new Vector2(53 * ImGuiHelpers.GlobalScale, 25 * ImGuiHelpers.GlobalScale), selected))
+                        if(ToggelButton($"{label}###toggleButton", new Vector2(53, 25), selected))
                         {
                             clicked = true;
                             selected = !selected;
@@ -78,7 +78,7 @@ public static partial class ImBrio
         {
             using(ImRaii.PushStyle(ImGuiStyleVar.ChildRounding, ImGui.GetStyle().FrameRounding))
             {
-                using(var child = ImRaii.Child(id, size))
+                using(var child = ImRaii.Child(id, size, false, ImGuiWindowFlags.NoScrollbar))
                 {
                     if(child.Success)
                     {

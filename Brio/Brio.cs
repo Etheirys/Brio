@@ -20,6 +20,7 @@ using Brio.MCDF.Game.FileCache;
 using Brio.MCDF.Game.Services;
 using Brio.Resources;
 using Brio.UI;
+using Brio.UI.Controls.Stateless;
 using Brio.UI.Windows;
 using Brio.UI.Windows.Specialized;
 using Brio.Web;
@@ -200,6 +201,7 @@ public class Brio : IDalamudPlugin
         serviceCollection.AddSingleton<PosingTransformWindow>();
         serviceCollection.AddSingleton<CameraWindow>();
         serviceCollection.AddSingleton<PosingGraphicalWindow>();
+        serviceCollection.AddSingleton<ImBrioText>();
 
         return serviceCollection;
     }
