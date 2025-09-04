@@ -251,7 +251,7 @@ public class ActorAppearanceService : IDisposable
 
         if(glamourerUnlocked)
         {
-            await _glamourerService.UnlockAndRevertCharacter(character);
+            _glamourerService.UnlockAndRevertCharacter(character);
 
             needsRedraw = true;
         }

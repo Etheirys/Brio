@@ -4,6 +4,7 @@ using Brio.IPC;
 using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Plugin.Services;
 using Dalamud.Utility;
+using FFXIVClientStructs.FFXIV.Client.Game.Character;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -58,34 +59,34 @@ public class CharacterHandlerService : IDisposable
         }
     }
 
-    public async Task RevertMCDF(CharacterHolder mDCFCharacterHolder)
+    public async Task RevertMCDF(CharacterHolder mCDFCharacterHolder)
     {
-        if(mDCFCharacterHolder.GameObject.Address == nint.Zero || mDCFCharacterHolder.Name.IsNullOrEmpty()) return;
+        if(mCDFCharacterHolder.GameObject.Address == nint.Zero || mCDFCharacterHolder.Name.IsNullOrEmpty()) return;
+    
+        _glamourerService.UnlockAndRevertCharacter(mCDFCharacterHolder.GameObject);
+        _glamourerService.UnlockAndRevertCharacterByName(mCDFCharacterHolder.Name);
 
-        await _glamourerService.UnlockAndRevertCharacterByName(mDCFCharacterHolder.Name);
-        await _customizePlusService.RevertByIdAsync(mDCFCharacterHolder.CPlusID);
-
-        if(mDCFCharacterHolder.GameObject.Address != nint.Zero)
+        if(mCDFCharacterHolder.GameObject.Address != nint.Zero)
         {
-            await _redrawService.RedrawAndWait(mDCFCharacterHolder.GameObject).ConfigureAwait(false);
-            await _penumbraService.Redraw(mDCFCharacterHolder.GameObject).ConfigureAwait(false);
+            _customizePlusService.RemoveTemporaryProfile(mCDFCharacterHolder.GameObject);
+            await _penumbraService.Redraw(mCDFCharacterHolder.GameObject, true).ConfigureAwait(false);
         }
     }
 
-    public async Task Revert(IGameObject obj)
+    public async Task Revert(IGameObject obj, bool afterGpose = false)
     {
         if(obj.Address == nint.Zero) return;
 
-        await _glamourerService.UnlockAndRevertCharacterByName(obj.Name.TextValue);
-        await _glamourerService.UnlockAndRevertCharacter(obj);
+        _glamourerService.UnlockAndRevertCharacterByName(obj.Name.TextValue);
+        _glamourerService.UnlockAndRevertCharacter(obj);
 
-        _customizePlusService.SetProfile(obj, "{}");
         _customizePlusService.RemoveTemporaryProfile(obj);
 
         if(obj.Address != nint.Zero)
         {
-            await _redrawService.RedrawAndWait(obj).ConfigureAwait(false);
-            await _penumbraService.Redraw(obj).ConfigureAwait(false);
+            if(afterGpose == false)
+                await _redrawService.RedrawAndWait(obj).ConfigureAwait(false);
+            await _penumbraService.Redraw(obj, afterGpose).ConfigureAwait(false);
         }
     }
 

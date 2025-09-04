@@ -362,10 +362,11 @@ public class PosingOverlayWindow : Window, IDisposable
         var selected = posing.Selected;
 
         Matrix4x4 projectionMatrix = camera->GetProjectionMatrix();
-        Matrix4x4 viewMatrix = camera->GetViewMatrix();
+        Matrix4x4 worldViewMatrix = camera->GetViewMatrix();
+        worldViewMatrix.M44 = 1;
 
         Transform currentTransform = Transform.Identity;
-        Matrix4x4 modelMatrix = Matrix4x4.Identity;
+        Matrix4x4 modelMatrix = worldViewMatrix;
 
         Game.Posing.Skeletons.Bone? selectedBone = null;
 
@@ -395,6 +396,8 @@ public class PosingOverlayWindow : Window, IDisposable
                     Scale = Vector3.Clamp((Vector3)charaBase->CharacterBase.DrawObject.Object.Scale * charaBase->ScaleFactor, new Vector3(.5f), new Vector3(1.5f))
                 }.ToMatrix();
 
+                worldViewMatrix = Matrix4x4.Multiply(modelMatrix, worldViewMatrix);
+
                 return true;
             },
             _ =>
@@ -409,9 +412,8 @@ public class PosingOverlayWindow : Window, IDisposable
             return;
 
         var lastObserved = _trackingTransform ?? currentTransform;
-        var localMatrix = lastObserved.ToMatrix();
 
-        var worldMatrix = Matrix4x4.Multiply(localMatrix, modelMatrix);
+        var lastMatrix = lastObserved.ToMatrix();
 
         ImGuizmo.BeginFrame();
         var io = ImGui.GetIO();
@@ -423,43 +425,28 @@ public class PosingOverlayWindow : Window, IDisposable
 
         Transform? newTransform = null;
 
-        if(ImGuizmoExtensions.MouseWheelManipulate(ref worldMatrix))
+        if(ImGuizmoExtensions.MouseWheelManipulate(ref lastMatrix))
         {
             if(!posing.ModelPosing.Freeze && !(selectedBone != null && selectedBone.Freeze))
             {
-                if(Matrix4x4.Invert(modelMatrix, out var invModel))
-                {
-                    var newLocal = Matrix4x4.Multiply(worldMatrix, invModel);
-                    newTransform = newLocal.ToTransform();
-                    _trackingTransform = newTransform;
-                }
-                else
-                {
-                    newTransform = worldMatrix.ToTransform();
-                    _trackingTransform = newTransform;
-                }
+                newTransform = lastMatrix.ToTransform();
+                _trackingTransform = newTransform;       
             }
         }
 
         if(ImGuizmo.Manipulate(
-            ref viewMatrix.M11,
+            ref worldViewMatrix.M11,
             ref projectionMatrix.M11,
             _posingService.Operation.AsGizmoOperation(),
             _posingService.CoordinateMode.AsGizmoMode(),
-            ref worldMatrix.M11
+            ref lastMatrix.M11
         ))
         {
             if(!posing.ModelPosing.Freeze && !(selectedBone != null && selectedBone.Freeze))
             {
-                if(Matrix4x4.Invert(modelMatrix, out var invModel))
+                if(!posing.ModelPosing.Freeze && !(selectedBone != null && selectedBone.Freeze))
                 {
-                    var newLocal = Matrix4x4.Multiply(worldMatrix, invModel);
-                    newTransform = newLocal.ToTransform();
-                    _trackingTransform = newTransform;
-                }
-                else
-                {
-                    newTransform = worldMatrix.ToTransform();
+                    newTransform = lastMatrix.ToTransform();
                     _trackingTransform = newTransform;
                 }
             }
@@ -546,6 +533,8 @@ public class PosingOverlayWindow : Window, IDisposable
     public void Dispose()
     {
         _gPoseService.OnGPoseStateChange -= OnGPoseStateChanged;
+
+        GC.SuppressFinalize(this);
     }
 
     private class OverlayUIState(PosingConfiguration configuration)

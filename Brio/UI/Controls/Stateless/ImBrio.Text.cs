@@ -26,6 +26,8 @@ public static partial class ImBrio
 
     public static void Icon(FontAwesomeIcon icon)
     {
+        if(icon == FontAwesomeIcon.None) return;
+
         // Use a button here since we can control its width, unlike text.
         ImGui.PushStyleColor(ImGuiCol.Button, 0);
         ImGui.PushStyleColor(ImGuiCol.ButtonHovered, 0);

@@ -11,6 +11,8 @@ public static partial class ImBrio
     // Patent pending ToggleLock! (this is a 5AM joke, I need sleep)
     public static bool ToggleLock(string label, float size, ref bool selected, ref bool locked, bool canSelect = true, bool disableOnLock = false)
     {
+        bool clicked = false;
+
         using(ImRaii.PushColor(ImGuiCol.ChildBg, ImGui.GetColorU32(ImGuiCol.Tab)))
         {
             using(ImRaii.PushStyle(ImGuiStyleVar.ChildRounding, ImGui.GetStyle().FrameRounding))
@@ -21,8 +23,11 @@ public static partial class ImBrio
                 {
                     using(ImRaii.Disabled(locked && disableOnLock))
                         if(ToggelButton($"{label}###toggleButton", new Vector2(53 * ImGuiHelpers.GlobalScale, 25 * ImGuiHelpers.GlobalScale), selected))
+                        {
+                            clicked = true;
                             selected = !selected;
-                   
+                        }
+
                     ImGui.SameLine();
 
                     if(FontIconButton($"###{label}_lockButton", locked ? FontAwesomeIcon.Lock : FontAwesomeIcon.Unlock, locked ? "Unlock" : "Lock", bordered: false))
@@ -31,7 +36,7 @@ public static partial class ImBrio
             }
         }
 
-        return selected;
+        return clicked;
     }
 
     public static bool ToggleButton(string label, ref bool selected, bool canSelect = true)

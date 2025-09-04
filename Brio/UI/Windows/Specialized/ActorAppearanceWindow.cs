@@ -175,7 +175,7 @@ public class ActorAppearanceWindow : Window, IDisposable
         if(ImBrio.Button("Redraw", FontAwesomeIcon.PaintBrush, buttonSize))
             _ = _capability.Redraw();
 
-        using(ImRaii.Disabled(!_capability.HasPenumbraIntegration))
+        using(ImRaii.Disabled(!_capability.HasPenumbraIntegration || _capability.HasCustomizePlusIntegration))
         {
             if(ImBrio.FontIconButton("toggle_adv_bar", isAdvancedMenuOpen ? FontAwesomeIcon.ArrowUp : FontAwesomeIcon.ArrowDown, "Toggle Advanced Menu"))
             {

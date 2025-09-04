@@ -238,10 +238,10 @@ public class MCDFService
             await _penumbraService.Redraw(tempHandler.GameObject);
             await _actorRedrawService.RedrawAndWait(tempHandler.GameObject);
 
-            await _glamourerService.UnlockAndRevertCharacter(tempHandler.GameObject);
-            await _glamourerService.UnlockAndRevertCharacterByName(tempHandler.Name);
+            _glamourerService.UnlockAndRevertCharacter(tempHandler.GameObject);
+            _glamourerService.UnlockAndRevertCharacterByName(tempHandler.Name);
 
-            _customizePlusService.SetProfile(tempHandler.GameObject, "{}");
+            _customizePlusService.RemoveTemporaryProfile(tempHandler.GameObject);
 
             await Task.Delay(TimeSpan.FromSeconds(3), token).ConfigureAwait(false);
 

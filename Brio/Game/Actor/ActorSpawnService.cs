@@ -10,7 +10,6 @@ using Brio.Game.GPose;
 using Brio.Game.Posing;
 using Brio.Game.Types;
 using Brio.IPC;
-using Brio.MCDF.Game.Services;
 using Brio.Resources;
 using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Plugin.Services;
@@ -221,8 +220,8 @@ public class ActorSpawnService : IDisposable
     {
         if(go is null)
             return false;
-     
-        CleanObject(go);
+
+        CleanObject(go, false);
 
         var com = ClientObjectManager.Instance();
         var native = go.Native();
@@ -236,7 +235,7 @@ public class ActorSpawnService : IDisposable
         return false;
     }
 
-    public unsafe void DestroyAllCreated()
+    public unsafe void DestroyAllCreated(bool disposing)
     {
         Brio.Log.Debug("Destroying all created gameobjects.");
 
@@ -250,8 +249,8 @@ public class ActorSpawnService : IDisposable
                 try
                 {
                     var go = _objectTable.CreateObjectReference((nint)obj);
-                  
-                    CleanObject(go);
+
+                    CleanObject(go, disposing);
                 }
                 catch(Exception ex)
                 {
@@ -263,15 +262,15 @@ public class ActorSpawnService : IDisposable
         _createdIndexes.Clear();
     }
 
-    public void CleanObject(IGameObject go)
+    public void CleanObject(IGameObject go, bool disposing)
     {
-        if(go is  null) return;
+        if(go is null) return;
 
         Brio.Log.Debug($"Destroying gameobject: {go.ObjectIndex}...");
 
         _actorLookAtService.RemoveFromLook(go);
 
-        _ = _characterHandlerService.Revert(go);
+        _ = _characterHandlerService.Revert(go, disposing);
     }
 
     public void DestroyCompanion(ICharacter character)
@@ -371,8 +370,8 @@ public class ActorSpawnService : IDisposable
 
     private void OnGPoseStateChanged(bool newState)
     {
-        if(!newState)
-            DestroyAllCreated();
+        if(newState == false)
+            DestroyAllCreated(newState);
     }
 
     private unsafe void OnCharacterDestroyed(NativeCharacter* chara)
@@ -398,7 +397,7 @@ public class ActorSpawnService : IDisposable
         _gPoseService.OnGPoseStateChange -= OnGPoseStateChanged;
         _clientState.TerritoryChanged -= OnTerritoryChanged;
 
-        DestroyAllCreated();
+        DestroyAllCreated(true);
 
         GC.SuppressFinalize(this);
     }
