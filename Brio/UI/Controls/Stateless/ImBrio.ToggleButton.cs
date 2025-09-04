@@ -9,16 +9,17 @@ namespace Brio.UI.Controls.Stateless;
 public static partial class ImBrio
 {
     // Patent pending ToggleLock! (this is a 5AM joke, I need sleep)
-    public static bool ToggleLock(string label, float size, ref bool selected, ref bool locked, bool canSelect = true, bool disableOnLock = false)
+    public static (bool, bool) ToggleLock(string label, float size, ref bool selected, ref bool locked, bool canSelect = true, bool disableOnLock = false)
     {
         bool clicked = false;
+        bool lockClick = false;
 
         using(ImRaii.PushColor(ImGuiCol.ChildBg, ImGui.GetColorU32(ImGuiCol.Tab)))
         {
             using(ImRaii.PushStyle(ImGuiStyleVar.ChildRounding, ImGui.GetStyle().FrameRounding))
             {
-                using var child = ImRaii.Child($"###{label}_child", new Vector2((size - 2.3f) * ImGuiHelpers.GlobalScale , 25 * ImGuiHelpers.GlobalScale));
-               
+                using var child = ImRaii.Child($"###{label}_child", new Vector2((size - 2.3f) * ImGuiHelpers.GlobalScale, 25 * ImGuiHelpers.GlobalScale));
+
                 if(child.Success)
                 {
                     using(ImRaii.Disabled(locked && disableOnLock))
@@ -30,13 +31,17 @@ public static partial class ImBrio
 
                     ImGui.SameLine();
 
-                    if(FontIconButton($"###{label}_lockButton", locked ? FontAwesomeIcon.Lock : FontAwesomeIcon.Unlock, locked ? "Unlock" : "Lock", bordered: false))
-                        locked = !locked;
+                    using(ImRaii.Disabled(!selected))
+                        if(FontIconButton($"###{label}_lockButton", locked ? FontAwesomeIcon.Lock : FontAwesomeIcon.Unlock, locked ? "Unlock" : "Lock", bordered: false))
+                        {
+                            lockClick = true;
+                            locked = !locked;
+                        }
                 }
             }
         }
 
-        return clicked;
+        return (clicked, lockClick);
     }
 
     public static bool ToggleButton(string label, ref bool selected, bool canSelect = true)
@@ -67,7 +72,7 @@ public static partial class ImBrio
     public static bool ToggleButtonStrip(string id, Vector2 size, ref int selected, string[] options)
     {
         bool changed = false;
-        float buttonWidth = (size.X / options.Length) ;
+        float buttonWidth = (size.X / options.Length);
 
         using(ImRaii.PushColor(ImGuiCol.ChildBg, ImGui.GetColorU32(ImGuiCol.Tab)))
         {

@@ -1,4 +1,7 @@
-﻿using Brio.Game.Actor.Extensions;
+﻿
+#nullable disable
+
+using Brio.Game.Actor.Extensions;
 using Brio.Game.Camera;
 using Brio.Game.GPose;
 using Dalamud.Game;
@@ -7,6 +10,7 @@ using Dalamud.Hooking;
 using Dalamud.Plugin.Services;
 using FFXIVClientStructs.FFXIV.Client.Game.Character;
 using FFXIVClientStructs.FFXIV.Client.Game.Control;
+using Lumina.Data.Parsing.Layer;
 using System;
 using System.Collections.Generic;
 using System.Numerics;
@@ -42,11 +46,153 @@ public unsafe class ActorLookAtService : IDisposable
         _updateLookAt = (delegate* unmanaged<CharacterLookAtController*, LookAtTarget*, uint, nint, void>)updateFaceTrackerAddress;
 
         var actorLookAtLoopAddress = sigScanner.ScanText("E8 ?? ?? ?? ?? 48 83 C3 08 48 83 EF 01 75 CF 48 ?? ?? ?? ?? 48");
-        _actorLookAtLoop = hooks.HookFromAddress<ActorLookAtLoopDelegate>(actorLookAtLoopAddress, ActorLookAtLoopDetour);
+        _actorLookAtLoop = hooks.HookFromAddress<ActorLookAtLoopDelegate>(actorLookAtLoopAddress, ActorLookAtDetour);
         _actorLookAtLoop.Enable();
 
         _gPoseService.OnGPoseStateChange += OnGPoseStateChange;
     }
+
+    public unsafe nint ActorLookAtDetour(nint args)
+    {
+        if(_gPoseService.IsGPosing)
+        {
+            var lookAtContainer = (ContainerInterface*)args;
+            var targetActor = _objectTable.CreateObjectReference((nint)lookAtContainer->OwnerObject);
+            if(targetActor is not null && targetActor.IsValid() && targetActor.IsGPose()
+                && _lookAtHandles.TryGetValue(targetActor.GameObjectId, out LookAtDataHolder lookAtDataHolder))
+            {
+                LookAtSource lookAt = lookAtDataHolder.Target;
+
+                if(lookAtDataHolder.TargetMode == LookAtTargetMode.Camera)
+                {
+                    var camera = _virtualCameraManager?.CurrentCamera;
+
+                    if(camera is null)
+                        return _actorLookAtLoop.Original(args);
+
+                    if(lookAtDataHolder.TargetType.HasFlag(LookAtTargetType.Eyes) && lookAtDataHolder.EyesTargetLock is false)
+                        lookAt.Eyes.LookAtTarget.Position = camera.RealPosition;
+                    if(lookAtDataHolder.TargetType.HasFlag(LookAtTargetType.Body) && lookAtDataHolder.BodyTargetLock is false)
+                        lookAt.Body.LookAtTarget.Position = camera.RealPosition;
+                    if(lookAtDataHolder.TargetType.HasFlag(LookAtTargetType.Head) && lookAtDataHolder.HeadTargetLock is false)
+                        lookAt.Head.LookAtTarget.Position = camera.RealPosition;
+                }
+                else if(lookAtDataHolder.TargetMode == LookAtTargetMode.None)
+                    return _actorLookAtLoop.Original(args);
+
+                var lookAtController = &((Character*)targetActor.Address)->LookAt.Controller;
+
+                if(lookAtDataHolder.TargetType.HasFlag(LookAtTargetType.Body))
+                    _updateLookAt(lookAtController, &lookAt.Body.LookAtTarget, 0, 0); // 0 == Body
+                if(lookAtDataHolder.TargetType.HasFlag(LookAtTargetType.Head))
+                    _updateLookAt(lookAtController, &lookAt.Head.LookAtTarget, 1, 0); // 1 == Head
+                if(lookAtDataHolder.TargetType.HasFlag(LookAtTargetType.Eyes))
+                    _updateLookAt(lookAtController, &lookAt.Eyes.LookAtTarget, 2, 0); // 2 == Eyes
+            }
+        }
+
+        return _actorLookAtLoop.Original(args);
+    }
+
+    public unsafe void StopLookAt(IGameObject gameobj)
+    {
+        if(_lookAtHandles.TryGetValue(gameobj.GameObjectId, out var obj))
+        {
+            obj.LookMode = LookMode.None;
+            obj.TargetType = LookAtTargetType.None;
+            obj.TargetMode = LookAtTargetMode.None;
+        }
+        else
+        {
+
+        }
+    }
+
+    public unsafe void AddObjectToLook(IGameObject gameobj)
+    {
+        var camera = _virtualCameraManager?.CurrentCamera;
+
+        if(camera is null)
+            return;
+
+        if(!_lookAtHandles.TryGetValue(gameobj.GameObjectId, out LookAtDataHolder obj))
+        {
+            obj = new LookAtDataHolder();
+            _lookAtHandles.Add(gameobj.GameObjectId, obj);
+        }
+
+        obj.LookMode = LookMode.Position;
+        obj.TargetType = LookAtTargetType.None;
+        obj.TargetMode = LookAtTargetMode.None;
+        obj.Target = new()
+        {
+            Body = new LookAtType
+            {
+                LookAtTarget = new LookAtTarget
+                {
+                    LookMode = LookMode.Position,
+                    Position = camera.RealPosition
+                }
+            },
+            Eyes = new LookAtType
+            {
+                LookAtTarget = new LookAtTarget
+                {
+                    LookMode = LookMode.Position,
+                    Position = camera.RealPosition
+                }
+            },
+            Head = new LookAtType
+            {
+                LookAtTarget = new LookAtTarget
+                {
+                    LookMode = LookMode.Position,
+                    Position = camera.RealPosition
+                }
+            },
+        };
+    }
+    public void RemoveObjectFromLook(IGameObject gameobj)
+    {
+        if(_lookAtHandles.ContainsKey(gameobj.GameObjectId))
+        {
+            _lookAtHandles.Remove(gameobj.GameObjectId);
+        }
+    }
+
+    public unsafe void SetTargetType(IGameObject obj, LookAtTargetType lookAtTarget)
+    {
+        if(obj is not null && _lookAtHandles.TryGetValue(obj.GameObjectId, out LookAtDataHolder value))
+        {
+            value.TargetType = lookAtTarget;
+        }
+    }
+    public unsafe void SetTargetMode(IGameObject obj, LookAtTargetMode lookAtTargetMode)
+    {
+        if(obj is not null && _lookAtHandles.TryGetValue(obj.GameObjectId, out LookAtDataHolder value))
+        {
+            value.TargetMode = lookAtTargetMode;
+        }
+    }
+    public unsafe void SetTargetLock(IGameObject obj, bool doLock, LookAtTargetType targetType, Vector3 Target)
+    {
+        if(obj is not null && _lookAtHandles.TryGetValue(obj.GameObjectId, out LookAtDataHolder value))
+        {
+            value.SetTargetLock(doLock, targetType, Target);
+        }
+    }
+
+#nullable enable
+    public unsafe LookAtDataHolder? GetTargetDataHolder(IGameObject obj)
+    {
+        if(obj is not null && _lookAtHandles.TryGetValue(obj.GameObjectId, out LookAtDataHolder? value))
+        {
+            return value;
+        }
+
+        return null;
+    }
+#nullable disable
 
     private void OnGPoseStateChange(bool newState)
     {
@@ -55,126 +201,6 @@ public unsafe class ActorLookAtService : IDisposable
             _lookAtHandles.Clear();
         }
     }
-
-    public unsafe IntPtr ActorLookAtLoopDetour(nint a1)
-    {
-        if(_gPoseService.IsGPosing)
-        {
-            var lookAtContainer = (ContainerInterface*)a1;
-            var obj = _objectTable.CreateObjectReference((nint)lookAtContainer->OwnerObject);
-            if(obj is not null && obj.IsValid() && obj.IsGPose() && _lookAtHandles.ContainsKey(obj.GameObjectId))
-            {
-                actorLook(obj, _lookAtHandles[obj.GameObjectId]);
-            }
-        }
-
-        return _actorLookAtLoop.Original(a1);
-    }
-
-    public unsafe void actorLook(IGameObject targetActor, LookAtDataHolder lookAtDataHolder)
-    {
-        LookAtSource lookAt = lookAtDataHolder.Target;
-
-        lookAt.Eyes.LookAtTarget.LookMode = (uint)lookAtDataHolder.LookAtMode;
-        lookAt.Head.LookAtTarget.LookMode = (uint)lookAtDataHolder.LookAtMode;
-        lookAt.Body.LookAtTarget.LookMode = (uint)lookAtDataHolder.LookAtMode;
-
-        if(lookAtDataHolder.LookAtType == LookAtTargetMode.Camera)
-        {
-            var camera = _virtualCameraManager?.CurrentCamera;
-
-            if(camera is null)
-                return;
-
-            if(lookAtDataHolder.lookAtTargetType.HasFlag(LookAtTargetType.Eyes))
-                lookAt.Eyes.LookAtTarget.Position = camera.RealPosition;
-            if(lookAtDataHolder.lookAtTargetType.HasFlag(LookAtTargetType.Body))
-                lookAt.Head.LookAtTarget.Position = camera.RealPosition;
-            if(lookAtDataHolder.lookAtTargetType.HasFlag(LookAtTargetType.Head))
-                lookAt.Body.LookAtTarget.Position = camera.RealPosition;
-        }
-        else if(lookAtDataHolder.LookAtType == LookAtTargetMode.None)
-            return;
-
-        var lookAtController = &((Character*)targetActor.Address)->LookAt.Controller;
-
-        if(lookAtDataHolder.lookAtTargetType.HasFlag(LookAtTargetType.Eyes))
-            _updateLookAt(lookAtController, &lookAt.Eyes.LookAtTarget, (uint)LookEditType.Eyes, 0);
-        if(lookAtDataHolder.lookAtTargetType.HasFlag(LookAtTargetType.Body))
-            _updateLookAt(lookAtController, &lookAt.Body.LookAtTarget, (uint)LookEditType.Body, 0);
-        if(lookAtDataHolder.lookAtTargetType.HasFlag(LookAtTargetType.Head))
-            _updateLookAt(lookAtController, &lookAt.Head.LookAtTarget, (uint)LookEditType.Head, 0);
-    }
-
-    public unsafe void TESTactorlookClear(IGameObject gameobj)
-    {
-        if(_lookAtHandles.TryGetValue(gameobj.GameObjectId, out var obj))
-        {
-            obj.LookAtMode = LookMode.None;
-            obj.lookAtTargetType = LookAtTargetType.All;
-            obj.LookAtType = LookAtTargetMode.None;
-        }
-        else
-        {
-
-        }
-    }
-
-    public unsafe void TESTactorlook(IGameObject gameobj)
-    {
-        var camera = _virtualCameraManager?.CurrentCamera;
-
-        if(camera is null)
-            return;
-
-        _lookAtHandles.TryGetValue(gameobj.GameObjectId, out LookAtDataHolder? obj);
-
-        if(obj is null)
-        {
-            obj = new LookAtDataHolder();
-            _lookAtHandles.Add(gameobj.GameObjectId, obj);
-        }
-
-        obj.LookAtMode = LookMode.Position;
-        obj.lookAtTargetType = LookAtTargetType.All;
-        obj.LookAtType = LookAtTargetMode.Camera;
-        obj.Target = new()
-        {
-            Body = new LookAtType
-            {
-                LookAtTarget = new LookAtTarget
-                {
-                    LookMode = (uint)LookMode.Position,
-                    Position = camera.RealPosition
-                }
-            },
-            Eyes = new LookAtType
-            {
-                LookAtTarget = new LookAtTarget
-                {
-                    LookMode = (uint)LookMode.Position,
-                    Position = camera.RealPosition
-                }
-            },
-            Head = new LookAtType
-            {
-                LookAtTarget = new LookAtTarget
-                {
-                    LookMode = (uint)LookMode.Position,
-                    Position = camera.RealPosition
-                }
-            },
-        };
-    }
-
-    public void RemoveFromLook(IGameObject gameobj)
-    {
-        if(_lookAtHandles.ContainsKey(gameobj.GameObjectId))
-        {
-            _lookAtHandles.Remove(gameobj.GameObjectId);
-        }
-    }
-
     public void Dispose()
     {
         _actorLookAtLoop.Dispose();
@@ -185,23 +211,48 @@ public unsafe class ActorLookAtService : IDisposable
     }
 }
 
-public record class LookAtDataHolder
+public class LookAtDataHolder
 {
-    public LookAtTargetMode LookAtType;
-
-    public LookAtTargetType lookAtTargetType;
-    public LookMode LookAtMode;
-
+    public LookAtTargetMode TargetMode;
+    public LookAtTargetType TargetType;
+  
     public LookAtSource Target;
 
-    public void SetTarget(Vector3 vector, LookAtTargetType targetType)
+    public LookMode LookMode
+    {
+        set
+        {
+            Target.Eyes.LookAtTarget.LookMode = value;
+            Target.Head.LookAtTarget.LookMode = value;
+            Target.Body.LookAtTarget.LookMode = value;
+        }
+    }
+  
+    public Vector3 EyesTarget { get => Target.Eyes.LookAtTarget.Position; set => Target.Eyes.LookAtTarget.Position = value; }
+    public Vector3 BodyTarget { get => Target.Body.LookAtTarget.Position; set => Target.Body.LookAtTarget.Position = value; }
+    public Vector3 HeadTarget { get => Target.Head.LookAtTarget.Position; set => Target.Head.LookAtTarget.Position = value; }
+
+    public bool EyesTargetLock;
+    public bool BodyTargetLock;
+    public bool HeadTargetLock;
+
+    public void SetTargetLock(bool doLock, LookAtTargetType targetType, Vector3 Target)
     {
         if(targetType.HasFlag(LookAtTargetType.Eyes))
-            Target.Eyes.LookAtTarget.Position = vector;
+        {
+            EyesTarget = Target;
+            EyesTargetLock = doLock;
+        }
         if(targetType.HasFlag(LookAtTargetType.Body))
-            Target.Head.LookAtTarget.Position = vector;
+        {
+            BodyTarget = Target;
+            BodyTargetLock = doLock;
+        }
         if(targetType.HasFlag(LookAtTargetType.Head))
-            Target.Body.LookAtTarget.Position = vector;
+        {
+            HeadTarget = Target;
+            HeadTargetLock = doLock;
+        }
     }
 }
 
@@ -213,27 +264,15 @@ public enum LookAtTargetMode
     Position
 }
 
-public class LookAtData
-{
-    public uint EntityIdSource;
-    public LookAtSource LookAtSource;
-
-    public LookMode LookMode;
-    public LookAtTargetType TargetType;
-
-    public uint TargetEntityId;
-    public Vector3 TargetPosition;
-}
-
 [Flags]
 public enum LookAtTargetType
 {
-    Body = 0,
-    Head = 1,
-    Eyes = 2,
+    None = 0,
+    Body = 1,
+    Head = 4,
+    Eyes = 8,
 
-    Face = Head | Eyes,
-    All = Body | Head | Eyes
+    All = (Eyes | Head | Body)
 }
 
 [StructLayout(LayoutKind.Sequential)]
@@ -254,15 +293,8 @@ public struct LookAtType
 [StructLayout(LayoutKind.Explicit)]
 public struct LookAtTarget
 {
-    [FieldOffset(0x08)] public uint LookMode;
+    [FieldOffset(0x08)] public LookMode LookMode;
     [FieldOffset(0x10)] public Vector3 Position;
-}
-
-public enum LookEditType
-{
-    Body = 0,
-    Head = 1,
-    Eyes = 2
 }
 
 public enum LookMode
@@ -271,4 +303,18 @@ public enum LookMode
     Frozen = 1,
     Pivot = 2,
     Position = 3,
+}
+
+
+
+public class LookAtData
+{
+    public uint EntityIdSource;
+    public LookAtSource LookAtSource;
+
+    public LookMode LookMode;
+    public LookAtTargetType TargetType;
+
+    public uint TargetEntityId;
+    public Vector3 TargetPosition;
 }

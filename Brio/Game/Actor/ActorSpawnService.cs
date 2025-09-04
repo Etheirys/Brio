@@ -268,7 +268,7 @@ public class ActorSpawnService : IDisposable
 
         Brio.Log.Debug($"Destroying gameobject: {go.ObjectIndex}...");
 
-        _actorLookAtService.RemoveFromLook(go);
+        _actorLookAtService.RemoveObjectFromLook(go);
 
         _ = _characterHandlerService.Revert(go, disposing);
     }

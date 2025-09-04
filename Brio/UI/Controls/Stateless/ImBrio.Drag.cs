@@ -1,6 +1,7 @@
 ﻿using Brio.Core;
 using Brio.Input;
 using Brio.UI.Controls.Core;
+using Brio.UI.Controls.Selectors;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface;
 using Dalamud.Interface.Utility;
@@ -86,6 +87,17 @@ public static partial class ImBrio
         }
 
         return (active, changed);
+    }
+
+
+    public static (bool anyActive, bool didChange) DragFloat3Simple(string label, ref Vector3 value, float step)
+    {
+        Vector2 d3size = new(0, 0)
+        {
+            X = GetRemainingWidth() + ImGui.GetStyle().ItemSpacing.X
+        };
+
+        return DragFloat3Horizontal($"###{label}", ref value, step, d3size);
     }
 
     public static (bool anyActive, bool didChange) DragFloat3Horizontal(string label, ref Vector3 value, float step, Vector2 size)
