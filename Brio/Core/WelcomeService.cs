@@ -69,8 +69,8 @@ public class WelcomeService : IDisposable
     {
         if(newState)
         {
-            ImGui.SetNextWindowPos(new Vector2((ImGui.GetIO().DisplaySize.X / 2) - 710, (ImGui.GetIO().DisplaySize.Y / 2) - 745));
-            _updateWindow.IsOpen = true;
+            //ImGui.SetNextWindowPos(new Vector2((ImGui.GetIO().DisplaySize.X / 2) - 710, (ImGui.GetIO().DisplaySize.Y / 2) - 745));
+            //_updateWindow.IsOpen = true;
         }
     }
 
