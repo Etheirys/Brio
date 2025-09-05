@@ -23,6 +23,7 @@ public class CutsceneManager : IDisposable
     private readonly EntityManager _entityManager;
     private readonly GPoseService _gPoseService;
     private readonly ITargetManager _targetManager;
+    private readonly IFramework _framework;
 
     private bool _animationStarted = false;
 
@@ -57,11 +58,22 @@ public class CutsceneManager : IDisposable
         _entityManager = entityManager;
 
         _gPoseService.OnGPoseStateChange += OnGPoseStateChange;
+        _framework = framework;
 
-        // I don't know if this is still needed, but commenting for build purposes - Bronya
-        //InputService.Instance.AddListener(KeyBindEvents.Interface_StopCutscene, StopPlayback);
-        //InputService.Instance.AddListener(KeyBindEvents.Interface_StartAllActorsAnimations, StartAllActors);
-        //InputService.Instance.AddListener(KeyBindEvents.Interface_StopAllActorsAnimations, StopAllActors);
+        _framework.Update += OnFrameworkUpdate;
+    }
+
+    private void OnFrameworkUpdate(IFramework framework)
+    {
+        if(_gPoseService.IsGPosing is false)
+            return;
+
+        if(InputManagerService.ActionKeysPressedLastFrame(InputAction.Interface_StopCutscene))
+            StopPlayback();
+        if(InputManagerService.ActionKeysPressedLastFrame(InputAction.Interface_StartAllActorsAnimations))
+            StartAllActors();
+        if(InputManagerService.ActionKeysPressedLastFrame(InputAction.Interface_StopAllActorsAnimations))
+            StopAllActors();
     }
 
     private void OnGPoseStateChange(bool newState)
@@ -244,14 +256,12 @@ public class CutsceneManager : IDisposable
 
     public void Dispose()
     {
-        // Same here, commenting for build purposes - Bronya
-        //InputService.Instance.RemoveListener(KeyBindEvents.Interface_StopCutscene, StopPlayback);
-        //InputService.Instance.RemoveListener(KeyBindEvents.Interface_StartAllActorsAnimations, StartAllActors);
-        //InputService.Instance.RemoveListener(KeyBindEvents.Interface_StopAllActorsAnimations, StopAllActors);
-
         _gPoseService.OnGPoseStateChange -= OnGPoseStateChange;
+        _framework.Update -= OnFrameworkUpdate;
 
         if(IsRunning)
             StopPlayback();
+
+        GC.SuppressFinalize(this);
     }
 }

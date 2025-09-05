@@ -28,16 +28,18 @@ public class InputManagerConfiguration
         { InputAction.Posing_Translate, new KeyConfig(VirtualKey.NO_KEY) },
         { InputAction.Posing_Rotate, new KeyConfig(VirtualKey.NO_KEY) },
         { InputAction.Posing_Scale, new KeyConfig(VirtualKey.NO_KEY) },
+        { InputAction.Posing_Universal, new KeyConfig(VirtualKey.NO_KEY) },
+        { InputAction.Posing_ToggleLink, new KeyConfig(VirtualKey.L) },
 
         { InputAction.FreeCamera_Forward, new KeyConfig(VirtualKey.W) },
         { InputAction.FreeCamera_Backward, new KeyConfig(VirtualKey.S) },
         { InputAction.FreeCamera_Left, new KeyConfig(VirtualKey.A) },
         { InputAction.FreeCamera_Right, new KeyConfig(VirtualKey.D) },
-        { InputAction.FreeCamera_Up, new KeyConfig(VirtualKey.SPACE) },
-        { InputAction.FreeCamera_UpAlt, new KeyConfig(VirtualKey.Q) },
-        { InputAction.FreeCamera_Down, new KeyConfig(VirtualKey.CONTROL) },
-        { InputAction.FreeCamera_DownAlt, new KeyConfig(VirtualKey.E) },
-        { InputAction.FreeCamera_IncreaseCamMovement, new KeyConfig(VirtualKey.SHIFT) },
+        { InputAction.FreeCamera_Up, new KeyConfig(VirtualKey.Q) },
+        { InputAction.FreeCamera_UpAlt, new KeyConfig(VirtualKey.SPACE) },
+        { InputAction.FreeCamera_Down, new KeyConfig(VirtualKey.E) },
+        { InputAction.FreeCamera_DownAlt, new KeyConfig(VirtualKey.SHIFT) },
+        { InputAction.FreeCamera_IncreaseCamMovement, new KeyConfig(VirtualKey.CONTROL) },
         { InputAction.FreeCamera_DecreaseCamMovement, new KeyConfig(VirtualKey.MENU) },
 
         { InputAction.Brio_Alt, new KeyConfig(VirtualKey.MENU) },
@@ -67,16 +69,17 @@ public class InputManagerConfiguration
         { InputAction.Posing_Rotate, new KeyConfig(VirtualKey.NO_KEY) },
         { InputAction.Posing_Scale, new KeyConfig(VirtualKey.NO_KEY) },
         { InputAction.Posing_Universal, new KeyConfig(VirtualKey.NO_KEY) },
+        { InputAction.Posing_ToggleLink, new KeyConfig(VirtualKey.L) },
 
         { InputAction.FreeCamera_Forward, new KeyConfig(VirtualKey.W) },
         { InputAction.FreeCamera_Backward, new KeyConfig(VirtualKey.S) },
         { InputAction.FreeCamera_Left, new KeyConfig(VirtualKey.A) },
         { InputAction.FreeCamera_Right, new KeyConfig(VirtualKey.D) },
-        { InputAction.FreeCamera_Up, new KeyConfig(VirtualKey.SPACE) },
-        { InputAction.FreeCamera_UpAlt, new KeyConfig(VirtualKey.Q) },
-        { InputAction.FreeCamera_Down, new KeyConfig(VirtualKey.CONTROL) },
-        { InputAction.FreeCamera_DownAlt, new KeyConfig(VirtualKey.E) },
-        { InputAction.FreeCamera_IncreaseCamMovement, new KeyConfig(VirtualKey.SHIFT) },
+        { InputAction.FreeCamera_Up, new KeyConfig(VirtualKey.Q) },
+        { InputAction.FreeCamera_UpAlt, new KeyConfig(VirtualKey.SPACE) },
+        { InputAction.FreeCamera_Down, new KeyConfig(VirtualKey.E) },
+        { InputAction.FreeCamera_DownAlt, new KeyConfig(VirtualKey.SHIFT) },
+        { InputAction.FreeCamera_IncreaseCamMovement, new KeyConfig(VirtualKey.CONTROL) },
         { InputAction.FreeCamera_DecreaseCamMovement, new KeyConfig(VirtualKey.MENU) },
 
         { InputAction.Brio_Alt, new KeyConfig(VirtualKey.MENU) },
@@ -87,7 +90,7 @@ public class InputManagerConfiguration
     public bool Enable { get; set; } = true;
     public bool ShowPromptsInGPose { get; set; } = false;
     public bool EnableKeyHandlingOnKeyMod { get; set; } = false;
-    public bool FlipKeyBindsPastNinety { get; set; } = true;
+    public bool FlipKeyBindsPastNinety { get; set; } = false;
 
     public void ResetKeyToDefault(InputAction action)
     {

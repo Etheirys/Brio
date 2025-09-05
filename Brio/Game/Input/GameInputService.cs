@@ -41,12 +41,16 @@ public class GameInputService : IDisposable
         {
             _virtualCameraService.Update(mouseFrame);
 
+            keyboardFrame->KeyState[69] = 0; // E
+            keyboardFrame->KeyState[81] = 0; // Q
+            keyboardFrame->KeyState[32] = 0; // SPACE
+
             if(_virtualCameraService.CurrentCamera.FreeCamValues.IsMovementEnabled && 
                 Config.ConfigurationService.Instance.Configuration.InputManager.EnableKeyHandlingOnKeyMod)
             {
                 for(int i = 0; i < KeyboardFrame.KeyStateLength; i++)
                 {
-                    if(i == (int)VirtualKey.ESCAPE)
+                    if(i == 27) // VirtualKey.ESCAPE
                         continue;
                     keyboardFrame->KeyState[i] = 0;
                 }

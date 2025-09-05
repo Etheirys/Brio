@@ -1,12 +1,13 @@
 ﻿using Brio.Capabilities.Posing;
 using Brio.Core;
 using Brio.Game.Posing;
+using Brio.Input;
 using Brio.UI.Controls.Core;
 using Brio.UI.Controls.Stateless;
 using Brio.UI.Theming;
+using Dalamud.Bindings.ImGui;
 using Dalamud.Interface;
 using Dalamud.Interface.Utility.Raii;
-using Dalamud.Bindings.ImGui;
 using OneOf.Types;
 using System.Numerics;
 
@@ -142,15 +143,15 @@ public static class PosingEditorCommon
                         switch(poseInfo.MirrorMode)
                         {
                             case PoseMirrorMode.None:
-                                if(ImGui.Button($"{FontAwesomeIcon.Unlink.ToIconString()}###mirror_mode", buttonSize))
+                                if(ImGui.Button($"{FontAwesomeIcon.Unlink.ToIconString()}###mirror_mode", buttonSize) || InputManagerService.ActionKeysPressedLastFrame(InputAction.Posing_ToggleLink))
                                     poseInfo.MirrorMode = PoseMirrorMode.Copy;
                                 break;
                             case PoseMirrorMode.Copy:
-                                if(ImGui.Button($"{FontAwesomeIcon.Link.ToIconString()}###mirror_mode", buttonSize))
+                                if(ImGui.Button($"{FontAwesomeIcon.Link.ToIconString()}###mirror_mode", buttonSize) || InputManagerService.ActionKeysPressedLastFrame(InputAction.Posing_ToggleLink))
                                     poseInfo.MirrorMode = PoseMirrorMode.Mirror;
                                 break;
                             case PoseMirrorMode.Mirror:
-                                if(ImGui.Button($"{FontAwesomeIcon.YinYang.ToIconString()}###mirror_mode", buttonSize))
+                                if(ImGui.Button($"{FontAwesomeIcon.YinYang.ToIconString()}###mirror_mode", buttonSize) || InputManagerService.ActionKeysPressedLastFrame(InputAction.Posing_ToggleLink))
                                     poseInfo.MirrorMode = PoseMirrorMode.None;
                                 break;
                         }

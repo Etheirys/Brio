@@ -1,28 +1,47 @@
 ﻿using Brio.Config;
-using Brio.Game.Camera;
 using Brio.Game.GPose;
 using Dalamud.Game.ClientState.Keys;
 using Dalamud.Plugin.Services;
+using System;
 using System.Collections.Generic;
 
 namespace Brio.Input;
-public class InputManagerService
+
+public class InputManagerService : IDisposable
 {
     private readonly IKeyState _keyState;
     private readonly ConfigurationService _configurationService;
     private readonly GPoseService _gPoseService;
-    private readonly VirtualCameraManager _virtualCameraManager;
+    private readonly IFramework _framework;
+
+    private readonly Dictionary<VirtualKey, bool> _lastFrameKeyStates = [];
+    private readonly HashSet<VirtualKey> _keyUpTriggered = [];
 
     public static InputManagerService Instance { get; private set; } = null!;
 
-    public InputManagerService(IKeyState keyState, ConfigurationService configurationService, VirtualCameraManager virtualCameraManager, GPoseService gPoseService)
+    public InputManagerService(IKeyState keyState, IFramework framework, ConfigurationService configurationService, GPoseService gPoseService)
     {
         _keyState = keyState;
         _configurationService = configurationService;
         _gPoseService = gPoseService;
-        _virtualCameraManager = virtualCameraManager;
+        _framework = framework;
+
+        _framework.Update += OnFrameworkUpdate;
 
         Instance = this;
+    }
+
+    private void OnFrameworkUpdate(IFramework framework)
+    {
+        if(_gPoseService.IsGPosing is false || _configurationService.Configuration.InputManager.Enable is false)
+            return;
+
+        foreach(var key in _keyState.GetValidVirtualKeys())
+        {
+            _lastFrameKeyStates[key] = _keyState[key];
+            if(_keyState[key])
+                _keyUpTriggered.Remove(key);
+        }
     }
 
     private bool IsKeyDown(VirtualKey key)
@@ -30,8 +49,58 @@ public class InputManagerService
         return _keyState[key];
     }
 
-    //
-    //
+    public bool IsKeyUp(VirtualKey key)
+    {
+        if(_configurationService.Configuration.InputManager.Enable is false)
+            return false;
+
+        bool released = (!_keyState[key] && _lastFrameKeyStates.TryGetValue(key, out var wasDown) && wasDown);
+        if(released && !_keyUpTriggered.Contains(key))
+        {
+            _keyUpTriggered.Add(key);
+            return true;
+        }
+        return false;
+    }
+
+    public static bool ActionKeysPressedLastFrame(InputAction action)
+    {
+        if(Instance._configurationService.Configuration.InputManager.KeyBindings.TryGetValue(action, out KeyConfig? value))
+        {
+            if(value.Key == VirtualKey.NO_KEY)
+                return false;
+
+            if(value.RequireCtrl || action is InputAction.Brio_Ctrl)
+            {
+                if(Instance.IsKeyDown(VirtualKey.CONTROL) && Instance.IsKeyUp(value.Key))
+                {
+                    return true;
+                }
+            }
+            else if(value.requireShift || action is InputAction.Brio_Shift)
+            {
+                if(Instance.IsKeyDown(VirtualKey.SHIFT) && Instance.IsKeyUp(value.Key))
+                {
+                    return true;
+                }
+            }
+            else if(value.requireAlt || action is InputAction.Brio_Alt)
+            {
+                if(Instance.IsKeyDown(VirtualKey.MENU) && Instance.IsKeyUp(value.Key))
+                {
+                    return true;
+                }
+            }
+            else
+            {
+                if(Instance.IsKeyUp(value.Key))
+                {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
 
     public static bool ActionKeysPressed(InputAction action)
     {
@@ -77,39 +146,10 @@ public class InputManagerService
         return Instance._keyState.GetValidVirtualKeys();
     }
 
-    //public void AddListener(KeyBindEvents evt, Action callback)
-    //{
-    //    if(!_listeners.ContainsKey(evt))
-    //        _listeners.Add(evt, new());
+    public void Dispose()
+    {
+        _framework.Update -= OnFrameworkUpdate;
 
-    //    _listeners[evt].Add(callback);
-    //}
-
-    //public void RemoveListener(KeyBindEvents evt, Action callback)
-    //{
-    //    if(!_listeners.ContainsKey(evt))
-    //        return;
-
-    //    _listeners[evt].Remove(callback);
-    //}
-
-    //private void OnFrameworkUpdate(IFramework framework)
-    //{
-    //    if(_gPoseService.IsGPosing == false)
-    //        return;
-
-    //    bool disable = false;
-    //    if(_virtualCameraManager.CurrentCamera is not null && _virtualCameraManager.CurrentCamera.FreeCamValues.IsMovementEnabled)
-    //    {
-    //        disable = true;
-    //    }
-
-    //    if(_configurationService.Configuration.InputManager.Enable && disable == false)
-    //    {
-    //        foreach(var evt in keyBindEvents)
-    //        {
-    //            this.CheckEvent(evt);
-    //        }
-    //    }
-    //}
+        GC.SuppressFinalize(this);
+    }
 }

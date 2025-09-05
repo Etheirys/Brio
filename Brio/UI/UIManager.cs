@@ -1,15 +1,16 @@
 ﻿using Brio.Config;
 using Brio.Game.GPose;
+using Brio.Input;
 using Brio.IPC;
 using Brio.UI.Controls;
 using Brio.UI.Windows;
 using Brio.UI.Windows.Specialized;
+using Dalamud.Bindings.ImGui;
 using Dalamud.Interface.ImGuiFileDialog;
 using Dalamud.Interface.Textures.TextureWraps;
 using Dalamud.Interface.Windowing;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
-using Dalamud.Bindings.ImGui;
 using System;
 using System.Collections.Generic;
 
@@ -217,10 +218,25 @@ public class UIManager : IDisposable
             FileDialogManager.Draw();
             _libraryWindow.DrawModal();
             RenameActorModal.DrawModal();
+
+            UpdateKeyBinds();
         }
         finally
         {
             BrioStyle.PopStyle();
+        }
+    }
+
+    private void UpdateKeyBinds()
+    {
+        if(InputManagerService.ActionKeysPressedLastFrame(InputAction.Interface_ToggleBrioWindow))
+        {
+            _mainWindow.IsOpen = !_mainWindow.IsOpen;
+        }
+        if(InputManagerService.ActionKeysPressedLastFrame(InputAction.Interface_ToggleBindPromptWindow))
+        {
+            _configurationService.Configuration.InputManager.ShowPromptsInGPose = !_configurationService.Configuration.InputManager.ShowPromptsInGPose;
+            _configurationService.ApplyChange();
         }
     }
 

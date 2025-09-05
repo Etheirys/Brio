@@ -24,6 +24,7 @@ public enum InputAction
     Posing_Rotate,
     Posing_Scale,
     Posing_Universal,
+    Posing_ToggleLink,
 
     // Free Camera
     FreeCamera_Forward,
