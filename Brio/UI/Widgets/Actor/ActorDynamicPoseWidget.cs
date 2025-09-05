@@ -32,12 +32,6 @@ public class ActorDynamicPoseWidget(ActorDynamicPoseCapability capability) : Wid
     Vector3 cameraVector3;
     public override void DrawBody()
     {
-        if(selected == -1)
-        {
-            Capability.SetMode(LookAtTargetMode.Camera);
-            selected = 0;
-        }
-
         if(Capability.Camera is not null)
             cameraVector3 = Capability.Camera.RealPosition;
 
@@ -59,11 +53,7 @@ public class ActorDynamicPoseWidget(ActorDynamicPoseCapability capability) : Wid
             {
                 Reset();
 
-                Capability.SetTargetLock(false, LookAtTargetType.Head, cameraVector3);
-                Capability.SetTargetLock(false, LookAtTargetType.Eyes, cameraVector3);
-                Capability.SetTargetLock(false, LookAtTargetType.Body, cameraVector3);
-
-                Capability.SetTargetType(LookAtTargetType.None);
+                Capability.SetTargetLock(false, LookAtTargetType.All, cameraVector3);
 
                 switch(selected)
                 {
