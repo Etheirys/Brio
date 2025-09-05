@@ -258,7 +258,7 @@ public class VirtualCameraManager : IDisposable
         // Handle keyboard input
         //
 
-        // This removes the purgatory function and prevent camera crazying out when typing with the camera enabled
+        // This removes the purgatory function and prevent camera crazing out when typing with the camera enabled
         if(FreeCamValues.IsMovementEnabled == false || RaptureAtkModule.Instance()->AtkModule.IsTextInputActive())
         {
             return;
@@ -378,9 +378,11 @@ public class VirtualCameraManager : IDisposable
         else
         {
             var defaultCam = _entityManager.GetEntity<CameraEntity>(new Entities.Core.CameraId(0));
-            defaultCam.VirtualCamera.SaveCameraState();
-            if(defaultCam != null)
+            if(defaultCam is not null)
+            {
+                defaultCam.VirtualCamera.SaveCameraState();
                 SelectCamera(defaultCam.VirtualCamera);
+            }
         }
     }
 

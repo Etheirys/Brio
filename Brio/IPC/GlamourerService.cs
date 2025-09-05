@@ -202,7 +202,7 @@ public class GlamourerService : BrioIPC
         }).ConfigureAwait(false);
     }
   
-    public async Task ApplyAllAsync(IGameObject? character, string? customization, Guid applicationId)
+    public void ApplyAllAsync(IGameObject? character, string? customization, Guid applicationId)
     {
         if(IsAvailable == false || string.IsNullOrEmpty(customization)) return;
 

@@ -61,7 +61,7 @@ public class MCDFService : IDisposable
 
     private int _currentApplicationCount = 0;
 
-    private int _globalFileCounter = 0;
+    //private int _globalFileCounter = 0;
 
     public MCDFService(IFramework framework, CharacterHandlerService characterHandlerService, GPoseService gPoseService, ActorAppearanceService actorAppearanceService, ConfigurationService configurationService, FileCacheService fileCacheService, TargetService targetService, ActorRedrawService actorRedrawService, DalamudService dalamudService,
         PenumbraService penumbraService, TransientResourceService transientResourceService, GlamourerService glamourerService, CustomizePlusService customizePlusService)
@@ -291,7 +291,7 @@ public class MCDFService : IDisposable
             DataApplicationProgress = "Applying Glamourer and redrawing Character";
             Brio.Log.Debug($"{DataApplicationProgress}");
 
-            await _glamourerService.ApplyAllAsync(tempHandler.GameObject, glamourerData, applicationId).ConfigureAwait(false);
+            _glamourerService.ApplyAllAsync(tempHandler.GameObject, glamourerData, applicationId);
 
             await _actorRedrawService.RedrawAndWait(tempHandler.GameObject);
 

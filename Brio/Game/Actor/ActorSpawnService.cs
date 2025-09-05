@@ -244,13 +244,16 @@ public class ActorSpawnService : IDisposable
         foreach(var idx in indexes)
         {
             var obj = com->GetObjectByIndex(idx);
-            if(obj != null)
+            if(obj is not null)
             {
                 try
                 {
                     var go = _objectTable.CreateObjectReference((nint)obj);
 
-                    CleanObject(go, disposing);
+                    if(obj is not null)
+                        CleanObject(go, disposing);
+                    else
+                        Brio.Log.Fatal($"CleanObject could not be called because the object was null idx:{idx}");
                 }
                 catch(Exception ex)
                 {
@@ -262,7 +265,7 @@ public class ActorSpawnService : IDisposable
         _createdIndexes.Clear();
     }
 
-    public void CleanObject(IGameObject go, bool disposing)
+    public void CleanObject(IGameObject? go, bool disposing)
     {
         if(go is null) return;
 
