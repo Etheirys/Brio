@@ -40,9 +40,16 @@ public class ActorDynamicPoseWidget(ActorDynamicPoseCapability capability) : Wid
             enable = !enable;
 
             if(enable)
+            {
                 Capability.StartLookAt();
+                Reset();
+                Capability.SetTargetLock(false, LookAtTargetType.All, cameraVector3);
+            }
             else
+            {
                 Capability.StopLookAt();
+                selected = -1;
+            }
         }
 
         using(ImRaii.Disabled(!enable))
