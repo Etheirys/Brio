@@ -120,12 +120,6 @@ public class SettingsWindow : Window
 
     private void DrawGeneralTab()
     {
-        if(ImGui.CollapsingHeader("Window", ImGuiTreeNodeFlags.DefaultOpen))
-        {
-            DrawOpenBrioSetting();
-            DrawHideSettings();
-        }
-
         if(ImGui.CollapsingHeader("Library", ImGuiTreeNodeFlags.DefaultOpen))
         {
             bool useLibraryWhenImporting = _configurationService.Configuration.UseLibraryWhenImporting;
@@ -150,8 +144,6 @@ public class SettingsWindow : Window
             }
         }
 
-        DrawNPCAppearanceHack();
-
         if(ImGui.CollapsingHeader("Display", ImGuiTreeNodeFlags.DefaultOpen))
         {
             DrawDisplaySettings();
@@ -162,7 +154,7 @@ public class SettingsWindow : Window
     {
         var selectedBrioOpenBehavior = _configurationService.Configuration.Interface.OpenBrioBehavior;
         const string label = "Open Brio";
-        ImGui.SetNextItemWidth(-ImGui.CalcTextSize(label).X);
+        ImGui.SetNextItemWidth(-ImGui.CalcTextSize(label).X - 20);
         using(var combo = ImRaii.Combo(label, selectedBrioOpenBehavior.ToString()))
         {
             if(combo.Success)
@@ -212,6 +204,13 @@ public class SettingsWindow : Window
             _configurationService.ApplyChange();
         }
 
+        bool hideNames = _configurationService.Configuration.Posing.HideNameOnGPoseSettingsWindow;
+        if(ImGui.Checkbox("Hide Name in 'Group Pose Settings' Window", ref hideNames))
+        {
+            _configurationService.Configuration.Posing.HideNameOnGPoseSettingsWindow = hideNames;
+            _configurationService.ApplyChange();
+        }
+
         bool enableBrioColor = _configurationService.Configuration.Appearance.EnableBrioColor;
         if(ImGui.Checkbox("Enable Brio Color", ref enableBrioColor))
         {
@@ -220,7 +219,7 @@ public class SettingsWindow : Window
         }
 
         bool enableBrioScale = _configurationService.Configuration.Appearance.EnableBrioScale;
-        if(ImGui.Checkbox("Enable Brio Text Scale", ref enableBrioScale))
+        if(ImGui.Checkbox("Enable Brio Scale", ref enableBrioScale))
         {
             _configurationService.Configuration.Appearance.EnableBrioScale = enableBrioScale;
             _configurationService.ApplyChange();
@@ -440,7 +439,7 @@ public class SettingsWindow : Window
         {
             var allowNPCHackBehavior = _configurationService.Configuration.Appearance.ApplyNPCHack;
             const string label = "Allow NPC Appearance on Players";
-            ImGui.SetNextItemWidth(-ImGui.CalcTextSize(label).X);
+            ImGui.SetNextItemWidth(-ImGui.CalcTextSize(label).X - 15);
             using(var combo = ImRaii.Combo(label, allowNPCHackBehavior.ToString()))
             {
                 if(combo.Success)
@@ -645,6 +644,14 @@ public class SettingsWindow : Window
     bool resetSettings = false;
     private void DrawAdvancedTab()
     {
+        if(ImGui.CollapsingHeader("Scene Manager", ImGuiTreeNodeFlags.DefaultOpen))
+        {
+            DrawOpenBrioSetting();
+            DrawHideSettings();
+        }
+
+        DrawNPCAppearanceHack();
+
         DrawEnvironmentSection();
 
         if(ImGui.CollapsingHeader("Brio", ImGuiTreeNodeFlags.DefaultOpen))
@@ -771,6 +778,8 @@ public class SettingsWindow : Window
             DrawKeyBind(InputAction.Posing_Translate);
             DrawKeyBind(InputAction.Posing_Rotate);
             DrawKeyBind(InputAction.Posing_Scale);
+            DrawKeyBind(InputAction.Posing_Universal);
+            DrawKeyBind(InputAction.Posing_ToggleLink);
         }
 
         if(enableKeybinds == false)
