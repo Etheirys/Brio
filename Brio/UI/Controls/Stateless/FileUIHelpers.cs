@@ -15,16 +15,15 @@ using Brio.Library.Filters;
 using Brio.UI.Controls.Core;
 using Brio.UI.Controls.Editors;
 using Brio.UI.Windows;
+using Dalamud.Bindings.ImGui;
 using Dalamud.Interface;
 using Dalamud.Interface.Utility.Raii;
-using Dalamud.Bindings.ImGui;
+using Dalamud.Utility;
 using MessagePack;
 using OneOf;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using Dalamud.Utility;
-using System.Threading.Tasks;
 
 namespace Brio.UI.Controls.Stateless;
 
@@ -37,24 +36,24 @@ public class FileUIHelpers
         {
             using(ImRaii.PushColor(ImGuiCol.Button, UIConstants.Transparent))
             {
+                if(ImGui.Button("Save/Load Project"))
+                {
+                    projectWindow.IsOpen = true;
+                }
+                if(ImGui.IsItemHovered())
+                    ImGui.SetTooltip("Save or Load this Scene");
+
+                if(ImGui.Button("View Auto-Saves"))
+                {
+                    autoSaveService.ShowAutoSaves();
+                }
+                if(ImGui.IsItemHovered())
+                    ImGui.SetTooltip("View Scene Auto-Saves");
+
+                ImGui.Separator();
+
                 using(ImRaii.Disabled(true))
                 {
-                    if(ImGui.Button("Save/Load Project"))
-                    {
-                        projectWindow.IsOpen = true;
-                    }
-                    if(ImGui.IsItemHovered())
-                        ImGui.SetTooltip("Save or Load this Scene");
-
-                    if(ImGui.Button("View Auto-Saves"))
-                    {
-                        autoSaveService.ShowAutoSaves();
-                    }
-                    if(ImGui.IsItemHovered())
-                        ImGui.SetTooltip("View Scene Auto-Saves");
-
-                    ImGui.Separator();
-
                     if(ImGui.Button("Export Scene"))
                     {
                         ShowExportSceneModal(entityManager, sceneService);
@@ -391,7 +390,7 @@ public class FileUIHelpers
                          Brio.Log.Info("Exporting MCDF...");
                          if(!path.EndsWith(".mcdf"))
                              path += ".mcdf";
-                    
+
                          var directory = Path.GetDirectoryName(path);
                          if(directory is not null)
                          {

@@ -37,7 +37,7 @@ public class ActorDynamicPoseWidget(ActorDynamicPoseCapability capability) : Wid
             Capability.SetMode(LookAtTargetMode.Camera);
             selected = 0;
         }
-  
+
         if(Capability.Camera is not null)
             cameraVector3 = Capability.Camera.RealPosition;
 
@@ -58,7 +58,7 @@ public class ActorDynamicPoseWidget(ActorDynamicPoseCapability capability) : Wid
             if(ImBrio.ToggleButtonStrip("DynamicFaceControlSelector", new Vector2(ImBrio.GetRemainingWidth(), ImBrio.GetLineHeight()), ref selected, ["Camera", "Position", "Actor"]))
             {
                 Reset();
-             
+
                 Capability.SetTargetLock(false, LookAtTargetType.Head, cameraVector3);
                 Capability.SetTargetLock(false, LookAtTargetType.Eyes, cameraVector3);
                 Capability.SetTargetLock(false, LookAtTargetType.Body, cameraVector3);
@@ -262,10 +262,12 @@ public class ActorDynamicPoseWidget(ActorDynamicPoseCapability capability) : Wid
         }
 
         var data = Capability.GetData();
-
-        headVector3 = data.HeadTarget;
-        bodyVector3 = data.BodyTarget;
-        eyesVector3 = data.EyesTarget;
+        if(data is not null)
+        {
+            headVector3 = data.HeadTarget;
+            bodyVector3 = data.BodyTarget;
+            eyesVector3 = data.EyesTarget;
+        }
     }
 
     public override void ToggleAdvancedWindow()

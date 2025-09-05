@@ -4,6 +4,8 @@ using Brio.Entities;
 using Brio.Game.Core;
 using Brio.Game.GPose;
 using Brio.Game.Scene;
+using Brio.Input;
+using Brio.MCDF.Game.Services;
 using Brio.UI.Controls.Core;
 using Brio.UI.Controls.Stateless;
 using Brio.UI.Entitites;
@@ -30,6 +32,7 @@ public class MainWindow : Window, IDisposable
     private readonly GPoseService _gPoseService;
     private readonly AutoSaveService _autoSaveService;
     private readonly HistoryService _groupedUndoService;
+    private readonly MCDFService _mCDFService;
 
     public MainWindow(
         ConfigurationService configService,
@@ -41,7 +44,8 @@ public class MainWindow : Window, IDisposable
         SceneService sceneService,
         GPoseService gPoseService,
         ProjectWindow projectWindow,
-        AutoSaveService autoSaveService
+        AutoSaveService autoSaveService,
+        MCDFService mCDFService
         )
         : base($"BRIO DEV [{configService.Version}]###brio_main_window", ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.AlwaysAutoResize)
     {
@@ -58,6 +62,7 @@ public class MainWindow : Window, IDisposable
         _sceneService = sceneService;
         _projectWindow = projectWindow;
         _autoSaveService = autoSaveService;
+        _mCDFService = mCDFService;
 
         SizeConstraints = new WindowSizeConstraints
         {
@@ -96,18 +101,6 @@ public class MainWindow : Window, IDisposable
         }
 
         EntityHelpers.DrawEntitySection(_entityManager.SelectedEntity);
-    }
-
-    private void OnMainWindowToggle()
-    {
-        this.IsOpen = !this.IsOpen;
-    }
-
-    private void OnPromptWindowToggle()
-    {
-        _configurationService.Configuration.InputManager.ShowPromptsInGPose = !_configurationService.Configuration.InputManager.ShowPromptsInGPose;
-
-        _configurationService.ApplyChange();
     }
 
     private void DrawHeaderButtons()
@@ -151,7 +144,8 @@ public class MainWindow : Window, IDisposable
 
         //
 
-        FileUIHelpers.DrawProjectPopup(_sceneService, _entityManager, _projectWindow, _autoSaveService);
+        using(ImRaii.Disabled(_mCDFService.IsApplyingMCDF))
+            FileUIHelpers.DrawProjectPopup(_sceneService, _entityManager, _projectWindow, _autoSaveService);
     }
 
     public void Dispose()

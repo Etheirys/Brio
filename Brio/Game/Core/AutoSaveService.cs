@@ -2,6 +2,7 @@
 using Brio.Files;
 using Brio.Game.GPose;
 using Brio.Game.Scene;
+using Brio.MCDF.Game.Services;
 using Brio.Resources;
 using Brio.UI;
 using Dalamud.Plugin;
@@ -21,15 +22,17 @@ public class AutoSaveService : IDisposable
     private readonly IFramework _framework;
     private readonly GPoseService _gPoseService;
     private readonly SceneService _sceneService;
+    private readonly MCDFService _mCDFService;
 
     public bool IsEnabled = true;
 
-    public AutoSaveService(IDalamudPluginInterface pluginInterface, IFramework framework, SceneService sceneService, GPoseService gPoseService)
+    public AutoSaveService(IDalamudPluginInterface pluginInterface, IFramework framework, SceneService sceneService, MCDFService mCDFService, GPoseService gPoseService)
     {
         _pluginInterface = pluginInterface;
         _framework = framework;
         _gPoseService = gPoseService;
         _sceneService = sceneService;
+        _mCDFService = mCDFService;
 
         gPoseService.OnGPoseStateChange += GPoseService_OnGPoseStateChange;
     }
@@ -78,6 +81,12 @@ public class AutoSaveService : IDisposable
 
         if(ConfigurationService.Instance.Configuration.AutoSave.AutoSaveSystemEnabled)
         {
+            if(_mCDFService.IsApplyingMCDF)
+            {
+                Brio.Log.Verbose($"IsApplyingMCDF aborting this autosave ");
+                return;
+            }
+
             try
             {
                 var scene = _sceneService.GenerateSceneFile();

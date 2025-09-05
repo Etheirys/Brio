@@ -52,9 +52,12 @@ public class MCDFService
     public Task? UiBlockingComputation { get; private set; }
     public string DataApplicationProgress { get; private set; } = string.Empty;
 
+    public bool IsSavingMCDF => UiBlockingComputation?.Status == TaskStatus.Running;
+    public bool IsApplyingMCDF => _currentApplicationCount > 0;
+
     //
 
-
+    private int _currentApplicationCount = 0;
 
     private int _globalFileCounter = 0;
 
@@ -83,7 +86,9 @@ public class MCDFService
     }
     public async Task SaveMCDF(string path, string description, IGameObject gameObject)
     {
-        await Task.Run(async () => await SaveCharaFileAsync(description, path, gameObject).ConfigureAwait(false));
+        UiBlockingComputation = Task.Run(async () => await SaveCharaFileAsync(description, path, gameObject).ConfigureAwait(false));
+
+        await UiBlockingComputation.ConfigureAwait(false);
     }
 
     public void ApplyMCDFToGPoseTarget()
@@ -102,6 +107,8 @@ public class MCDFService
             return;
 
         var name = gameObject.Name.TextValue;
+
+        _currentApplicationCount++;
 
         await (McdfApplicationTask = Task.Run(async () =>
         {
@@ -147,6 +154,8 @@ public class MCDFService
             }
             finally
             {
+                _currentApplicationCount--;
+
                 // delete extracted files
                 foreach(var file in actuallyExtractedFiles)
                 {
