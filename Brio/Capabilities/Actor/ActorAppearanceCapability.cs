@@ -73,6 +73,8 @@ public class ActorAppearanceCapability : ActorCharacterCapability
     public bool CanMCDF => _mCDFService.IsIPCAvailable;
     public bool IsSelf => _targetService.IsSelf(GameObject);
 
+    public bool IsAnyMCDFLoading => _mCDFService.IsApplyingMCDF;
+
     public bool IsHidden => CurrentAppearance.ExtendedAppearance.Transparency == 0;
 
     public ActorAppearanceCapability(ActorEntity parent,CharacterHandlerService characterHandlerService, MCDFService mCDFService, IFramework framework, ActorAppearanceService actorAppearanceService,
@@ -95,10 +97,16 @@ public class ActorAppearanceCapability : ActorCharacterCapability
         _penumbraService.OnPenumbraRedraw += OnPenumbraRedraw;
     }
 
-    public async Task LoadMcdf(string path)
+    public async Task LoadMCDF(string path)
     {
         try
         {
+            if(_mCDFService.IsApplyingMCDF)
+            {
+                Brio.NotifyError("Another MCDF is loading, Please wait for it to finish.");
+                return;
+            }
+
             Entity.LoadingDescription = "Loading MCDF...";
             Entity.IsLoading = true;
 

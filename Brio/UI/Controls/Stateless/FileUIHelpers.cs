@@ -308,7 +308,7 @@ public class FileUIHelpers
                 }
                 else if(r is MareCharacterDataFile mareFile)
                 {
-                    _ = capability.LoadMcdf(mareFile.GetPath());
+                    _ = capability.LoadMCDF(mareFile.GetPath());
                 }
             });
 
@@ -332,7 +332,7 @@ public class FileUIHelpers
                 }
                 else if(r is MareCharacterDataFile mareFile)
                 {
-                    _ = capability.LoadMcdf(mareFile.GetPath());
+                    _ = capability.LoadMCDF(mareFile.GetPath());
                 }
             });
         }
@@ -375,7 +375,7 @@ public class FileUIHelpers
                              ConfigurationService.Instance.Configuration.LastMCDFPath = directory;
                              ConfigurationService.Instance.Save();
                          }
-                         _ = capability.LoadMcdf(path);
+                         _ = capability.LoadMCDF(path);
                      }
                  }, 1, ConfigurationService.Instance.Configuration.LastMCDFPath, true);
     }

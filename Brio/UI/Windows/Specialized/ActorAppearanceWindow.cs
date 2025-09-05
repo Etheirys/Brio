@@ -4,6 +4,7 @@ using Brio.Entities.Actor;
 using Brio.Game.Actor.Appearance;
 using Brio.Game.Actor.Extensions;
 using Brio.Game.GPose;
+using Brio.MCDF.Game.Services;
 using Brio.UI.Controls.Editors;
 using Brio.UI.Controls.Stateless;
 using Brio.UI.Entitites;
@@ -22,17 +23,18 @@ public class ActorAppearanceWindow : Window, IDisposable
     private readonly GearEditor _gearEditor;
     private readonly ExtendedAppearanceEditor _extendedAppearanceEditor;
     private readonly ModelShaderEditor _modelShaderEditor;
+    private readonly MCDFService _mCDFService;
 
     private readonly EntityManager _entityManager;
     private readonly GPoseService _gPoseService;
     private ActorAppearanceCapability _capability = null!;
     private AppearanceImportOptions _importOptions = AppearanceImportOptions.Default;
 
-    public ActorAppearanceWindow(EntityManager entityManager, GPoseService gPoseService) : base($"{Brio.Name} - Appearance###brio_character_editor_window")
+    public ActorAppearanceWindow(EntityManager entityManager, GPoseService gPoseService, MCDFService mCDFService) : base($"{Brio.Name} - Appearance###brio_character_editor_window")
     {
         Namespace = "brio_character_editor_namespace";
 
-
+        _mCDFService = mCDFService;
         _entityManager = entityManager;
         _gPoseService = gPoseService;
         _customizeEditor = new();
@@ -187,7 +189,7 @@ public class ActorAppearanceWindow : Window, IDisposable
 
         using(ImRaii.Disabled(_capability.CanMCDF is false))
         {
-            using(ImRaii.Disabled(_capability.IsSelf))
+            using(ImRaii.Disabled(_capability.IsSelf || _capability.IsAnyMCDFLoading))
             {
                 if(ImBrio.FontIconButton("load_mcdf", FontAwesomeIcon.CloudDownloadAlt, "Load MCDF"))
                 {
@@ -197,6 +199,8 @@ public class ActorAppearanceWindow : Window, IDisposable
             }
             if(_capability.IsSelf)
                 ImBrio.AttachToolTip("Can not load a MCDF on your Player Character. Spawn an Actor to load a MCDF.");
+            if(_capability.IsAnyMCDFLoading)
+                ImBrio.AttachToolTip("Another MCDF is loading, Please wait for it to finish.");
 
             using(ImRaii.Disabled(_capability.HasMCDF))
             {

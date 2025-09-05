@@ -28,7 +28,7 @@ public class MareCharacterDataFileInfo : AppliableActorFileInfoBase<MareCharacte
         ActorAppearanceCapability? capability;
         if(actor.TryGetCapability<ActorAppearanceCapability>(out capability) && capability != null)
         {
-            _ = capability.LoadMcdf(file.GetPath());
+            _ = capability.LoadMCDF(file.GetPath());
         }
     }
 }

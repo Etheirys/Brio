@@ -1,6 +1,7 @@
 ﻿using Brio.Config;
 using Brio.Game.Actor;
 using Brio.Game.Core;
+using Brio.Game.GPose;
 using Brio.IPC;
 using Brio.MCDF.API.Data;
 using Brio.MCDF.Game.FileCache;
@@ -25,7 +26,7 @@ using System.Threading.Tasks;
 
 namespace Brio.MCDF.Game.Services;
 
-public class MCDFService
+public class MCDFService : IDisposable
 {
     public static readonly IImmutableList<string> AllowedFileExtensions = [".mdl", ".tex", ".mtrl", ".tmb", ".pap", ".avfx", ".atex", ".sklb", ".eid", ".phyb", ".pbd", ".scd", ".skp", ".shpk"];
 
@@ -39,6 +40,7 @@ public class MCDFService
     private readonly TransientResourceService _transientResourceService;
 
     private readonly CharacterHandlerService _characterHandlerService;
+    private readonly GPoseService _gPoseService;
 
     private readonly PenumbraService _penumbraService;
     private readonly GlamourerService _glamourerService;
@@ -61,7 +63,7 @@ public class MCDFService
 
     private int _globalFileCounter = 0;
 
-    public MCDFService(IFramework framework, CharacterHandlerService characterHandlerService, ActorAppearanceService actorAppearanceService, ConfigurationService configurationService, FileCacheService fileCacheService, TargetService targetService, ActorRedrawService actorRedrawService, DalamudService dalamudService,
+    public MCDFService(IFramework framework, CharacterHandlerService characterHandlerService, GPoseService gPoseService, ActorAppearanceService actorAppearanceService, ConfigurationService configurationService, FileCacheService fileCacheService, TargetService targetService, ActorRedrawService actorRedrawService, DalamudService dalamudService,
         PenumbraService penumbraService, TransientResourceService transientResourceService, GlamourerService glamourerService, CustomizePlusService customizePlusService)
     {
         _framework = framework;
@@ -74,10 +76,31 @@ public class MCDFService
         _transientResourceService = transientResourceService;
 
         _characterHandlerService = characterHandlerService;
+        _gPoseService = gPoseService;
 
         _penumbraService = penumbraService;
         _glamourerService = glamourerService;
         _customizePlusService = customizePlusService;
+
+        _gPoseService.OnGPoseStateChange += OnGPoseStateChange;
+    }
+
+    private void OnGPoseStateChange(bool newState)
+    {
+        if(newState is false)
+        {
+            try
+            {
+                if(IsApplyingMCDF)
+                {
+                    McdfApplicationTask?.Dispose(); //This is not good code and does nothing
+                }
+            }
+            catch(Exception ex)
+            {
+                Brio.Log.Verbose(ex, "Exception while trying to stop the application process of a MCDF on GPose exit");
+            }
+        }
     }
 
     public async Task LoadMCDFHeader(string path)
@@ -868,5 +891,12 @@ public class MCDFService
         _configurationService.Configuration.MCDF.DataStorage.BonesDictionary[hash] = output;
         _configurationService.Save();
         return output;
+    }
+
+    public void Dispose()
+    {
+        _gPoseService.OnGPoseStateChange -= OnGPoseStateChange;
+
+        GC.SuppressFinalize(this);
     }
 }
