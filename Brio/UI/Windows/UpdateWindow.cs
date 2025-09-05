@@ -23,7 +23,7 @@ public class UpdateWindow : Window
     private bool _scrollToTop = false;
     private float _closeButtonWidth => 310f * ImGuiHelpers.GlobalScale;
 
-    public UpdateWindow(ConfigurationService configurationService, ImBrioText imBrioText) : base($"###brio_welcomewindow", ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoDocking | ImGuiWindowFlags.NoTitleBar | ImGuiWindowFlags.NoDecoration)
+    public UpdateWindow(ConfigurationService configurationService, ImBrioText imBrioText) : base($"  BRIO WELCOME###brio_welcomewindow", ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoDocking | ImGuiWindowFlags.NoTitleBar | ImGuiWindowFlags.NoDecoration)
     {
         Namespace = "brio_welcomewindow_namespace";
 
