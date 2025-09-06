@@ -21,7 +21,7 @@ public class CameraWindow : Window, IDisposable
     private readonly CutsceneManager _cutsceneManager;
     private readonly ConfigurationService _configService;
 
-    public CameraWindow(EntityManager entityManager, GPoseService gPoseService, CutsceneManager cutsceneManager, ConfigurationService configService, VirtualCameraManager virtualCameraService) : base($"{Brio.Name} - Camera###brio_camera_window")
+    public CameraWindow(EntityManager entityManager, GPoseService gPoseService, CutsceneManager cutsceneManager, ConfigurationService configService, VirtualCameraManager virtualCameraService) : base($"{Brio.Name} - CAMERA###brio_camera_window")
     {
         Namespace = "brio_camera_namespace";
 

@@ -101,7 +101,7 @@ public class LibraryWindow : Window
         PosingService posingService,
         IFramework frameworkService,
         SettingsWindow settingsWindow)
-        : base($"{Brio.Name} Library###brio_library_window")
+        : base($"{Brio.Name} LIBRARY###brio_library_window")
     {
         this.Namespace = "brio_library_namespace";
 

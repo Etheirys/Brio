@@ -23,7 +23,7 @@ public class ProjectWindow : Window, IDisposable
     static Project? selectedItem;
     private const float InfoPaneWidth = 200;
 
-    public ProjectWindow(ProjectSystem projectSystem, MCDFService mCDFService, GPoseService gPoseService) : base($"Project Window BETA###brio_project_window", ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse)
+    public ProjectWindow(ProjectSystem projectSystem, MCDFService mCDFService, GPoseService gPoseService) : base($"{Brio.Name} PROJECT BETA###brio_project_window", ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse)
     {
         Namespace = "brio_project_namespace";
 
@@ -51,40 +51,36 @@ public class ProjectWindow : Window, IDisposable
         using(ImRaii.Disabled(_mCDFService.IsApplyingMCDF || _mCDFService.IsSavingMCDF))
         {
             ImBrio.ToggleButtonStrip("library_filters_selector", new Vector2(ImBrio.GetRemainingWidth(), ImBrio.GetLineHeight()), ref selected, ["Load", "Save"]);
-            //var firstPos = ImGui.GetCursorPos();
 
             if(selected == 0 || _projectSystem.IsLoading)
             {
                 DrawLoad();
-
             }
             else
             {
                 var windowSize = ImGui.GetWindowSize();
-
                 var lastPos = ImGui.GetCursorPos();
 
-                //ImGui.SetCursorPos(firstPos);
+                using var child = ImRaii.Child("###new_pane", new Vector2(ImBrio.GetRemainingWidth(), ImBrio.GetRemainingHeight()), false);
 
-                using(var child = ImRaii.Child("###new_pane", new Vector2(ImBrio.GetRemainingWidth(), ImBrio.GetRemainingHeight()), false))
+                if(child.Success)
                 {
-                    if(child.Success)
+                    ImGui.Text($"Save New Project");
+
+                    ImGui.InputText("Project Name###brio_popup_name", ref currentActorName, 35);
+                    ImGui.InputText("Project Description###brio_popup_dis", ref currentActorDis, 35);
+
+                    using(ImRaii.Disabled(string.IsNullOrEmpty(currentActorName)))
                     {
-                        ImGui.Text($"Save New Project");
+                        if(ImBrio.Button("Save Project", FontAwesomeIcon.Save, new(135, 0), centerTest: true, hoverText: "Save Project"))
+                        {
+                            _projectSystem.NewProject(currentActorName, currentActorDis);
 
-                        ImGui.InputText("Project Name###brio_popup_name", ref currentActorName, 35);
-                        ImGui.InputText("Project Description###brio_popup_dis", ref currentActorDis, 35);
+                            selected = 0;
 
-                        using(ImRaii.Disabled(string.IsNullOrEmpty(currentActorName)))
-                            if(ImBrio.Button("Save Project", FontAwesomeIcon.Save, new(135, 0), centerTest: true, hoverText: "Save Project"))
-                            {
-                                _projectSystem.NewProject(currentActorName, currentActorDis);
-
-                                selected = 0;
-
-                                currentActorName = string.Empty;
-                                currentActorDis = string.Empty;
-                            }
+                            currentActorName = string.Empty;
+                            currentActorDis = string.Empty;
+                        }
                     }
                 }
             }

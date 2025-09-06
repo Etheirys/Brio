@@ -34,7 +34,7 @@ namespace Brio;
 
 public class Brio : IDalamudPlugin
 {
-    public const string Name = "Brio";
+    public const string Name = "BRIO DEV";
 
     private static ServiceProvider? _services = null;
 

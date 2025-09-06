@@ -19,7 +19,7 @@ public class ActionTimelineWindow : Window, IDisposable
     private readonly GPoseService _gPoseService;
     private readonly CutsceneManager _cutsceneManager;
 
-    public ActionTimelineWindow(EntityManager entityManager, CutsceneManager cutsceneManager, GPoseService gPoseService, PhysicsService physicsService, ConfigurationService configurationService) : base($"{Brio.Name} - Animation Control###brio_action_timelines_window")
+    public ActionTimelineWindow(EntityManager entityManager, CutsceneManager cutsceneManager, GPoseService gPoseService, PhysicsService physicsService, ConfigurationService configurationService) : base($"{Brio.Name} - ANIMATION CONTROL###brio_action_timelines_window")
     {
         Namespace = "brio_action_timelines_namespace";
 

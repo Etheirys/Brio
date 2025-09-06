@@ -30,7 +30,7 @@ public class ActorAppearanceWindow : Window, IDisposable
     private ActorAppearanceCapability _capability = null!;
     private AppearanceImportOptions _importOptions = AppearanceImportOptions.Default;
 
-    public ActorAppearanceWindow(EntityManager entityManager, GPoseService gPoseService, MCDFService mCDFService) : base($"{Brio.Name} - Appearance###brio_character_editor_window")
+    public ActorAppearanceWindow(EntityManager entityManager, GPoseService gPoseService, MCDFService mCDFService) : base($"{Brio.Name} - APPEARANCE###brio_character_editor_window")
     {
         Namespace = "brio_character_editor_namespace";
 
@@ -177,7 +177,7 @@ public class ActorAppearanceWindow : Window, IDisposable
         if(ImBrio.Button("Redraw", FontAwesomeIcon.PaintBrush, buttonSize))
             _ = _capability.Redraw();
 
-        using(ImRaii.Disabled(!_capability.HasPenumbraIntegration || _capability.HasCustomizePlusIntegration))
+        using(ImRaii.Disabled(!_capability.HasPenumbraIntegration && !_capability.HasCustomizePlusIntegration && !_capability.HasGlamourerIntegration))
         {
             if(ImBrio.FontIconButton("toggle_adv_bar", isAdvancedMenuOpen ? FontAwesomeIcon.ArrowUp : FontAwesomeIcon.ArrowDown, "Toggle Advanced Menu"))
             {

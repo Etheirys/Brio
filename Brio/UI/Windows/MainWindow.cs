@@ -47,7 +47,7 @@ public class MainWindow : Window, IDisposable
         AutoSaveService autoSaveService,
         MCDFService mCDFService
         )
-        : base($"BRIO DEV [{configService.Version}]###brio_main_window", ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.AlwaysAutoResize)
+        : base($" {Brio.Name} [{configService.Version}]###brio_main_window", ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.AlwaysAutoResize)
     {
         Namespace = "brio_main_namespace";
 

@@ -11,7 +11,7 @@ public class AutoSaveWindow : Window, IDisposable
     private readonly GPoseService _gPoseService;
 
 
-    public AutoSaveWindow(ConfigurationService configurationService, GPoseService gPoseService) : base($"Auto Saves###brio_autosaves_window", ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse)
+    public AutoSaveWindow(ConfigurationService configurationService, GPoseService gPoseService) : base($"{Brio.Name} AUTO-SAVE###brio_autosaves_window", ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse)
     {
         Namespace = "brio_autosaves_window";
 
