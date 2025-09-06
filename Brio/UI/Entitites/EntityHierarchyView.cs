@@ -37,14 +37,14 @@ public class EntityHierarchyView(EntityManager entityManager, GPoseService gPose
             _lastSelectedId = selectedEntityId;
         }
 
-        if(InputManagerService.ActionKeysPressed(InputAction.Interface_SelectAllActors))
-        {
-            entityManager.ClearSelectedEntities();
-            foreach(var e in entityManager.TryGetAllActors())
-            {
-                entityManager.AddSelectedEntity(e.Id);
-            }
-        }
+        //if(InputManagerService.ActionKeysPressed(InputAction.Interface_SelectAllActors))
+        //{
+        //    entityManager.ClearSelectedEntities();
+        //    foreach(var e in entityManager.TryGetAllActors())
+        //    {
+        //        entityManager.AddSelectedEntity(e.Id);
+        //    }
+        //}
 
         using(ImRaii.PushId($"entity_hierarchy_{root.Id}"))
         {
