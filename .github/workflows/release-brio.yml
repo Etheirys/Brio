@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: Version tag to create
+        description: Version to create
         required: true
 
 jobs:

@@ -1,4 +1,4 @@
-name: Release Brio
+name: Release Testing Brio
 
 permissions:
   contents: write
@@ -7,10 +7,10 @@ on:
   workflow_dispatch:
     inputs:
       version-testing:
-        description: Testing Version tag to create
+        description: Testing Version to create
         required: true
       version-live:
-        description: Live Version to create
+        description: Live Version
         required: true
 
 jobs:
@@ -65,7 +65,7 @@ jobs:
         $ver = '${{ github.event.inputs.version-testing }}'
         $ver2 = '${{ github.event.inputs.version-live }}'
         $path = './Resources/Templates/repotesting.tmpl'
-        $new_path = './repo_test.json
+        $new_path = './repo_test.json'
         $content = get-content -path $path
         $content = $content -replace '{version_testing}',$ver
         $content = $content -replace '{version_live}',$ver2
