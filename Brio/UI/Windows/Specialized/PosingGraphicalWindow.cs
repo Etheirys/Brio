@@ -4,6 +4,7 @@ using Brio.Config;
 using Brio.Core;
 using Brio.Entities;
 using Brio.Entities.Actor;
+using Brio.Entities.Core;
 using Brio.Game.Actor.Appearance;
 using Brio.Game.Camera;
 using Brio.Game.GPose;
@@ -12,10 +13,10 @@ using Brio.Resources;
 using Brio.UI.Controls.Core;
 using Brio.UI.Controls.Editors;
 using Brio.UI.Controls.Stateless;
+using Dalamud.Bindings.ImGui;
 using Dalamud.Interface;
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Interface.Windowing;
-using Dalamud.Bindings.ImGui;
 using OneOf.Types;
 using System;
 using System.Collections.Generic;
@@ -26,9 +27,13 @@ namespace Brio.UI.Windows.Specialized;
 
 public class PosingGraphicalWindow : Window, IDisposable
 {
+    static bool _hasPushedScale = false;
+    static float _lastGlobalScale;
+
     private const float RightPanelWidth = 250;
 
     private readonly GraphicalPosePositionFile _posePositions;
+    private readonly HistoryService _groupedUndoService;
     private readonly EntityManager _entityManager;
     private readonly CameraService _cameraService;
     private readonly ConfigurationService _configurationService;
@@ -40,15 +45,17 @@ public class PosingGraphicalWindow : Window, IDisposable
     private float _closestHover = float.MaxValue;
 
     private Matrix4x4? _trackingMatrix;
+    private List<(EntityId id, PoseInfo info, Transform model)>? _groupedSnapshotPending = null;
 
     int _selectedPane = 0;
     private bool _hideControlPane = false;
 
-    public PosingGraphicalWindow(EntityManager entityManager, CameraService cameraService, PhysicsService physicsService, ConfigurationService configurationService, PosingService posingService, GPoseService gPoseService) : base($"{Brio.Name} - Posing###brio_posing_graphical_window")
+    public PosingGraphicalWindow(EntityManager entityManager, HistoryService groupedUndoService, CameraService cameraService, PhysicsService physicsService, ConfigurationService configurationService, PosingService posingService, GPoseService gPoseService) : base($"{Brio.Name} - POSING###brio_posing_graphical_window")
     {
         Namespace = "brio_posing_graphical_namespace";
 
         _entityManager = entityManager;
+        _groupedUndoService = groupedUndoService;
         _cameraService = cameraService;
         _configurationService = configurationService;
         _posingService = posingService;
@@ -86,7 +93,23 @@ public class PosingGraphicalWindow : Window, IDisposable
             x->DesiredSize.Y = x->DesiredSize.X * 0.5f;
         });
 
+        if(_configurationService.Configuration.Appearance.EnableBrioScale)
+        {
+            var imIO = ImGui.GetIO();
+            _lastGlobalScale = imIO.FontGlobalScale;
+            imIO.FontGlobalScale = 1f;
+            _hasPushedScale = true;
+        }
+
         base.PreDraw();
+    }
+
+    public override void PostDraw()
+    {
+        if(_hasPushedScale)
+            ImGui.GetIO().FontGlobalScale = _lastGlobalScale;
+
+        base.PostDraw();
     }
 
     public override void Draw()
@@ -223,7 +246,7 @@ public class PosingGraphicalWindow : Window, IDisposable
 
         ImBrio.RightAlign(buttonWidth, 4);
 
-        using(ImRaii.Disabled(!posing.HasUndoStack))
+        using(ImRaii.Disabled(!posing.CanUndo))
         {
             if(ImBrio.FontIconButton(FontAwesomeIcon.Backward, new(buttonWidth, 0)))
                 posing.Undo();
@@ -234,7 +257,7 @@ public class PosingGraphicalWindow : Window, IDisposable
 
         ImGui.SameLine();
 
-        using(ImRaii.Disabled(!posing.HasRedoStack))
+        using(ImRaii.Disabled(!posing.CanRedo))
         {
             if(ImBrio.FontIconButton(FontAwesomeIcon.Forward, new(buttonWidth, 0)))
                 posing.Redo();
@@ -419,16 +442,100 @@ public class PosingGraphicalWindow : Window, IDisposable
 
         if(_trackingMatrix.HasValue)
         {
+            var delta = _trackingMatrix.Value.ToTransform().CalculateDiff(originalMatrix.ToTransform());
+
             selected.Switch(
                 boneSelect => posing.SkeletonPosing.GetBonePose(boneSelect).Apply(_trackingMatrix.Value.ToTransform(), originalMatrix.ToTransform()),
-                _ => posing.ModelPosing.Transform += _trackingMatrix.Value.ToTransform().CalculateDiff(originalMatrix.ToTransform()),
-                _ => posing.ModelPosing.Transform += _trackingMatrix.Value.ToTransform().CalculateDiff(originalMatrix.ToTransform())
+                _ =>
+                {
+                    // On first application while starting a gizmo drag, capture before-states for grouped undo
+                    if(_groupedSnapshotPending == null && ImBrioGizmo.IsUsing())
+                    {
+                        var list = new List<(EntityId, PoseInfo, Transform)>();
+                        foreach(var id in _entityManager.SelectedEntityIds)
+                        {
+                            if(!_entityManager.TryGetEntity(id, out var ent))
+                                continue;
+
+                            if(!ent.TryGetCapability<PosingCapability>(out var cap))
+                                continue;
+
+                            list.Add((id, cap.SkeletonPosing.PoseInfo.Clone(), cap.ModelPosing.Transform));
+                        }
+                        _groupedSnapshotPending = list;
+                    }
+
+                    // apply delta to all selected entities
+                    foreach(var id in _entityManager.SelectedEntityIds)
+                    {
+                        if(!_entityManager.TryGetEntity(id, out var ent))
+                            continue;
+
+                        if(!ent.TryGetCapability<PosingCapability>(out var cap))
+                            continue;
+
+                        if(cap.ModelPosing.Freeze)
+                            continue;
+
+                        cap.ModelPosing.Transform += delta;
+                    }
+                },
+                _ => 
+                {
+                    // On first application while starting a gizmo drag, capture before-states for grouped undo
+                    if(_groupedSnapshotPending == null && ImBrioGizmo.IsUsing())
+                    {
+                        var list = new List<(EntityId, PoseInfo, Transform)>();
+                        foreach(var id in _entityManager.SelectedEntityIds)
+                        {
+                            if(!_entityManager.TryGetEntity(id, out var ent))
+                                continue;
+
+                            if(!ent.TryGetCapability<PosingCapability>(out var cap))
+                                continue;
+
+                            list.Add((id, cap.SkeletonPosing.PoseInfo.Clone(), cap.ModelPosing.Transform));
+                        }
+                        _groupedSnapshotPending = list;
+                    }
+
+                    // apply delta to all selected entities
+                    foreach(var id in _entityManager.SelectedEntityIds)
+                    {
+                        if(!_entityManager.TryGetEntity(id, out var ent))
+                            continue;
+
+                        if(!ent.TryGetCapability<PosingCapability>(out var cap))
+                            continue;
+
+                        if(cap.ModelPosing.Freeze)
+                            continue;
+
+                        cap.ModelPosing.Transform += delta;
+                    }
+                }
             );
         }
 
         if(!ImBrioGizmo.IsUsing() && _trackingMatrix.HasValue)
         {
-            posing.Snapshot(false, false);
+            if(_groupedSnapshotPending != null && _groupedSnapshotPending.Count > 0)
+            {
+                _groupedUndoService.Snapshot(_groupedSnapshotPending);
+                _groupedSnapshotPending = null;
+            }
+       
+            foreach(var eid in _entityManager.SelectedEntityIds)
+            {
+                if(!_entityManager.TryGetEntity(eid, out var ent))
+                    continue;
+
+                if(!ent.TryGetCapability<PosingCapability>(out var cap))
+                    continue;
+
+                cap.Snapshot(false, false);
+            }
+
             _trackingMatrix = null;
         }
     }

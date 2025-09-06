@@ -20,11 +20,6 @@ public static class CharacterExtensions
         return (StructsCharacter*)go.Address;
     }
 
-    public unsafe static BrioDrawData* BrioDrawData(this ICharacter go)
-    {
-        return (BrioDrawData*)&go.Native()->DrawData;
-    }
-
     public unsafe static bool HasCompanionSlot(this ICharacter go)
     {
         var native = go.Native();

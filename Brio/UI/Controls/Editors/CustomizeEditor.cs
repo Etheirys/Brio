@@ -3,10 +3,11 @@ using Brio.Game.Actor.Appearance;
 using Brio.Resources;
 using Brio.Resources.Sheets;
 using Brio.UI.Controls.Stateless;
+using Dalamud.Bindings.ImGui;
 using Dalamud.Game.ClientState.Objects.Enums;
 using Dalamud.Interface;
 using Dalamud.Interface.Utility.Raii;
-using Dalamud.Bindings.ImGui;
+using FFXIVClientStructs.FFXIV.Client.Game;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -24,26 +25,34 @@ public class CustomizeEditor()
 
     public bool DrawCustomize(ref ActorAppearance currentAppearance, ActorAppearance originalAppearance, ActorAppearanceCapability capability)
     {
+        bool didChange = false;
+   
         _capability = capability;
 
-        bool didChange = false;
-
-        didChange |= DrawReset(ref currentAppearance, originalAppearance);
-        didChange |= DrawModelIdSelector(ref currentAppearance.ModelCharaId);
-
-        if(_capability.IsHuman)
+        var slotSizes = ImGui.GetContentRegionAvail() / new Vector2(1, 1.32f);
+        using(var customizeGroup = ImRaii.Child("customizeGroup", slotSizes))
         {
-            ImGui.Separator();
-            didChange |= DrawRaceSelector(ref currentAppearance.Customize);
-            ImGui.Separator();
+            if(customizeGroup.Success)
+            {
 
-            var menus = BrioCharaMakeType.BuildMenus(currentAppearance);
-            didChange |= DrawMenus(ref currentAppearance, menus);
-        }
-        else
-        {
-            if(ImGui.Button("Make Human"))
-                _ = _capability.MakeHuman();
+                didChange |= DrawReset(ref currentAppearance, originalAppearance);
+                didChange |= DrawModelIdSelector(ref currentAppearance.ModelCharaId);
+
+                if(_capability.IsHuman)
+                {
+                    ImGui.Separator();
+                    didChange |= DrawRaceSelector(ref currentAppearance.Customize);
+                    ImGui.Separator();
+
+                    var menus = BrioCharaMakeType.BuildMenus(currentAppearance);
+                    didChange |= DrawMenus(ref currentAppearance, menus);
+                }
+                else
+                {
+                    if(ImGui.Button("Make Human"))
+                        _ = _capability.MakeHuman();
+                }
+            }
         }
 
         return didChange;

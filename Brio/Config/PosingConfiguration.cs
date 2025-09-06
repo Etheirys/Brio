@@ -27,6 +27,7 @@ public class PosingConfiguration
 
     // Hooks
     public bool DisableGPoseMouseSelect { get; set; } = false;
+    public bool HideNameOnGPoseSettingsWindow { get; set; } = true;
 
     // Targeting
     public bool GPoseTargetChangesWithBrio { get; set; } = false;

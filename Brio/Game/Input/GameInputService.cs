@@ -39,22 +39,25 @@ public class GameInputService : IDisposable
 
         if(_virtualCameraService.CurrentCamera?.IsFreeCamera == true)
         {
-            _virtualCameraService.Update(mouseFrame, keyboardFrame);
+            _virtualCameraService.Update(mouseFrame);
 
-            if(_virtualCameraService.CurrentCamera.FreeCamValues.IsMovementEnabled && Config.ConfigurationService.Instance.Configuration.Input.EnableKeyHandlingOnKeyMod)
+            keyboardFrame->KeyState[69] = 0; // E
+            keyboardFrame->KeyState[81] = 0; // Q
+            keyboardFrame->KeyState[32] = 0; // SPACE
+
+            if(_virtualCameraService.CurrentCamera.FreeCamValues.IsMovementEnabled && 
+                Config.ConfigurationService.Instance.Configuration.InputManager.EnableKeyHandlingOnKeyMod)
             {
-                if(keyboardFrame->IsKeyDown(VirtualKey.CONTROL, true) || keyboardFrame->IsKeyDown(VirtualKey.SHIFT, true) || keyboardFrame->IsKeyDown(VirtualKey.MENU, true) || keyboardFrame->IsKeyDown(VirtualKey.SPACE, true))
+                for(int i = 0; i < KeyboardFrame.KeyStateLength; i++)
                 {
-                    keyboardFrame->HandleAllKeys();
+                    if(i == 27) // VirtualKey.ESCAPE
+                        continue;
+                    keyboardFrame->KeyState[i] = 0;
                 }
             }
         }
 
-        if(HandleAllKeys)
-        {
-            keyboardFrame->HandleAllKeys();
-        }
-        else if(AllowEscape is false)
+        if(AllowEscape is false)
         {
             keyboardFrame->HandleKey(VirtualKey.ESCAPE);
         }

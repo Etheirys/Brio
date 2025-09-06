@@ -30,6 +30,11 @@ public class PosingService
     {
         OverlayFilter = new BoneFilter(this);
         OverlayFilter.DisableCategory("ex");
+        OverlayFilter.DisableCategory("weapon");
+        OverlayFilter.DisableCategory("clothing");
+        OverlayFilter.DisableCategory("other");
+        OverlayFilter.DisableCategory("legacy");
+
 
         DefaultImporterOptions = new PoseImporterOptions(new BoneFilter(this), TransformComponents.Rotation, false);
         DefaultImporterOptions.BoneFilter.DisableCategory("weapon");

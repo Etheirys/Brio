@@ -1,11 +1,13 @@
 ﻿using Brio.Game.Core;
 using Brio.Game.GPose;
+using Brio.MCDF.Game.Services;
 using Brio.UI.Controls.Core;
 using Brio.UI.Controls.Stateless;
+using Brio.UI.Entitites;
+using Dalamud.Bindings.ImGui;
 using Dalamud.Interface;
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Interface.Windowing;
-using Dalamud.Bindings.ImGui;
 using System;
 using System.Numerics;
 
@@ -15,17 +17,19 @@ public class ProjectWindow : Window, IDisposable
 {
     private readonly ProjectSystem _projectSystem;
     private readonly GPoseService _gPoseService;
+    private readonly MCDFService _mCDFService;
 
     int selected = 0;
     static Project? selectedItem;
     private const float InfoPaneWidth = 200;
 
-    public ProjectWindow(ProjectSystem projectSystem, GPoseService gPoseService) : base($"Project Window BETA###brio_project_window", ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse)
+    public ProjectWindow(ProjectSystem projectSystem, MCDFService mCDFService, GPoseService gPoseService) : base($"{Brio.Name} PROJECT BETA###brio_project_window", ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse)
     {
         Namespace = "brio_project_namespace";
 
         _projectSystem = projectSystem;
         _gPoseService = gPoseService;
+        _mCDFService = mCDFService;
 
         WindowSizeConstraints constraints = new()
         {
@@ -44,23 +48,21 @@ public class ProjectWindow : Window, IDisposable
         using(ImRaii.PushColor(ImGuiCol.Text, UIConstants.GizmoMagenta))
             ImGui.Text("Project System is in Beta. NOTE: Projects might not be compatible from version to version!");
 
-        ImBrio.ToggleButtonStrip("library_filters_selector", new Vector2(ImBrio.GetRemainingWidth(), ImBrio.GetLineHeight()), ref selected, ["Load", "Save"]);
-
-        var firstPos = ImGui.GetCursorPos();
-
-        using(ImRaii.Disabled(selected != 0 || _projectSystem.IsLoading))
-            DrawLoad();
-
-        if(selected == 1)
+        using(ImRaii.Disabled(_mCDFService.IsApplyingMCDF || _mCDFService.IsSavingMCDF))
         {
-            var windowSize = ImGui.GetWindowSize();
+            ImBrio.ToggleButtonStrip("library_filters_selector", new Vector2(ImBrio.GetRemainingWidth(), ImBrio.GetLineHeight()), ref selected, ["Load", "Save"]);
 
-            var lastPos = ImGui.GetCursorPos();
-
-            ImGui.SetCursorPos(firstPos);
-
-            using(var child = ImRaii.Child("###new_pane", new Vector2(ImBrio.GetRemainingWidth(), ImBrio.GetRemainingHeight()), false))
+            if(selected == 0 || _projectSystem.IsLoading)
             {
+                DrawLoad();
+            }
+            else
+            {
+                var windowSize = ImGui.GetWindowSize();
+                var lastPos = ImGui.GetCursorPos();
+
+                using var child = ImRaii.Child("###new_pane", new Vector2(ImBrio.GetRemainingWidth(), ImBrio.GetRemainingHeight()), false);
+
                 if(child.Success)
                 {
                     ImGui.Text($"Save New Project");
@@ -69,6 +71,7 @@ public class ProjectWindow : Window, IDisposable
                     ImGui.InputText("Project Description###brio_popup_dis", ref currentActorDis, 35);
 
                     using(ImRaii.Disabled(string.IsNullOrEmpty(currentActorName)))
+                    {
                         if(ImBrio.Button("Save Project", FontAwesomeIcon.Save, new(135, 0), centerTest: true, hoverText: "Save Project"))
                         {
                             _projectSystem.NewProject(currentActorName, currentActorDis);
@@ -78,10 +81,14 @@ public class ProjectWindow : Window, IDisposable
                             currentActorName = string.Empty;
                             currentActorDis = string.Empty;
                         }
+                    }
                 }
             }
+        }
 
-            ImGui.SetCursorPos(lastPos);
+        if(_mCDFService.IsApplyingMCDF || _mCDFService.IsSavingMCDF)
+        {
+            EntityHelpers.DrawSpinner();
         }
     }
 
@@ -211,5 +218,7 @@ public class ProjectWindow : Window, IDisposable
     public void Dispose()
     {
         _gPoseService.OnGPoseStateChange -= GPoseService_OnGPoseStateChange;
+
+        GC.SuppressFinalize(this);
     }
 }

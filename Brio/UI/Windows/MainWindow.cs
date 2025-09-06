@@ -1,16 +1,19 @@
 ﻿using Brio.Config;
+using Brio.Core;
 using Brio.Entities;
 using Brio.Game.Core;
 using Brio.Game.GPose;
 using Brio.Game.Scene;
 using Brio.Input;
+using Brio.MCDF.Game.Services;
 using Brio.UI.Controls.Core;
 using Brio.UI.Controls.Stateless;
 using Brio.UI.Entitites;
+using Brio.UI.Theming;
+using Dalamud.Bindings.ImGui;
 using Dalamud.Interface;
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Interface.Windowing;
-using Dalamud.Bindings.ImGui;
 using System;
 using System.Numerics;
 
@@ -19,30 +22,32 @@ namespace Brio.UI.Windows;
 public class MainWindow : Window, IDisposable
 {
     private readonly SettingsWindow _settingsWindow;
-    private readonly InfoWindow _infoWindow;
+    private readonly UpdateWindow _infoWindow;
     private readonly LibraryWindow _libraryWindow;
     private readonly ConfigurationService _configurationService;
-    private readonly InputService _inputService;
     private readonly EntityManager _entityManager;
     private readonly EntityHierarchyView _entitySelector;
     private readonly SceneService _sceneService;
     private readonly ProjectWindow _projectWindow;
     private readonly GPoseService _gPoseService;
     private readonly AutoSaveService _autoSaveService;
+    private readonly HistoryService _groupedUndoService;
+    private readonly MCDFService _mCDFService;
 
     public MainWindow(
         ConfigurationService configService,
         SettingsWindow settingsWindow,
-        InfoWindow infoWindow,
+        UpdateWindow infoWindow,
         LibraryWindow libraryWindow,
         EntityManager entityManager,
-        InputService input,
+        HistoryService groupedUndoService,
         SceneService sceneService,
         GPoseService gPoseService,
         ProjectWindow projectWindow,
-        AutoSaveService autoSaveService
+        AutoSaveService autoSaveService,
+        MCDFService mCDFService
         )
-        : base($"BRIO [{configService.Version}]###brio_main_window", ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.AlwaysAutoResize)
+        : base($" {Brio.Name} [{configService.Version}]###brio_main_window", ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.AlwaysAutoResize)
     {
         Namespace = "brio_main_namespace";
 
@@ -50,22 +55,20 @@ public class MainWindow : Window, IDisposable
         _settingsWindow = settingsWindow;
         _libraryWindow = libraryWindow;
         _infoWindow = infoWindow;
-        _inputService = input;
         _entityManager = entityManager;
         _gPoseService = gPoseService;
-        _entitySelector = new(_entityManager, _gPoseService);
+        _groupedUndoService = groupedUndoService;
+        _entitySelector = new(_entityManager, _gPoseService, _groupedUndoService);
         _sceneService = sceneService;
         _projectWindow = projectWindow;
         _autoSaveService = autoSaveService;
+        _mCDFService = mCDFService;
 
         SizeConstraints = new WindowSizeConstraints
         {
-            MaximumSize = new Vector2(270, 1030),
+            MaximumSize = new Vector2(270, 1230),
             MinimumSize = new Vector2(270, 200)
         };
-
-        input.AddListener(KeyBindEvents.Interface_ToggleBrioWindow, this.OnMainWindowToggle);
-        input.AddListener(KeyBindEvents.Interface_ToggleBindPromptWindow, this.OnPromptWindowToggle);
     }
 
     public override void Draw()
@@ -88,22 +91,16 @@ public class MainWindow : Window, IDisposable
             if(container.Success)
             {
                 _entitySelector.Draw(rootEntity);
+
+                if(_entityManager.SelectedEntityIds.Count > 1)
+                {
+                    using var color = ImRaii.PushColor(ImGuiCol.Text, ThemeManager.CurrentTheme.Accent.AccentColor);
+                    ImGui.Text($"{_entityManager.SelectedEntityIds.Count} selected");
+                }
             }
         }
 
         EntityHelpers.DrawEntitySection(_entityManager.SelectedEntity);
-    }
-
-    private void OnMainWindowToggle()
-    {
-        this.IsOpen = !this.IsOpen;
-    }
-
-    private void OnPromptWindowToggle()
-    {
-        _configurationService.Configuration.Input.ShowPromptsInGPose = !_configurationService.Configuration.Input.ShowPromptsInGPose;
-
-        _configurationService.ApplyChange();
     }
 
     private void DrawHeaderButtons()
@@ -146,12 +143,13 @@ public class MainWindow : Window, IDisposable
             ImGui.SetTooltip("Settings");
 
         //
-        FileUIHelpers.DrawProjectPopup(_sceneService, _entityManager, _projectWindow, _autoSaveService);
+
+        using(ImRaii.Disabled(_mCDFService.IsApplyingMCDF))
+            FileUIHelpers.DrawProjectPopup(_sceneService, _entityManager, _projectWindow, _autoSaveService);
     }
 
     public void Dispose()
     {
-        _inputService.RemoveListener(KeyBindEvents.Interface_ToggleBrioWindow, this.OnMainWindowToggle);
-        _inputService.RemoveListener(KeyBindEvents.Interface_ToggleBindPromptWindow, this.OnPromptWindowToggle);
+        GC.SuppressFinalize(this);
     }
 }

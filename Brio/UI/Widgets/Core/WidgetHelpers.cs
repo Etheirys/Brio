@@ -39,7 +39,7 @@ public class WidgetHelpers
                 var startPos = ImGui.GetCursorPos();
                 string tool = $"Advanced {widget.HeaderName}";
 
-                if(ImBrio.FontIconButtonRight("advanced", FontAwesomeIcon.SquareArrowUpRight, 1, tool, bordered: false))
+                if(ImBrio.FontIconButtonRight("advanced", FontAwesomeIcon.SquareArrowUpRight, 1, tool, bordered: false, size: new System.Numerics.Vector2(23)))
                     widget.ToggleAdvancedWindow();
 
                 ImGui.SetCursorPos(startPos);

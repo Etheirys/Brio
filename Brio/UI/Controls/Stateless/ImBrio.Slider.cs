@@ -44,11 +44,11 @@ public static partial class ImBrio
         if(max < min)
             step = -step;
 
-        var smallIncrement = InputService.IsKeyBindDown(KeyBindEvents.Interface_IncrementSmallModifier);
+        var smallIncrement = InputManagerService.ActionKeysPressed(InputAction.Interface_IncrementSmallModifier);
         if(smallIncrement)
             step /= 10;
 
-        bool largeIncrement = InputService.IsKeyBindDown(KeyBindEvents.Interface_IncrementLargeModifier);
+        bool largeIncrement = InputManagerService.ActionKeysPressed(InputAction.Interface_IncrementLargeModifier);
         if(largeIncrement)
             step *= 10;
 

@@ -8,65 +8,60 @@ namespace Brio.Input;
 
 public static class KeybindEditor
 {
-    private static string[] virtualKeyNames;
-    private static List<VirtualKey> virtualKeys;
+    private static readonly string[] virtualKeyNames;
+    private static readonly List<VirtualKey> virtualKeys;
 
     static KeybindEditor()
     {
-        List<string> names = new();
-        List<VirtualKey> keys = new();
+        List<string> names = [];
+        List<VirtualKey> keys = [];
 
         names.Add("None");
         keys.Add(VirtualKey.NO_KEY);
 
-        foreach(var vk in InputService.GetValidKeys())
+        foreach(var vk in InputManagerService.GetValidKeys())
         {
-            if(vk > VirtualKey.NO_KEY && vk <= VirtualKey.XBUTTON2)
+            if(vk is > VirtualKey.NO_KEY and <= VirtualKey.XBUTTON2)
                 continue;
 
-            if(vk >= VirtualKey.KANA && vk <= VirtualKey.MODECHANGE)
+            if(vk is VirtualKey.KANA && vk <= VirtualKey.MODECHANGE)
                 continue;
 
-            if(vk >= VirtualKey.LWIN && vk <= VirtualKey.SLEEP)
+            if(vk is VirtualKey.LWIN && vk <= VirtualKey.SLEEP)
                 continue;
 
-            if(vk >= VirtualKey.SCROLL)
+            if(vk is VirtualKey.SCROLL)
                 continue;
 
 
-            if(vk == VirtualKey.HELP
-                || vk == VirtualKey.EXECUTE
-                || vk == VirtualKey.PRINT)
+            if(vk is VirtualKey.HELP
+                or VirtualKey.EXECUTE
+                or VirtualKey.PRINT)
                 continue;
 
             names.Add(vk.GetFancyName());
             keys.Add(vk);
         }
 
-        virtualKeyNames = names.ToArray();
+        virtualKeyNames = [.. names];
         virtualKeys = keys;
     }
 
-    public static bool KeySelector(string label, KeyBindEvents evt, InputConfiguration config)
+    public static bool KeySelector(string label, InputAction evt, InputManagerConfiguration config)
     {
-        if(!config.Bindings.ContainsKey(evt))
-            config.Bindings.Add(evt, new());
+        if(!config.KeyBindings.ContainsKey(evt))
+            config.KeyBindings.Add(evt, new KeyConfig(VirtualKey.NO_KEY));
 
-        KeyBind bind = config.Bindings[evt];
-        return KeySelector(label, ref bind);
-    }
-
-    public static bool KeySelector(string label, ref KeyBind keyBind)
-    {
         bool changed = false;
+        KeyConfig keyBind = config.KeyBindings[evt];
 
         // Control
         using(ImRaii.Disabled(keyBind.Key == VirtualKey.CONTROL))
         {
-            bool control = keyBind.Control;
+            bool control = keyBind.RequireCtrl;
             if(ImGui.Checkbox($"##{label}_Control", ref control))
             {
-                keyBind.Control = control;
+                keyBind.RequireCtrl = control;
                 changed = true;
             }
 
@@ -78,13 +73,12 @@ public static class KeybindEditor
 
         // Alt
         ImGui.SameLine();
-
         using(ImRaii.Disabled(keyBind.Key == VirtualKey.MENU))
         {
-            bool alt = keyBind.Alt;
+            bool alt = keyBind.requireAlt;
             if(ImGui.Checkbox($"##{label}_Alt", ref alt))
             {
-                keyBind.Alt = alt;
+                keyBind.requireAlt = alt;
                 changed = true;
             }
 
@@ -98,10 +92,10 @@ public static class KeybindEditor
         ImGui.SameLine();
         using(ImRaii.Disabled(keyBind.Key == VirtualKey.SHIFT))
         {
-            bool shift = keyBind.Shift;
+            bool shift = keyBind.requireShift;
             if(ImGui.Checkbox($"##{label}_Shift", ref shift))
             {
-                keyBind.Shift = shift;
+                keyBind.requireShift = shift;
                 changed = true;
             }
 
@@ -109,6 +103,18 @@ public static class KeybindEditor
             {
                 ImGui.SetTooltip("Shift");
             }
+        }
+
+        // Reset to Default Button
+        ImGui.SameLine();
+        if(ImGui.Button($"Reset##{label}"))
+        {
+            config.ResetKeyToDefault(evt);
+        }
+
+        if(ImGui.IsItemHovered())
+        {
+            ImGui.SetTooltip("Reset Key to Default");
         }
 
         // Key

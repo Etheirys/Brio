@@ -1,5 +1,6 @@
 ﻿using Brio.Capabilities.Posing;
 using Brio.Config;
+using Brio.Core;
 using Brio.Entities;
 using Brio.Game.Input;
 using Brio.Game.Posing;
@@ -7,10 +8,11 @@ using Brio.Input;
 using Brio.UI.Controls.Core;
 using Brio.UI.Controls.Editors;
 using Brio.UI.Controls.Stateless;
+using Brio.UI.Theming;
+using Dalamud.Bindings.ImGui;
 using Dalamud.Interface;
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Interface.Windowing;
-using Dalamud.Bindings.ImGui;
 using OneOf.Types;
 using System.Numerics;
 
@@ -20,6 +22,7 @@ public class PosingOverlayToolbarWindow : Window
 {
     private readonly PosingOverlayWindow _overlayWindow;
     private readonly EntityManager _entityManager;
+    private readonly HistoryService _groupedUndoService;
     private readonly PosingTransformWindow _overlayTransformWindow;
     private readonly PosingService _posingService;
     private readonly ConfigurationService _configurationService;
@@ -31,7 +34,7 @@ public class PosingOverlayToolbarWindow : Window
 
     private const string _boneFilterPopupName = "bone_filter_popup";
 
-    public PosingOverlayToolbarWindow(PosingOverlayWindow overlayWindow, GameInputService gameInputService, EntityManager entityManager, PosingTransformWindow overlayTransformWindow, PosingService posingService, ConfigurationService configurationService) : base($"Brio - Overlay###brio_posing_overlay_toolbar_window", ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoCollapse)
+    public PosingOverlayToolbarWindow(PosingOverlayWindow overlayWindow, HistoryService groupedUndoService, GameInputService gameInputService, EntityManager entityManager, PosingTransformWindow overlayTransformWindow, PosingService posingService, ConfigurationService configurationService) : base($"{Brio.Name} OVERLAY###brio_posing_overlay_toolbar_window", ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoCollapse)
     {
         Namespace = "brio_posing_overlay_toolbar_namespace";
 
@@ -40,6 +43,7 @@ public class PosingOverlayToolbarWindow : Window
         _overlayTransformWindow = overlayTransformWindow;
         _posingService = posingService;
         _configurationService = configurationService;
+        _groupedUndoService = groupedUndoService;
         _gameInputService = gameInputService;
 
         ShowCloseButton = false;
@@ -95,7 +99,7 @@ public class PosingOverlayToolbarWindow : Window
         {
             _gameInputService.AllowEscape = false;
 
-            if(InputService.IsKeyBindDown(KeyBindEvents.Poseing_Esc))
+            if(InputManagerService.ActionKeysPressed(InputAction.Posing_Esc))
             {
                 posing.ClearSelection();
             }
@@ -168,7 +172,7 @@ public class PosingOverlayToolbarWindow : Window
         {
             using(ImRaii.PushFont(UiBuilder.IconFont))
             {
-                if(ImGui.Button($"{FontAwesomeIcon.ArrowsUpDownLeftRight.ToIconString()}###select_position", new Vector2(buttonOperationSize)) || InputService.IsKeyBindDown(KeyBindEvents.Posing_Translate))
+                if(ImGui.Button($"{FontAwesomeIcon.ArrowsUpDownLeftRight.ToIconString()}###select_position", new Vector2(buttonOperationSize)) || InputManagerService.ActionKeysPressed(InputAction.Posing_Translate))
                     _posingService.Operation = PosingOperation.Translate;
             }
         }
@@ -182,7 +186,7 @@ public class PosingOverlayToolbarWindow : Window
         {
             using(ImRaii.PushFont(UiBuilder.IconFont))
             {
-                if(ImGui.Button($"{FontAwesomeIcon.ArrowsSpin.ToIconString()}###select_rotate", new Vector2(buttonOperationSize)) || InputService.IsKeyBindDown(KeyBindEvents.Posing_Rotate))
+                if(ImGui.Button($"{FontAwesomeIcon.ArrowsSpin.ToIconString()}###select_rotate", new Vector2(buttonOperationSize)) || InputManagerService.ActionKeysPressed(InputAction.Posing_Rotate))
                     _posingService.Operation = PosingOperation.Rotate;
             }
         }
@@ -195,7 +199,7 @@ public class PosingOverlayToolbarWindow : Window
         {
             using(ImRaii.PushFont(UiBuilder.IconFont))
             {
-                if(ImGui.Button($"{FontAwesomeIcon.ExpandAlt.ToIconString()}###select_scale", new Vector2(buttonOperationSize)) || InputService.IsKeyBindDown(KeyBindEvents.Posing_Scale))
+                if(ImGui.Button($"{FontAwesomeIcon.ExpandAlt.ToIconString()}###select_scale", new Vector2(buttonOperationSize)) || InputManagerService.ActionKeysPressed(InputAction.Posing_Scale))
                     _posingService.Operation = PosingOperation.Scale;
             }
         }
@@ -208,7 +212,7 @@ public class PosingOverlayToolbarWindow : Window
         {
             using(ImRaii.PushFont(UiBuilder.IconFont))
             {
-                if(ImGui.Button($"{FontAwesomeIcon.Cubes.ToIconString()}###select_universal", new Vector2(buttonOperationSize)) || InputService.IsKeyBindDown(KeyBindEvents.Posing_Universal))
+                if(ImGui.Button($"{FontAwesomeIcon.Cubes.ToIconString()}###select_universal", new Vector2(buttonOperationSize)) || InputManagerService.ActionKeysPressed(InputAction.Posing_Universal))
                 {
                     _posingService.Operation = PosingOperation.Universal;
                 }
@@ -252,11 +256,22 @@ public class PosingOverlayToolbarWindow : Window
         if(ImGui.IsItemHovered())
             ImGui.SetTooltip("Select Parent");
 
+        // IK RED
+        bool enabled = false;
+        if(posing.Selected.Value is BonePoseInfoId boneId)
+        {
+            var bonePose = posing.SkeletonPosing.GetBonePose(boneId);
+            var ik = bonePose.DefaultIK;
+            enabled = ik.Enabled && BrioStyle.EnableStyle;
+        }
 
         using(ImRaii.Disabled(!(bone?.EligibleForIK == true)))
         {
-            if(ImGui.Button($"IK###bone_ik", new Vector2(buttonSize)))
-                ImGui.OpenPopup("overlay_bone_ik");
+            using(ImRaii.PushColor(ImGuiCol.Button, ThemeManager.CurrentTheme.Accent.AccentColor, enabled))
+            {
+                if(ImGui.Button($"IK###bone_ik", new Vector2(buttonSize)))
+                    ImGui.OpenPopup("overlay_bone_ik");
+            }
         }
         if(ImGui.IsItemHovered())
             ImGui.SetTooltip("Inverse Kinematics");
@@ -289,10 +304,12 @@ public class PosingOverlayToolbarWindow : Window
 
         using(ImRaii.PushFont(UiBuilder.IconFont))
         {
-            using(ImRaii.Disabled(!posing.HasUndoStack))
+            using(ImRaii.Disabled(!posing.CanUndo))
             {
                 if(ImGui.Button($"{FontAwesomeIcon.Backward.ToIconString()}###undo_pose", new Vector2(buttonSize)))
+                {
                     posing.Undo();
+                }
             }
         }
         if(ImGui.IsItemHovered())
@@ -302,10 +319,12 @@ public class PosingOverlayToolbarWindow : Window
 
         using(ImRaii.PushFont(UiBuilder.IconFont))
         {
-            using(ImRaii.Disabled(!posing.HasRedoStack))
+            using(ImRaii.Disabled(!posing.CanRedo))
             {
                 if(ImGui.Button($"{FontAwesomeIcon.Forward.ToIconString()}###redo_pose", new Vector2(buttonSize)))
+                {
                     posing.Redo();
+                }
             }
         }
         if(ImGui.IsItemHovered())

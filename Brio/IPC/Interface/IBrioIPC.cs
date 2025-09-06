@@ -18,14 +18,15 @@ public interface IBrioIPC : IDisposable
     int APIMinor { get; }
 }
 
+[Flags]
 public enum IPCStatus
 {
     None = 0,
     Available = 1,
     Disabled = 2,
-    NotInstalled = 3,
-    VersionMismatch = 4,
-    Error = 5,
+    NotInstalled = 4,
+    VersionMismatch = 8,
+    Error = 16,
 
     Unavailable = None | Disabled | NotInstalled | VersionMismatch | Error
 }
@@ -45,7 +46,8 @@ public abstract class BrioIPC : IBrioIPC
     public abstract int APIMajor { get; }
     public abstract int APIMinor { get; }
 
-    TimeSpan _interval = TimeSpan.FromSeconds(10);
+    readonly TimeSpan _interval = TimeSpan.FromSeconds(10);
+
     DateTime _lastCheckTime = DateTime.MinValue;
     IPCStatus _lastIPCStatus = IPCStatus.None;
     public IPCStatus CheckStatus(bool force = false)
@@ -57,7 +59,7 @@ public abstract class BrioIPC : IBrioIPC
                 return IPCStatus.Disabled;
             }
 
-            if(_lastIPCStatus != IPCStatus.None && (DateTime.Now - _lastCheckTime < _interval))
+            if(_lastIPCStatus is not IPCStatus.None && (DateTime.Now - _lastCheckTime < _interval))
             {
                 return _lastIPCStatus;
             }
@@ -69,14 +71,14 @@ public abstract class BrioIPC : IBrioIPC
             bool installed = GetPluginInterface().InstalledPlugins.Any(x => x.Name == Name && x.IsLoaded == true);
             if(!installed)
             {
-                Brio.Log.Debug($"{Name} not present");
+                Brio.Log.Verbose($"{Name} not present");
                 return _lastIPCStatus = IPCStatus.NotInstalled;
             }
 
             var (major, minor) = GetAPIVersion();
             if(major != APIMajor || minor < APIMinor)
             {
-                Brio.Log.Warning($"{Name} API Version mismatch, found v{major}.{minor}");
+                Brio.Log.Debug($"{Name} API Version mismatch, found v{major}.{minor}");
                 return _lastIPCStatus = IPCStatus.VersionMismatch;
             }
             return _lastIPCStatus = IPCStatus.Available;

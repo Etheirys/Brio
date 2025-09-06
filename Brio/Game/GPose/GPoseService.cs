@@ -43,9 +43,14 @@ public unsafe class GPoseService : IDisposable
     private delegate nint MouseHoverDelegate(nint a1, nint a2, nint a3);
     private readonly Hook<MouseHoverDelegate> _mouseHoverHook = null!;
 
+    internal delegate void TargetNameDelegate(nint args);
+    internal static Hook<TargetNameDelegate> _targetNameDelegateHook = null!;
+
     private readonly IFramework _framework;
     private readonly IClientState _clientState;
     private readonly ConfigurationService _configService;
+
+    public const string BrioHiddenName = "[HIDDEN]";
 
     public GPoseService(IFramework framework, IClientState clientState, ConfigurationService configService, IGameInteropProvider interopProvider, ISigScanner scanner)
     {
@@ -68,9 +73,25 @@ public unsafe class GPoseService : IDisposable
         var mouseHoverAddr = "40 57 48 83 EC ?? 48 89 5C 24 ?? 48 8B F9 48 89 6C 24 ?? 48 89 74 24 ?? 49 8B F0";
         _mouseHoverHook = interopProvider.HookFromAddress<MouseHoverDelegate>(scanner.ScanText(mouseHoverAddr), GPoseMouseEventDetour);
 
+        var targetNameAddr = "E8 ?? ?? ?? ?? 48 8D 8D ?? ?? ?? ?? 48 83 C4 28"; // sig from, Ktisis GuiHooks.cs line 43 (https://github.com/ktisis-tools/Ktisis/blob/main/Ktisis/Interop/Hooks/GuiHooks.cs)
+        _targetNameDelegateHook = interopProvider.HookFromAddress<TargetNameDelegate>(scanner.ScanText(targetNameAddr), TargetNameDetour);
+
         _framework.Update += OnFrameworkUpdate;
 
         UpdateDynamicHooks();
+    }
+
+    private void TargetNameDetour(nint args)
+    {
+        if(_configService.Configuration.Posing.HideNameOnGPoseSettingsWindow)
+        {
+            for(var i = 0; i < BrioHiddenName.Length; i++)
+            {
+                *(char*)(args + 488 + i) = BrioHiddenName[i];
+            }
+        }
+
+        _targetNameDelegateHook.Original(args);
     }
 
     public void TriggerGPoseChange()
@@ -144,11 +165,15 @@ public unsafe class GPoseService : IDisposable
             if(!_mouseHoverHook.IsEnabled)
                 _mouseHoverHook.Enable();
 
+            _targetNameDelegateHook.Enable();
+
         }
         else
         {
             if(_mouseHoverHook.IsEnabled)
                 _mouseHoverHook.Disable();
+
+            _targetNameDelegateHook.Disable();
         }
     }
 
@@ -156,9 +181,12 @@ public unsafe class GPoseService : IDisposable
     {
         _framework.Update -= OnFrameworkUpdate;
 
+        _targetNameDelegateHook.Dispose();
         _enterGPoseHook.Dispose();
         _exitGPoseHook.Dispose();
         _mouseHoverHook.Dispose();
+
+        GC.SuppressFinalize(this);
     }
 }
 

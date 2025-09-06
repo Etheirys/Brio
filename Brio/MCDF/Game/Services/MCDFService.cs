@@ -1,6 +1,7 @@
 ﻿using Brio.Config;
 using Brio.Game.Actor;
 using Brio.Game.Core;
+using Brio.Game.GPose;
 using Brio.IPC;
 using Brio.MCDF.API.Data;
 using Brio.MCDF.Game.FileCache;
@@ -25,7 +26,7 @@ using System.Threading.Tasks;
 
 namespace Brio.MCDF.Game.Services;
 
-public class MCDFService
+public class MCDFService : IDisposable
 {
     public static readonly IImmutableList<string> AllowedFileExtensions = [".mdl", ".tex", ".mtrl", ".tmb", ".pap", ".avfx", ".atex", ".sklb", ".eid", ".phyb", ".pbd", ".scd", ".skp", ".shpk"];
 
@@ -37,6 +38,9 @@ public class MCDFService
     private readonly ActorRedrawService _actorRedrawService;
     private readonly ActorAppearanceService _actorAppearanceService;
     private readonly TransientResourceService _transientResourceService;
+
+    private readonly CharacterHandlerService _characterHandlerService;
+    private readonly GPoseService _gPoseService;
 
     private readonly PenumbraService _penumbraService;
     private readonly GlamourerService _glamourerService;
@@ -50,11 +54,16 @@ public class MCDFService
     public Task? UiBlockingComputation { get; private set; }
     public string DataApplicationProgress { get; private set; } = string.Empty;
 
-    //
-  
-    private int _globalFileCounter = 0;
+    public bool IsSavingMCDF => UiBlockingComputation?.Status == TaskStatus.Running;
+    public bool IsApplyingMCDF => _currentApplicationCount > 0;
 
-    public MCDFService(IFramework framework, ActorAppearanceService actorAppearanceService, ConfigurationService configurationService, FileCacheService fileCacheService, TargetService targetService, ActorRedrawService actorRedrawService, DalamudService dalamudService,
+    //
+
+    private int _currentApplicationCount = 0;
+
+    //private int _globalFileCounter = 0;
+
+    public MCDFService(IFramework framework, CharacterHandlerService characterHandlerService, GPoseService gPoseService, ActorAppearanceService actorAppearanceService, ConfigurationService configurationService, FileCacheService fileCacheService, TargetService targetService, ActorRedrawService actorRedrawService, DalamudService dalamudService,
         PenumbraService penumbraService, TransientResourceService transientResourceService, GlamourerService glamourerService, CustomizePlusService customizePlusService)
     {
         _framework = framework;
@@ -66,9 +75,32 @@ public class MCDFService
         _actorAppearanceService = actorAppearanceService;
         _transientResourceService = transientResourceService;
 
+        _characterHandlerService = characterHandlerService;
+        _gPoseService = gPoseService;
+
         _penumbraService = penumbraService;
         _glamourerService = glamourerService;
         _customizePlusService = customizePlusService;
+
+        _gPoseService.OnGPoseStateChange += OnGPoseStateChange;
+    }
+
+    private void OnGPoseStateChange(bool newState)
+    {
+        if(newState is false)
+        {
+            try
+            {
+                if(IsApplyingMCDF)
+                {
+                    McdfApplicationTask?.Dispose(); //This is not good code and does nothing
+                }
+            }
+            catch(Exception ex)
+            {
+                Brio.Log.Verbose(ex, "Exception while trying to stop the application process of a MCDF on GPose exit");
+            }
+        }
     }
 
     public async Task LoadMCDFHeader(string path)
@@ -77,7 +109,9 @@ public class MCDFService
     }
     public async Task SaveMCDF(string path, string description, IGameObject gameObject)
     {
-        await Task.Run(async () => await SaveCharaFileAsync(description, path, gameObject).ConfigureAwait(false));
+        UiBlockingComputation = Task.Run(async () => await SaveCharaFileAsync(description, path, gameObject).ConfigureAwait(false));
+
+        await UiBlockingComputation.ConfigureAwait(false);
     }
 
     public void ApplyMCDFToGPoseTarget()
@@ -87,7 +121,7 @@ public class MCDFService
         if(canApply.CanApply)
             _ = ApplyMCDF(canApply.GameObject);
     }
-  
+
     // Load
 
     public async Task ApplyMCDF(IGameObject gameObject)
@@ -96,6 +130,8 @@ public class MCDFService
             return;
 
         var name = gameObject.Name.TextValue;
+
+        _currentApplicationCount++;
 
         await (McdfApplicationTask = Task.Run(async () =>
         {
@@ -141,6 +177,8 @@ public class MCDFService
             }
             finally
             {
+                _currentApplicationCount--;
+
                 // delete extracted files
                 foreach(var file in actuallyExtractedFiles)
                 {
@@ -223,14 +261,19 @@ public class MCDFService
     private async Task ApplyDataAsync(Guid applicationId, (string Name, IGameObject GameObject) tempHandler, bool isSelf, string UID,
         Dictionary<string, string> modPaths, string? manipData, string? glamourerData, string? customizeData, CancellationToken token)
     {
+        Guid? cPlusId = null;
         Guid penumbraCollection;
         try
         {
             DataApplicationProgress = "Reverting previous Application";
-
+          
             await _penumbraService.Redraw(tempHandler.GameObject);
-            await _glamourerService.UnlockAndRevertCharacter(tempHandler.GameObject);
-            _customizePlusService.SetProfile(tempHandler.GameObject, "{}");
+            await _actorRedrawService.RedrawAndWait(tempHandler.GameObject);
+
+            _glamourerService.UnlockAndRevertCharacter(tempHandler.GameObject);
+            _glamourerService.UnlockAndRevertCharacterByName(tempHandler.Name);
+
+            _customizePlusService.RemoveTemporaryProfile(tempHandler.GameObject);
 
             await Task.Delay(TimeSpan.FromSeconds(3), token).ConfigureAwait(false);
 
@@ -248,7 +291,7 @@ public class MCDFService
             DataApplicationProgress = "Applying Glamourer and redrawing Character";
             Brio.Log.Debug($"{DataApplicationProgress}");
 
-            await _glamourerService.ApplyAllAsync(tempHandler.GameObject, glamourerData, applicationId).ConfigureAwait(false);
+            _glamourerService.ApplyAllAsync(tempHandler.GameObject, glamourerData, applicationId);
 
             await _actorRedrawService.RedrawAndWait(tempHandler.GameObject);
 
@@ -259,26 +302,27 @@ public class MCDFService
             if(!string.IsNullOrEmpty(customizeData))
             {
                 Brio.Log.Debug($"{DataApplicationProgress}");
-                await _customizePlusService.SetBodyScaleAsync(tempHandler.GameObject, customizeData).ConfigureAwait(false);
+                cPlusId =  await _customizePlusService.SetBodyScaleAsync(tempHandler.GameObject, customizeData).ConfigureAwait(false);
             }
             else
             {
                 Brio.Log.Debug($"{DataApplicationProgress} IsNullOrEmpty");
-                await _customizePlusService.SetBodyScaleAsync(tempHandler.GameObject, Convert.ToBase64String(Encoding.UTF8.GetBytes("{}"))).ConfigureAwait(false);
+                cPlusId = await _customizePlusService.SetBodyScaleAsync(tempHandler.GameObject, Convert.ToBase64String(Encoding.UTF8.GetBytes("{}"))).ConfigureAwait(false);
             }
+
+            _characterHandlerService.CharacterHandler.Add(new CharacterHolder(tempHandler.GameObject, cPlusId, tempHandler.Name));
         }
         finally
         {
             if(token.IsCancellationRequested)
             {
                 DataApplicationProgress = "Application aborted. Reverting Character...";
-                await _actorAppearanceService.RevertMCDF(tempHandler.GameObject).ConfigureAwait(false);
+                await _characterHandlerService.RevertMCDF(new CharacterHolder(tempHandler.GameObject, cPlusId, tempHandler.Name)).ConfigureAwait(false);
             }
 
             DataApplicationProgress = string.Empty;
         }
     }
-
 
     // Save
 
@@ -463,6 +507,14 @@ public class MCDFService
             Brio.Log.Debug("Character is null but it shouldn't be, waiting");
             await Task.Delay(50, ct).ConfigureAwait(false);
             totalWaitTime -= 50;
+        }
+
+        if(_glamourerService.CheckForLock(playerRelatedObject))
+        {
+            Brio.Log.Information("Unable to apply MCDF, Actor is Locked by Glamourer");
+            Brio.NotifyError("Unable to apply MCDF, Actor is Locked by Glamourer");
+
+            throw new Exception("Glamourer has Lock");
         }
 
         ct.ThrowIfCancellationRequested();
@@ -839,5 +891,12 @@ public class MCDFService
         _configurationService.Configuration.MCDF.DataStorage.BonesDictionary[hash] = output;
         _configurationService.Save();
         return output;
+    }
+
+    public void Dispose()
+    {
+        _gPoseService.OnGPoseStateChange -= OnGPoseStateChange;
+
+        GC.SuppressFinalize(this);
     }
 }

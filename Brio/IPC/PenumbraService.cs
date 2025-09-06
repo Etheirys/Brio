@@ -18,7 +18,7 @@ public class PenumbraService : BrioIPC
     public override string Name { get; } = "Penumbra";
 
     public override bool IsAvailable
-        => CheckStatus() == IPCStatus.Available;
+        => PenumbraCheckStatus();
 
     public override bool AllowIntegration
         => _configurationService.Configuration.IPC.AllowPenumbraIntegration;
@@ -50,12 +50,11 @@ public class PenumbraService : BrioIPC
 
     //
 
-    private readonly ActorRedrawService _actorRedrawService;
     private readonly ConfigurationService _configurationService;
     private readonly IDalamudPluginInterface _pluginInterface;
     private readonly IFramework _framework;
 
-    private readonly GetEnabledState _penumbraEnabled;
+    //private readonly GetEnabledState _penumbraEnabled;
     private readonly ApiVersion _penumbraApiVersion;
 
     private readonly OpenMainWindow _penumbraOpenMainWindow;
@@ -93,43 +92,61 @@ public class PenumbraService : BrioIPC
     private readonly GetPlayerMetaManipulations _penumbraGetMetaManipulations;
     //private readonly ConvertTextureFile _penumbraConvertTextureFile;
 
-    public PenumbraService(IDalamudPluginInterface pluginInterface, IFramework framework, ConfigurationService configurationService, ActorRedrawService actorRedrawService)
+    public PenumbraService(IDalamudPluginInterface pluginInterface, IFramework framework, ConfigurationService configurationService)
     {
         _pluginInterface = pluginInterface;
         _configurationService = configurationService;
         _framework = framework;
-        _actorRedrawService = actorRedrawService;
 
-        _penumbraInitializedSubscriber = Initialized.Subscriber(pluginInterface, OnConfigurationChanged);
-        _penumbraDisposedSubscriber = Disposed.Subscriber(pluginInterface, OnConfigurationChanged);
-        _penumbraRedrawEvent = GameObjectRedrawn.Subscriber(pluginInterface, HandlePenumbraRedraw);
+        _penumbraInitializedSubscriber = Initialized.Subscriber(_pluginInterface, OnConfigurationChanged);
+        _penumbraDisposedSubscriber = Disposed.Subscriber(_pluginInterface, OnConfigurationChanged);
+        _penumbraRedrawEvent = GameObjectRedrawn.Subscriber(_pluginInterface, HandlePenumbraRedraw);
+        _penumbraGameObjectResourcePathResolved = GameObjectResourcePathResolved.Subscriber(_pluginInterface, ResourceLoaded);
 
         _penumbraGetCollectionForObject = new GetCollectionForObject(_pluginInterface);
         _penumbraSetCollectionForObject = new SetCollectionForObject(_pluginInterface);
         _penumbraGetCollections = new GetCollections(_pluginInterface);
-        _penumbraOpenMainWindow = new OpenMainWindow(pluginInterface);
+        _penumbraOpenMainWindow = new OpenMainWindow(_pluginInterface);
         _penumbraApiVersion = new ApiVersion(_pluginInterface);
 
-        _penumbraResolveModDir = new GetModDirectory(pluginInterface);
-        _penumbraRedraw = new RedrawObject(pluginInterface);
-        _penumbraRemoveTemporaryMod = new RemoveTemporaryMod(pluginInterface);
-        _penumbraAddTemporaryMod = new AddTemporaryMod(pluginInterface);
-        _penumbraCreateNamedTemporaryCollection = new CreateTemporaryCollection(pluginInterface);
-        _penumbraRemoveTemporaryCollection = new DeleteTemporaryCollection(pluginInterface);
-        _penumbraAssignTemporaryCollection = new AssignTemporaryCollection(pluginInterface);
-        _penumbraEnabled = new GetEnabledState(pluginInterface);
-     
-        _penumbraGameObjectResourcePathResolved = GameObjectResourcePathResolved.Subscriber(pluginInterface, ResourceLoaded);
+        _penumbraResolveModDir = new GetModDirectory(_pluginInterface);
+        _penumbraRedraw = new RedrawObject(_pluginInterface);
+        _penumbraRemoveTemporaryMod = new RemoveTemporaryMod(_pluginInterface);
+        _penumbraAddTemporaryMod = new AddTemporaryMod(_pluginInterface);
+        _penumbraCreateNamedTemporaryCollection = new CreateTemporaryCollection(_pluginInterface);
+        _penumbraRemoveTemporaryCollection = new DeleteTemporaryCollection(_pluginInterface);
+        _penumbraAssignTemporaryCollection = new AssignTemporaryCollection(_pluginInterface);
+        //_penumbraEnabled = new GetEnabledState(_pluginInterface);
 
-        _penumbraResolvePaths = new ResolvePlayerPathsAsync(pluginInterface);
-        _penumbraResourcePaths = new GetGameObjectResourcePaths(pluginInterface);
-        _penumbraGetMetaManipulations = new GetPlayerMetaManipulations(pluginInterface);
-        //_penumbraConvertTextureFile = new ConvertTextureFile(pluginInterface);
+        _penumbraResolvePaths = new ResolvePlayerPathsAsync(_pluginInterface);
+        _penumbraResourcePaths = new GetGameObjectResourcePaths(_pluginInterface);
+        _penumbraGetMetaManipulations = new GetPlayerMetaManipulations(_pluginInterface);
+        //_penumbraConvertTextureFile = new ConvertTextureFile(_pluginInterface);
 
         _configurationService.OnConfigurationChanged += OnConfigurationChanged;
 
         OnConfigurationChanged();
-        CheckModDirectory();
+        PenumbraCheckStatus();
+    }
+
+    public bool PenumbraCheckStatus()
+    {
+        var status = CheckStatus() == IPCStatus.Available;
+        
+        checkModDirectory(status);
+
+        return status;
+    }
+    void checkModDirectory(bool available)
+    {
+        if(!available)
+        {
+            ModDirectory = string.Empty;
+        }
+        else
+        {
+            ModDirectory = _penumbraResolveModDir!.Invoke().ToLowerInvariant();
+        }
     }
 
     public void OpenPenumbra()
@@ -203,18 +220,6 @@ public class PenumbraService : BrioIPC
         return _penumbraGetMetaManipulations.Invoke();
     }
 
-    public void CheckModDirectory()
-    {
-        if(!IsAvailable)
-        {
-            ModDirectory = string.Empty;
-        }
-        else
-        {
-            ModDirectory = _penumbraResolveModDir!.Invoke().ToLowerInvariant();
-        }
-    }
-
     public async Task RemoveTemporaryCollectionAsync(Guid applicationId, Guid collId)
     {
         if(!IsAvailable) return;
@@ -283,6 +288,8 @@ public class PenumbraService : BrioIPC
 
     public async Task Redraw(IGameObject gameObject, bool afterGPose = false)
     {
+        if(!IsAvailable) return;
+
         var redrawType = RedrawType.Redraw;
         if(afterGPose) redrawType = RedrawType.AfterGPose;
 

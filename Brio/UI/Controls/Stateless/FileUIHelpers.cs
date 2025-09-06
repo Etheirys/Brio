@@ -15,16 +15,15 @@ using Brio.Library.Filters;
 using Brio.UI.Controls.Core;
 using Brio.UI.Controls.Editors;
 using Brio.UI.Windows;
+using Dalamud.Bindings.ImGui;
 using Dalamud.Interface;
 using Dalamud.Interface.Utility.Raii;
-using Dalamud.Bindings.ImGui;
+using Dalamud.Utility;
 using MessagePack;
 using OneOf;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using Dalamud.Utility;
-using System.Threading.Tasks;
 
 namespace Brio.UI.Controls.Stateless;
 
@@ -309,7 +308,7 @@ public class FileUIHelpers
                 }
                 else if(r is MareCharacterDataFile mareFile)
                 {
-                    _ = capability.LoadMcdf(mareFile.GetPath());
+                    _ = capability.LoadMCDF(mareFile.GetPath());
                 }
             });
 
@@ -333,7 +332,7 @@ public class FileUIHelpers
                 }
                 else if(r is MareCharacterDataFile mareFile)
                 {
-                    _ = capability.LoadMcdf(mareFile.GetPath());
+                    _ = capability.LoadMCDF(mareFile.GetPath());
                 }
             });
         }
@@ -376,7 +375,7 @@ public class FileUIHelpers
                              ConfigurationService.Instance.Configuration.LastMCDFPath = directory;
                              ConfigurationService.Instance.Save();
                          }
-                         _ = capability.LoadMcdf(path);
+                         _ = capability.LoadMCDF(path);
                      }
                  }, 1, ConfigurationService.Instance.Configuration.LastMCDFPath, true);
     }
@@ -391,7 +390,7 @@ public class FileUIHelpers
                          Brio.Log.Info("Exporting MCDF...");
                          if(!path.EndsWith(".mcdf"))
                              path += ".mcdf";
-                    
+
                          var directory = Path.GetDirectoryName(path);
                          if(directory is not null)
                          {

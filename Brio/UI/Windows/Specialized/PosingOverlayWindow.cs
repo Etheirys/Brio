@@ -2,16 +2,17 @@
 using Brio.Config;
 using Brio.Core;
 using Brio.Entities;
+using Brio.Entities.Core;
 using Brio.Game.Camera;
 using Brio.Game.GPose;
 using Brio.Game.Posing;
 using Brio.Input;
 using Brio.UI.Controls.Editors;
+using Dalamud.Bindings.ImGui;
+using Dalamud.Bindings.ImGuizmo;
 using Dalamud.Interface.Utility;
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Interface.Windowing;
-using Dalamud.Bindings.ImGui;
-using Dalamud.Bindings.ImGuizmo;
 using OneOf.Types;
 using System;
 using System.Collections.Generic;
@@ -28,15 +29,17 @@ public class PosingOverlayWindow : Window, IDisposable
     private readonly ConfigurationService _configurationService;
     private readonly PosingService _posingService;
     private readonly GPoseService _gPoseService;
+    private readonly HistoryService _groupedUndoService;
 
     private List<ClickableItem> _selectingFrom = [];
     private Transform? _trackingTransform;
     private readonly PosingTransformEditor _posingTransformEditor = new();
+    private List<(EntityId id, PoseInfo info, Transform model)>? _groupedPendingSnapshot = null;
 
     private const int _gizmoId = 142857;
     private const string _boneSelectPopupName = "brio_bone_select_popup";
 
-    public PosingOverlayWindow(EntityManager entityManager, CameraService cameraService, ConfigurationService configService, PosingService posingService, GPoseService gPoseService)
+    public PosingOverlayWindow(EntityManager entityManager, CameraService cameraService, HistoryService groupedUndoService, ConfigurationService configService, PosingService posingService, GPoseService gPoseService)
         : base("##brio_posing_overlay_window", ImGuiWindowFlags.AlwaysAutoResize, true)
     {
         Namespace = "brio_posing_overlay_namespace";
@@ -47,6 +50,7 @@ public class PosingOverlayWindow : Window, IDisposable
         _configurationService = configService;
         _posingService = posingService;
         _gPoseService = gPoseService;
+        _groupedUndoService = groupedUndoService;
 
         _gPoseService.OnGPoseStateChange += OnGPoseStateChanged;
     }
@@ -358,11 +362,11 @@ public class PosingOverlayWindow : Window, IDisposable
         var selected = posing.Selected;
 
         Matrix4x4 projectionMatrix = camera->GetProjectionMatrix();
-        Matrix4x4 viewMatrix = camera->GetViewMatrix();
-        viewMatrix.M44 = 1;
+        Matrix4x4 worldViewMatrix = camera->GetViewMatrix();
+        worldViewMatrix.M44 = 1;
 
         Transform currentTransform = Transform.Identity;
-        Matrix4x4 worldViewMatrix = viewMatrix;
+        Matrix4x4 modelMatrix = worldViewMatrix;
 
         Game.Posing.Skeletons.Bone? selectedBone = null;
 
@@ -385,14 +389,14 @@ public class PosingOverlayWindow : Window, IDisposable
                     return false;
 
                 selectedBone = bone;
-                var modelMatrix = new Transform()
+                modelMatrix = new Transform()
                 {
                     Position = (Vector3)charaBase->CharacterBase.DrawObject.Object.Position,
                     Rotation = (Quaternion)charaBase->CharacterBase.DrawObject.Object.Rotation,
                     Scale = Vector3.Clamp((Vector3)charaBase->CharacterBase.DrawObject.Object.Scale * charaBase->ScaleFactor, new Vector3(.5f), new Vector3(1.5f))
                 }.ToMatrix();
 
-                worldViewMatrix = modelMatrix * viewMatrix;
+                worldViewMatrix = Matrix4x4.Multiply(modelMatrix, worldViewMatrix);
 
                 return true;
             },
@@ -407,9 +411,9 @@ public class PosingOverlayWindow : Window, IDisposable
         if(!shouldDraw)
             return;
 
-
         var lastObserved = _trackingTransform ?? currentTransform;
-        var matrix = lastObserved.ToMatrix();
+
+        var lastMatrix = lastObserved.ToMatrix();
 
         ImGuizmo.BeginFrame();
         var io = ImGui.GetIO();
@@ -421,11 +425,13 @@ public class PosingOverlayWindow : Window, IDisposable
 
         Transform? newTransform = null;
 
-        if(ImGuizmoExtensions.MouseWheelManipulate(ref matrix))
+        if(ImGuizmoExtensions.MouseWheelManipulate(ref lastMatrix))
         {
             if(!posing.ModelPosing.Freeze && !(selectedBone != null && selectedBone.Freeze))
-                newTransform = matrix.ToTransform();
-                _trackingTransform = newTransform;
+            {
+                newTransform = lastMatrix.ToTransform();
+                _trackingTransform = newTransform;       
+            }
         }
 
         if(ImGuizmo.Manipulate(
@@ -433,17 +439,38 @@ public class PosingOverlayWindow : Window, IDisposable
             ref projectionMatrix.M11,
             _posingService.Operation.AsGizmoOperation(),
             _posingService.CoordinateMode.AsGizmoMode(),
-            ref matrix.M11
+            ref lastMatrix.M11
         ))
         {
             if(!posing.ModelPosing.Freeze && !(selectedBone != null && selectedBone.Freeze))
-                newTransform = matrix.ToTransform();
-                _trackingTransform = newTransform;
+            {
+                if(!posing.ModelPosing.Freeze && !(selectedBone != null && selectedBone.Freeze))
+                {
+                    newTransform = lastMatrix.ToTransform();
+                    _trackingTransform = newTransform;
+                }
+            }
         }
 
         if(_trackingTransform.HasValue && !ImGuizmo.IsUsing())
         {
-            posing.Snapshot(false, false);
+            if(_groupedPendingSnapshot != null && _groupedPendingSnapshot.Count > 0)
+            {
+                _groupedUndoService.Snapshot(_groupedPendingSnapshot);
+                _groupedPendingSnapshot = null;
+            }
+
+            foreach(var eid in _entityManager.SelectedEntityIds)
+            {
+                if(!_entityManager.TryGetEntity(eid, out var ent))
+                    continue;
+
+                if(!ent.TryGetCapability<PosingCapability>(out var cap))
+                    continue;
+
+                cap.Snapshot(false, false);
+            }
+
             _trackingTransform = null;
         }
 
@@ -451,6 +478,8 @@ public class PosingOverlayWindow : Window, IDisposable
 
         if(newTransform != null)
         {
+            var delta = newTransform.Value.CalculateDiff(lastObserved);
+
             selected.Switch(
                 bone =>
                 {
@@ -458,13 +487,39 @@ public class PosingOverlayWindow : Window, IDisposable
                 },
                 _ =>
                 {
-                    posing.ModelPosing.Transform = newTransform.Value;
+                    if(_groupedPendingSnapshot == null && ImGuizmo.IsUsing())
+                    {
+                        var list = new List<(EntityId, PoseInfo, Transform)>();
+                        foreach(var id in _entityManager.SelectedEntityIds)
+                        {
+                            if(!_entityManager.TryGetEntity(id, out var ent))
+                                continue;
+
+                            if(!ent.TryGetCapability<PosingCapability>(out var cap))
+                                continue;
+
+                            list.Add((id, cap.SkeletonPosing.PoseInfo.Clone(), cap.ModelPosing.Transform));
+                        }
+                        _groupedPendingSnapshot = list;
+                    }
+
+                    foreach(var id in _entityManager.SelectedEntityIds)
+                    {
+                        if(!_entityManager.TryGetEntity(id, out var ent))
+                            continue;
+
+                        if(!ent.TryGetCapability<PosingCapability>(out var cap))
+                            continue;
+
+                        if(cap.ModelPosing.Freeze)
+                            continue;
+
+                        cap.ModelPosing.Transform += delta;
+                    }
                 },
                 _ => { }
             );
         }
-
-
     }
 
     private void OnGPoseStateChanged(bool newState)
@@ -478,6 +533,8 @@ public class PosingOverlayWindow : Window, IDisposable
     public void Dispose()
     {
         _gPoseService.OnGPoseStateChange -= OnGPoseStateChanged;
+
+        GC.SuppressFinalize(this);
     }
 
     private class OverlayUIState(PosingConfiguration configuration)
@@ -487,9 +544,9 @@ public class PosingOverlayWindow : Window, IDisposable
         public bool HoveringGizmo = ImGuizmo.IsOver();
         public bool AnyActive = ImGui.IsAnyItemActive();
         public bool AnyWindowHovered = ImGui.IsWindowHovered(ImGuiHoveredFlags.AnyWindow);
-        public bool UserDisablingSkeleton = InputService.IsKeyBindDown(KeyBindEvents.Posing_DisableSkeleton);
-        public bool UserDisablingGizmo = InputService.IsKeyBindDown(KeyBindEvents.Posing_DisableGizmo);
-        public bool UserHidingOverlay = InputService.IsKeyBindDown(KeyBindEvents.Posing_HideOverlay);
+        public bool UserDisablingSkeleton = InputManagerService.ActionKeysPressed(InputAction.Posing_DisableSkeleton);
+        public bool UserDisablingGizmo = InputManagerService.ActionKeysPressed(InputAction.Posing_DisableGizmo);
+        public bool UserHidingOverlay = InputManagerService.ActionKeysPressed(InputAction.Posing_HideOverlay);
 
 
         public bool AnythingBusy => PopupOpen || UsingGizmo || AnyActive || AnyWindowHovered;

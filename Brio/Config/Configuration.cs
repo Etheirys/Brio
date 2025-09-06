@@ -46,7 +46,7 @@ public class Configuration : IPluginConfiguration
     public bool SceneDestoryActorsBeforeImport { get; set; } = false;
 
     // Input
-    public InputConfiguration Input { get; set; } = new InputConfiguration();
+    public InputManagerConfiguration InputManager { get; set; } = new InputManagerConfiguration();
 
     // AutoSave
     public AutoSaveConfiguration AutoSave { get; set; } = new AutoSaveConfiguration();

@@ -1,6 +1,7 @@
 ﻿using Brio.Capabilities.Posing;
 using Brio.Config;
 using Brio.Entities.Actor;
+using Brio.Game.Actor;
 using Brio.UI.Widgets.Actor;
 using System.Collections.Generic;
 
@@ -12,10 +13,12 @@ public class ActorDebugCapability : ActorCharacterCapability
     public bool IsDebug => _configService.IsDebug;
 
     private readonly ConfigurationService _configService;
+    private readonly ActorVFXService _vfxService;
 
-    public ActorDebugCapability(ActorEntity parent, ConfigurationService configService) : base(parent)
+    public ActorDebugCapability(ActorEntity parent, ConfigurationService configService, ActorVFXService actorVFXService) : base(parent)
     {
         _configService = configService;
+        _vfxService = actorVFXService;
 
         Widget = new ActorDebugWidget(this);
     }
@@ -30,4 +33,6 @@ public class ActorDebugCapability : ActorCharacterCapability
             return [];
         }
     }
+
+    public ActorVFXService VFXService => _vfxService;
 }

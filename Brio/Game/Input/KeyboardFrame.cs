@@ -17,12 +17,6 @@ public unsafe struct KeyboardFrame
     public void HandleKey(VirtualKey virtualKey)
         => KeyState[(int)virtualKey] = 0;
 
-    public void HandleAllKeys()
-    {
-        for(int i = 0; i < KeyStateLength; i++)
-            KeyState[i] = 0;
-    }
-
     public bool IsKeyDown(VirtualKey virtualKey, bool handle)
     {
         var isDown = KeyDown(virtualKey);

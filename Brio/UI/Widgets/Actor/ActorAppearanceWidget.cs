@@ -1,6 +1,8 @@
 ﻿using Brio.Capabilities.Actor;
+using Brio.Capabilities.Core;
 using Brio.Capabilities.Posing;
 using Brio.Game.Actor.Appearance;
+using Brio.MCDF.Game.Services;
 using Brio.Resources;
 using Brio.UI.Controls.Editors;
 using Brio.UI.Controls.Selectors;
@@ -69,7 +71,6 @@ public class ActorAppearanceWidget(ActorAppearanceCapability capability) : Widge
     {
         bool didChange = false;
 
-        //var resetTo = ImGui.GetCursorPos();
         bool equipChanged = !currentAppearance.Equipment.Equals(originalAppearance.Equipment) || !currentAppearance.Weapons.Equals(originalAppearance.Weapons) || !currentAppearance.Runtime.Equals(originalAppearance.Runtime);
         if(ImBrio.FontIconButtonRight("reset_equipment", FontAwesomeIcon.Undo, 1, "Reset Equipment", equipChanged))
         {
@@ -78,7 +79,6 @@ public class ActorAppearanceWidget(ActorAppearanceCapability capability) : Widge
             currentAppearance.Runtime = originalAppearance.Runtime;
             didChange |= true;
         }
-        //ImGui.SetCursorPos(resetTo);
 
         return didChange;
     }
@@ -183,7 +183,7 @@ public class ActorAppearanceWidget(ActorAppearanceCapability capability) : Widge
 
         using(ImRaii.Disabled(Capability.CanMCDF is false))
         {
-            using(ImRaii.Disabled(Capability.IsSelf))
+            using(ImRaii.Disabled(Capability.IsSelf || Capability.IsAnyMCDFLoading))
             {
                 if(ImBrio.FontIconButton("load_mcdf", FontAwesomeIcon.CloudDownloadAlt, "Load MCDF"))
                 {
@@ -193,6 +193,8 @@ public class ActorAppearanceWidget(ActorAppearanceCapability capability) : Widge
             }
             if(Capability.IsSelf)
                 ImBrio.AttachToolTip("Can not load a MCDF on your Player Character. Spawn an Actor to load a MCDF.");
+            if(Capability.IsAnyMCDFLoading)
+                ImBrio.AttachToolTip("Another MCDF is loading, Please wait for it to finish.");
 
             using(ImRaii.Disabled(Capability.HasMCDF))
             {

@@ -101,7 +101,7 @@ public class LibraryWindow : Window
         PosingService posingService,
         IFramework frameworkService,
         SettingsWindow settingsWindow)
-        : base($"{Brio.Name} Library###brio_library_window")
+        : base($"{Brio.Name} LIBRARY###brio_library_window")
     {
         this.Namespace = "brio_library_namespace";
 
@@ -382,7 +382,7 @@ public class LibraryWindow : Window
                     float mouseWheel = ImGui.GetIO().MouseWheel * 10;
                     // TODO: replace this ctrl listener with the new key bind system when it is merged
                     // as ImGUI ctrl support is _spotty_
-                    if(InputService.IsKeyBindDown(KeyBindEvents.Interface_IncrementSmallModifier) && mouseWheel != 0)
+                    if(InputManagerService.ActionKeysPressed(InputAction.Interface_IncrementSmallModifier) && mouseWheel != 0)
                     {
                         float val = _configurationService.Configuration.Library.IconSize;
                         val = Math.Clamp(val + mouseWheel, MinEntrySize, MaxEntrySize);
@@ -435,7 +435,7 @@ public class LibraryWindow : Window
                             var config = ConfigurationService.Instance.Configuration;
                             bool isFavorite = config.Library.Favorites.Contains(ieb.Identifier);
 
-                            using(ImRaii.PushColor(ImGuiCol.Text, isFavorite ? TheameManager.CurrentTheame.Accent.AccentColor : UIConstants.ToggleButtonInactive))
+                            using(ImRaii.PushColor(ImGuiCol.Text, isFavorite ? ThemeManager.CurrentTheme.Accent.AccentColor : UIConstants.ToggleButtonInactive))
                             {
                                 if(ImBrio.FontIconButton(FontAwesomeIcon.Heart))
                                 {

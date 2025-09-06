@@ -103,7 +103,7 @@ public class CameraContainerWidget(CameraContainerCapability capability) : Widge
     }
 }
 
-public class BrioCameraWidget(BrioCameraCapability capability, CutsceneManager _cutsceneManager, ConfigurationService _configService) : Widget<BrioCameraCapability>(capability)
+public class BrioCameraWidget(BrioCameraCapability capability) : Widget<BrioCameraCapability>(capability)
 {
     public override string HeaderName => "Camera Editor";
 

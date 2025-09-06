@@ -35,7 +35,7 @@ public class ActorContainerEntity(IServiceProvider provider) : Entity("actorCont
     {
         using(ImRaii.Disabled(_gPoseService.IsGPosing == false))
         {
-            using(ImRaii.PushColor(ImGuiCol.Button, TheameManager.CurrentTheame.Accent.AccentColor))
+            using(ImRaii.PushColor(ImGuiCol.Button, ThemeManager.CurrentTheme.Accent.AccentColor))
             {
                 string toolTip = $"New Actor";
                 if(ImBrio.FontIconButtonRight($"###{Id}_actors_contextButton", FontAwesomeIcon.Plus, 1f, toolTip, bordered: false))
