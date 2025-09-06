@@ -1,8 +1,8 @@
 ﻿using Brio.Capabilities.Actor;
 using Brio.Entities.Actor;
 using Brio.UI.Controls.Core;
-using Dalamud.Interface.Utility.Raii;
 using Dalamud.Bindings.ImGui;
+using Dalamud.Interface.Utility.Raii;
 
 namespace Brio.UI.Controls.Editors;
 

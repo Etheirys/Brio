@@ -12,11 +12,11 @@ using Brio.UI.Controls.Core;
 using Brio.UI.Controls.Editors;
 using Brio.UI.Controls.Stateless;
 using Brio.UI.Theming;
+using Dalamud.Bindings.ImGui;
 using Dalamud.Interface;
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Interface.Windowing;
 using Dalamud.Plugin.Services;
-using Dalamud.Bindings.ImGui;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -781,7 +781,7 @@ public class LibraryWindow : Window
 
                             using(ImRaii.PushColor(ImGuiCol.FrameBg, 0x000000))
                             {
-                                if(ImGui.InputText("###library_search_input", ref _searchText,  256, 
+                                if(ImGui.InputText("###library_search_input", ref _searchText, 256,
                                     ImGuiInputTextFlags.NoHorizontalScroll | ImGuiInputTextFlags.NoUndoRedo
                                     | ImGuiInputTextFlags.CallbackAlways,
                                     OnSearchFunc))

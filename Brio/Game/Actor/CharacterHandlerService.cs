@@ -4,7 +4,6 @@ using Brio.IPC;
 using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Plugin.Services;
 using Dalamud.Utility;
-using FFXIVClientStructs.FFXIV.Client.Game.Character;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -62,7 +61,7 @@ public class CharacterHandlerService : IDisposable
     public async Task RevertMCDF(CharacterHolder mCDFCharacterHolder)
     {
         if(mCDFCharacterHolder.GameObject.Address == nint.Zero || mCDFCharacterHolder.Name.IsNullOrEmpty()) return;
-    
+
         _glamourerService.UnlockAndRevertCharacter(mCDFCharacterHolder.GameObject);
         _glamourerService.UnlockAndRevertCharacterByName(mCDFCharacterHolder.Name);
 

@@ -1,5 +1,4 @@
-﻿using Brio.Capabilities.Actor;
-using Brio.Capabilities.Camera;
+﻿using Brio.Capabilities.Camera;
 using Brio.Config;
 using Brio.Entities.Camera;
 using Brio.Files;
@@ -7,9 +6,9 @@ using Brio.Game.Camera;
 using Brio.Game.Cutscene;
 using Brio.UI.Controls.Core;
 using Brio.UI.Controls.Stateless;
+using Dalamud.Bindings.ImGui;
 using Dalamud.Interface;
 using Dalamud.Interface.Utility.Raii;
-using Dalamud.Bindings.ImGui;
 using System.IO;
 using System.Numerics;
 
@@ -119,7 +118,7 @@ public static class CameraEditor
                     float pivot = camera.PivotRotation;
                     if(ImBrio.SliderAngle("##PivotRotation", ref pivot, -180, 180, "%.2f"))
                         camera.PivotRotation = pivot;
-                   
+
                     ImGui.SameLine();
 
                     if(ImBrio.FontIconButtonRight("resetPivotRotation", FontAwesomeIcon.Undo, 1f, "Reset Pivot", camera.PivotRotation != 0))

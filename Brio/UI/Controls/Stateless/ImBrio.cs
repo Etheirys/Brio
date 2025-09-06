@@ -149,7 +149,7 @@ public static partial class ImBrio
                 if(ImGui.IsItemHovered())
                     ImGui.SetTooltip(hoverText);
             }
-        
+
             if(icon != FontAwesomeIcon.None)
             {
                 ImGui.SetCursorPos(startPos + ImGui.GetStyle().FramePadding);
@@ -158,7 +158,7 @@ public static partial class ImBrio
 
                     ImGui.Text(icon.ToIconString());
                 }
-            }   
+            }
 
             size.Y = 1;
 

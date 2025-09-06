@@ -1,8 +1,8 @@
 ﻿using Brio.Capabilities.Posing;
 using Brio.Game.Posing;
 using Brio.Game.Posing.Skeletons;
-using Dalamud.Interface.Utility.Raii;
 using Dalamud.Bindings.ImGui;
+using Dalamud.Interface.Utility.Raii;
 using OneOf.Types;
 using System;
 using System.Numerics;

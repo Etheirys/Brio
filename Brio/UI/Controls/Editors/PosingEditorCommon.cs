@@ -29,16 +29,17 @@ public static class PosingEditorCommon
         BonePoseInfoId? selectedIsBone = posing.IsSelectedBone();
         using(ImRaii.PushColor(ImGuiCol.Text, UIConstants.GizmoRed))
         {
-            if (selectedIsBone.HasValue)
+            if(selectedIsBone.HasValue)
             {
                 Game.Posing.Skeletons.Bone? bone = posing.SkeletonPosing.GetBone(selectedIsBone.Value);
                 if(bone != null && bone.Skeleton.IsValid && bone.Freeze)
                 {
                     ImGui.Text("This bone's transform values are frozen.");
                 }
-            } else
+            }
+            else
             {
-                if (posing.ModelPosing.Freeze)
+                if(posing.ModelPosing.Freeze)
                 {
                     ImGui.Text("This actor's transform values are frozen.");
                 }

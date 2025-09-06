@@ -7,6 +7,7 @@ using Brio.Files;
 using Brio.Game.Input;
 using Brio.Game.Posing;
 using Brio.Game.Posing.Skeletons;
+using Brio.Input;
 using Brio.Resources;
 using Brio.UI.Widgets.Posing;
 using Brio.UI.Windows.Specialized;
@@ -15,8 +16,6 @@ using OneOf;
 using OneOf.Types;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
 
 namespace Brio.Capabilities.Posing;
 
@@ -31,6 +30,8 @@ public class PosingCapability : ActorCharacterCapability
 
     public PosingService PosingService => _posingService;
 
+
+    public bool IsEntitySelected;
     public bool HasOverride
     {
         get
@@ -93,6 +94,7 @@ public class PosingCapability : ActorCharacterCapability
         : base(parent)
     {
         Widget = new PosingWidget(this);
+
         _overlayWindow = window;
         _posingService = posingService;
         _configurationService = configurationService;
@@ -101,15 +103,30 @@ public class PosingCapability : ActorCharacterCapability
         _framework = framework;
         _groupedUndoService = groupedUndoService;
         _gameInputService = gameInputService;
+
+        _framework.Update += OnFrameworkUpdate;
+    }
+
+    private void OnFrameworkUpdate(IFramework framework)
+    {
+        if(IsEntitySelected)
+        {
+            if(InputManagerService.ActionKeysPressedLastFrame(InputAction.Posing_Undo))
+                Undo();
+            if(InputManagerService.ActionKeysPressedLastFrame(InputAction.Posing_Redo))
+                Redo();
+        }
     }
 
     public override void OnEntitySelected()
     {
+        IsEntitySelected = true;
         base.OnEntitySelected();
     }
 
     public override void OnEntityDeselected()
     {
+        IsEntitySelected = false;
         base.OnEntityDeselected();
     }
 
@@ -327,11 +344,6 @@ public class PosingCapability : ActorCharacterCapability
             Snapshot(reset);
     }
 
-    public void ToggleOverlay()
-    {
-        OverlayOpen = !OverlayOpen;
-    }
-
     private void Reconcile(bool reset = true, bool generateSnapshot = true)
     {
         _framework.RunOnTick(() =>
@@ -395,7 +407,7 @@ public class PosingCapability : ActorCharacterCapability
             {
                 var poseInfo = SkeletonPosing.PoseInfo.GetPoseInfo(bone);
                 FlipBone(bone, poseInfo);
-             
+
                 // record change for undo
                 Snapshot(reset: false);
             }
@@ -404,6 +416,13 @@ public class PosingCapability : ActorCharacterCapability
         {
             // Model Flip (TODO: Implement)
         }
+    }
+
+    public override void Dispose()
+    {
+        _framework.Update -= OnFrameworkUpdate;
+
+        base.Dispose();
     }
 
     public record struct PoseStack(PoseInfo Info, Transform ModelTransform);

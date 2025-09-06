@@ -480,7 +480,7 @@ public class PosingGraphicalWindow : Window, IDisposable
                         cap.ModelPosing.Transform += delta;
                     }
                 },
-                _ => 
+                _ =>
                 {
                     // On first application while starting a gizmo drag, capture before-states for grouped undo
                     if(_groupedSnapshotPending == null && ImBrioGizmo.IsUsing())
@@ -524,7 +524,7 @@ public class PosingGraphicalWindow : Window, IDisposable
                 _groupedUndoService.Snapshot(_groupedSnapshotPending);
                 _groupedSnapshotPending = null;
             }
-       
+
             foreach(var eid in _entityManager.SelectedEntityIds)
             {
                 if(!_entityManager.TryGetEntity(eid, out var ent))

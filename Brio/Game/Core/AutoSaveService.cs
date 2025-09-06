@@ -56,7 +56,7 @@ public class AutoSaveService : IDisposable
     public void Stop()
     {
         _timer?.Stop();
-    
+
         Brio.Log.Verbose($"AutoSave: Stop");
 
         if(ConfigurationService.Instance.Configuration.AutoSave.CleanAutoSaveOnLeavingGpose)
@@ -169,7 +169,7 @@ public class AutoSaveService : IDisposable
     internal void Update()
     {
         Brio.Log.Verbose($"AutoSave: Update");
-       
+
         var timeInterval = TimeSpan.FromSeconds(ConfigurationService.Instance.Configuration.AutoSave.AutoSaveInterval).TotalMilliseconds;
         if(_timer is not null && _timer.Interval != timeInterval)
         {

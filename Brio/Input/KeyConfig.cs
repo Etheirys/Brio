@@ -1,14 +1,14 @@
 ﻿using Dalamud.Game.ClientState.Keys;
 
 namespace Brio.Input;
-public class KeyConfig(VirtualKey key, bool requireShift = false, bool requireCtrl = false, bool requireAlt = false)
+public struct KeyConfig(VirtualKey key, bool requireShift = false, bool requireCtrl = false, bool requireAlt = false)
 {
     public VirtualKey Key = key;
     public bool requireShift = requireShift;
     public bool RequireCtrl = requireCtrl;
     public bool requireAlt = requireAlt;
 
-    public override string ToString()
+    public override readonly string ToString()
     {
         string result = string.Empty;
         if(RequireCtrl)

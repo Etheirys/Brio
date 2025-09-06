@@ -1,7 +1,6 @@
 ﻿using Brio.Config;
 using Brio.IPC;
 using Brio.MCDF.Utils;
-using Dalamud.Utility;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -34,7 +33,7 @@ public class FileCacheService : IDisposable
     {
         _configurationService = configurationService;
         _penumbraService = penumbraService;
-      
+
         _csvPath = Path.Combine(CacheFolder, "FileCache.csv");
 
         //if(_configurationService.Configuration.MCDF.CacheFolder.IsNullOrEmpty())

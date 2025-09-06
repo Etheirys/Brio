@@ -7,8 +7,8 @@ using Brio.Game.Camera;
 using Brio.Game.Cutscene;
 using Brio.Game.GPose;
 using Brio.UI.Controls.Editors;
-using Dalamud.Interface.Windowing;
 using Dalamud.Bindings.ImGui;
+using Dalamud.Interface.Windowing;
 using System;
 
 namespace Brio.UI.Windows.Specialized;

@@ -7,9 +7,9 @@ using Brio.Game.Input;
 using Brio.UI.Controls;
 using Brio.UI.Controls.Stateless;
 using Brio.UI.Theming;
+using Dalamud.Bindings.ImGui;
 using Dalamud.Interface;
 using Dalamud.Interface.Utility.Raii;
-using Dalamud.Bindings.ImGui;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 
@@ -83,7 +83,7 @@ public class CameraEntity(IServiceProvider provider, int cameraID, CameraType ca
     public override void OnDoubleClick()
     {
         var ce = GetCapability<CameraLifetimeCapability>();
-        if (!ce.CanDestroy) return;
+        if(!ce.CanDestroy) return;
         RenameActorModal.Open(ce.Entity);
     }
 

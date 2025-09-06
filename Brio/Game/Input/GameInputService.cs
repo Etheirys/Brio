@@ -45,7 +45,7 @@ public class GameInputService : IDisposable
             keyboardFrame->KeyState[81] = 0; // Q
             keyboardFrame->KeyState[32] = 0; // SPACE
 
-            if(_virtualCameraService.CurrentCamera.FreeCamValues.IsMovementEnabled && 
+            if(_virtualCameraService.CurrentCamera.FreeCamValues.IsMovementEnabled &&
                 Config.ConfigurationService.Instance.Configuration.InputManager.EnableKeyHandlingOnKeyMod)
             {
                 for(int i = 0; i < KeyboardFrame.KeyStateLength; i++)

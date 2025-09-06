@@ -1,5 +1,4 @@
 ﻿using Brio.Config;
-using Brio.Game.Actor;
 using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
@@ -7,7 +6,6 @@ using Penumbra.Api.Enums;
 using Penumbra.Api.Helpers;
 using Penumbra.Api.IpcSubscribers;
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -61,7 +59,7 @@ public class PenumbraService : BrioIPC
 
     public delegate void PenumbraRedrawEvent(int gameObjectId);
     public event PenumbraRedrawEvent? OnPenumbraRedraw;
- 
+
     public delegate void PenumbraResourceLoadedEvent(IntPtr ptr, string arg1, string arg2);
     public event PenumbraResourceLoadedEvent? OnPenumbraResourceLoaded;
 
@@ -86,7 +84,7 @@ public class PenumbraService : BrioIPC
     private readonly RemoveTemporaryMod _penumbraRemoveTemporaryMod;
 
     private readonly GetModDirectory _penumbraResolveModDir;
-  
+
     private readonly ResolvePlayerPathsAsync _penumbraResolvePaths;
     private readonly GetGameObjectResourcePaths _penumbraResourcePaths;
     private readonly GetPlayerMetaManipulations _penumbraGetMetaManipulations;
@@ -132,7 +130,7 @@ public class PenumbraService : BrioIPC
     public bool PenumbraCheckStatus()
     {
         var status = CheckStatus() == IPCStatus.Available;
-        
+
         checkModDirectory(status);
 
         return status;
@@ -214,7 +212,7 @@ public class PenumbraService : BrioIPC
     public string GetMetaManipulations()
     {
         if(IsAvailable == false) return string.Empty;
-        
+
         Brio.Log.Debug("Calling On IPC: Penumbra.GetMetaManipulations");
 
         return _penumbraGetMetaManipulations.Invoke();

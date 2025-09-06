@@ -136,7 +136,7 @@ public class MCDFService : IDisposable
         await (McdfApplicationTask = Task.Run(async () =>
         {
             List<string> actuallyExtractedFiles = [];
-           
+
             Brio.Log.Info("Extracting MCDF");
 
             try
@@ -266,7 +266,7 @@ public class MCDFService : IDisposable
         try
         {
             DataApplicationProgress = "Reverting previous Application";
-          
+
             await _penumbraService.Redraw(tempHandler.GameObject);
             await _actorRedrawService.RedrawAndWait(tempHandler.GameObject);
 
@@ -302,7 +302,7 @@ public class MCDFService : IDisposable
             if(!string.IsNullOrEmpty(customizeData))
             {
                 Brio.Log.Debug($"{DataApplicationProgress}");
-                cPlusId =  await _customizePlusService.SetBodyScaleAsync(tempHandler.GameObject, customizeData).ConfigureAwait(false);
+                cPlusId = await _customizePlusService.SetBodyScaleAsync(tempHandler.GameObject, customizeData).ConfigureAwait(false);
             }
             else
             {
@@ -362,7 +362,7 @@ public class MCDFService : IDisposable
 
             var data = await CreatePlayerData(gameObject).ConfigureAwait(false);
             if(data == null) return;
-         
+
             MareCharaFileData mareCharaFileData = new MareCharaFileData(_fileCacheService, "", data);
             MareCharaFileHeader output = new(MareCharaFileHeader.CurrentVersion, mareCharaFileData);
 
@@ -393,7 +393,7 @@ public class MCDFService : IDisposable
                 await fs.FlushAsync().ConfigureAwait(false);
                 fs.Close();
                 File.Move(tempFilePath, filePath, true);
-           
+
                 Brio.Log.Info("MCDF export complete!");
             });
         }
@@ -408,9 +408,9 @@ public class MCDFService : IDisposable
     {
         CharacterDataEX newCdata = new();
         var fragment = await BuildCharacterData(gameObject, CancellationToken.None).ConfigureAwait(false);
-       
+
         newCdata.SetFragment(API.Data.Enum.ObjectKind.Player, fragment);
-    
+
         if(newCdata.FileReplacements.TryGetValue(API.Data.Enum.ObjectKind.Player, out var playerData) && playerData != null)
         {
             foreach(var data in playerData.Select(g => g.GamePaths))
@@ -601,7 +601,7 @@ public class MCDFService : IDisposable
         var customizeScale = await getCustomizeData.ConfigureAwait(false);
         fragment.CustomizePlusScale = customizeScale ?? string.Empty;
         Brio.Log.Verbose("Customize is now: {data}", fragment.CustomizePlusScale);
-       
+
         if(objectKind == ObjectKind.Player)
         {
             var playerFragment = (fragment as CharacterDataFragmentPlayer)!;
@@ -630,13 +630,13 @@ public class MCDFService : IDisposable
             ct.ThrowIfCancellationRequested();
             file.Hash = computedPaths[file.ResolvedPath]?.Hash ?? string.Empty;
         }
-          
+
         var removed = fragment.FileReplacements.RemoveWhere(f => !f.IsFileSwap && string.IsNullOrEmpty(f.Hash));
         if(removed > 0)
         {
             Brio.Log.Verbose("Removed {amount} of invalid files", removed);
         }
-    
+
         ct.ThrowIfCancellationRequested();
 
         if(objectKind == ObjectKind.Player)
@@ -655,7 +655,7 @@ public class MCDFService : IDisposable
                 Brio.Log.Warning(e, "Failed to verify player animations, continuing without further verification");
             }
         }
-      
+
         Brio.Log.Info("Building character data for {obj} took {time}ms", objectKind, TimeSpan.FromTicks(DateTime.UtcNow.Ticks - start.Ticks).TotalMilliseconds);
 
         return fragment;

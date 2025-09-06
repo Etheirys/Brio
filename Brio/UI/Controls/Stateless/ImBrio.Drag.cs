@@ -1,7 +1,6 @@
 ﻿using Brio.Core;
 using Brio.Input;
 using Brio.UI.Controls.Core;
-using Brio.UI.Controls.Selectors;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface;
 using Dalamud.Interface.Utility;
@@ -199,7 +198,7 @@ public static partial class ImBrio
         {
             ImGui.SetNextItemWidth((ImBrio.GetRemainingWidth() - buttonWidth) + ImGui.GetStyle().ItemSpacing.X);
         }
-        
+
         changed |= ImGui.DragFloat($"##{label}_drag", ref value, step / 10.0f);
         active |= ImGui.IsItemActive();
 
@@ -249,7 +248,7 @@ public static partial class ImBrio
         ImGui.SetNextItemWidth(buttonWidth);
         if(ImGui.Button($"◀##{label}_decrease"))
         {
-            if (value - step <= min)
+            if(value - step <= min)
             {
                 value = min;
             }
@@ -280,7 +279,7 @@ public static partial class ImBrio
         {
             ImGui.SetNextItemWidth(width);
         }
-        
+
         if(ImGui.DragFloat($"##{label}_drag", ref value, step / 10.0f, min, max))
         {
             if(value < min)

@@ -1,8 +1,6 @@
 ﻿using Brio.Capabilities.Actor;
-using Brio.Capabilities.Core;
 using Brio.Capabilities.Posing;
 using Brio.Game.Actor.Appearance;
-using Brio.MCDF.Game.Services;
 using Brio.Resources;
 using Brio.UI.Controls.Editors;
 using Brio.UI.Controls.Selectors;

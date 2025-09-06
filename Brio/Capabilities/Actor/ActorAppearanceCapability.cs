@@ -77,7 +77,7 @@ public class ActorAppearanceCapability : ActorCharacterCapability
 
     public bool IsHidden => CurrentAppearance.ExtendedAppearance.Transparency == 0;
 
-    public ActorAppearanceCapability(ActorEntity parent,CharacterHandlerService characterHandlerService, MCDFService mCDFService, IFramework framework, ActorAppearanceService actorAppearanceService,
+    public ActorAppearanceCapability(ActorEntity parent, CharacterHandlerService characterHandlerService, MCDFService mCDFService, IFramework framework, ActorAppearanceService actorAppearanceService,
         CustomizePlusService customizePlusService, PenumbraService penumbraService, TargetService targetService, GlamourerService glamourerService,
         GPoseService gPoseService) : base(parent)
     {
@@ -345,7 +345,7 @@ public class ActorAppearanceCapability : ActorCharacterCapability
     }
 
     public async Task Redraw()
-    {           
+    {
         await _actorAppearanceService.Redraw(Character, HasMCDF);
 
         ApplyShaderOverride();

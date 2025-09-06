@@ -1,6 +1,6 @@
 ﻿using Brio.Resources;
-using Dalamud.Interface.Textures.TextureWraps;
 using Dalamud.Bindings.ImGui;
+using Dalamud.Interface.Textures.TextureWraps;
 using Lumina.Excel.Sheets;
 using System;
 using System.Numerics;

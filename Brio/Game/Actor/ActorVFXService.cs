@@ -1,8 +1,8 @@
-﻿using Dalamud.Game;
-using NativeGameObject =  FFXIVClientStructs.FFXIV.Client.Game.Object.GameObject;
-using System;
+﻿using Brio.Game.Actor.Extensions;
+using Dalamud.Game;
 using Dalamud.Game.ClientState.Objects.Types;
-using Brio.Game.Actor.Extensions;
+using System;
+using NativeGameObject = FFXIVClientStructs.FFXIV.Client.Game.Object.GameObject;
 
 namespace Brio.Game.Actor;
 
@@ -33,10 +33,10 @@ public unsafe class ActorVFXService : IDisposable
 
     public nint CreateActorVFX(string vfxName, NativeGameObject* actor, NativeGameObject* target = null)
     {
-       if(target == null)
+        if(target == null)
             target = actor;
 
-       return _createActorVfx(vfxName, actor, target, -1, 0, 0, 0);
+        return _createActorVfx(vfxName, actor, target, -1, 0, 0, 0);
     }
 
     public void DestroyVFX(nint vfxInstance)

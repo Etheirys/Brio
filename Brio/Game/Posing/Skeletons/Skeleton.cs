@@ -103,7 +103,7 @@ public class Skeleton : IDisposable
                     // Single-root partials are mapped by connected bone indices
                     var parentBone = Partials[0].GetOrCreateBone(partial->ConnectedParentBoneIndex);
                     var bone = newPartial.GetOrCreateBone(partial->ConnectedBoneIndex);
-                
+
                     bone.Parent = parentBone;
                     if(!parentBone.Children.Contains(bone))
                         parentBone.Children.Add(bone);

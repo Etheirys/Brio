@@ -8,12 +8,10 @@ using Brio.Entities.Actor;
 using Brio.Entities.Core;
 using Brio.Entities.World;
 using Brio.Files;
-using Brio.Game.Actor;
 using Brio.Game.Actor.Appearance;
 using Brio.Game.Actor.Extensions;
 using Brio.Game.Camera;
 using Brio.Game.Core;
-using Brio.Game.Posing;
 using Dalamud.Plugin.Services;
 using System.Threading.Tasks;
 

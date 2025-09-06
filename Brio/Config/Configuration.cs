@@ -31,7 +31,7 @@ public class Configuration : IPluginConfiguration
 
     // Library
     public LibraryConfiguration Library { get; set; } = new LibraryConfiguration();
-  
+
     // MCDF Data
     public MCDFConfiguration MCDF { get; set; } = new MCDFConfiguration();
 

@@ -1,7 +1,7 @@
 ﻿using Brio.Config;
+using Dalamud.Bindings.ImGui;
 using Dalamud.Game.ClientState.Keys;
 using Dalamud.Interface.Utility.Raii;
-using Dalamud.Bindings.ImGui;
 using System.Collections.Generic;
 
 namespace Brio.Input;
@@ -109,7 +109,8 @@ public static class KeybindEditor
         ImGui.SameLine();
         if(ImGui.Button($"Reset##{label}"))
         {
-            config.ResetKeyToDefault(evt);
+            keyBind = config.GetDefaultKey(evt);
+            changed = true;
         }
 
         if(ImGui.IsItemHovered())
@@ -125,6 +126,11 @@ public static class KeybindEditor
         {
             keyBind.Key = virtualKeys[currentIndex];
             changed = true;
+        }
+
+        if(changed)
+        {
+            config.KeyBindings[evt] = keyBind;
         }
 
         return changed;

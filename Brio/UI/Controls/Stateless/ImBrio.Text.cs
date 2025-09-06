@@ -6,7 +6,6 @@ using Dalamud.Interface.Utility.Raii;
 using Dalamud.Plugin;
 using System;
 using System.Numerics;
-using static FFXIVClientStructs.FFXIV.Component.GUI.AtkFontManager;
 
 namespace Brio.UI.Controls.Stateless;
 public static partial class ImBrio

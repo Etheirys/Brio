@@ -1,7 +1,7 @@
 ﻿using Brio.Config;
+using Dalamud.Bindings.ImGui;
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Interface.Windowing;
-using Dalamud.Bindings.ImGui;
 using System.Diagnostics;
 using System.Numerics;
 

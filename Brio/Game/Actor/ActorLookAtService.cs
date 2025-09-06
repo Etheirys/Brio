@@ -10,7 +10,6 @@ using Dalamud.Hooking;
 using Dalamud.Plugin.Services;
 using FFXIVClientStructs.FFXIV.Client.Game.Character;
 using FFXIVClientStructs.FFXIV.Client.Game.Control;
-using Lumina.Data.Parsing.Layer;
 using System;
 using System.Collections.Generic;
 using System.Numerics;
@@ -215,7 +214,7 @@ public class LookAtDataHolder
 {
     public LookAtTargetMode TargetMode;
     public LookAtTargetType TargetType;
-  
+
     public LookAtSource Target;
 
     public LookMode LookMode
@@ -227,7 +226,7 @@ public class LookAtDataHolder
             Target.Body.LookAtTarget.LookMode = value;
         }
     }
-  
+
     public Vector3 EyesTarget { get => Target.Eyes.LookAtTarget.Position; set => Target.Eyes.LookAtTarget.Position = value; }
     public Vector3 BodyTarget { get => Target.Body.LookAtTarget.Position; set => Target.Body.LookAtTarget.Position = value; }
     public Vector3 HeadTarget { get => Target.Head.LookAtTarget.Position; set => Target.Head.LookAtTarget.Position = value; }

@@ -1,7 +1,5 @@
-﻿using Brio.Config;
-using Brio.Entities.Camera;
+﻿using Brio.Entities.Camera;
 using Brio.Game.Camera;
-using Brio.Game.Cutscene;
 using Brio.Game.GPose;
 using Brio.UI.Widgets.Camera;
 using Brio.UI.Windows.Specialized;

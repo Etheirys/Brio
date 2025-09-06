@@ -1,14 +1,13 @@
 ﻿using Brio.Capabilities.Camera;
 using Brio.Entities.Core;
 using Brio.Game.Camera;
-using Brio.Game.GPose;
 using Brio.Game.Input;
 using Brio.UI.Controls.Editors;
 using Brio.UI.Controls.Stateless;
 using Brio.UI.Theming;
+using Dalamud.Bindings.ImGui;
 using Dalamud.Interface;
 using Dalamud.Interface.Utility.Raii;
-using Dalamud.Bindings.ImGui;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 

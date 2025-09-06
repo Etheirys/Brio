@@ -57,7 +57,7 @@ public unsafe class CameraService : IDisposable
         _cameraUpdateHook = hooking.HookFromAddress<CameraUpdateDelegate>(scanner.ScanText(cameraUpdateAddr), CameraUpdateDetour);
         _cameraUpdateHook.Enable();
 
-        var cameraSceneUpdateAddr = "48 ?? ?? ?? ?? ?? 48 81 EC ?? ?? ?? ?? F6 81 F0 ?? ?? ?? ?? 48 8B ??"; 
+        var cameraSceneUpdateAddr = "48 ?? ?? ?? ?? ?? 48 81 EC ?? ?? ?? ?? F6 81 F0 ?? ?? ?? ?? 48 8B ??";
         _cameraSceneUpdateHook = hooking.HookFromAddress<CameraSceneUpdate>(scanner.ScanText(cameraSceneUpdateAddr), CameraSceneUpdateDetour);
         _cameraSceneUpdateHook.Enable();
 

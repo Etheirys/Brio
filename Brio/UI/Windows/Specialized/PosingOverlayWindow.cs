@@ -430,7 +430,7 @@ public class PosingOverlayWindow : Window, IDisposable
             if(!posing.ModelPosing.Freeze && !(selectedBone != null && selectedBone.Freeze))
             {
                 newTransform = lastMatrix.ToTransform();
-                _trackingTransform = newTransform;       
+                _trackingTransform = newTransform;
             }
         }
 

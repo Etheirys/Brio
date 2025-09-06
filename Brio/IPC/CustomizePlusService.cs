@@ -76,7 +76,7 @@ public class CustomizePlusService : BrioIPC
         _customizeplusGetAllProfiles = _pluginInterface.GetIpcSubscriber<IList<IPCProfileDataTuple>>("CustomizePlus.Profile.GetList");
         _customizeplusGetActiveProfileId = _pluginInterface.GetIpcSubscriber<ushort, (int, Guid?)>("CustomizePlus.Profile.GetActiveProfileIdOnCharacter");
         _customizeplusGetProfileById = _pluginInterface.GetIpcSubscriber<Guid, (int, string?)>("CustomizePlus.Profile.GetByUniqueId");
-       
+
         _customizePlusDeleteByUniqueId = _pluginInterface.GetIpcSubscriber<Guid, int>("CustomizePlus.Profile.DeleteTemporaryProfileByUniqueId");
 
         _configurationService.OnConfigurationChanged += OnConfigurationChanged;
@@ -172,7 +172,7 @@ public class CustomizePlusService : BrioIPC
             return null;
         }).ConfigureAwait(false);
     }
-    
+
     public async Task<string?> GetScaleAsync(nint character)
     {
         if(IsAvailable == false) return null;

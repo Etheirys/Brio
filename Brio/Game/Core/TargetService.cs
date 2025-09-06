@@ -1,5 +1,4 @@
 ﻿using Brio.Config;
-using Brio.Core;
 using Brio.Entities;
 using Brio.Entities.Actor;
 using Brio.Game.GPose;
@@ -8,8 +7,6 @@ using Dalamud.Game.ClientState.Objects.Enums;
 using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Plugin.Services;
 using System;
-using System.Threading.Tasks;
-using System.Xml.Linq;
 
 namespace Brio.Game.Core;
 
@@ -90,9 +87,9 @@ public unsafe class TargetService : IDisposable
     public (bool CanApply, string TargetName, IGameObject GameObject) CanApplyMCDFToTarget()
     {
         var targetName = "Invalid Target";
-        var canApply = _gPoseService.IsGPosing && HasGPoseTarget 
+        var canApply = _gPoseService.IsGPosing && HasGPoseTarget
             && GPoseTarget!.ObjectKind == ObjectKind.Player;
-       
+
         if(canApply)
         {
             targetName = GPoseTarget!.Name.TextValue;

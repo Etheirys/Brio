@@ -31,11 +31,11 @@ public class HumanData
         return [.. _rawColors[start..(start + HairLength)].Where(x => x != NeutralHair)];
     }
 
-    public uint[] GetHairHighlightColors() => [.. _rawColors[256..(256+HairLength)].Where(x => x != NeutralHair)];
+    public uint[] GetHairHighlightColors() => [.. _rawColors[256..(256 + HairLength)].Where(x => x != NeutralHair)];
 
     public uint[] GetEyeColors() => _rawColors[0..192];
 
-    
+
 
     public uint[] GetFacepaintColors()
     {

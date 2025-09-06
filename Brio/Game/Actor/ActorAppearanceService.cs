@@ -11,12 +11,8 @@ using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Hooking;
 using Dalamud.Plugin.Services;
 using FFXIVClientStructs.FFXIV.Client.Game.Character;
-using FFXIVClientStructs.FFXIV.Client.Game.Control;
 using FFXIVClientStructs.FFXIV.Client.Graphics.Scene;
-using InteropGenerator.Runtime;
 using System;
-using System.Collections.Generic;
-using System.Numerics;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using static Brio.Game.Actor.ActorRedrawService;
@@ -179,7 +175,7 @@ public class ActorAppearanceService : IDisposable
                                 else
                                 {
                                     Buffer.MemoryCopy(existingAppearance.Equipment.Data, ptr + 32, 80, 80);
-                                                                  }
+                                }
 
                                 var didUpdate = human->Human.UpdateDrawData(ptr, false);
                                 needsRedraw |= !didUpdate;

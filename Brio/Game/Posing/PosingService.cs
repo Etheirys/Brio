@@ -1,5 +1,4 @@
 ﻿using Brio.Core;
-using Dalamud.Bindings.ImGui;
 using Dalamud.Bindings.ImGuizmo;
 
 namespace Brio.Game.Posing;

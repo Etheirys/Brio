@@ -1,8 +1,8 @@
 ﻿using Brio.Capabilities.Actor;
 using Brio.Game.Actor.Extensions;
 using Brio.UI.Widgets.Core;
-using Dalamud.Interface.Utility.Raii;
 using Dalamud.Bindings.ImGui;
+using Dalamud.Interface.Utility.Raii;
 
 namespace Brio.UI.Widgets.Actor;
 

@@ -1,18 +1,15 @@
 ﻿using Brio.Config;
-using Brio.Core;
 using Brio.Game.Actor;
 using Brio.Game.Core;
 using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
 using Dalamud.Utility;
-using FFXIVClientStructs.FFXIV.Client.Game.Character;
 using Glamourer.Api.Enums;
 using Glamourer.Api.Helpers;
 using Glamourer.Api.IpcSubscribers;
 using System;
 using System.Collections.Generic;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace Brio.IPC;
@@ -201,7 +198,7 @@ public class GlamourerService : BrioIPC
 
         }).ConfigureAwait(false);
     }
-  
+
     public void ApplyAllAsync(IGameObject? character, string? customization, Guid applicationId)
     {
         if(IsAvailable == false || string.IsNullOrEmpty(customization)) return;
@@ -233,7 +230,7 @@ public class GlamourerService : BrioIPC
             Brio.Log.Warning(ex, "Error during Glamourer RevertByName");
         }
     }
-  
+
     public async Task<string> GetCharacterCustomizationAsync(IntPtr character)
     {
         if(IsAvailable == false) return string.Empty;

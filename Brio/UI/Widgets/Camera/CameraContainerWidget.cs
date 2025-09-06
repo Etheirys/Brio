@@ -1,13 +1,11 @@
 ﻿using Brio.Capabilities.Camera;
-using Brio.Config;
 using Brio.Entities.Camera;
-using Brio.Game.Cutscene;
 using Brio.UI.Controls.Editors;
 using Brio.UI.Controls.Stateless;
 using Brio.UI.Widgets.Core;
+using Dalamud.Bindings.ImGui;
 using Dalamud.Interface;
 using Dalamud.Interface.Utility.Raii;
-using Dalamud.Bindings.ImGui;
 using System.Numerics;
 
 namespace Brio.UI.Widgets.Camera;

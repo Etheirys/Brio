@@ -4,10 +4,10 @@ using Brio.Game.Types;
 using Brio.Resources;
 using Brio.UI.Controls.Selectors;
 using Brio.UI.Controls.Stateless;
+using Dalamud.Bindings.ImGui;
 using Dalamud.Interface;
 using Dalamud.Interface.Utility.Raii;
 using FFXIVClientStructs.FFXIV.Client.Game.Character;
-using Dalamud.Bindings.ImGui;
 using System.Numerics;
 
 namespace Brio.UI.Controls.Editors;
@@ -463,7 +463,7 @@ public class GearEditor()
         using(ImRaii.PushId(slot.ToString()))
         {
             ImGui.Text($"{slot}: {model?.Name ?? "Unknown"}");
-          
+
             if(ImBrio.BorderedGameIcon("##icon", model?.Icon ?? 0, fallback, size: IconSize))
             {
                 _gearSelector.SetGearSelect(model, _propSlots);

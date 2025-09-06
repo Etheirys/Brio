@@ -1,6 +1,5 @@
 ﻿using Brio.Entities.Actor;
 using Brio.Game.Actor;
-using Brio.Game.Actor.Extensions;
 using Brio.Game.Camera;
 using Brio.Game.GPose;
 using Brio.UI.Widgets.Actor;
@@ -8,7 +7,6 @@ using Dalamud.Game.ClientState.Objects.Types;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Numerics;
-using static Brio.Capabilities.Actor.CompanionCapability;
 
 namespace Brio.Capabilities.Actor;
 public class ActorDynamicPoseCapability : ActorCharacterCapability

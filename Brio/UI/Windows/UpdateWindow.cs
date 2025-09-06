@@ -1,13 +1,11 @@
 ﻿using Brio.Config;
 using Brio.Resources;
-using Brio.UI.Controls.Selectors;
 using Brio.UI.Controls.Stateless;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface;
 using Dalamud.Interface.Utility;
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Interface.Windowing;
-using K4os.Compression.LZ4.Legacy;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -28,8 +26,8 @@ public class UpdateWindow : Window
     private bool _scrollToTop = false;
     private float _closeButtonWidth => 310f * ImGuiHelpers.GlobalScale;
 
-    private readonly List<string> _supporters  = [];
-    private readonly List<string> _contributors  = [];
+    private readonly List<string> _supporters = [];
+    private readonly List<string> _contributors = [];
     public UpdateWindow(ConfigurationService configurationService, ImBrioText imBrioText) : base($"  {Brio.Name} WELCOME###brio_welcomewindow", ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoDocking | ImGuiWindowFlags.NoTitleBar | ImGuiWindowFlags.NoDecoration)
     {
         Namespace = "brio_welcomewindow_namespace";
@@ -42,7 +40,7 @@ public class UpdateWindow : Window
         ShowCloseButton = false;
         AllowClickthrough = false;
         AllowPinning = false;
-       
+
         string? line;
 
         var kofiStream = ResourceProvider.Instance.GetRawResourceStream("Data.kofi.txt");
@@ -95,7 +93,7 @@ public class UpdateWindow : Window
         var scaledHeight = scaledWidth / imageAspect;
 
         var imagePos = headerStart;
-        
+
         var drawList = ImGui.GetWindowDrawList();
         drawList.AddImage(image.Handle, imagePos, imagePos + new Vector2(scaledWidth, scaledHeight));
 
@@ -118,22 +116,22 @@ public class UpdateWindow : Window
 
         using(ImRaii.PushColor(ImGuiCol.Button, new Vector4(0, 224, 148, 200) / 255))
             if(ImGui.Button("Support on KoFi", buttonSize))
-            Process.Start(new ProcessStartInfo { FileName = "https://ko-fi.com/minmoosexiv", UseShellExecute = true });
+                Process.Start(new ProcessStartInfo { FileName = "https://ko-fi.com/minmoosexiv", UseShellExecute = true });
         ImGui.SameLine();
 
         using(ImRaii.PushColor(ImGuiCol.Button, new Vector4(65, 90, 240, 200) / 255))
             if(ImGui.Button("Brio Community Discord", buttonSize))
-            Process.Start(new ProcessStartInfo { FileName = "https://discord.gg/GCb4srgEaH ", UseShellExecute = true });
+                Process.Start(new ProcessStartInfo { FileName = "https://discord.gg/GCb4srgEaH ", UseShellExecute = true });
         ImGui.SameLine();
 
         using(ImRaii.PushColor(ImGuiCol.Button, new Vector4(96, 108, 246, 200) / 255))
             if(ImGui.Button("Aetherworks Discord", buttonSize))
-            Process.Start(new ProcessStartInfo { FileName = "https://discord.gg/KvGJCCnG8t", UseShellExecute = true });
+                Process.Start(new ProcessStartInfo { FileName = "https://discord.gg/KvGJCCnG8t", UseShellExecute = true });
         ImGui.SameLine();
 
         using(ImRaii.PushColor(ImGuiCol.Button, new Vector4(29, 161, 242, 200) / 255))
             if(ImGui.Button("More Links", buttonSize))
-            Process.Start(new ProcessStartInfo { FileName = "https://etheirystools.carrd.co", UseShellExecute = true });
+                Process.Start(new ProcessStartInfo { FileName = "https://etheirystools.carrd.co", UseShellExecute = true });
 
         ImGui.SetCursorPosY(ImGui.GetCursorPosY() + 10);
 
@@ -144,11 +142,11 @@ public class UpdateWindow : Window
         ImBrio.VerticalPadding(10);
 
         ImGui.Text("To open this window again click on the `Information` button on the Scene Manager!");
-    
+
         ImBrio.ToggleButtonStrip("selector", new Vector2(ImBrio.GetRemainingWidth(), ImBrio.GetLineHeight()), ref selected, [" Changelog ", "Supporters & Contributors"]);
 
         using(ImRaii.PushColor(ImGuiCol.ChildBg, 0))
-        using(var c = ImRaii.Child("###brio_update_text", new Vector2(ImGui.GetWindowHeight() - 55 * ImGuiHelpers.GlobalScale, ImBrio.GetRemainingHeight() - 35f), false, 
+        using(var c = ImRaii.Child("###brio_update_text", new Vector2(ImGui.GetWindowHeight() - 55 * ImGuiHelpers.GlobalScale, ImBrio.GetRemainingHeight() - 35f), false,
             Flags = ImGuiWindowFlags.NoSavedSettings | ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoCollapse))
             if(c.Success)
             {
@@ -202,7 +200,7 @@ public class UpdateWindow : Window
             {
                 ImGui.Text("An enormous thank you to the following,");
                 ImGui.Text("people for their support on KoFi / Patreon!");
-               
+
                 ImBrio.VerticalPadding(5);
 
                 foreach(var item in _supporters)
@@ -211,7 +209,7 @@ public class UpdateWindow : Window
                 }
             }
         }
-        
+
         ImGui.SameLine();
 
         using(var rightGearGroup = ImRaii.Child("rightGroup", slotSizes))
@@ -220,7 +218,7 @@ public class UpdateWindow : Window
             {
                 ImGui.Text("And another enormous thank you to the following,");
                 ImGui.Text("people for their contributions to Brio!");
-              
+
                 ImBrio.VerticalPadding(5);
 
                 foreach(var item in _contributors)

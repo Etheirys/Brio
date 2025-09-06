@@ -1,5 +1,5 @@
-﻿using Dalamud.Interface.Utility.Raii;
-using Dalamud.Bindings.ImGui;
+﻿using Dalamud.Bindings.ImGui;
+using Dalamud.Interface.Utility.Raii;
 using System.Numerics;
 
 namespace Brio.UI.Controls.Stateless;
@@ -16,7 +16,7 @@ public static partial class ImBrio
 
         Vector2 textSize = ImGui.CalcTextSize(colorText);
         Vector2 initialPos = ImGui.GetCursorScreenPos();
-        Vector2 textPos = initialPos + (buttonSize - textSize) * 0.5f ;
+        Vector2 textPos = initialPos + (buttonSize - textSize) * 0.5f;
 
         wasClicked |= ImGui.ColorButton($"{description}###{id}", ImGui.ColorConvertU32ToFloat4(color), ImGuiColorEditFlags.NoPicker | ImGuiColorEditFlags.DisplayHex | ImGuiColorEditFlags.NoAlpha, buttonSize);
 

@@ -40,7 +40,8 @@ public abstract class AppliableActorFileInfoBase<T> : JsonDocumentBaseFileInfo<T
         {
             if(Load(fileEntry.FilePath) is T file)
             {
-                if (_configService.Configuration.Library.UseFilenameAsActorName) {
+                if(_configService.Configuration.Library.UseFilenameAsActorName)
+                {
                     actor.FriendlyName = fileEntry.Name;
                 }
                 Apply(file, actor, false);

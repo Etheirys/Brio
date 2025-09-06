@@ -3,8 +3,8 @@ using Brio.Library.Sources;
 using Brio.Library.Tags;
 using Brio.UI.Controls.Stateless;
 using Brio.UI.Windows;
-using Dalamud.Interface.Textures.TextureWraps;
 using Dalamud.Bindings.ImGui;
+using Dalamud.Interface.Textures.TextureWraps;
 
 namespace Brio.Library;
 

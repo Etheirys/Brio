@@ -1,8 +1,8 @@
 ﻿using Brio.Capabilities.Core;
 using Brio.UI.Controls.Stateless;
+using Dalamud.Bindings.ImGui;
 using Dalamud.Interface;
 using Dalamud.Interface.Utility.Raii;
-using Dalamud.Bindings.ImGui;
 using System.Collections.Generic;
 
 namespace Brio.UI.Widgets.Core;

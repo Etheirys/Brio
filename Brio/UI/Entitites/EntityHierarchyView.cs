@@ -3,15 +3,13 @@ using Brio.Entities;
 using Brio.Entities.Core;
 using Brio.Game.GPose;
 using Brio.Input;
-using Brio.UI.Controls.Stateless;
 using Brio.UI.Theming;
 using Brio.UI.Widgets.Core;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface;
-using Dalamud.Interface.Utility.Raii;
-using System.Collections.Generic;
-using System.Linq;
 using Dalamud.Interface.Utility;
+using Dalamud.Interface.Utility.Raii;
+using System.Linq;
 using System.Numerics;
 
 namespace Brio.UI.Entitites;
@@ -80,7 +78,7 @@ public class EntityHierarchyView(EntityManager entityManager, GPoseService gPose
             using(ImRaii.PushColor(ImGuiCol.Button, 0))
             {
                 var invsButtonPos = ImGui.GetCursorPos();
-              
+
                 float width = buttonWidth;
 
                 if(entity.ContextButtonCount >= 1)

@@ -31,7 +31,7 @@ public class TransientResourceService : IDisposable
     private readonly HashSet<(IGameObject GameObject, ObjectKind ObjectKind)> _playerRelatedPointers = [];
     private ConcurrentDictionary<IntPtr, ObjectKind> _cachedFrameAddresses = [];
     private ConcurrentDictionary<ObjectKind, HashSet<string>>? _semiTransientResources = null;
-   
+
     private uint _lastClassJobId = uint.MaxValue;
 
     public bool IsTransientRecording { get; private set; } = false;

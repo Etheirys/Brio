@@ -7,7 +7,6 @@ using Dalamud.Bindings.ImGui;
 using Dalamud.Game.ClientState.Objects.Enums;
 using Dalamud.Interface;
 using Dalamud.Interface.Utility.Raii;
-using FFXIVClientStructs.FFXIV.Client.Game;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -26,7 +25,7 @@ public class CustomizeEditor()
     public bool DrawCustomize(ref ActorAppearance currentAppearance, ActorAppearance originalAppearance, ActorAppearanceCapability capability)
     {
         bool didChange = false;
-   
+
         _capability = capability;
 
         var slotSizes = ImGui.GetContentRegionAvail() / new Vector2(1, 1.32f);

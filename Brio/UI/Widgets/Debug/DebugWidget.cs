@@ -1,8 +1,8 @@
 ﻿using Brio.Capabilities.Debug;
 using Brio.UI.Widgets.Core;
+using Dalamud.Bindings.ImGui;
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Plugin.Services;
-using Dalamud.Bindings.ImGui;
 
 namespace Brio.UI.Widgets.Debug;
 

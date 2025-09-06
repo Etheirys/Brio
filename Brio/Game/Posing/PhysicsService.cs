@@ -29,7 +29,6 @@ using Brio.Game.GPose;
 using Dalamud.Game;
 using Dalamud.Hooking;
 using Dalamud.Plugin.Services;
-using FFXIVClientStructs.FFXIV.Client.Graphics;
 using System;
 
 namespace Brio.Game.Posing;

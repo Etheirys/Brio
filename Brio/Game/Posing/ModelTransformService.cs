@@ -48,7 +48,8 @@ public unsafe class ModelTransformService : IDisposable
             {
                 Position = native->Position
             };
-        };
+        }
+        ;
     }
 
     public unsafe void SetTransform(IGameObject go, Transform transform) => SetTransform(go.Native(), transform);
