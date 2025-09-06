@@ -11,4 +11,5 @@ HoloWise
 MKhayle
 WorstAquaPlayer
 snaeling
+sparqle
 Yuki-Codes
