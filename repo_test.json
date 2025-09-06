@@ -1,0 +1,30 @@
+[
+    {
+        "Author": "Minmoose, Asgard and Contributors",
+        "Name": "Brio",
+        "Punchline": "Enhanced GPosing.",
+        "Description": "Brio is suite of tools that gives you advanced control to edit and pose actors during GPose.",
+        "InternalName": "Brio",
+        "AssemblyVersion": "0.5.3.1",
+        "TestingAssemblyVersion": "0.5.3.1",
+        "RepoUrl": "https://github.com/Etheirys/Brio",
+        "ApplicableVersion": "any",
+        "DownloadCount": 1385853,
+        "DalamudApiLevel": 13,
+        "DownloadLinkInstall": "https://github.com/Etheirys/Brio/releases/download/v0.5.3.1/Brio.zip",
+        "DownloadLinkTesting": "https://github.com/Etheirys/Brio/releases/download/v0.5.3.1/Brio.zip",
+        "DownloadLinkUpdate": "https://github.com/Etheirys/Brio/releases/download/v0.5.3.1/Brio.zip",
+        "IconUrl": "https://raw.githubusercontent.com/Etheirys/Brio/main/Resources/Images/BrioIcon.png",
+        "Tags": [ 
+            "gpose",
+            "brio",
+            "posing",
+            "pose",
+            "animation",
+            "xat",
+            "cutscene",
+            "utility", 
+            "tools"
+        ]
+    }
+]
