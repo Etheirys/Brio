@@ -63,30 +63,32 @@ public class InputManagerService : IDisposable
         return false;
     }
 
+    public bool IsKeyUpOrDown(VirtualKey key) => IsKeyUp(key) || IsKeyDown(key);
+
     public static bool ActionKeysPressedLastFrame(InputAction action)
     {
-        if(Instance._configurationService.Configuration.InputManager.KeyBindings.TryGetValue(action, out KeyConfig? value))
+        if(Instance._configurationService.Configuration.InputManager.KeyBindings.TryGetValue(action, out KeyConfig value))
         {
             if(value.Key == VirtualKey.NO_KEY)
                 return false;
 
             if(value.RequireCtrl || action is InputAction.Brio_Ctrl)
             {
-                if(Instance.IsKeyDown(VirtualKey.CONTROL) && Instance.IsKeyUp(value.Key))
+                if(Instance.IsKeyUpOrDown(VirtualKey.CONTROL) && Instance.IsKeyUp(value.Key))
                 {
                     return true;
                 }
             }
             else if(value.requireShift || action is InputAction.Brio_Shift)
             {
-                if(Instance.IsKeyDown(VirtualKey.SHIFT) && Instance.IsKeyUp(value.Key))
+                if(Instance.IsKeyUpOrDown(VirtualKey.SHIFT) && Instance.IsKeyUp(value.Key))
                 {
                     return true;
                 }
             }
             else if(value.requireAlt || action is InputAction.Brio_Alt)
             {
-                if(Instance.IsKeyDown(VirtualKey.MENU) && Instance.IsKeyUp(value.Key))
+                if(Instance.IsKeyUpOrDown(VirtualKey.MENU) && Instance.IsKeyUp(value.Key))
                 {
                     return true;
                 }
@@ -104,7 +106,7 @@ public class InputManagerService : IDisposable
 
     public static bool ActionKeysPressed(InputAction action)
     {
-        if(Instance._configurationService.Configuration.InputManager.KeyBindings.TryGetValue(action, out KeyConfig? value))
+        if(Instance._configurationService.Configuration.InputManager.KeyBindings.TryGetValue(action, out KeyConfig value))
         {
             if(value.Key == VirtualKey.NO_KEY)
                 return false;

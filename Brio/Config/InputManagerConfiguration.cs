@@ -18,7 +18,7 @@ public class InputManagerConfiguration
 
         { InputAction.Interface_SelectAllActors, new KeyConfig(VirtualKey.A, false, true) },
 
-        { InputAction.Posing_ToggleOverlay, new KeyConfig(VirtualKey.O, false, true, false) },
+        { InputAction.Posing_ToggleOverlay, new KeyConfig(VirtualKey.O, requireCtrl: true) },
         { InputAction.Posing_Undo, new KeyConfig(VirtualKey.Z, false, true, false) },
         { InputAction.Posing_Redo, new KeyConfig(VirtualKey.Y, false, true, false) },
         { InputAction.Posing_Esc, new KeyConfig(VirtualKey.ESCAPE) },
@@ -45,7 +45,8 @@ public class InputManagerConfiguration
         { InputAction.Brio_Alt, new KeyConfig(VirtualKey.MENU) },
         { InputAction.Brio_Ctrl, new KeyConfig(VirtualKey.CONTROL) },
         { InputAction.Brio_Shift, new KeyConfig(VirtualKey.SHIFT) }
-};
+    };
+
     public Dictionary<InputAction, KeyConfig> KeyBindings { get; set; } = new()
     {
         { InputAction.Interface_ToggleBrioWindow, new KeyConfig(VirtualKey.B, false, true, false) },
@@ -58,7 +59,7 @@ public class InputManagerConfiguration
 
         { InputAction.Interface_SelectAllActors, new KeyConfig(VirtualKey.A, false, true) },
 
-        { InputAction.Posing_ToggleOverlay, new KeyConfig(VirtualKey.O, false, true, false) },
+        { InputAction.Posing_ToggleOverlay, new KeyConfig(VirtualKey.O, requireCtrl: true) },
         { InputAction.Posing_Undo, new KeyConfig(VirtualKey.Z, false, true, false) },
         { InputAction.Posing_Redo, new KeyConfig(VirtualKey.Y, false, true, false) },
         { InputAction.Posing_Esc, new KeyConfig(VirtualKey.ESCAPE) },
@@ -92,14 +93,12 @@ public class InputManagerConfiguration
     public bool EnableKeyHandlingOnKeyMod { get; set; } = false;
     public bool FlipKeyBindsPastNinety { get; set; } = false;
 
-    public void ResetKeyToDefault(InputAction action)
+    public KeyConfig GetDefaultKey(InputAction action)
     {
-        if(KeyBindings.TryGetValue(action, out KeyConfig? value))
+        if(_defaultKeyBindings.TryGetValue(action, out KeyConfig value))
         {
-            value.Key = _defaultKeyBindings[action].Key;
-            value.requireShift = _defaultKeyBindings[action].requireShift;
-            value.RequireCtrl = _defaultKeyBindings[action].RequireCtrl;
-            value.requireAlt = _defaultKeyBindings[action].requireAlt;
+            return value;
         }
+        return new KeyConfig(VirtualKey.NO_KEY);
     }
 }

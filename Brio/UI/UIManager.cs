@@ -238,6 +238,10 @@ public class UIManager : IDisposable
             _configurationService.Configuration.InputManager.ShowPromptsInGPose = !_configurationService.Configuration.InputManager.ShowPromptsInGPose;
             _configurationService.ApplyChange();
         }
+        if(InputManagerService.ActionKeysPressed(InputAction.Posing_ToggleOverlay))
+        {
+            _overlayToolbarWindow.IsOpen = !_overlayToolbarWindow.IsOpen;
+        }
     }
 
     public void TemporarilyHideAllOpenWindows()
