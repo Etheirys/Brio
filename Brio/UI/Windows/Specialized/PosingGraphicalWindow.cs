@@ -9,6 +9,7 @@ using Brio.Game.Actor.Appearance;
 using Brio.Game.Camera;
 using Brio.Game.GPose;
 using Brio.Game.Posing;
+using Brio.Input;
 using Brio.Resources;
 using Brio.UI.Controls.Core;
 using Brio.UI.Controls.Editors;
@@ -248,7 +249,7 @@ public class PosingGraphicalWindow : Window, IDisposable
 
         using(ImRaii.Disabled(!posing.CanUndo))
         {
-            if(ImBrio.FontIconButton(FontAwesomeIcon.Backward, new(buttonWidth, 0)))
+            if(ImBrio.FontIconButton(FontAwesomeIcon.Backward, new(buttonWidth, 0)) || (InputManagerService.ActionKeysPressedLastFrame(InputAction.Posing_Undo) && posing.CanUndo))
                 posing.Undo();
         }
 
@@ -259,7 +260,7 @@ public class PosingGraphicalWindow : Window, IDisposable
 
         using(ImRaii.Disabled(!posing.CanRedo))
         {
-            if(ImBrio.FontIconButton(FontAwesomeIcon.Forward, new(buttonWidth, 0)))
+            if(ImBrio.FontIconButton(FontAwesomeIcon.Forward, new(buttonWidth, 0)) || (InputManagerService.ActionKeysPressedLastFrame(InputAction.Posing_Redo) && posing.CanRedo))
                 posing.Redo();
         }
 

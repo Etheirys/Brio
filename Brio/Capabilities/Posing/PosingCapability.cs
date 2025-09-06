@@ -12,6 +12,7 @@ using Brio.Resources;
 using Brio.UI.Widgets.Posing;
 using Brio.UI.Windows.Specialized;
 using Dalamud.Plugin.Services;
+using FFXIVClientStructs.FFXIV.Common.Lua;
 using OneOf;
 using OneOf.Types;
 using System;
@@ -103,8 +104,6 @@ public class PosingCapability : ActorCharacterCapability
         _framework = framework;
         _groupedUndoService = groupedUndoService;
         _gameInputService = gameInputService;
-
-        _framework.Update += OnFrameworkUpdate;
     }
 
     private void OnFrameworkUpdate(IFramework framework)
@@ -112,22 +111,16 @@ public class PosingCapability : ActorCharacterCapability
         if(IsEntitySelected)
         {
             if(InputManagerService.ActionKeysPressedLastFrame(InputAction.Posing_Undo))
-                Undo();
+            {
+                Brio.Log.Warning($"Undo ActionKeysPressedLastFrame");
+
+            }
             if(InputManagerService.ActionKeysPressedLastFrame(InputAction.Posing_Redo))
-                Redo();
+            {
+                Brio.Log.Warning($"Redo ActionKeysPressedLastFrame");
+
+            }
         }
-    }
-
-    public override void OnEntitySelected()
-    {
-        IsEntitySelected = true;
-        base.OnEntitySelected();
-    }
-
-    public override void OnEntityDeselected()
-    {
-        IsEntitySelected = false;
-        base.OnEntityDeselected();
     }
 
     public void ClearSelection() => Selected = PosingSelectionType.None;
@@ -416,13 +409,6 @@ public class PosingCapability : ActorCharacterCapability
         {
             // Model Flip (TODO: Implement)
         }
-    }
-
-    public override void Dispose()
-    {
-        _framework.Update -= OnFrameworkUpdate;
-
-        base.Dispose();
     }
 
     public record struct PoseStack(PoseInfo Info, Transform ModelTransform);

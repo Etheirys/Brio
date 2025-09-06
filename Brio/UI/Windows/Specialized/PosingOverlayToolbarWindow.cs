@@ -306,7 +306,7 @@ public class PosingOverlayToolbarWindow : Window
         {
             using(ImRaii.Disabled(!posing.CanUndo))
             {
-                if(ImGui.Button($"{FontAwesomeIcon.Backward.ToIconString()}###undo_pose", new Vector2(buttonSize)))
+                if(ImGui.Button($"{FontAwesomeIcon.Backward.ToIconString()}###undo_pose", new Vector2(buttonSize)) || (InputManagerService.ActionKeysPressedLastFrame(InputAction.Posing_Undo) && posing.CanUndo))
                 {
                     posing.Undo();
                 }
@@ -321,7 +321,7 @@ public class PosingOverlayToolbarWindow : Window
         {
             using(ImRaii.Disabled(!posing.CanRedo))
             {
-                if(ImGui.Button($"{FontAwesomeIcon.Forward.ToIconString()}###redo_pose", new Vector2(buttonSize)))
+                if(ImGui.Button($"{FontAwesomeIcon.Forward.ToIconString()}###redo_pose", new Vector2(buttonSize)) || (InputManagerService.ActionKeysPressedLastFrame(InputAction.Posing_Redo) && posing.CanRedo))
                 {
                     posing.Redo();
                 }

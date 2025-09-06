@@ -11,6 +11,7 @@ using Dalamud.Interface.Textures.TextureWraps;
 using Dalamud.Interface.Windowing;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
+using FFXIVClientStructs.FFXIV.Common.Lua;
 using System;
 using System.Collections.Generic;
 
@@ -238,9 +239,9 @@ public class UIManager : IDisposable
             _configurationService.Configuration.InputManager.ShowPromptsInGPose = !_configurationService.Configuration.InputManager.ShowPromptsInGPose;
             _configurationService.ApplyChange();
         }
-        if(InputManagerService.ActionKeysPressed(InputAction.Posing_ToggleOverlay))
+        if(InputManagerService.ActionKeysPressedLastFrame(InputAction.Posing_ToggleOverlay))
         {
-            _overlayToolbarWindow.IsOpen = !_overlayToolbarWindow.IsOpen;
+            _overlayWindow.IsOpen = !_overlayWindow.IsOpen;
         }
     }
 
