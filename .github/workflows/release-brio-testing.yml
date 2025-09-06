@@ -65,11 +65,11 @@ jobs:
         $ver = '${{ github.event.inputs.version-testing }}'
         $ver2 = '${{ github.event.inputs.version-live }}'
         $path = './Resources/Templates/repotesting.tmpl'
-        $new_path = './repo_test.json'
+        $new_path = './repo.json'
         $content = get-content -path $path
         $content = $content -replace '{version_testing}',$ver
         $content = $content -replace '{version_live}',$ver2
         set-content -Path $new_path -Value $content
-        git add repo_test.json
+        git add repo.json
         git commit -m "[CI] Updating Testing version for v${{ github.event.inputs.version-testing }}" || true
         git push origin main || true
