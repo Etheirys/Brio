@@ -24,6 +24,7 @@ using OneOf;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Numerics;
 
 namespace Brio.UI.Controls.Stateless;
 
@@ -80,15 +81,17 @@ public class FileUIHelpers
 
         if(popup.Success)
         {
+            var imIO = ImGui.GetIO();
+            var _lastGlobalScale = imIO.FontGlobalScale;
+            imIO.FontGlobalScale = 1f;
+
             using(ImRaii.PushColor(ImGuiCol.Button, UIConstants.Transparent))
             {
+                var size = new Vector2(245, 400); //= ImGui.GetContentRegionAvail(); //ImGui.CalcTextSize("XXXX Freeze Actor on Import");
 
-                var size = ImGui.GetContentRegionAvail(); //ImGui.CalcTextSize("XXXX Freeze Actor on Import");
                 size.Y = 44;
 
                 var buttonSize = size / 8;
-
-                var with = buttonSize * 4;
 
                 ImGui.Checkbox("Freeze Actor on Import", ref freezeOnLoad);
 
@@ -162,11 +165,6 @@ public class FileUIHelpers
 
                 if(ImGui.Button("Import", new(size.X, 25)))
                 {
-                    //bool? modelTransformOverride = null;
-                    //if(doTransform)
-                    //{
-                    //    modelTransformOverride = doTransform;
-                    //}
                     ShowImportPoseModal(capability, freezeOnLoad: freezeOnLoad, transformComponents: transformComponents, applyModelTransformOverride: doTransform);
                 }
 
@@ -192,6 +190,8 @@ public class FileUIHelpers
                     PosingEditorCommon.DrawImportOptionEditor(service.DefaultImporterOptions, true);
                 }
             }
+
+            ImGui.GetIO().FontGlobalScale = _lastGlobalScale;
         }
     }
 
