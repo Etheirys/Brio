@@ -150,10 +150,10 @@ public unsafe class SkeletonService : IDisposable
 
                 if((bone.IsPartialRoot && !bone.IsSkeletonRoot))
                 {
+                    var modelSpace = pose->AccessBoneModelSpace(boneIdx, PropagateOrNot.Propagate);
                     if(bone.Parent is not null)
                     {
                         var parent = bone.Parent.LastTransform;
-                        var modelSpace = pose->AccessBoneModelSpace(boneIdx, PropagateOrNot.Propagate);
                         modelSpace->Translation = *(hkVector4f*)(&parent.Position);
                         modelSpace->Rotation = *(hkQuaternionf*)(&parent.Rotation);
                         modelSpace->Scale = *(hkVector4f*)(&parent.Scale);
