@@ -37,8 +37,11 @@ public class GameInputService : IDisposable
         if(_gPoseService.IsGPosing == false)
             return;
 
-        keyboardFrame->KeyState[90] = 0; // Z
-        keyboardFrame->KeyState[86] = 0; // V
+        if(keyboardFrame->KeyState[17] == 1)
+        {
+            keyboardFrame->KeyState[90] = 0; // Z
+            keyboardFrame->KeyState[86] = 0; // V
+        }
 
         if(_virtualCameraService.CurrentCamera?.IsFreeCamera == true)
         {
