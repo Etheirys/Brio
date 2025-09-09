@@ -77,7 +77,7 @@ public class FileCacheService : IDisposable
         if(_fileCaches.TryGetValue(hash, out var caches))
         {
             var removedCount = caches?.RemoveAll(c => string.Equals(c.PrefixedFilePath, prefixedFilePath, StringComparison.Ordinal));
-            Brio.Log.Debug("Removed from DB: {count} file(s) with hash {hash} and file cache {path}", removedCount, hash, prefixedFilePath);
+            Brio.Log.Debug("Removed from DB: {count} file(s) with hash {hash} and file cache {path}", removedCount!, hash, prefixedFilePath);
 
             if(caches?.Count == 0)
             {
