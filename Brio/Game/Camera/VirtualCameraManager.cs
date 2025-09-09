@@ -5,7 +5,6 @@ using Brio.Entities.Camera;
 using Brio.Game.GPose;
 using Brio.Game.Input;
 using Brio.Input;
-using FFXIVClientStructs.FFXIV.Client.UI;
 using Microsoft.Extensions.DependencyInjection;
 using Swan;
 using System;
@@ -259,7 +258,7 @@ public class VirtualCameraManager : IDisposable
         //
 
         // This removes the purgatory function and prevent camera crazing out when typing with the camera enabled
-        if(FreeCamValues.IsMovementEnabled == false || RaptureAtkModule.Instance()->AtkModule.IsTextInputActive())
+        if(FreeCamValues.IsMovementEnabled == false)
         {
             return;
         }

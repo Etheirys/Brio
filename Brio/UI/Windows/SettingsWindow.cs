@@ -645,6 +645,13 @@ public class SettingsWindow : Window
 
     private void DrawKeysTab()
     {
+        bool enableKeybinds = _configurationService.Configuration.InputManager.Enable;
+        if(ImGui.Checkbox("Enable keyboard shortcuts", ref enableKeybinds))
+        {
+            _configurationService.Configuration.InputManager.Enable = enableKeybinds;
+            _configurationService.ApplyChange();
+        }
+        
         bool enableKeyHandlingOnKeyMod = _configurationService.Configuration.InputManager.EnableKeyHandlingOnKeyMod;
         if(ImGui.Checkbox("Consume [SPACE], [Shift], [Ctrl] & [Alt] when moving a FreeCam", ref enableKeyHandlingOnKeyMod))
         {
@@ -652,17 +659,10 @@ public class SettingsWindow : Window
             _configurationService.ApplyChange();
         }
 
-        bool flipKeybindsPastNinety = _configurationService.Configuration.InputManager.FlipKeyBindsPastNinety;
-        if(ImGui.Checkbox("Flip Free Camera Keybinds Past -90/90 Degrees", ref flipKeybindsPastNinety))
+        bool handlingAllOnKeys = _configurationService.Configuration.InputManager.EnableConsumeAllInput;
+        if(ImGui.Checkbox("Consume all game input when in G-Pose", ref handlingAllOnKeys))
         {
-            _configurationService.Configuration.InputManager.FlipKeyBindsPastNinety = flipKeybindsPastNinety;
-            _configurationService.ApplyChange();
-        }
-
-        bool enableKeybinds = _configurationService.Configuration.InputManager.Enable;
-        if(ImGui.Checkbox("Enable keyboard shortcuts", ref enableKeybinds))
-        {
-            _configurationService.Configuration.InputManager.Enable = enableKeybinds;
+            _configurationService.Configuration.InputManager.EnableConsumeAllInput = handlingAllOnKeys;
             _configurationService.ApplyChange();
         }
 
@@ -673,9 +673,11 @@ public class SettingsWindow : Window
             _configurationService.ApplyChange();
         }
 
-        if(enableKeybinds == false)
+        bool flipKeybindsPastNinety = _configurationService.Configuration.InputManager.FlipKeyBindsPastNinety;
+        if(ImGui.Checkbox("Flip Free Camera Keybinds Past -90/90 Degrees", ref flipKeybindsPastNinety))
         {
-            ImGui.EndDisabled();
+            _configurationService.Configuration.InputManager.FlipKeyBindsPastNinety = flipKeybindsPastNinety;
+            _configurationService.ApplyChange();
         }
 
         if(ImGui.CollapsingHeader("Free Camera", ImGuiTreeNodeFlags.DefaultOpen))
@@ -692,36 +694,29 @@ public class SettingsWindow : Window
             DrawKeyBind(InputAction.FreeCamera_DecreaseCamMovement);
         }
 
-        if(enableKeybinds == false)
+        using(ImRaii.Disabled(!enableKeybinds))
         {
-            ImGui.BeginDisabled();
-        }
+            if(ImGui.CollapsingHeader("Interface", ImGuiTreeNodeFlags.DefaultOpen))
+            {
+                DrawKeyBind(InputAction.Interface_ToggleBrioWindow);
+                DrawKeyBind(InputAction.Posing_Undo);
+                DrawKeyBind(InputAction.Posing_Redo);
+                DrawKeyBind(InputAction.Interface_IncrementSmallModifier);
+                DrawKeyBind(InputAction.Interface_IncrementLargeModifier);
+            }
 
-        if(ImGui.CollapsingHeader("Interface", ImGuiTreeNodeFlags.DefaultOpen))
-        {
-            DrawKeyBind(InputAction.Interface_ToggleBrioWindow);
-            DrawKeyBind(InputAction.Interface_IncrementSmallModifier);
-            DrawKeyBind(InputAction.Interface_IncrementLargeModifier);
-        }
-
-        if(ImGui.CollapsingHeader("Posing", ImGuiTreeNodeFlags.DefaultOpen))
-        {
-            DrawKeyBind(InputAction.Posing_DisableGizmo);
-            DrawKeyBind(InputAction.Posing_DisableSkeleton);
-            DrawKeyBind(InputAction.Posing_HideOverlay);
-            DrawKeyBind(InputAction.Posing_ToggleOverlay);
-            DrawKeyBind(InputAction.Posing_Undo);
-            DrawKeyBind(InputAction.Posing_Redo);
-            DrawKeyBind(InputAction.Posing_Translate);
-            DrawKeyBind(InputAction.Posing_Rotate);
-            DrawKeyBind(InputAction.Posing_Scale);
-            DrawKeyBind(InputAction.Posing_Universal);
-            DrawKeyBind(InputAction.Posing_ToggleLink);
-        }
-
-        if(enableKeybinds == false)
-        {
-            ImGui.EndDisabled();
+            if(ImGui.CollapsingHeader("Posing", ImGuiTreeNodeFlags.DefaultOpen))
+            {
+                DrawKeyBind(InputAction.Posing_ToggleOverlay);
+                DrawKeyBind(InputAction.Posing_HideOverlay);
+                DrawKeyBind(InputAction.Posing_DisableGizmo);
+                DrawKeyBind(InputAction.Posing_DisableSkeleton);
+                DrawKeyBind(InputAction.Posing_ToggleLink);
+                DrawKeyBind(InputAction.Posing_Translate);
+                DrawKeyBind(InputAction.Posing_Rotate);
+                DrawKeyBind(InputAction.Posing_Scale);
+                DrawKeyBind(InputAction.Posing_Universal);
+            }
         }
     }
 

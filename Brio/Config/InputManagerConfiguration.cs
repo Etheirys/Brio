@@ -90,7 +90,8 @@ public class InputManagerConfiguration
 
     public bool Enable { get; set; } = true;
     public bool ShowPromptsInGPose { get; set; } = false;
-    public bool EnableKeyHandlingOnKeyMod { get; set; } = false;
+    public bool EnableKeyHandlingOnKeyMod { get; set; } = true;
+    public bool EnableConsumeAllInput  { get; set; } = false;
     public bool FlipKeyBindsPastNinety { get; set; } = false;
 
     public KeyConfig GetDefaultKey(InputAction action)
