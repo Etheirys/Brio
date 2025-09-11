@@ -716,6 +716,7 @@ public class SettingsWindow : Window
                 DrawKeyBind(InputAction.Posing_Rotate);
                 DrawKeyBind(InputAction.Posing_Scale);
                 DrawKeyBind(InputAction.Posing_Universal);
+                DrawKeyBind(InputAction.Posing_ToggleWorld);
             }
         }
     }
