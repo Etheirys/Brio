@@ -299,6 +299,7 @@
         "Posing_Scale": "Cycle Gizmo to Scale",
         "Posing_Universal": "Cycle Gizmo to Universal",
         "Posing_ToggleLink": "Cycle Mirror/Link Mode",
+        "Posing_ToggleWorld": "Cycle World/Local",
         "FreeCamera_Forward": "Forward",
         "FreeCamera_Backward": "Backward",
         "FreeCamera_Left": "Left",
