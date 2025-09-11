@@ -494,6 +494,13 @@ public class SettingsWindow : Window
                 _configurationService.ApplyChange();
             }
 
+            bool skeletonLineToCircle = _configurationService.Configuration.Posing.SkeletonLineToCircle;
+            if(ImGui.Checkbox("Draw skeleton line to edge of bone circle", ref skeletonLineToCircle))
+            {
+                _configurationService.Configuration.Posing.SkeletonLineToCircle = skeletonLineToCircle;
+                _configurationService.ApplyChange();
+            }
+
             bool hideSkeletonWhenGizmoActive = _configurationService.Configuration.Posing.HideSkeletonWhenGizmoActive;
             if(ImGui.Checkbox("Hide Skeleton when Gizmo Active", ref hideSkeletonWhenGizmoActive))
             {
