@@ -298,6 +298,13 @@ public class PosingOverlayWindow : Window, IDisposable
         }
     }
 
+    private static Vector2 PointAlongLine(Vector2 start, Vector2 end, float distance)
+    {
+        Vector2 direction = end - start;
+        Vector2 unit = Vector2.Normalize(direction);
+        return start + unit * distance;
+    }
+    
     private static void DrawSkeletonLines(OverlayUIState uiState, PosingConfiguration config, List<ClickableItem> clickables)
     {
         if(!uiState.DrawSkeletonLines)
@@ -309,7 +316,22 @@ public class PosingOverlayWindow : Window, IDisposable
             {
                 float thickness = config.SkeletonLineThickness;
                 uint color = uiState.SkeletonLinesEnabled ? config.SkeletonLineActiveColor : config.SkeletonLineInactiveColor;
-                ImGui.GetWindowDrawList().AddLine(clickable.ParentScreenPosition.Value, clickable.ScreenPosition, color, thickness);
+
+                if(config.SkeletonLineToCircle)
+                {
+                    if(Vector2.DistanceSquared(clickable.ParentScreenPosition.Value, clickable.ScreenPosition) >= MathF.Pow(clickable.Size * 2, 2)) 
+                    {
+                        ImGui.GetWindowDrawList().AddLine(
+                            PointAlongLine(clickable.ParentScreenPosition.Value, clickable.ScreenPosition, clickable.Size),
+                            PointAlongLine(clickable.ScreenPosition, clickable.ParentScreenPosition.Value, clickable.Size),
+                            color, thickness
+                        );
+                    }
+                }
+                else
+                {
+                    ImGui.GetWindowDrawList().AddLine(clickable.ParentScreenPosition.Value, clickable.ScreenPosition, color, thickness);
+                }
             }
         }
     }
