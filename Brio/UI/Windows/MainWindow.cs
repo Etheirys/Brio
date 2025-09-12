@@ -11,6 +11,7 @@ using Brio.UI.Entitites;
 using Brio.UI.Theming;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface;
+using Dalamud.Interface.Utility;
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Interface.Windowing;
 using System;
@@ -65,8 +66,8 @@ public class MainWindow : Window, IDisposable
 
         SizeConstraints = new WindowSizeConstraints
         {
-            MaximumSize = new Vector2(270, 1230),
-            MinimumSize = new Vector2(270, 200)
+            MaximumSize = new Vector2(280, 1230),
+            MinimumSize = new Vector2(280, 200)
         };
     }
 
@@ -104,10 +105,10 @@ public class MainWindow : Window, IDisposable
 
     private void DrawHeaderButtons()
     {
-        float buttonWidths = 25;
+        float buttonWidths = 25 * ImGuiHelpers.GlobalScale;
         float line1FinalWidth = ImBrio.GetRemainingWidth() - ((buttonWidths * 2) + (ImGui.GetStyle().ItemSpacing.X * 2) + ImGui.GetStyle().WindowBorderSize);
 
-        float line1Width = (line1FinalWidth / 2) - 3;
+        float line1Width = ((line1FinalWidth / 2) - 3);// * ImGuiHelpers.GlobalScale;
 
         using(ImRaii.Disabled(_gPoseService.IsGPosing == false))
         {

@@ -8,6 +8,7 @@ using Brio.UI.Controls.Stateless;
 using Brio.UI.Widgets.Core;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface;
+using Dalamud.Interface.Utility;
 using Dalamud.Interface.Utility.Raii;
 using FFXIVClientStructs.FFXIV.Client.Game.Character;
 using System.Numerics;
@@ -30,16 +31,30 @@ public class ActorAppearanceWidget(ActorAppearanceCapability capability) : Widge
         if(Capability.Actor.IsProp)
         {
             DrawPropLoadAppearance();
-            ImGui.Separator();
-            AppearanceEditorCommon.DrawPenumbraCollectionSwitcher(Capability);
+            using var child1 = ImRaii.Child($"###appearance_child", new Vector2(0, 33 * ImGuiHelpers.GlobalScale), true);
+            if(child1.Success)
+                AppearanceEditorCommon.DrawPenumbraCollectionSwitcher(Capability);
         }
         else
         {
             DrawLoadAppearance();
-            ImGui.Separator();
-            AppearanceEditorCommon.DrawPenumbraCollectionSwitcher(Capability);
-            AppearanceEditorCommon.DrawGlamourerDesignSwitcher(Capability);
-            AppearanceEditorCommon.DrawCustomizePlusProfileSwitcher(Capability);
+            float size = (34 * ((Capability.HasCustomizePlusIntegration ? 1 : 0) + (Capability.HasPenumbraIntegration ? 1 : 0) + (Capability.HasGlamourerIntegration ? 1 : 0))) * ImGuiHelpers.GlobalScale;
+
+            if(size != 0)
+            {
+                using var child1 = ImRaii.Child($"###appearance_child", new Vector2(0, size), true, ImGuiWindowFlags.NoScrollbar);
+                if(child1.Success)
+                    drawBody();
+            }
+            else
+                drawBody();
+
+            void drawBody() 
+            {
+                AppearanceEditorCommon.DrawPenumbraCollectionSwitcher(Capability);
+                AppearanceEditorCommon.DrawGlamourerDesignSwitcher(Capability);
+                AppearanceEditorCommon.DrawCustomizePlusProfileSwitcher(Capability);
+            }
         }
     }
 

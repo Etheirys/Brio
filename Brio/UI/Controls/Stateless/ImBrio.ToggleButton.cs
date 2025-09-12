@@ -1,5 +1,6 @@
 ﻿using Dalamud.Bindings.ImGui;
 using Dalamud.Interface;
+using Dalamud.Interface.Utility;
 using Dalamud.Interface.Utility.Raii;
 using System.Numerics;
 
@@ -17,7 +18,7 @@ public static partial class ImBrio
         {
             using(ImRaii.PushStyle(ImGuiStyleVar.ChildRounding, ImGui.GetStyle().FrameRounding))
             {
-                using var child = ImRaii.Child($"###{label}_child", new Vector2((size - 2.3f), 25), false, ImGuiWindowFlags.NoScrollbar);
+                using var child = ImRaii.Child($"###{label}_child", new Vector2((size - 2.3f), 25 * ImGuiHelpers.GlobalScale), false, ImGuiWindowFlags.NoScrollbar);
 
                 if(child.Success)
                 {

@@ -1,4 +1,4 @@
-﻿using Brio.Config;
+﻿using Brio.Files;
 using Brio.Resources;
 using Brio.UI.Controls.Stateless;
 using Dalamud.Bindings.ImGui;
@@ -6,11 +6,14 @@ using Dalamud.Interface;
 using Dalamud.Interface.Utility;
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Interface.Windowing;
+using Dalamud.Utility;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Numerics;
 using System.Text;
+using YamlDotNet.Serialization;
+using YamlDotNet.Serialization.NamingConventions;
 
 namespace Brio.UI.Windows;
 
@@ -18,22 +21,17 @@ public class UpdateWindow : Window
 {
     //
     // Some code found here is inspired by CharacterSelect+
-    //
-
-    private readonly ConfigurationService _configurationService;
-    private readonly ImBrioText _imBrioText;
 
     private bool _scrollToTop = false;
     private float _closeButtonWidth => 310f * ImGuiHelpers.GlobalScale;
 
     private readonly List<string> _supporters = [];
     private readonly List<string> _contributors = [];
-    public UpdateWindow(ConfigurationService configurationService, ImBrioText imBrioText) : base($"  {Brio.Name} WELCOME###brio_welcomewindow", ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoDocking | ImGuiWindowFlags.NoTitleBar | ImGuiWindowFlags.NoDecoration)
+    private readonly ChangelogFile _changelogFile;
+
+    public UpdateWindow() : base($"  {Brio.Name} WELCOME###brio_welcomewindow", ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoDocking | ImGuiWindowFlags.NoTitleBar | ImGuiWindowFlags.NoDecoration)
     {
         Namespace = "brio_welcomewindow_namespace";
-
-        _configurationService = configurationService;
-        _imBrioText = imBrioText;
 
         Size = new Vector2(710, 745);
 
@@ -41,11 +39,13 @@ public class UpdateWindow : Window
         AllowClickthrough = false;
         AllowPinning = false;
 
+        //
+
         string? line;
 
-        var kofiStream = ResourceProvider.Instance.GetRawResourceStream("Data.kofi.txt");
-        var patreonStream = ResourceProvider.Instance.GetRawResourceStream("Data.patreon.txt");
-        var contributorsStream = ResourceProvider.Instance.GetRawResourceStream("Data.Contributors.txt");
+        var kofiStream = ResourceProvider.Instance.GetRawResourceStream("Changelog.kofi.txt");
+        var patreonStream = ResourceProvider.Instance.GetRawResourceStream("Changelog.patreon.txt");
+        var contributorsStream = ResourceProvider.Instance.GetRawResourceStream("Changelog.contributors.txt");
 
         using var streamReader = new StreamReader(kofiStream, Encoding.UTF8, true, 128);
         while((line = streamReader.ReadLine()) is not null)
@@ -58,13 +58,25 @@ public class UpdateWindow : Window
         using var streamReader3 = new StreamReader(contributorsStream, Encoding.UTF8, true, 128);
         while((line = streamReader3.ReadLine()) is not null)
             _contributors.Add(line);
+
+        //
+
+        var changelogStream = ResourceProvider.Instance.GetRawResourceStream("Changelog.changelog.yaml");
+        using var streamReader4 = new StreamReader(changelogStream, Encoding.UTF8, true, 128);
+
+        var deserializer = new DeserializerBuilder()
+            .WithNamingConvention(CamelCaseNamingConvention.Instance)
+            .IgnoreUnmatchedProperties()
+            .Build();
+
+        var yaml = streamReader4.ReadToEnd();
+        _changelogFile = deserializer.Deserialize<ChangelogFile>(yaml);
     }
 
     public override void OnOpen()
     {
         _scrollToTop = true;
     }
-
     public override void PreDraw()
     {
         ImGui.SetNextWindowPos(new Vector2((ImGui.GetIO().DisplaySize.X - Size!.Value.X) / 2, (ImGui.GetIO().DisplaySize.Y - Size!.Value.Y) / 2), ImGuiCond.Appearing);
@@ -72,20 +84,22 @@ public class UpdateWindow : Window
         base.PreDraw();
     }
 
+    //
+
     int selected = 0;
     public override void Draw()
     {
         var windowPos = ImGui.GetWindowPos();
         var windowPadding = ImGui.GetStyle().WindowPadding;
 
-        var headerWidth = 1000f - (windowPadding.X * 2) * ImGuiHelpers.GlobalScale;
+        var headerWidth = 1000f - (windowPadding.X * 2 * ImGuiHelpers.GlobalScale);
         var headerHeight = 500f * ImGuiHelpers.GlobalScale;
 
         var headerStart = windowPos - new Vector2(-1, 0);
 
-        //
+        // Image
 
-        var image = ResourceProvider.Instance.GetResourceImage($"Images.Update.brio-artbk-aug-25-01.png");
+        var image = ResourceProvider.Instance.GetResourceImage($"Changelog.Images.brio-artbk-aug-25.png");
 
         // Calculate scaling to fill width and maintain aspect ratio
         var imageAspect = (float)image.Width / image.Height;
@@ -100,17 +114,18 @@ public class UpdateWindow : Window
         headerStart = new Vector2(headerStart.X, headerStart.Y + scaledHeight);
         var headerEnd = headerStart + new Vector2(headerWidth, headerHeight);
 
+        // Background
         DrawBackground(headerStart, headerEnd);
 
+        // Cursor line up
         ImGui.SetCursorScreenPos(headerStart);
 
-        //
-
-        var segmentSize = ImGui.GetWindowSize().X / 4.15f;
-
-        var buttonSize = new Vector2(segmentSize, ImGui.GetTextLineHeight() * 1.7f);
-
+        // Keep this for correct cursor line up
         ImGui.Separator();
+
+        // Buttons
+        var segmentSize = ImGui.GetWindowSize().X / 4.15f;
+        var buttonSize = new Vector2(segmentSize, ImGui.GetTextLineHeight() * 1.7f);
 
         ImGui.SetCursorPosY(ImGui.GetCursorPosY() + 10);
 
@@ -133,67 +148,101 @@ public class UpdateWindow : Window
             if(ImGui.Button("More Links", buttonSize))
                 Process.Start(new ProcessStartInfo { FileName = "https://etheirystools.carrd.co", UseShellExecute = true });
 
+        // Tagline Test
         ImGui.SetCursorPosY(ImGui.GetCursorPosY() + 10);
-
-        ImGui.TextColored(new Vector4(0.4f, 0.9f, 0.4f, 1.0f), $"Whats New in Brio v0.6.0");
+        ImGui.TextColored(new Vector4(0.4f, 0.9f, 0.4f, 1.0f), _changelogFile.Tagline);
         ImGui.SameLine();
-        ImGui.TextColored(new Vector4(0.75f, 0.75f, 0.85f, 1.0f), $"  -  MCDFs, Dynamic Face Control, & ?????");
-
+        ImGui.TextColored(new Vector4(0.75f, 0.75f, 0.85f, 1.0f), $"  -  {_changelogFile.Subline}");
         ImBrio.VerticalPadding(10);
 
-        ImGui.Text("To open this window again click on the `Information` button on the Scene Manager!");
+        // Selector
+        ImBrio.ToggleButtonStrip("brio_changelog_selector", new Vector2(ImBrio.GetRemainingWidth(), ImBrio.GetLineHeight()), ref selected, [" Changelog ", "Supporters & Contributors"]);
 
-        ImBrio.ToggleButtonStrip("selector", new Vector2(ImBrio.GetRemainingWidth(), ImBrio.GetLineHeight()), ref selected, [" Changelog ", "Supporters & Contributors"]);
-
-        using(ImRaii.PushColor(ImGuiCol.ChildBg, 0))
-        using(var c = ImRaii.Child("###brio_update_text", new Vector2(ImGui.GetWindowHeight() - 55 * ImGuiHelpers.GlobalScale, ImBrio.GetRemainingHeight() - 35f), false,
-            Flags = ImGuiWindowFlags.NoSavedSettings | ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoCollapse))
-            if(c.Success)
-            {
-
-                if(_scrollToTop)
+        if(selected == 0)
+        {
+            using(ImRaii.PushColor(ImGuiCol.ChildBg, 0))
+            using(var c = ImRaii.Child("###brio_changelog", new Vector2(ImGui.GetWindowHeight() - 55 * ImGuiHelpers.GlobalScale, ImBrio.GetRemainingHeight() - 44), false,
+                Flags = ImGuiWindowFlags.NoSavedSettings | ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoCollapse))
+                if(c.Success)
                 {
-                    _scrollToTop = false;
-                    ImGui.SetScrollHereY(0);
-                }
+                    if(_scrollToTop)
+                    {
+                        _scrollToTop = false;
+                        ImGui.SetScrollHereY(0);
+                    }
 
+                    foreach(var entry in _changelogFile.Changelog)
+                        DrawChangelogTemplate(entry);
+
+                    ImGui.Spacing();
+                    ImGui.Spacing();
+                    ImGui.Spacing();
+                    ImGui.Spacing();
+                    ImGui.Spacing();
+                    ImGui.Spacing();
+                    ImGui.Spacing();
+
+                    ImBrio.VerticalPadding(15);
+                }
+        }
+        else
+        {
+            ImBrio.VerticalPadding(5);
+            ImGui.Text("Maintained & Developed by: Minmoose. Originally Developed by: Asgard. Happy Posing!");
+            ImBrio.VerticalPadding(10);
+
+            DrawSupporters();
+        }
+
+        ImGui.SetCursorPosX((ImGui.GetWindowSize().Y - _closeButtonWidth) / 2);
+        if(ImBrio.Button("Close", FontAwesomeIcon.SquareXmark, new Vector2(_closeButtonWidth, 0), centerTest: true, tooltip: "To open this window again click the `Information` button on the Brio Scene Manager!"))
+        {
+            IsOpen = false;
+        }
+    }
+
+    private void DrawChangelogTemplate(ChangelogEntry entry)
+    {
+        var currentColor = entry.IsCurrent == true ? new Vector4(0.5f, 0.9f, 0.5f, 1.0f) : new Vector4(0.75f, 0.75f, 0.85f, 1.0f);
+        bool isCurrent = entry.IsCurrent ?? false;
+
+        // Dev Message
+        if(entry.Message.IsNullOrEmpty() is false)
+        {
+            if(CollapsingHeader($" {entry.Name} –- {entry.Date} ", $" {entry.Tagline} ", currentColor, isCurrent))
+            {
                 ImBrio.VerticalPadding(10);
 
-                if(selected == 0)
-                {
-                    DrawChangelog();
-                }
-                else
-                {
-                    DrawSupporters();
-                }
+                ImGui.Text(entry.Message);
 
-                ImGui.Spacing();
-                ImGui.Spacing();
-                ImGui.Spacing();
-                ImGui.Spacing();
-                ImGui.Spacing();
-                ImGui.Spacing();
-                ImGui.Spacing();
+                ImBrio.VerticalPadding(10);
+            }
+            return;
+        }
+
+        if(CollapsingHeader($" {entry.Name} –- {entry.Date} ", $"  –-  {entry.Tagline} ", currentColor, isCurrent))
+        {
+            ImBrio.VerticalPadding(10);
+
+            foreach(var item in entry.Versions)
+            {
+                DrawFeature(FontAwesomeIcon.None, item.Number, new Vector4(0.5f, 0.9f, 0.5f, 1.0f));
+
+                foreach(var subItem in item.Items)
+                {
+                    ImGui.BulletText(subItem);
+                }
             }
 
-        // 
-
-        ImGui.SetCursorPosX(((ImGui.GetWindowSize().Y - _closeButtonWidth) / 2));
-
-        if(ImBrio.Button("Close", FontAwesomeIcon.SquareXmark, new Vector2(_closeButtonWidth, 0), centerTest: true))
-        {
-            this.IsOpen = false;
+            ImBrio.VerticalPadding(10);
         }
     }
 
     public void DrawSupporters()
     {
-        ImBrio.VerticalPadding(5);
-        ImGui.Text("Maintained & Developed by: Minmoose. Originally Developed by: Asgard. Happy Posing!");
-        ImBrio.VerticalPadding(10);
-
         var slotSizes = ImGui.GetContentRegionAvail() / new Vector2(2, .8f);
+        slotSizes.Y -= 144 * ImGuiHelpers.GlobalScale;
+
         using(var leftGearGroup = ImRaii.Child("leftGroup", slotSizes))
         {
             if(leftGearGroup.Success)
@@ -226,74 +275,6 @@ public class UpdateWindow : Window
                     ImGui.BulletText(item);
                 }
             }
-        }
-    }
-
-    private void DrawChangelog()
-    {
-        if(CollapsingHeader(" v0.6.0 – ", "  -  MCDFs, Dynamic Face Control, & ????? ", new Vector4(0.5f, 0.9f, 0.5f, 1.0f), true))
-        {
-            ImBrio.VerticalPadding(10);
-
-            ImGui.BulletText("");
-            ImGui.SameLine();
-            ImGui.TextColored(new Vector4(0.6f, 0.4f, 0.4f, 1.0f), $"Changelog is not yet written please check back later!");
-
-            ImBrio.VerticalPadding(10);
-        }
-
-        if(CollapsingHeader(" v0.5.3 – August 30 2025", "  -  That damned boat ", new Vector4(0.75f, 0.75f, 0.85f, 1.0f), false))
-        {
-            DrawFeature(FontAwesomeIcon.None, "0.5.3.1", new Vector4(0.5f, 0.9f, 0.5f, 1.0f));
-
-            ImGui.BulletText("- Fix being able to select things in the Scene Manager (AHAHH)");
-
-            DrawFeature(FontAwesomeIcon.None, "0.5.3", new Vector4(0.5f, 0.9f, 0.5f, 1.0f));
-
-            ImGui.BulletText("Added Moonfire Faire festival's 2024 & 2025 to the festival list");
-            ImGui.BulletText("Fixed an issue where you could sometimes not interact with the Scene Manager");
-            ImGui.BulletText("Reenable double click to rename an actor ");
-            ImGui.BulletText("Facewear now properly displays in the advance appearance window (Thank you sparqle)");
-            ImGui.BulletText("Fixed an issue where, certain clothing did not parent skeletons correctly (Thank you sparqle)");
-            ImGui.BulletText("Fix pose preview image not shown on second viewing in the Library (Thank you sparqle)");
-
-            ImBrio.VerticalPadding(10);
-        }
-
-        if(CollapsingHeader(" v0.5.2 – August 15 2025", "  - 7.3 Support  ", new Vector4(0.75f, 0.75f, 0.85f, 1.0f), false))
-        {
-            DrawFeature(FontAwesomeIcon.None, "0.5.2.2", new Vector4(0.5f, 0.9f, 0.5f, 1.0f));
-
-            ImGui.BulletText("Fixed a rare crash ");
-            ImGui.BulletText("Fixed ImGUI assertion errors");
-            ImGui.BulletText("Disabled double click on actors and camera to rename them to fix a bug (temporarily) ");
-
-            DrawFeature(FontAwesomeIcon.None, "0.5.2", new Vector4(0.5f, 0.9f, 0.5f, 1.0f));
-
-            ImGui.BulletText("Update Brio to support FFXIV 7.3 (Thanks for the help Asgard!)");
-
-            ImBrio.VerticalPadding(10);
-        }
-
-        if(CollapsingHeader(" v0.5.1 – March 27 2025", "  - 7.2 Support ", new Vector4(0.75f, 0.75f, 0.85f, 1.0f), false))
-        {
-            DrawFeature(FontAwesomeIcon.None, "0.5.1.1", new Vector4(0.5f, 0.9f, 0.5f, 1.0f));
-
-            ImGui.BulletText("You can now double-click and Actor or Camera to rename them (Thanks @Bronya-Rand)");
-
-            DrawFeature(FontAwesomeIcon.None, "0.5.1", new Vector4(0.5f, 0.9f, 0.5f, 1.0f));
-
-            ImGui.BulletText("Fixed new Facewear being unable to be equipped");
-            ImGui.BulletText("Added the ability to rotate Free Cameras! (Thanks @Bronya-Rand)");
-
-            ImGui.BulletText("Fixed saving a project with props or mounts would cause the project not to load (Thanks @Bronya-Rand)");
-            ImGui.BulletText("Fixed the formant of `Time of Day` slider in Environment so it can be edited");
-            ImGui.BulletText("Fixed a crash when training your chocobo ");
-            ImGui.BulletText("Fixed a crash when in certain cutscenes");
-            ImGui.BulletText("Fixed the camera from snaping on gpose enter/exit");
-            ImGui.BulletText("Fixed a potential memory leak ");
-
-            ImBrio.VerticalPadding(10);
         }
     }
 

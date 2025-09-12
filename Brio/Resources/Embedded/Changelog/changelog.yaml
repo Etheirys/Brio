@@ -1,0 +1,164 @@
+
+tagline: "Whats New in Brio v0.6.0"
+subline: "MCDFs, Dynamic Face Control, & Lights"
+changelog:
+
+  - name: v0.6.0
+    tagline: "MCDFs, Dynamic Face Control & Lights"
+    date: "September 2025"
+    isCurrent: true
+    versions:
+      - number: "0.6.0"
+        icon: ""
+        items:
+          - ""
+          - ""
+          - ""  
+          
+  - name: v0.5.3
+    tagline: "That damned boat"
+    date: "August 30 2025"
+    versions:
+      - number: "0.5.3.1"
+        icon: ""
+        items:
+          - "Fix being able to select things in the Scene Manager (AHAHH)"
+      - number: "0.5.3"
+        icon: ""
+        items:
+          - "Added Moonfire Faire festival's 2024 & 2025 to the festival list"
+          - "Fixed an issue where you could sometimes not interact with the Scene Manager"
+          - "Reenable double click to rename an actor"   
+          - "Facewear now properly displays in the advance appearance window (Thank you sparqle)"   
+          - "Fixed an issue where, certain clothing did not parent skeletons correctly (Thank you sparqle)"   
+          - "Fix pose preview image not shown on second viewing in the Library (Thank you sparqle)"   
+          
+  - name: v0.5.2
+    tagline: "7.3 Support"
+    date: "August 15 2025"
+    versions:
+      - number: "0.5.2.2"
+        icon: ""
+        items:
+          - "Fixed a rare crash"
+          - "Fixed ImGUI assertion errors"
+          - "Disabled double click on actors and camera to rename them to fix a bug (temporarily)"  
+      - number: "0.5.2"
+        icon: ""
+        items:
+          - "Update Brio to support FFXIV 7.3 (Thanks for the help Asgard!)"
+          
+  - name: v0.5.1
+    tagline: "7.2 Support"
+    date: "March 27 2025"
+    versions:
+      - number: "0.5.1.1"
+        icon: ""
+        items:
+          - "You can now double-click and Actor or Camera to rename them (Thanks @Bronya-Rand)"
+      - number: "0.5.1"
+        icon: ""
+        items:
+          - "Fixed new Facewear being unable to be equipped"
+          - "Added the ability to rotate Free Cameras! (Thanks @Bronya-Rand)"
+          - "Fixed saving a project with props or mounts would cause the project not to load (Thanks @Bronya-Rand)"
+          - "Fixed the formant of `Time of Day` slider in Environment so it can be edited"
+          - "Fixed a crash when training your chocobo"
+          - "Fixed a crash when in certain cutscenes"
+          - "Fixed the camera from snaping on gpose enter/exit"
+          - "Fixed a potential memory leak"
+
+  - name: v0.5.0
+    tagline: "Props, Free Cameras, Projects & more!"
+    date: "February 16 2025"
+    versions:
+      - number: "0.5.0.1 - 0.5.0.6"
+        icon: ""
+        items:
+          - "Added Camera cloning"
+          - "Added a new Library Feature `Spawn as new actor` (Thanks @Cazzar)"
+          - "Added a new setting `Consumed, [SPACE], [Shift], [Ctrl] & [Alt] keyboard input when moving a FreeCam`."
+          - "Added SPACE (Up) & CONTROL (Down) to Camera movement."
+          - "Made a small optimization to speed up Brio's rendering"
+          - "Environment is once again useable outside of Gpose."
+          - "The Glamourer Design menu is now in alphabetical order."
+          - "Updated Thank Yous."
+      - number: "Fixes"
+        icon: ""
+        items:
+          - "Once more, fixed ESCAPE not opening the `End group pose` menu."
+          - "Once again, fix an issue where PosingOverlayWindow would be to small if the text scale was less then 100%."
+          - "Once again allow AllowPinning & AllowClickthrough on the Overlay window & Main window."
+          - "Fixed a crash when leaving a cutscene"
+          - "Fixed camera snaping when leaving Gpose"
+          - "Fixed an issue with C+ not being reverted on exiting Gpose or actor despawn (Thanks @HoloWise)"
+          - "Fixed a rare issue with loading projects"
+          - "Fixed an issue where the import setting `ModelTransform` was not working"
+          - "Fixed Destroying Camera on Scene load if `Override Current Scene` was enabled."
+          - "Fixed Projects saving Free Cameras being frozen in place and unable to move."
+          - "Fixed Scene loading characters with custom colors. (Thanks @Bronya-Rand)"
+          - "Fixed Auto-Save not turning off when is was disabled in the settings."
+          - "Fixed Cameras being unable to be destroyed in certain situations."
+          - "Fixed text scaling issues."
+          - "Fixed an issue with T-Pose & A-Pose loading."
+          - "Fixed not being able to drag the Main window off FFXIV."
+          - "Fixed [Shift], [Ctrl] & [Alt] being consumed my Brio."
+          - "Fixed `Disable Collision` on Brio Cameras."
+          - "Fixed ESCAPE not opening the `End group pose` menu."
+          - "Fixed on destroying a Camera not targeting Default Camera. (Thanks @Bronya-Rand)"
+          - "Fixed loading and saving characters with custom colors. (Thanks @Bronya-Rand)"
+      - number: "0.5.0"
+        icon: ""
+        items:
+          - "Brio has a new Icon! (Over time it will update in Dalamud)"
+          - "Added `Legacy` bone filter. (Use this import filter when loading on to pre-dawntrail faces)"
+          - "Added Brio Style  (You can disabled the Color Style in the Settings)"
+          - "Added AutoSaving, saves the entire Brio scene."
+          - "Added Customize+ suport."
+          - "Added a Change Customize+ Profile menu."
+          - "Added Virtual Cameras, You can now spawn more then one Camera!"
+          - "Added Free Cameras!"
+          - "Added Prop Spawning! (Thanks MKhayle for inspiration)"
+          - "Added `Change weapon into a Prop` button to the Advanced Appearance window. (Thanks MKhayle!)"
+          - "Added a Reset model transform button to the posing widget."
+          - "You can now press Escape to clear the selected bone."
+          - "Refresh the designs of the Appearance, Posing, & Animation Control widgets!"
+          - "Rewrote the Freeze Physics System for better reliability. (Thanks Winter & darkarchon for the tip!)"
+          - "Fixed an issue when loading as 'Body' on pre-dawntrail actors"
+          - "Fixed an issue with Third-Party plugins not being Available after being updated or installed!"
+          - "Fixed an issue with font scaling, Brio's font scale will now always be '1'."
+          - "Fixed an issue with the Reset Settings button being enabled when it shouldn't have been"
+      - number: Added Projects (BETA)
+        icon: ""
+        items:
+        - "Added Projects, save and load the entire Brio scene."
+        - Scene exporting will be available in a later update.
+        - (Thanks Ashadow700 for the initial implementation and inspiration)
+  
+  - name: Message From the Dev
+    tagline:
+    date: "February 16 2025"
+    message: |
+      It's been over a year now that I've been the developer & maintainer for Brio.
+
+      Thank you to everyone who uses Brio, supports it monetarily, contributes with code, requests features, 
+      reports bugs, or simply engages with the community.
+      I'm truly grateful for all the wonderful people I have met over the past year.
+
+      This last year has been the hardest of my life. Without all of you, and without Brio,
+      it would have been much worse, so again, Thank You!
+
+      But there is one in particular whom I have met I wish to make a message for, 
+
+      I started talking to you to simply ask you what the color of your sky was, 
+      what I found was a sky full of beautiful colors, colors I couldn't stop looking at, 
+      colors I fell in love with, colors I wish never to forget.
+      I told you I'll give you stars and the moon and a soul to guide you 
+      and a promise I'll never go, I mean it now more then ever.
+
+      So, while it is not mine to give necessary, 
+      I want to give you the only thing else I know to give you,
+      I dedicate Brio to you
+
+      I love you, forever unto eternity~
+      - Minmoose

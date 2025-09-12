@@ -24,7 +24,7 @@ public static partial class ImBrio
 
     public static bool FontIconButton(FontAwesomeIcon icon)
     {
-        return FontIconButton(icon, new());
+        return FontIconButton(icon, new(25 * ImGuiHelpers.GlobalScale));
     }
 
     public static bool FontIconButton(FontAwesomeIcon icon, Vector2 size)
@@ -117,7 +117,7 @@ public static partial class ImBrio
         return Button(label, icon, Vector2.Zero);
     }
 
-    public static bool Button(string label, FontAwesomeIcon icon, Vector2 size, string hoverText = "", bool centerTest = false)
+    public static bool Button(string label, FontAwesomeIcon icon, Vector2 size, string tooltip = "", bool centerTest = false)
     {
         bool clicked;
 
@@ -144,10 +144,10 @@ public static partial class ImBrio
             clicked = ImGui.Button(label, size);
             Vector2 endPos = ImGui.GetCursorPos();
 
-            if(string.IsNullOrEmpty(hoverText) is false)
+            if(string.IsNullOrEmpty(tooltip) is false)
             {
                 if(ImGui.IsItemHovered())
-                    ImGui.SetTooltip(hoverText);
+                    ImGui.SetTooltip(tooltip);
             }
 
             if(icon != FontAwesomeIcon.None)

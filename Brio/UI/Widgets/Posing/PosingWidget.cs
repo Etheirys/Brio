@@ -6,6 +6,7 @@ using Brio.UI.Controls.Stateless;
 using Brio.UI.Widgets.Core;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface;
+using Dalamud.Interface.Utility;
 using Dalamud.Interface.Utility.Raii;
 using System.Numerics;
 
@@ -26,9 +27,11 @@ public class PosingWidget(PosingCapability capability) : Widget<PosingCapability
     {
         DrawButtons();
 
-        ImGui.Separator();
-
-        DrawTransform();
+        using var child1 = ImRaii.Child($"###appearance_child", new Vector2(0, 165 * ImGuiHelpers.GlobalScale), true, ImGuiWindowFlags.AlwaysAutoResize);
+        if(child1.Success)
+        {
+            DrawTransform();
+        }
     }
 
     private void DrawButtons()

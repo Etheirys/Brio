@@ -465,7 +465,7 @@ public class LibraryWindow : Window
 
                     if(isPoseModal)
                     {
-                        if(ImBrio.Button("##importPoseOptionButton", FontAwesomeIcon.Cog, new Vector2(25, 0), hoverText: "Import Options"))
+                        if(ImBrio.Button("##importPoseOptionButton", FontAwesomeIcon.Cog, new Vector2(25, 0), tooltip: "Import Options"))
                         {
                             ImGui.OpenPopup("import_options_popup_lib");
                         }

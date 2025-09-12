@@ -168,7 +168,7 @@ public class ActorDynamicPoseWidget(ActorDynamicPoseCapability capability) : Wid
         bool bodytoggle = false;
         bool headtoggle = false;
 
-        if(ImBrio.ToggelButton($"Eyes###toggleButton_Eyes", new Vector2(53 * ImGuiHelpers.GlobalScale, 25 * ImGuiHelpers.GlobalScale), eyes))
+        if(ImBrio.ToggelButton($"Eyes###toggleButton_Eyes", new Vector2(53, 25 ), eyes))
         {
             eyetoggle = true;
             eyes = !eyes;
@@ -188,7 +188,7 @@ public class ActorDynamicPoseWidget(ActorDynamicPoseCapability capability) : Wid
             eyesVectorDrag = ImBrio.DragFloat3Simple($"###dynamicFaceControlSelector_Eyes_drag3", ref eyesVector3, 1);
         }
 
-        if(ImBrio.ToggelButton($"Body###toggleButton_Body", new Vector2(53 * ImGuiHelpers.GlobalScale, 25 * ImGuiHelpers.GlobalScale), body))
+        if(ImBrio.ToggelButton($"Body###toggleButton_Body", new Vector2(53 , 25 ), body))
         {
             bodytoggle = true;
             body = !body;
@@ -208,7 +208,7 @@ public class ActorDynamicPoseWidget(ActorDynamicPoseCapability capability) : Wid
             bodyVectorDrag = ImBrio.DragFloat3Simple($"###dynamicFaceControlSelector_Body_drag3", ref bodyVector3, 1);
         }
 
-        if(ImBrio.ToggelButton($"Head###toggleButton_Head", new Vector2(53 * ImGuiHelpers.GlobalScale, 25 * ImGuiHelpers.GlobalScale), head))
+        if(ImBrio.ToggelButton($"Head###toggleButton_Head", new Vector2(53, 25), head))
         {
             headtoggle = true;
             head = !head;

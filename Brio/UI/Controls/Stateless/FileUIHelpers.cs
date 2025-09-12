@@ -157,7 +157,7 @@ public class FileUIHelpers
 
                 using(ImRaii.Disabled(doExpression || doBody))
                 {
-                    if(ImBrio.Button("Import Options", FontAwesomeIcon.Cog, new(size.X, 25), centerTest: true, hoverText: "Import Options"))
+                    if(ImBrio.Button("Import Options", FontAwesomeIcon.Cog, new(size.X, 25), centerTest: true, tooltip: "Import Options"))
                         ImGui.OpenPopup("import_optionsImportPoseMenuPopup");
                 }
 

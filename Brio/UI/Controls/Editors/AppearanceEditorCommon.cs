@@ -4,6 +4,7 @@ using Brio.UI.Controls.Selectors;
 using Brio.UI.Controls.Stateless;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface;
+using Dalamud.Interface.Utility;
 using Dalamud.Interface.Utility.Raii;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,9 +17,12 @@ public static class AppearanceEditorCommon
     private const string _collectionLabel = "Collection";
     private const string _collectionLabelDesign = "Design";
     private const string _collectionLabelProfile = "Profile";
-    private static float _lableWidth { get; } = ImGui.CalcTextSize($"{_collectionLabel}  IIXXXXXXXX").X;
-    private static float _lableWidthDesign { get; } = ImGui.CalcTextSize($"{_collectionLabelDesign}  IIIXXXXXXXXXX").X;
-    private static float _lableWidthProfile { get; } = ImGui.CalcTextSize($"{_collectionLabelProfile}  IIIIIXXXXXXXXX").X;
+   
+    private static float _lableWidth => ImGui.CalcTextSize(_collectionLabel).X - (44 * ImGuiHelpers.GlobalScale) + 125;
+    private static float _lableWidthDesign => ImGui.CalcTextSize(_collectionLabelDesign).X - (44 * ImGuiHelpers.GlobalScale) + 142;  
+    private static float _lableWidthProfile => ImGui.CalcTextSize(_collectionLabelProfile).X - (44 * ImGuiHelpers.GlobalScale) + 144;  
+
+    //
 
     private static readonly NpcSelector _globalNpcSelector = new("global_npc_selector");
 
@@ -26,8 +30,10 @@ public static class AppearanceEditorCommon
     {
         if(!capability.HasPenumbraIntegration)
             return;
+     
+        ImBrio.VerticalPadding(1);
 
-        if(ImBrio.FontIconButton(FontAwesomeIcon.EarthOceania, new Vector2(25)))
+        if(ImBrio.FontIconButton(FontAwesomeIcon.EarthOceania))
         {
             capability.PenumbraService.OpenPenumbra();
         }
@@ -38,7 +44,7 @@ public static class AppearanceEditorCommon
 
         var currentCollection = capability.CurrentCollection;
 
-        ImGui.SetNextItemWidth(_lableWidth);
+        ImGui.SetNextItemWidth(_lableWidth * ImGuiHelpers.GlobalScale);
 
         using(var combo = ImRaii.Combo(_collectionLabel, currentCollection))
         {
@@ -64,8 +70,9 @@ public static class AppearanceEditorCommon
     {
         if(!capability.HasGlamourerIntegration)
             return;
+        ImBrio.VerticalPadding(1);
 
-        if(ImBrio.FontIconButton(FontAwesomeIcon.TheaterMasks, new Vector2(25)))
+        if(ImBrio.FontIconButton(FontAwesomeIcon.TheaterMasks))
         {
             capability.GlamourerService.OpenGlamourer();
         }
@@ -76,7 +83,7 @@ public static class AppearanceEditorCommon
 
         var currentDesign = capability.CurrentDesign;
 
-        ImGui.SetNextItemWidth(_lableWidthDesign);
+        ImGui.SetNextItemWidth(_lableWidthDesign * ImGuiHelpers.GlobalScale);
 
         using(var combo = ImRaii.Combo(_collectionLabelDesign, "Apply Design"))
         {
@@ -112,8 +119,9 @@ public static class AppearanceEditorCommon
     {
         if(!capability.HasCustomizePlusIntegration)
             return;
+        ImBrio.VerticalPadding(1);
 
-        if(ImGui.Button("C+", new Vector2(25)))
+        if(ImGui.Button("C+", new Vector2(25 * ImGuiHelpers.GlobalScale)))
         {
             capability.CustomizePlusService.OpenCustomizePlus();
         }
@@ -122,7 +130,7 @@ public static class AppearanceEditorCommon
             ImGui.SetTooltip("Customize+ Profile");
         ImGui.SameLine();
 
-        ImGui.SetNextItemWidth(_lableWidthProfile);
+        ImGui.SetNextItemWidth(_lableWidthProfile * ImGuiHelpers.GlobalScale);
 
         if(capability.SelectedDesign.name is null)
         {

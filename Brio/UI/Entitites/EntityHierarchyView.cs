@@ -35,20 +35,23 @@ public class EntityHierarchyView(EntityManager entityManager, GPoseService gPose
             _lastSelectedId = selectedEntityId;
         }
 
-        //if(InputManagerService.ActionKeysPressed(InputAction.Interface_SelectAllActors))
-        //{
-        //    entityManager.ClearSelectedEntities();
-        //    foreach(var e in entityManager.TryGetAllActors())
-        //    {
-        //        entityManager.AddSelectedEntity(e.Id);
-        //    }
-        //}
+        if(ImGui.IsWindowHovered())
+        {
+            if(InputManagerService.ActionKeysPressed(InputAction.Interface_SelectAllActors))
+            {
+                entityManager.ClearSelectedEntities();
+                foreach(var e in entityManager.TryGetAllActors())
+                {
+                    entityManager.AddSelectedEntity(e.Id);
+                }
+            }
+        }
 
         using(ImRaii.PushId($"entity_hierarchy_{root.Id}"))
         {
             foreach(var item in root.Children)
             {
-                var disable = gPoseService.IsGPosing == false && item.Flags.HasFlag(EntityFlags.AllowOutSideGpose) == false;
+                var disable = gPoseService.IsGPosing == false && item.Flags.HasFlag(EntityFlags.AllowOutsideGpose) == false;
                 using(ImRaii.Disabled(disable))
                     DrawEntity(item, selectedEntityId);
             }
@@ -120,7 +123,6 @@ public class EntityHierarchyView(EntityManager entityManager, GPoseService gPose
                     ImGui.OpenPopup($"context_popup{entity.Id}");
                 }
 
-
                 ImGui.SetCursorPos(invsButtonPos);
             }
 
@@ -136,7 +138,7 @@ public class EntityHierarchyView(EntityManager entityManager, GPoseService gPose
             {
                 using(ImRaii.Disabled(true))
                 {
-                    ImGui.Button($"###tab_{entity.Id}");
+                    ImGui.Button($"###tab_{entity.Id}", new Vector2(8 * ImGuiHelpers.GlobalScale, 24 * ImGuiHelpers.GlobalScale));
                 }
             }
         }

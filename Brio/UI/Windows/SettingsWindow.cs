@@ -8,6 +8,7 @@ using Brio.UI.Controls.Stateless;
 using Brio.Web;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface;
+using Dalamud.Interface.Utility;
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Interface.Windowing;
 using System;
@@ -604,7 +605,7 @@ public class SettingsWindow : Window
 
             using(ImRaii.Disabled(!resetSettings))
             {
-                if(ImGui.Button("Reset Settings to Default", new(170, 0)))
+                if(ImGui.Button("Reset Settings to Default", new(170 * ImGuiHelpers.GlobalScale, 0)))
                 {
                     _configurationService.Reset();
                     resetSettings = false;

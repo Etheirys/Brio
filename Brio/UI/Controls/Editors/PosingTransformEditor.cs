@@ -4,6 +4,7 @@ using Brio.Game.Posing;
 using Brio.UI.Controls.Stateless;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface;
+using Dalamud.Interface.Utility;
 using Dalamud.Interface.Utility.Raii;
 using OneOf.Types;
 using System.Numerics;
@@ -44,6 +45,9 @@ public class PosingTransformEditor
 
                 if(posingCapability.Actor.IsProp == false)
                 {
+
+                    ImBrio.VerticalPadding(3);
+                    
                     if(ImBrio.FontIconButton("transformOffset", FontAwesomeIcon.GaugeSimpleHigh, "Transform Offset"))
                     {
                         ImGui.OpenPopup("transformOffset");
@@ -69,7 +73,7 @@ public class PosingTransformEditor
                         {
                             ImGui.SameLine();
 
-                            PosingEditorCommon.DrawIKSelect(posingCapability, new Vector2(25));
+                            PosingEditorCommon.DrawIKSelect(posingCapability, new Vector2(25 * ImGuiHelpers.GlobalScale));
 
                             ImGui.SameLine();
 
@@ -81,15 +85,16 @@ public class PosingTransformEditor
 
                             // Select Parent
                             ImGui.SameLine();
+
                             var parentBone = posingCapability.Selected.Match(
                                    boneSelect => posingCapability.SkeletonPosing.GetBone(boneSelect)?.GetFirstVisibleParent(),
                                    _ => null,
                                    _ => null
                             );
 
-                            using(ImRaii.Disabled(parentBone == null))
+                            using(ImRaii.Disabled(parentBone is not null))
                             {
-                                if(ImBrio.FontIconButton(FontAwesomeIcon.LevelUpAlt, new Vector2(25)))
+                                if(ImBrio.FontIconButton(FontAwesomeIcon.LevelUpAlt))
                                     posingCapability.Selected = new BonePoseInfoId(parentBone!.Name, parentBone!.PartialId, PoseInfoSlot.Character);
                             }
 
@@ -151,8 +156,11 @@ public class PosingTransformEditor
             }
 
             (var pdidChange, var panyActive) = ImBrio.DragFloat3($"###_transformPosition_0", ref realTransform.Position, offset, FontAwesomeIcon.ArrowsUpDownLeftRight, "Position", enableExpanded: compactMode);
+            ImBrio.VerticalPadding(3);
             (var rdidChange, var ranyActive) = ImBrio.DragFloat3($"###_transformRotation_0", ref realEuler, offset * 100, FontAwesomeIcon.ArrowsSpin, "Rotation", enableExpanded: compactMode);
+            ImBrio.VerticalPadding(3);
             (var sdidChange, var sanyActive) = ImBrio.DragFloat3($"###_transformScale_0", ref realTransform.Scale, offset, FontAwesomeIcon.ExpandAlt, "Scale", enableExpanded: compactMode);
+            ImBrio.VerticalPadding(3);
 
             didChange |= pdidChange |= rdidChange |= sdidChange;
             anyActive |= panyActive |= ranyActive |= sanyActive;
@@ -198,7 +206,9 @@ public class PosingTransformEditor
             bool anyActive = false;
 
             (var pdidChange, var panyActive) = ImBrio.DragFloat3($"###_transformPosition_1", ref realTransform.Position, offset, FontAwesomeIcon.ArrowsUpDownLeftRight, "Position", enableExpanded: compactMode);
+            ImBrio.VerticalPadding(3);
             (var rdidChange, var ranyActive) = ImBrio.DragFloat3($"###_transformRotation_1", ref realEuler, offset * 100, FontAwesomeIcon.ArrowsSpin, "Rotation", enableExpanded: compactMode);
+            ImBrio.VerticalPadding(3);
 
             bool sdidChange = false;
             bool sanyActive = false;
@@ -221,6 +231,7 @@ public class PosingTransformEditor
             }
             else
                 (sdidChange, sanyActive) = ImBrio.DragFloat3($"###_transformScale_1", ref realTransform.Scale, offset, FontAwesomeIcon.ExpandAlt, "Scale", enableExpanded: compactMode);
+            ImBrio.VerticalPadding(3);
 
             didChange |= pdidChange |= rdidChange |= sdidChange;
             anyActive |= panyActive |= ranyActive |= sanyActive;
