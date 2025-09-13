@@ -120,11 +120,11 @@ public class MainWindow : Window, IDisposable
                 ImGui.SetCursorPos(startPos);
             }
 
-            if(ImBrio.Button("Project", FontAwesomeIcon.FolderOpen, new Vector2(line1Width, 0)))
+            if(ImBrio.Button("Project", FontAwesomeIcon.FolderOpen, new Vector2(line1Width, 0), centerTest: true))
                 ImGui.OpenPopup("DrawProjectPopup");
 
             ImGui.SameLine();
-            if(ImBrio.Button("Library", FontAwesomeIcon.Book, new Vector2(line1Width, 0)))
+            if(ImBrio.Button("Library", FontAwesomeIcon.Book, new Vector2(line1Width, 0), centerTest: true))
                 _libraryWindow.Toggle();
         }
 

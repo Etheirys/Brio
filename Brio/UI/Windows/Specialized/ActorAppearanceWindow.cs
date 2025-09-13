@@ -158,7 +158,7 @@ public class ActorAppearanceWindow : Window, IDisposable
     {
         var buttonSize = new Vector2(ImGui.GetContentRegionAvail().X / 3f - (ImGui.GetStyle().FramePadding.X / 2), 0);
 
-        if(ImBrio.Button("Load NPC", FontAwesomeIcon.PersonArrowDownToLine, buttonSize))
+        if(ImBrio.Button("Load NPC", FontAwesomeIcon.PersonArrowDownToLine, buttonSize, centerTest: true))
         {
             AppearanceEditorCommon.ResetNPCSelector();
             ImGui.OpenPopup("window_load_npc");
@@ -168,13 +168,13 @@ public class ActorAppearanceWindow : Window, IDisposable
 
         using(ImRaii.Disabled(!_capability.IsAppearanceOverridden))
         {
-            if(ImBrio.Button("Revert", FontAwesomeIcon.RedoAlt, buttonSize))
+            if(ImBrio.Button("Revert", FontAwesomeIcon.RedoAlt, buttonSize, centerTest: true))
                 _ = _capability.ResetAppearance();
         }
 
         ImGui.SameLine();
 
-        if(ImBrio.Button("Redraw", FontAwesomeIcon.PaintBrush, buttonSize))
+        if(ImBrio.Button("Redraw", FontAwesomeIcon.PaintBrush, buttonSize, centerTest: true))
             _ = _capability.Redraw();
 
         using(ImRaii.Disabled(!_capability.HasPenumbraIntegration && !_capability.HasCustomizePlusIntegration && !_capability.HasGlamourerIntegration))
