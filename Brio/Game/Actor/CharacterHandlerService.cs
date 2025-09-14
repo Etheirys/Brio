@@ -48,11 +48,14 @@ public class CharacterHandlerService : IDisposable
         {
             foreach(var entry in CharacterHandler)
             {
-                var character = _dalamudService.GetGposeCharacterFromObjectTableByName(entry.Name, onlyGposeCharacters: true);
-                if(character is null)
+                if(entry.GameObject is not null)
                 {
-                    CharacterHandler.Remove(entry);
-                    RevertMCDF(entry).GetAwaiter().GetResult();
+                    var character = _dalamudService.GetGposeCharacterFromObjectTableByName(entry.Name, onlyGposeCharacters: true);
+                    if(character is null)
+                    {
+                        CharacterHandler.Remove(entry);
+                        RevertMCDF(entry).GetAwaiter().GetResult();
+                    }
                 }
             }
         }
@@ -60,6 +63,8 @@ public class CharacterHandlerService : IDisposable
 
     public async Task RevertMCDF(CharacterHolder mCDFCharacterHolder)
     {
+        if(mCDFCharacterHolder.GameObject is null) return;
+
         if(mCDFCharacterHolder.GameObject.Address == nint.Zero || mCDFCharacterHolder.Name.IsNullOrEmpty()) return;
 
         _glamourerService.UnlockAndRevertCharacter(mCDFCharacterHolder.GameObject);
@@ -74,6 +79,8 @@ public class CharacterHandlerService : IDisposable
 
     public async Task Revert(IGameObject obj, bool afterGpose = false)
     {
+        if(obj is null) return;
+
         if(obj.Address == nint.Zero) return;
 
         _glamourerService.UnlockAndRevertCharacterByName(obj.Name.TextValue);
