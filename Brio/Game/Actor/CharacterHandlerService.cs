@@ -48,29 +48,25 @@ public class CharacterHandlerService : IDisposable
         {
             foreach(var entry in CharacterHandler)
             {
-                if(entry.GameObject is not null)
+                var character = _dalamudService.GetGposeCharacterFromObjectTableByName(entry.Name, onlyGposeCharacters: true);
+                if(character is null)
                 {
-                    var character = _dalamudService.GetGposeCharacterFromObjectTableByName(entry.Name, onlyGposeCharacters: true);
-                    if(character is null)
-                    {
-                        CharacterHandler.Remove(entry);
-                        RevertMCDF(entry).GetAwaiter().GetResult();
-                    }
+                    RevertMCDF(entry).GetAwaiter().GetResult();
                 }
             }
+            CharacterHandler.Clear();
         }
     }
 
     public async Task RevertMCDF(CharacterHolder mCDFCharacterHolder)
     {
-        if(mCDFCharacterHolder.GameObject is null) return;
+        if(mCDFCharacterHolder.GameObject is not null)
+            _glamourerService.UnlockAndRevertCharacter(mCDFCharacterHolder.GameObject);
 
-        if(mCDFCharacterHolder.GameObject.Address == nint.Zero || mCDFCharacterHolder.Name.IsNullOrEmpty()) return;
+        if(mCDFCharacterHolder.Name.IsNullOrEmpty() is false)
+            _glamourerService.UnlockAndRevertCharacterByName(mCDFCharacterHolder.Name);
 
-        _glamourerService.UnlockAndRevertCharacter(mCDFCharacterHolder.GameObject);
-        _glamourerService.UnlockAndRevertCharacterByName(mCDFCharacterHolder.Name);
-
-        if(mCDFCharacterHolder.GameObject.Address != nint.Zero)
+        if(mCDFCharacterHolder.GameObject is not null && mCDFCharacterHolder.GameObject.Address != nint.Zero)
         {
             _customizePlusService.RemoveTemporaryProfile(mCDFCharacterHolder.GameObject);
             await _penumbraService.Redraw(mCDFCharacterHolder.GameObject, true).ConfigureAwait(false);
@@ -80,8 +76,6 @@ public class CharacterHandlerService : IDisposable
     public async Task Revert(IGameObject obj, bool afterGpose = false)
     {
         if(obj is null) return;
-
-        if(obj.Address == nint.Zero) return;
 
         _glamourerService.UnlockAndRevertCharacterByName(obj.Name.TextValue);
         _glamourerService.UnlockAndRevertCharacter(obj);
