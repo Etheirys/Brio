@@ -1,4 +1,5 @@
 ﻿using Brio.Capabilities.Actor;
+using Brio.Core;
 using Brio.Entities.Actor;
 using Brio.Files;
 using Brio.Game.Actor.Appearance;
@@ -39,7 +40,6 @@ namespace Brio.Capabilities.Posing
 
             _skeletonService.SkeletonUpdateStart += OnSkeletonUpdateStart;
             _skeletonService.SkeletonUpdateEnd += OnSkeletonUpdateEnd;
-
         }
 
         public void ResetPose()
@@ -100,6 +100,25 @@ namespace Brio.Capabilities.Posing
                     poseFile.OffHand[bone.Name] = bone.LastRawTransform;
                 }
             }
+        }
+
+        // From LivePose (Thank You Caraxi!) https://github.com/Caraxi/LivePose/blob/69afd7ba4f46611ac6055266f2524d1ac1d22454/LivePose/UI/Windows/Specialized/PosingOverlayToolbarWindow.cs#L337
+        public void ResetIK()
+        {
+            var pose = new PoseFile();
+            ExportSkeletonPose(pose);
+            foreach(var p in pose.Bones.Keys)
+            {
+                var bBone = GetBone(p, PoseInfoSlot.Character);
+                if(bBone == null) continue;
+                var bonePoseInfo = GetBonePose(bBone);
+
+                bonePoseInfo.ClearStacks();
+                bonePoseInfo.DefaultIK = BoneIKInfo.CalculateDefault(p);
+            }
+
+            ResetPose();
+            ImportSkeletonPose(pose, new PoseImporterOptions(new BoneFilter(_posingService), TransformComponents.All, false));
         }
 
         public unsafe BonePoseInfo GetBonePose(BonePoseInfoId bone)
