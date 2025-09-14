@@ -736,6 +736,7 @@ public class SettingsWindow : Window
         if(KeybindEditor.KeySelector(evtText, keyAction, _configurationService.Configuration.InputManager))
         {
             _configurationService.ApplyChange();
+            _configurationService.Save();
         }
     }
 }
