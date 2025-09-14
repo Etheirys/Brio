@@ -31,7 +31,7 @@ public class PosingConfiguration
     public bool HideNameOnGPoseSettingsWindow { get; set; } = true;
 
     // Targeting
-    public bool GPoseTargetChangesWithBrio { get; set; } = true;
+    public bool GPoseTargetChangesWithBrio { get; set; } = false;
     public bool BrioTargetChangesWithGPose { get; set; } = true;
 
     // Undo / Redo
