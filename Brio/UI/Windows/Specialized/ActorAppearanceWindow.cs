@@ -100,7 +100,7 @@ public class ActorAppearanceWindow : Window, IDisposable
 
         bool shouldSetAppearance = false;
 
-        ImBrio.ToggleButtonStrip("appearance_filters_selector", new Vector2(ImBrio.GetRemainingWidth(), ImBrio.GetLineHeight()), ref selected, ["Equipment", "Customize"]);
+        ImBrio.ButtonSelectorStrip("appearance_filters_selector", new Vector2(ImBrio.GetRemainingWidth(), ImBrio.GetLineHeight()), ref selected, ["Equipment", "Customize"]);
 
         if(selected == 1)
         {

@@ -83,7 +83,7 @@ public class SettingsWindow : Window
             }
             else
             {
-                ImBrio.ToggleButtonStrip("settings_filters_selector", new Vector2(ImBrio.GetRemainingWidth(), ImBrio.GetLineHeight()), ref selected, ["General", "IPC", "Posing", "Library", "Auto-Save", "Input", "Advanced"]);
+                ImBrio.ButtonSelectorStrip("settings_filters_selector", new Vector2(ImBrio.GetRemainingWidth(), ImBrio.GetLineHeight()), ref selected, ["General", "IPC", "Posing", "Library", "Auto-Save", "Input", "Advanced"]);
 
                 using(var child = ImRaii.Child("###settingsPane"))
                 {

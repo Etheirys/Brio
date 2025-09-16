@@ -156,7 +156,7 @@ public class UpdateWindow : Window
         ImBrio.VerticalPadding(10);
 
         // Selector
-        ImBrio.ToggleButtonStrip("brio_changelog_selector", new Vector2(ImBrio.GetRemainingWidth(), ImBrio.GetLineHeight()), ref selected, [" Changelog ", "Supporters & Contributors"]);
+        ImBrio.ButtonSelectorStrip("brio_changelog_selector", new Vector2(ImBrio.GetRemainingWidth(), ImBrio.GetLineHeight()), ref selected, [" Changelog ", "Supporters & Contributors"]);
 
         if(selected == 0)
         {

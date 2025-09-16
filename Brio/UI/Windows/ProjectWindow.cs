@@ -50,7 +50,7 @@ public class ProjectWindow : Window, IDisposable
 
         using(ImRaii.Disabled(_mCDFService.IsApplyingMCDF || _mCDFService.IsSavingMCDF))
         {
-            ImBrio.ToggleButtonStrip("library_filters_selector", new Vector2(ImBrio.GetRemainingWidth(), ImBrio.GetLineHeight()), ref selected, ["Load", "Save"]);
+            ImBrio.ButtonSelectorStrip("library_filters_selector", new Vector2(ImBrio.GetRemainingWidth(), ImBrio.GetLineHeight()), ref selected, ["Load", "Save"]);
 
             if(selected == 0 || _projectSystem.IsLoading)
             {

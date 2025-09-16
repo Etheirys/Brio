@@ -203,7 +203,7 @@ public class PosingGraphicalWindow : Window, IDisposable
 
         ImGui.SameLine();
 
-        ImBrio.ToggleButtonStrip("posing_page_selector", new(ImBrio.GetRemainingWidth() - RightPanelWidth - 10, ImBrio.GetLineHeight()), ref _selectedPane, _bonePages);
+        ImBrio.ButtonSelectorStrip("posing_page_selector", new(ImBrio.GetRemainingWidth() - RightPanelWidth - 10, ImBrio.GetLineHeight()), ref _selectedPane, _bonePages);
 
         ImGui.SameLine();
 
@@ -346,7 +346,7 @@ public class PosingGraphicalWindow : Window, IDisposable
         if(ImBrio.Button("Import##import_pose", FontAwesomeIcon.FileImport, buttonSize))
             ImGui.OpenPopup("DrawImportPoseMenuPopup");
 
-        FileUIHelpers.DrawImportPoseMenuPopup(posing, false);
+        FileUIHelpers.DrawImportPoseMenuPopup("posingGraphicalWindow", posing, false);
 
         ImGui.SameLine();
 

@@ -56,7 +56,7 @@ public class ActorDynamicPoseWidget(ActorDynamicPoseCapability capability) : Wid
         {
             ImGui.Separator();
 
-            if(ImBrio.ToggleButtonStrip("DynamicFaceControlSelector", new Vector2(ImBrio.GetRemainingWidth(), ImBrio.GetLineHeight()), ref selected, ["Camera", "Position", "Actor"]))
+            if(ImBrio.ButtonSelectorStrip("DynamicFaceControlSelector", new Vector2(ImBrio.GetRemainingWidth(), ImBrio.GetLineHeight()), ref selected, ["Camera", "Position", "Actor"]))
             {
                 Reset();
 

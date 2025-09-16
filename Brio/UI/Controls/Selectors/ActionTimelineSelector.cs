@@ -95,20 +95,21 @@ public class ActionTimelineSelector(string id) : Selector<ActionTimelineSelector
         ImGui.SetTooltip($"{item.Name}\n{item.TimelineId} - {item.Key}");
     }
 
+
     protected override void DrawOptions()
     {
-        if(ImGui.Checkbox("Emotes", ref _showEmotes))
+        bool[] items = [_showEmotes, _showActions, _showRaw];
+
+        var changed =ImBrio.ToggleSelecterStrip("actiontimeline_filters_selector", new Vector2(ImBrio.GetRemainingWidth(), ImBrio.GetLineHeight()), ref items, ["Emotes", "Actions", "Timelines"]);
+      
+        if(changed)
+        {
+            _showEmotes = items[0];
+            _showActions = items[1];
+            _showRaw = items[2];
+
             UpdateList();
-
-        ImGui.SameLine();
-
-        if(ImGui.Checkbox("Actions", ref _showActions))
-            UpdateList();
-
-        ImGui.SameLine();
-
-        if(ImGui.Checkbox("Timelines", ref _showRaw))
-            UpdateList();
+        }
     }
 
     protected override int Compare(ActionTimelineSelectorEntry itemA, ActionTimelineSelectorEntry itemB)
