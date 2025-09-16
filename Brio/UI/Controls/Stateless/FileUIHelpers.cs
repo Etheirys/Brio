@@ -75,7 +75,7 @@ public class FileUIHelpers
     static bool doBody = false;
     static bool doTransform = false;
     static TransformComponents? transformComponents = null;
-    public static void DrawImportPoseMenuPopup(PosingCapability capability, bool showImportOptions = true)
+    public static void DrawImportPoseMenuPopup(string tag, PosingCapability capability, bool showImportOptions = true)
     {
         using var popup = ImRaii.Popup("DrawImportPoseMenuPopup");
 
@@ -87,7 +87,7 @@ public class FileUIHelpers
 
             using(ImRaii.PushColor(ImGuiCol.Button, UIConstants.Transparent))
             {
-                var size = new Vector2(245, 400); //= ImGui.GetContentRegionAvail(); //ImGui.CalcTextSize("XXXX Freeze Actor on Import");
+                var size = new Vector2(245, 400);
 
                 size.Y = 44;
 
@@ -158,7 +158,7 @@ public class FileUIHelpers
                 using(ImRaii.Disabled(doExpression || doBody))
                 {
                     if(ImBrio.Button("Import Options", FontAwesomeIcon.Cog, new(size.X, 25), centerTest: true, tooltip: "Import Options"))
-                        ImGui.OpenPopup("import_optionsImportPoseMenuPopup");
+                        ImGui.OpenPopup($"import_{tag}_optionsImportPoseMenuPopup");
                 }
 
                 ImGui.Separator();
@@ -183,7 +183,7 @@ public class FileUIHelpers
                 }
             }
 
-            using(var popup2 = ImRaii.Popup("import_optionsImportPoseMenuPopup"))
+            using(var popup2 = ImRaii.Popup($"import_{tag}_optionsImportPoseMenuPopup"))
             {
                 if(popup2.Success && showImportOptions && Brio.TryGetService<PosingService>(out var service))
                 {

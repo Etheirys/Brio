@@ -10,6 +10,7 @@ using System;
 using System.Numerics;
 
 namespace Brio.UI.Controls.Stateless;
+
 public static partial class ImBrio
 {
     public const string TooltipSeparator = "--SEP--";
@@ -64,8 +65,8 @@ public static partial class ImBrio
         if(!bordered)
             ImGui.PopStyleColor();
 
-        if(tooltip != null && ImGui.IsItemHovered())
-            ImGui.SetTooltip(tooltip);
+        if(tooltip != null)
+            AttachToolTip(tooltip);
 
         if(!enabled)
             ImGui.EndDisabled();
@@ -103,8 +104,8 @@ public static partial class ImBrio
         if(bordered is false)
             ImGui.PopStyleColor();
 
-        if(tooltip is not null && ImGui.IsItemHovered())
-            ImGui.SetTooltip(tooltip);
+        if(tooltip is not null)
+            AttachToolTip(tooltip);
 
         if(enabled is false)
             ImGui.EndDisabled();
@@ -146,8 +147,7 @@ public static partial class ImBrio
 
             if(string.IsNullOrEmpty(tooltip) is false)
             {
-                if(ImGui.IsItemHovered())
-                    ImGui.SetTooltip(tooltip);
+                AttachToolTip(tooltip);
             }
 
             if(icon != FontAwesomeIcon.None)

@@ -56,7 +56,7 @@ public class PosingWidget(PosingCapability capability) : Widget<PosingCapability
                 ImGui.OpenPopup("DrawImportPoseMenuPopup");
             }
 
-            FileUIHelpers.DrawImportPoseMenuPopup(Capability);
+            FileUIHelpers.DrawImportPoseMenuPopup("postingWidget",Capability);
 
             ImGui.SameLine();
 
@@ -95,7 +95,6 @@ public class PosingWidget(PosingCapability capability) : Widget<PosingCapability
                     timelineCapability.ResetOverallSpeedOverride();
                 else
                     timelineCapability.SetOverallSpeedOverride(0f);
-
             }
             ImGui.SameLine();
         }

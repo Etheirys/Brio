@@ -47,7 +47,7 @@ public class PosingTransformEditor
                 {
 
                     ImBrio.VerticalPadding(3);
-                    
+
                     if(ImBrio.FontIconButton("transformOffset", FontAwesomeIcon.GaugeSimpleHigh, "Transform Offset"))
                     {
                         ImGui.OpenPopup("transformOffset");
@@ -97,32 +97,31 @@ public class PosingTransformEditor
                                 if(ImBrio.FontIconButton(FontAwesomeIcon.LevelUpAlt))
                                     posingCapability.Selected = new BonePoseInfoId(parentBone!.Name, parentBone!.PartialId, PoseInfoSlot.Character);
                             }
+                            ImBrio.AttachToolTip("Select Parent");
 
-                            if(ImGui.IsItemHovered())
-                                ImGui.SetTooltip("Select Parent");
-                        }
+                         }
                     }
                     ImGui.SameLine();
 
-                    using(ImRaii.Disabled(true))
-                        if(ImBrio.FontIconButton("copypaste", FontAwesomeIcon.Clipboard, "Copy/Paste"))
-                            ImGui.OpenPopup("transform_CopyPaste_popup");
+                    if(ImBrio.FontIconButton("copypaste", FontAwesomeIcon.Clipboard, "Copy/Paste"))
+                        ImGui.OpenPopup("transform_CopyPaste_popup");
 
-                    if(isBone == false)
-                        using(ImRaii.Disabled(posingCapability.ModelPosing.HasOverride == false))
+                    using(ImRaii.Disabled(!posingCapability.CanResetBone(realBone)))
+                    {
+                        ImGui.SameLine();
+
+                        if(ImBrio.FontIconButtonRight("resetTransform", FontAwesomeIcon.Recycle, 1, tooltip: "Reset Bone"))
                         {
-                            ImGui.SameLine();
-
-                            if(ImBrio.FontIconButtonRight("resetTransform", FontAwesomeIcon.Recycle, 1, tooltip: "Reset Model Transform"))
-                            {
-                                posingCapability.ModelPosing.ResetTransform();
-                            }
+                            posingCapability.ResetSelectedBone();
                         }
+                    }
 
                     using(var popup = ImRaii.Popup("transform_CopyPaste_popup"))
                     {
                         if(popup.Success)
+                        {
                             DrawCopyPastePopup();
+                        }
                     }
                 }
             }
@@ -231,6 +230,7 @@ public class PosingTransformEditor
             }
             else
                 (sdidChange, sanyActive) = ImBrio.DragFloat3($"###_transformScale_1", ref realTransform.Scale, offset, FontAwesomeIcon.ExpandAlt, "Scale", enableExpanded: compactMode);
+       
             ImBrio.VerticalPadding(3);
 
             didChange |= pdidChange |= rdidChange |= sdidChange;
