@@ -66,7 +66,7 @@ public class MainWindow : Window, IDisposable
 
         SizeConstraints = new WindowSizeConstraints
         {
-            MaximumSize = new Vector2(280, 1230),
+            MaximumSize = new Vector2(280, 1200),
             MinimumSize = new Vector2(280, 200)
         };
     }
@@ -108,7 +108,7 @@ public class MainWindow : Window, IDisposable
         float buttonWidths = 25 * ImGuiHelpers.GlobalScale;
         float line1FinalWidth = ImBrio.GetRemainingWidth() - ((buttonWidths * 2) + (ImGui.GetStyle().ItemSpacing.X * 2) + ImGui.GetStyle().WindowBorderSize);
 
-        float line1Width = ((line1FinalWidth / 2) - 3);// * ImGuiHelpers.GlobalScale;
+        float line1Width = (line1FinalWidth / 2) - 3;
 
         using(ImRaii.Disabled(_gPoseService.IsGPosing == false))
         {
