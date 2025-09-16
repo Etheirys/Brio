@@ -283,6 +283,13 @@ public class ActorAppearanceService : IDisposable
                     native->DrawData.IsVisorToggled = appearance.Runtime.IsVisorToggled;
                 }
 
+                // Viera Ears
+                if(existingAppearance.Runtime.IsVieraEarsHidden != appearance.Runtime.IsVieraEarsHidden || forceHeadToggles)
+                {
+                    native->DrawData.VieraEarsHidden = appearance.Runtime.IsVieraEarsHidden;
+                    native->DrawData.HideVieraEars(appearance.Runtime.IsVieraEarsHidden);
+                }
+
                 // Wetness
                 if(existingAppearance.ExtendedAppearance.Wetness != appearance.ExtendedAppearance.Wetness)
                 {
