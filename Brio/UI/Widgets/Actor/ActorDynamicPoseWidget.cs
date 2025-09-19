@@ -5,11 +5,11 @@ using Brio.UI.Controls.Stateless;
 using Brio.UI.Widgets.Core;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface;
-using Dalamud.Interface.Utility;
 using Dalamud.Interface.Utility.Raii;
 using System.Numerics;
 
 namespace Brio.UI.Widgets.Actor;
+
 public class ActorDynamicPoseWidget(ActorDynamicPoseCapability capability) : Widget<ActorDynamicPoseCapability>(capability)
 {
     public override string HeaderName => "Dynamic Face Control";
@@ -17,29 +17,26 @@ public class ActorDynamicPoseWidget(ActorDynamicPoseCapability capability) : Wid
     public override WidgetFlags Flags => Capability.Actor.IsProp ? WidgetFlags.CanHide :
         WidgetFlags.DefaultOpen | WidgetFlags.DrawBody;
 
-    bool eyes;
-    bool body;
-    bool head;
+    bool eyes = false;
+    bool body = false;
+    bool head = false;
 
-    bool eyesLock;
-    bool bodyLock;
-    bool headLock;
+    bool eyesLock = false;
+    bool bodyLock = false;
+    bool headLock = false;
 
     int selected = -1;
-
-    bool enable;
-
     Vector3 cameraVector3;
     public override void DrawBody()
     {
         if(Capability.Camera is not null)
             cameraVector3 = Capability.Camera.RealPosition;
 
-        if(ImBrio.ToggelButton("Enable Face Control", enable))
+        if(ImBrio.ToggelButton("Enable Face Control", Capability.IsEnabled))
         {
-            enable = !enable;
+            Capability.IsEnabled = !Capability.IsEnabled;
 
-            if(enable)
+            if(Capability.IsEnabled)
             {
                 Capability.StartLookAt();
                 Reset();
@@ -52,7 +49,7 @@ public class ActorDynamicPoseWidget(ActorDynamicPoseCapability capability) : Wid
             }
         }
 
-        using(ImRaii.Disabled(!enable))
+        using(ImRaii.Disabled(!Capability.IsEnabled))
         {
             ImGui.Separator();
 
@@ -139,19 +136,19 @@ public class ActorDynamicPoseWidget(ActorDynamicPoseCapability capability) : Wid
                 if(eyesLock)
                     Capability.SetTargetLock(true, LookAtTargetType.Eyes, cameraVector3);
                 else
-                    Capability.SetTargetLock(false, LookAtTargetType.Eyes, Capability.GetData()!.HeadTarget);
+                    Capability.SetTargetLock(false, LookAtTargetType.Eyes, Capability.GetData()?.HeadTarget ?? cameraVector3);
 
             if(bodylock)
                 if(bodyLock)
                     Capability.SetTargetLock(true, LookAtTargetType.Body, cameraVector3);
                 else
-                    Capability.SetTargetLock(false, LookAtTargetType.Body, Capability.GetData()!.BodyTarget);
+                    Capability.SetTargetLock(false, LookAtTargetType.Body, Capability.GetData()?.BodyTarget ?? cameraVector3);
 
             if(headlock)
                 if(headLock)
                     Capability.SetTargetLock(true, LookAtTargetType.Head, cameraVector3);
                 else
-                    Capability.SetTargetLock(false, LookAtTargetType.Head, Capability.GetData()!.HeadTarget);
+                    Capability.SetTargetLock(false, LookAtTargetType.Head, Capability.GetData()?.HeadTarget ?? cameraVector3);
         }
     }
 
@@ -168,7 +165,7 @@ public class ActorDynamicPoseWidget(ActorDynamicPoseCapability capability) : Wid
         bool bodytoggle = false;
         bool headtoggle = false;
 
-        if(ImBrio.ToggelButton($"Eyes###toggleButton_Eyes", new Vector2(53, 25 ), eyes))
+        if(ImBrio.ToggelButton($"Eyes###toggleButton_Eyes", new Vector2(53, 25), eyes))
         {
             eyetoggle = true;
             eyes = !eyes;
@@ -188,7 +185,7 @@ public class ActorDynamicPoseWidget(ActorDynamicPoseCapability capability) : Wid
             eyesVectorDrag = ImBrio.DragFloat3Simple($"###dynamicFaceControlSelector_Eyes_drag3", ref eyesVector3, 1);
         }
 
-        if(ImBrio.ToggelButton($"Body###toggleButton_Body", new Vector2(53 , 25 ), body))
+        if(ImBrio.ToggelButton($"Body###toggleButton_Body", new Vector2(53, 25), body))
         {
             bodytoggle = true;
             body = !body;

@@ -231,6 +231,16 @@ public class GearEditor()
                             appearance.Runtime.IsVisorToggled = !isToggled;
                             didChange |= true;
                         }
+
+                        ImGui.SameLine();
+
+                        // Icon choice inspired by anamnesis
+                        bool IsEars = appearance.Runtime.IsVieraEarsHidden;
+                        if(ImBrio.FontIconButton("ears", FontAwesomeIcon.Deaf, "Viera Ears Hidden", bordered: false, textColor: IsEars ? 0xFF555555 : null))
+                        {
+                            appearance.Runtime.IsVieraEarsHidden = !IsEars;
+                            didChange |= true;
+                        }
                     }
 
                     using(var dyePopup = ImRaii.Popup("gear_dye_0_popup"))

@@ -35,19 +35,15 @@ public partial class PosingSelectionType : OneOfBase<BonePoseInfoId, ModelTransf
         if(obj is null)
             return false;
 
-        if(obj is PosingSelectionType other)
-            return UniqueId.Equals(other.UniqueId);
-
-        if(obj is None && Value is None)
-            return true;
-
-        if(obj is ModelTransformSelection && Value is ModelTransformSelection)
-            return true;
-
-        if(obj is BonePoseInfoId bone && obj is BonePoseInfoId otherBone)
-            return bone.Equals(otherBone);
-
-        return base.Equals(obj);
+        return obj is PosingSelectionType other
+            ? UniqueId.Equals(other.UniqueId)
+            : obj is None && Value is None
+            ? true
+            : obj is ModelTransformSelection && Value is ModelTransformSelection
+            ? true
+            : obj is BonePoseInfoId bone and BonePoseInfoId otherBone 
+            ? bone.Equals(otherBone) 
+            : base.Equals(obj);
     }
 
     public static bool operator ==(PosingSelectionType? left, PosingSelectionType? right) => left?.Equals(right) ?? right is null;

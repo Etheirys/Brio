@@ -1,6 +1,7 @@
 ﻿using Brio.Core;
 using Brio.Game.Posing.Skeletons;
 using OneOf;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
@@ -202,13 +203,13 @@ public record struct BonePoseInfoId(string BoneName, int Partial, PoseInfoSlot S
     {
         if(BoneName.EndsWith("_r"))
         {
-            var mirrorName = BoneName.Substring(0, BoneName.Length - 2) + "_l";
+            var mirrorName = string.Concat(BoneName.AsSpan(0, BoneName.Length - 2), "_l");
             return new BonePoseInfoId(mirrorName, Partial, Slot);
         }
 
         if(BoneName.EndsWith("_l"))
         {
-            var mirrorName = BoneName.Substring(0, BoneName.Length - 2) + "_r";
+            var mirrorName = string.Concat(BoneName.AsSpan(0, BoneName.Length - 2), "_r");
             return new BonePoseInfoId(mirrorName, Partial, Slot);
         }
 

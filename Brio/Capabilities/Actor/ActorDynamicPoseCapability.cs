@@ -9,6 +9,7 @@ using System;
 using System.Numerics;
 
 namespace Brio.Capabilities.Actor;
+
 public class ActorDynamicPoseCapability : ActorCharacterCapability
 {
     private readonly ActorLookAtService _actorLookAtService;
@@ -17,6 +18,7 @@ public class ActorDynamicPoseCapability : ActorCharacterCapability
     private readonly VirtualCameraManager _virtualCameraManager;
 
     public VirtualCamera? Camera => _virtualCameraManager.CurrentCamera;
+    public bool IsEnabled { get; set; }
 
     public ActorDynamicPoseCapability(ActorEntity parent, ActorLookAtService actorLookAtService, VirtualCameraManager virtualCameraManager, ActorAppearanceService actorAppearanceService, GPoseService gPoseService) : base(parent)
     {

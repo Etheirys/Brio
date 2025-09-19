@@ -7,12 +7,10 @@ using Brio.Files;
 using Brio.Game.Input;
 using Brio.Game.Posing;
 using Brio.Game.Posing.Skeletons;
-using Brio.Input;
 using Brio.Resources;
 using Brio.UI.Widgets.Posing;
 using Brio.UI.Windows.Specialized;
 using Dalamud.Plugin.Services;
-using FFXIVClientStructs.FFXIV.Common.Lua;
 using OneOf;
 using OneOf.Types;
 using System;
@@ -31,8 +29,6 @@ public class PosingCapability : ActorCharacterCapability
 
     public PosingService PosingService => _posingService;
 
-
-    public bool IsEntitySelected;
     public bool HasOverride
     {
         get
@@ -403,7 +399,7 @@ public class PosingCapability : ActorCharacterCapability
         {
             ResetBoneStacks(selectedIsBone);
         }
-        else if (ModelPosing.HasOverride)
+        else if(ModelPosing.HasOverride)
         {
             ResetTransform();
         }
