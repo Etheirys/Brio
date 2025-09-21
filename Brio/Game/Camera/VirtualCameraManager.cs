@@ -63,8 +63,8 @@ public class VirtualCameraManager : IDisposable
                         camEnt.VirtualCamera.FreeCamValues.MovementSpeed = DefaultMovementSpeed;
                         camEnt.VirtualCamera.FreeCamValues.MouseSensitivity = DefaultMouseSensitivity;
                         camEnt.VirtualCamera.IsFreeCamera = true;
-                        camEnt.VirtualCamera.ActivateCamera();
                         camEnt.VirtualCamera.ToFreeCam();
+                        camEnt.VirtualCamera.ActivateCamera();
                         camEnt.VirtualCamera.DeactivateCamera();
                         _createdCameras.Add(cameraId, camEnt);
                         break;
@@ -131,7 +131,7 @@ public class VirtualCameraManager : IDisposable
                 if(oldCamEnt.CameraType == CameraType.Free)
                 {
                     newCam.VirtualCamera.Position = oldCam.Position;
-                    newCam.VirtualCamera.IsFreeCamera = true;
+                    newCam.VirtualCamera.ToFreeCam();
                 }
                 else
                 {
