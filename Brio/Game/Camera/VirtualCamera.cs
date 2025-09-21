@@ -1,5 +1,6 @@
 ﻿using FFXIVClientStructs.FFXIV.Client.Game.Control;
 using MessagePack;
+using System;
 using System.Numerics;
 
 namespace Brio.Game.Camera;
@@ -7,6 +8,8 @@ namespace Brio.Game.Camera;
 [MessagePackObject(keyAsPropertyName: true)]
 public unsafe partial class VirtualCamera
 {
+    private readonly Vector3 Up = new(0f, 1f, 0f);
+
     public VirtualCamera() { }
     public VirtualCamera(int cameraID)
     {
@@ -30,6 +33,8 @@ public unsafe partial class VirtualCamera
     public bool IsCutsceneCamera { get; set; } = false;
 
     [IgnoreMember] public int CameraID { get; private set; } = -1;
+
+    public Vector3 SpawnPosition = Vector3.Zero; // TODO (KEN) Implement spawn position logic
 
     public Vector3 RealPosition => BrioCamera->GetPosition();
 
