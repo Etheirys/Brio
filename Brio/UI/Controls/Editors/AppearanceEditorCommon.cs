@@ -97,7 +97,7 @@ public static class AppearanceEditorCommon
         }
 
         if(ImGui.IsItemHovered())
-            ImGui.SetTooltip("Glamourer Design");
+            ImGui.SetTooltip("Open Glamourer");
         ImGui.SameLine();
 
         var currentDesign = capability.CurrentDesign;
@@ -146,7 +146,7 @@ public static class AppearanceEditorCommon
         }
 
         if(ImGui.IsItemHovered())
-            ImGui.SetTooltip("Customize+ Profile");
+            ImGui.SetTooltip("Open Customize+");
         ImGui.SameLine();
 
         ImGui.SetNextItemWidth(_lableWidthProfile * ImGuiHelpers.GlobalScale);

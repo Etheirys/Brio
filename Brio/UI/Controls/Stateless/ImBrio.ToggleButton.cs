@@ -67,10 +67,12 @@ public static partial class ImBrio
         return clicked;
     }
 
-    public static bool ToggleSelecterStrip(string id, Vector2 size, ref bool[] selected, string[] options)
+    public static bool ToggleSelecterStrip(string id, Vector2 size, ref bool[] selected, string[] options, string? toolTip = null)
     {
+        if(size == Vector2.Zero) size = new Vector2(GetRemainingWidth(), GetLineHeight());
+
         bool changed = false;
-        float buttonWidth = size.X / options.Length  - (options.Length - 2) - 0.5f;
+        float buttonWidth = (size.X / options.Length) - (options.Length - 2) - 0.5f;
 
         using(ImRaii.PushColor(ImGuiCol.ChildBg, ImGui.GetColorU32(ImGuiCol.Tab)))
         {
@@ -86,6 +88,12 @@ public static partial class ImBrio
                             if(i > 0) ImGui.SameLine();
 
                             changed |= ToggleStripButton($"{options[i]}##{id}_{i}", new(buttonWidth, size.Y), ref selected[i], false);
+                          
+                            if(toolTip is not null)
+                            {
+                                var tooltip = selected[i] ? "Disable" : "Enable";
+                                AttachToolTip($"{tooltip} {options[i]} {toolTip}");
+                            }
                         }
                     }
                 }
@@ -96,6 +104,8 @@ public static partial class ImBrio
 
     public static bool ButtonSelectorStrip(string id, Vector2 size, ref int selected, string[] options)
     {
+        if(size == Vector2.Zero) size = new Vector2(GetRemainingWidth(), GetLineHeight());
+
         bool changed = false;
         float buttonWidth = size.X / options.Length;
 
