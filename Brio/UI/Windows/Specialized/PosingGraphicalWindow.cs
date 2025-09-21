@@ -128,7 +128,7 @@ public class PosingGraphicalWindow : Window, IDisposable
         posing.Hover = new None();
         _closestHover = float.MaxValue;
 
-        WindowName = $"{Brio.Name} - Posing - {posing.Entity.FriendlyName}###brio_posing_graphical_window";
+        WindowName = $"{Brio.Name} - POSING - {posing.Entity.FriendlyName}###brio_posing_graphical_window";
 
         DrawGlobalButtons(posing);
 
