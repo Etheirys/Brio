@@ -277,6 +277,33 @@ public class GearEditor()
                     {
                         if(gearPopup.Success)
                         {
+                            ImBrio.VerticalPadding(3);
+
+                            if(ImBrio.FontIconButton("erase_equipment_popup", FontAwesomeIcon.Eraser, "Remove Equipment"))
+                            {
+                                equip = SpecialAppearances.None;
+                                didChange |= true;
+                                ImGui.CloseCurrentPopup();
+                            }
+
+                            ImGui.SameLine();
+                            if(ImBrio.FontIconButton("apply_smallclothes_popup", FontAwesomeIcon.UserShield, "Equip NPC Smallclothes"))
+                            {
+                                equip = SpecialAppearances.Smallclothes;
+                                didChange |= true;
+                                ImGui.CloseCurrentPopup();
+                            }
+
+                            ImGui.SameLine();
+                            if(ImBrio.FontIconButton("apply_emperors_popup", FontAwesomeIcon.UserNinja, "Equip Emperor's Set"))
+                            {
+                                equip = SpecialAppearances.EmperorsMainSlotsEquipment;
+                                didChange |= true;
+                                ImGui.CloseCurrentPopup();
+                            }
+
+                            ImBrio.VerticalPadding(3);
+
                             _gearSelector.Draw();
                             if(_gearSelector.SoftSelectionChanged && _gearSelector.SoftSelected != null)
                             {
@@ -362,8 +389,6 @@ public class GearEditor()
                         didChange |= true;
                     }
 
-
-
                     if(ImBrio.DrawLabeledColor("dye0", dye0Color, dye0Id.ToString(), $"{dye0Name} ({dye0Id})"))
                     {
                         _dye0Selector.Select(dye0Union, true);
@@ -437,6 +462,26 @@ public class GearEditor()
                     {
                         if(gearPopup.Success)
                         {
+                            ImBrio.VerticalPadding(3);
+
+                            if(ImBrio.FontIconButton("erase_equipment_popup", FontAwesomeIcon.Eraser, "Remove Equipment"))
+                            {
+                                if(slot == ActorEquipSlot.MainHand)
+                                {
+                                    equip = SpecialAppearances.EmperorsMainHand;
+                                }
+                                else if (slot == ActorEquipSlot.OffHand)
+                                {
+
+                                    equip = SpecialAppearances.EmperorsOffHand;
+                                }
+
+                                didChange |= true;
+                                ImGui.CloseCurrentPopup();
+                            }
+
+                            ImBrio.VerticalPadding(3);
+
                             _gearSelector.Draw();
                             if(_gearSelector.SoftSelectionChanged && _gearSelector.SoftSelected != null)
                             {
