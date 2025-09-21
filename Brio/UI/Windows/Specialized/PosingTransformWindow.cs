@@ -36,7 +36,6 @@ public class PosingTransformWindow : Window
             MaximumSize = new Vector2(350, 850),
             MinimumSize = new Vector2(200, 150)
         };
-
     }
 
     public override bool DrawConditions()

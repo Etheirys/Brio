@@ -94,14 +94,14 @@ public static class PosingEditorCommon
 
     public static void DrawBoneFilterEditor(BoneFilter filter)
     {
-        if(ImBrio.FontIconButton("select_all", Dalamud.Interface.FontAwesomeIcon.Check, "Select All"))
+        if(ImBrio.FontIconButton("select_all", FontAwesomeIcon.Check, "Select All"))
         {
             filter.EnableAll();
         }
 
         ImGui.SameLine();
 
-        if(ImBrio.FontIconButton("select_none", Dalamud.Interface.FontAwesomeIcon.Minus, "Select None"))
+        if(ImBrio.FontIconButton("select_none", FontAwesomeIcon.Minus, "Select None"))
         {
             filter.DisableAll();
         }
@@ -188,7 +188,7 @@ public static class PosingEditorCommon
         if(posing.Selected.Value is BonePoseInfoId boneId)
         {
             bool enabled = false;
-        
+
             var bone = posing.SkeletonPosing.GetBone(boneId);
             bool isValid = bone != null && bone.Skeleton.IsValid && bone.EligibleForIK;
 

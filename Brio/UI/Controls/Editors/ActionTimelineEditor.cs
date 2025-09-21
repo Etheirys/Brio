@@ -89,7 +89,7 @@ public class ActionTimelineEditor(CutsceneManager cutsceneManager, GPoseService 
 
         ImGui.SameLine();
 
-        ImBrio.RightAlign(110 * ImGuiHelpers.GlobalScale, 1);
+        ImBrio.RightAlign(100 * ImGuiHelpers.GlobalScale, 1);
 
         if(ImGui.Button("Actors  ▼", new Vector2(70, 25) * ImGuiHelpers.GlobalScale))
         {

@@ -184,7 +184,7 @@ public static partial class ImBrio
 
         float buttonWidth = 32;
         ImGui.SetNextItemWidth(buttonWidth);
-        if(ImGui.Button($"◀ ###{label}_decrease", new Vector2(30 * ImGuiHelpers.GlobalScale)))
+        if(ImGui.Button($"◀ ###{label}_decrease", new Vector2(25 * ImGuiHelpers.GlobalScale)))
         {
             value -= step;
             changed = true;
@@ -221,7 +221,7 @@ public static partial class ImBrio
 
         ImGui.SameLine();
         ImGui.SetNextItemWidth(buttonWidth);
-        if(ImGui.Button($"▶ ###{label}_increase", new Vector2(30 * ImGuiHelpers.GlobalScale)))
+        if(ImGui.Button($"▶ ###{label}_increase", new Vector2(25 * ImGuiHelpers.GlobalScale)))
         {
             value += step;
             changed = true;
