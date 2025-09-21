@@ -49,6 +49,8 @@ public static partial class ImBrio
             else
             {
                 Icon(icon);
+                if(string.IsNullOrEmpty(tooltip) is false)
+                    AttachToolTip(tooltip);
             }
         }
 

@@ -85,7 +85,7 @@ public class EntityHierarchyView(EntityManager entityManager, GPoseService gPose
                 float width = buttonWidth;
 
                 if(entity.ContextButtonCount >= 1)
-                    width -= (30 * ImGuiHelpers.GlobalScale * entity.ContextButtonCount);
+                    width -= (33 * ImGuiHelpers.GlobalScale * entity.ContextButtonCount);
                 else
                     width -= 5;
 
