@@ -6,6 +6,7 @@ using Dalamud.Bindings.ImGui;
 using Dalamud.Interface;
 using Dalamud.Interface.Utility;
 using Dalamud.Interface.Utility.Raii;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
@@ -14,6 +15,24 @@ namespace Brio.UI.Controls.Editors;
 
 public static class AppearanceEditorCommon
 {
+    // Helpers for color handling (Thank you Ny, from https://github.com/Ottermandias/Glamourer/blob/0a9693daea99f79c44b2a69e1bfb006573a721a0/Glamourer/Interop/Material/MaterialValueManager.cs#L43-L53)
+
+    private static Vector4 Square(Vector4 value)
+        => new(Square(value.X), Square(value.Y), Square(value.Z), Square(value.W));
+    private static Vector3 Square(Vector3 value)
+        => new(Square(value.X), Square(value.Y), Square(value.Z));
+    private static float Square(float value)
+        => value < 0 ? -value * value : value * value;
+
+    private static Vector4 Root(Vector4 value)
+        => new(Root(value.X), Root(value.Y), Root(value.Z), Root(value.W));
+    private static Vector3 Root(Vector3 value)
+        => new(Root(value.X), Root(value.Y), Root(value.Z));
+    private static float Root(float value)
+        => value < 0 ? MathF.Sqrt(-value) : MathF.Sqrt(value);
+
+    //
+
     private const string _collectionLabel = "Collection";
     private const string _collectionLabelDesign = "Design";
     private const string _collectionLabelProfile = "Profile";
@@ -207,7 +226,7 @@ public static class AppearanceEditorCommon
         {
             bool didChange = false;
 
-            var tempColor = color;
+            var tempColor = Root(color);
             if(ImGui.ColorButton($"{label}###{id}", tempColor, ImGuiColorEditFlags.NoInputs | ImGuiColorEditFlags.NoLabel))
             {
                 ImGui.OpenPopup($"{id}_color_popup");
@@ -219,7 +238,7 @@ public static class AppearanceEditorCommon
                 {
                     if(ImGui.ColorPicker4("###color", ref tempColor))
                     {
-                        color = tempColor;
+                        color = Square(tempColor);
                         didChange = true;
                     }
                 }
@@ -235,7 +254,7 @@ public static class AppearanceEditorCommon
         {
             bool didChange = false;
 
-            var tempColor = color;
+            var tempColor = Root(color);
             var tempColor4 = new Vector4(tempColor, 0.0f);
             var flags = ImGuiColorEditFlags.NoInputs | ImGuiColorEditFlags.NoLabel | ImGuiColorEditFlags.NoAlpha;
             if(ImGui.ColorButton($"{label}###{id}", tempColor4, flags))
@@ -249,7 +268,7 @@ public static class AppearanceEditorCommon
                 {
                     if(ImGui.ColorPicker3("###color", ref tempColor))
                     {
-                        color = tempColor;
+                        color = Square(tempColor);
                         didChange = true;
                     }
                 }
