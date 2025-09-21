@@ -5,6 +5,7 @@ using Dalamud.Bindings.ImGui;
 using Dalamud.Interface;
 using System;
 using System.Numerics;
+using System.Threading;
 
 namespace Brio.UI.Widgets.World;
 
@@ -39,7 +40,7 @@ public class TimeWidget(TimeCapability timeCapability) : Widget<TimeCapability>(
 
         var preservePos = ImGui.GetCursorPos();
         ImGui.SetCursorPos(unlockPos);
-        if(ImBrio.FontIconButtonRight("timeLock", isLocked ? FontAwesomeIcon.Lock : FontAwesomeIcon.Unlock, 1, isLocked ? "Unlock Time" : "lock Time", bordered: false))
+        if(ImBrio.FontIconButtonRight("timeLock", isLocked ? FontAwesomeIcon.Unlock : FontAwesomeIcon.Lock, 1, isLocked ? "Lock Time" : "Unlock Time", bordered: false))
             isLocked = !isLocked;
         ImGui.SetCursorPos(preservePos);
 
