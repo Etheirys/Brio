@@ -100,8 +100,15 @@ public class DynamisIPC : BrioIPC
         _disposed = _pluginInterface.GetIpcSubscriber<object?>("Dynamis.ApiDisposing");
         _disposed.Subscribe(OnDisposed);
 
-        if(_getApiVersion.InvokeFunc() is { Major: var major, Minor: var minor, Flags: var flags })
-            OnInitialized(major, minor, flags, null!);
+        try
+        {
+            if(_getApiVersion.InvokeFunc() is { Major: var major, Minor: var minor, Flags: var flags })
+                OnInitialized(major, minor, flags, null!);
+        }
+        catch(Exception)
+        {
+            OnDisposed();
+        }
 
         Instance = this;
     }
