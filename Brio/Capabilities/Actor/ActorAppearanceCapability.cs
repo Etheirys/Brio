@@ -305,6 +305,13 @@ public class ActorAppearanceCapability : ActorCharacterCapability
         return SetAppearance(appearance, AppearanceImportOptions.Gear);
     }
 
+    public Task ApplyInvisibleClothes()
+    {
+        var appearance = _actorAppearanceService.GetActorAppearance(Character);
+        appearance.Equipment = ActorEquipment.Invisible();
+        return SetAppearance(appearance, AppearanceImportOptions.Gear);
+    }
+
     public Task ToggleHide()
     {
         var appearance = _actorAppearanceService.GetActorAppearance(Character);
