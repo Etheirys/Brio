@@ -56,6 +56,12 @@ public class GearEditor()
             _capability.ApplyEmperors();
         }
 
+        ImGui.SameLine();
+        if(ImBrio.FontIconButton("apply_invisibleclothes", FontAwesomeIcon.LowVision, "Equip Invisible Clothes"))
+        {
+            _capability.ApplyInvisibleClothes();
+        }
+
         ImGui.Spacing();
 
         var slotSizes = ImGui.GetContentRegionAvail() / new Vector2(2, 1f);

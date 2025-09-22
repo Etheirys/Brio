@@ -42,5 +42,11 @@ public static class SpecialAppearances
         Variant = 0
     };
 
+    public static EquipmentModelId InvisibleItem { get; } = new()
+    {
+        Id = 6121,
+        Variant = 12
+    };
+
     public static ENpcBase DefaultHumanEventNpc = GameDataProvider.Instance.ENpcBases[1029275];
 }

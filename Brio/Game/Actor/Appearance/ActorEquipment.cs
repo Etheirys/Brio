@@ -33,6 +33,23 @@ public unsafe struct ActorEquipment
         return equipment;
     }
 
+    public static ActorEquipment Invisible()
+    {
+        var equipment = new ActorEquipment
+        {
+            Head = SpecialAppearances.InvisibleItem,
+            Top = SpecialAppearances.InvisibleItem,
+            Arms = SpecialAppearances.EmperorsMainSlotsEquipment,
+            Legs = SpecialAppearances.EmperorsMainSlotsEquipment,
+            Feet = SpecialAppearances.EmperorsMainSlotsEquipment,
+            Ear = SpecialAppearances.EmperorsAccessorySlotsEquipment,
+            Neck = SpecialAppearances.EmperorsAccessorySlotsEquipment,
+            Wrist = SpecialAppearances.EmperorsAccessorySlotsEquipment,
+            RFinger = SpecialAppearances.EmperorsAccessorySlotsEquipment,
+            LFinger = SpecialAppearances.EmperorsAccessorySlotsEquipment
+        };
+        return equipment;
+    }
     public static ActorEquipment Emperors()
     {
         var equipment = new ActorEquipment
