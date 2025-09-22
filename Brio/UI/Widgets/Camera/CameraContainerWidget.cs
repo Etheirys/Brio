@@ -81,6 +81,11 @@ public class CameraContainerWidget(CameraContainerCapability capability) : Widge
     {
         using(ImRaii.Disabled(Capability.IsAllowed == false))
         {
+            if(ImGui.MenuItem("Open Camera Editor###containerwidgetpopup_OpenAdvance"))
+            {
+                Capability.OpenCameraWindow();
+            }
+
             if(ImGui.MenuItem("New Camera###containerwidgetpopup_newcamera"))
             {
                 Capability.VirtualCameraManager.CreateCamera(CameraType.Brio);
