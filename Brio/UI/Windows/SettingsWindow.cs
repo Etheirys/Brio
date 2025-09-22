@@ -659,7 +659,7 @@ public class SettingsWindow : Window
             _configurationService.Configuration.InputManager.Enable = enableKeybinds;
             _configurationService.ApplyChange();
         }
-        
+
         bool enableKeyHandlingOnKeyMod = _configurationService.Configuration.InputManager.EnableKeyHandlingOnKeyMod;
         if(ImGui.Checkbox("Consume [SPACE], [Shift], [Ctrl] & [Alt] when moving a FreeCam", ref enableKeyHandlingOnKeyMod))
         {
@@ -710,13 +710,20 @@ public class SettingsWindow : Window
                 DrawKeyBind(InputAction.Posing_Undo);
                 DrawKeyBind(InputAction.Posing_Redo);
                 DrawKeyBind(InputAction.Interface_IncrementSmallModifier);
-                DrawKeyBind(InputAction.Interface_IncrementLargeModifier);
+            }
+
+            if(ImGui.CollapsingHeader("XAT Cutscene"))
+            {
+                DrawKeyBind(InputAction.Interface_StopCutscene);
+                DrawKeyBind(InputAction.Interface_StartAllActorsAnimations);
+                DrawKeyBind(InputAction.Interface_StopAllActorsAnimations);
             }
 
             if(ImGui.CollapsingHeader("Posing", ImGuiTreeNodeFlags.DefaultOpen))
             {
                 DrawKeyBind(InputAction.Posing_ToggleOverlay);
                 DrawKeyBind(InputAction.Posing_HideOverlay);
+                DrawKeyBind(InputAction.Posing_Freeze);
                 DrawKeyBind(InputAction.Posing_DisableGizmo);
                 DrawKeyBind(InputAction.Posing_DisableSkeleton);
                 DrawKeyBind(InputAction.Posing_ToggleLink);

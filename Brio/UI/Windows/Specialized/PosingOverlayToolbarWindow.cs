@@ -354,7 +354,7 @@ public class PosingOverlayToolbarWindow : Window
         using(ImRaii.PushColor(ImGuiCol.Text, timelineCapability.SpeedMultiplierOverride == 0 ? UIConstants.ToggleButtonActive : UIConstants.ToggleButtonInactive))
         using(ImRaii.PushFont(UiBuilder.IconFont))
         {
-            if(ImGui.Button($"{FontAwesomeIcon.Snowflake.ToIconString()}###freeze_toggle", new Vector2(button4XSize)))
+            if(ImGui.Button($"{FontAwesomeIcon.Snowflake.ToIconString()}###freeze_toggle", new Vector2(button4XSize)) || InputManagerService.ActionKeysPressedLastFrame(InputAction.Posing_Freeze))
             {
                 if(timelineCapability.SpeedMultiplierOverride == 0)
                     timelineCapability.ResetOverallSpeedOverride();

@@ -192,7 +192,7 @@ public class PosingGraphicalWindow : Window, IDisposable
 
         if(_entityManager.TryGetCapabilityFromSelectedEntity<ActionTimelineCapability>(out var capability, considerParents: true))
         {
-            if(ImBrio.ToggelButton("Freeze Character", new Vector2(110, 0), capability.SpeedMultiplier == 0, hoverText: capability.SpeedMultiplierOverride == 0 ? "Un-Freeze Character" : "Freeze Character"))
+            if(ImBrio.ToggelButton("Freeze Character", new Vector2(110, 0), capability.SpeedMultiplier == 0, hoverText: capability.SpeedMultiplierOverride == 0 ? "Un-Freeze Character" : "Freeze Character") || InputManagerService.ActionKeysPressedLastFrame(InputAction.Posing_Freeze))
             {
                 if(capability.SpeedMultiplierOverride == 0)
                     capability.ResetOverallSpeedOverride();

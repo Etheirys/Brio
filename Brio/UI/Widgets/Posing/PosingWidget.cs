@@ -89,7 +89,7 @@ public class PosingWidget(PosingCapability capability) : Widget<PosingCapability
 
         if(Capability.Actor.IsProp == false)
         {
-            if(ImBrio.ToggelFontIconButton("freezeActor", FontAwesomeIcon.Snowflake, new Vector2(0), timelineCapability.SpeedMultiplier == 0, hoverText: timelineCapability.SpeedMultiplierOverride == 0 ? "Un-Freeze Character" : "Freeze Character"))
+            if(ImBrio.ToggelFontIconButton("freezeActor", FontAwesomeIcon.Snowflake, new Vector2(0), timelineCapability.SpeedMultiplier == 0, hoverText: timelineCapability.SpeedMultiplierOverride == 0 ? "Un-Freeze Character" : "Freeze Character") || InputManagerService.ActionKeysPressedLastFrame(InputAction.Posing_Freeze))
             {
                 if(timelineCapability.SpeedMultiplierOverride == 0)
                     timelineCapability.ResetOverallSpeedOverride();
