@@ -28,7 +28,7 @@ public unsafe class ActorLookAtService : IDisposable
 
     private unsafe delegate* unmanaged<CharacterLookAtController*, LookAtTarget*, uint, nint, void> _updateLookAt;
 
-    public delegate nint ActorLookAtLoopDelegate(nint args);
+    public delegate nint ActorLookAtLoopDelegate(ContainerInterface* args);
     public Hook<ActorLookAtLoopDelegate> _actorLookAtLoop = null!;
 
     Dictionary<ulong, LookAtDataHolder> _lookAtHandles = [];
@@ -51,12 +51,11 @@ public unsafe class ActorLookAtService : IDisposable
         _gPoseService.OnGPoseStateChange += OnGPoseStateChange;
     }
 
-    public unsafe nint ActorLookAtDetour(nint args)
+    public unsafe nint ActorLookAtDetour(ContainerInterface* args)
     {
         if(_gPoseService.IsGPosing)
         {
-            var lookAtContainer = (ContainerInterface*)args;
-            var targetActor = _objectTable.CreateObjectReference((nint)lookAtContainer->OwnerObject);
+            var targetActor = _objectTable.CreateObjectReference((nint)args->OwnerObject);
             if(targetActor is not null && targetActor.IsValid() && targetActor.IsGPose()
                 && _lookAtHandles.TryGetValue(targetActor.GameObjectId, out LookAtDataHolder lookAtDataHolder))
             {
@@ -100,10 +99,6 @@ public unsafe class ActorLookAtService : IDisposable
             obj.LookMode = LookMode.None;
             obj.TargetType = LookAtTargetType.None;
             obj.TargetMode = LookAtTargetMode.None;
-        }
-        else
-        {
-
         }
     }
 
@@ -200,6 +195,7 @@ public unsafe class ActorLookAtService : IDisposable
             _lookAtHandles.Clear();
         }
     }
+
     public void Dispose()
     {
         _actorLookAtLoop.Dispose();
@@ -302,18 +298,4 @@ public enum LookMode
     Frozen = 1,
     Pivot = 2,
     Position = 3,
-}
-
-
-
-public class LookAtData
-{
-    public uint EntityIdSource;
-    public LookAtSource LookAtSource;
-
-    public LookMode LookMode;
-    public LookAtTargetType TargetType;
-
-    public uint TargetEntityId;
-    public Vector3 TargetPosition;
 }

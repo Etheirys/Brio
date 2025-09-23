@@ -15,7 +15,7 @@ namespace Brio.Game.Camera;
 
 public class VirtualCameraManager : IDisposable
 {
-    public const float DefaultMovementSpeed = 0.04f;
+    public const float DefaultMovementSpeed = 0.03f;
     public const float DefaultMouseSensitivity = 0.1f;
 
     public VirtualCamera? CurrentCamera { get; private set; }
@@ -42,7 +42,6 @@ public class VirtualCameraManager : IDisposable
     private readonly Dictionary<int, CameraEntity> _createdCameras = [];
 
     private float _moveSpeed = DefaultMovementSpeed;
-    //private float _mouseSensitivity = DefaultMouseSensitivity;
 
     public (bool, int) CreateCamera(CameraType cameraType, bool selectCamera = true, bool targetNewInHierarch = true, VirtualCamera? virtualCamera = null)
     {
@@ -63,8 +62,8 @@ public class VirtualCameraManager : IDisposable
                         camEnt.VirtualCamera.FreeCamValues.MovementSpeed = DefaultMovementSpeed;
                         camEnt.VirtualCamera.FreeCamValues.MouseSensitivity = DefaultMouseSensitivity;
                         camEnt.VirtualCamera.IsFreeCamera = true;
-                        camEnt.VirtualCamera.ActivateCamera();
                         camEnt.VirtualCamera.ToFreeCam();
+                        camEnt.VirtualCamera.ActivateCamera();
                         camEnt.VirtualCamera.DeactivateCamera();
                         _createdCameras.Add(cameraId, camEnt);
                         break;
@@ -131,7 +130,7 @@ public class VirtualCameraManager : IDisposable
                 if(oldCamEnt.CameraType == CameraType.Free)
                 {
                     newCam.VirtualCamera.Position = oldCam.Position;
-                    newCam.VirtualCamera.IsFreeCamera = true;
+                    newCam.VirtualCamera.ToFreeCam();
                 }
                 else
                 {

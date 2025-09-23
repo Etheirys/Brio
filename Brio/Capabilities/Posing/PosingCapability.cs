@@ -7,12 +7,10 @@ using Brio.Files;
 using Brio.Game.Input;
 using Brio.Game.Posing;
 using Brio.Game.Posing.Skeletons;
-using Brio.Input;
 using Brio.Resources;
 using Brio.UI.Widgets.Posing;
 using Brio.UI.Windows.Specialized;
 using Dalamud.Plugin.Services;
-using FFXIVClientStructs.FFXIV.Common.Lua;
 using OneOf;
 using OneOf.Types;
 using System;
@@ -31,8 +29,6 @@ public class PosingCapability : ActorCharacterCapability
 
     public PosingService PosingService => _posingService;
 
-
-    public bool IsEntitySelected;
     public bool HasOverride
     {
         get
@@ -48,6 +44,8 @@ public class PosingCapability : ActorCharacterCapability
             return false;
         }
     }
+
+    public bool CanResetBone(Bone? bone) => ModelPosing.HasOverride == false || !(bone is not null && !SkeletonPosing.PoseInfo.GetPoseInfo(bone).HasStacks);
 
     public bool CanUndo => _undoStack.Count is not 0 and not 1 || _groupedUndoService.CanUndo;
     public bool CanRedo => _redoStack.Count > 0 || _groupedUndoService.CanRedo;
@@ -104,23 +102,6 @@ public class PosingCapability : ActorCharacterCapability
         _framework = framework;
         _groupedUndoService = groupedUndoService;
         _gameInputService = gameInputService;
-    }
-
-    private void OnFrameworkUpdate(IFramework framework)
-    {
-        if(IsEntitySelected)
-        {
-            if(InputManagerService.ActionKeysPressedLastFrame(InputAction.Posing_Undo))
-            {
-                Brio.Log.Warning($"Undo ActionKeysPressedLastFrame");
-
-            }
-            if(InputManagerService.ActionKeysPressedLastFrame(InputAction.Posing_Redo))
-            {
-                Brio.Log.Warning($"Redo ActionKeysPressedLastFrame");
-
-            }
-        }
     }
 
     public void ClearSelection() => Selected = PosingSelectionType.None;
@@ -409,6 +390,42 @@ public class PosingCapability : ActorCharacterCapability
         {
             // Model Flip (TODO: Implement)
         }
+    }
+
+    public void ResetSelectedBone()
+    {
+        BonePoseInfoId? selectedIsBone = IsSelectedBone();
+        if(selectedIsBone.HasValue)
+        {
+            ResetBoneStacks(selectedIsBone);
+        }
+        else if(ModelPosing.HasOverride)
+        {
+            ResetTransform();
+        }
+    }
+
+    public void ResetBoneStacks(BonePoseInfoId? boneid)
+    {
+        if(boneid == null)
+            return;
+
+        var bone = SkeletonPosing.GetBone(boneid.Value);
+        if(bone != null)
+        {
+            var poseInfo = SkeletonPosing.PoseInfo.GetPoseInfo(bone);
+            if(poseInfo.HasStacks)
+            {
+                poseInfo.ClearStacks();
+                Snapshot(reset: false);
+            }
+        }
+    }
+
+    public void ResetTransform()
+    {
+        ModelPosing.ResetTransform();
+        Snapshot(reset: false);
     }
 
     public record struct PoseStack(PoseInfo Info, Transform ModelTransform);

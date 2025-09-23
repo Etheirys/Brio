@@ -1,4 +1,5 @@
 ﻿using Dalamud.Bindings.ImGui;
+using Dalamud.Interface.Utility;
 using System.Numerics;
 
 namespace Brio.UI;
@@ -6,12 +7,9 @@ public static class BrioStyle
 {
     public static bool EnableStyle { get; set; }
     public static bool EnableColor => Config.ConfigurationService.Instance.Configuration.Appearance.EnableBrioColor;
-    //public static bool EnableScale => Config.ConfigurationService.Instance.Configuration.Appearance.EnableBrioScale;
 
     static bool _hasPushed = false;
     static bool _hasPushedColor = false;
-    //static bool _hasPushedScale = false;
-    //static float _lastGlobalScale;
 
     public static void PushStyle()
     {
@@ -20,14 +18,6 @@ public static class BrioStyle
             return;
         }
         _hasPushed = true;
-
-        //var imIO = ImGui.GetIO();
-        //if(EnableScale)
-        //{
-        //    _lastGlobalScale = imIO.FontGlobalScale;
-        //    imIO.FontGlobalScale = 1f;
-        //    _hasPushedScale = true;
-        //}
 
         if(EnableColor)
         {
@@ -119,11 +109,11 @@ public static class BrioStyle
         ImGui.PushStyleVar(ImGuiStyleVar.FrameBorderSize, 0f);
 
         ImGui.PushStyleVar(ImGuiStyleVar.WindowRounding, 7f);
-        ImGui.PushStyleVar(ImGuiStyleVar.ChildRounding, 4f);
+        ImGui.PushStyleVar(ImGuiStyleVar.ChildRounding, 4f * ImGuiHelpers.GlobalScale);
         ImGui.PushStyleVar(ImGuiStyleVar.FrameRounding, 4f);
         ImGui.PushStyleVar(ImGuiStyleVar.PopupRounding, 4f);
         ImGui.PushStyleVar(ImGuiStyleVar.ScrollbarRounding, 4f);
-        ImGui.PushStyleVar(ImGuiStyleVar.GrabRounding, 4f);
+        ImGui.PushStyleVar(ImGuiStyleVar.GrabRounding, 4f * ImGuiHelpers.GlobalScale);
         ImGui.PushStyleVar(ImGuiStyleVar.TabRounding, 4f);
     }
 
@@ -150,9 +140,6 @@ public static class BrioStyle
                 _hasPushedColor = false;
                 ImGui.PopStyleColor(51);
             }
-
-            //if(_hasPushedScale)
-            //    ImGui.GetIO().FontGlobalScale = _lastGlobalScale;
         }
     }
 }

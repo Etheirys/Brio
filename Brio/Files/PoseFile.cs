@@ -36,7 +36,7 @@ public class PoseFileInfo : AppliableActorFileInfoBase<PoseFile>
 
     public override void DrawActions(FileEntry fileEntry, bool isModal)
     {
-        if(ImBrio.Button("##pose_import_options_action", FontAwesomeIcon.Cog, new Vector2(25, 0), hoverText: "Import Options"))
+        if(ImBrio.Button("##pose_import_options_action", FontAwesomeIcon.Cog, new Vector2(25, 0), tooltip: "Import Options"))
         {
             ImGui.OpenPopup("import_options_popup_lib");
         }

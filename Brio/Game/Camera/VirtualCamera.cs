@@ -1,5 +1,6 @@
 ﻿using FFXIVClientStructs.FFXIV.Client.Game.Control;
 using MessagePack;
+using System;
 using System.Numerics;
 
 namespace Brio.Game.Camera;
@@ -7,6 +8,8 @@ namespace Brio.Game.Camera;
 [MessagePackObject(keyAsPropertyName: true)]
 public unsafe partial class VirtualCamera
 {
+    private readonly Vector3 Up = new(0f, 1f, 0f);
+
     public VirtualCamera() { }
     public VirtualCamera(int cameraID)
     {
@@ -31,56 +34,55 @@ public unsafe partial class VirtualCamera
 
     [IgnoreMember] public int CameraID { get; private set; } = -1;
 
+    public Vector3 SpawnPosition = Vector3.Zero; // TODO (KEN) Implement spawn position logic
+
     public Vector3 RealPosition => BrioCamera->GetPosition();
 
     public Vector3 Position = Vector3.Zero;
     public Vector3 PositionOffset = Vector3.Zero;
     public Vector3 Rotation = Vector3.Zero;
 
-    float pivotRotation;
     public float PivotRotation
     {
-        get => IsActiveCamera ? BrioCamera->Rotation : (pivotRotation);
+        get => IsActiveCamera ? BrioCamera->Rotation : (field);
         set
         {
-            _ = IsActiveCamera ? (BrioCamera->Rotation = pivotRotation = value) : (pivotRotation = value);
-        }
-    }
-    float zoom = 0;
-    public float Zoom
-    {
-        get => IsActiveCamera ? BrioCamera->Camera.Distance : (zoom);
-        set
-        {
-            _ = IsActiveCamera ? (BrioCamera->Camera.Distance = zoom = value) : (zoom = value);
-        }
-    }
-    float fov = 0;
-    public float FoV
-    {
-        get => IsActiveCamera ? BrioCamera->FoV : (fov);
-        set
-        {
-            _ = IsActiveCamera ? (BrioCamera->FoV = fov = value) : (fov = value);
+            _ = IsActiveCamera ? (BrioCamera->Rotation = field = value) : (field = value);
         }
     }
 
-    Vector2 pan;
+    public float Zoom
+    {
+        get => IsActiveCamera ? BrioCamera->Camera.Distance : (field);
+        set
+        {
+            _ = IsActiveCamera ? (BrioCamera->Camera.Distance = field = value) : (field = value);
+        }
+    } = 0;
+
+    public float FoV
+    {
+        get => IsActiveCamera ? BrioCamera->FoV : (field);
+        set
+        {
+            _ = IsActiveCamera ? (BrioCamera->FoV = field = value) : (field = value);
+        }
+    } = 0;
+
     public Vector2 Pan
     {
-        get => IsActiveCamera ? BrioCamera->Pan : (pan);
+        get => IsActiveCamera ? BrioCamera->Pan : (field);
         set
         {
-            _ = IsActiveCamera ? (BrioCamera->Pan = pan = value) : (pan = value);
+            _ = IsActiveCamera ? (BrioCamera->Pan = field = value) : (field = value);
         }
     }
-    Vector2 angle;
     public Vector2 Angle
     {
-        get => IsActiveCamera ? BrioCamera->Angle : (angle);
+        get => IsActiveCamera ? BrioCamera->Angle : (field);
         set
         {
-            _ = IsActiveCamera ? (BrioCamera->Angle = angle = value) : (angle = value);
+            _ = IsActiveCamera ? (BrioCamera->Angle = field = value) : (field = value);
         }
     }
 
@@ -105,6 +107,8 @@ public unsafe partial class VirtualCamera
             delimitCameraHasOverride = value;
         }
     }
+
+    public Vector3 RotationAsVector3 => BrioCamera->RotationAsVector3;
 
     private void DelimitCameraStop()
     {
@@ -189,6 +193,7 @@ public unsafe partial class VirtualCamera
     {
         if(Position == Vector3.Zero)
             Position = RealPosition;
+        Rotation = RotationAsVector3;
         IsFreeCamera = true;
     }
 }

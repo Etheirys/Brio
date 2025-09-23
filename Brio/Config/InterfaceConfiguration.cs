@@ -6,5 +6,5 @@ public class InterfaceConfiguration
     public bool ShowInGPose { get; set; } = true;
     public bool ShowInCutscene { get; set; } = false;
     public bool ShowWhenUIHidden { get; set; } = false;
-    public bool CensorActorNames { get; set; } = false;
+    public bool CensorActorNames { get; set; } = true;
 }

@@ -1,9 +1,7 @@
 ﻿using Brio.Config;
 using Brio.Game.GPose;
 using Brio.UI.Windows;
-using Dalamud.Bindings.ImGui;
 using System;
-using System.Numerics;
 
 namespace Brio.Core;
 
@@ -24,8 +22,6 @@ public class WelcomeService : IDisposable
         }
         else if(configService.Configuration.PopupKey != Configuration.CurrentPopupKey)
         {
-            ImGui.SetNextWindowPos(new Vector2((ImGui.GetIO().DisplaySize.X / 2) - 630, (ImGui.GetIO().DisplaySize.Y / 2) - 535));
-
             updateWindow.IsOpen = true;
             configService.Configuration.PopupKey = Configuration.CurrentPopupKey;
         }

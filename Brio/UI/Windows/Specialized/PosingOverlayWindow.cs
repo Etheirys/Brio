@@ -114,17 +114,23 @@ public class PosingOverlayWindow : Window, IDisposable
         // Model Transform
         if(camera->WorldToScreen(posing.ModelPosing.Transform.Position, out var modelScreen))
         {
-            clickables.Add(new ClickableItem
+            var modelTransform = new ClickableItem
             {
                 Item = PosingSelectionType.ModelTransform,
                 ScreenPosition = modelScreen,
                 Size = config.BoneCircleSize,
-            });
+            };
+            clickables.Add(modelTransform);
+            modelTransform.CurrentlySelected = posing.Selected.Equals(modelTransform);
         }
 
         // Bone Transforms
         if(posing.Actor.IsProp == false)
-        {
+        {        
+            BonePoseInfoId? selectedBoneId = null;
+            if(posing.Selected.Value is BonePoseInfoId boneId)
+                selectedBoneId = boneId;
+
             foreach(var (skeleton, poseSlot) in posing.SkeletonPosing.Skeletons)
             {
                 if(!skeleton.IsValid)
@@ -141,22 +147,26 @@ public class PosingOverlayWindow : Window, IDisposable
                     Scale = (Vector3)charaBase->CharacterBase.DrawObject.Object.Scale * charaBase->ScaleFactor
                 }.ToMatrix();
 
-
                 foreach(var bone in skeleton.Bones)
                 {
-                    if(!_posingService.OverlayFilter.IsBoneValid(bone, poseSlot) || bone.Name == "n_throw")
+                    bool isSelectedBone = selectedBoneId != null && selectedBoneId.Value.Equals(posing.SkeletonPosing.GetBonePose(bone).Id);
+
+                    // Always show the selected bone, even if the overlay filter would hide it
+                    if((!_posingService.OverlayFilter.IsBoneValid(bone, poseSlot) || bone.Name == "n_throw") && !isSelectedBone)
                         continue;
 
                     var boneWorldPosition = Vector3.Transform(bone.LastTransform.Position, modelMatrix);
 
                     if(camera->WorldToScreen(boneWorldPosition, out var boneScreen))
                     {
-                        clickables.Add(new ClickableItem
+                        var clickItem = new ClickableItem
                         {
                             Item = posing.SkeletonPosing.GetBonePose(bone).Id,
                             ScreenPosition = boneScreen,
                             Size = config.BoneCircleSize,
-                        });
+                            CurrentlySelected = isSelectedBone
+                        };
+                        clickables.Add(clickItem);
 
                         if(bone.Parent != null)
                         {
@@ -168,21 +178,12 @@ public class PosingOverlayWindow : Window, IDisposable
                             {
                                 clickables.Last().ParentScreenPosition = parentScreen;
                             }
-
                         }
                     }
                 }
             }
         }
-
-        // Selection
-        foreach(var clickable in clickables)
-        {
-            if(posing.Selected.Equals(clickable.Item))
-                clickable.CurrentlySelected = true;
-        }
     }
-
     private void HandleSkeletonInput(PosingCapability posing, OverlayUIState uiState, List<ClickableItem> clickables)
     {
         if(!uiState.SkeletonInputEnabled)
@@ -304,7 +305,7 @@ public class PosingOverlayWindow : Window, IDisposable
         Vector2 unit = Vector2.Normalize(direction);
         return start + unit * distance;
     }
-    
+
     private static void DrawSkeletonLines(OverlayUIState uiState, PosingConfiguration config, List<ClickableItem> clickables)
     {
         if(!uiState.DrawSkeletonLines)
@@ -319,10 +320,10 @@ public class PosingOverlayWindow : Window, IDisposable
 
                 if(config.SkeletonLineToCircle)
                 {
-                    if(Vector2.DistanceSquared(clickable.ParentScreenPosition.Value, clickable.ScreenPosition) >= MathF.Pow(clickable.Size * 2, 2)) 
+                    if(Vector2.DistanceSquared(clickable.ParentScreenPosition.Value, clickable.ScreenPosition) >= MathF.Pow(clickable.Size * 2, 2))
                     {
                         ImGui.GetWindowDrawList().AddLine(
-                            PointAlongLine(clickable.ParentScreenPosition.Value, clickable.ScreenPosition, clickable.Size -  1),
+                            PointAlongLine(clickable.ParentScreenPosition.Value, clickable.ScreenPosition, clickable.Size - 1),
                             PointAlongLine(clickable.ScreenPosition, clickable.ParentScreenPosition.Value, clickable.Size - 1),
                             color, thickness
                         );
@@ -399,10 +400,10 @@ public class PosingOverlayWindow : Window, IDisposable
                 if(bone == null)
                     return false;
 
-                if(!_posingService.OverlayFilter.IsBoneValid(bone, boneSelect.Slot))
-                {
-                    return false;
-                }
+                //if(!_posingService.OverlayFilter.IsBoneValid(bone, boneSelect.Slot))
+                //{
+                //    return false;
+                //}
 
                 currentTransform = bone.LastTransform;
 

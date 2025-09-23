@@ -27,12 +27,12 @@ public class PosingConfiguration
     public bool ShowGenitaliaInAdvancedPoseWindow { get; set; } = false;
 
     // Hooks
-    public bool DisableGPoseMouseSelect { get; set; } = false;
+    public bool DisableGPoseMouseSelect { get; set; } = true;
     public bool HideNameOnGPoseSettingsWindow { get; set; } = true;
 
     // Targeting
     public bool GPoseTargetChangesWithBrio { get; set; } = false;
-    public bool BrioTargetChangesWithGPose { get; set; } = false;
+    public bool BrioTargetChangesWithGPose { get; set; } = true;
 
     // Undo / Redo
     public int UndoStackSize { get; set; } = 50;

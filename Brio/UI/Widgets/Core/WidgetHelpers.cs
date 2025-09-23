@@ -4,6 +4,7 @@ using Dalamud.Bindings.ImGui;
 using Dalamud.Interface;
 using Dalamud.Interface.Utility.Raii;
 using System.Collections.Generic;
+using System.Numerics;
 
 namespace Brio.UI.Widgets.Core;
 
@@ -16,11 +17,9 @@ public class WidgetHelpers
             if(!w.Entity.IsAttached)
                 break;
 
-            DrawBody(w);
+            DrawBody(w.Widget);
         }
     }
-
-    public static void DrawBody(Capability capability) => DrawBody(capability.Widget);
 
     public static void DrawBody(IWidget? widget)
     {
@@ -39,14 +38,16 @@ public class WidgetHelpers
                 var startPos = ImGui.GetCursorPos();
                 string tool = $"Advanced {widget.HeaderName}";
 
-                if(ImBrio.FontIconButtonRight("advanced", FontAwesomeIcon.SquareArrowUpRight, 1, tool, bordered: false, size: new System.Numerics.Vector2(23)))
+                if(ImBrio.FontIconButtonRight("advanced", FontAwesomeIcon.SquareArrowUpRight, 1, tool, bordered: false, size: new Vector2(23)))
                     widget.ToggleAdvancedWindow();
 
                 ImGui.SetCursorPos(startPos);
             }
 
             if(ImGui.CollapsingHeader(widget.HeaderName, treeFlags))
+            {
                 widget.DrawBody();
+            }
         }
     }
 

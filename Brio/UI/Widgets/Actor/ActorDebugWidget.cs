@@ -1,5 +1,6 @@
 ﻿using Brio.Capabilities.Actor;
 using Brio.Game.Actor.Extensions;
+using Brio.IPC;
 using Brio.UI.Widgets.Core;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface.Utility.Raii;
@@ -17,79 +18,103 @@ public class ActorDebugWidget(ActorDebugCapability capability) : Widget<ActorDeb
 
     public unsafe override void DrawBody()
     {
-        using(var tabBar = ImRaii.TabBar("###debug_tabs"))
+        using var tabBar = ImRaii.TabBar("###debug_tabs");
+        if(tabBar.Success)
         {
-            if(tabBar.Success)
+            using(var infoTab = ImRaii.TabItem("Info"))
             {
-                using(var infoTab = ImRaii.TabItem("Info"))
+                if(infoTab.Success)
                 {
-                    if(infoTab.Success)
+                    if(DynamisIPC.Instance != null)
+                    {
+                        ImGui.Text("GameObject ");
+                        ImGui.SameLine();
+                        DynamisIPC.Instance.DrawPointer(Capability.GameObject.Address);
+                    }
+                    else
                     {
                         string addr = Capability.GameObject.Address.ToString("X");
                         ImGui.SetNextItemWidth(-ImGui.CalcTextSize("Address").X);
                         ImGui.InputText("Address", ref addr, 256, ImGuiInputTextFlags.ReadOnly);
+                    }
 
-
-                        var charaBase = Capability.Character.GetCharacterBase();
-                        if(charaBase != null)
+                    var charaBase = Capability.Character.GetCharacterBase();
+                    if(charaBase != null)
+                    {
+                        if(DynamisIPC.Instance != null)
                         {
-                            addr = ((nint)charaBase).ToString("X");
-                            ImGui.SetNextItemWidth(-ImGui.CalcTextSize("DrawObject").X);
+                            ImGui.Text("Character Base ");
+                            ImGui.SameLine();
+                            DynamisIPC.Instance.DrawPointer((nint)charaBase);
+                        }
+                        else
+                        {
+                            var addr = ((nint)charaBase).ToString("X");
+                            ImGui.SetNextItemWidth(-ImGui.CalcTextSize("DrawObject").X - 10);
                             ImGui.InputText("DrawObject", ref addr, 256, ImGuiInputTextFlags.ReadOnly);
+                        }
 
-                            var skele = charaBase->CharacterBase.Skeleton;
-                            addr = ((nint)skele).ToString("X");
-                            ImGui.SetNextItemWidth(-ImGui.CalcTextSize("Skeleton").X);
+                        var skele = charaBase->CharacterBase.Skeleton;
+                        if(DynamisIPC.Instance != null)
+                        {
+                            ImGui.Text("Skeleton ");
+                            ImGui.SameLine();
+                            DynamisIPC.Instance.DrawPointer((nint)skele);
+                        }
+                        else
+                        {
+                            var addr = ((nint)skele).ToString("X");
+                            ImGui.SetNextItemWidth(-ImGui.CalcTextSize("Skeleton").X - 10);
                             ImGui.InputText("Skeleton", ref addr, 256, ImGuiInputTextFlags.ReadOnly);
+                        }
 
-
-                            var shaders = Capability.Character.GetShaderParams();
-                            addr = ((nint)shaders).ToString("X");
-                            ImGui.SetNextItemWidth(-ImGui.CalcTextSize("Shaders").X);
+                        var shaders = Capability.Character.GetShaderParams();
+                        if(DynamisIPC.Instance != null)
+                        {
+                            ImGui.Text("Character Shader ");
+                            ImGui.SameLine();
+                            DynamisIPC.Instance.DrawPointer((nint)shaders);
+                        }
+                        else
+                        {
+                            var addr = ((nint)shaders).ToString("X");
+                            ImGui.SetNextItemWidth(-ImGui.CalcTextSize("Shaders").X - 10);
                             ImGui.InputText("Shaders", ref addr, 256, ImGuiInputTextFlags.ReadOnly);
                         }
                     }
                 }
+            }
 
-                using(var infoTab = ImRaii.TabItem("Skeleton"))
+            using(var infoTab = ImRaii.TabItem("Skeleton"))
+            {
+                if(infoTab.Success)
                 {
-                    if(infoTab.Success)
+                    if(ImGui.CollapsingHeader("Stacks", ImGuiTreeNodeFlags.DefaultOpen))
                     {
-                        if(ImGui.CollapsingHeader("Stacks", ImGuiTreeNodeFlags.DefaultOpen))
+                        var stacks = Capability.SkeletonStacks;
+                        foreach(var stack in stacks)
                         {
-                            var stacks = Capability.SkeletonStacks;
-                            foreach(var stack in stacks)
-                            {
-                                ImGui.Text($"{stack.Key}: {stack.Value}");
-                            }
+                            ImGui.Text($"{stack.Key}: {stack.Value}");
                         }
                     }
                 }
+            }
 
-                using(var vfxTab = ImRaii.TabItem("Goop Demo"))
+            using(var vfxTab = ImRaii.TabItem("Goop Demo"))
+            {
+                if(vfxTab.Success)
                 {
-                    if(vfxTab.Success)
+                    if(ImGui.Button("Create Goop"))
                     {
-                        if(ImGui.Button("Create Goop"))
-                        {
-                            // TODO: Store this properly in a list or whatever so it can be cleaned up
-                            _spawnedGoopInstance = Capability.VFXService.CreateActorVFX("vfx/common/eff/c0101_stlp_mim_gre_c0r1.avfx", Capability.GameObject);
+                        // TODO: Store this properly in a list or whatever so it can be cleaned up
+                        _spawnedGoopInstance = Capability.VFXService.CreateActorVFX("vfx/common/eff/c0101_stlp_mim_gre_c0r1.avfx", Capability.GameObject);
 
-                        }
-
-                        if(ImGui.Button("Destroy Goop"))
-                        {
-                            Capability.VFXService.DestroyVFX(_spawnedGoopInstance);
-                            _spawnedGoopInstance = 0;
-                        }
                     }
-                }
 
-                using(var infoTab = ImRaii.TabItem("GameObject"))
-                {
-                    if(infoTab.Success)
+                    if(ImGui.Button("Destroy Goop"))
                     {
-                        Dalamud.Utility.Util.ShowGameObjectStruct(Capability.GameObject, true);
+                        Capability.VFXService.DestroyVFX(_spawnedGoopInstance);
+                        _spawnedGoopInstance = 0;
                     }
                 }
             }

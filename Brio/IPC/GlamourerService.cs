@@ -111,9 +111,8 @@ public class GlamourerService : BrioIPC
 
         Brio.Log.Verbose("Glamourer CheckForLock... " + key);
 
-        return key == Glamourer.Api.Enums.GlamourerApiEc.InvalidKey;
+        return key == GlamourerApiEc.InvalidKey;
     }
-
 
     public bool UnlockAndRevertCharacterByName(string name)
     {

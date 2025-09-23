@@ -1,9 +1,11 @@
 ﻿using Brio.Capabilities.Posing;
 using Brio.Core;
 using Brio.Game.Posing;
+using Brio.Input;
 using Brio.UI.Controls.Stateless;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface;
+using Dalamud.Interface.Utility;
 using Dalamud.Interface.Utility.Raii;
 using OneOf.Types;
 using System.Numerics;
@@ -23,101 +25,121 @@ public class PosingTransformEditor
         if(compactMode)
             style = new Vector2(4, 3);
 
-        using(ImRaii.PushStyle(ImGuiStyleVar.ItemSpacing, style))
-        {
-            using(ImRaii.PushId(id))
-            {
-                BonePoseInfoId? selectedIsBone = posingCapability.IsSelectedBone();
-                bool isBone = false;
-                Game.Posing.Skeletons.Bone? realBone = null;
+        BonePoseInfoId? selectedIsBone = posingCapability.IsSelectedBone();
+        bool isBone = false;
+        Game.Posing.Skeletons.Bone? realBone = null;
 
-                if(selectedIsBone.HasValue && !posingCapability.Actor.IsProp)
+        using var _ = ImRaii.PushStyle(ImGuiStyleVar.ItemSpacing, style);
+
+        using(ImRaii.PushId(id))
+        {
+            if(selectedIsBone.HasValue && !posingCapability.Actor.IsProp)
+            {
+                isBone = true;
+                realBone = posingCapability.SkeletonPosing.GetBone(selectedIsBone.Value);
+                DrawBoneTransformEditor(posingCapability, selectedIsBone.Value, compactMode);
+            }
+            else
+            {
+                DrawModelTransformEditor(posingCapability, compactMode);
+            }
+
+            if(posingCapability.Actor.IsProp == false)
+            {
+
+                ImBrio.VerticalPadding(3);
+
+                if(ImBrio.FontIconButton("transformOffset", FontAwesomeIcon.GaugeSimpleHigh, "Transform Movement Speed"))
                 {
-                    isBone = true;
-                    realBone = posingCapability.SkeletonPosing.GetBone(selectedIsBone.Value);
-                    DrawBoneTransformEditor(posingCapability, selectedIsBone.Value, compactMode);
+                    ImGui.OpenPopup("transformOffset");
+                }
+                ImBrio.AttachToolTip("Adjusts the speed of the transform controls");
+
+                DrawTransformOffset(posingCapability);
+
+                ImGui.SameLine();
+
+                using(ImRaii.Disabled(isBone == false))
+                {
+                    //if(ImBrio.FontIconButton("flipBoneModelButton", FontAwesomeIcon.Repeat, "Flip Bone"))
+                    //{
+                    //    posingCapability.FlipBoneModel();
+                    //}
+
+                    //ImGui.SameLine();
+
+                    if(ImBrio.FontIconButton("propagate", FontAwesomeIcon.Compress, "Propagate", realBone?.EligibleForIK == true))
+                        ImGui.OpenPopup("transform_propagate_popup");
+
+                    if(compactMode)
+                    {
+                        ImGui.SameLine();
+
+                        PosingEditorCommon.DrawIKSelect(posingCapability, new Vector2(25 * ImGuiHelpers.GlobalScale));
+
+                        ImGui.SameLine();
+
+                        using(ImRaii.Disabled(posingCapability.Selected.Value is None))
+                        {
+                            if(ImBrio.FontIconButton("clear_selection", FontAwesomeIcon.MinusSquare, "Clear Selection"))
+                                posingCapability.ClearSelection();
+                        }
+
+                        // Select Parent
+                        ImGui.SameLine();
+
+                        var parentBone = posingCapability.Selected.Match(
+                               boneSelect => posingCapability.SkeletonPosing.GetBone(boneSelect)?.GetFirstVisibleParent(),
+                               _ => null,
+                               _ => null
+                        );
+
+                        using(ImRaii.Disabled(parentBone is not null))
+                        {
+                            if(ImBrio.FontIconButton(FontAwesomeIcon.LevelUpAlt))
+                                posingCapability.Selected = new BonePoseInfoId(parentBone!.Name, parentBone!.PartialId, PoseInfoSlot.Character);
+                        }
+                        ImBrio.AttachToolTip("Select Parent");
+                    }
+                }
+                ImGui.SameLine();
+
+                using(ImRaii.Disabled(selectedIsBone.HasValue)) // This is borken to all hell
+                    if(ImBrio.FontIconButton("copypaste", FontAwesomeIcon.Clipboard, "Copy & Paste Transform"))
+                        ImGui.OpenPopup("CopyPastePopup");
+                if(selectedIsBone.HasValue)
+                    ImBrio.AttachToolTip("Copy & Paste is currently only available for Model Transform");
+
+                using(ImRaii.Disabled(!posingCapability.CanResetBone(realBone)))
+                {
+                    ImGui.SameLine();
+
+                    if(ImBrio.FontIconButtonRight("resetTransform", FontAwesomeIcon.Recycle, 1, tooltip: "Reset Bone"))
+                    {
+                        posingCapability.ResetSelectedBone();
+                    }
+                }
+
+                var transform = selectedIsBone.HasValue ? posingCapability.SkeletonPosing.GetBone(selectedIsBone.Value)?.LastRawTransform : null;
+                if(transform is not null)
+                {
+                    using(ImRaii.Disabled(true)) // This is borken to all hell
+                    {
+                        var modTransform = posingCapability.ModelPosing.Transform;
+                        if(ClipboardServices.DrawCopyPastePopup(ref modTransform, 1))
+                        {
+                            posingCapability.SkeletonPosing.GetBonePose(selectedIsBone!.Value).Apply(modTransform, null, TransformComponents.Rotation);
+                            posingCapability.Snapshot(false, false);
+                        }
+                    }
                 }
                 else
                 {
-                    DrawModelTransformEditor(posingCapability, compactMode);
-                }
-
-                if(posingCapability.Actor.IsProp == false)
-                {
-                    if(ImBrio.FontIconButton("transformOffset", FontAwesomeIcon.GaugeSimpleHigh, "Transform Offset"))
+                    var modTransform = posingCapability.ModelPosing.Transform;
+                    if(ClipboardServices.DrawCopyPastePopup(ref modTransform, 1))
                     {
-                        ImGui.OpenPopup("transformOffset");
-                    }
-
-                    DrawTransformOffset(posingCapability);
-
-                    ImGui.SameLine();
-
-                    using(ImRaii.Disabled(isBone == false))
-                    {
-                        //if(ImBrio.FontIconButton("flipBoneModelButton", FontAwesomeIcon.Repeat, "Flip Bone"))
-                        //{
-                        //    posingCapability.FlipBoneModel();
-                        //}
-
-                        //ImGui.SameLine();
-
-                        if(ImBrio.FontIconButton("propagate", FontAwesomeIcon.Compress, "Propagate", realBone?.EligibleForIK == true))
-                            ImGui.OpenPopup("transform_propagate_popup");
-
-                        if(compactMode)
-                        {
-                            ImGui.SameLine();
-
-                            PosingEditorCommon.DrawIKSelect(posingCapability, new Vector2(25));
-
-                            ImGui.SameLine();
-
-                            using(ImRaii.Disabled(posingCapability.Selected.Value is None))
-                            {
-                                if(ImBrio.FontIconButton("clear_selection", FontAwesomeIcon.MinusSquare, "Clear Selection"))
-                                    posingCapability.ClearSelection();
-                            }
-
-                            // Select Parent
-                            ImGui.SameLine();
-                            var parentBone = posingCapability.Selected.Match(
-                                   boneSelect => posingCapability.SkeletonPosing.GetBone(boneSelect)?.GetFirstVisibleParent(),
-                                   _ => null,
-                                   _ => null
-                            );
-
-                            using(ImRaii.Disabled(parentBone == null))
-                            {
-                                if(ImBrio.FontIconButton(FontAwesomeIcon.LevelUpAlt, new Vector2(25)))
-                                    posingCapability.Selected = new BonePoseInfoId(parentBone!.Name, parentBone!.PartialId, PoseInfoSlot.Character);
-                            }
-
-                            if(ImGui.IsItemHovered())
-                                ImGui.SetTooltip("Select Parent");
-                        }
-                    }
-                    ImGui.SameLine();
-
-                    using(ImRaii.Disabled(true))
-                        if(ImBrio.FontIconButton("copypaste", FontAwesomeIcon.Clipboard, "Copy/Paste"))
-                            ImGui.OpenPopup("transform_CopyPaste_popup");
-
-                    if(isBone == false)
-                        using(ImRaii.Disabled(posingCapability.ModelPosing.HasOverride == false))
-                        {
-                            ImGui.SameLine();
-
-                            if(ImBrio.FontIconButtonRight("resetTransform", FontAwesomeIcon.Recycle, 1, tooltip: "Reset Model Transform"))
-                            {
-                                posingCapability.ModelPosing.ResetTransform();
-                            }
-                        }
-
-                    using(var popup = ImRaii.Popup("transform_CopyPaste_popup"))
-                    {
-                        if(popup.Success)
-                            DrawCopyPastePopup();
+                        posingCapability.ModelPosing.Transform = modTransform;
+                        posingCapability.Snapshot(false, false);
                     }
                 }
             }
@@ -151,8 +173,11 @@ public class PosingTransformEditor
             }
 
             (var pdidChange, var panyActive) = ImBrio.DragFloat3($"###_transformPosition_0", ref realTransform.Position, offset, FontAwesomeIcon.ArrowsUpDownLeftRight, "Position", enableExpanded: compactMode);
+            ImBrio.VerticalPadding(2);
             (var rdidChange, var ranyActive) = ImBrio.DragFloat3($"###_transformRotation_0", ref realEuler, offset * 100, FontAwesomeIcon.ArrowsSpin, "Rotation", enableExpanded: compactMode);
+            ImBrio.VerticalPadding(2);
             (var sdidChange, var sanyActive) = ImBrio.DragFloat3($"###_transformScale_0", ref realTransform.Scale, offset, FontAwesomeIcon.ExpandAlt, "Scale", enableExpanded: compactMode);
+            ImBrio.VerticalPadding(2);
 
             didChange |= pdidChange |= rdidChange |= sdidChange;
             anyActive |= panyActive |= ranyActive |= sanyActive;
@@ -198,7 +223,9 @@ public class PosingTransformEditor
             bool anyActive = false;
 
             (var pdidChange, var panyActive) = ImBrio.DragFloat3($"###_transformPosition_1", ref realTransform.Position, offset, FontAwesomeIcon.ArrowsUpDownLeftRight, "Position", enableExpanded: compactMode);
+            ImBrio.VerticalPadding(2);
             (var rdidChange, var ranyActive) = ImBrio.DragFloat3($"###_transformRotation_1", ref realEuler, offset * 100, FontAwesomeIcon.ArrowsSpin, "Rotation", enableExpanded: compactMode);
+            ImBrio.VerticalPadding(2);
 
             bool sdidChange = false;
             bool sanyActive = false;
@@ -221,6 +248,8 @@ public class PosingTransformEditor
             }
             else
                 (sdidChange, sanyActive) = ImBrio.DragFloat3($"###_transformScale_1", ref realTransform.Scale, offset, FontAwesomeIcon.ExpandAlt, "Scale", enableExpanded: compactMode);
+
+            ImBrio.VerticalPadding(2);
 
             didChange |= pdidChange |= rdidChange |= sdidChange;
             anyActive |= panyActive |= ranyActive |= sanyActive;
@@ -250,60 +279,35 @@ public class PosingTransformEditor
         }
     }
 
-    private static void DrawCopyPastePopup()
-    {
-        if(ImGui.Button("Copy"))
-        {
-
-        }
-        if(ImGui.Button("Paste"))
-        {
-
-        }
-    }
-
-    private static void DrawTransformBoneOffset(PosingCapability posingCapability, BonePoseInfoId boneId)
-    {
-        using var popup = ImRaii.Popup("transformOffset");
-        if(popup.Success)
-        {
-            var bone = posingCapability.SkeletonPosing.GetBone(boneId);
-            if(bone is not null)
-            {
-                ImBrio.DragFloat($"##transformSpeed_1", ref bone.BoneAdjustmentOffset, 0.001f, 10, 0.01f, "Offset", 50);
-                bool freezeTransforms = bone.Freeze;
-                if(ImGui.Checkbox("Freeze Transforms", ref freezeTransforms))
-                {
-                    bone.Freeze = freezeTransforms;
-                }
-            }
-        }
-    }
-
-    private static void DrawTransformModelOffset(PosingCapability posingCapability)
-    {
-        using var popup = ImRaii.Popup("transformOffset");
-        if(popup.Success)
-        {
-            ImBrio.DragFloat($"##transformSpeed_1", ref posingCapability.ModelPosing.TransformOffset, 0.001f, 10, 0.01f, "Offset", 50);
-            bool freezeTransforms = posingCapability.ModelPosing.Freeze;
-            if(ImGui.Checkbox("Freeze Transforms", ref freezeTransforms))
-            {
-                posingCapability.ModelPosing.Freeze = freezeTransforms;
-            }
-        }
-    }
     private unsafe static void DrawTransformOffset(PosingCapability posingCapability)
     {
-        BonePoseInfoId? selectedIsBone = posingCapability.IsSelectedBone();
+        using var popup = ImRaii.Popup("transformOffset");
+        if(popup.Success)
+        {
+            BonePoseInfoId? selectedIsBone = posingCapability.IsSelectedBone();
 
-        if(selectedIsBone.HasValue && !posingCapability.Actor.IsProp)
-        {
-            DrawTransformBoneOffset(posingCapability, selectedIsBone.Value);
-        }
-        else
-        {
-            DrawTransformModelOffset(posingCapability);
+            if(selectedIsBone.HasValue && !posingCapability.Actor.IsProp)
+            {
+                var bone = posingCapability.SkeletonPosing.GetBone(selectedIsBone);
+                if(bone is not null)
+                {
+                    ImBrio.DragFloat($"##transformSpeed_1", ref bone.BoneAdjustmentOffset, 0.001f, 10, 0.01f, "Offset", 50);
+                    bool freezeTransforms = bone.Freeze;
+                    if(ImGui.Checkbox("Freeze Transforms", ref freezeTransforms))
+                    {
+                        bone.Freeze = freezeTransforms;
+                    }
+                }
+            }
+            else
+            {
+                ImBrio.DragFloat($"##transformSpeed_1", ref posingCapability.ModelPosing.TransformOffset, 0.001f, 10, 0.01f, "Offset", 50);
+                bool freezeTransforms = posingCapability.ModelPosing.Freeze;
+                if(ImGui.Checkbox("Freeze Transforms", ref freezeTransforms))
+                {
+                    posingCapability.ModelPosing.Freeze = freezeTransforms;
+                }
+            }
         }
     }
 

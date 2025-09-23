@@ -8,6 +8,7 @@ using Brio.UI.Controls.Stateless;
 using Brio.Web;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface;
+using Dalamud.Interface.Utility;
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Interface.Windowing;
 using System;
@@ -82,7 +83,7 @@ public class SettingsWindow : Window
             }
             else
             {
-                ImBrio.ToggleButtonStrip("settings_filters_selector", new Vector2(ImBrio.GetRemainingWidth(), ImBrio.GetLineHeight()), ref selected, ["General", "IPC", "Posing", "Library", "Auto-Save", "Input", "Advanced"]);
+                ImBrio.ButtonSelectorStrip("settings_filters_selector", new Vector2(ImBrio.GetRemainingWidth(), ImBrio.GetLineHeight()), ref selected, ["General", "IPC", "Posing", "Library", "Auto-Save", "Input", "Advanced"]);
 
                 using(var child = ImRaii.Child("###settingsPane"))
                 {
@@ -604,7 +605,7 @@ public class SettingsWindow : Window
 
             using(ImRaii.Disabled(!resetSettings))
             {
-                if(ImGui.Button("Reset Settings to Default", new(170, 0)))
+                if(ImGui.Button("Reset Settings to Default", new(170 * ImGuiHelpers.GlobalScale, 0)))
                 {
                     _configurationService.Reset();
                     resetSettings = false;
@@ -658,7 +659,7 @@ public class SettingsWindow : Window
             _configurationService.Configuration.InputManager.Enable = enableKeybinds;
             _configurationService.ApplyChange();
         }
-        
+
         bool enableKeyHandlingOnKeyMod = _configurationService.Configuration.InputManager.EnableKeyHandlingOnKeyMod;
         if(ImGui.Checkbox("Consume [SPACE], [Shift], [Ctrl] & [Alt] when moving a FreeCam", ref enableKeyHandlingOnKeyMod))
         {
@@ -709,13 +710,20 @@ public class SettingsWindow : Window
                 DrawKeyBind(InputAction.Posing_Undo);
                 DrawKeyBind(InputAction.Posing_Redo);
                 DrawKeyBind(InputAction.Interface_IncrementSmallModifier);
-                DrawKeyBind(InputAction.Interface_IncrementLargeModifier);
+            }
+
+            if(ImGui.CollapsingHeader("XAT Cutscene"))
+            {
+                DrawKeyBind(InputAction.Interface_StopCutscene);
+                DrawKeyBind(InputAction.Interface_StartAllActorsAnimations);
+                DrawKeyBind(InputAction.Interface_StopAllActorsAnimations);
             }
 
             if(ImGui.CollapsingHeader("Posing", ImGuiTreeNodeFlags.DefaultOpen))
             {
                 DrawKeyBind(InputAction.Posing_ToggleOverlay);
                 DrawKeyBind(InputAction.Posing_HideOverlay);
+                DrawKeyBind(InputAction.Posing_Freeze);
                 DrawKeyBind(InputAction.Posing_DisableGizmo);
                 DrawKeyBind(InputAction.Posing_DisableSkeleton);
                 DrawKeyBind(InputAction.Posing_ToggleLink);
@@ -735,6 +743,7 @@ public class SettingsWindow : Window
         if(KeybindEditor.KeySelector(evtText, keyAction, _configurationService.Configuration.InputManager))
         {
             _configurationService.ApplyChange();
+            _configurationService.Save();
         }
     }
 }

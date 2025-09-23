@@ -133,9 +133,11 @@ public class Brio : IDalamudPlugin
 
         // IPC
         serviceCollection.AddSingleton<BrioIPCService>();
+        serviceCollection.AddSingleton<DynamisIPC>();
         serviceCollection.AddSingleton<PenumbraService>();
         serviceCollection.AddSingleton<GlamourerService>();
         serviceCollection.AddSingleton<CustomizePlusService>();
+        serviceCollection.AddSingleton<KtisisIPC>();
 
         // Web
         serviceCollection.AddSingleton<WebService>();
@@ -232,5 +234,7 @@ public class Brio : IDalamudPlugin
     public void Dispose()
     {
         _services?.Dispose();
+
+        GC.SuppressFinalize(this);
     }
 }

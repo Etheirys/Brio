@@ -1,5 +1,6 @@
 ﻿using Dalamud.Bindings.ImGui;
 using Dalamud.Interface;
+using Dalamud.Interface.Utility;
 using Dalamud.Interface.Utility.Raii;
 using System.Numerics;
 
@@ -17,7 +18,7 @@ public static partial class ImBrio
         {
             using(ImRaii.PushStyle(ImGuiStyleVar.ChildRounding, ImGui.GetStyle().FrameRounding))
             {
-                using var child = ImRaii.Child($"###{label}_child", new Vector2((size - 2.3f), 25), false, ImGuiWindowFlags.NoScrollbar);
+                using var child = ImRaii.Child($"###{label}_child", new Vector2((size - 2.3f), 25 * ImGuiHelpers.GlobalScale), false, ImGuiWindowFlags.NoScrollbar);
 
                 if(child.Success)
                 {
@@ -43,59 +44,92 @@ public static partial class ImBrio
         return (clicked, lockClick);
     }
 
-    public static bool ToggleButton(string label, ref bool selected, bool canSelect = true)
+    public static bool ToggleStripButton(string label, ref bool selected, bool canSelect = false)
     {
-        return ToggleButton(label, new(0, 0), ref selected, canSelect);
+        return ToggleStripButton(label, new(0, 0), ref selected, canSelect);
     }
 
-    public static bool ToggleButton(string label, Vector2 size, ref bool selected, bool canSelect = true)
+    public static bool ToggleStripButton(string label, Vector2 size, ref bool selected, bool canSelect = true)
     {
         bool clicked = false;
 
         using(ImRaii.Disabled(canSelect && selected))
         {
-            ImGui.PushStyleColor(ImGuiCol.Button, ImGui.GetColorU32(selected ? ImGuiCol.TabActive : ImGuiCol.Tab));
-
-            if(ImGui.Button(label, size))
-            {
-                selected = !selected;
-                clicked = true;
-            }
-
-            ImGui.PopStyleColor();
+            using(ImRaii.PushColor(ImGuiCol.Button, ImGui.GetColorU32(selected ? ImGuiCol.TabActive : ImGuiCol.Tab)))
+            using(ImRaii.PushStyle(ImGuiStyleVar.ItemSpacing, new Vector2(0, 0)))
+                if(ImGui.Button(label, size))
+                {
+                    selected = !selected;
+                    clicked = true;
+                }
         }
 
         return clicked;
     }
 
-    public static bool ToggleButtonStrip(string id, Vector2 size, ref int selected, string[] options)
+    public static bool ToggleSelecterStrip(string id, Vector2 size, ref bool[] selected, string[] options, string? toolTip = null)
     {
+        if(size == Vector2.Zero) size = new Vector2(GetRemainingWidth(), GetLineHeight());
+
         bool changed = false;
-        float buttonWidth = (size.X / options.Length);
+        float buttonWidth = (size.X / options.Length) - (options.Length - 2) - 0.5f;
 
         using(ImRaii.PushColor(ImGuiCol.ChildBg, ImGui.GetColorU32(ImGuiCol.Tab)))
         {
             using(ImRaii.PushStyle(ImGuiStyleVar.ChildRounding, ImGui.GetStyle().FrameRounding))
             {
-                using(var child = ImRaii.Child(id, size, false, ImGuiWindowFlags.NoScrollbar))
+                using var child = ImRaii.Child(id, size, false, ImGuiWindowFlags.NoScrollbar);
+                if(child.Success)
                 {
-                    if(child.Success)
+                    using(ImRaii.PushStyle(ImGuiStyleVar.ItemSpacing, new Vector2(options.Length - 1)))
                     {
-                        using(ImRaii.PushStyle(ImGuiStyleVar.ItemSpacing, new Vector2(0, 0)))
+                        for(int i = 0; i < selected.Length; i++)
                         {
-                            for(int i = 0; i < options.Length; i++)
+                            if(i > 0) ImGui.SameLine();
+
+                            changed |= ToggleStripButton($"{options[i]}##{id}_{i}", new(buttonWidth, size.Y), ref selected[i], false);
+                          
+                            if(toolTip is not null)
                             {
-                                if(i > 0)
-                                    ImGui.SameLine();
+                                var tooltip = selected[i] ? "Disable" : "Enable";
+                                AttachToolTip($"{tooltip} {options[i]} {toolTip}");
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return changed;
+    }
 
-                                bool val = i == selected;
-                                ToggleButton($"{options[i]}##{id}", new(buttonWidth, size.Y), ref val, false);
+    public static bool ButtonSelectorStrip(string id, Vector2 size, ref int selected, string[] options)
+    {
+        if(size == Vector2.Zero) size = new Vector2(GetRemainingWidth(), GetLineHeight());
 
-                                if(val && i != selected)
-                                {
-                                    selected = i;
-                                    changed = true;
-                                }
+        bool changed = false;
+        float buttonWidth = size.X / options.Length;
+
+        using(ImRaii.PushColor(ImGuiCol.ChildBg, ImGui.GetColorU32(ImGuiCol.Tab)))
+        {
+            using(ImRaii.PushStyle(ImGuiStyleVar.ChildRounding, ImGui.GetStyle().FrameRounding))
+            {
+                using var child = ImRaii.Child(id, size, false, ImGuiWindowFlags.NoScrollbar);
+                if(child.Success)
+                {
+                    using(ImRaii.PushStyle(ImGuiStyleVar.ItemSpacing, new Vector2(0, 0)))
+                    {
+                        for(int i = 0; i < options.Length; i++)
+                        {
+                            if(i > 0)
+                                ImGui.SameLine();
+
+                            bool val = i == selected;
+                            ToggleStripButton($"{options[i]}##{id}", new(buttonWidth, size.Y), ref val, false);
+
+                            if(val && i != selected)
+                            {
+                                selected = i;
+                                changed = true;
                             }
                         }
                     }

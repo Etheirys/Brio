@@ -27,11 +27,11 @@ public class ActorRedrawService(IFramework framework, IObjectTable objectTable)
 
     public async Task<RedrawResult> Redraw(IGameObject go)
     {
-        Brio.Log.Debug($"Beginning Brio redraw on gameobject {go.ObjectIndex}...");
+        Brio.Log.Info($"Beginning Brio redraw on gameobject {go.ObjectIndex}...");
         DisableDraw(go);
         try
         {
-            ActorRedrawEvent?.Invoke(go, RedrawStage.After);
+            ActorRedrawEvent?.Invoke(go, RedrawStage.Before);
             await DrawWhenReady(go);
             await WaitForDrawing(go);
             ActorRedrawEvent?.Invoke(go, RedrawStage.After);
@@ -47,7 +47,7 @@ public class ActorRedrawService(IFramework framework, IObjectTable objectTable)
 
     public async Task RedrawAndWait(IGameObject go)
     {
-        Brio.Log.Debug($"Beginning Brio redraw on gameobject {go.ObjectIndex}...");
+        Brio.Log.Info($"Beginning Brio RedrawAndWait on gameobject {go.ObjectIndex}...");
         try
         {
             DisableDraw(go);
@@ -59,7 +59,7 @@ public class ActorRedrawService(IFramework framework, IObjectTable objectTable)
             {
                 if(await _framework.RunOnFrameworkThread(() => IsDrawing(go)))
                 {
-                    Brio.Log.Debug($"Brio redraw complete on gameobject {go.ObjectIndex}.");
+                    Brio.Log.Debug($"Brio RedrawAndWait complete on gameobject {go.ObjectIndex}.");
 
                     return;
                 }
@@ -69,7 +69,7 @@ public class ActorRedrawService(IFramework framework, IObjectTable objectTable)
         }
         catch(Exception e)
         {
-            Brio.Log.Error(e, $"Brio redraw failed on gameobject {go.ObjectIndex}.");
+            Brio.Log.Error(e, $"Brio RedrawAndWait failed on gameobject {go.ObjectIndex}.");
         }
     }
 

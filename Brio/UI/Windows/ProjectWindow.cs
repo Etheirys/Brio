@@ -50,7 +50,7 @@ public class ProjectWindow : Window, IDisposable
 
         using(ImRaii.Disabled(_mCDFService.IsApplyingMCDF || _mCDFService.IsSavingMCDF))
         {
-            ImBrio.ToggleButtonStrip("library_filters_selector", new Vector2(ImBrio.GetRemainingWidth(), ImBrio.GetLineHeight()), ref selected, ["Load", "Save"]);
+            ImBrio.ButtonSelectorStrip("library_filters_selector", new Vector2(ImBrio.GetRemainingWidth(), ImBrio.GetLineHeight()), ref selected, ["Load", "Save"]);
 
             if(selected == 0 || _projectSystem.IsLoading)
             {
@@ -72,7 +72,7 @@ public class ProjectWindow : Window, IDisposable
 
                     using(ImRaii.Disabled(string.IsNullOrEmpty(currentActorName)))
                     {
-                        if(ImBrio.Button("Save Project", FontAwesomeIcon.Save, new(135, 0), centerTest: true, hoverText: "Save Project"))
+                        if(ImBrio.Button("Save Project", FontAwesomeIcon.Save, new(135, 0), centerTest: true, tooltip: "Save Project"))
                         {
                             _projectSystem.NewProject(currentActorName, currentActorDis);
 
@@ -129,7 +129,7 @@ public class ProjectWindow : Window, IDisposable
 
             using(ImRaii.Disabled(selectedItem is null))
             {
-                if(ImBrio.Button("Load", FontAwesomeIcon.FileImport, new(120, 0), centerTest: true, hoverText: "Load Project"))
+                if(ImBrio.Button("Load", FontAwesomeIcon.FileImport, new(120, 0), centerTest: true, tooltip: "Load Project"))
                 {
                     _projectSystem.LoadProject(selectedItem!, destroyAll);
                 }
@@ -171,7 +171,7 @@ public class ProjectWindow : Window, IDisposable
                 ImGui.Checkbox("###doDelete", ref doDelete);
                 ImGui.SameLine();
                 using(ImRaii.Disabled(doDelete == false))
-                    if(ImBrio.Button("Delete", FontAwesomeIcon.Trash, new(120, 0), centerTest: true, hoverText: "Delete Project"))
+                    if(ImBrio.Button("Delete", FontAwesomeIcon.Trash, new(120, 0), centerTest: true, tooltip: "Delete Project"))
                     {
                         _projectSystem.DeleteProject(selectedItem!);
                         selectedItem = null;

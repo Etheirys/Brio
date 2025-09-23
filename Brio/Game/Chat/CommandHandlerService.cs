@@ -34,7 +34,7 @@ public class CommandHandlerService : IDisposable
         _commandManager.AddHandler(MCDFCommandName, new CommandInfo(OnCommand)
         {
             HelpMessage = "Toggles Brio's MCDF window.",
-            ShowInHelp = true,
+            ShowInHelp = false,
         });
     }
 

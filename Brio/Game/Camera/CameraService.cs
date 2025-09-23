@@ -71,20 +71,14 @@ public unsafe class CameraService : IDisposable
 
         if(_gPoseService.IsGPosing)
         {
-            if(_entityManager.TryGetEntity<CameraContainerEntity>("cameras", out var cameraEntity))
+            if(_virtualCameraService.CurrentCamera is not null)
             {
-                if(cameraEntity.TryGetCapability<CameraContainerCapability>(out var cameraCapability))
-                {
-                    if(cameraCapability.CurrentCamera is not null)
-                    {
-                        Vector3 currentPos = camera->Camera.CameraBase.SceneCamera.Object.Position;
-                        var newPos = cameraCapability.CurrentCamera.PositionOffset + currentPos;
-                        camera->Camera.CameraBase.SceneCamera.Object.Position = newPos;
+                Vector3 currentPos = camera->Camera.CameraBase.SceneCamera.Object.Position;
+                var newPos = _virtualCameraService.CurrentCamera.PositionOffset + currentPos;
+                camera->Camera.CameraBase.SceneCamera.Object.Position = newPos;
 
-                        Vector3 currentLookAt = camera->Camera.CameraBase.SceneCamera.LookAtVector;
-                        camera->Camera.CameraBase.SceneCamera.LookAtVector = currentLookAt + (newPos - currentPos);
-                    }
-                }
+                Vector3 currentLookAt = camera->Camera.CameraBase.SceneCamera.LookAtVector;
+                camera->Camera.CameraBase.SceneCamera.LookAtVector = currentLookAt + (newPos - currentPos);
             }
         }
 

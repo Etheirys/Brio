@@ -253,6 +253,7 @@ public enum EntityFlags
     None,
     DefaultOpen = 1 << 0,
     HasContextButton = 1 << 1,
-    AllowOutSideGpose = 1 << 2,
+    AllowOutsideGpose = 1 << 2,
     AllowDoubleClick = 1 << 3,
+    AllowMultiSelect = 1 << 4,
 }

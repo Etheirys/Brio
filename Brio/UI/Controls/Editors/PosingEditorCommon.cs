@@ -94,14 +94,14 @@ public static class PosingEditorCommon
 
     public static void DrawBoneFilterEditor(BoneFilter filter)
     {
-        if(ImBrio.FontIconButton("select_all", Dalamud.Interface.FontAwesomeIcon.Check, "Select All"))
+        if(ImBrio.FontIconButton("select_all", FontAwesomeIcon.Check, "Select All"))
         {
             filter.EnableAll();
         }
 
         ImGui.SameLine();
 
-        if(ImBrio.FontIconButton("select_none", Dalamud.Interface.FontAwesomeIcon.Minus, "Select None"))
+        if(ImBrio.FontIconButton("select_none", FontAwesomeIcon.Minus, "Select None"))
         {
             filter.DisableAll();
         }
@@ -187,6 +187,8 @@ public static class PosingEditorCommon
     {
         if(posing.Selected.Value is BonePoseInfoId boneId)
         {
+            bool enabled = false;
+
             var bone = posing.SkeletonPosing.GetBone(boneId);
             bool isValid = bone != null && bone.Skeleton.IsValid && bone.EligibleForIK;
 
@@ -195,16 +197,7 @@ public static class PosingEditorCommon
                 var bonePose = posing.SkeletonPosing.GetBonePose(boneId);
 
                 var ik = bonePose.DefaultIK;
-                bool enabled = ik.Enabled && BrioStyle.EnableStyle;
-
-                using(ImRaii.PushColor(ImGuiCol.Button, ThemeManager.CurrentTheme.Accent.AccentColor, enabled))
-                {
-                    if(ImGui.Button("IK", buttonSize))
-                        ImGui.OpenPopup("transform_ik_popup");
-
-                    if(ImGui.IsItemHovered())
-                        ImGui.SetTooltip("Inverse Kinematics");
-                }
+                enabled = ik.Enabled && BrioStyle.EnableStyle;
 
                 using var popup = ImRaii.Popup("transform_ik_popup");
                 {
@@ -213,13 +206,22 @@ public static class PosingEditorCommon
                         BoneIKEditor.Draw(bonePose, posing);
                     }
                 }
+            }
 
-                return;
+            using(ImRaii.PushColor(ImGuiCol.Button, ThemeManager.CurrentTheme.Accent.AccentColor, enabled))
+            {
+                if(ImGui.Button("IK", buttonSize))
+                    ImGui.OpenPopup("transform_ik_popup");
+
+                ImBrio.AttachToolTip("Inverse Kinematics");
             }
         }
-
-        ImGui.BeginDisabled();
-        ImGui.Button("IK", buttonSize);
-        ImGui.EndDisabled();
+        else
+        {
+            ImGui.BeginDisabled();
+            ImGui.Button("IK", buttonSize);
+            ImGui.EndDisabled();
+            ImBrio.AttachToolTip("Inverse Kinematics");
+        }
     }
 }

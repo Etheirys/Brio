@@ -509,6 +509,7 @@ public class MCDFService : IDisposable
             totalWaitTime -= 50;
         }
 
+        // Make sure Brio can't MCDF if the actor had a "Mare" actor loaded on it by cheaking for lock from glamourer
         if(_glamourerService.CheckForLock(playerRelatedObject))
         {
             Brio.Log.Information("Unable to apply MCDF, Actor is Locked by Glamourer");

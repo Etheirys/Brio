@@ -33,6 +33,6 @@ public class CameraCapability : Capability, IDisposable
     public override void Dispose()
     {
         _gPoseService.OnGPoseStateChange -= OnGPoseStateChange;
+        base.Dispose();
     }
-
 }

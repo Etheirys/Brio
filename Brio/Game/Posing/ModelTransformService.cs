@@ -87,8 +87,9 @@ public unsafe class ModelTransformService : IDisposable
 
     private void OnActorRedraw(IGameObject go, RedrawStage stage)
     {
-        if(stage == RedrawStage.After)
-            UpdatePositionDetour((StructsGameObject*)go.Address, go.Position.X, go.Position.Y, go.Position.Z);
+        if(go is not null)
+            if(stage == RedrawStage.After)
+                UpdatePositionDetour((StructsGameObject*)go.Address, go.Position.X, go.Position.Y, go.Position.Z);
     }
 
 

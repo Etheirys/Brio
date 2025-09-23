@@ -8,12 +8,15 @@ using Dalamud.Interface.Utility;
 using Dalamud.Interface.Utility.Raii;
 using System;
 using System.Numerics;
+using System.Runtime.CompilerServices;
 
 namespace Brio.UI.Controls.Stateless;
+
 public static partial class ImBrio
 {
     public const string TooltipSeparator = "--SEP--";
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
     public static void FontIcon(FontAwesomeIcon icon)
     {
         using(ImRaii.PushFont(UiBuilder.IconFont))
@@ -22,11 +25,13 @@ public static partial class ImBrio
         }
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
     public static bool FontIconButton(FontAwesomeIcon icon)
     {
-        return FontIconButton(icon, new());
+        return FontIconButton(icon, new(25 * ImGuiHelpers.GlobalScale));
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
     public static bool FontIconButton(FontAwesomeIcon icon, Vector2 size)
     {
         bool clicked = false;
@@ -39,6 +44,7 @@ public static partial class ImBrio
         return clicked;
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
     public static bool FontIconButton(string id, FontAwesomeIcon icon, string? tooltip = null, bool enabled = true, bool bordered = true, uint? textColor = null)
     {
         bool wasClicked = false;
@@ -64,14 +70,16 @@ public static partial class ImBrio
         if(!bordered)
             ImGui.PopStyleColor();
 
-        if(tooltip != null && ImGui.IsItemHovered())
-            ImGui.SetTooltip(tooltip);
+        if(tooltip != null)
+            AttachToolTip(tooltip);
 
         if(!enabled)
             ImGui.EndDisabled();
 
         return wasClicked;
     }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
     public static bool FontIconButtonRight(string id, FontAwesomeIcon icon, float position, string? tooltip = null, bool enabled = true, bool bordered = true, uint? textColor = null, Vector2? size = null)
     {
         size ??= new Vector2(25);
@@ -81,7 +89,7 @@ public static partial class ImBrio
         if(enabled is false)
             ImGui.BeginDisabled();
 
-        var pixelPos = ImGui.GetWindowSize().X - ((ImGui.CalcTextSize("XXX").X + (ImGui.GetStyle().FramePadding.X * 2)) * position);
+        var pixelPos = ImGui.GetWindowSize().X - ((ImGui.CalcTextSize("XXII").X + (ImGui.GetStyle().FramePadding.X * 2)) * position );
 
         ImGui.SetCursorPosX(pixelPos);
 
@@ -103,8 +111,8 @@ public static partial class ImBrio
         if(bordered is false)
             ImGui.PopStyleColor();
 
-        if(tooltip is not null && ImGui.IsItemHovered())
-            ImGui.SetTooltip(tooltip);
+        if(tooltip is not null)
+            AttachToolTip(tooltip);
 
         if(enabled is false)
             ImGui.EndDisabled();
@@ -112,12 +120,14 @@ public static partial class ImBrio
         return wasClicked;
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
     public static bool Button(string label, FontAwesomeIcon icon)
     {
         return Button(label, icon, Vector2.Zero);
     }
 
-    public static bool Button(string label, FontAwesomeIcon icon, Vector2 size, string hoverText = "", bool centerTest = false)
+    [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+    public static bool Button(string label, FontAwesomeIcon icon, Vector2 size, string tooltip = "", bool centerTest = false)
     {
         bool clicked;
 
@@ -144,10 +154,9 @@ public static partial class ImBrio
             clicked = ImGui.Button(label, size);
             Vector2 endPos = ImGui.GetCursorPos();
 
-            if(string.IsNullOrEmpty(hoverText) is false)
+            if(string.IsNullOrEmpty(tooltip) is false)
             {
-                if(ImGui.IsItemHovered())
-                    ImGui.SetTooltip(hoverText);
+                AttachToolTip(tooltip);
             }
 
             if(icon != FontAwesomeIcon.None)
@@ -163,13 +172,14 @@ public static partial class ImBrio
             size.Y = 1;
 
             ImGui.SetCursorPos(startPos);
-            ImGui.InvisibleButton("##dummy", size);
+            ImGui.InvisibleButton("##dummy"u8, size);
             ImGui.SetCursorPos(endPos);
         }
 
         return clicked;
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
     public static bool ToggelButton(string lable, bool isToggled, uint toggledColor = 0, string hoverText = "")
     {
         if(toggledColor == 0) toggledColor = ThemeManager.CurrentTheme.Accent.AccentColor;
@@ -177,6 +187,7 @@ public static partial class ImBrio
         return ToggelButton(lable, Vector2.Zero, isToggled, toggledColor, hoverText);
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
     public static bool ToggelButton(string lable, Vector2 size, bool isToggled, uint toggledColor = 0, string hoverText = "")
     {
         if(toggledColor == 0) toggledColor = ThemeManager.CurrentTheme.Accent.AccentColor;
@@ -198,6 +209,7 @@ public static partial class ImBrio
         return clicked;
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
     public static bool ToggelFontIconButton(string id, FontAwesomeIcon icon, Vector2 size, bool isToggled, uint toggledColor = 0, string hoverText = "")
     {
         var clicked = false;
@@ -230,8 +242,11 @@ public static partial class ImBrio
         return clicked;
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
     public static bool IsItemConfirmed() => ImGui.IsItemDeactivated() && (ImGui.IsKeyPressed(ImGuiKey.Enter) || ImGui.IsKeyPressed(ImGuiKey.KeypadEnter));
 
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
     public static bool BorderedGameIcon(string id, uint iconId, string fallback, string? description = null, ImGuiButtonFlags flags = ImGuiButtonFlags.MouseButtonLeft, Vector2? size = null)
     {
         IDalamudTextureWrap? iconTex = null;
@@ -250,6 +265,7 @@ public static partial class ImBrio
         return BorderedGameIcon(id, iconTex, description, flags, size);
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
     public static bool BorderedGameIcon(string id, IDalamudTextureWrap texture, string? description = null, ImGuiButtonFlags flags = ImGuiButtonFlags.MouseButtonLeft, Vector2? size = null)
     {
         using(ImRaii.PushId(id))
@@ -279,7 +295,7 @@ public static partial class ImBrio
             if(flags.HasFlag(ImGuiButtonFlags.MouseButtonLeft) || flags.HasFlag(ImGuiButtonFlags.MouseButtonRight) || flags.HasFlag(ImGuiButtonFlags.MouseButtonMiddle))
             {
                 ImGui.SetCursorPos(startPos + scaleOffsetTopLeft);
-                if(ImGui.InvisibleButton($"button", containedSize, flags))
+                if(ImGui.InvisibleButton("button"u8, containedSize, flags))
                 {
                     result = true;
                 }
@@ -303,33 +319,40 @@ public static partial class ImBrio
         }
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
     public static void AttachToolTip(string text)
     {
         if(ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenDisabled))
         {
-            ImGui.BeginTooltip();
-            ImGui.PushTextWrapPos(ImGui.GetFontSize() * 35f);
-            if(text.Contains(TooltipSeparator, StringComparison.Ordinal))
+            using(ImRaii.Disabled(false))
             {
-                var splitText = text.Split(TooltipSeparator, StringSplitOptions.RemoveEmptyEntries);
-                for(int i = 0; i < splitText.Length; i++)
+                using(ImRaii.Tooltip())
                 {
-                    ImGui.TextUnformatted(splitText[i]);
-                    if(i != splitText.Length - 1) ImGui.Separator();
+                    ImGui.PushTextWrapPos(ImGui.GetFontSize() * 35f);
+                    if(text.Contains(TooltipSeparator, StringComparison.Ordinal))
+                    {
+                        var splitText = text.Split(TooltipSeparator, StringSplitOptions.RemoveEmptyEntries);
+                        for(int i = 0; i < splitText.Length; i++)
+                        {
+                            ImGui.TextUnformatted(splitText[i]);
+                            if(i != splitText.Length - 1) ImGui.Separator();
+                        }
+                    }
+                    else
+                    {
+                        ImGui.TextUnformatted(text);
+                    }
+                    ImGui.PopTextWrapPos();
                 }
             }
-            else
-            {
-                ImGui.TextUnformatted(text);
-            }
-            ImGui.PopTextWrapPos();
-            ImGui.EndTooltip();
         }
     }
+    [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
     public static void VerticalPadding(float leng)
     {
         ImGui.SetCursorPosY(ImGui.GetCursorPosY() + leng * ImGuiHelpers.GlobalScale);
     }
+    [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
     public static void HorizontalPadding(float leng)
     {
         ImGui.SetCursorPosX(ImGui.GetCursorPosX() + leng * ImGuiHelpers.GlobalScale);

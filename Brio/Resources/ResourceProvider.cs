@@ -1,6 +1,5 @@
 ﻿using Brio.Core;
 using Dalamud.Interface.Textures.TextureWraps;
-using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
 using System;
 using System.Collections.Generic;
@@ -16,13 +15,11 @@ public class ResourceProvider : IDisposable
     private readonly Dictionary<string, object> _cachedDocuments = [];
     private readonly Dictionary<string, IDalamudTextureWrap> _cachedImages = [];
 
-    private readonly IDalamudPluginInterface _pluginInterface;
     private readonly ITextureProvider _textureProvider;
 
-    public ResourceProvider(IDalamudPluginInterface pluginInterface, ITextureProvider textureProvider)
+    public ResourceProvider(ITextureProvider textureProvider)
     {
         Instance = this;
-        _pluginInterface = pluginInterface;
         _textureProvider = textureProvider;
 
         Localize.Load(this);
@@ -96,5 +93,7 @@ public class ResourceProvider : IDisposable
 
         _cachedImages?.Clear();
         _cachedDocuments?.Clear();
+
+        GC.SuppressFinalize(this);
     }
 }

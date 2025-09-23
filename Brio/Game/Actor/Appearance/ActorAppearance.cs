@@ -38,6 +38,7 @@ public struct ActorAppearance()
 
         actorAppearance.Runtime.IsHatHidden = native->DrawData.IsHatHidden;
         actorAppearance.Runtime.IsVisorToggled = native->DrawData.IsVisorToggled;
+        actorAppearance.Runtime.IsVieraEarsHidden = native->DrawData.VieraEarsHidden;
 
         actorAppearance.Runtime.IsMainHandHidden = character.GetWeaponDrawObjectData(ActorEquipSlot.MainHand)->IsHidden;
         actorAppearance.Runtime.IsOffHandHidden = character.GetWeaponDrawObjectData(ActorEquipSlot.OffHand)->IsHidden;

@@ -51,21 +51,22 @@ public class CharacterHandlerService : IDisposable
                 var character = _dalamudService.GetGposeCharacterFromObjectTableByName(entry.Name, onlyGposeCharacters: true);
                 if(character is null)
                 {
-                    CharacterHandler.Remove(entry);
                     RevertMCDF(entry).GetAwaiter().GetResult();
                 }
             }
+            CharacterHandler.Clear();
         }
     }
 
     public async Task RevertMCDF(CharacterHolder mCDFCharacterHolder)
     {
-        if(mCDFCharacterHolder.GameObject.Address == nint.Zero || mCDFCharacterHolder.Name.IsNullOrEmpty()) return;
+        if(mCDFCharacterHolder.GameObject is not null)
+            _glamourerService.UnlockAndRevertCharacter(mCDFCharacterHolder.GameObject);
 
-        _glamourerService.UnlockAndRevertCharacter(mCDFCharacterHolder.GameObject);
-        _glamourerService.UnlockAndRevertCharacterByName(mCDFCharacterHolder.Name);
+        if(mCDFCharacterHolder.Name.IsNullOrEmpty() is false)
+            _glamourerService.UnlockAndRevertCharacterByName(mCDFCharacterHolder.Name);
 
-        if(mCDFCharacterHolder.GameObject.Address != nint.Zero)
+        if(mCDFCharacterHolder.GameObject is not null && mCDFCharacterHolder.GameObject.Address != nint.Zero)
         {
             _customizePlusService.RemoveTemporaryProfile(mCDFCharacterHolder.GameObject);
             await _penumbraService.Redraw(mCDFCharacterHolder.GameObject, true).ConfigureAwait(false);
@@ -74,7 +75,7 @@ public class CharacterHandlerService : IDisposable
 
     public async Task Revert(IGameObject obj, bool afterGpose = false)
     {
-        if(obj.Address == nint.Zero) return;
+        if(obj is null) return;
 
         _glamourerService.UnlockAndRevertCharacterByName(obj.Name.TextValue);
         _glamourerService.UnlockAndRevertCharacter(obj);

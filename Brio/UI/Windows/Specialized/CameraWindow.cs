@@ -31,6 +31,13 @@ public class CameraWindow : Window, IDisposable
         _cutsceneManager = cutsceneManager;
         _configService = configService;
 
+        WindowSizeConstraints constraints = new()
+        {
+            MinimumSize = new(250, 300),
+            MaximumSize = new(355, 400)
+        };
+        this.SizeConstraints = constraints;
+
         _gPoseService.OnGPoseStateChange += OnGPoseStateChange;
     }
 

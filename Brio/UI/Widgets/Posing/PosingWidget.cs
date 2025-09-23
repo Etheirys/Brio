@@ -6,6 +6,7 @@ using Brio.UI.Controls.Stateless;
 using Brio.UI.Widgets.Core;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface;
+using Dalamud.Interface.Utility;
 using Dalamud.Interface.Utility.Raii;
 using System.Numerics;
 
@@ -26,9 +27,11 @@ public class PosingWidget(PosingCapability capability) : Widget<PosingCapability
     {
         DrawButtons();
 
-        ImGui.Separator();
-
-        DrawTransform();
+        using var child1 = ImRaii.Child($"###appearance_child", new Vector2(0, 165 * ImGuiHelpers.GlobalScale), true, ImGuiWindowFlags.AlwaysAutoResize);
+        if(child1.Success)
+        {
+            DrawTransform();
+        }
     }
 
     private void DrawButtons()
@@ -53,7 +56,7 @@ public class PosingWidget(PosingCapability capability) : Widget<PosingCapability
                 ImGui.OpenPopup("DrawImportPoseMenuPopup");
             }
 
-            FileUIHelpers.DrawImportPoseMenuPopup(Capability);
+            FileUIHelpers.DrawImportPoseMenuPopup("postingWidget",Capability);
 
             ImGui.SameLine();
 
@@ -86,13 +89,12 @@ public class PosingWidget(PosingCapability capability) : Widget<PosingCapability
 
         if(Capability.Actor.IsProp == false)
         {
-            if(ImBrio.ToggelFontIconButton("freezeActor", FontAwesomeIcon.Snowflake, new Vector2(0), timelineCapability.SpeedMultiplier == 0, hoverText: timelineCapability.SpeedMultiplierOverride == 0 ? "Un-Freeze Character" : "Freeze Character"))
+            if(ImBrio.ToggelFontIconButton("freezeActor", FontAwesomeIcon.Snowflake, new Vector2(0), timelineCapability.SpeedMultiplier == 0, hoverText: timelineCapability.SpeedMultiplierOverride == 0 ? "Un-Freeze Character" : "Freeze Character") || InputManagerService.ActionKeysPressedLastFrame(InputAction.Posing_Freeze))
             {
                 if(timelineCapability.SpeedMultiplierOverride == 0)
                     timelineCapability.ResetOverallSpeedOverride();
                 else
                     timelineCapability.SetOverallSpeedOverride(0f);
-
             }
             ImGui.SameLine();
         }

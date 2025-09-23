@@ -128,7 +128,7 @@ public class PosingGraphicalWindow : Window, IDisposable
         posing.Hover = new None();
         _closestHover = float.MaxValue;
 
-        WindowName = $"{Brio.Name} - Posing - {posing.Entity.FriendlyName}###brio_posing_graphical_window";
+        WindowName = $"{Brio.Name} - POSING - {posing.Entity.FriendlyName}###brio_posing_graphical_window";
 
         DrawGlobalButtons(posing);
 
@@ -192,7 +192,7 @@ public class PosingGraphicalWindow : Window, IDisposable
 
         if(_entityManager.TryGetCapabilityFromSelectedEntity<ActionTimelineCapability>(out var capability, considerParents: true))
         {
-            if(ImBrio.ToggelButton("Freeze Character", new Vector2(110, 0), capability.SpeedMultiplier == 0, hoverText: capability.SpeedMultiplierOverride == 0 ? "Un-Freeze Character" : "Freeze Character"))
+            if(ImBrio.ToggelButton("Freeze Character", new Vector2(110, 0), capability.SpeedMultiplier == 0, hoverText: capability.SpeedMultiplierOverride == 0 ? "Un-Freeze Character" : "Freeze Character") || InputManagerService.ActionKeysPressedLastFrame(InputAction.Posing_Freeze))
             {
                 if(capability.SpeedMultiplierOverride == 0)
                     capability.ResetOverallSpeedOverride();
@@ -203,7 +203,7 @@ public class PosingGraphicalWindow : Window, IDisposable
 
         ImGui.SameLine();
 
-        ImBrio.ToggleButtonStrip("posing_page_selector", new(ImBrio.GetRemainingWidth() - RightPanelWidth - 10, ImBrio.GetLineHeight()), ref _selectedPane, _bonePages);
+        ImBrio.ButtonSelectorStrip("posing_page_selector", new(ImBrio.GetRemainingWidth() - RightPanelWidth - 10, ImBrio.GetLineHeight()), ref _selectedPane, _bonePages);
 
         ImGui.SameLine();
 
@@ -346,7 +346,7 @@ public class PosingGraphicalWindow : Window, IDisposable
         if(ImBrio.Button("Import##import_pose", FontAwesomeIcon.FileImport, buttonSize))
             ImGui.OpenPopup("DrawImportPoseMenuPopup");
 
-        FileUIHelpers.DrawImportPoseMenuPopup(posing, false);
+        FileUIHelpers.DrawImportPoseMenuPopup("posingGraphicalWindow", posing, false);
 
         ImGui.SameLine();
 
