@@ -234,11 +234,11 @@ public class ActorAppearanceCapability : ActorCharacterCapability
             SelectedDesign = ("None", null);
         }
     }
-    public void SetProfileToNone()
+    public void SetProfileToNone(bool force = false)
     {
         var profile = _customizePlusService.GetActiveProfile(Character);
 
-        if(profile.Item1 is null)
+        if(profile.Item1 is null && force is false)
         {
             ResetProfile();
         }
@@ -267,7 +267,7 @@ public class ActorAppearanceCapability : ActorCharacterCapability
             _modelShaderOverride.Reset();
         }
 
-        if(Entity is ActorEntity actor && actor.IsProp == true)
+        if(Entity is ActorEntity actor && actor.IsProp is true)
             await _framework.RunOnTick(() =>
             {
                 AttachWeapon();
