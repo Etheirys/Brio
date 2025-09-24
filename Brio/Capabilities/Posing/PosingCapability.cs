@@ -229,6 +229,17 @@ public class PosingCapability : ActorCharacterCapability
 
         if(generateSnapshot)
             _framework.RunOnTick(() => Snapshot(reset, reconcile, asExpression: asExpression), delayTicks: 4);
+
+        if(expressionPhase2)
+        {
+            var bone = SkeletonPosing.GetBone("j_kao", PoseInfoSlot.Character);
+            if(bone != null)
+            {
+                var poseInfo = SkeletonPosing.PoseInfo.GetPoseInfo(bone);
+                if(poseInfo.HasStacks)
+                    poseInfo.RemoveLastStack();
+            }
+        }
     }
 
     public PoseFile ExportPose()
