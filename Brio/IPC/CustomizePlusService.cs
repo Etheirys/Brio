@@ -142,7 +142,7 @@ public class CustomizePlusService : BrioIPC
 
     public bool SetProfile(IGameObject? character, string profileData)
     {
-        if(IsAvailable == false && string.IsNullOrEmpty(profileData) && character is not null)
+        if(IsAvailable == false && string.IsNullOrEmpty(profileData) && character is null)
             return false;
 
         _customizeplusSetTemporaryProfile.InvokeFunc(character!.ObjectIndex, profileData);

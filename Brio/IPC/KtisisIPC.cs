@@ -31,8 +31,8 @@ public class KtisisIPC : BrioIPC
 
     private readonly ICallGateSubscriber<(int, int)>? _ktisisApiVersion;
 
-    private readonly ICallGateSubscriber<IGameObject, Task<string?>> _ktisisLoadPose;
-    private readonly ICallGateSubscriber<IGameObject, string, Task<bool>> _ktisisSavePose;
+    //private readonly ICallGateSubscriber<IGameObject, Task<string?>> _ktisisLoadPose;
+    //private readonly ICallGateSubscriber<IGameObject, string, Task<bool>> _ktisisSavePose;
 
     private readonly ICallGateSubscriber<bool> _ktisisRefreshActors;
     private readonly ICallGateSubscriber<bool> _ktisisIsPosing;
