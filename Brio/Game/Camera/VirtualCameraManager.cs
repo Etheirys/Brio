@@ -205,7 +205,8 @@ public class VirtualCameraManager : IDisposable
 
     public void DestroyAll()
     {
-        CurrentCamera = null;
+        if(CurrentCamera?.CameraID != 0)
+            CurrentCamera = null;
         foreach(var item in _createdCameras.Values)
         {
             DestroyCamera(item.CameraID);

@@ -77,8 +77,7 @@ public class FileUIHelpers
     static TransformComponents? transformComponents = null;
     public static void DrawImportPoseMenuPopup(string tag, PosingCapability capability, bool showImportOptions = true)
     {
-        using var popup = ImRaii.Popup("DrawImportPoseMenuPopup");
-
+        using var popup = ImRaii.Popup($"DrawImportPoseMenuPopup");
         if(popup.Success)
         {
             var imIO = ImGui.GetIO();
@@ -87,9 +86,10 @@ public class FileUIHelpers
 
             using(ImRaii.PushColor(ImGuiCol.Button, UIConstants.Transparent))
             {
-                var size = new Vector2(245, 400);
-
-                size.Y = 44;
+                var size = new Vector2(245, 400)
+                {
+                    Y = 44
+                };
 
                 var buttonSize = size / 8;
 
@@ -181,13 +181,13 @@ public class FileUIHelpers
                     capability.LoadResourcesPose("Data.BrioTPose.pose", freezeOnLoad: freezeOnLoad, asBody: true);
                     ImGui.CloseCurrentPopup();
                 }
-            }
 
-            using(var popup2 = ImRaii.Popup($"import_{tag}_optionsImportPoseMenuPopup"))
-            {
-                if(popup2.Success && showImportOptions && Brio.TryGetService<PosingService>(out var service))
+                using(var popup2 = ImRaii.Popup($"import_{tag}_optionsImportPoseMenuPopup"))
                 {
-                    PosingEditorCommon.DrawImportOptionEditor(service.DefaultImporterOptions, true);
+                    if(popup2.Success && showImportOptions && Brio.TryGetService<PosingService>(out var service))
+                    {
+                        PosingEditorCommon.DrawImportOptionEditor(service.DefaultImporterOptions, true);
+                    }
                 }
             }
 
