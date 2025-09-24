@@ -596,11 +596,12 @@ public class MCDFService : IDisposable
         //Task<string> getHonorificTitle = _ipcManager.Honorific.GetTitle();
 
         Task<string> getGlamourerData = _glamourerService.GetCharacterCustomizationAsync(playerRelatedObject.Address);
-        Task<string?> getCustomizeData = _customizePlusService.GetScaleAsync(playerRelatedObject.Address);
+        Task<string?> getCustomizeData = _customizePlusService.GetScaleAsync(playerRelatedObject);
+        
         fragment.GlamourerString = await getGlamourerData.ConfigureAwait(false);
         Brio.Log.Verbose("Glamourer is now: {data}", fragment.GlamourerString);
-        var customizeScale = await getCustomizeData.ConfigureAwait(false);
-        fragment.CustomizePlusScale = customizeScale ?? string.Empty;
+       
+        fragment.CustomizePlusScale = await getCustomizeData.ConfigureAwait(false) ?? string.Empty;
         Brio.Log.Verbose("Customize is now: {data}", fragment.CustomizePlusScale);
 
         if(objectKind == ObjectKind.Player)

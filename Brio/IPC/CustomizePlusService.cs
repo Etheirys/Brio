@@ -8,10 +8,16 @@ global using IPCProfileDataTuple = (
     System.Collections.Generic.List<(string Name, ushort WorldId, byte CharacterType, ushort CharacterSubType)> Characters,
     int Priority,
     bool IsEnabled);
+using Brio.Capabilities.Actor;
+
 
 // ---------------------------------------------------------------------------------
 
 using Brio.Config;
+using Brio.Core;
+using Brio.Entities;
+using Brio.Entities.Core;
+using Brio.Game.Core;
 using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Ipc;
@@ -46,6 +52,8 @@ public class CustomizePlusService : BrioIPC
     private readonly ConfigurationService _configurationService;
     private readonly IDalamudPluginInterface _pluginInterface;
     private readonly ICommandManager _commandManager;
+    private readonly DalamudService _dalamudService;
+    private readonly EntityManager _entityManager;
     private readonly IObjectTable _gameObjects;
     private readonly IFramework _framework;
 
@@ -59,13 +67,15 @@ public class CustomizePlusService : BrioIPC
     private readonly ICallGateSubscriber<bool> _customizeplusIsValid;
 
 
-    public CustomizePlusService(IDalamudPluginInterface pluginInterface, ICommandManager commandManager, IObjectTable gameObjects, ConfigurationService configurationService, IFramework framework)
+    public CustomizePlusService(IDalamudPluginInterface pluginInterface, EntityManager entityManager, DalamudService dalamudService, ICommandManager commandManager, IObjectTable gameObjects, ConfigurationService configurationService, IFramework framework)
     {
         _pluginInterface = pluginInterface;
         _configurationService = configurationService;
         _framework = framework;
         _gameObjects = gameObjects;
         _commandManager = commandManager;
+        _dalamudService = dalamudService;
+        _entityManager = entityManager;
 
         _customizeplusApiVersion = _pluginInterface.GetIpcSubscriber<(int, int)>("CustomizePlus.General.GetApiVersion");
         _customizeplusIsValid = _pluginInterface.GetIpcSubscriber<bool>("CustomizePlus.General.IsValid");
@@ -173,19 +183,38 @@ public class CustomizePlusService : BrioIPC
         }).ConfigureAwait(false);
     }
 
-    public async Task<string?> GetScaleAsync(nint character)
+    public async Task<string?> GetScaleAsync(IGameObject gameObj)
     {
         if(IsAvailable == false) return null;
 
         var scale = await _framework.RunOnFrameworkThread(() =>
         {
-            var gameObj = _gameObjects.CreateObjectReference(character);
             if(gameObj is ICharacter c)
             {
-                var res = _customizeplusGetActiveProfileId.InvokeFunc(c.ObjectIndex);
-                Brio.Log.Debug("CustomizePlus GetActiveProfile returned {err}", res.Item1);
-                if(res.Item1 != 0 || res.Item2 == null) return string.Empty;
-                return _customizeplusGetProfileById.InvokeFunc(res.Item2.Value).Item2;
+                if(_dalamudService.GetPlayerCharacter() == c)
+                {
+                    var res = _customizeplusGetActiveProfileId.InvokeFunc(c.ObjectIndex);
+                    Brio.Log.Debug("CustomizePlus GetActiveProfile returned {err} - {name}", res.Item1, c.Name);
+                    if(res.Item1 != 0 || res.Item2 == null) return string.Empty;
+                    return _customizeplusGetProfileById.InvokeFunc(res.Item2.Value).Item2;
+                }
+                else
+                {
+                    var entity = _entityManager.GetEntity(new EntityId(gameObj));
+                    if(entity is not null)
+                    {
+                        if(entity.TryGetCapability<ActorAppearanceCapability>(out var appearance))
+                        {
+                            if(appearance.SelectedDesign.id is not null && appearance.SelectedDesign.id.Value != Guid.Empty)
+                            {
+                                var res = GetProfile(appearance.SelectedDesign.id.Value);
+                                Brio.Log.Debug("CustomizePlus GetActiveProfile returned {err} - {name}", res.Item1, c.Name);
+                                if(res.Item1 != 0 || res.Item2 == null) return string.Empty;
+                                return res.Item2;
+                            }
+                        }
+                    }
+                }
             }
 
             return string.Empty;

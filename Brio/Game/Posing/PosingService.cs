@@ -31,7 +31,6 @@ public class PosingService
         OverlayFilter.DisableCategory("ex");
         OverlayFilter.DisableCategory("weapon");
         OverlayFilter.DisableCategory("clothing");
-        //OverlayFilter.DisableCategory("other");
         OverlayFilter.DisableCategory("legacy");
 
 

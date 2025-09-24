@@ -17,6 +17,8 @@ public static class AppearanceEditorCommon
 {
     // Helpers for color handling (Thank you Ny, from https://github.com/Ottermandias/Glamourer/blob/0a9693daea99f79c44b2a69e1bfb006573a721a0/Glamourer/Interop/Material/MaterialValueManager.cs#L43-L53)
 
+    // TODO Move this to MathHelpers or something (Ken)
+
     private static Vector4 Square(Vector4 value)
         => new(Square(value.X), Square(value.Y), Square(value.Z), Square(value.W));
     private static Vector3 Square(Vector3 value)
@@ -36,10 +38,10 @@ public static class AppearanceEditorCommon
     private const string _collectionLabel = "Collection";
     private const string _collectionLabelDesign = "Design";
     private const string _collectionLabelProfile = "Profile";
-   
+
     private static float _lableWidth => ImGui.CalcTextSize(_collectionLabel).X - (44 * ImGuiHelpers.GlobalScale) + 125;
-    private static float _lableWidthDesign => ImGui.CalcTextSize(_collectionLabelDesign).X - (44 * ImGuiHelpers.GlobalScale) + 142;  
-    private static float _lableWidthProfile => ImGui.CalcTextSize(_collectionLabelProfile).X - (44 * ImGuiHelpers.GlobalScale) + 144;  
+    private static float _lableWidthDesign => ImGui.CalcTextSize(_collectionLabelDesign).X - (44 * ImGuiHelpers.GlobalScale) + 142;
+    private static float _lableWidthProfile => ImGui.CalcTextSize(_collectionLabelProfile).X - (44 * ImGuiHelpers.GlobalScale) + 144;
 
     //
 
@@ -49,7 +51,7 @@ public static class AppearanceEditorCommon
     {
         if(!capability.HasPenumbraIntegration)
             return;
-     
+
         ImBrio.VerticalPadding(1);
 
         if(ImBrio.FontIconButton(FontAwesomeIcon.EarthOceania))
@@ -133,7 +135,7 @@ public static class AppearanceEditorCommon
     }
 
     private static bool _isProfileOpen = false;
-    private static IEnumerable<IPCProfileDataTuple> _profiles = [];
+    private static List<IPCProfileDataTuple> _profiles = [];
     public static void DrawCustomizePlusProfileSwitcher(ActorAppearanceCapability capability)
     {
         if(!capability.HasCustomizePlusIntegration)
@@ -156,6 +158,7 @@ public static class AppearanceEditorCommon
             capability.SetSelectedProfile();
         }
 
+        using(ImRaii.Disabled(capability.HasMCDF))
         using(var combo = ImRaii.Combo(_collectionLabelProfile, capability.SelectedDesign.name!))
         {
             if(combo.Success)
@@ -163,7 +166,9 @@ public static class AppearanceEditorCommon
                 if(_isProfileOpen == false)
                 {
                     _isProfileOpen = true;
-                    _profiles = capability.CustomizePlusService.GetProfiles();
+                    _profiles = [.. capability.CustomizePlusService.GetProfiles()];
+
+                    _profiles.Add(new IPCProfileDataTuple { Name = "None", UniqueId = Guid.Empty });
 
                     if(capability.SelectedDesign.id is null)
                         capability.SetSelectedProfile();
@@ -171,14 +176,20 @@ public static class AppearanceEditorCommon
 
                 if(_profiles is not null)
                 {
-                    foreach(var collection in _profiles)
+                    foreach(IPCProfileDataTuple collection in _profiles)
                     {
                         bool isSelected = collection.UniqueId.Equals(capability.CurrentProfile.id);
                         if(ImGui.Selectable(collection.Name, isSelected))
                         {
                             capability.ResetProfile();
                             var (_, data) = capability.CustomizePlusService.GetProfile(collection.UniqueId);
-                            if(string.IsNullOrEmpty(data) == false)
+
+                            if(collection.UniqueId == Guid.Empty)
+                            {
+                                capability.SelectedDesign = ("None", null);
+                                capability.SetProfileToNone();
+                            }
+                            else if(string.IsNullOrEmpty(data) == false)
                             {
                                 capability.SelectedDesign = (collection.Name, collection.UniqueId);
                                 capability.SetProfile(data);
@@ -193,6 +204,9 @@ public static class AppearanceEditorCommon
                 _profiles = [];
             }
         }
+
+        if(capability.HasMCDF)
+            ImBrio.AttachToolTip("Unable to apply Customize+ profile while a MCDF is applied!");
 
         ImGui.SameLine();
 
