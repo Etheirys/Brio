@@ -56,7 +56,7 @@ public class PosingWidget(PosingCapability capability) : Widget<PosingCapability
                 ImGui.OpenPopup("DrawImportPoseMenuPopup");
             }
 
-            FileUIHelpers.DrawImportPoseMenuPopup("postingWidget",Capability);
+            FileUIHelpers.DrawImportPoseMenuPopup("postingWidget", Capability);
 
             ImGui.SameLine();
 

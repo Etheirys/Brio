@@ -340,33 +340,16 @@ public class PosingGraphicalWindow : Window, IDisposable
 
     private void DrawImportButtons(PosingCapability posing)
     {
-        float settingsSize = 28;
-        var buttonSize = new Vector2(((ImGui.GetContentRegionAvail().X - settingsSize) / 2.0f) - (ImGui.GetStyle().FramePadding.X * 2), 0);
+        var buttonSize = new Vector2((ImGui.GetContentRegionAvail().X / 2.0f) - (ImGui.GetStyle().FramePadding.X * 2), 0);
 
-        if(ImBrio.Button("Import##import_pose", FontAwesomeIcon.FileImport, buttonSize))
+        if(ImBrio.Button("Import##import_pose", FontAwesomeIcon.FileDownload, buttonSize))
             ImGui.OpenPopup("DrawImportPoseMenuPopup");
 
-        FileUIHelpers.DrawImportPoseMenuPopup("posingGraphicalWindow", posing, false);
+        FileUIHelpers.DrawImportPoseMenuPopup("posingGraphicalWindow", posing, true);
 
         ImGui.SameLine();
 
-        if(ImBrio.FontIconButton(FontAwesomeIcon.Cog, new(settingsSize, 0)))
-            ImGui.OpenPopup("import_options_popup_posing_graphical");
-
-        ImGui.SameLine();
-
-        if(ImGui.IsItemHovered())
-            ImGui.SetTooltip("Import Options");
-
-        using(var popup = ImRaii.Popup("import_options_popup_posing_graphical"))
-        {
-            if(popup.Success)
-            {
-                PosingEditorCommon.DrawImportOptionEditor(_posingService.DefaultImporterOptions);
-            }
-        }
-
-        if(ImBrio.Button("Export##export_pose", FontAwesomeIcon.FileExport, buttonSize))
+        if(ImBrio.Button("Export##export_pose", FontAwesomeIcon.Save, buttonSize))
             FileUIHelpers.ShowExportPoseModal(posing);
     }
 

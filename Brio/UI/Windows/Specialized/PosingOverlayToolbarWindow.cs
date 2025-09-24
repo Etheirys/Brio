@@ -447,8 +447,6 @@ public class PosingOverlayToolbarWindow : Window
         }
         ImBrio.AttachToolTip("Import Pose");
 
-        FileUIHelpers.DrawImportPoseMenuPopup("postingOverlay", posing, false);
-
         ImGui.SameLine();
 
         // Save Pose Button
@@ -461,6 +459,8 @@ public class PosingOverlayToolbarWindow : Window
         ImBrio.AttachToolTip("Save Pose");
 
         ImGui.PopStyleColor();
+      
+        FileUIHelpers.DrawImportPoseMenuPopup("postingOverlay", posing, true);
 
         using(var popup = ImRaii.Popup("overlay_bone_search_popup"))
         {
@@ -485,12 +485,10 @@ public class PosingOverlayToolbarWindow : Window
 
     private void DrawBoneFilterPopup()
     {
-        using(var popup = ImRaii.Popup(_boneFilterPopupName))
+        using var popup = ImRaii.Popup(_boneFilterPopupName);
+        if(popup.Success)
         {
-            if(popup.Success)
-            {
-                PosingEditorCommon.DrawBoneFilterEditor(_posingService.OverlayFilter);
-            }
+            PosingEditorCommon.DrawBoneFilterEditor(_posingService.OverlayFilter);
         }
     }
 }
