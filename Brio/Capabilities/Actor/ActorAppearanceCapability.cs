@@ -135,11 +135,14 @@ public class ActorAppearanceCapability : ActorCharacterCapability
             Entity.LoadingDescription = "Saving MCDF...";
             Entity.IsLoading = true;
             await _mCDFService.SaveMCDF(path, dis, GameObject);
-            Entity.IsLoading = false;
         }
         catch(Exception ex)
         {
             Brio.Log.Warning(ex, "Exception while Loading MCDF");
+        }
+        finally 
+        {
+            Entity.IsLoading = false;
         }
     }
 
