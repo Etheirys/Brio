@@ -143,6 +143,7 @@ public class ActorAppearanceCapability : ActorCharacterCapability
         finally 
         {
             Entity.IsLoading = false;
+            Brio.NotifyError("MCDF Export failed! Try again!");
         }
     }
 
