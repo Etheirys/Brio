@@ -513,7 +513,7 @@ public class MCDFService : IDisposable
         if(_glamourerService.CheckForLock(playerRelatedObject))
         {
             Brio.Log.Information("Unable to apply MCDF, Actor is Locked by Glamourer");
-            Brio.NotifyError("Unable to apply MCDF, Actor is Locked by Glamourer");
+            Brio.NotifyError("Unable to apply MCDF! Actor is Locked! Are you using a sync service?!");
 
             throw new Exception("Glamourer has Lock");
         }
