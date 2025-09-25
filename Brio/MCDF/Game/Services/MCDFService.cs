@@ -549,22 +549,6 @@ public class MCDFService : IDisposable
 
         await _transientResourceService.WaitForRecording(ct).ConfigureAwait(false);
 
-        // if it's pet then it's summoner, if it's summoner we actually want to keep all filereplacements alive at all times
-        // or we get into redraw city for every change and nothing works properly
-        if(objectKind == ObjectKind.Companion)
-        {
-            foreach(var item in fragment.FileReplacements.Where(i => i.HasFileReplacement).SelectMany(p => p.GamePaths))
-            {
-                if(_transientResourceService.AddTransientResource(API.Data.Enum.ObjectKind.Pet, item))
-                {
-                    Brio.Log.Verbose("Marking static {item} for Pet as transient", item);
-                }
-            }
-
-            Brio.Log.Verbose("Clearing {count} Static Replacements for Pet", fragment.FileReplacements.Count);
-            fragment.FileReplacements.Clear();
-        }
-
         ct.ThrowIfCancellationRequested();
 
         Brio.Log.Verbose("Handling transient update for {obj}", playerRelatedObject);
