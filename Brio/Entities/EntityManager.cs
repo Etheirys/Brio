@@ -55,7 +55,7 @@ public unsafe partial class EntityManager(IServiceProvider serviceProvider, Conf
 
         RefreshDebugEntity();
 
-        var environmentEntity = ActivatorUtilities.CreateInstance<EnvironmentEntity>(_serviceProvider);
+        var environmentEntity = ActivatorUtilities.CreateInstance<EnvironmentContainerEntity>(_serviceProvider);
         AttachEntity(environmentEntity, _worldEntity);
 
         var cameraContainerEntity = ActivatorUtilities.CreateInstance<CameraContainerEntity>(_serviceProvider);

@@ -40,20 +40,19 @@ public class SceneService(EntityManager _entityManager, VirtualCameraManager _vi
             sceneFile.GameCameras.Add(new GameCameraFile { Camera = camera.VirtualCamera, CameraType = camera.CameraType });
         }
 
-        var environmentEntity = _entityManager.GetEntity<EnvironmentEntity>("environment");
+        var environmentEntity = _entityManager.GetEntity<EnvironmentContainerEntity>("environment");
 
         if(environmentEntity is not null)
         {
-            var tc = environmentEntity.GetCapability<TimeCapability>();
-            var wc = environmentEntity.GetCapability<WeatherCapability>();
+            var wc = environmentEntity.GetCapability<TimeWeatherCapability>();
             var wrc = environmentEntity.GetCapability<WorldRenderingCapability>();
             sceneFile.EnvironmentData = new EnvironmentData
             {
                 CurrentWeather = wc.WeatherService.CurrentWeather,
-                IsTimeFrozen = tc.TimeService.IsTimeFrozen,
-                EorzeaTime = tc.TimeService.EorzeaTime,
-                DayOfMonth = tc.TimeService.DayOfMonth,
-                MinuteOfDay = tc.TimeService.MinuteOfDay,
+                IsTimeFrozen = wc.TimeService.IsTimeFrozen,
+                EorzeaTime = wc.TimeService.EorzeaTime,
+                DayOfMonth = wc.TimeService.DayOfMonth,
+                MinuteOfDay = wc.TimeService.MinuteOfDay,
                 IsWaterFrozen = wrc.WorldRenderingService.IsWaterFrozen
             };
         }
@@ -114,16 +113,15 @@ public class SceneService(EntityManager _entityManager, VirtualCameraManager _vi
 
         if(sceneFile.EnvironmentData is not null)
         {
-            var environmentEntity = _entityManager.GetEntity<EnvironmentEntity>("environment")!;
-            var tc = environmentEntity.GetCapability<TimeCapability>();
-            var wc = environmentEntity.GetCapability<WeatherCapability>();
+            var environmentEntity = _entityManager.GetEntity<EnvironmentContainerEntity>("environment")!;
+            var wc = environmentEntity.GetCapability<TimeWeatherCapability>();
             var wrc = environmentEntity.GetCapability<WorldRenderingCapability>();
 
             wc.WeatherService.CurrentWeather = sceneFile.EnvironmentData.CurrentWeather;
-            tc.TimeService.IsTimeFrozen = sceneFile.EnvironmentData.IsTimeFrozen;
-            tc.TimeService.EorzeaTime = sceneFile.EnvironmentData.EorzeaTime;
-            tc.TimeService.DayOfMonth = sceneFile.EnvironmentData.DayOfMonth;
-            tc.TimeService.MinuteOfDay = sceneFile.EnvironmentData.MinuteOfDay;
+            wc.TimeService.IsTimeFrozen = sceneFile.EnvironmentData.IsTimeFrozen;
+            wc.TimeService.EorzeaTime = sceneFile.EnvironmentData.EorzeaTime;
+            wc.TimeService.DayOfMonth = sceneFile.EnvironmentData.DayOfMonth;
+            wc.TimeService.MinuteOfDay = sceneFile.EnvironmentData.MinuteOfDay;
             wrc.WorldRenderingService.IsWaterFrozen = sceneFile.EnvironmentData.IsWaterFrozen;
         }
 
