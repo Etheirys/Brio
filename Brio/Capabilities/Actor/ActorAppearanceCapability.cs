@@ -120,11 +120,15 @@ public class ActorAppearanceCapability : ActorCharacterCapability
             await _mCDFService.ApplyMCDF(GameObject);
 
             HasMCDF = true;
-            Entity.IsLoading = false;
         }
         catch(Exception ex)
         {
             Brio.Log.Warning(ex, "Exception while Loading MCDF");
+            Brio.NotifyError("MCDF Loading failed! Try again!");
+        }
+        finally
+        {
+            Entity.IsLoading = false;
         }
     }
 
