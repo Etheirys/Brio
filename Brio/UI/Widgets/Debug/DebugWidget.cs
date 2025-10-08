@@ -1,4 +1,5 @@
 ﻿using Brio.Capabilities.Debug;
+using Brio.Game.World;
 using Brio.IPC;
 using Brio.UI.Controls.Stateless;
 using Brio.UI.Widgets.Core;
@@ -67,7 +68,7 @@ public class DebugWidget(DebugCapability capability, IClientState _clientState) 
 
     private unsafe void DrawAddresses()
     {
-        DynamisIPC.Instance?.DrawPointer((nint)EnvManagerEx.Instance());
+        DynamisIPC.Instance?.DrawPointer((nint)BrioEnvManager.Instance());
 
         foreach(var (desc, addr) in Capability.GetInterestingAddresses())
         {
