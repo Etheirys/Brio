@@ -8,12 +8,10 @@ namespace Brio.Core;
 public class WelcomeService : IDisposable
 {
     private readonly GPoseService _gPoseService;
-    private readonly UpdateWindow _updateWindow;
 
     public WelcomeService(ConfigurationService configService, MainWindow mainWindow, UpdateWindow updateWindow, GPoseService gPoseService)
     {
         _gPoseService = gPoseService;
-        _updateWindow = updateWindow;
 
         if(configService.Configuration.PopupKey == -1) // New User
         {
