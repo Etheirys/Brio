@@ -39,9 +39,15 @@ public class CustomizeEditor()
 
                 if(_capability.IsHuman)
                 {
+                    ImBrio.VerticalPadding(2);
                     ImGui.Separator();
+                    ImBrio.VerticalPadding(2);
+                    
                     didChange |= DrawRaceSelector(ref currentAppearance.Customize);
+                 
+                    ImBrio.VerticalPadding(2);
                     ImGui.Separator();
+                    ImBrio.VerticalPadding(2);
 
                     var menus = BrioCharaMakeType.BuildMenus(currentAppearance);
                     didChange |= DrawMenus(ref currentAppearance, menus);
@@ -95,7 +101,10 @@ public class CustomizeEditor()
                     break;
 
                 case CustomizeIndex.EyeShape:
+                    ImBrio.VerticalPadding(4);
                     didChange |= DrawEyeSelector(ref appearance.Customize);
+                    ImGui.Separator();
+                    ImBrio.VerticalPadding(4);
                     break;
 
                 case CustomizeIndex.EyeColor:
@@ -104,7 +113,10 @@ public class CustomizeEditor()
                     break;
 
                 case CustomizeIndex.HairStyle:
+                    ImBrio.VerticalPadding(4);
                     didChange |= DrawHairSelect(ref appearance.Customize, menu, menu.Title);
+                    ImGui.Separator();
+                    ImBrio.VerticalPadding(4);
                     break;
 
                 case CustomizeIndex.HairColor:
@@ -113,17 +125,27 @@ public class CustomizeEditor()
                     break;
 
                 case CustomizeIndex.LipStyle:
+                    ImBrio.VerticalPadding(4);
                     didChange |= DrawMouth(ref appearance.Customize, menu.Title, hasLipColor);
+                    ImGui.Separator();
+                    ImBrio.VerticalPadding(4);
                     break;
 
                 case CustomizeIndex.LipColor:
                     if(!hasLipColor)
+                    {
+                        ImBrio.VerticalPadding(4);
                         didChange |= DrawListSelector(ref appearance.Customize, CustomizeIndex.LipColor, menu.Title);
-
+                        ImGui.Separator();
+                        ImBrio.VerticalPadding(4);
+                    }
                     break;
 
                 case CustomizeIndex.Facepaint:
+                    ImBrio.VerticalPadding(4);
                     didChange |= DrawFacePaintSelect(ref appearance.Customize, menu, menu.Title);
+                    ImGui.Separator();
+                    ImBrio.VerticalPadding(4);
                     break;
 
                 case CustomizeIndex.FacepaintColor:
@@ -136,8 +158,11 @@ public class CustomizeEditor()
                     {
                         if(colorMenu != null)
                         {
+                            ImBrio.VerticalPadding(4);
                             didChange |= DrawFeatureSelect(ref appearance.Customize, menu, colorMenu);
                             featuresDone = true;
+                            ImGui.Separator();
+                            ImBrio.VerticalPadding(4);
                         }
                     }
                     break;
@@ -147,9 +172,11 @@ public class CustomizeEditor()
                     break;
 
                 default:
+                    ImBrio.VerticalPadding(4);
                     didChange |= DrawGenericMenu(ref appearance.Customize, menu);
+                    ImGui.Separator();
+                    ImBrio.VerticalPadding(4);
                     break;
-
             }
         }
 
@@ -386,7 +413,6 @@ public class CustomizeEditor()
         ImGui.SameLine();
         ImGui.SetCursorPosX(LabelStart);
         ImGui.Text("Eyes");
-
 
         return madeChange;
     }
@@ -661,7 +687,7 @@ public class CustomizeEditor()
         var menuType = menu.Type;
         var customizeIndex = menu.CustomizeIndex;
         var title = menu.Title;
-
+       
         return menuType switch
         {
             BrioCharaMakeType.MenuType.Numerical => DrawNumericalSelector(ref customize, customizeIndex, title),
@@ -703,8 +729,6 @@ public class CustomizeEditor()
             customize.Data[(int)customizeIndex] = (byte)valueIdx;
             madeChange |= true;
         }
-
-
 
         return madeChange;
     }
