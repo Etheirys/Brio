@@ -1,18 +1,23 @@
 ﻿{
   "Categories": {
-    "body": {
+   "headCategory": {
+      "Type": "Category",
+      "Bones": [
+        "hair",
+        "head",
+        "face",
+        "eyes",
+        "lips",
+        "jaw",
+        "ears",
+      ]
+    },
+    "hair": {
       "Type": "Filter",
       "Bones": [
-        "n_root",
-        "n_hara",
-        "n_hkata_",
-        "n_hhiji_",
-        "j_kosi",
-        "j_kubi",
-        "j_sebo_",
-        "j_mune_",
-        "j_sako_",
-        "j_ude_"
+        "j_ex_h",
+        "j_kami_",
+        "j_ex_met_va"
       ]
     },
     "head": {
@@ -118,12 +123,70 @@
         "j_zer"
       ]
     },
-    "hair": {
+   "bodyCategory": {
+      "Type": "Category",
+      "Bones": [
+        "body",
+        "handsLeft",
+        "handsRight",
+        "legs",
+        "tail"
+      ]
+    },
+    "body": {
       "Type": "Filter",
       "Bones": [
-        "j_ex_h",
-        "j_kami_",
-        "j_ex_met_va"
+        "n_root",
+        "n_hara",
+        "j_kosi",
+        "j_kubi",
+        "j_sebo_",
+        "j_mune_",
+        "j_sako_",
+      ]
+    },
+    "handsLeft": {
+      "Type": "Filter",
+      "Bones": [
+        "j_ude_b_r",
+        "j_ko_a_r",
+        "n_hhiji_r",
+        "j_hito_a_r",
+        "j_kusu_a_r",
+        "j_ko_b_r",
+        "j_oya_a_r",
+        "j_hito_b_r",
+        "j_naka_a_r",
+        "j_kusu_b_r",
+        "j_naka_b_r",
+        "j_oya_b_r",
+        "j_te_r",
+        "j_hand_r",
+        "n_hte_r",
+        "n_hkata_r",
+        "j_ude_a_r",
+      ]
+    },
+    "handsRight": {
+      "Type": "Filter",
+      "Bones": [
+        "j_ude_b_l",
+        "j_ko_a_l",
+        "n_hhiji_l",
+        "j_hito_a_l",
+        "j_kusu_a_l",
+        "j_ko_b_l",
+        "j_oya_a_l",
+        "j_hito_b_l",
+        "j_naka_a_l",
+        "j_kusu_b_l",
+        "j_naka_b_l",
+        "j_oya_b_l",
+        "j_te_l",
+        "j_hand_l",
+        "n_hte_l",
+        "n_hkata_l",
+        "j_ude_a_l",
       ]
     },
     "legs": {
@@ -138,16 +201,88 @@
         "n_sippo_"
       ]
     },
-    "hands": {
+    "ivcsCategory": {
+      "Type": "Category",
+      "Bones": [
+        "ivcsHandsLeft",
+        "ivcsHandsRight",
+        "ivcsPenis",
+        "ivcsVagina",
+        "ivcsAbdomen",
+        "ivcsLegs",
+        "ivcsButt",
+      ]
+    },
+    "ivcsAbdomen": {
       "Type": "Filter",
       "Bones": [
-        "n_hte_",
-        "j_te_",
-        "j_hito_",
-        "j_ko_",
-        "j_kusu_",
-        "j_oya_",
-        "j_naka_"
+        "iv_c_mune_",
+        "iv_kyokin_phys_",
+        "iv_fukubu_phys",
+        "iv_fukubu_phys_"
+      ]
+    },
+    "ivcsHandsRight": {
+      "Type": "Filter",
+      "Bones": [
+        "iv_ko_c_r",
+        "iv_kusu_c_r",
+        "iv_naka_c_r",
+        "iv_hito_c_r",
+        "iv_nitoukin_r",
+      ]
+    },
+    "ivcsHandsLeft": {
+      "Type": "Filter",
+      "Bones": [
+        "iv_ko_c_l",
+        "iv_kusu_c_l",
+        "iv_naka_c_l",
+        "iv_hito_c_l",
+        "iv_nitoukin_l",
+      ]
+    },
+    "ivcsLegs": {
+      "Type": "Filter",
+      "Bones": [
+        "iv_daitai_phys_",
+        "iv_asi_",
+      ]
+    },
+    "ivcsButt": {
+      "Type": "Filter",
+      "Bones": [
+        "iv_koumon",
+        "iv_koumon_",
+        "iv_shiri_",
+        "ya_shiri_phys_",
+      ]
+    },
+    "ivcsPenis": {
+      "Type": "Filter",
+      "Bones": [
+        "iv_kougan_",
+        "iv_ochinko_",
+        "j_penis",
+        "j_balls",
+        "iv_funyachin_phy_",
+        "iv_kintama_phys_"
+      ]
+    },
+    "ivcsVagina": {
+      "Type": "Filter",
+      "Bones": [
+        "iv_omanko",
+        "iv_kuritto",
+        "iv_inshin_"
+      ]
+    },
+   "otherCategory": {
+      "Type": "Category",
+      "Bones": [
+        "clothing",
+        "weapon",
+        "legacy"
       ]
     },
     "clothing": {
@@ -170,12 +305,6 @@
       "Bones": [
         "n_buki_",
         "j_buki"
-      ]
-    },
-    "ivcs": {
-      "Type": "Filter",
-      "Bones": [
-        "iv_"
       ]
     },
      "ex": {

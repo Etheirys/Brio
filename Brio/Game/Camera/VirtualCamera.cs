@@ -44,10 +44,10 @@ public unsafe partial class VirtualCamera
 
     public float PivotRotation
     {
-        get => IsActiveCamera ? BrioCamera->Rotation : (field);
+        get => IsActiveCamera ? BrioCamera->Roll : (field);
         set
         {
-            _ = IsActiveCamera ? (BrioCamera->Rotation = field = value) : (field = value);
+            _ = IsActiveCamera ? (BrioCamera->Roll = field = value) : (field = value);
         }
     }
 
@@ -62,10 +62,10 @@ public unsafe partial class VirtualCamera
 
     public float FoV
     {
-        get => IsActiveCamera ? BrioCamera->FoV : (field);
+        get => IsActiveCamera ? BrioCamera->Zoom : (field);
         set
         {
-            _ = IsActiveCamera ? (BrioCamera->FoV = field = value) : (field = value);
+            _ = IsActiveCamera ? (BrioCamera->Zoom = field = value) : (field = value);
         }
     } = 0;
 
@@ -165,18 +165,18 @@ public unsafe partial class VirtualCamera
 
     public void SaveCameraState()
     {
-        PivotRotation = BrioCamera->Rotation;
+        PivotRotation = BrioCamera->Roll;
         Zoom = BrioCamera->Camera.Distance;
-        FoV = BrioCamera->FoV;
+        FoV = BrioCamera->Zoom;
 
         Angle = BrioCamera->Angle;
         Pan = BrioCamera->Pan;
     }
     public void LoadCameraState()
     {
-        BrioCamera->Rotation = PivotRotation;
+        BrioCamera->Roll = PivotRotation;
         BrioCamera->Camera.Distance = Zoom;
-        BrioCamera->FoV = FoV;
+        BrioCamera->Zoom = FoV;
 
         BrioCamera->Angle = Angle;
         BrioCamera->Pan = Pan;

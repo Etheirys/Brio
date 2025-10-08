@@ -34,7 +34,7 @@ namespace Brio;
 
 public class Brio : IDalamudPlugin
 {
-    public const string Name = "BRIO DEV";
+    public const string Name = "BRIO";
 
     private static ServiceProvider? _services = null;
 
@@ -130,6 +130,7 @@ public class Brio : IDalamudPlugin
         serviceCollection.AddSingleton<TransientResourceService>();
         serviceCollection.AddSingleton<ActorLookAtService>();
         serviceCollection.AddSingleton<CharacterHandlerService>();
+        serviceCollection.AddSingleton<LightingService>();
 
         // IPC
         serviceCollection.AddSingleton<BrioIPCService>();
@@ -203,6 +204,7 @@ public class Brio : IDalamudPlugin
         serviceCollection.AddSingleton<PosingTransformWindow>();
         serviceCollection.AddSingleton<CameraWindow>();
         serviceCollection.AddSingleton<PosingGraphicalWindow>();
+        serviceCollection.AddSingleton<LightWindow>();
         serviceCollection.AddSingleton<ImBrioText>();
 
         return serviceCollection;

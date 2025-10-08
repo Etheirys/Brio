@@ -8,6 +8,7 @@ using Brio.UI.Controls.Core;
 using Brio.UI.Controls.Stateless;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface;
+using Dalamud.Interface.Utility;
 using Dalamud.Interface.Utility.Raii;
 using System.IO;
 using System.Numerics;
@@ -23,12 +24,12 @@ public static class CameraEditor
         {
             using(ImRaii.PushColor(ImGuiCol.Button, UIConstants.Transparent))
             {
-                if(ImGui.Button("New Brio Camera"))
+                if(ImGui.Button("New Brio Camera"u8, new(155 * ImGuiHelpers.GlobalScale, 0)))
                 {
-                    virtualCameraManager.CreateCamera(CameraType.Brio);
+                    virtualCameraManager.CreateCamera(CameraType.Game);
                 }
 
-                if(ImGui.Button("New Free-Cam"))
+                if(ImGui.Button("New Free-Cam"u8, new(155 * ImGuiHelpers.GlobalScale, 0)))
                 {
                     virtualCameraManager.CreateCamera(CameraType.Free);
                 }

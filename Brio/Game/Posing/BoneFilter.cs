@@ -5,9 +5,17 @@ using static Brio.Game.Posing.BoneCategories;
 
 namespace Brio.Game.Posing;
 
+public class SubCategory(string[] Categories, bool Enabled)
+{
+    public string[] Categories { get; } = Categories;
+    public bool Enabled { get; set; } = Enabled;
+}
+
 public class BoneFilter
 {
     private readonly PosingService _posingService;
+
+    private readonly Dictionary<string, SubCategory> _subCategories = [];
 
     private readonly HashSet<string> _allowedCategories = [];
 
@@ -20,7 +28,17 @@ public class BoneFilter
         _posingService = posingService;
 
         foreach(var category in _posingService.BoneCategories.Categories)
-            _allowedCategories.Add(category.Id);
+        {
+            switch(category.Type)
+            {
+                case BoneCategoryTypes.Category:
+                    _subCategories.Add(category.Id, new SubCategory([.. category.Bones], true));
+                    break;
+                case BoneCategoryTypes.Filter:
+                    _allowedCategories.Add(category.Id);
+                    break;
+            }
+        }
     }
 
     public unsafe bool IsBoneValid(Bone bone, PoseInfoSlot slot, bool considerHidden = false)
@@ -38,7 +56,7 @@ public class BoneFilter
         }
 
         // Weapon bone names don't matter
-        if(slot == PoseInfoSlot.MainHand || slot == PoseInfoSlot.OffHand)
+        if(slot is PoseInfoSlot.MainHand or PoseInfoSlot.OffHand)
             if(WeaponsAllowed)
                 return true;
             else
@@ -73,8 +91,31 @@ public class BoneFilter
 
     public bool OtherAllowed => _allowedCategories.Any((x) => x == "other");
 
+    public bool IsSubCategoryEnabled(string id) => _subCategories[id].Enabled;
+
     public bool IsCategoryEnabled(string id) => _allowedCategories.Any((x) => x == id);
     public bool IsCategoryEnabled(BoneCategory category) => _allowedCategories.Any(x => category.Id == x);
+
+
+    public void DisableSubCategory(string id)
+    {
+        var bones = _subCategories[id];
+        foreach(var category in bones.Categories)
+        {
+            _allowedCategories.Remove(category);
+        }
+        bones.Enabled = false;
+    }
+
+    public void EnableSubCategory(string id)
+    {
+        var bones = _subCategories[id];
+        foreach(var category in bones.Categories)
+        {
+            _allowedCategories.Add(category);
+        }
+        bones.Enabled = true;
+    }
 
     public void DisableCategory(string id)
     {

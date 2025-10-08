@@ -10,9 +10,9 @@ public class KtisisIPC : BrioIPC
 {
     public override string Name => "Ktisis";
 
-    public override bool IsAvailable => false;
+    public override bool IsAvailable => GetAPIVersion() is not (0, 0);
 
-    public override bool AllowIntegration => false;
+    public override bool AllowIntegration => true;
 
     public override int APIMajor => 1;
 
@@ -31,11 +31,11 @@ public class KtisisIPC : BrioIPC
 
     private readonly ICallGateSubscriber<(int, int)>? _ktisisApiVersion;
 
-    private readonly ICallGateSubscriber<IGameObject, Task<string?>> _ktisisLoadPose;
-    private readonly ICallGateSubscriber<IGameObject, string, Task<bool>> _ktisisSavePose;
+    //private readonly ICallGateSubscriber<IGameObject, Task<string?>> _ktisisLoadPose;
+    //private readonly ICallGateSubscriber<IGameObject, string, Task<bool>> _ktisisSavePose;
 
-    private readonly ICallGateSubscriber<bool> _ktisisRefreshActors;
-    private readonly ICallGateSubscriber<bool> _ktisisIsPosing;
+    private readonly ICallGateSubscriber<bool>? _ktisisRefreshActors;
+    private readonly ICallGateSubscriber<bool>? _ktisisIsPosing;
 
 
     public KtisisIPC(IDalamudPluginInterface pluginInterface, ConfigurationService configurationService)
@@ -46,6 +46,18 @@ public class KtisisIPC : BrioIPC
         _ktisisApiVersion = _pluginInterface.GetIpcSubscriber<(int, int)>("Ktisis.ApiVersion");
         _ktisisRefreshActors = _pluginInterface.GetIpcSubscriber<bool>("Ktisis.RefreshActors");
         _ktisisIsPosing = _pluginInterface.GetIpcSubscriber<bool>("Ktisis.IsPosing");
+
+        Brio.Log.Verbose($"Ktisis IPC initialized IsPosing:{_ktisisIsPosing?.InvokeFunc()}");
+    }
+
+    public bool IsPosing => _ktisisIsPosing?.InvokeFunc() ?? false;
+
+    public void RefreshActors()
+    {
+        if (IsAvailable && !Disabled)
+        {
+            _ktisisRefreshActors?.InvokeFunc();
+        }
     }
 
     public override void Dispose()

@@ -66,4 +66,8 @@ public static class IntExtensions
     {
         return ToWords(i, " ");
     }
+    public static string ToName(this ulong i)
+    {
+        return ToWords((int)i, " ");
+    }
 }

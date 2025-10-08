@@ -5,6 +5,7 @@ using Brio.UI.Controls.Stateless;
 using Brio.UI.Widgets.Core;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface;
+using Dalamud.Interface.Utility;
 using Dalamud.Interface.Utility.Raii;
 using System.Numerics;
 
@@ -86,18 +87,28 @@ public class CameraContainerWidget(CameraContainerCapability capability) : Widge
                 Capability.OpenCameraWindow();
             }
 
-            if(ImGui.MenuItem("New Camera###containerwidgetpopup_newcamera"))
+            if(ImGui.BeginMenu("New...###containerwidgetpopup_new"))
             {
-                Capability.VirtualCameraManager.CreateCamera(CameraType.Brio);
-            }
-            if(ImGui.MenuItem("New Free-Cam###containerwidgetpopup_newfreecamera"))
-            {
-                Capability.VirtualCameraManager.CreateCamera(CameraType.Free);
-            }
+                if(ImGui.MenuItem("New Camera###containerwidgetpopup_newcamera"))
+                {
+                    Capability.VirtualCameraManager.CreateCamera(CameraType.Game);
+                }
+                if(ImGui.MenuItem("New Free-Cam###containerwidgetpopup_newfreecamera"))
+                {
+                    Capability.VirtualCameraManager.CreateCamera(CameraType.Free);
+                }
 
-            if(ImGui.MenuItem("Destroy All###containerwidgetpopup_destroyall"))
+                ImGui.EndMenu();
+            }
+        
+            if(ImGui.BeginMenu("Destroy All Cameras###containerwidgetpopup_destroyall"))
             {
-                Capability.VirtualCameraManager.DestroyAll();
+                if(ImGui.MenuItem("Confirm Destruction###containerwidgetpopup_destroyall_confirm"))
+                {
+                    Capability.VirtualCameraManager.DestroyAll();
+                }
+
+                ImGui.EndMenu();
             }
         }
     }
@@ -106,7 +117,7 @@ public class CameraContainerWidget(CameraContainerCapability capability) : Widge
     {
         using(ImRaii.Disabled(Capability.IsAllowed == false))
         {
-            if(ImGui.BeginListBox($"###CameraContainerWidget_{Capability.Entity.Id}_list", new Vector2(-1, 150)))
+            if(ImGui.BeginListBox($"###CameraContainerWidget_{Capability.Entity.Id}_list", new Vector2(-1, 150 * ImGuiHelpers.GlobalScale)))
             {
                 foreach(var child in Capability.Entity.Children)
                 {

@@ -72,7 +72,7 @@ public class TimeService : IDisposable
         {
             long currentTime = EorzeaTime;
             long timeVal = currentTime % 2764800;
-            int dayOfMonth = (int)(Math.Floor(timeVal / 86400f) + 1);
+            int dayOfMonth = (int)(MathF.Floor(timeVal / 86400f) + 1);
             return dayOfMonth;
         }
 

@@ -32,6 +32,6 @@ public class BoneCategories
 
     public enum BoneCategoryTypes
     {
-        Filter
+        Filter, Category
     }
 }

@@ -132,6 +132,12 @@ public class BonePoseInfo(BonePoseInfoId id, PoseInfo parent)
         return finaleTransform;
     }
 
+    public void RemoveLastStack()
+    {
+        if(_stacks.Count > 0)
+            _stacks.RemoveAt(_stacks.Count - 1);
+    }
+
     public void ClearStacks()
     {
         _stacks.Clear();

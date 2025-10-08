@@ -34,13 +34,6 @@ public class CameraLifetimeWidget(CameraLifetimeCapability capability) : Widget<
 
             ImGui.SameLine();
 
-            if(ImBrio.FontIconButton("CameraLifetime_target", FontAwesomeIcon.Bullseye, "Target Camera"))
-            {
-                Capability.VirtualCameraManager.SelectCamera(Capability.VirtualCamera);
-            }
-
-            ImGui.SameLine();
-
             using(ImRaii.Disabled(Capability.CameraEntity.CameraID == 0))
             {
                 if(ImBrio.FontIconButton("CameraLifetime_destroy", FontAwesomeIcon.Trash, "Destroy Camera", Capability.CanDestroy))
@@ -55,6 +48,14 @@ public class CameraLifetimeWidget(CameraLifetimeCapability capability) : Widget<
                     RenameActorModal.Open(Capability.Entity);
                 }
             }
+
+            ImGui.SameLine();
+
+            if(ImBrio.FontIconButton("CameraLifetime_target", FontAwesomeIcon.Bullseye, "Target Camera"))
+            {
+                Capability.VirtualCameraManager.SelectCamera(Capability.VirtualCamera);
+            }
+
         }
     }
 
@@ -78,10 +79,16 @@ public class CameraLifetimeWidget(CameraLifetimeCapability capability) : Widget<
 
         if(Capability.CanDestroy)
         {
-            if(ImGui.MenuItem("Destroy###CameraLifetime_destroy"))
+            if(ImGui.BeginMenu("Destroy###actorlifetime_destroy"))
             {
-                Capability.VirtualCameraManager.DestroyCamera(Capability.CameraEntity.CameraID);
+                if(ImGui.MenuItem("Confirm Destruction###CameraLifetime_destroy_confirm"))
+                {
+                    Capability.VirtualCameraManager.DestroyCamera(Capability.CameraEntity.CameraID);
+                }
+            
+                ImGui.EndMenu();
             }
+
 
             if(ImGui.MenuItem($"Rename {Capability.CameraEntity.FriendlyName}###CameraLifetime_rename"))
             {

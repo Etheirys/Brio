@@ -1,5 +1,9 @@
 ﻿using Brio.Capabilities.Debug;
+using Brio.Game.World;
+using Brio.IPC;
+using Brio.UI.Controls.Stateless;
 using Brio.UI.Widgets.Core;
+using Brio.UI.Widgets.World;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Plugin.Services;
@@ -58,15 +62,23 @@ public class DebugWidget(DebugCapability capability, IClientState _clientState) 
         {
             Capability.ExitGPose();
         }
+
+        ImGui.Text($"IsPosing: {Capability.IsPosing}");
     }
 
-    private void DrawAddresses()
+    private unsafe void DrawAddresses()
     {
+        DynamisIPC.Instance?.DrawPointer((nint)BrioEnvManager.Instance());
+
         foreach(var (desc, addr) in Capability.GetInterestingAddresses())
         {
             string addrStr = addr.ToString("X");
-            ImGui.SetNextItemWidth(-ImGui.CalcTextSize(addrStr).X);
+
+            ImGui.SetNextItemWidth(150);
+            ImBrio.CenterNextElementWithPadding(10);
             ImGui.InputText(desc, ref addrStr, 16, ImGuiInputTextFlags.ReadOnly);
+
+            DynamisIPC.Instance?.DrawPointer(addr);
         }
     }
     private void DrawMisc()

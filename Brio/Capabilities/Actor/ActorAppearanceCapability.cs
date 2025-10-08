@@ -1,4 +1,5 @@
 ﻿using Brio.Core;
+using Brio.Entities;
 using Brio.Entities.Actor;
 using Brio.Entities.Core;
 using Brio.Files;
@@ -16,6 +17,7 @@ using Brio.UI.Widgets.Actor;
 using Dalamud.Plugin.Services;
 using FFXIVClientStructs.FFXIV.Client.Game.Character;
 using System;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace Brio.Capabilities.Actor;
@@ -29,6 +31,7 @@ public class ActorAppearanceCapability : ActorCharacterCapability
     private readonly GlamourerService _glamourerService;
 
     private readonly CharacterHandlerService _characterHandlerService;
+    private readonly EntityManager _entityManager;
 
     private readonly GPoseService _gposeService;
     private readonly IFramework _framework;
@@ -77,7 +80,7 @@ public class ActorAppearanceCapability : ActorCharacterCapability
 
     public bool IsHidden => CurrentAppearance.ExtendedAppearance.Transparency == 0;
 
-    public ActorAppearanceCapability(ActorEntity parent, CharacterHandlerService characterHandlerService, MCDFService mCDFService, IFramework framework, ActorAppearanceService actorAppearanceService,
+    public ActorAppearanceCapability(ActorEntity parent, CharacterHandlerService characterHandlerService, EntityManager entityManager, MCDFService mCDFService, IFramework framework, ActorAppearanceService actorAppearanceService,
         CustomizePlusService customizePlusService, PenumbraService penumbraService, TargetService targetService, GlamourerService glamourerService,
         GPoseService gPoseService) : base(parent)
     {
@@ -87,6 +90,7 @@ public class ActorAppearanceCapability : ActorCharacterCapability
         _gposeService = gPoseService;
         _customizePlusService = customizePlusService;
         _framework = framework;
+        _entityManager = entityManager;
         _mCDFService = mCDFService;
         _targetService = targetService;
         _characterHandlerService = characterHandlerService;
@@ -95,6 +99,8 @@ public class ActorAppearanceCapability : ActorCharacterCapability
 
         _gposeService.OnGPoseStateChange += OnGPoseStateChanged;
         _penumbraService.OnPenumbraRedraw += OnPenumbraRedraw;
+
+        SetSelectedProfile();
     }
 
     public async Task LoadMCDF(string path)
@@ -114,11 +120,15 @@ public class ActorAppearanceCapability : ActorCharacterCapability
             await _mCDFService.ApplyMCDF(GameObject);
 
             HasMCDF = true;
-            Entity.IsLoading = false;
         }
         catch(Exception ex)
         {
             Brio.Log.Warning(ex, "Exception while Loading MCDF");
+            Brio.NotifyError("MCDF Loading failed! Try again!");
+        }
+        finally
+        {
+            Entity.IsLoading = false;
         }
     }
 
@@ -129,11 +139,15 @@ public class ActorAppearanceCapability : ActorCharacterCapability
             Entity.LoadingDescription = "Saving MCDF...";
             Entity.IsLoading = true;
             await _mCDFService.SaveMCDF(path, dis, GameObject);
-            Entity.IsLoading = false;
         }
         catch(Exception ex)
         {
             Brio.Log.Warning(ex, "Exception while Loading MCDF");
+            Brio.NotifyError("MCDF Export failed! Try again!");
+        }
+        finally 
+        {
+            Entity.IsLoading = false;
         }
     }
 
@@ -215,7 +229,7 @@ public class ActorAppearanceCapability : ActorCharacterCapability
         var activeProfile = GetActiveProfile();
         if(activeProfile is not null)
         {
-            foreach(var item in profiles)
+            foreach(IPCProfileDataTuple item in profiles)
             {
                 if(item.UniqueId == activeProfile.Value)
                 {
@@ -226,6 +240,19 @@ public class ActorAppearanceCapability : ActorCharacterCapability
         else
         {
             SelectedDesign = ("None", null);
+        }
+    }
+    public void SetProfileToNone(bool force = false)
+    {
+        var profile = _customizePlusService.GetActiveProfile(Character);
+
+        if(profile.Item1 is null && force is false)
+        {
+            ResetProfile();
+        }
+        else
+        {
+            SetProfile(Convert.ToBase64String(Encoding.UTF8.GetBytes("{}")));
         }
     }
 
@@ -248,7 +275,7 @@ public class ActorAppearanceCapability : ActorCharacterCapability
             _modelShaderOverride.Reset();
         }
 
-        if(Entity is ActorEntity actor && actor.IsProp == true)
+        if(Entity is ActorEntity actor && actor.IsProp is true)
             await _framework.RunOnTick(() =>
             {
                 AttachWeapon();

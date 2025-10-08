@@ -39,6 +39,7 @@ public class UIManager : IDisposable
     private readonly PosingTransformWindow _overlayTransformWindow;
     private readonly PosingGraphicalWindow _graphicalWindow;
     private readonly CameraWindow _cameraWindow;
+    private readonly LightWindow _lightWindow;
 
     private readonly ITextureProvider _textureProvider;
     private readonly IToastGui _toastGui;
@@ -90,6 +91,7 @@ public class UIManager : IDisposable
             CameraWindow cameraWindow,
             AutoSaveWindow autoSaveWindow,
             MCDFWindow mCDFWindow,
+            LightWindow lightWindow,
 
             PenumbraService penumbraService,
             GlamourerService glamourerService
@@ -119,6 +121,7 @@ public class UIManager : IDisposable
         _cameraWindow = cameraWindow;
         _autoSaveWindow = autoSaveWindow;
         _mCDFWindow = mCDFWindow;
+        _lightWindow = lightWindow;
 
         _framework = framework;
 
@@ -143,6 +146,7 @@ public class UIManager : IDisposable
         _windowSystem.AddWindow(_cameraWindow);
         _windowSystem.AddWindow(_autoSaveWindow);
         _windowSystem.AddWindow(_mCDFWindow);
+        _windowSystem.AddWindow(_lightWindow);
 
         _gPoseService.OnGPoseStateChange += OnGPoseStateChange;
         _configurationService.OnConfigurationChanged += ApplySettings;

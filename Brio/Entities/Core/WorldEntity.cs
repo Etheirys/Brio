@@ -1,8 +1,7 @@
-﻿using Brio.Entities.Core;
-using Dalamud.Interface;
+﻿using Dalamud.Interface;
 using System;
 
-namespace Brio.Entities.World;
+namespace Brio.Entities.Core;
 
 public class WorldEntity : Entity
 {

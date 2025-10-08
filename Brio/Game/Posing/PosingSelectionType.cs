@@ -41,8 +41,8 @@ public partial class PosingSelectionType : OneOfBase<BonePoseInfoId, ModelTransf
             ? true
             : obj is ModelTransformSelection && Value is ModelTransformSelection
             ? true
-            : obj is BonePoseInfoId bone and BonePoseInfoId otherBone 
-            ? bone.Equals(otherBone) 
+            : obj is BonePoseInfoId bone && Value is BonePoseInfoId otherBone
+            ? bone.Equals(otherBone)
             : base.Equals(obj);
     }
 
@@ -53,3 +53,4 @@ public partial class PosingSelectionType : OneOfBase<BonePoseInfoId, ModelTransf
 }
 
 public record struct ModelTransformSelection();
+public record struct LightTransformSelection();

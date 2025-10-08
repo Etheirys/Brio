@@ -513,7 +513,7 @@ public class MCDFService : IDisposable
         if(_glamourerService.CheckForLock(playerRelatedObject))
         {
             Brio.Log.Information("Unable to apply MCDF, Actor is Locked by Glamourer");
-            Brio.NotifyError("Unable to apply MCDF, Actor is Locked by Glamourer");
+            Brio.NotifyError("Unable to apply MCDF! Actor is Locked! Are you using a sync service?!");
 
             throw new Exception("Glamourer has Lock");
         }
@@ -549,22 +549,6 @@ public class MCDFService : IDisposable
 
         await _transientResourceService.WaitForRecording(ct).ConfigureAwait(false);
 
-        // if it's pet then it's summoner, if it's summoner we actually want to keep all filereplacements alive at all times
-        // or we get into redraw city for every change and nothing works properly
-        if(objectKind == ObjectKind.Companion)
-        {
-            foreach(var item in fragment.FileReplacements.Where(i => i.HasFileReplacement).SelectMany(p => p.GamePaths))
-            {
-                if(_transientResourceService.AddTransientResource(API.Data.Enum.ObjectKind.Pet, item))
-                {
-                    Brio.Log.Verbose("Marking static {item} for Pet as transient", item);
-                }
-            }
-
-            Brio.Log.Verbose("Clearing {count} Static Replacements for Pet", fragment.FileReplacements.Count);
-            fragment.FileReplacements.Clear();
-        }
-
         ct.ThrowIfCancellationRequested();
 
         Brio.Log.Verbose("Handling transient update for {obj}", playerRelatedObject);
@@ -596,11 +580,12 @@ public class MCDFService : IDisposable
         //Task<string> getHonorificTitle = _ipcManager.Honorific.GetTitle();
 
         Task<string> getGlamourerData = _glamourerService.GetCharacterCustomizationAsync(playerRelatedObject.Address);
-        Task<string?> getCustomizeData = _customizePlusService.GetScaleAsync(playerRelatedObject.Address);
+        Task<string?> getCustomizeData = _customizePlusService.GetScaleAsync(playerRelatedObject);
+        
         fragment.GlamourerString = await getGlamourerData.ConfigureAwait(false);
         Brio.Log.Verbose("Glamourer is now: {data}", fragment.GlamourerString);
-        var customizeScale = await getCustomizeData.ConfigureAwait(false);
-        fragment.CustomizePlusScale = customizeScale ?? string.Empty;
+       
+        fragment.CustomizePlusScale = await getCustomizeData.ConfigureAwait(false) ?? string.Empty;
         Brio.Log.Verbose("Customize is now: {data}", fragment.CustomizePlusScale);
 
         if(objectKind == ObjectKind.Player)

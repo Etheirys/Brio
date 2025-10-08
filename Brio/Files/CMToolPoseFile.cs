@@ -74,7 +74,7 @@ public class CMToolPoseFileInfo : AppliableActorFileInfoBase<CMToolPoseFile>
         {
             if(popup.Success)
             {
-                PosingEditorCommon.DrawImportOptionEditor(_posingService.DefaultImporterOptions);
+                PosingEditorCommon.DrawImportOptionEditor(_posingService.DefaultImporterOptions, _posingService);
             }
         }
 
