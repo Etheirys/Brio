@@ -56,7 +56,7 @@ public class CommandHandlerService : IDisposable
                 break;
 
             case "about":
-                _uiManager.ToggleInfoWindow();
+                _uiManager.ToggleWelcomeWindow();
                 break;
 
             case "help":
@@ -81,5 +81,6 @@ public class CommandHandlerService : IDisposable
     {
         _commandManager.RemoveHandler(BrioCommandName);
         _commandManager.RemoveHandler(XATCommandName);
+        _commandManager.RemoveHandler(MCDFCommandName);
     }
 }

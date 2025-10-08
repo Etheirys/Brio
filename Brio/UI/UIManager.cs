@@ -25,7 +25,6 @@ public class UIManager : IDisposable
 
     private readonly MainWindow _mainWindow;
     private readonly SettingsWindow _settingsWindow;
-    private readonly InfoWindow _infoWindow;
     private readonly ProjectWindow _projectWindow;
     private readonly UpdateWindow _updateWindow;
     private readonly AutoSaveWindow _autoSaveWindow;
@@ -77,7 +76,6 @@ public class UIManager : IDisposable
             IFramework framework,
             MainWindow mainWindow,
             SettingsWindow settingsWindow,
-            InfoWindow infoWindow,
             UpdateWindow updateWindow,
             LibraryWindow libraryWindow,
             ProjectWindow projectWindow,
@@ -108,7 +106,6 @@ public class UIManager : IDisposable
         _mainWindow = mainWindow;
         _settingsWindow = settingsWindow;
         _libraryWindow = libraryWindow;
-        _infoWindow = infoWindow;
         _updateWindow = updateWindow;
         _projectWindow = projectWindow;
         _actorAppearanceWindow = appearanceWindow;
@@ -134,7 +131,6 @@ public class UIManager : IDisposable
         _windowSystem.AddWindow(_settingsWindow);
         _windowSystem.AddWindow(_libraryWindow);
         _windowSystem.AddWindow(_projectWindow);
-        _windowSystem.AddWindow(_infoWindow);
         _windowSystem.AddWindow(_updateWindow);
         _windowSystem.AddWindow(_actorAppearanceWindow);
         _windowSystem.AddWindow(_actionTimelineWindow);
@@ -195,8 +191,7 @@ public class UIManager : IDisposable
 
     public void ToggleMainWindow() => _mainWindow.IsOpen = !_mainWindow.IsOpen;
     public void ToggleSettingsWindow() => _settingsWindow.IsOpen = !_settingsWindow.IsOpen;
-    public void ToggleInfoWindow() => _infoWindow.IsOpen = !_infoWindow.IsOpen;
-
+    public void ToggleWelcomeWindow() => _updateWindow.IsOpen = !_updateWindow.IsOpen;
 
     private void OnGPoseStateChange(bool newState)
     {
