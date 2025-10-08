@@ -1,23 +1,150 @@
 
 tagline: "Whats New in Brio v0.6.0"
-subline: "MCDFs, Dynamic Face Control, & Lights"
+subline: " MCDF, Dynamic Face Control & Lights!"
 changelog:
 
   - name: v0.6.0
-    tagline: "MCDFs, Dynamic Face Control & Lights"
-    date: "September 2025"
+    tagline: "MCDF, Dynamic Face Control & Lights!"
+    date: "October 8th 2025"
     isCurrent: true
     versions:
-      - number: "0.6.0"
+
+      - number: "PLEASE READ THE KNOWN ISSUES AT THE BOTTOM OF THIS SECTION!"
         icon: ""
         items:
-          - "Change log not yet complete please check once 0.6.0 releases!"
-          - "Change log not yet complete please check once 0.6.0 releases!"
-          - "Change log not yet complete please check once 0.6.0 releases!"
-          
+          - "If you experience any issues please report them on the discord or on GitHub"
+
+      - number: "Added MCDF Import and export!"
+        icon: ""
+        items:
+          - "Added support for importing and exporting MCDF files."
+          - "MCDF obviously requires Penumbra & Glamourer"
+          - "The experience should be as seamless as what you are used to with MCDFs."
+          - "Further updates and features will come soon!"
+          - "Some transient files do not get saved in MCDFs, this will be fixed in a later update!"
+          - "(Animations, some body mods, some tattoos and some accessories; are examples of transient files)"
+          - "If you experience any issues with MCDFs --please-- report them on the discords or on GitHub"
+
+      - number: "Added Dynamic Face Control!"
+        icon: ""
+        items:
+          - "Dynamic Face Control lets you move the eyes and head of a given actor."
+          - "You can make them follow the camera even!"
+          - "(More features will be added soon!)"
+          - "(Thank you, Enth for the original inspiration)"
+     
+      - number: "Added Lights!"
+        icon: ""
+        items:
+          - "Added Lights!"
+          - "Lights can be spawned under the `Environment` section of the Scene Manager."
+          - "Selecting a light in the Scene Manager with the Overlay open lets you change the values of the Gizmo."
+          - "You can open the Light window by right-clicking Environment or using the button in the overlay."
+          - "Lights spawned with the GPOSE menu also show up in Brio"
+          - "Lights *DO NOT* yet support Auto-Saving. This will come in a later update"
+          - "Saving and Loading light presets will also come in a later update!"
+
+      - number: "Refreshed the User Interface!"
+        icon: ""
+        items:
+          - "Brio now correctly scales with Dalamud's UI Text Scaling (It's about time!)." # Apply global UI scale UI elements
+          - "(Some UI elements do not yet have perfect scaling, this will be fixed in a later update)"
+          - "Multiple UI elements now have a tooltip!"
+          - "Redesigned the Advance Appearance window"
+          - "All of the entities in the scene manager now have a right click menu"
+          - "The Scene Manager now has padding on multiple widgets"
+          - "The Overlay & Settings visuals have been reworked"
+          - "Greatly improved the change log (Look at you! Reading it right now!!)"
+          - "Improved the visual look of the skeleton's bone circles. (Thank you, Caraxi.)" # Add option to draw skeleton lines between the edges of bone circles
+          - "UI elements across Brio are now more consistent"
+
+      - number: "General Improvements and Fixes!"
+        icon: ""
+        items:
+          # Temporarily disabled - "Added the ability to 'flip' individual bones. (Thank you @Bronya-Rand)" # feat: implement bone flipping
+          # This is a Secret unfinished feature - "Added the ability to select multiple actors." # Add multi-entity selection and multi-entity undo support
+          - "Removed 'Mare Synchronos' IPC"
+          - "The bone filter in the Overlay now has bone groups, that let you toggle multiple bones at once"
+          - "Added multiple new bone categories & separated out 'Arms' into right arm and left arm"
+          - "Added the ability to open Penumbra, Glamourer and CustomizePlus." 
+          - "(The buttons next to Respective Plugins Quick Selectors)" # Add UI commands to open Glamourer and CustomizePlus
+          - "Added the ability to search in the Penumbra, Glamourer and CustomizePlus quick selectors"
+          - "Added a `Reset Bone` button to the Overlay and the posing widget. (Thank you for the suggestion, Aster!)"
+          - "(This also acts like a 'Reset Model Transform' button)"
+          - "Added 'toggle' Viera Ears button to the Advance Appearance Window"
+          - "Added multiple quick select buttons when Selecting an equipment piece in the Advance Appearance Window"
+          - "Added `Equip invisible clothes` button to the Advance Appearance Window"
+          - "Added the accent color to IK button in the overlay to better display when IK is enabled. (Thank you, Ny)"  # Add accent color to IK button when enabled
+          - "Added the ability to keep the Gizmo active even when you've hidden all bones in the overlay (Thank you, Ny)"
+          - "Added option to hide name in the GPose settings window. (Enabled by default)"
+          - "Added `Set IK` Button, this button lets you 'Lock' IK into the Actor as if it where a normal pose"
+          - "(You should use this once you're done with IK, you'll have a much nice time with posing!)"
+          - "Added a `Copy and paste` button for Copy and pasting model transforms for Actors"
+          - "(This feature will be added for bones in a later update)"
+          - "Added a keybind for switching between mirror modes. (Thank you for the suggestion, Persephius!)"
+          - "Added a keybind for freezing a pose."
+          - "Added a hotkey for toggling between world and local relative manipulation. (Thank you, Caraxi)" # Add 'Cycle World/Local' Action Key
+          - "Multiple settings defaults have changed"
+          - "Added better protections to prevent the attempted drawing of null actors." # Add better protection for null and sill drawing actors
+          - "Fixed issues with certain menu elements drawing incorrectly when the UI scale was set above 100%." # Fix DrawImportPoseMenuPopup jumping to infinity when UI scale is above a 100%
+          - "Fixed a bug where autosave would disable unintentionally under certain circumstances." # Fix autosave being disabled once you open the FileDialogManager
+          - "Fixed an issue when applying custom colors to actors (Thank you Ny for the heads up)"
+          - "Fixed an issue where Import Options popup would not appear on the Import options screen"
+          - "Fixed an isues when copying/making a new camera would not preserve the rotation of the camera properly"
+          - "Various other bugfixes, UI, stability improvements and under the hood changes!"
+      
+      - number: "Known issues!"
+        icon: ""
+        items:
+          - "Animations (and some other transient files) do not export with MCDFs."
+          - "When deselecting items in the overlay bone filter, the bone groups do not get deselected appropriately."
+          - "When spawning a Spot Light with free cam, it doesn't preserve the rotation of the camera."
+          - "Lights do not get saved with Projects."
+
+  - name: Message From the Developer 
+    tagline:
+    date: "October 8th 2025"
+    isCurrent: true
+    message: |
+      With over 13,000 lines of code added/changed, 3 Major new features, A plethora of smaller features and improvements
+      Numerous system rewrites; Brio 0.6.0 is by far the largest update since 0.2.0!
+
+      I want to think everyone who has supported me this last mouth and a half especially, 
+      The support, encouragement, and kind words I have received has been overwhelming & humbling,
+      it means so very much to me.
+
+      Another very big, Thank You, to anyone and everyone who has donated to me, or to my mothers GoFundMe, 
+      if you wish to be added to the supporters section in Brio, please let me know with the proof of support!
+      There are not words to express how much your support means to me.  
+
+      The future of Brio is very strong, I have numerous ideas for features and improvements getting to an eventual 1.0
+      With the energy behind the scenes and Brio now having a sizeable amount of Mare in it, there are going to be some 
+      fun things coming up!
+
+      In no particular order or priority, here is a non exhaustive list/tease of upcoming features of Brio
+
+      - Improve the Brio Overlay 
+      - Add more features to Lights
+      - Add more features to MCDFs (This one has a lot of possibilities!)
+      - Add the Environment feature's from Ktisis
+      - Multi-actor selection
+      - Multi-bone selection
+      - Finishing the Projects system
+      - Add more features to Dynamic Face Control
+      - More ease of use and Quality of life features
+
+      And two secret features that I have been working on for a while now
+
+      As always, if you have any suggestions, requests or find any bugs, please let me know on the discord or on GitHub!
+
+      Also There is now a Brio Community discord, come join us! discord.gg/GCb4srgEaH
+
+      I love you all very much, Thank you!
+      - Minmoose  
+    
   - name: v0.5.3
     tagline: "That damned boat"
-    date: "August 30 2025"
+    date: "August 30th 2025"
     versions:
       - number: "0.5.3.1"
         icon: ""
@@ -35,7 +162,7 @@ changelog:
           
   - name: v0.5.2
     tagline: "7.3 Support"
-    date: "August 15 2025"
+    date: "August 15th 2025"
     versions:
       - number: "0.5.2.2"
         icon: ""
@@ -50,7 +177,7 @@ changelog:
           
   - name: v0.5.1
     tagline: "7.2 Support"
-    date: "March 27 2025"
+    date: "March 27th 2025"
     versions:
       - number: "0.5.1.1"
         icon: ""
@@ -70,7 +197,7 @@ changelog:
 
   - name: v0.5.0
     tagline: "Props, Free Cameras, Projects & more!"
-    date: "February 16 2025"
+    date: "February 16th 2025"
     versions:
       - number: "0.5.0.1 - 0.5.0.6"
         icon: ""
@@ -135,9 +262,9 @@ changelog:
         - Scene exporting will be available in a later update.
         - (Thanks Ashadow700 for the initial implementation and inspiration)
   
-  - name: Message From the Dev
+  - name: Message From the Developer
     tagline:
-    date: "February 16 2025"
+    date: "February 16th 2025"
     message: |
       It's been over a year now that I've been the developer & maintainer for Brio.
 
