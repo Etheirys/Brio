@@ -1,4 +1,5 @@
-﻿using Dalamud.Game.ClientState.Objects.Types;
+﻿using Brio.Game.World;
+using Dalamud.Game.ClientState.Objects.Types;
 
 using NativeCharacter = FFXIVClientStructs.FFXIV.Client.Game.Character.Character;
 using NativeGameObject = FFXIVClientStructs.FFXIV.Client.Game.Object.GameObject;
@@ -13,12 +14,14 @@ public record struct EntityId(string Unique)
     public EntityId(CameraId id) : this($"camera_{id}")
     {
     }
+    public EntityId(IGameLight id) : this($"light_{id.Address}")
+    {
+    }
 
     public static implicit operator EntityId(Entity entity)
     {
         return entity.Id;
     }
-
     public static implicit operator EntityId(string id)
     {
         return new EntityId(id);
@@ -37,5 +40,9 @@ public record struct EntityId(string Unique)
     public unsafe static implicit operator EntityId(NativeGameObject* go)
     {
         return new EntityId($"actor_{(nint)go}");
+    }
+    public unsafe static implicit operator EntityId(GameLight* light)
+    {
+        return new EntityId($"light_{(nint)light}");
     }
 }

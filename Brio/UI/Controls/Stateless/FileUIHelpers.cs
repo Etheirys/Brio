@@ -75,7 +75,7 @@ public class FileUIHelpers
     static bool doBody = false;
     static bool doTransform = false;
     static TransformComponents? transformComponents = null;
-    public static void DrawImportPoseMenuPopup(string tag, PosingCapability capability, bool showImportOptions = true)
+    public static void DrawImportPoseMenuPopup(string tag, PosingCapability? capability, bool showImportOptions = true)
     {
         using var popup = ImRaii.Popup($"DrawImportPoseMenuPopup");
         if(popup.Success)
@@ -83,6 +83,9 @@ public class FileUIHelpers
             var imIO = ImGui.GetIO();
             var _lastGlobalScale = imIO.FontGlobalScale;
             imIO.FontGlobalScale = 1f;
+
+            if(capability is null)
+                return;
 
             using(ImRaii.PushColor(ImGuiCol.Button, UIConstants.Transparent))
             {
@@ -186,7 +189,7 @@ public class FileUIHelpers
                 {
                     if(popup2.Success && showImportOptions && Brio.TryGetService<PosingService>(out var service))
                     {
-                        PosingEditorCommon.DrawImportOptionEditor(service.DefaultImporterOptions, true);
+                        PosingEditorCommon.DrawImportOptionEditor(service.DefaultImporterOptions, service, true);
                     }
                 }
             }
@@ -258,7 +261,7 @@ public class FileUIHelpers
         }
     }
 
-    public static void ShowExportPoseModal(PosingCapability capability)
+    public static void ShowExportPoseModal(PosingCapability? capability)
     {
         UIManager.Instance.FileDialogManager.SaveFileDialog("Export Pose###export_pose", "Pose File (*.pose){.pose}", "brio", ".pose",
                 (success, path) =>
@@ -275,7 +278,7 @@ public class FileUIHelpers
                             ConfigurationService.Instance.Save();
                         }
 
-                        capability.ExportSavePose(path);
+                        capability?.ExportSavePose(path);
                     }
                 }, ConfigurationService.Instance.Configuration.LastExportPath, true);
     }

@@ -4,7 +4,7 @@ namespace Brio.Entities.Camera;
 public enum CameraType
 {
     Default,
-    Brio,
+    Game,
     Free,
     Cutscene
 }

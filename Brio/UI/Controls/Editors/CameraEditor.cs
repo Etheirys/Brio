@@ -26,7 +26,7 @@ public static class CameraEditor
             {
                 if(ImGui.Button("New Brio Camera"u8, new(155 * ImGuiHelpers.GlobalScale, 0)))
                 {
-                    virtualCameraManager.CreateCamera(CameraType.Brio);
+                    virtualCameraManager.CreateCamera(CameraType.Game);
                 }
 
                 if(ImGui.Button("New Free-Cam"u8, new(155 * ImGuiHelpers.GlobalScale, 0)))

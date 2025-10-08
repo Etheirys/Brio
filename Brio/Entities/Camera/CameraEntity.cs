@@ -124,7 +124,7 @@ public class CameraEntity(IServiceProvider provider, int cameraID, CameraType ca
 
     public FontAwesomeIcon GetIcon() => CameraType switch
     {
-        CameraType.Brio => FontAwesomeIcon.CameraRetro,
+        CameraType.Game => FontAwesomeIcon.CameraRetro,
         CameraType.Free => FontAwesomeIcon.Video,
         CameraType.Cutscene => FontAwesomeIcon.Clapperboard,
         _ => FontAwesomeIcon.CameraRetro,

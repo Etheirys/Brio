@@ -59,6 +59,13 @@ public class SettingsWindow : Window
         _isModal = true;
     }
 
+    public override void PreDraw()
+    {
+        ImGui.SetNextWindowPos(new Vector2((ImGui.GetIO().DisplaySize.X - Size!.Value.X) / 2, (ImGui.GetIO().DisplaySize.Y - Size!.Value.Y) / 2), ImGuiCond.Appearing);
+
+        base.PreDraw();
+    }
+
     public override void OnClose()
     {
         Flags = ImGuiWindowFlags.NoResize;
@@ -199,7 +206,7 @@ public class SettingsWindow : Window
     private void DrawDisplaySettings()
     {
         bool censorActorNames = _configurationService.Configuration.Interface.CensorActorNames;
-        if(ImGui.Checkbox("Censor Actor Names", ref censorActorNames))
+        if(ImGui.Checkbox("Censor Actor Names Across Brio", ref censorActorNames))
         {
             _configurationService.Configuration.Interface.CensorActorNames = censorActorNames;
             _configurationService.ApplyChange();
@@ -242,25 +249,6 @@ public class SettingsWindow : Window
     {
         if(ImGui.CollapsingHeader("Third-Party", ImGuiTreeNodeFlags.DefaultOpen))
         {
-            bool enableCustomizePlus = _configurationService.Configuration.IPC.AllowCustomizePlusIntegration;
-            if(ImGui.Checkbox("Allow Customize+ Integration", ref enableCustomizePlus))
-            {
-                _configurationService.Configuration.IPC.AllowCustomizePlusIntegration = enableCustomizePlus;
-                _configurationService.ApplyChange();
-                _customizePlusService.CheckStatus(true);
-            }
-
-            var customizePlusStatus = _customizePlusService.CheckStatus();
-            using(ImRaii.Disabled(!enableCustomizePlus))
-            {
-                ImGui.Text($"Customize+ Status: {customizePlusStatus}");
-                ImGui.SameLine();
-                if(ImBrio.FontIconButton("refresh_Customize", FontAwesomeIcon.Sync, "Refresh Customize+ Status"))
-                {
-                    _customizePlusService.CheckStatus(true);
-                }
-            }
-
             var penumbraStatus = _penumbraService.CheckStatus();
             var penumbraUnavailable = penumbraStatus is IPCStatus.None or IPCStatus.NotInstalled or IPCStatus.VersionMismatch or IPCStatus.Error;
 
@@ -307,6 +295,24 @@ public class SettingsWindow : Window
                 }
             }
 
+            bool enableCustomizePlus = _configurationService.Configuration.IPC.AllowCustomizePlusIntegration;
+            if(ImGui.Checkbox("Allow Customize+ Integration", ref enableCustomizePlus))
+            {
+                _configurationService.Configuration.IPC.AllowCustomizePlusIntegration = enableCustomizePlus;
+                _configurationService.ApplyChange();
+                _customizePlusService.CheckStatus(true);
+            }
+
+            var customizePlusStatus = _customizePlusService.CheckStatus();
+            using(ImRaii.Disabled(!enableCustomizePlus))
+            {
+                ImGui.Text($"Customize+ Status: {customizePlusStatus}");
+                ImGui.SameLine();
+                if(ImBrio.FontIconButton("refresh_Customize", FontAwesomeIcon.Sync, "Refresh Customize+ Status"))
+                {
+                    _customizePlusService.CheckStatus(true);
+                }
+            }
         }
     }
 
@@ -523,10 +529,35 @@ public class SettingsWindow : Window
                 _configurationService.ApplyChange();
             }
 
+            ImGui.Separator();
+            ImGui.Text("Overlay Colors"u8);
+
+            Vector4 lightCircleNormalColor = ImGui.ColorConvertU32ToFloat4(_configurationService.Configuration.Posing.LightCircleNormalColor);
+            if(ImGui.ColorEdit4("Light Normal Color", ref lightCircleNormalColor, ImGuiColorEditFlags.NoInputs))
+            {
+                _configurationService.Configuration.Posing.LightCircleNormalColor = ImGui.ColorConvertFloat4ToU32(lightCircleNormalColor);
+                _configurationService.ApplyChange();
+
+                Brio.Log.Error($"{ImGui.ColorConvertFloat4ToU32(lightCircleNormalColor)}");
+            }
+
+            Vector4 lightCircleHoveredColor = ImGui.ColorConvertU32ToFloat4(_configurationService.Configuration.Posing.LightCircleHoveredColor);
+            if(ImGui.ColorEdit4("Light Hovered Color", ref lightCircleHoveredColor, ImGuiColorEditFlags.NoInputs))
+            {
+                _configurationService.Configuration.Posing.LightCircleHoveredColor = ImGui.ColorConvertFloat4ToU32(lightCircleHoveredColor);
+                _configurationService.ApplyChange();
+            }
+
+            Vector4 lightCircleSelectedColor = ImGui.ColorConvertU32ToFloat4(_configurationService.Configuration.Posing.LightCircleSelectedColor);
+            if(ImGui.ColorEdit4("Light Selected Color", ref lightCircleSelectedColor, ImGuiColorEditFlags.NoInputs))
+            {
+                _configurationService.Configuration.Posing.LightCircleSelectedColor = ImGui.ColorConvertFloat4ToU32(lightCircleSelectedColor);
+                _configurationService.ApplyChange();
+            }
+
             Vector4 boneCircleNormalColor = ImGui.ColorConvertU32ToFloat4(_configurationService.Configuration.Posing.BoneCircleNormalColor);
             if(ImGui.ColorEdit4("Bone Circle Normal Color", ref boneCircleNormalColor, ImGuiColorEditFlags.NoInputs))
             {
-
                 _configurationService.Configuration.Posing.BoneCircleNormalColor = ImGui.ColorConvertFloat4ToU32(boneCircleNormalColor);
                 _configurationService.ApplyChange();
             }
@@ -534,7 +565,6 @@ public class SettingsWindow : Window
             Vector4 boneCircleInactiveColor = ImGui.ColorConvertU32ToFloat4(_configurationService.Configuration.Posing.BoneCircleInactiveColor);
             if(ImGui.ColorEdit4("Bone Circle Inactive Color", ref boneCircleInactiveColor, ImGuiColorEditFlags.NoInputs))
             {
-
                 _configurationService.Configuration.Posing.BoneCircleInactiveColor = ImGui.ColorConvertFloat4ToU32(boneCircleInactiveColor);
                 _configurationService.ApplyChange();
             }
@@ -542,7 +572,6 @@ public class SettingsWindow : Window
             Vector4 boneCircleHoveredColor = ImGui.ColorConvertU32ToFloat4(_configurationService.Configuration.Posing.BoneCircleHoveredColor);
             if(ImGui.ColorEdit4("Bone Circle Hovered Color", ref boneCircleHoveredColor, ImGuiColorEditFlags.NoInputs))
             {
-
                 _configurationService.Configuration.Posing.BoneCircleHoveredColor = ImGui.ColorConvertFloat4ToU32(boneCircleHoveredColor);
                 _configurationService.ApplyChange();
             }
@@ -550,7 +579,6 @@ public class SettingsWindow : Window
             Vector4 boneCircleSelectedColor = ImGui.ColorConvertU32ToFloat4(_configurationService.Configuration.Posing.BoneCircleSelectedColor);
             if(ImGui.ColorEdit4("Bone Circle Selected Color", ref boneCircleSelectedColor, ImGuiColorEditFlags.NoInputs))
             {
-
                 _configurationService.Configuration.Posing.BoneCircleSelectedColor = ImGui.ColorConvertFloat4ToU32(boneCircleSelectedColor);
                 _configurationService.ApplyChange();
             }
@@ -558,7 +586,6 @@ public class SettingsWindow : Window
             Vector4 skeletonLineActive = ImGui.ColorConvertU32ToFloat4(_configurationService.Configuration.Posing.SkeletonLineActiveColor);
             if(ImGui.ColorEdit4("Skeleton Active Color", ref skeletonLineActive, ImGuiColorEditFlags.NoInputs))
             {
-
                 _configurationService.Configuration.Posing.SkeletonLineActiveColor = ImGui.ColorConvertFloat4ToU32(skeletonLineActive);
                 _configurationService.ApplyChange();
             }
@@ -566,10 +593,11 @@ public class SettingsWindow : Window
             Vector4 skeletonLineInactive = ImGui.ColorConvertU32ToFloat4(_configurationService.Configuration.Posing.SkeletonLineInactiveColor);
             if(ImGui.ColorEdit4("Skeleton Inactive Color", ref skeletonLineInactive, ImGuiColorEditFlags.NoInputs))
             {
-
                 _configurationService.Configuration.Posing.SkeletonLineInactiveColor = ImGui.ColorConvertFloat4ToU32(skeletonLineInactive);
                 _configurationService.ApplyChange();
             }
+
+            ImGui.Separator();
         }
     }
 

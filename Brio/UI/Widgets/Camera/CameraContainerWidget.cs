@@ -91,7 +91,7 @@ public class CameraContainerWidget(CameraContainerCapability capability) : Widge
             {
                 if(ImGui.MenuItem("New Camera###containerwidgetpopup_newcamera"))
                 {
-                    Capability.VirtualCameraManager.CreateCamera(CameraType.Brio);
+                    Capability.VirtualCameraManager.CreateCamera(CameraType.Game);
                 }
                 if(ImGui.MenuItem("New Free-Cam###containerwidgetpopup_newfreecamera"))
                 {

@@ -7,9 +7,13 @@ using Brio.Game.Camera;
 using Brio.Game.Cutscene;
 using Brio.Game.GPose;
 using Brio.UI.Controls.Editors;
+using Brio.UI.Controls.Stateless;
 using Dalamud.Bindings.ImGui;
+using Dalamud.Interface.Colors;
+using Dalamud.Interface.Utility.Raii;
 using Dalamud.Interface.Windowing;
 using System;
+using System.Linq;
 
 namespace Brio.UI.Windows.Specialized;
 
@@ -41,53 +45,74 @@ public class CameraWindow : Window, IDisposable
         _gPoseService.OnGPoseStateChange += OnGPoseStateChange;
     }
 
-    public override bool DrawConditions()
-    {
-        if(!_entityManager.TryGetEntity<CameraContainerEntity>("cameras", out var cameraContainerEntity))
-            return false;
-
-        if(!cameraContainerEntity.TryGetCapability<CameraContainerCapability>(out var cameraContainerCap))
-            return false;
-
-        if(!_entityManager.TryGetEntity<CameraEntity>(new CameraId(cameraContainerCap.CurrentCamera.CameraID), out var camEntity))
-            return false;
-
-        if(!camEntity.HasCapability<BrioCameraCapability>())
-            return false;
-
-        return base.DrawConditions();
-    }
-
     public override void Draw()
     {
-        if(_entityManager.TryGetEntity<CameraContainerEntity>("cameras", out var cameraContainerEntity))
-        {
-            if(cameraContainerEntity.TryGetCapability<CameraContainerCapability>(out var cameraContainerCap))
+        ImBrio.VerticalPadding(2);
+
+        ImGui.Text("Select Camera to Edit:");
+        ImBrio.CenterNextElementWithPadding(15);
+        using(ImRaii.Disabled(_virtualCameraService.CamerasCount == 0))
+            if(ImGui.BeginCombo("###setCamera"u8, $"{_virtualCameraService.SelectedCameraEntity?.FriendlyName}"))
             {
-                if(_entityManager.TryGetEntity<CameraEntity>(new CameraId(cameraContainerCap.CurrentCamera.CameraID), out var camEntity))
+                var list = _virtualCameraService.SpawnedCameraEntities;
+                list.Add(_virtualCameraService.GetDefaultCamera()!);
+                foreach(var value in list)
                 {
-                    if(camEntity.TryGetCapability<BrioCameraCapability>(out var camBrioCap))
+                    if(ImGui.Selectable($"Camera: [ {value.FriendlyName} ] [ {value.CameraType.ToString().ToUpper()} ]"))
                     {
-                        ImGui.Text($" {camEntity.FriendlyName}");
-
-                        ImGui.Separator();
-
-                        if(camBrioCap.CameraEntity.CameraType == CameraType.Free)
-                        {
-                            CameraEditor.DrawFreeCam("camera_widget_editor", camBrioCap);
-                        }
-                        else if(camBrioCap.CameraEntity.CameraType == CameraType.Cutscene)
-                        {
-                            CameraEditor.DrawBrioCutscene("camera_widget_editor", camBrioCap, _cutsceneManager, _configService);
-                        }
-                        else
-                        {
-                            CameraEditor.DrawBrioCam("camera_widget_editor", camBrioCap);
-                        }
+                        _virtualCameraService.SelectedCameraEntity = value;
                     }
                 }
+                ImGui.EndCombo();
             }
+
+        ImBrio.AttachToolTip("Current Camera");
+
+        ImBrio.VerticalPadding(5);
+
+        ImGui.Separator();
+
+        if(_virtualCameraService.SelectedCameraEntity is null || _virtualCameraService.SelectedCameraEntity.IsAttached == false)
+        {
+            _virtualCameraService.SelectedCameraEntity = _virtualCameraService.CamerasCount > 0
+                ? _virtualCameraService.SpawnedCameraEntities.First()
+                : null;
         }
+
+        //
+        // Hedder
+
+        if(_virtualCameraService.SelectedCameraEntity is null)
+        {
+            _virtualCameraService.SelectedCameraEntity = _virtualCameraService.GetDefaultCamera();
+        }
+
+        if(!_virtualCameraService!.SelectedCameraEntity!.TryGetCapability<BrioCameraCapability>(out var camBrioCap))
+        {
+            return;
+        }
+
+        //
+        // Body
+
+        switch(camBrioCap.CameraEntity.CameraType)
+        {
+            case CameraType.Free:
+                WindowName = $"{Brio.Name} - CAMERA (FREE)###brio_camera_window";
+                CameraEditor.DrawFreeCam("camera_widget_editor", camBrioCap);
+                break;
+            case CameraType.Cutscene:
+                WindowName = $"{Brio.Name} - CAMERA (CUTSCENE)###brio_camera_window";
+                CameraEditor.DrawBrioCutscene("camera_widget_editor", camBrioCap, _cutsceneManager, _configService);
+                break;
+            case CameraType.Game:
+            case CameraType.Default:
+                WindowName = $"{Brio.Name} - CAMERA (GAME)###brio_camera_window";
+                CameraEditor.DrawBrioCam("camera_widget_editor", camBrioCap);
+                break;
+        }
+
+
     }
 
     private void OnGPoseStateChange(bool newState)
