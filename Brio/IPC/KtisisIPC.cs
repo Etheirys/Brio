@@ -46,8 +46,6 @@ public class KtisisIPC : BrioIPC
         _ktisisApiVersion = _pluginInterface.GetIpcSubscriber<(int, int)>("Ktisis.ApiVersion");
         _ktisisRefreshActors = _pluginInterface.GetIpcSubscriber<bool>("Ktisis.RefreshActors");
         _ktisisIsPosing = _pluginInterface.GetIpcSubscriber<bool>("Ktisis.IsPosing");
-
-        Brio.Log.Verbose($"Ktisis IPC initialized IsPosing:{_ktisisIsPosing?.InvokeFunc()}");
     }
 
     public bool IsPosing => _ktisisIsPosing?.InvokeFunc() ?? false;
