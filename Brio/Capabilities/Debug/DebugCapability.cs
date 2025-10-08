@@ -1,6 +1,7 @@
 ﻿using Brio.Capabilities.Core;
 using Brio.Entities.Core;
 using Brio.Game.GPose;
+using Brio.IPC;
 using Brio.UI.Widgets.Debug;
 using Dalamud.Plugin.Services;
 using FFXIVClientStructs.FFXIV.Client.Game;
@@ -16,10 +17,14 @@ namespace Brio.Capabilities.Debug;
 public unsafe class DebugCapability : Capability
 {
     private readonly GPoseService _gPoseService;
+    private readonly KtisisIPC _ktisisIPC;
 
-    public DebugCapability(IClientState clientState, Entity parent, GPoseService gPoseService) : base(parent)
+    public bool IsPosing => _ktisisIPC.IsPosing;
+
+    public DebugCapability(IClientState clientState, Entity parent, GPoseService gPoseService, KtisisIPC ktisisIPC) : base(parent)
     {
         _gPoseService = gPoseService;
+        _ktisisIPC = ktisisIPC;
         Widget = new DebugWidget(this, clientState);
     }
 
@@ -50,6 +55,7 @@ public unsafe class DebugCapability : Capability
             ["CameraManager"] = ((nint)CameraManager.Instance()),
             ["ActiveCamera"] = ((nint)CameraManager.Instance()->GetActiveCamera()),
             ["EventFramework"] = ((nint)EventFramework.Instance()),
+            ["EventGPoseController"] = (nint)(&EventFramework.Instance()->EventSceneModule.EventGPoseController),
             ["Target"] = ((nint)TargetSystem.Instance()->Target),
         };
 

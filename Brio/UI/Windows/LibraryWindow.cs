@@ -474,7 +474,7 @@ public class LibraryWindow : Window
                         {
                             if(popup.Success)
                             {
-                                PosingEditorCommon.DrawImportOptionEditor(_posingService.DefaultImporterOptions);
+                                PosingEditorCommon.DrawImportOptionEditor(_posingService.DefaultImporterOptions, _posingService);
                             }
                         }
 

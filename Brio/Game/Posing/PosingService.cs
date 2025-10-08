@@ -9,7 +9,7 @@ public class PosingService
 
     public PosingCoordinateMode CoordinateMode { get; set; } = PosingCoordinateMode.Local;
 
-    public bool UniversalGizmoOperation { get; set; } = false;
+    public bool GizmoStaysWhenAllBonesAreDisabled { get; set; } = false;
 
     public BoneCategories BoneCategories { get; } = new();
 
@@ -32,7 +32,6 @@ public class PosingService
         OverlayFilter.DisableCategory("weapon");
         OverlayFilter.DisableCategory("clothing");
         OverlayFilter.DisableCategory("legacy");
-
 
         DefaultImporterOptions = new PoseImporterOptions(new BoneFilter(this), TransformComponents.Rotation, false);
         DefaultImporterOptions.BoneFilter.DisableCategory("weapon");

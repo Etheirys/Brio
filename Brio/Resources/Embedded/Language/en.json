@@ -257,10 +257,17 @@
     "iv_asi_naka_a_r": "IVCS Middle Toe A Right",
     "iv_asi_naka_b_r": "IVCS Middle Toe B Right",
     "iv_asi_kusu_a_r": "IVCS Fore Toe A Right",
-    "iv_asi_kusu_b_r": "IVCS Fore Toe B Right"
+    "iv_asi_kusu_b_r": "IVCS Fore Toe B Right",
+
+    "iv_kyokin_phys_r": "IVCS Physics Breast Right",
+    "iv_kyokin_phys_l": "IVCS Physics Breast Left"
   },
 
-  "bone_categories": {
+  "bone_categories": {   
+    "headCategory": "Head Bones",
+    "bodyCategory": "Body Bones",
+    "ivcsCategory": "IVCS Bones",
+    "otherCategory": "Other Bones",
     "body": "Body",
     "head": "Head",
     "hair": "Hair",
@@ -268,14 +275,21 @@
     "eyes": "Eyes",
     "lips": "Lips",
     "jaw": "Jaw",
-    "clothing": "Clothes",
     "legs": "Legs",
     "tail": "Tail",
     "ears": "Ears",
-    "hands": "Hands",
+    "handsLeft": "Right Arm",
+    "handsRight": "Left Arm",
+    "ivcsHandsRight": "IVCS Right Arm",
+    "ivcsHandsLeft": "IVCS Left Arm",
+    "ivcsPenis": "IVCS Penis",
+    "ivcsVagina": "IVCS Vagina",
+    "ivcsAbdomen": "IVCS Breast & Abdomen",
+    "ivcsLegs": "IVCS Legs & Feet",
+    "ivcsButt": "IVCS Butt",
+    "clothing": "Clothes",
     "weapon": "Weapons",
-    "ivcs": "IVCS",
-    "ex": "EX",
+    "ex": "Dawntrail Other",
     "legacy": "Legacy",
     "other": "Other"
   },
@@ -300,6 +314,7 @@
         "Posing_Universal": "Cycle Gizmo to Universal",
         "Posing_ToggleLink": "Cycle Mirror/Link Mode",
         "Posing_ToggleWorld": "Cycle World/Local",
+        "Posing_Freeze": "Freeze Actor",
         "FreeCamera_Forward": "Forward",
         "FreeCamera_Backward": "Backward",
         "FreeCamera_Left": "Left",
