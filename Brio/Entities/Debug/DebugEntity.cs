@@ -13,6 +13,8 @@ public class DebugEntity(IServiceProvider provider) : Entity(FixedId, provider)
     public override string FriendlyName => "Debug";
     public override FontAwesomeIcon Icon => FontAwesomeIcon.Bug;
 
+    public override EntityFlags Flags =>  EntityFlags.AllowOutsideGpose;
+
     public override void OnAttached()
     {
         AddCapability(ActivatorUtilities.CreateInstance<DebugCapability>(_serviceProvider, this));
