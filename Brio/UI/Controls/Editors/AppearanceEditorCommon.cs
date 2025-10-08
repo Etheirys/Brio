@@ -16,7 +16,7 @@ namespace Brio.UI.Controls.Editors;
 public static class AppearanceEditorCommon
 {
     // Helpers for color handling (Thank you Ny, from https://github.com/Ottermandias/Glamourer/blob/0a9693daea99f79c44b2a69e1bfb006573a721a0/Glamourer/Interop/Material/MaterialValueManager.cs#L43-L53)
-   
+
     // TODO Move this to MathHelpers or something (Ken)
     private static Vector4 Square(Vector4 value) => new(Square(value.X), Square(value.Y), Square(value.Z), Square(value.W));
     private static Vector3 Square(Vector3 value) => new(Square(value.X), Square(value.Y), Square(value.Z));
@@ -56,7 +56,7 @@ public static class AppearanceEditorCommon
         {
             capability.PenumbraService.OpenPenumbra();
         }
- 
+
         ImBrio.AttachToolTip("Open Penumbra");
         ImGui.SameLine();
 
@@ -82,7 +82,7 @@ public static class AppearanceEditorCommon
                         ?.Where(collection => collection.Value.Contains(_search, StringComparison.OrdinalIgnoreCase))
                         .ToDictionary(collection => collection.Key, collection => collection.Value);
                 }
-        
+
                 foreach(var collection in from col in _collections orderby col.Value ascending select col)
                 {
                     bool isSelected = collection.Value.Equals(currentCollection);
@@ -90,7 +90,7 @@ public static class AppearanceEditorCommon
                         capability.SetCollection(collection.Key);
                 }
             }
-            if(_isCollectionsOpen)
+            else if(_isCollectionsOpen)
             {
                 _isCollectionsOpen = false;
                 _collections = [];
@@ -116,7 +116,7 @@ public static class AppearanceEditorCommon
         {
             capability.GlamourerService.OpenGlamourer();
         }
-  
+
         ImBrio.AttachToolTip("Open Glamourer");
         ImGui.SameLine();
 
@@ -230,7 +230,7 @@ public static class AppearanceEditorCommon
 
                 if(_profiles is not null)
                 {
-                    foreach(IPCProfileDataTuple collection in _profiles)
+                    foreach(IPCProfileDataTuple collection in from col in _profiles orderby col.Name ascending select col)
                     {
                         bool isSelected = collection.UniqueId.Equals(capability.CurrentProfile.id);
                         if(ImGui.Selectable(collection.Name, isSelected))
