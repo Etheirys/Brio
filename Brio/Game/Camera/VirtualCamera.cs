@@ -193,7 +193,6 @@ public unsafe partial class VirtualCamera
     {
         if(Position == Vector3.Zero)
             Position = RealPosition;
-        Rotation = RotationAsVector3;
         IsFreeCamera = true;
     }
 }
