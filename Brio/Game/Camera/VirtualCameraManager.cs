@@ -56,11 +56,14 @@ public class VirtualCameraManager : IDisposable
     {
         if(_entityManager.TryGetEntity("cameras", out var ent))
         {
+            var oldCam = CurrentCamera;
             CurrentCamera?.DeactivateCamera();
-
+         
             int cameraId = _nextCameraId + 1;
 
             var camEnt = ActivatorUtilities.CreateInstance<CameraEntity>(_serviceProvider, cameraId, cameraType);
+            bool lastCameraIsFreeCam = oldCam?.IsFreeCamera ?? false;
+
             _entityManager.AttachEntity(camEnt, ent);
 
             if(virtualCamera is null)
@@ -72,6 +75,13 @@ public class VirtualCameraManager : IDisposable
                         camEnt.VirtualCamera.FreeCamValues.MouseSensitivity = DefaultMouseSensitivity;
                         camEnt.VirtualCamera.IsFreeCamera = true;
                         camEnt.VirtualCamera.ToFreeCam();
+
+                        // preserve the rotation from a BrioCamera if switching to a free cam
+                        if(!lastCameraIsFreeCam && oldCam is not null)
+                        {
+                            camEnt.VirtualCamera.Rotation = oldCam.RotationAsVector3;
+                        }
+
                         camEnt.VirtualCamera.ActivateCamera();
                         camEnt.VirtualCamera.DeactivateCamera();
                         _createdCameras.Add(cameraId, camEnt);
