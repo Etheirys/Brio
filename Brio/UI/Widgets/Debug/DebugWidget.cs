@@ -68,7 +68,7 @@ public class DebugWidget(DebugCapability capability, IClientState _clientState) 
 
     private unsafe void DrawAddresses()
     {
-        DynamisIPC.Instance?.DrawPointer((nint)BrioEnvManager.Instance());
+        DynamisService.Instance?.DrawPointer((nint)BrioEnvManager.Instance());
 
         foreach(var (desc, addr) in Capability.GetInterestingAddresses())
         {
@@ -78,7 +78,7 @@ public class DebugWidget(DebugCapability capability, IClientState _clientState) 
             ImBrio.CenterNextElementWithPadding(10);
             ImGui.InputText(desc, ref addrStr, 16, ImGuiInputTextFlags.ReadOnly);
 
-            DynamisIPC.Instance?.DrawPointer(addr);
+            DynamisService.Instance?.DrawPointer(addr);
         }
     }
     private void DrawMisc()
