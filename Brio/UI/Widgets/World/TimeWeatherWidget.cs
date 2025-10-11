@@ -49,14 +49,14 @@ public class TimeWeatherWidget(TimeWeatherCapability weatherCapability) : Widget
         ImGui.SetCursorPos(preservePostime);
 
         ImBrio.CenterNextElementWithPadding(15);
-        var realTime = ImGui.SliderInt("##time_real"u8, ref minuteOfDay, 0, DayTime, dateTime.ToShortTimeString(), ImGuiSliderFlags.NoInput);
+        var realTime = ImGui.SliderInt("##time_real"u8, ref minuteOfDay, 0, DayTime - 1, dateTime.ToShortTimeString(), ImGuiSliderFlags.NoInput);
         ImBrio.AttachToolTip("Time of Day");
 
         var time = false;
         var dragday = false;
         using(ImRaii.ItemWidth((ImBrio.GetRemainingWidth() / 2) - ImGui.GetStyle().ItemInnerSpacing.X))
         {
-            time = ImGui.SliderInt("##time_set"u8, ref minuteOfDay, 10, DayTime, "%.0f"u8);
+            time = ImGui.SliderInt("##time_set"u8, ref minuteOfDay, 0, DayTime - 1, "%.0f"u8);
             ImBrio.AttachToolTip("Time of Day (In Minutes)");
 
             ImGui.SameLine();
