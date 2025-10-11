@@ -61,7 +61,7 @@ public class TimeWeatherWidget(TimeWeatherCapability weatherCapability) : Widget
 
             ImGui.SameLine();
 
-            dragday = ImGui.SliderInt("##day_set"u8, ref dayOfMonth, 10, 31, "%.0f"u8);
+            dragday = ImGui.SliderInt("##day_set"u8, ref dayOfMonth, 1, 31);
             ImBrio.AttachToolTip("Day of Month");
         }
 
