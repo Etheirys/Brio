@@ -75,10 +75,10 @@ public static class KeybindEditor
         ImGui.SameLine();
         using(ImRaii.Disabled(keyBind.Key == VirtualKey.MENU))
         {
-            bool alt = keyBind.requireAlt;
+            bool alt = keyBind.RequireAlt;
             if(ImGui.Checkbox($"##{label}_Alt", ref alt))
             {
-                keyBind.requireAlt = alt;
+                keyBind.RequireAlt = alt;
                 changed = true;
             }
 
@@ -92,10 +92,10 @@ public static class KeybindEditor
         ImGui.SameLine();
         using(ImRaii.Disabled(keyBind.Key == VirtualKey.SHIFT))
         {
-            bool shift = keyBind.requireShift;
+            bool shift = keyBind.RequireShift;
             if(ImGui.Checkbox($"##{label}_Shift", ref shift))
             {
-                keyBind.requireShift = shift;
+                keyBind.RequireShift = shift;
                 changed = true;
             }
 
