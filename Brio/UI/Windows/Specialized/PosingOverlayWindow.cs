@@ -509,11 +509,11 @@ public class PosingOverlayWindow : Window, IDisposable
         }
 
         if(ImGuizmo.Manipulate(
-            ref worldViewMatrix.M11,
-            ref projectionMatrix.M11,
+            ref worldViewMatrix,
+            ref projectionMatrix,
             _lightingService.Operation.AsGizmoOperation(),
             _lightingService.CoordinateMode.AsGizmoMode(),
-            ref lastMatrix.M11
+            ref lastMatrix
         ))
         {
             newTransform = lastMatrix.ToTransform();
@@ -633,11 +633,11 @@ public class PosingOverlayWindow : Window, IDisposable
         }
 
         if(ImGuizmo.Manipulate(
-            ref worldViewMatrix.M11,
-            ref projectionMatrix.M11,
+            ref worldViewMatrix,
+            ref projectionMatrix,
             _posingService.Operation.AsGizmoOperation(),
             _posingService.CoordinateMode.AsGizmoMode(),
-            ref lastMatrix.M11
+            ref lastMatrix
         ))
         {
             if(!posing.ModelPosing.Freeze && !(selectedBone != null && selectedBone.Freeze))
