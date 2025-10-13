@@ -72,7 +72,7 @@ public static class CameraEditor
 
                 ImGui.SameLine();
 
-                if(ImBrio.FontIconButtonRight("reset", FontAwesomeIcon.Undo, 1f, "Reset", camera.IsOverridden))
+                if(ImBrio.FontIconButtonRight("reset", FontAwesomeIcon.Undo, 1f, "Reset Camera", camera.IsOverridden))
                     camera.ResetCamera();
 
                 //
