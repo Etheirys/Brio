@@ -36,10 +36,12 @@ public class CameraContainerWidget(CameraContainerCapability capability) : Widge
             using(ImRaii.Disabled(hasSelection == false))
             {
                 using(ImRaii.Disabled(_selectedEntity?.VirtualCamera.CameraID == null))
+                {
                     if(ImBrio.FontIconButton("CameraLifetime_clone", FontAwesomeIcon.Clone, "Clone Camera"))
                     {
                         Capability.VirtualCameraManager.CloneCamera(_selectedEntity!.VirtualCamera.CameraID);
                     }
+                }
 
                 ImGui.SameLine();
 
