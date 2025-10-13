@@ -19,5 +19,4 @@ public class CameraLifetimeCapability : CameraCapability
     }
 
     public bool CanDestroy => CameraEntity.CameraID != 0;
-    public bool CanClone => CameraEntity.CameraID != 0;
 }
