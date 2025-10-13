@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using Brio.Config;
 using Brio.Core;
 using Brio.Resources;
 using static FFXIVClientStructs.FFXIV.Client.Graphics.Scene.CharacterBase;
