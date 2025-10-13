@@ -107,7 +107,7 @@ public class EntityHierarchyView(EntityManager entityManager, GPoseService gPose
                     {
                         groupedUndoService.Clear();
 
-                        Select(_lastSelectedEntityRef ?? entity);
+                        Select(entity);
                     }
                 }
 
