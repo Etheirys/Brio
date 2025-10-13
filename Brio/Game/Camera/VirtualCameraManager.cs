@@ -18,9 +18,6 @@ namespace Brio.Game.Camera;
 
 public class VirtualCameraManager : IDisposable
 {
-    public const float DefaultMovementSpeed = 0.03f;
-    public const float DefaultMouseSensitivity = 0.1f;
-
     public VirtualCamera? CurrentCamera { get; private set; }
     public FreeCamValues FreeCamValues => CurrentCamera?.FreeCamValues!;
 
@@ -29,24 +26,28 @@ public class VirtualCameraManager : IDisposable
     private readonly IServiceProvider _serviceProvider;
     private readonly GPoseService _gPoseService;
     private readonly EntityManager _entityManager;
+    private readonly ConfigurationService _configurationService;
 
     private CameraEntity? DefaultCamera;
+    private float _moveSpeed = 0.03f;
+    private float DefaultMovementSpeed =>  _configurationService.Configuration.Interface.DefaultFreeCameraMovementSpeed;
+    private float DefaultMouseSensitivity =>  _configurationService.Configuration.Interface.DefaultFreeCameraMouseSensitivity;
 
-    public VirtualCameraManager(IServiceProvider serviceProvider, GPoseService gPoseService, EntityManager entityManager)
+    public VirtualCameraManager(IServiceProvider serviceProvider, GPoseService gPoseService, EntityManager entityManager, ConfigurationService configurationService)
     {
         _serviceProvider = serviceProvider;
         _gPoseService = gPoseService;
         _entityManager = entityManager;
+        _configurationService = configurationService;
 
         _gPoseService.OnGPoseStateChange += OnGPoseStateChange;
+        _moveSpeed = configurationService.Configuration.Interface.DefaultFreeCameraMovementSpeed;
     }
 
     private readonly Vector3 Up = new(0f, 1f, 0f);
 
     private int _nextCameraId = 1;
     private readonly Dictionary<int, CameraEntity> _createdCameras = [];
-
-    private float _moveSpeed = DefaultMovementSpeed;
 
     public List<CameraEntity> SpawnedCameraEntities => [.. _createdCameras.Values];
    
