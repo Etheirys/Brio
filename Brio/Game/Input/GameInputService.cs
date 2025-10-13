@@ -3,10 +3,12 @@ using Brio.Game.Camera;
 using Brio.Game.GPose;
 using Brio.Input;
 using Dalamud.Game;
+using Dalamud.Game.ClientState.Keys;
 using Dalamud.Hooking;
 using Dalamud.Plugin.Services;
 using FFXIVClientStructs.FFXIV.Client.UI;
 using System;
+using System.Collections.Generic;
 
 namespace Brio.Game.Input;
 
@@ -84,7 +86,6 @@ public class GameInputService : IDisposable
         _requireShift |= keyBindings[InputAction.Posing_Redo].RequireShift;
         _requireCtrl |= keyBindings[InputAction.Posing_Redo].RequireCtrl;
         _requireAlt |= keyBindings[InputAction.Posing_Redo].RequireAlt;
-
     }
 
     public unsafe void HandleInputDetour(IntPtr arg1, IntPtr arg2, IntPtr arg3, MouseFrame* mouseFrame, KeyboardFrame* keyboardFrame)
@@ -93,7 +94,7 @@ public class GameInputService : IDisposable
 
         _handleInputHook.Original(arg1, arg2, arg3, mouseFrame, keyboardFrame);
 
-        if(_gPoseService.IsGPosing == false)
+        if(_gPoseService.IsGPosing is false)
             return;
 
         if(RaptureAtkModule.Instance()->AtkModule.IsTextInputActive())
@@ -101,7 +102,7 @@ public class GameInputService : IDisposable
 
         if(_configurationService.Configuration.InputManager.EnableConsumeAllInput)
         {
-            if(_virtualCameraService.CurrentCamera?.IsFreeCamera == true)
+            if(_virtualCameraService.CurrentCamera?.IsFreeCamera is true)
                 _virtualCameraService.Update(mouseFrame);
 
             for(int i = 0; i < KeyboardFrame.KeyStateLength; i++)
@@ -114,9 +115,8 @@ public class GameInputService : IDisposable
                 keyboardFrame->KeyState[i] = 0;
             }
         }
-        else
+        else if (_configurationService.Configuration.InputManager.Enable)
         {
-
             if(_requireMod)
             {
                 if(_requireCtrl && keyboardFrame->KeyState[17] == 1)            // Ctrl 
@@ -136,7 +136,7 @@ public class GameInputService : IDisposable
                 }
             }
 
-            if(_virtualCameraService.CurrentCamera?.IsFreeCamera == true)
+            if(_virtualCameraService.CurrentCamera?.IsFreeCamera is true)
             {
                 _virtualCameraService.Update(mouseFrame);
 
