@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Brio.IPC;
 
-public class KtisisIPC : BrioIPC
+public class KtisisService : BrioIPC
 {
     public override string Name => "Ktisis";
 
@@ -38,7 +38,7 @@ public class KtisisIPC : BrioIPC
     private readonly ICallGateSubscriber<bool>? _ktisisIsPosing;
 
 
-    public KtisisIPC(IDalamudPluginInterface pluginInterface, ConfigurationService configurationService)
+    public KtisisService(IDalamudPluginInterface pluginInterface, ConfigurationService configurationService)
     {
         _pluginInterface = pluginInterface;
         _configurationService = configurationService;

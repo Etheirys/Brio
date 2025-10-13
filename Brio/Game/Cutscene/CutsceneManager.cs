@@ -61,82 +61,93 @@ public class CutsceneManager : IDisposable
         _framework = framework;
     }
 
-    private void OnGPoseStateChange(bool newState)
+    public void OnGPoseStateChange(bool newState)
     {
         if(newState == false && IsRunning)
             StopPlayback();
     }
 
-    private void StartAllActors()
+    public void StartAllActors()
     {
-        foreach(var actor in _entityManager.TryGetAllActors())
-        {
-            if(actor.TryGetCapability<ActionTimelineCapability>(out ActionTimelineCapability? atCap))
+        _framework.RunOnFrameworkThread(() => {
+            foreach(var actor in _entityManager.TryGetAllActors())
             {
-                if(atCap is null)
-                    return;
+                if(actor.TryGetCapability<ActionTimelineCapability>(out ActionTimelineCapability? atCap))
+                {
+                    if(atCap is null)
+                        return;
 
-                ActionTimelineEditor.ApplyBaseOverride(atCap, true);
+                    ActionTimelineEditor.ApplyBaseOverride(atCap, true);
+                }
             }
-        }
+        });
     }
-    private void StopAllActors()
+    public void StopAllActors()
     {
-        foreach(var actor in _entityManager.TryGetAllActors())
+        _framework.RunOnFrameworkThread(() =>
         {
-            if(actor.TryGetCapability<ActionTimelineCapability>(out ActionTimelineCapability? atCap))
+            foreach(var actor in _entityManager.TryGetAllActors())
             {
-                if(atCap is null)
-                    return;
+                if(actor.TryGetCapability<ActionTimelineCapability>(out ActionTimelineCapability? atCap))
+                {
+                    if(atCap is null)
+                        return;
 
-                atCap.Stop();
+                    atCap.Stop();
+                }
             }
-        }
+        });
     }
 
     public void StartPlayback()
     {
-        if(CloseWindowsOnPlay)
-        {
-            UIManager.Instance.TemporarilyHideAllOpenWindows();
-        }
-
-        unsafe
-        {
-            IGameObject? gameObject = _targetManager.GPoseTarget;
-
-            if(gameObject == null)
-                return;
-            var nativeGameObj = gameObject.Native();
-
-            if(nativeGameObj == null)
-                return;
-
-            BasePosition = new Vector3(nativeGameObj->DrawObject->Object.Position.X, nativeGameObj->DrawObject->Object.Position.Y, nativeGameObj->DrawObject->Object.Position.Z);
-            BaseRotation = new Quaternion(nativeGameObj->DrawObject->Object.Rotation.X, nativeGameObj->DrawObject->Object.Rotation.Y, nativeGameObj->DrawObject->Object.Rotation.Z, nativeGameObj->DrawObject->Object.Rotation.W);
-        }
-
-        Stopwatch.Reset();
-        Stopwatch.Start();
-        VirtualCamera.IsActiveCamera = true;
-    }
-    public void StopPlayback()
-    {
-        if(IsRunning)
+        _framework.RunOnFrameworkThread(() =>
         {
             if(CloseWindowsOnPlay)
             {
-                UIManager.Instance.ReopenAllTemporarilyHiddenWindows();
+                UIManager.Instance.TemporarilyHideAllOpenWindows();
+            }
+
+            unsafe
+            {
+                IGameObject? gameObject = _targetManager.GPoseTarget;
+
+                if(gameObject == null)
+                    return;
+                var nativeGameObj = gameObject.Native();
+
+                if(nativeGameObj == null)
+                    return;
+
+                BasePosition = new Vector3(nativeGameObj->DrawObject->Object.Position.X, nativeGameObj->DrawObject->Object.Position.Y, nativeGameObj->DrawObject->Object.Position.Z);
+                BaseRotation = new Quaternion(nativeGameObj->DrawObject->Object.Rotation.X, nativeGameObj->DrawObject->Object.Rotation.Y, nativeGameObj->DrawObject->Object.Rotation.Z, nativeGameObj->DrawObject->Object.Rotation.W);
             }
 
             Stopwatch.Reset();
-            _animationStarted = false;
-            VirtualCamera.IsActiveCamera = false;
-            if(StartAllActorAnimationsOnPlay)
+            Stopwatch.Start();
+            VirtualCamera.IsActiveCamera = true;
+        });
+    }
+    public void StopPlayback()
+    {
+        _framework.RunOnFrameworkThread(() =>
+        {
+            if(IsRunning)
             {
-                StopAllActors();
+                if(CloseWindowsOnPlay)
+                {
+                    UIManager.Instance.ReopenAllTemporarilyHiddenWindows();
+                }
+
+                Stopwatch.Reset();
+                _animationStarted = false;
+                VirtualCamera.IsActiveCamera = false;
+                if(StartAllActorAnimationsOnPlay)
+                {
+                    StopAllActors();
+                }
             }
-        }
+        });
     }
 
     public Matrix4x4? UpdateCamera()
@@ -144,13 +155,6 @@ public class CutsceneManager : IDisposable
         if(IsRunning is false || CameraPath is null)
             return null;
     
-        if(InputManagerService.ActionKeysPressedLastFrame(InputAction.Interface_StopCutscene))
-            StopPlayback();
-        if(InputManagerService.ActionKeysPressedLastFrame(InputAction.Interface_StartAllActorsAnimations))
-            StartAllActors();
-        if(InputManagerService.ActionKeysPressedLastFrame(InputAction.Interface_StopAllActorsAnimations))
-            StopAllActors();
-
         if(DelayStart)
         {
             if(Stopwatch.ElapsedMilliseconds > DelayTime)

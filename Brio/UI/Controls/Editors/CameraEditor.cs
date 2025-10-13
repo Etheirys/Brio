@@ -72,7 +72,7 @@ public static class CameraEditor
 
                 ImGui.SameLine();
 
-                if(ImBrio.FontIconButtonRight("reset", FontAwesomeIcon.Undo, 1f, "Reset", camera.IsOverridden))
+                if(ImBrio.FontIconButtonRight("reset", FontAwesomeIcon.Undo, 1f, "Reset Camera", camera.IsOverridden))
                     camera.ResetCamera();
 
                 //
@@ -139,8 +139,8 @@ public static class CameraEditor
 
                     ImGui.SameLine();
 
-                    if(ImBrio.FontIconButtonRight("resetMovementSpeed", FontAwesomeIcon.Undo, 1f, "Reset Movement Speed", moveSpeed != VirtualCameraManager.DefaultMovementSpeed))
-                        camera.FreeCamValues.MovementSpeed = VirtualCameraManager.DefaultMovementSpeed;
+                    if(ImBrio.FontIconButtonRight("resetMovementSpeed", FontAwesomeIcon.Undo, 1f, "Reset Movement Speed", moveSpeed != capability.configurationService.Configuration.Interface.DefaultFreeCameraMovementSpeed))
+                        camera.FreeCamValues.MovementSpeed = capability.configurationService.Configuration.Interface.DefaultFreeCameraMovementSpeed;
                 }
 
                 {
@@ -154,8 +154,8 @@ public static class CameraEditor
 
                     ImGui.SameLine();
 
-                    if(ImBrio.FontIconButtonRight("resetMouseSensitivity", FontAwesomeIcon.Undo, 1f, "Reset MouseSensitivity", mouseSpeed != VirtualCameraManager.DefaultMouseSensitivity))
-                        camera.FreeCamValues.MouseSensitivity = VirtualCameraManager.DefaultMouseSensitivity;
+                    if(ImBrio.FontIconButtonRight("resetMouseSensitivity", FontAwesomeIcon.Undo, 1f, "Reset MouseSensitivity", mouseSpeed != capability.configurationService.Configuration.Interface.DefaultFreeCameraMouseSensitivity))
+                        camera.FreeCamValues.MouseSensitivity = capability.configurationService.Configuration.Interface.DefaultFreeCameraMouseSensitivity;
                 }
 
                 ImGui.Separator();

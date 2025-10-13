@@ -17,11 +17,11 @@ namespace Brio.Capabilities.Debug;
 public unsafe class DebugCapability : Capability
 {
     private readonly GPoseService _gPoseService;
-    private readonly KtisisIPC _ktisisIPC;
+    private readonly KtisisService _ktisisIPC;
 
     public bool IsPosing => _ktisisIPC.IsPosing;
 
-    public DebugCapability(IClientState clientState, Entity parent, GPoseService gPoseService, KtisisIPC ktisisIPC) : base(parent)
+    public DebugCapability(IClientState clientState, Entity parent, GPoseService gPoseService, KtisisService ktisisIPC) : base(parent)
     {
         _gPoseService = gPoseService;
         _ktisisIPC = ktisisIPC;

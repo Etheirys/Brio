@@ -25,11 +25,11 @@ public class ActorDebugWidget(ActorDebugCapability capability) : Widget<ActorDeb
             {
                 if(infoTab.Success)
                 {
-                    if(DynamisIPC.Instance != null)
+                    if(DynamisService.Instance != null)
                     {
                         ImGui.Text("GameObject ");
                         ImGui.SameLine();
-                        DynamisIPC.Instance.DrawPointer(Capability.GameObject.Address);
+                        DynamisService.Instance.DrawPointer(Capability.GameObject.Address);
                     }
                     else
                     {
@@ -41,11 +41,11 @@ public class ActorDebugWidget(ActorDebugCapability capability) : Widget<ActorDeb
                     var charaBase = Capability.Character.GetCharacterBase();
                     if(charaBase != null)
                     {
-                        if(DynamisIPC.Instance != null)
+                        if(DynamisService.Instance != null)
                         {
                             ImGui.Text("Character Base ");
                             ImGui.SameLine();
-                            DynamisIPC.Instance.DrawPointer((nint)charaBase);
+                            DynamisService.Instance.DrawPointer((nint)charaBase);
                         }
                         else
                         {
@@ -55,11 +55,11 @@ public class ActorDebugWidget(ActorDebugCapability capability) : Widget<ActorDeb
                         }
 
                         var skele = charaBase->CharacterBase.Skeleton;
-                        if(DynamisIPC.Instance != null)
+                        if(DynamisService.Instance != null)
                         {
                             ImGui.Text("Skeleton ");
                             ImGui.SameLine();
-                            DynamisIPC.Instance.DrawPointer((nint)skele);
+                            DynamisService.Instance.DrawPointer((nint)skele);
                         }
                         else
                         {
@@ -69,11 +69,11 @@ public class ActorDebugWidget(ActorDebugCapability capability) : Widget<ActorDeb
                         }
 
                         var shaders = Capability.Character.GetShaderParams();
-                        if(DynamisIPC.Instance != null)
+                        if(DynamisService.Instance != null)
                         {
                             ImGui.Text("Character Shader ");
                             ImGui.SameLine();
-                            DynamisIPC.Instance.DrawPointer((nint)shaders);
+                            DynamisService.Instance.DrawPointer((nint)shaders);
                         }
                         else
                         {

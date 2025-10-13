@@ -25,7 +25,7 @@ public class TransientResourceService : IDisposable
     private readonly object _cacheAdditionLock = new();
     private readonly HashSet<string> _cachedHandledPaths = new(StringComparer.Ordinal);
 
-    private readonly string[] _handledFileTypes = ["tmb", "pap", "avfx", "atex", "sklb", "eid", "phyb", "scd", "skp", "shpk"];
+    private readonly string[] _handledFileTypes = ["tmb", "pap", "avfx", "atex", "sklb", "eid", "phyb", "scd", "skp", "shpk", "kdb"];
     private readonly string[] _handledRecordingFileTypes = ["tex", "mdl", "mtrl"];
 
     private readonly HashSet<(IGameObject GameObject, ObjectKind ObjectKind)> _playerRelatedPointers = [];

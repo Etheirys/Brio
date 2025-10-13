@@ -4,9 +4,9 @@ namespace Brio.Input;
 public struct KeyConfig(VirtualKey key, bool requireShift = false, bool requireCtrl = false, bool requireAlt = false)
 {
     public VirtualKey Key = key;
-    public bool requireShift = requireShift;
+    public bool RequireShift = requireShift;
     public bool RequireCtrl = requireCtrl;
-    public bool requireAlt = requireAlt;
+    public bool RequireAlt = requireAlt;
 
     public override readonly string ToString()
     {
@@ -15,11 +15,11 @@ public struct KeyConfig(VirtualKey key, bool requireShift = false, bool requireC
         {
             result += "Ctrl+";
         }
-        if(requireAlt)
+        if(RequireAlt)
         {
             result += "Alt+";
         }
-        if(requireShift)
+        if(RequireShift)
         {
             result += "Shift+";
         }

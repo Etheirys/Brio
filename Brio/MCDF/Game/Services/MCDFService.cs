@@ -28,7 +28,7 @@ namespace Brio.MCDF.Game.Services;
 
 public class MCDFService : IDisposable
 {
-    public static readonly IImmutableList<string> AllowedFileExtensions = [".mdl", ".tex", ".mtrl", ".tmb", ".pap", ".avfx", ".atex", ".sklb", ".eid", ".phyb", ".pbd", ".scd", ".skp", ".shpk"];
+    public static readonly IImmutableList<string> AllowedFileExtensions = [".mdl", ".tex", ".mtrl", ".tmb", ".pap", ".avfx", ".atex", ".sklb", ".eid", ".phyb", ".pbd", ".scd", ".skp", ".shpk", ".kdb"];
 
     private readonly IFramework _framework;
     private readonly TargetService _targetService;
@@ -303,6 +303,8 @@ public class MCDFService : IDisposable
             {
                 Brio.Log.Debug($"{DataApplicationProgress}");
                 cPlusId = await _customizePlusService.SetBodyScaleAsync(tempHandler.GameObject, customizeData).ConfigureAwait(false);
+                Brio.Log.Warning("LOOK AT ME I' M MR MESEECKS {customizeData}");
+                Brio.Log.Warning(customizeData);
             }
             else
             {

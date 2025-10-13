@@ -79,14 +79,14 @@ public class InputManagerService : IDisposable
                     return true;
                 }
             }
-            else if(value.requireShift || action is InputAction.Brio_Shift)
+            else if(value.RequireShift || action is InputAction.Brio_Shift)
             {
                 if(Instance.IsKeyUpOrDown(VirtualKey.SHIFT) && Instance.IsKeyUp(value.Key))
                 {
                     return true;
                 }
             }
-            else if(value.requireAlt || action is InputAction.Brio_Alt)
+            else if(value.RequireAlt || action is InputAction.Brio_Alt)
             {
                 if(Instance.IsKeyUpOrDown(VirtualKey.MENU) && Instance.IsKeyUp(value.Key))
                 {
@@ -118,14 +118,14 @@ public class InputManagerService : IDisposable
                     return true;
                 }
             }
-            else if(value.requireShift || action is InputAction.Brio_Shift)
+            else if(value.RequireShift || action is InputAction.Brio_Shift)
             {
                 if(Instance.IsKeyDown(VirtualKey.SHIFT) && Instance.IsKeyDown(value.Key))
                 {
                     return true;
                 }
             }
-            else if(value.requireAlt || action is InputAction.Brio_Alt)
+            else if(value.RequireAlt || action is InputAction.Brio_Alt)
             {
                 if(Instance.IsKeyDown(VirtualKey.MENU) && Instance.IsKeyDown(value.Key))
                 {

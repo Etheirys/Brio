@@ -28,9 +28,9 @@ using System.Numerics;
 
 namespace Brio.IPC;
 
-public class DynamisIPC : BrioIPC
+public class DynamisService : BrioIPC
 {
-    public static DynamisIPC? Instance { get; private set; }
+    public static DynamisService? Instance { get; private set; }
 
     public override string Name { get; } = "Dynamis";
 
@@ -88,7 +88,7 @@ public class DynamisIPC : BrioIPC
 
     //
 
-    public DynamisIPC(ConfigurationService configurationService, IDalamudPluginInterface pluginInterface)
+    public DynamisService(ConfigurationService configurationService, IDalamudPluginInterface pluginInterface)
     {
         _configurationService = configurationService;
         _pluginInterface = pluginInterface;

@@ -29,6 +29,8 @@ public class PosingCapability : ActorCharacterCapability
 
     public PosingService PosingService => _posingService;
 
+    public ConfigurationService ConfigurationService => _configurationService;
+
     public bool HasOverride
     {
         get

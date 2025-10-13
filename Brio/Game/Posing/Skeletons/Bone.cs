@@ -1,7 +1,7 @@
-﻿using Brio.Core;
-using Brio.Resources;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using Brio.Core;
+using Brio.Resources;
 using static FFXIVClientStructs.FFXIV.Client.Graphics.Scene.CharacterBase;
 
 namespace Brio.Game.Posing.Skeletons;
@@ -36,6 +36,7 @@ public class Bone(int index, Skeleton skeleton, PartialSkeleton partial)
     public bool IsSkeletonRoot;
 
     public float BoneAdjustmentOffset = 0.01f;
+    public bool IsBoneAdjustmentSet = false;
     public bool Freeze = false;
 
     public List<Bone> Children = [];

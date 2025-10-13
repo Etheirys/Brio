@@ -3,6 +3,7 @@ using Brio.Entities;
 using Brio.Entities.Camera;
 using Brio.Game.Cutscene;
 using Brio.Game.GPose;
+using Brio.Input;
 using Dalamud.Game;
 using Dalamud.Hooking;
 using Dalamud.Plugin.Services;
@@ -99,6 +100,15 @@ public unsafe class CameraService : IDisposable
 
         if(_gPoseService.IsGPosing == false)
             return exec;
+
+        // ha ha ha, this is bad
+
+        if(InputManagerService.ActionKeysPressedLastFrame(InputAction.Interface_StopCutscene))
+            _cutsceneManager.StopPlayback();
+        if(InputManagerService.ActionKeysPressedLastFrame(InputAction.Interface_StartAllActorsAnimations))
+            _cutsceneManager.StartAllActors();
+        if(InputManagerService.ActionKeysPressedLastFrame(InputAction.Interface_StopAllActorsAnimations))
+            _cutsceneManager.StopAllActors();
 
         if(_virtualCameraService.CurrentCamera is not null && _virtualCameraService.CurrentCamera.IsFreeCamera)
         {
