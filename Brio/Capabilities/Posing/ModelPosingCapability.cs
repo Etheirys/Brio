@@ -49,10 +49,15 @@ public class ModelPosingCapability : ActorCharacterCapability
     private Transform? _originalTransform = null;
 
     private readonly ModelTransformService _transformService;
+    private readonly ConfigurationService _configurationService;
 
-    public ModelPosingCapability(ActorEntity parent, ModelTransformService transformService) : base(parent)
+    public ModelPosingCapability(ActorEntity parent, ModelTransformService transformService, ConfigurationService configurationService) : base(parent)
     {
         _transformService = transformService;
+        _configurationService = configurationService;
+
+        // Set transform offset from config
+        this.TransformOffset = _configurationService.Configuration.Interface.DefaultTransformMovementSpeed;
     }
 
     public void ResetTransform()

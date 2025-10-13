@@ -27,7 +27,7 @@ public class CameraLifetimeWidget(CameraLifetimeCapability capability) : Widget<
 
             ImGui.SameLine();
 
-            if(ImBrio.FontIconButton("CameraLifetime_clone", FontAwesomeIcon.Clone, "Clone Camera", Capability.CanClone))
+            if(ImBrio.FontIconButton("CameraLifetime_clone", FontAwesomeIcon.Clone, "Clone Camera"))
             {
                 Capability.VirtualCameraManager.CloneCamera(Capability.CameraEntity.CameraID);
             }
@@ -69,12 +69,9 @@ public class CameraLifetimeWidget(CameraLifetimeCapability capability) : Widget<
             Capability.VirtualCameraManager.SelectCamera(Capability.VirtualCamera);
         }
 
-        if(Capability.CanClone)
+        if(ImGui.MenuItem("Clone###CameraLifetime_clone"))
         {
-            if(ImGui.MenuItem("Clone###CameraLifetime_clone"))
-            {
-                Capability.VirtualCameraManager.CloneCamera(Capability.CameraEntity.CameraID);
-            }
+            Capability.VirtualCameraManager.CloneCamera(Capability.CameraEntity.CameraID);
         }
 
         if(Capability.CanDestroy)

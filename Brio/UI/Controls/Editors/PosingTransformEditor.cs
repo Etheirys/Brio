@@ -152,7 +152,7 @@ public class PosingTransformEditor
         bool anyActive = false;
 
         var bone = posingCapability.SkeletonPosing.GetBone(boneId);
-        var offset = bone?.BoneAdjustmentOffset ?? 0.01f;
+        var offset = posingCapability.ConfigurationService.Configuration.Interface.DefaultBoneTransformMovementSpeed;
         var bonePose = bone is not null ? posingCapability.SkeletonPosing.GetBonePose(boneId) : null;
 
         var propagate = bonePose?.DefaultPropagation ?? TransformComponents.None;
@@ -291,7 +291,13 @@ public class PosingTransformEditor
                 var bone = posingCapability.SkeletonPosing.GetBone(selectedIsBone);
                 if(bone is not null)
                 {
-                    ImBrio.DragFloat($"##transformSpeed_1", ref bone.BoneAdjustmentOffset, 0.001f, 10, 0.01f, "Offset", 50);
+                    if(!bone.IsBoneAdjustmentSet)
+                    {
+                        bone.BoneAdjustmentOffset = posingCapability.ConfigurationService.Configuration.Interface.DefaultBoneTransformMovementSpeed;
+                        bone.IsBoneAdjustmentSet = true;
+                    }
+
+                    ImBrio.DragFloat($"##transformSpeed_1", ref bone.BoneAdjustmentOffset, 0.001f, 10f, 0.01f, "Offset", 50);
                     bool freezeTransforms = bone.Freeze;
                     if(ImGui.Checkbox("Freeze Transforms", ref freezeTransforms))
                     {
@@ -301,7 +307,7 @@ public class PosingTransformEditor
             }
             else
             {
-                ImBrio.DragFloat($"##transformSpeed_1", ref posingCapability.ModelPosing.TransformOffset, 0.001f, 10, 0.01f, "Offset", 50);
+                ImBrio.DragFloat($"##transformSpeed_1", ref posingCapability.ModelPosing.TransformOffset, 0.001f, 10f, 0.01f, "Offset", 50);
                 bool freezeTransforms = posingCapability.ModelPosing.Freeze;
                 if(ImGui.Checkbox("Freeze Transforms", ref freezeTransforms))
                 {

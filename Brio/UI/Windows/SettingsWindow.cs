@@ -156,6 +156,11 @@ public class SettingsWindow : Window
         {
             DrawDisplaySettings();
         }
+
+        if(ImGui.CollapsingHeader("Offset", ImGuiTreeNodeFlags.DefaultOpen))
+        {
+            DrawOffsetSection();
+        }
     }
 
     private void DrawOpenBrioSetting()
@@ -612,6 +617,37 @@ public class SettingsWindow : Window
                 _configurationService.ApplyChange();
             }
         }
+    }
+
+    private void DrawOffsetSection()
+    {
+        var defaultTransformMovementSpeed = _configurationService.Configuration.Interface.DefaultTransformMovementSpeed;
+        if(ImGui.DragFloat("Transform Movement Speed", ref defaultTransformMovementSpeed, 0.001f, 0.001f, 10f))
+        {
+            _configurationService.Configuration.Interface.DefaultTransformMovementSpeed = defaultTransformMovementSpeed;
+            _configurationService.ApplyChange();
+        }
+
+        var defaultBoneTransformMovementSpeed = _configurationService.Configuration.Interface.DefaultBoneTransformMovementSpeed;
+        if(ImGui.DragFloat("Bone Transform Movement Speed", ref defaultBoneTransformMovementSpeed, 0.001f, 0.001f, 10f))
+        {
+            _configurationService.Configuration.Interface.DefaultBoneTransformMovementSpeed = defaultBoneTransformMovementSpeed;
+            _configurationService.ApplyChange();
+        }
+
+        var defaultFreeCamMovementSpeed = _configurationService.Configuration.Interface.DefaultFreeCameraMovementSpeed;
+        if(ImGui.DragFloat("Free Camera Movement Speed", ref defaultFreeCamMovementSpeed, 0.001f, 0.005f, 0.3f))
+        {
+            _configurationService.Configuration.Interface.DefaultFreeCameraMovementSpeed = defaultFreeCamMovementSpeed;
+            _configurationService.ApplyChange();
+        }
+
+        var defaultFreeCamMouseSensitivity = _configurationService.Configuration.Interface.DefaultFreeCameraMouseSensitivity;
+        if(ImGui.DragFloat("Free Camera Mouse Sensitivity", ref defaultFreeCamMouseSensitivity, 0.001f, 0.001f, 0.2f))
+        {
+            _configurationService.Configuration.Interface.DefaultFreeCameraMouseSensitivity = defaultFreeCamMouseSensitivity;
+            _configurationService.ApplyChange();
+        }   
     }
 
     bool resetSettings = false;
