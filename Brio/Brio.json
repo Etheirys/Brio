@@ -1,18 +1,24 @@
 ﻿{
   "Author": "Asgard, Minmoose and Contributors",
   "Name": "Brio",
-  "Punchline": "Enhanced GPosing.",
-  "Description": "Brio is suite of tools that gives you advanced control to edit and pose actors during GPose.",
-  "AssemblyVersion": "0.0.0.1",
-  "DownloadCount": 646779,
   "InternalName": "Brio",
-  "publicName": "Brio",
+  "AssemblyVersion": "0.0.0.1",
+  "Description": "Brio is suite of tools that gives you advanced control to edit and pose actors during GPose.\n- Advanced actor posing \n\t- While animating\n\t- While animating\n\t- Overlay and graphical posing modes\n- Creation of up to 239 G-Pose actors\n- Creation of custom lights\n- Supports integration with Penumbra & Glamourer\n- Offline import and export of MCDF files onto G-Pose actors\n- Play XAT .xcp camera files\n- Play/Blend animations of GPose actors\n- Control Time/Weather in both the Overworld and GPose\n- Change the active festivals and apply up to 4 at once\n- Add/Remove Status Effects of GPose actors",
   "ApplicableVersion": "any",
-  "IconUrl": "https://raw.githubusercontent.com/Etheirys/Brio/main/Resources/Images/BrioIcon.png",
   "Tags": [
     "gpose",
     "brio",
     "posing",
     "animation"
-  ]
+  ],
+  "DownloadCount": 646779,
+  "DalamudApiLevel": 13,
+  "LoadRequiredState": 0,
+  "LoadSync": false,
+  "CanUnloadAsync": false,
+  "LoadPriority": 0,
+  "IconUrl": "https://raw.githubusercontent.com/Etheirys/Brio/main/Resources/Images/BrioIcon.png",
+  "Punchline": "Enhanced GPosing! A utility for improving the G-Pose experience in FFXIV.",
+  "Changelog": "", 
+  "AcceptsFeedback": true
 }
