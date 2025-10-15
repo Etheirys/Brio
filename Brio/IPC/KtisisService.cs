@@ -1,8 +1,6 @@
 ﻿using Brio.Config;
-using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Ipc;
-using System.Threading.Tasks;
 
 namespace Brio.IPC;
 
@@ -48,11 +46,11 @@ public class KtisisService : BrioIPC
         _ktisisIsPosing = _pluginInterface.GetIpcSubscriber<bool>("Ktisis.IsPosing");
     }
 
-    public bool IsPosing => _ktisisIsPosing?.InvokeFunc() ?? false;
+    public bool IsPosing => ((_ktisisIsPosing?.HasFunction ?? false) && (_ktisisIsPosing?.InvokeFunc() ?? false));
 
     public void RefreshActors()
     {
-        if (IsAvailable && !Disabled)
+        if(IsAvailable && !Disabled)
         {
             _ktisisRefreshActors?.InvokeFunc();
         }

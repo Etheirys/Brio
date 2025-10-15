@@ -63,7 +63,7 @@ public class DebugWidget(DebugCapability capability, IClientState _clientState) 
             Capability.ExitGPose();
         }
 
-        ImGui.Text($"IsPosing: {Capability.IsPosing}");
+        ImGui.Text($"IsPosing: {Capability?.IsPosing}");
     }
 
     private unsafe void DrawAddresses()
