@@ -106,16 +106,15 @@ public static class PosingEditorCommon
             filter.DisableAll();
         }
 
-        ImGui.SameLine();
 
         if(posingService is not null)
         {
+            ImGui.SameLine();
+
             if(ImBrio.ToggelFontIconButton("keep_gizmo", FontAwesomeIcon.LocationCrosshairs, new(0), posingService.GizmoStaysWhenAllBonesAreDisabled, hoverText: "Keep gizmo active even when all items in the filter are disabled"))
             {
                 posingService.GizmoStaysWhenAllBonesAreDisabled = !posingService.GizmoStaysWhenAllBonesAreDisabled;
             }
-
-            ImGui.Separator();
         }
 
         foreach(var category in filter.AllCategories)
