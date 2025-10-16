@@ -9,6 +9,18 @@ changelog:
     isCurrent: true
     versions:
 
+      - number: "0.6.0.1"
+        icon: ""
+        items:
+          - "Add kdb file support to MCDFs (does this do anything, I have no idea!!!)"
+          - "Updated Brio's icon"
+          - "Fixed an issue with cloning cameras (Thanks @Bronya-Rand)"
+          - "Fixed an issue with multi bone selection (WHAT?! Don't look at it! it's a secret!)"
+          - "Fixed an issue with the clone button not being present on the default camera (Thanks @Bronya-Rand)"
+          - "Made improvements to key handling with the new Input manager"
+          - "Fixed certain key binds from functioning in certain situations"
+          - "Fix time of day & day of month slider not updating properly in the environment window"
+
       - number: "PLEASE READ THE KNOWN ISSUES AT THE BOTTOM OF THIS SECTION!"
         icon: ""
         items:
