@@ -9,6 +9,18 @@ changelog:
     isCurrent: true
     versions:
 
+      - number: "0.6.0.2"
+        icon: ""
+        items:
+          - "Change the name of the Area light to Point light (Thank you to snerdfire on Discord for the suggestion!)"
+          - "Added `Scale` Transform Property to lights"
+          - "Added All Saints' Wake (2025) & MONSTER HUNTER WILDS Collab to the festival list"
+          - "Added a bunch of old festivals to the festival list"
+          - "Attempt to fix an issue with extending limbs when importing as expression"
+          - "(one I forgot last time) Added Default Transform slider movement speed to the settings (Thank you Bronya-Rand)" 
+          - "Fixed an issue with the head rotating when importing as expression (another one I forgot :p)"
+          - "Very small UI tweaks"
+
       - number: "0.6.0.1"
         icon: ""
         items:
