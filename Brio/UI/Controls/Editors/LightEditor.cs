@@ -303,7 +303,7 @@ public class LightEditor
             ImBrio.VerticalPadding(2);
             (var rdidChange, var ranyActive) = ImBrio.DragFloat3($"###_transform_Light_Rotation_0", ref Capability.rotation, 1f * 10, FontAwesomeIcon.ArrowsSpin, "Rotation", enableExpanded: false);
             ImBrio.VerticalPadding(2);
-            (var sdidChange, var sanyActive) = ImBrio.DragFloat3($"###_transform_Light_Scale_0", ref Capability.scale, 1f, FontAwesomeIcon.Expand, "Scale", enableExpanded: false);
+            (var sdidChange, var sanyActive) = ImBrio.DragFloat3($"###_transform_Light_Scale_0", ref Capability.scale, 1f, FontAwesomeIcon.ExpandAlt, "Scale", enableExpanded: false);
 
             didChange |= pdidChange |= rdidChange |= sdidChange;
             anyActive |= panyActive |= ranyActive |= sanyActive;
