@@ -27,7 +27,7 @@ public class LightEditor
                     lightingService.SpawnLight(LightType.SpotLight);
                 }
 
-                if(ImGui.Button("Spawn Area Light"u8, new(125 * ImGuiHelpers.GlobalScale, 0)))
+                if(ImGui.Button("Spawn Point Light"u8, new(125 * ImGuiHelpers.GlobalScale, 0)))
                 {
                     lightingService.SpawnLight(LightType.AreaLight);
                 }
@@ -141,7 +141,7 @@ public class LightEditor
             }
         }
 
-        if(ImBrio.ButtonSelectorStrip("light_type", Vector2.Zero, ref Capability.SelectedLightType, ["Spot", "Area", "Flat", "World"]))
+        if(ImBrio.ButtonSelectorStrip("light_type", Vector2.Zero, ref Capability.SelectedLightType, ["Spot", "Point", "Flat", "World"]))
         {
             switch(Capability.SelectedLightType)
             {
