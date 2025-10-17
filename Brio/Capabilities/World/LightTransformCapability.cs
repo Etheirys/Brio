@@ -57,6 +57,7 @@ public class LightTransformCapability : LightCapability
     public bool IsTransformDraggingActive = false;
     public Vector3 rotation = Vector3.Zero;
     public Vector3 position = Vector3.Zero;
+    public Vector3 scale = Vector3.Zero;
     public StructsTransforms Transform = new()
     {
         Position = Vector3.Zero,
@@ -103,9 +104,11 @@ public class LightTransformCapability : LightCapability
     {
         Transform.Position = Light.GameLight.GameLight->Transform.Position = Light.GameLight.SpawnPosition;
         Transform.Rotation = Light.GameLight.GameLight->Transform.Rotation = Light.GameLight.SpawnRotation;
+        Transform.Scale = Light.GameLight.GameLight->Transform.Scale = Light.GameLight.SpawnScale;
 
         rotation = Vector3.Zero;
         position = Vector3.Zero;
+        scale = Vector3.Zero;
 
         if(clearHistStack)
             _redoStack.Clear();
@@ -127,9 +130,9 @@ public class LightTransformCapability : LightCapability
         _redoStack.Clear();
 
         if(_undoStack.Count == 0)
-            _undoStack.Push(new LightStack(GameLight.SpawnPosition, GameLight.SpawnRotation));
+            _undoStack.Push(new LightStack(GameLight.SpawnPosition, GameLight.SpawnRotation, GameLight.SpawnScale));
 
-        _undoStack.Push(new LightStack(Transform.Position, Transform.Rotation));
+        _undoStack.Push(new LightStack(Transform.Position, Transform.Rotation, Transform.Scale));
         _undoStack = _undoStack.Trim(undoStackSize + 1);
     }
 
@@ -137,10 +140,12 @@ public class LightTransformCapability : LightCapability
     {
         rotation = state.Rotation.EulerAngles;
         position = state.Position;
+        scale = state.Scale;
 
         Light.GameLight.GameLight->Transform.Position = Transform.Position = state.Position;
         Light.GameLight.GameLight->Transform.Rotation = Transform.Rotation = state.Rotation;
+        Light.GameLight.GameLight->Transform.Scale = Transform.Scale = state.Scale;
     }
 }
 
-public record struct LightStack(StructsVector3 Position, StructsQuaternion Rotation);
+public record struct LightStack(StructsVector3 Position, StructsQuaternion Rotation, StructsVector3 Scale);

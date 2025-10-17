@@ -21,7 +21,6 @@ using FFXIVClientStructs.FFXIV.Client.Graphics.Scene;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Numerics;
 using System.Runtime.CompilerServices;
@@ -134,7 +133,7 @@ public unsafe class LightingService : IDisposable
 
             if(gposeLight != null)
             {
-                Light light = new(gposeLight, gposeLight->Transform.Position, gposeLight->Transform.Rotation)
+                Light light = new(gposeLight, gposeLight->Transform.Position, gposeLight->Transform.Rotation, gposeLight->Transform.Scale)
                 {
                     IsGPoseLight = true,
                     GposeLightIndex = index
@@ -192,7 +191,7 @@ public unsafe class LightingService : IDisposable
         {
             var gamelight = SpawnGameLight(lightType);
 
-            Light light = new(gamelight, gamelight->Transform.Position, gamelight->Transform.Rotation);
+            Light light = new(gamelight, gamelight->Transform.Position, gamelight->Transform.Rotation, gamelight->Transform.Scale);
             light.SetIndex(_spawnedLights.Add(light));
 
             UpdateLight(gamelight);
@@ -279,7 +278,7 @@ public unsafe class LightingService : IDisposable
             // Spawn a new GameLight
             var clonedGameLight = SpawnGameLight(sourceLight.GameLight->LightRenderObject->EmissionType);
 
-            Light clonedLight = new(clonedGameLight, clonedGameLight->Transform.Position, clonedGameLight->Transform.Rotation);
+            Light clonedLight = new(clonedGameLight, clonedGameLight->Transform.Position, clonedGameLight->Transform.Rotation, clonedGameLight->Transform.Scale);
             clonedLight.SetIndex(_spawnedLights.Add(clonedLight));
 
             // Copy properties from the source light to the cloned light
@@ -397,7 +396,7 @@ public unsafe class LightingService : IDisposable
 
                 UpdateLight(gameLight);
 
-                var light = new Light(gameLight, gameLight->Transform.Position, gameLight->Transform.Rotation);
+                var light = new Light(gameLight, gameLight->Transform.Position, gameLight->Transform.Rotation, gameLight->Transform.Scale);
                 light.SetIndex(_spawnedLights.Add(light));
 
                 if(_entityManager.TryGetEntity("environment", out var ent))
@@ -562,6 +561,7 @@ public unsafe class Light : IGameLight, IDisposable
 
     public Vector3 SpawnPosition { get; set; }
     public Quaternion SpawnRotation { get; set; }
+    public Vector3 SpawnScale { get; set; }
 
     public bool IsGismoVisible { get; set; } = false;
     public bool NeedsUpdate { get; set; }
@@ -569,12 +569,13 @@ public unsafe class Light : IGameLight, IDisposable
     public bool IsGPoseLight { get; set; }
     public uint GposeLightIndex { get; set; }
 
-    public Light(GameLight* gameLight, Vector3 position, Quaternion rotation)
+    public Light(GameLight* gameLight, Vector3 position, Quaternion rotation, Vector3 scale)
     {
         _gameLight = gameLight;
 
         SpawnPosition = position;
         SpawnRotation = rotation;
+        SpawnScale = scale;
     }
 
     public void SetIndex(int index)
@@ -617,6 +618,7 @@ public unsafe interface IGameLight
 
     public Vector3 SpawnPosition { get; set; }
     public Quaternion SpawnRotation { get; set; }
+    public Vector3 SpawnScale { get; set; }
 
     public GameLight* GameLight { get; }
     public IntPtr Address { get; }

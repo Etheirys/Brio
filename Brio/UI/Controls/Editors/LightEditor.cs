@@ -285,7 +285,7 @@ public class LightEditor
         var light = Capability.GameLight.GameLight != null ? Capability.GameLight.GameLight->LightRenderObject : null;
         if(light == null) return;
 
-        using var child1 = ImRaii.Child("LightPropertiesChild", new Vector2(0, 70 * ImGuiHelpers.GlobalScale), true);
+        using var child1 = ImRaii.Child("LightPropertiesChild", new Vector2(0, (35 * 3) * ImGuiHelpers.GlobalScale), true);
         if(child1.Success)
         {
             bool didChange = false;
@@ -295,14 +295,18 @@ public class LightEditor
                 Capability.rotation = (Capability.Transform.Rotation = light->Transform->Rotation).EulerAngles;
             if(Capability.position == Vector3.Zero)
                 Capability.position = (Capability.Transform.Position = light->Transform->Position);
+            if(Capability.scale == Vector3.Zero)
+                Capability.scale = (Capability.Transform.Scale = light->Transform->Scale);
 
             ImBrio.VerticalPadding(2);
             (var pdidChange, var panyActive) = ImBrio.DragFloat3($"###_transform_Light_Position_0", ref Capability.position, 0.1f, FontAwesomeIcon.ArrowsUpDownLeftRight, "Position", enableExpanded: false);
             ImBrio.VerticalPadding(2);
             (var rdidChange, var ranyActive) = ImBrio.DragFloat3($"###_transform_Light_Rotation_0", ref Capability.rotation, 1f * 10, FontAwesomeIcon.ArrowsSpin, "Rotation", enableExpanded: false);
+            ImBrio.VerticalPadding(2);
+            (var sdidChange, var sanyActive) = ImBrio.DragFloat3($"###_transform_Light_Scale_0", ref Capability.scale, 1f, FontAwesomeIcon.Expand, "Scale", enableExpanded: false);
 
-            didChange |= pdidChange |= rdidChange;
-            anyActive |= panyActive |= ranyActive;
+            didChange |= pdidChange |= rdidChange |= sdidChange;
+            anyActive |= panyActive |= ranyActive |= sanyActive;
 
             if(anyActive)
             {
@@ -311,6 +315,7 @@ public class LightEditor
 
                 light->Transform->Position = Capability.Transform.Position = Capability.position;
                 light->Transform->Rotation = Capability.Transform.Rotation = Capability.rotation.ToEulerAngles();
+                light->Transform->Scale = Capability.Transform.Scale = Capability.scale;
             }
             else if(Capability.IsTransformDraggingActive && activeState)
             {
@@ -318,7 +323,8 @@ public class LightEditor
                 activeState = false;
 
                 Capability.Transform.Position = Capability.position;
-                Capability.Transform.Rotation = Capability.rotation.ToEulerAngles();  
+                Capability.Transform.Rotation = Capability.rotation.ToEulerAngles();
+                Capability.Transform.Scale = Capability.scale;
                 Capability.Snapshot();
             }
         }
