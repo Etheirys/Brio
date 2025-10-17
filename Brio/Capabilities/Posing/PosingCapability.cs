@@ -173,7 +173,7 @@ public class PosingCapability : ActorCharacterCapability
         if(poseFile.Bones.Count == 0 && poseFile.MainHand.Count == 0 && poseFile.OffHand.Count == 0)
         {
             Brio.NotifyError("Invalid pose file.");
-            Brio.Log.Verbose($"Invalid pose file. {reconcile} {reset} {generateSnapshot} {asExpression} {expressionPhase2} {asScene} {asIPCpose} {asBody}");
+            Brio.Log.Info($"Invalid pose file. {reconcile} {reset} {generateSnapshot} {asExpression} {expressionPhase2} {asScene} {asIPCpose} {asBody}");
             return;
         }
 
@@ -182,7 +182,7 @@ public class PosingCapability : ActorCharacterCapability
         bool applyModelTransform = false;
         if(asExpression)
         {
-            Brio.Log.Info("Loading as Expression");
+            Brio.Log.Debug("Loading as Expression");
 
             options = _posingService.ExpressionOptions;
             tempPose = GeneratePoseFile();
@@ -228,10 +228,7 @@ public class PosingCapability : ActorCharacterCapability
 
         if(asExpression == false)
             ModelPosing.ImportModelPose(poseFile, options, asScene, applyModelTransform);
-
-        if(generateSnapshot)
-            _framework.RunOnTick(() => Snapshot(reset, reconcile, asExpression: asExpression), delayTicks: 4);
-
+       
         if(expressionPhase2)
         {
             var bone = SkeletonPosing.GetBone("j_kao", PoseInfoSlot.Character);
@@ -242,6 +239,9 @@ public class PosingCapability : ActorCharacterCapability
                     poseInfo.RemoveLastStack();
             }
         }
+
+        if(generateSnapshot)
+            _framework.RunOnTick(() => Snapshot(reset, reconcile, asExpression: asExpression), delayTicks: 4);
     }
 
     public PoseFile ExportPose()
@@ -279,6 +279,19 @@ public class PosingCapability : ActorCharacterCapability
 
         _undoStack.Push(new PoseStack(SkeletonPosing.PoseInfo.Clone(), ModelPosing.Transform));
         _undoStack = _undoStack.Trim(undoStackSize + 1);
+
+        //var bone = SkeletonPosing.GetBone("j_kao", PoseInfoSlot.Character);
+        //if(bone != null)
+        //{
+        //    var face = SkeletonPosing.PoseInfo.GetPoseInfo(bone);
+        //    var parent = face.Parent;
+        //    if(parent.IsOverridden)
+        //    {
+        //        face.Apply(bone.LastTransform, bone.LastRawTransform, TransformComponents.All, TransformComponents.Rotation, BoneIKInfo.Disabled, PoseMirrorMode.None, true);
+        //        face.ClearStacks();
+        //        Reconcile(false);
+        //    }
+        //}
 
         if(reconcile)
             Reconcile(reset);
@@ -344,6 +357,7 @@ public class PosingCapability : ActorCharacterCapability
             ImportPose_Internal(poseFile, options: all, generateSnapshot: false);
         }, delayTicks: 2);
     }
+
     public PoseFile GeneratePoseFile()
     {
         var poseFile = new PoseFile();
@@ -351,6 +365,7 @@ public class PosingCapability : ActorCharacterCapability
         ModelPosing.ExportModelPose(poseFile);
         return poseFile;
     }
+
     public BonePoseInfoId? IsSelectedBone()
     {
         Bone? realBone = null;
