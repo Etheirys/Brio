@@ -37,7 +37,7 @@ public struct BrioCamera
     [FieldOffset(0x218)] public Vector2 Collide;
 
     // Converts Brio Camera Angle and Pan Vector2s to a single Vector3 for Free Camera use
-    private readonly Vector3 ConvertBrioCameraToXIVCamera()
+    private readonly Vector3 ConvertToVector3()
     {
         // Used for calculating rotation Y offset based on zoom level
         // A lot of math calculation was done to get these values so don't
@@ -103,7 +103,7 @@ public struct BrioCamera
         return rotation;
     }
 
-    public readonly Vector3 RotationAsVector3 => ConvertBrioCameraToXIVCamera();
+    public readonly Vector3 RotationAsVector3 => new(Angle.X - Pan.X, -Angle.Y - Pan.Y, Roll);
 
     public readonly Quaternion CalculateDirectionAsQuaternion()
         => (new Vector3(-(Angle.Y + Pan.Y), ((Angle.X + MathF.PI) % MathF.Tau) - Pan.X, 0.0f)
