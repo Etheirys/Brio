@@ -8,7 +8,6 @@ using Dalamud.Hooking;
 using Dalamud.Plugin.Services;
 using FFXIVClientStructs.FFXIV.Client.UI;
 using System;
-using System.Collections.Generic;
 
 namespace Brio.Game.Input;
 
@@ -115,21 +114,22 @@ public class GameInputService : IDisposable
                 keyboardFrame->KeyState[i] = 0;
             }
         }
-        else if (_configurationService.Configuration.InputManager.Enable)
+    
+        if(_configurationService.Configuration.InputManager.Enable)
         {
             if(_requireMod)
             {
-                if(_requireCtrl && keyboardFrame->KeyState[17] == 1)            // Ctrl 
+                if(_requireCtrl && keyboardFrame->KeyState[17] == 1)       // Ctrl 
                 {
                     keyboardFrame->KeyState[_undo] = 0;
                     keyboardFrame->KeyState[_redo] = 0;
                 }
-                else if(_requireShift && keyboardFrame->KeyState[16] == 1)      // SHIFT
+                if(_requireShift && keyboardFrame->KeyState[16] == 1)      // SHIFT
                 {
                     keyboardFrame->KeyState[_undo] = 0;
                     keyboardFrame->KeyState[_redo] = 0;
                 }
-                else if(_requireAlt && keyboardFrame->KeyState[18] == 1)        // Alt
+                if(_requireAlt && keyboardFrame->KeyState[18] == 1)        // Alt
                 {
                     keyboardFrame->KeyState[_undo] = 0;
                     keyboardFrame->KeyState[_redo] = 0;
@@ -150,6 +150,9 @@ public class GameInputService : IDisposable
                 if(_virtualCameraService.CurrentCamera.FreeCamValues.IsMovementEnabled &&
                     _configurationService.Configuration.InputManager.EnableKeyHandlingOnKeyMod)
                 {
+                    keyboardFrame->KeyState[81] = 0; // VirtualKey.Q
+                    keyboardFrame->KeyState[69] = 0; // VirtualKey.E
+
                     keyboardFrame->KeyState[32] = 0; // SPACE
                     keyboardFrame->KeyState[16] = 0; // SHIFT
                     keyboardFrame->KeyState[17] = 0; // Ctrl
