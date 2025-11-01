@@ -8,6 +8,11 @@ changelog:
     date: "October 8th 2025"
     isCurrent: true
     versions:
+          
+    - number: "0.6.0.3"
+        icon: ""
+        items:
+          - "Fixed an issue with the Free camera bugging out in certain circumstances"
 
       - number: "0.6.0.2"
         icon: ""
