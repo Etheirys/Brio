@@ -43,7 +43,6 @@ public class PosingService
 
         BodyOptions = new PoseImporterOptions(new BoneFilter(this), TransformComponents.Rotation | TransformComponents.Position, false);
         BodyOptions.BoneFilter.DisableCategory("weapon");
-        BodyOptions.BoneFilter.DisableCategory("head");
         BodyOptions.BoneFilter.DisableCategory("ears");
         BodyOptions.BoneFilter.DisableCategory("hair");
         BodyOptions.BoneFilter.DisableCategory("face");
