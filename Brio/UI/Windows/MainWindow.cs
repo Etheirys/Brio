@@ -16,6 +16,7 @@ using Dalamud.Interface.Utility.Raii;
 using Dalamud.Interface.Windowing;
 using System;
 using System.Numerics;
+using Brio.UI.Controls.Editors;
 
 namespace Brio.UI.Windows;
 
@@ -33,7 +34,8 @@ public class MainWindow : Window, IDisposable
     private readonly AutoSaveService _autoSaveService;
     private readonly HistoryService _groupedUndoService;
     private readonly MCDFService _mCDFService;
-
+    private readonly Sequencer _sequencer;
+    
     public MainWindow(
         ConfigurationService configService,
         SettingsWindow settingsWindow,
@@ -45,7 +47,8 @@ public class MainWindow : Window, IDisposable
         GPoseService gPoseService,
         ProjectWindow projectWindow,
         AutoSaveService autoSaveService,
-        MCDFService mCDFService
+        MCDFService mCDFService,
+        Sequencer sequencer
         )
         : base($" {Brio.Name} [{configService.Version}]###brio_main_window", ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.AlwaysAutoResize)
     {
@@ -63,6 +66,7 @@ public class MainWindow : Window, IDisposable
         _projectWindow = projectWindow;
         _autoSaveService = autoSaveService;
         _mCDFService = mCDFService;
+        _sequencer = sequencer;
 
         SizeConstraints = new WindowSizeConstraints
         {
@@ -106,7 +110,7 @@ public class MainWindow : Window, IDisposable
     private void DrawHeaderButtons()
     {
         float buttonWidths = 25 * ImGuiHelpers.GlobalScale;
-        float line1FinalWidth = ImBrio.GetRemainingWidth() - ((buttonWidths * 2) + (ImGui.GetStyle().ItemSpacing.X * 2) + ImGui.GetStyle().WindowBorderSize);
+        float line1FinalWidth = ImBrio.GetRemainingWidth() - ((buttonWidths * 1) + (ImGui.GetStyle().ItemSpacing.X * 2) + ImGui.GetStyle().WindowBorderSize);
 
         float line1Width = (line1FinalWidth / 2) - 3;
 
@@ -127,14 +131,6 @@ public class MainWindow : Window, IDisposable
             if(ImBrio.Button("Library", FontAwesomeIcon.Book, new Vector2(line1Width, 0), centerTest: true))
                 _libraryWindow.Toggle();
         }
-
-        ImGui.SameLine();
-        if(ImBrio.FontIconButton(FontAwesomeIcon.InfoCircle, new(buttonWidths, 0)))
-            _infoWindow.Toggle();
-
-        if(ImGui.IsItemHovered())
-            ImGui.SetTooltip("Information & Changelog");
-
         ImGui.SameLine();
         if(ImBrio.FontIconButton(FontAwesomeIcon.Cog, new(buttonWidths, 0)))
             _settingsWindow.Toggle();
@@ -142,7 +138,21 @@ public class MainWindow : Window, IDisposable
         if(ImGui.IsItemHovered())
             ImGui.SetTooltip("Settings");
 
+        using(ImRaii.Disabled(_gPoseService.IsGPosing == false))
+        {
+            if(ImBrio.Button("Timeline", FontAwesomeIcon.CodeCommit, new Vector2(line1Width, 0), centerTest: true))
+                _sequencer.Toggle();
+            ImGui.SameLine();
+            if(ImBrio.Button("Placeholder", FontAwesomeIcon.Egg, new Vector2(line1Width, 0), centerTest: true))
+                _libraryWindow.Toggle();
+        }
         //
+        ImGui.SameLine();
+        if(ImBrio.FontIconButton(FontAwesomeIcon.InfoCircle, new(buttonWidths, 0)))
+            _infoWindow.Toggle();
+
+        if(ImGui.IsItemHovered())
+            ImGui.SetTooltip("Information & Changelog");
 
         using(ImRaii.Disabled(_mCDFService.IsApplyingMCDF))
             FileUIHelpers.DrawProjectPopup(_sceneService, _entityManager, _projectWindow, _autoSaveService);
