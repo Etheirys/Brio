@@ -1,4 +1,10 @@
 ﻿
+//
+// Some code in this file is based on and inspired from FFXIVClientStructs
+// https://github.com/aers/FFXIVClientStructs/blob/5da3308ee50128f7de894793e41231f48e1a1d0c/FFXIVClientStructs/FFXIV/Client/Game/Character/LookAtContainer.cs
+// https://github.com/aers/FFXIVClientStructs/blob/main/FFXIVClientStructs/FFXIV/Client/Game/Control/CharacterLookAtTargetParam.cs
+//
+
 #nullable disable
 
 using Brio.Game.Actor.Extensions;
@@ -10,6 +16,7 @@ using Dalamud.Hooking;
 using Dalamud.Plugin.Services;
 using FFXIVClientStructs.FFXIV.Client.Game.Character;
 using FFXIVClientStructs.FFXIV.Client.Game.Control;
+using FFXIVClientStructs.FFXIV.Client.Game.Object;
 using System;
 using System.Collections.Generic;
 using System.Numerics;
@@ -290,6 +297,7 @@ public struct LookAtTarget
 {
     [FieldOffset(0x08)] public LookMode LookMode;
     [FieldOffset(0x10)] public Vector3 Position;
+    [FieldOffset(0x10)] public GameObjectId Target;
 }
 
 public enum LookMode
