@@ -1,14 +1,47 @@
 
-tagline: "Whats New in Brio v0.6.0"
-subline: " MCDF, Dynamic Face Control & Lights!"
+tagline: "Whats New in Brio v0.6.1"
+subline: "Emote Props, Bones and Frozen Boobs / MCDF, Dynamic Face Control & Lights!"
 changelog:
+
+  - name: v0.6.1
+    tagline: Emote Props, Bones and Frozen Boobs!
+    date: "November 26th 2025"
+    isCurrent: true
+    versions:
+      - number: "ATTENTION Projects made in this version will be incompatible with the next version of Brio!"
+        icon: ""
+        items:
+          - "Devs, if you are wanting any changes to Brio's API now is the time before 7.4, Contact me!"
+          - "As a reminder! If you experience any issues please report them on Discord or on GitHub"
+    
+      - number: "0.6.1"
+        icon: ""
+        items:
+          - "Added the Ability to pose Emote Props and Fashion Accessories (Thanks Cara for the help)"
+          - "Attempted to fixed an issue with a errorbox taking over the Scene Manager"
+          - "Fixed an issue where certain bones like, brest would significantly shrink with Freeze Physics enabled"    
+          - "Updated the C+ API version requirement"
+          - "The head bone is now imported with the body option selected"
+          - "Fixed an issue where Brio would use 300MB of VRAM (Thanks Cara)"
+          - "Fixed an issue with spamming the log with debug info"
+          - "Fixed an crash with the Library"
+          - "Fixed an crash when redrawing"
+
+      - number: "Known issues!"
+        icon: ""
+        items:
+          - "Viera ears now grow to max length with Freeze Physics enabled (if it's not boobs it's the ears)"
+          - "Animations (and some other transient files) do not export with MCDFs."
+          - "When deselecting items in the overlay bone filter, the bone groups do not get deselected appropriately."
+          - "When spawning a Spot Light with free cam, it doesn't preserve the rotation of the camera."
+          - "Lights do not get saved with Projects."
 
   - name: v0.6.0
     tagline: "MCDF, Dynamic Face Control & Lights!"
     date: "October 8th 2025"
     isCurrent: true
     versions:
-         
+      
       - number: "0.6.0.3"
         icon: ""
         items:
@@ -38,11 +71,6 @@ changelog:
           - "Made improvements to key handling with the new Input manager"
           - "Fixed certain key binds from functioning in certain situations"
           - "Fix time of day & day of month slider not updating properly in the environment window"
-
-      - number: "PLEASE READ THE KNOWN ISSUES AT THE BOTTOM OF THIS SECTION!"
-        icon: ""
-        items:
-          - "If you experience any issues please report them on the discord or on GitHub"
 
       - number: "Added MCDF Import and export!"
         icon: ""
@@ -123,18 +151,9 @@ changelog:
           - "Fixed an isues when copying/making a new camera would not preserve the rotation of the camera properly"
           - "Various other bugfixes, UI, stability improvements and under the hood changes!"
       
-      - number: "Known issues!"
-        icon: ""
-        items:
-          - "Animations (and some other transient files) do not export with MCDFs."
-          - "When deselecting items in the overlay bone filter, the bone groups do not get deselected appropriately."
-          - "When spawning a Spot Light with free cam, it doesn't preserve the rotation of the camera."
-          - "Lights do not get saved with Projects."
-
   - name: Message From the Developer 
     tagline:
     date: "October 8th 2025"
-    isCurrent: true
     message: |
       With over 13,000 lines of code added/changed, 3 Major new features, A plethora of smaller features and improvements
       Numerous system rewrites; Brio 0.6.0 is by far the largest update since 0.2.0!
