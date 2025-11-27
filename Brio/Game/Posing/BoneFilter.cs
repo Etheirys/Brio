@@ -57,10 +57,13 @@ public class BoneFilter
 
         // Weapon bone names don't matter
         if(slot is PoseInfoSlot.MainHand or PoseInfoSlot.OffHand)
-            if(WeaponsAllowed)
-                return true;
-            else
-                return false;
+            return WeaponsAllowed;
+
+        if(slot is PoseInfoSlot.Ornament)
+            return OrnamentsAllowed;
+       
+        if(slot is PoseInfoSlot.Prop)
+            return PropAllowed;
 
         // Check if the bone is in any of the categories and that category is visible
         foreach(var category in AllCategories)
@@ -90,6 +93,10 @@ public class BoneFilter
     public bool WeaponsAllowed => _allowedCategories.Any((x) => x == "weapon");
 
     public bool OtherAllowed => _allowedCategories.Any((x) => x == "other");
+
+    public bool OrnamentsAllowed =>  _allowedCategories.Any((x) => x == "ornament");
+
+    public bool PropAllowed => _allowedCategories.Any((x) => x == "prop");
 
     public bool IsSubCategoryEnabled(string id) => _subCategories[id].Enabled;
 

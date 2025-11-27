@@ -71,6 +71,28 @@ public class BoneSearchControl
                                     }
                                 }
                             }
+
+                            if(posing.SkeletonPosing.PropSkeleton != null)
+                            {
+                                using(var skeleton = ImRaii.TreeNode("Prop", ImGuiTreeNodeFlags.DefaultOpen | ImGuiTreeNodeFlags.OpenOnDoubleClick))
+                                {
+                                    if(skeleton.Success)
+                                    {
+                                        DrawBone(posing.SkeletonPosing.PropSkeleton.RootBone, posing, PoseInfoSlot.OffHand);
+                                    }
+                                }
+                            }
+
+                            if(posing.SkeletonPosing.OrnamentSkeleton != null)
+                            {
+                                using(var skeleton = ImRaii.TreeNode("Ornament", ImGuiTreeNodeFlags.DefaultOpen | ImGuiTreeNodeFlags.OpenOnDoubleClick))
+                                {
+                                    if(skeleton.Success)
+                                    {
+                                        DrawBone(posing.SkeletonPosing.OrnamentSkeleton.RootBone, posing, PoseInfoSlot.OffHand);
+                                    }
+                                }
+                            }
                         }
                     }
                 }

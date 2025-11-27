@@ -3,6 +3,7 @@ using Brio.Entities.Core;
 using Brio.Game.Actor;
 using Brio.Game.Actor.Extensions;
 using Brio.Game.Core;
+using Dalamud.Game.ClientState.Objects.Enums;
 using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Plugin.Services;
 using Microsoft.Extensions.DependencyInjection;
@@ -65,6 +66,8 @@ public unsafe class EntityActorManager : IDisposable
             // Only characters
             if(!go.Native()->IsCharacter())
                 return;
+
+            if(go.ObjectKind == ObjectKind.Ornament) return;
 
             // TODO: We should allow manipulation of overworld actors too
             if(!go.IsGPose())

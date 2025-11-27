@@ -191,6 +191,7 @@ public enum PoseInfoSlot
     MainHand,
     OffHand,
     Prop,
+    Ornament,
     Unknown
 }
 
