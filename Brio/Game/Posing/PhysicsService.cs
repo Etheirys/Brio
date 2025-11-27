@@ -17,13 +17,10 @@ using System;
 
 namespace Brio.Game.Posing;
 
-public unsafe partial class PhysicsService : IDisposable
+public partial class PhysicsService : IDisposable
 {
     private readonly GPoseService _gPoseService;
     private readonly IFramework _framework;
-
-    //private unsafe delegate void HandlePhysicsDelegate(IntPtr arg1, short arg2, IntPtr arg3, char arg4, char arg5);
-    //private readonly Hook<HandlePhysicsDelegate> _handlePhysicsDelegate = null!;
 
     public bool IsFreezeEnabled { get; private set; } = false;
 
@@ -46,21 +43,7 @@ public unsafe partial class PhysicsService : IDisposable
 
         _originalPhysicsBytes1 = MemoryHelper.ReadRaw(_freezePhysicsAddress, 4);
         _originalPhysicsBytes2 = MemoryHelper.ReadRaw(_freezePhysicsAddress - 0x9, 3);
-
-        //var handlePhysicsSig = "E9 ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? 41 ?? ?? ?? 4c ?? ?? 30 ?? ?? ?? 41"; // e9 2d e0 09 00 ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? 41 0f b6 c0 4c 8b d1 45 8b c8 48 69 c8 20 02 00 00
-        //_handlePhysicsDelegate = hooking.HookFromAddress<HandlePhysicsDelegate>(scanner.ScanText(handlePhysicsSig), HandlePhysicsDetour);
-        //_handlePhysicsDelegate.Enable();
     }
-
-    //public unsafe void HandlePhysicsDetour(IntPtr arg1, short arg2, IntPtr arg3, char arg4, char arg5)
-    //{
-    //    if(IsFreezeEnabled)
-    //    {
-    //        //return;
-    //    }
-
-    //    _handlePhysicsDelegate.Original(arg1, arg2, arg3, arg4, arg5);
-    //}
 
     public bool FreezeToggle() => IsFreezeEnabled ? FreezeRevert() : FreezeEnable();
 
@@ -100,12 +83,13 @@ public unsafe partial class PhysicsService : IDisposable
 
     public void Dispose()
     {
+        GC.SuppressFinalize(this);
+
         if(IsFreezeEnabled)
         {
             FreezeRevert();
         }
 
         _framework.Update -= OnFrameworkUpdate;
-        //_handlePhysicsDelegate.Dispose();
     }
 }
