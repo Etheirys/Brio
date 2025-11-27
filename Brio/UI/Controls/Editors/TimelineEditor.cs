@@ -17,6 +17,7 @@ using FFXIVClientStructs.FFXIV.Client.Graphics.Scene;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Numerics;
 using Dalamud.Interface.Windowing;
 using Dalamud.Plugin;
@@ -45,9 +46,10 @@ public unsafe class RampEdit : ImSequencer.ImCurveEdit.CurveContext
                 
                 mPts[i][j] = new Vector2(temp.NextSingle() % 1, temp.NextSingle() % 1);
             }
+            SortEntries(i);
         }
 
-
+    
     }
 
     private Vector2[][] mPts;
@@ -85,13 +87,30 @@ public unsafe class RampEdit : ImSequencer.ImCurveEdit.CurveContext
 
     public override int EditPoint(int curveIndex, int pointIndex, Vector2 value)
     {
-        mPts[curveIndex][pointIndex] = value;
+        mPts[curveIndex][pointIndex] = NormalizeVector(value);
+        SortEntries(curveIndex);
         return 1;
     }
 
     public override void AddPoint(int curveIndex, Vector2 value)
     {
-        return;
+        Vector2[] tempPts = new Vector2[mPts[curveIndex].Length + 1];
+        mPts[curveIndex].CopyTo(tempPts, 0);
+        tempPts[^1] = value;
+        mPts[curveIndex] = tempPts;
+        
+    }
+    
+    private void SortEntries(int curveIndex)
+    {
+        mPts[curveIndex] = [..mPts[curveIndex].OrderBy(x =>x.X)];
+    }
+
+    private Vector2 NormalizeVector(Vector2 vec)
+    {
+        float x = float.Max(float.Min(vec.X, 1), 0);
+        float y = float.Max(float.Min(vec.Y, 1), 0);
+        return new Vector2(x, y);
     }
 }
 
@@ -128,7 +147,6 @@ public unsafe class Sequencer : Window, SequenceInterface
     private int frameMin = 0;
     private int frameMax = 100;
     public UnsafeList<Item> items = [];
-    private IDalamudPluginInterface iface;
     
     // We give this window a hidden ID using ##
     // So that the user will see "My Amazing Window" as window title,
@@ -136,7 +154,6 @@ public unsafe class Sequencer : Window, SequenceInterface
     public Sequencer(IDalamudPluginInterface pluginInterfacePlugin )
         : base("Timeline##With a hidden ID", ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse)
     {
-        iface = pluginInterfacePlugin;
         SizeConstraints = new WindowSizeConstraints
         {
             MinimumSize = new Vector2(375, 330),
@@ -328,7 +345,7 @@ public unsafe class Sequencer : Window, SequenceInterface
                 float p = ramp.GetPoints(i)[j].X;
                 if (p < items[index].start || p > items[index].end)
                     continue;
-                float r = (p - frameMin) / (float)(frameMax - frameMin);
+                float r = (p*(items[index].end - items[index].start) + frameMin) / (float)(frameMax - frameMin);
                 float x = Extensions.ImLerp(customRect.Min.X, customRect.Max.X, r);
                 drawList.AddLine(new Vector2(x, customRect.Min.Y + 6), new Vector2(x, customRect.Max.Y - 4), 0xAA000000,
                     4.0f);
