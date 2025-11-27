@@ -216,5 +216,7 @@ public enum SkeletonType
 {
     Character,
     MainHandWeapon,
-    OffHandWeapon
+    OffHandWeapon,
+    Prop,
+    Ornament
 }

@@ -82,12 +82,18 @@ public class ActorRedrawService(IFramework framework, IObjectTable objectTable)
 
     public unsafe void DisableDraw(IGameObject go)
     {
+        if(!go.IsValid())
+            return;
+
         var native = go.Native();
         native->DisableDraw();
     }
 
     public unsafe void EnableDraw(IGameObject go)
     {
+        if(!go.IsValid())
+            return;
+
         var native = go.Native();
         native->EnableDraw();
     }
@@ -95,7 +101,12 @@ public class ActorRedrawService(IFramework framework, IObjectTable objectTable)
     public unsafe Task DrawWhenReady(IGameObject go)
     {
         return _framework.RunUntilSatisfied(
-           () => go.Native()->IsReadyToDraw(),
+           () =>
+           {
+               if(go.IsValid())
+                   return go.Native()->IsReadyToDraw();
+               return false;
+           },
            (_) => EnableDraw(go),
            100,
            dontStartFor: 2
@@ -107,6 +118,7 @@ public class ActorRedrawService(IFramework framework, IObjectTable objectTable)
         return _framework.RunUntilSatisfied(
            () =>
            {
+
                var drawObject = go.Native()->DrawObject;
                if(drawObject == null)
                    return false;

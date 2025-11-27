@@ -2,32 +2,16 @@
 //
 // Code found in this file is from and is inspired by,
 // Anamnesis (https://github.com/imchillin/Anamnesis)
+// And SimpleTweaks (https://github.com/Caraxi/SimpleTweaksPlugin/tree/main) 
 //
 
-// This file is licensed under the MIT license.
-// © Anamnesis, Brio & Contributors.
 //
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files (the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions:
-// 
-// The above copyright notice and this permission notice shall be included in all
-// copies or substantial portions of the Software.
-// 
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-// SOFTWARE.
+// Thank you Winter!
+//
 
 using Brio.Game.GPose;
 using Dalamud.Game;
-using Dalamud.Hooking;
+using Dalamud.Memory;
 using Dalamud.Plugin.Services;
 using System;
 
@@ -38,10 +22,14 @@ public unsafe partial class PhysicsService : IDisposable
     private readonly GPoseService _gPoseService;
     private readonly IFramework _framework;
 
-    private unsafe delegate void HandlePhysicsDelegate(IntPtr arg1, short arg2, IntPtr arg3, char arg4, char arg5);
-    private readonly Hook<HandlePhysicsDelegate> _handlePhysicsDelegate = null!;
+    //private unsafe delegate void HandlePhysicsDelegate(IntPtr arg1, short arg2, IntPtr arg3, char arg4, char arg5);
+    //private readonly Hook<HandlePhysicsDelegate> _handlePhysicsDelegate = null!;
 
     public bool IsFreezeEnabled { get; private set; } = false;
+
+    private readonly nint _freezePhysicsAddress;
+    private byte[] _originalPhysicsBytes1 = [];
+    private byte[] _originalPhysicsBytes2 = [];
 
     public PhysicsService(ISigScanner scanner, IFramework framework, GPoseService gPoseService, IGameInteropProvider hooking)
     {
@@ -52,28 +40,45 @@ public unsafe partial class PhysicsService : IDisposable
 
         // This signature is from Anamnesis (https://github.com/imchillin/Anamnesis)
         // Found in AddressService.cs on line 159 - SkeletonFreezePhysics (1/2/3)
-        //var oldFreezePhysicsAddress = "0F 11 48 10 41 0F 10 44 24 ?? 0F 11 40 20 48 8B 46 28";
+        var freezePhysicsAddress = "0F 11 48 10 41 0F 10 44 24 ?? 0F 11 40 20 48 8B 46 28";
+        if(!scanner.TryScanText(freezePhysicsAddress, out this._freezePhysicsAddress))
+            this._freezePhysicsAddress = 0;
 
-        // Thank you Winter!
-        var handlePhysicsSig = "E9 ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? 41 ?? ?? ?? 4c ?? ?? 30 ?? ?? ?? 41"; // e9 2d e0 09 00 ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? 41 0f b6 c0 4c 8b d1 45 8b c8 48 69 c8 20 02 00 00
-        _handlePhysicsDelegate = hooking.HookFromAddress<HandlePhysicsDelegate>(scanner.ScanText(handlePhysicsSig), HandlePhysicsDetour);
-        _handlePhysicsDelegate.Enable();
+        _originalPhysicsBytes1 = MemoryHelper.ReadRaw(_freezePhysicsAddress, 4);
+        _originalPhysicsBytes2 = MemoryHelper.ReadRaw(_freezePhysicsAddress - 0x9, 3);
+
+        //var handlePhysicsSig = "E9 ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? 41 ?? ?? ?? 4c ?? ?? 30 ?? ?? ?? 41"; // e9 2d e0 09 00 ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? ?? 41 0f b6 c0 4c 8b d1 45 8b c8 48 69 c8 20 02 00 00
+        //_handlePhysicsDelegate = hooking.HookFromAddress<HandlePhysicsDelegate>(scanner.ScanText(handlePhysicsSig), HandlePhysicsDetour);
+        //_handlePhysicsDelegate.Enable();
     }
 
-    public unsafe void HandlePhysicsDetour(IntPtr arg1, short arg2, IntPtr arg3, char arg4, char arg5)
-    {
-        if(IsFreezeEnabled)
-        {
-            return;
-        }
+    //public unsafe void HandlePhysicsDetour(IntPtr arg1, short arg2, IntPtr arg3, char arg4, char arg5)
+    //{
+    //    if(IsFreezeEnabled)
+    //    {
+    //        //return;
+    //    }
 
-        _handlePhysicsDelegate.Original(arg1, arg2, arg3, arg4, arg5);
-    }
+    //    _handlePhysicsDelegate.Original(arg1, arg2, arg3, arg4, arg5);
+    //}
 
     public bool FreezeToggle() => IsFreezeEnabled ? FreezeRevert() : FreezeEnable();
 
-    public bool FreezeRevert() => IsFreezeEnabled = false;
-    public bool FreezeEnable() => IsFreezeEnabled = true;
+    public bool FreezeRevert()
+    {
+        ReplaceRaw(_freezePhysicsAddress, _originalPhysicsBytes1);
+        ReplaceRaw(_freezePhysicsAddress - 0x9, _originalPhysicsBytes2);
+
+        return IsFreezeEnabled = false;
+    }
+
+    public bool FreezeEnable()
+    {
+        _originalPhysicsBytes1 = ReplaceRaw(_freezePhysicsAddress, [0x90, 0x90, 0x90, 0x90]);
+        _originalPhysicsBytes2 = ReplaceRaw(_freezePhysicsAddress - 0x9, [0x90, 0x90, 0x90]);
+
+        return IsFreezeEnabled = true;
+    }
 
     private void OnFrameworkUpdate(IFramework framework)
     {
@@ -81,6 +86,16 @@ public unsafe partial class PhysicsService : IDisposable
         {
             FreezeRevert();
         }
+    }
+
+    // From SimpleTweaks (https://github.com/Caraxi/SimpleTweaksPlugin/blob/124523ca0ddbeadec86fd7bea323b66870e1a474/Tweaks/HighResScreenshots.cs)
+    private static byte[] ReplaceRaw(nint address, byte[] data)
+    {
+        var originalBytes = MemoryHelper.ReadRaw(address, data.Length);
+        var oldProtection = MemoryHelper.ChangePermission(address, data.Length, MemoryProtection.ExecuteReadWrite);
+        MemoryHelper.WriteRaw(address, data);
+        MemoryHelper.ChangePermission(address, data.Length, oldProtection);
+        return originalBytes;
     }
 
     public void Dispose()
@@ -91,6 +106,6 @@ public unsafe partial class PhysicsService : IDisposable
         }
 
         _framework.Update -= OnFrameworkUpdate;
-        _handlePhysicsDelegate.Dispose();
+        //_handlePhysicsDelegate.Dispose();
     }
 }

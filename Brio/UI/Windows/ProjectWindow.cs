@@ -46,7 +46,10 @@ public class ProjectWindow : Window, IDisposable
     public override void Draw()
     {
         using(ImRaii.PushColor(ImGuiCol.Text, UIConstants.GizmoMagenta))
-            ImGui.Text("Project System is in Beta. NOTE: Projects might not be compatible from version to version!");
+            ImGui.Text("Project System is in Beta.");
+     
+        using(ImRaii.PushColor(ImGuiCol.Text, UIConstants.GizmoMagenta))
+            ImGui.Text("ATTENTION: Projects made in this version will be incompatible with the next version of Brio!");
 
         using(ImRaii.Disabled(_mCDFService.IsApplyingMCDF || _mCDFService.IsSavingMCDF))
         {

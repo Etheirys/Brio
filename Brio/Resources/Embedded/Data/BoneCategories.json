@@ -307,6 +307,14 @@
         "j_buki"
       ]
     },
+    "prop": {
+      "Type": "Filter",
+      "Bones": []
+    },
+    "ornament": {
+      "Type": "Filter",
+      "Bones": []
+    },
      "ex": {
       "Type": "Filter",
       "Bones": [

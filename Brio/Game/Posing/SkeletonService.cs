@@ -308,7 +308,7 @@ public unsafe class SkeletonService : IDisposable
         modelSpace->Scale = *(hkVector4f*)(&temp.Scale);
     }
 
-    private void RefreshSkeletonCache()
+    public void RefreshSkeletonCache()
     {
         Brio.Log.Debug("Refreshing skeleton cache...");
         _skeletonToPosingCapability.Clear();
@@ -321,6 +321,7 @@ public unsafe class SkeletonService : IDisposable
                 foreach(var charaBase in bases)
                 {
                     CacheSkeleton(charaBase.CharacterBase);
+                    Brio.Log.Debug($"Skeleton cached {actor.Name}");
                 }
             }
         }

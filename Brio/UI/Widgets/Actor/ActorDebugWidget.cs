@@ -89,6 +89,11 @@ public class ActorDebugWidget(ActorDebugCapability capability) : Widget<ActorDeb
             {
                 if(infoTab.Success)
                 {
+                    if(ImGui.Button("Refresh Skeleton Cache"))
+                    {
+                        Capability.SkeletonService.RefreshSkeletonCache();
+                    }
+
                     if(ImGui.CollapsingHeader("Stacks", ImGuiTreeNodeFlags.DefaultOpen))
                     {
                         var stacks = Capability.SkeletonStacks;

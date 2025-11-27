@@ -60,6 +60,30 @@ public class PoseImporter(PoseFile poseFile, PoseImporterOptions options, bool e
                 }
             }
         }
+
+        if(poseInfo.Slot == PoseInfoSlot.Prop)
+        {
+            var isAllowed = options.BoneFilter.PropAllowed;
+            if(isAllowed == true)
+            {
+                if(poseFile.Prop.TryGetValue(bone.Name, out var fileBone))
+                {
+                    poseInfo.Apply(fileBone, bone.LastRawTransform, TransformComponents.All, options.TransformComponents, BoneIKInfo.Disabled, PoseMirrorMode.None, true);
+                }
+            }
+        }
+
+        if(poseInfo.Slot == PoseInfoSlot.Ornament)
+        {
+            var isAllowed = options.BoneFilter.OrnamentsAllowed;
+            if(isAllowed == true)
+            {
+                if(poseFile.Ornament.TryGetValue(bone.Name, out var fileBone))
+                {
+                    poseInfo.Apply(fileBone, bone.LastRawTransform, TransformComponents.All, options.TransformComponents, BoneIKInfo.Disabled, PoseMirrorMode.None, true);
+                }
+            }
+        }
     }
 }
 

@@ -126,7 +126,7 @@ public class PosingOverlayWindow : Window, IDisposable
             var lightClickable = new ClickableItem
             {
                 Name = lightCapability.Entity.FriendlyName,
-                ScreenPosition = modelScreen,
+                ScreenPosition = ImGui.GetMainViewport().Pos + modelScreen,
                 Size = overlayConfig.BoneCircleSize,
                 CurrentlySelected = _lightingService.SelectedLightEntity?.GameLight.EntityIndex == light.EntityIndex
             };
@@ -217,7 +217,7 @@ public class PosingOverlayWindow : Window, IDisposable
             var modelTransform = new ClickableItem
             {
                 Item = PosingSelectionType.ModelTransform,
-                ScreenPosition = modelScreen,
+                ScreenPosition = ImGui.GetMainViewport().Pos +  modelScreen,
                 Size = config.BoneCircleSize,
             };
             clickables.Add(modelTransform);
@@ -276,7 +276,7 @@ public class PosingOverlayWindow : Window, IDisposable
                             var parentWorldPosition = Vector3.Transform(bone.Parent.LastTransform.Position, modelMatrix);
                             if(camera->WorldToScreen(parentWorldPosition, out var parentScreen))
                             {
-                                clickables.Last().ParentScreenPosition = parentScreen;
+                                clickables.Last().ParentScreenPosition = ImGui.GetMainViewport().Pos + parentScreen;
                             }
                         }
                     }

@@ -21,12 +21,14 @@ public class SkeletonPosingCapability : ActorCharacterCapability
     public Skeleton? CharacterSkeleton { get; private set; }
     public Skeleton? MainHandSkeleton { get; private set; }
     public Skeleton? OffHandSkeleton { get; private set; }
+    public Skeleton? PropSkeleton { get; private set; }
+    public Skeleton? OrnamentSkeleton { get; private set; }
 
     public bool CharacterHasTail { get; private set; }
     public bool CharacterIsIVCS { get; private set; }
     public bool CharacterIsDawntrail { get; private set; }
 
-    public IReadOnlyList<(Skeleton Skeleton, PoseInfoSlot Slot)> Skeletons => [.. new[] { (CharacterSkeleton, PoseInfoSlot.Character), (MainHandSkeleton, PoseInfoSlot.MainHand), (OffHandSkeleton, PoseInfoSlot.OffHand) }.Where(s => s.Item1 != null).Cast<(Skeleton Skeleton, PoseInfoSlot Slot)>()];
+    public IReadOnlyList<(Skeleton Skeleton, PoseInfoSlot Slot)> Skeletons => [.. new[] { (CharacterSkeleton, PoseInfoSlot.Character), (MainHandSkeleton, PoseInfoSlot.MainHand), (OffHandSkeleton, PoseInfoSlot.OffHand), (PropSkeleton, PoseInfoSlot.Prop), (OrnamentSkeleton, PoseInfoSlot.Ornament) }.Where(s => s.Item1 != null).Cast<(Skeleton Skeleton, PoseInfoSlot Slot)>()];
 
     public PoseInfo PoseInfo { get; set; } = new PoseInfo();
 
@@ -100,6 +102,30 @@ public class SkeletonPosingCapability : ActorCharacterCapability
                 poseFile.OffHand[bone.Name] = bone.LastRawTransform;
             }
         }
+
+        var propSkeleton = PropSkeleton;
+        if(propSkeleton != null)
+        {
+            foreach(var bone in propSkeleton!.Bones)
+            {
+                if(bone.IsPartialRoot && !bone.IsSkeletonRoot)
+                    continue;
+
+                poseFile.Prop[bone.Name] = bone.LastRawTransform;
+            }
+        }
+
+        var ornamentSkeleton = OrnamentSkeleton;
+        if(ornamentSkeleton != null)
+        {
+            foreach(var bone in ornamentSkeleton!.Bones)
+            {
+                if(bone.IsPartialRoot && !bone.IsSkeletonRoot)
+                    continue;
+
+                poseFile.Ornament[bone.Name] = bone.LastRawTransform;
+            }
+        }
     }
 
     // From LivePose (Thank You Caraxi!) https://github.com/Caraxi/LivePose/blob/69afd7ba4f46611ac6055266f2524d1ac1d22454/LivePose/UI/Windows/Specialized/PosingOverlayToolbarWindow.cs#L337
@@ -143,6 +169,16 @@ public class SkeletonPosingCapability : ActorCharacterCapability
             return PoseInfo.GetPoseInfo(bone, PoseInfoSlot.OffHand);
         }
 
+        if(PropSkeleton != null && PropSkeleton == bone.Skeleton)
+        {
+            return PoseInfo.GetPoseInfo(bone, PoseInfoSlot.Prop);
+        }
+
+        if(OrnamentSkeleton != null && OrnamentSkeleton == bone.Skeleton)
+        {
+            return PoseInfo.GetPoseInfo(bone, PoseInfoSlot.Ornament);
+        }
+
         return PoseInfo.GetPoseInfo(bone, PoseInfoSlot.Unknown);
     }
 
@@ -156,6 +192,8 @@ public class SkeletonPosingCapability : ActorCharacterCapability
             PoseInfoSlot.Character => CharacterSkeleton?.Partials.ElementAtOrDefault(id.Value.Partial)?.GetBone(id.Value.BoneName),
             PoseInfoSlot.MainHand => MainHandSkeleton?.Partials.ElementAtOrDefault(id.Value.Partial)?.GetBone(id.Value.BoneName),
             PoseInfoSlot.OffHand => OffHandSkeleton?.Partials.ElementAtOrDefault(id.Value.Partial)?.GetBone(id.Value.BoneName),
+            PoseInfoSlot.Prop => PropSkeleton?.Partials.ElementAtOrDefault(id.Value.Partial)?.GetBone(id.Value.BoneName),
+            PoseInfoSlot.Ornament => OrnamentSkeleton?.Partials.ElementAtOrDefault(id.Value.Partial)?.GetBone(id.Value.BoneName),
             _ => null,
         };
     }
@@ -167,6 +205,8 @@ public class SkeletonPosingCapability : ActorCharacterCapability
             PoseInfoSlot.Character => CharacterSkeleton?.GetFirstVisibleBone(name),
             PoseInfoSlot.MainHand => MainHandSkeleton?.GetFirstVisibleBone(name),
             PoseInfoSlot.OffHand => OffHandSkeleton?.GetFirstVisibleBone(name),
+            PoseInfoSlot.Prop => PropSkeleton?.GetFirstVisibleBone(name),
+            PoseInfoSlot.Ornament => OrnamentSkeleton?.GetFirstVisibleBone(name),
             _ => null,
         };
     }
@@ -176,10 +216,14 @@ public class SkeletonPosingCapability : ActorCharacterCapability
         CharacterSkeleton = _skeletonService.GetSkeleton(Character.GetCharacterBase());
         MainHandSkeleton = _skeletonService.GetSkeleton(Character.GetWeaponCharacterBase(ActorEquipSlot.MainHand));
         OffHandSkeleton = _skeletonService.GetSkeleton(Character.GetWeaponCharacterBase(ActorEquipSlot.OffHand));
+        PropSkeleton = _skeletonService.GetSkeleton(Character.GetWeaponCharacterBase(ActorEquipSlot.Prop));
+        OrnamentSkeleton = _skeletonService.GetSkeleton(Character.GetOrnamentBase());
 
         _skeletonService.RegisterForFrameUpdate(CharacterSkeleton, this);
         _skeletonService.RegisterForFrameUpdate(MainHandSkeleton, this);
         _skeletonService.RegisterForFrameUpdate(OffHandSkeleton, this);
+        _skeletonService.RegisterForFrameUpdate(PropSkeleton, this);
+        _skeletonService.RegisterForFrameUpdate(OrnamentSkeleton, this);
 
         CharacterHasTail = CharacterSkeleton?.GetFirstVisibleBone("n_sippo_a") != null;
         CharacterIsIVCS = CharacterSkeleton?.GetFirstVisibleBone("iv_ko_c_l") != null;
