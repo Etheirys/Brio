@@ -161,7 +161,7 @@ public class ActorAppearanceCapability : ActorCharacterCapability
 
         var old = _penumbraService.SetCollectionForObject(Character, collection);
 
-        if(!IsCollectionOverridden)
+        if(!IsCollectionOverridden && old is not null)
             _oldCollection = old.ToString();
 
         _ = _actorAppearanceService.Redraw(Character, HasMCDF);

@@ -164,7 +164,7 @@ public class PenumbraService : BrioIPC
         return collection.Name;
     }
 
-    public Guid SetCollectionForObject(IGameObject gameObject, Guid collectionName)
+    public Guid? SetCollectionForObject(IGameObject gameObject, Guid collectionName)
     {
         if(IsAvailable == false || gameObject is null)
             return Guid.Empty;
@@ -172,7 +172,11 @@ public class PenumbraService : BrioIPC
         Brio.Log.Debug($"Setting GameObject {gameObject.ObjectIndex} collection to {collectionName}");
 
         var (_, oldCollection) = _penumbraSetCollectionForObject.Invoke(gameObject.ObjectIndex, collectionName, true, true);
-        return oldCollection!.Value.Id; // TODO Fix null reference
+
+        if(oldCollection is null)
+            return null;
+
+        return oldCollection.Value.Id;
     }
 
     public Dictionary<Guid, string> GetCollections()
