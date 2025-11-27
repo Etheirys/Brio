@@ -13,7 +13,12 @@ changelog:
         items:
           - "Devs, if you are wanting any changes to Brio's API now is the time before 7.4, Contact me!"
           - "As a reminder! If you experience any issues please report them on Discord or on GitHub"
-    
+
+      - number: "0.6.1.1"
+        icon: ""
+        items:
+          - "More Fixes with a errorboxs taking over the Scene Manager"
+
       - number: "0.6.1"
         icon: ""
         items:
