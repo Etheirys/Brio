@@ -17,7 +17,7 @@ changelog:
       - number: "0.6.1.1"
         icon: ""
         items:
-          - "More Fixes with a errorboxs taking over the Scene Manager"
+          - "More fixes with errorboxs taking over the Scene Manager"
 
       - number: "0.6.1"
         icon: ""
