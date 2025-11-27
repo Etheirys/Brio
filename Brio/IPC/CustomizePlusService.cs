@@ -8,13 +8,13 @@ global using IPCProfileDataTuple = (
     System.Collections.Generic.List<(string Name, ushort WorldId, byte CharacterType, ushort CharacterSubType)> Characters,
     int Priority,
     bool IsEnabled);
+
 using Brio.Capabilities.Actor;
 
 
 // ---------------------------------------------------------------------------------
 
 using Brio.Config;
-using Brio.Core;
 using Brio.Entities;
 using Brio.Entities.Core;
 using Brio.Game.Core;
@@ -40,7 +40,7 @@ public class CustomizePlusService : BrioIPC
         => _configurationService.Configuration.IPC.AllowCustomizePlusIntegration;
 
     public override int APIMajor => 6;
-    public override int APIMinor => 0;
+    public override int APIMinor => 4;
 
     public override (int Major, int Minor) GetAPIVersion()
         => _customizeplusApiVersion.InvokeFunc();
@@ -54,7 +54,6 @@ public class CustomizePlusService : BrioIPC
     private readonly ICommandManager _commandManager;
     private readonly DalamudService _dalamudService;
     private readonly EntityManager _entityManager;
-    private readonly IObjectTable _gameObjects;
     private readonly IFramework _framework;
 
     private readonly ICallGateSubscriber<ushort, string, (int, Guid?)> _customizeplusSetTemporaryProfile;
@@ -67,12 +66,11 @@ public class CustomizePlusService : BrioIPC
     private readonly ICallGateSubscriber<bool> _customizeplusIsValid;
 
 
-    public CustomizePlusService(IDalamudPluginInterface pluginInterface, EntityManager entityManager, DalamudService dalamudService, ICommandManager commandManager, IObjectTable gameObjects, ConfigurationService configurationService, IFramework framework)
+    public CustomizePlusService(IDalamudPluginInterface pluginInterface, EntityManager entityManager, DalamudService dalamudService, ICommandManager commandManager, ConfigurationService configurationService, IFramework framework)
     {
         _pluginInterface = pluginInterface;
         _configurationService = configurationService;
         _framework = framework;
-        _gameObjects = gameObjects;
         _commandManager = commandManager;
         _dalamudService = dalamudService;
         _entityManager = entityManager;
