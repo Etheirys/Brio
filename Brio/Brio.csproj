@@ -48,4 +48,10 @@
 	  <PackageReference Update="DotNet.ReproducibleBuilds" Version="1.2.39" />
 	</ItemGroup>
 
+	<ItemGroup>
+	  <Reference Include="ImSequencer">
+	    <HintPath>..\..\MockSequencer\ImSequencer\ImSequencer\bin\Debug\net9.0-windows\ImSequencer.dll</HintPath>
+	  </Reference>
+	</ItemGroup>
+
 </Project>
