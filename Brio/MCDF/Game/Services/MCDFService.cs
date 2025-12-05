@@ -303,8 +303,8 @@ public class MCDFService : IDisposable
             {
                 Brio.Log.Debug($"{DataApplicationProgress}");
                 cPlusId = await _customizePlusService.SetBodyScaleAsync(tempHandler.GameObject, customizeData).ConfigureAwait(false);
-                Brio.Log.Warning("LOOK AT ME I' M MR MESEECKS {customizeData}");
-                Brio.Log.Warning(customizeData);
+                //Brio.Log.Warning("LOOK AT ME I' M MR MESEECKS {customizeData}");
+                //Brio.Log.Warning(customizeData);
             }
             else
             {

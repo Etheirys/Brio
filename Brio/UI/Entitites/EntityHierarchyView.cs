@@ -52,8 +52,15 @@ public class EntityHierarchyView(EntityManager entityManager, GPoseService gPose
             foreach(var item in root.Children)
             {
                 var disable = gPoseService.IsGPosing == false && item.Flags.HasFlag(EntityFlags.AllowOutsideGpose) == false;
-                using(ImRaii.Disabled(disable))
-                    DrawEntity(item, selectedEntityId);
+                try
+                {
+                    using(ImRaii.Disabled(disable))
+                        DrawEntity(item, selectedEntityId);
+                }
+                catch(System.Exception ex)
+                {
+                    Brio.Log.Error($"Error drawing entity {item.FriendlyName} ({item.Id}): {ex}");
+                }
             }
         }
     }

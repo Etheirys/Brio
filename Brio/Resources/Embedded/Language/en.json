@@ -291,7 +291,9 @@
     "weapon": "Weapons",
     "ex": "Dawntrail Other",
     "legacy": "Legacy",
-    "other": "Other"
+    "other": "Other",
+    "prop": "Emote Props",
+    "ornament": "Fashion Accessories"
   },
 
     "keys": {

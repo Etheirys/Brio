@@ -1,6 +1,7 @@
 ﻿using Brio.Library.Filters;
 using Brio.Library.Sources;
 using Brio.Library.Tags;
+using System;
 using System.Collections.Generic;
 
 namespace Brio.Library;
@@ -112,17 +113,24 @@ public abstract class GroupEntryBase : EntryBase
         if(this.FilteredEntries == null)
             return;
 
-        foreach(EntryBase entry in this.FilteredEntries)
+        try
         {
-            if(entry.Tags != null)
+            foreach(EntryBase entry in this.FilteredEntries)
             {
-                tags.AddRange(entry.Tags);
-            }
+                if(entry.Tags != null)
+                {
+                    tags.AddRange(entry.Tags);
+                }
 
-            if(entry is GroupEntryBase dir)
-            {
-                dir.GetAllTags(ref tags);
+                if(entry is GroupEntryBase dir)
+                {
+                    dir.GetAllTags(ref tags);
+                }
             }
+        }
+        catch(Exception ex)
+        {
+            Brio.Log.Error(ex, "Exception while getting all tags from group entry");
         }
     }
 

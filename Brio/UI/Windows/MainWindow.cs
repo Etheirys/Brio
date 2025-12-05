@@ -100,7 +100,14 @@ public class MainWindow : Window, IDisposable
             }
         }
 
-        EntityHelpers.DrawEntitySection(_entityManager.SelectedEntity);
+        try
+        {
+            EntityHelpers.DrawEntitySection(_entityManager.SelectedEntity);
+        }
+        catch(Exception ex)
+        {
+            Brio.Log.Error(ex, $"Failed to draw entity section: [ {_entityManager?.SelectedEntity?.FriendlyName ?? "Unknown"} ] ");
+        }
     }
 
     private void DrawHeaderButtons()
