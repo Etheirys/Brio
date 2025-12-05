@@ -6,7 +6,6 @@ using Brio.Game.Actor.Interop;
 using Brio.Game.Core;
 using Brio.Game.GPose;
 using Brio.Game.Posing.Skeletons;
-using Dalamud.Game;
 using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Hooking;
 using Dalamud.Plugin.Services;

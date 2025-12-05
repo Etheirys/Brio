@@ -3,7 +3,6 @@ using Brio.Config;
 using Brio.Game.GPose;
 using Brio.Game.Types;
 using Brio.Resources;
-using Dalamud.Game;
 using Dalamud.Hooking;
 using Dalamud.Plugin.Services;
 using FFXIVClientStructs.FFXIV.Client.Graphics.Environment;
