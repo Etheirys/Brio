@@ -82,7 +82,7 @@ public class CameraLifetimeWidget(CameraLifetimeCapability capability) : Widget<
                 {
                     Capability.VirtualCameraManager.DestroyCamera(Capability.CameraEntity.CameraID);
                 }
-            
+
                 ImGui.EndMenu();
             }
 

@@ -1,5 +1,4 @@
 ﻿using Brio.Config;
-using Dalamud.Game;
 using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Hooking;
 using Dalamud.Plugin.Services;

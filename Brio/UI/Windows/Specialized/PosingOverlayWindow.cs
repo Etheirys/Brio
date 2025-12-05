@@ -217,7 +217,7 @@ public class PosingOverlayWindow : Window, IDisposable
             var modelTransform = new ClickableItem
             {
                 Item = PosingSelectionType.ModelTransform,
-                ScreenPosition = ImGui.GetMainViewport().Pos +  modelScreen,
+                ScreenPosition = ImGui.GetMainViewport().Pos + modelScreen,
                 Size = config.BoneCircleSize,
             };
             clickables.Add(modelTransform);

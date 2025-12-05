@@ -2,7 +2,6 @@
 using Brio.Entities;
 using Brio.Entities.Actor;
 using Brio.Game.GPose;
-using Dalamud.Game.ClientState.Objects;
 using Dalamud.Game.ClientState.Objects.Enums;
 using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Plugin.Services;

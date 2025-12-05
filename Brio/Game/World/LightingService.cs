@@ -13,7 +13,6 @@ using Brio.Entities.World;
 using Brio.Game.Camera;
 using Brio.Game.GPose;
 using Dalamud.Bindings.ImGuizmo;
-using Dalamud.Game;
 using Dalamud.Hooking;
 using Dalamud.Plugin.Services;
 using FFXIVClientStructs.FFXIV.Client.Game.Event;

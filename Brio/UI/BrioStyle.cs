@@ -3,6 +3,7 @@ using Dalamud.Interface.Utility;
 using System.Numerics;
 
 namespace Brio.UI;
+
 public static class BrioStyle
 {
     public static bool EnableStyle { get; set; }

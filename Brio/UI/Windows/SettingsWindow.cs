@@ -661,7 +661,7 @@ public class SettingsWindow : Window
         {
             _configurationService.Configuration.Interface.DefaultFreeCameraMouseSensitivity = defaultFreeCamMouseSensitivity;
             _configurationService.ApplyChange();
-        }   
+        }
     }
 
     bool resetSettings = false;
