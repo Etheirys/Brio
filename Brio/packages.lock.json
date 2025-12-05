@@ -111,6 +111,9 @@
         "type": "Transitive",
         "resolved": "3.1.0",
         "contentHash": "X3s5QE/KMj3WAPFqFve7St+Ds10BB50u8kW8PmKIn7FVkn7yEXe9Yxr2htt1WV85DRqfFR0MN/BUNHkGHtL4OQ=="
+      },
+      "brio.api": {
+        "type": "Project"
       }
     }
   }

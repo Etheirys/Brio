@@ -1,0 +1,3 @@
+[submodule "Libs/Brio API"]
+	path = Libs/Brio API
+	url = https://github.com/Etheirys/Brio.API.git
