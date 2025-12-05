@@ -1,6 +1,7 @@
 ﻿using Dalamud.Game.ClientState.Keys;
 
 namespace Brio.Input;
+
 public struct KeyConfig(VirtualKey key, bool requireShift = false, bool requireCtrl = false, bool requireAlt = false)
 {
     public VirtualKey Key = key;

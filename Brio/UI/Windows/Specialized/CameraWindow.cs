@@ -2,14 +2,12 @@
 using Brio.Config;
 using Brio.Entities;
 using Brio.Entities.Camera;
-using Brio.Entities.Core;
 using Brio.Game.Camera;
 using Brio.Game.Cutscene;
 using Brio.Game.GPose;
 using Brio.UI.Controls.Editors;
 using Brio.UI.Controls.Stateless;
 using Dalamud.Bindings.ImGui;
-using Dalamud.Interface.Colors;
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Interface.Windowing;
 using System;

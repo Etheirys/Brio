@@ -20,6 +20,7 @@ using System.Numerics;
 using System.Threading.Tasks;
 
 namespace Brio.IPC;
+
 public class BrioIPCService : IDisposable
 {
     public static readonly (int, int) CurrentApiVersion = (2, 0);

@@ -145,7 +145,7 @@ public class ActorAppearanceCapability : ActorCharacterCapability
             Brio.Log.Warning(ex, "Exception while Loading MCDF");
             Brio.NotifyError("MCDF Export failed! Try again!");
         }
-        finally 
+        finally
         {
             Entity.IsLoading = false;
         }

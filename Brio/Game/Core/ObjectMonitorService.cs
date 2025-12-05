@@ -1,5 +1,4 @@
 ﻿using Brio.Game.Actor.Interop;
-using Dalamud.Game;
 using Dalamud.Hooking;
 using Dalamud.Plugin.Services;
 using FFXIVClientStructs.FFXIV.Client.Graphics.Scene;

@@ -47,7 +47,7 @@ public class ProjectWindow : Window, IDisposable
     {
         using(ImRaii.PushColor(ImGuiCol.Text, UIConstants.GizmoMagenta))
             ImGui.Text("Project System is in Beta.");
-     
+
         using(ImRaii.PushColor(ImGuiCol.Text, UIConstants.GizmoMagenta))
             ImGui.Text("ATTENTION: Projects made in this version will be incompatible with the next version of Brio!");
 

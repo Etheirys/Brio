@@ -2,6 +2,7 @@
 using System.Runtime.InteropServices;
 
 namespace Brio.Core;
+
 public static class NativeHelpers
 {
     public static (nint Aligned, nint Unaligned) AllocateAlignedMemory(int sizeInBytes, int alignment)

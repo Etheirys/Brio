@@ -61,7 +61,7 @@ public class BoneFilter
 
         if(slot is PoseInfoSlot.Ornament)
             return OrnamentsAllowed;
-       
+
         if(slot is PoseInfoSlot.Prop)
             return PropAllowed;
 
@@ -94,7 +94,7 @@ public class BoneFilter
 
     public bool OtherAllowed => _allowedCategories.Any((x) => x == "other");
 
-    public bool OrnamentsAllowed =>  _allowedCategories.Any((x) => x == "ornament");
+    public bool OrnamentsAllowed => _allowedCategories.Any((x) => x == "ornament");
 
     public bool PropAllowed => _allowedCategories.Any((x) => x == "prop");
 

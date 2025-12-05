@@ -100,8 +100,8 @@ public class ActionTimelineSelector(string id) : Selector<ActionTimelineSelector
     {
         bool[] items = [_showEmotes, _showActions, _showRaw];
 
-        var changed =ImBrio.ToggleSelecterStrip("actiontimeline_filters_selector", Vector2.Zero, ref items, ["Emotes", "Actions", "Timelines"]);
-      
+        var changed = ImBrio.ToggleSelecterStrip("actiontimeline_filters_selector", Vector2.Zero, ref items, ["Emotes", "Actions", "Timelines"]);
+
         if(changed)
         {
             _showEmotes = items[0];

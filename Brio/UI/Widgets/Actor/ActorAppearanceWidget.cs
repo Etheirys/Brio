@@ -49,7 +49,7 @@ public class ActorAppearanceWidget(ActorAppearanceCapability capability) : Widge
             else
                 drawBody();
 
-            void drawBody() 
+            void drawBody()
             {
                 AppearanceEditorCommon.DrawPenumbraCollectionSwitcher(Capability);
                 AppearanceEditorCommon.DrawGlamourerDesignSwitcher(Capability);

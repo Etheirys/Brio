@@ -24,7 +24,7 @@ public class LightEntity(IGameLight gameLight, IServiceProvider provider) : Enti
             {
                 if(GameLight.IsGPoseLight)
                     return $"GPose Light ({indexName})";
-            
+
                 return $"Light ({indexName})";
             }
 

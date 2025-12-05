@@ -67,7 +67,8 @@ public class ActorWebController(IFramework framework, ActorSpawnService actorSpa
     public unsafe Task WaitForReadyToDraw(IGameObject go)
     {
         return _framework.RunUntilSatisfied(
-           () => {
+           () =>
+           {
                if(go.IsValid())
                    return go.Native()->IsReadyToDraw();
                return false;

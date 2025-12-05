@@ -3,7 +3,6 @@ using Brio.Game.World;
 using Brio.IPC;
 using Brio.UI.Controls.Stateless;
 using Brio.UI.Widgets.Core;
-using Brio.UI.Widgets.World;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Plugin.Services;

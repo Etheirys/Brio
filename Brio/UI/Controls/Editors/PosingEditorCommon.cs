@@ -148,7 +148,7 @@ public static class PosingEditorCommon
             {
                 filter.EnableOnly(category);
             }
-        
+
             if(category.Type is BoneCategories.BoneCategoryTypes.Category)
             {
                 ImGui.Separator();

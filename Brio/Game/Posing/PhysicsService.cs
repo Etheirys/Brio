@@ -10,7 +10,6 @@
 //
 
 using Brio.Game.GPose;
-using Dalamud.Game;
 using Dalamud.Memory;
 using Dalamud.Plugin.Services;
 using System;

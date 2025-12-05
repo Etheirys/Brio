@@ -5,6 +5,7 @@ using Dalamud.Interface.Windowing;
 using System;
 
 namespace Brio.UI.Windows;
+
 public class AutoSaveWindow : Window, IDisposable
 {
     private readonly ConfigurationService _configurationService;

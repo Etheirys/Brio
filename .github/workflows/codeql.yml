@@ -89,7 +89,7 @@ jobs:
     - if: matrix.build-mode == 'manual'
       shell: pwsh
       run: |
-        Invoke-WebRequest -Uri https://goatcorp.github.io/dalamud-distrib/stg/latest.zip -OutFile latest.zip
+        Invoke-WebRequest -Uri https://goatcorp.github.io/dalamud-distrib/api14/latest.zip -OutFile latest.zip
         Expand-Archive -Force latest.zip "$env:AppData\XIVLauncher\addon\Hooks\dev"
         dotnet restore Brio.sln
         dotnet build --no-restore Brio.sln /p:Configuration=Release /p:Version=0.0.0.1

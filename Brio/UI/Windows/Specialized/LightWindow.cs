@@ -77,7 +77,7 @@ public class LightWindow : Window, IDisposable
 
         if(_lightingService.SelectedLightEntity is null || _lightingService.SelectedLightEntity.GameLight.IsValid == false)
         {
-            _lightingService.SelectedLightEntity = _lightingService.SpawnedLightEntitiesCount > 0 
+            _lightingService.SelectedLightEntity = _lightingService.SpawnedLightEntitiesCount > 0
                 ? _lightingService.SpawnedLightEntities.First()
                 : null;
         }
@@ -117,9 +117,9 @@ public class LightWindow : Window, IDisposable
             if(ImBrio.FontIconButton("lifetimewidget_rename", FontAwesomeIcon.Signature, "Rename Light"))
             {
                 RenameActorModal.Open(light!.Entity);
-            }      
+            }
         }
-     
+
         LightEditor.DrawSpawnMenu(_lightingService);
 
         if(_lightingService.SelectedLightEntity is null || _lightingService.SelectedLightEntity.GameLight.IsValid == false)

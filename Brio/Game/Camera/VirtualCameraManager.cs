@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Numerics;
-using Brio.Config;
+﻿using Brio.Config;
 using Brio.Core;
 using Brio.Entities;
 using Brio.Entities.Camera;
@@ -11,6 +8,9 @@ using Brio.Game.Input;
 using Brio.Input;
 using Microsoft.Extensions.DependencyInjection;
 using Swan;
+using System;
+using System.Collections.Generic;
+using System.Numerics;
 
 namespace Brio.Game.Camera;
 
@@ -28,8 +28,8 @@ public class VirtualCameraManager : IDisposable
 
     private CameraEntity? DefaultCamera;
     private float _moveSpeed = 0.03f;
-    private float DefaultMovementSpeed =>  _configurationService.Configuration.Interface.DefaultFreeCameraMovementSpeed;
-    private float DefaultMouseSensitivity =>  _configurationService.Configuration.Interface.DefaultFreeCameraMouseSensitivity;
+    private float DefaultMovementSpeed => _configurationService.Configuration.Interface.DefaultFreeCameraMovementSpeed;
+    private float DefaultMouseSensitivity => _configurationService.Configuration.Interface.DefaultFreeCameraMouseSensitivity;
 
     public VirtualCameraManager(IServiceProvider serviceProvider, GPoseService gPoseService, EntityManager entityManager, ConfigurationService configurationService)
     {
@@ -48,7 +48,7 @@ public class VirtualCameraManager : IDisposable
     private readonly Dictionary<int, CameraEntity> _createdCameras = [];
 
     public List<CameraEntity> SpawnedCameraEntities => [.. _createdCameras.Values];
-   
+
     public CameraEntity? SelectedCameraEntity;
 
     public (bool, int) CreateCamera(CameraType cameraType, bool selectCamera = true, bool targetNewInHierarch = true, VirtualCamera? virtualCamera = null)
@@ -57,7 +57,7 @@ public class VirtualCameraManager : IDisposable
         {
             var oldCam = CurrentCamera;
             CurrentCamera?.DeactivateCamera();
-         
+
             int cameraId = _nextCameraId + 1;
 
             var camEnt = ActivatorUtilities.CreateInstance<CameraEntity>(_serviceProvider, cameraId, cameraType);
@@ -157,7 +157,7 @@ public class VirtualCameraManager : IDisposable
                 oldCameraEntity = oldCamEnt;
             }
 
-            if (oldCameraEntity == null)
+            if(oldCameraEntity == null)
             {
                 Brio.Log.Error("No camera found to clone");
                 return (false, -1);

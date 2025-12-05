@@ -1,6 +1,6 @@
 ﻿using Brio.Core;
 using Brio.Game.Posing.Skeletons;
-using Dalamud.Game;
+using Dalamud.Plugin.Services;
 using FFXIVClientStructs.Havok.Animation.Rig;
 using FFXIVClientStructs.Havok.Common.Base.Container.Array;
 using FFXIVClientStructs.Havok.Common.Base.Math.Vector;
@@ -10,6 +10,7 @@ using System.Numerics;
 using System.Runtime.InteropServices;
 
 namespace Brio.Game.Posing;
+
 public unsafe class IKService : IDisposable
 {
     delegate* unmanaged<hkaCCDSolver*, int, float, void> _ccdSolverCtr;

@@ -89,7 +89,7 @@ public static partial class ImBrio
         if(enabled is false)
             ImGui.BeginDisabled();
 
-        var pixelPos = ImGui.GetWindowSize().X - ((ImGui.CalcTextSize("XXII").X + (ImGui.GetStyle().FramePadding.X * 2)) * position );
+        var pixelPos = ImGui.GetWindowSize().X - ((ImGui.CalcTextSize("XXII").X + (ImGui.GetStyle().FramePadding.X * 2)) * position);
 
         ImGui.SetCursorPosX(pixelPos);
 

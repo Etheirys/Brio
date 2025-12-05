@@ -1,6 +1,5 @@
 ﻿using Brio.Capabilities.Actor;
 using Brio.Entities;
-using Dalamud.Game;
 using Dalamud.Hooking;
 using Dalamud.Plugin.Services;
 using FFXIVClientStructs.FFXIV.Client.Game.Character;

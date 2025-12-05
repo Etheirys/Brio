@@ -10,7 +10,6 @@
 using Brio.Game.Actor.Extensions;
 using Brio.Game.Camera;
 using Brio.Game.GPose;
-using Dalamud.Game;
 using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Hooking;
 using Dalamud.Plugin.Services;

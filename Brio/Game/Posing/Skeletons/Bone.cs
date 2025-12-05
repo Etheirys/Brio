@@ -1,7 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using Brio.Core;
+﻿using Brio.Core;
 using Brio.Resources;
+using System;
+using System.Collections.Generic;
 using static FFXIVClientStructs.FFXIV.Client.Graphics.Scene.CharacterBase;
 
 namespace Brio.Game.Posing.Skeletons;

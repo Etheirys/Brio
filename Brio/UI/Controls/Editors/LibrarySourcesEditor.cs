@@ -9,6 +9,7 @@ using System.Numerics;
 using static Brio.Config.LibraryConfiguration;
 
 namespace Brio.UI.Controls.Editors;
+
 public static class LibrarySourcesEditor
 {
     static Vector2 MinimumSize = new(400, 95);

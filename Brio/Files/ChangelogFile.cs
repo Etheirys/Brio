@@ -20,7 +20,7 @@ public class ChangelogEntry
     public string Tagline { get; set; }
     public string Date { get; set; }
     public bool? IsCurrent { get; set; }
-    public string Message { get; set; } 
+    public string Message { get; set; }
 
     [YamlMember(DefaultValuesHandling = DefaultValuesHandling.Preserve)]
     public List<VersionEntry> Versions { get; set; }

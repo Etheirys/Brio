@@ -95,7 +95,7 @@ public class ComponentSet<T> : IEnumerable<T>, IDisposable
     }
 
     public void Clear()
-    {        
+    {
         Array.Clear(Components, 0, Components.Length);
 
         AvailableIndices.Clear();
