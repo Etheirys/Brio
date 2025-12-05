@@ -42,9 +42,9 @@ public class CustomizeEditor()
                     ImBrio.VerticalPadding(2);
                     ImGui.Separator();
                     ImBrio.VerticalPadding(2);
-                    
+
                     didChange |= DrawRaceSelector(ref currentAppearance.Customize);
-                 
+
                     ImBrio.VerticalPadding(2);
                     ImGui.Separator();
                     ImBrio.VerticalPadding(2);
@@ -687,7 +687,7 @@ public class CustomizeEditor()
         var menuType = menu.Type;
         var customizeIndex = menu.CustomizeIndex;
         var title = menu.Title;
-       
+
         return menuType switch
         {
             BrioCharaMakeType.MenuType.Numerical => DrawNumericalSelector(ref customize, customizeIndex, title),

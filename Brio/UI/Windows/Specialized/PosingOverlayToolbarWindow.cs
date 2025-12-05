@@ -124,7 +124,7 @@ public class PosingOverlayToolbarWindow : Window
         else
         {
             ImGui.PushStyleColor(ImGuiCol.Button, UIConstants.Transparent);
-          
+
             using(ImRaii.PushColor(ImGuiCol.Text, _overlayTransformWindow.IsOpen ? UIConstants.ToggleButtonActive : UIConstants.ToggleButtonInactive))
             {
                 using(ImRaii.PushFont(UiBuilder.IconFont))
@@ -155,7 +155,7 @@ public class PosingOverlayToolbarWindow : Window
                     _overlayWindow.IsOpen = false;
             }
             ImBrio.AttachToolTip("Close Overlay");
-         
+
             ImGui.PopStyleColor();
 
             ImGui.TextColored(ImGuiColors.DalamudRed, "Attention! No valid,");
@@ -362,7 +362,7 @@ public class PosingOverlayToolbarWindow : Window
                 _posingService.CoordinateMode = _posingService.CoordinateMode == PosingCoordinateMode.Local ? PosingCoordinateMode.World : PosingCoordinateMode.Local;
         }
         ImBrio.AttachToolTip(_posingService.CoordinateMode == PosingCoordinateMode.Local ? "Switch to World" : "Switch to Local");
-      
+
         ImGui.SameLine();
 
         using(ImRaii.PushColor(ImGuiCol.Text, _overlayTransformWindow.IsOpen ? UIConstants.ToggleButtonActive : UIConstants.ToggleButtonInactive))
@@ -374,7 +374,7 @@ public class PosingOverlayToolbarWindow : Window
             }
         }
         ImBrio.AttachToolTip("Toggle Transform Window");
-    
+
         ImGui.SameLine();
 
         using(ImRaii.PushColor(ImGuiCol.Text, _lightWindow.IsOpen ? UIConstants.ToggleButtonActive : UIConstants.ToggleButtonInactive))
