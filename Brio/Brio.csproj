@@ -33,6 +33,10 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <ProjectReference Include="..\Libs\Brio API\Brio.API\Brio.API.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
 		<None Update="Brio.json">
 			<CopyToOutputDirectory>Never</CopyToOutputDirectory>
 		</None>
