@@ -410,11 +410,11 @@ public class ActorSpawnService : IDisposable
 public enum SpawnFlags
 {
     None = 0,
-    ReserveCompanionSlot = 1 << 0,
-    CopyPosition = 1 << 1,
-    IsProp = 1 << 2,
-    IsEffect = 1 << 3,
-    SetDefaultAppearance = 1 << 4,
+    ReserveCompanionSlot = 1 << 1,
+    CopyPosition = 1 << 2,
+    IsProp = 1 << 4,
+    IsEffect = 1 << 8,
+    SetDefaultAppearance = 1 << 16,
 
     Prop = IsProp | SetDefaultAppearance | CopyPosition,
     Effect = IsEffect | SetDefaultAppearance | CopyPosition,
