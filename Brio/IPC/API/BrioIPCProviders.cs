@@ -10,12 +10,12 @@ public class BrioIPCProviders : IDisposable
 {
     private readonly List<IDisposable> _providers;
 
-    private readonly EventProvider _disposedProvider;
+    private readonly EventProvider _deinitializedProvider;
     private readonly EventProvider _initializedProvider;
 
     public BrioIPCProviders(IDalamudPluginInterface pi, BrioAPIService brioAPI)
     {
-        _disposedProvider = Disposed.Provider(pi);
+        _deinitializedProvider = Deinitialized.Provider(pi);
         _initializedProvider = Initialized.Provider(pi);
 
         _providers = [
@@ -55,7 +55,7 @@ public class BrioIPCProviders : IDisposable
         }
 
         _initializedProvider.Dispose();
-        _disposedProvider.Invoke();
-        _disposedProvider.Dispose();
+        _deinitializedProvider.Invoke();
+        _deinitializedProvider.Dispose();
     }
 }
