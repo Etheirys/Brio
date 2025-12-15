@@ -421,7 +421,7 @@
       ]
     }
   },
-    {
+  {
     "Id": 159,
     "Name": "Moonfire Faire (2025)",
     "Unsafe": false,
@@ -469,7 +469,7 @@
     }
   },
   {
-  "Id": 150,
+    "Id": 150,
     "Name": "Moonfire Faire (2024)",
     "Unsafe": false,
     "AreaExclusion": {
@@ -664,7 +664,7 @@
   },
   {
     "Id": 153,
-    "Name": "All Saint's Wake (2024)",
+    "Name": "Starlight Celebration (2024)",
     "Unsafe": false
   },
   {
@@ -693,8 +693,13 @@
     "Unsafe": false
   },
   {
+    "Id": 165,
+    "Name": "Starlight Celebration (2025)",
+    "Unsafe": false
+  },
+  {
     "Id": 166,
     "Name": "MONSTER HUNTER WILDS Collab",
     "Unsafe": false
-  },
+  }
 ]
