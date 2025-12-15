@@ -158,7 +158,6 @@ public class ActionTimelineCapability : ActorCharacterCapability
                         if(control->PlaybackSpeed == 0)
                         {
                             control->hkaAnimationControl.LocalTime = 0;
-                            Brio.Log.Verbose($"hkaAnimationControl");
                         }
                     }
                 }
@@ -167,15 +166,11 @@ public class ActionTimelineCapability : ActorCharacterCapability
 
         postStopAction?.Invoke();
 
-        Brio.Log.Verbose($"postStopAction Invoke: {postStopAction is not null}");
-
         if(resetSpeedAfterAction)
         {
             await _framework.RunOnTick(() =>
             {
                 SetOverallSpeedOverride(oldSpeed);
-
-                Brio.Log.Verbose($"SetOverallSpeedOverride {SpeedMultiplier}");
             }, delayTicks: 2);
         }
     }
