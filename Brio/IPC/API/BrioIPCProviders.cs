@@ -1,6 +1,8 @@
 ﻿using Brio.API;
 using Brio.API.Helpers;
+using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Plugin;
+using FFXIVClientStructs.FFXIV.Client.Game.Object;
 using System;
 using System.Collections.Generic;
 
@@ -10,13 +12,20 @@ public class BrioIPCProviders : IDisposable
 {
     private readonly List<IDisposable> _providers;
 
-    private readonly EventProvider _deinitializedProvider;
-    private readonly EventProvider _initializedProvider;
+    private readonly BrioEventProvider _deinitializedProvider;
+    private readonly BrioEventProvider _initializedProvider;
+  
+    public readonly BrioEventProvider<IGameObject> ActorDespawned;
+    public readonly BrioEventProvider<IGameObject> ActorSpawned;
+
 
     public BrioIPCProviders(IDalamudPluginInterface pi, BrioAPIService brioAPI)
     {
         _deinitializedProvider = Deinitialized.Provider(pi);
         _initializedProvider = Initialized.Provider(pi);
+
+        ActorDespawned = global::Brio.API.ActorDestroyed.Provider(pi);
+        ActorSpawned = global::Brio.API.ActorSpawned.Provider(pi);
 
         _providers = [
             ApiVersion.Provider(pi, brioAPI.State),
@@ -57,8 +66,12 @@ public class BrioIPCProviders : IDisposable
             provider.Dispose();
         }
 
+
         _initializedProvider.Dispose();
         _deinitializedProvider.Invoke();
         _deinitializedProvider.Dispose();
+
+        ActorDespawned.Dispose();
+        ActorSpawned.Dispose();
     }
 }

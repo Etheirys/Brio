@@ -10,6 +10,7 @@ using Brio.Game.GPose;
 using Brio.Game.Posing;
 using Brio.Game.Types;
 using Brio.IPC;
+using Brio.IPC.API;
 using Brio.Resources;
 using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Plugin.Services;
@@ -39,9 +40,11 @@ public class ActorSpawnService : IDisposable
     private readonly ActorLookAtService _actorLookAtService;
     private readonly CharacterHandlerService _characterHandlerService;
 
+    private readonly BrioIPCProviders _brioIPCProviders;
+
     private readonly Dictionary<ushort, SpawnFlags> _createdIndexes = [];
 
-    public unsafe ActorSpawnService(ObjectMonitorService monitorService, CustomizePlusService customizePlusService, ActorLookAtService actorLookAtService, CharacterHandlerService characterHandlerService,
+    public unsafe ActorSpawnService(ObjectMonitorService monitorService, BrioIPCProviders brioIPCProviders, CustomizePlusService customizePlusService, ActorLookAtService actorLookAtService, CharacterHandlerService characterHandlerService,
         ActorAppearanceService actorAppearanceService, PosingService posingService, GlamourerService glamourerService,
         EntityManager entityManager, IObjectTable objectTable, IClientState clientState, IFramework framework,
         GPoseService gPoseService, ActorRedrawService actorRedrawService, TargetService targetService)
@@ -58,6 +61,8 @@ public class ActorSpawnService : IDisposable
         _posingService = posingService;
         _actorAppearanceService = actorAppearanceService;
         _customizePlusService = customizePlusService;
+
+        _brioIPCProviders = brioIPCProviders;
 
         _actorLookAtService = actorLookAtService;
         _characterHandlerService = characterHandlerService;
@@ -141,6 +146,7 @@ public class ActorSpawnService : IDisposable
                     _actorRedrawService.DrawWhenReady(companion);
             }
 
+            _brioIPCProviders.ActorSpawned.Invoke(outCharacter);
 
             return true;
         }
@@ -274,6 +280,8 @@ public class ActorSpawnService : IDisposable
         _actorLookAtService.RemoveObjectFromLook(go);
 
         _ = _characterHandlerService.Revert(go, disposing);
+
+        _brioIPCProviders.ActorDespawned.Invoke(go);
     }
 
     public void DestroyCompanion(ICharacter character)
