@@ -1,6 +1,7 @@
 using Brio.Config;
 using Brio.Input;
 using Brio.IPC;
+using Brio.IPC.API;
 using Brio.Resources;
 using Brio.UI.Controls.Core;
 using Brio.UI.Controls.Editors;
@@ -22,7 +23,7 @@ public class SettingsWindow : Window
     private readonly PenumbraService _penumbraService;
     private readonly GlamourerService _glamourerService;
     private readonly WebService _webService;
-    private readonly BrioIPCService _brioIPCService;
+    private readonly BrioAPIService _brioIPCService;
     private readonly CustomizePlusService _customizePlusService;
 
     public SettingsWindow(
@@ -31,7 +32,7 @@ public class SettingsWindow : Window
         GlamourerService glamourerService,
         WebService webService,
         CustomizePlusService customizePlusService,
-        BrioIPCService brioIPCService) : base($"{Brio.Name} SETTINGS###brio_settings_window", ImGuiWindowFlags.NoResize)
+        BrioAPIService brioIPCService) : base($"{Brio.Name} SETTINGS###brio_settings_window", ImGuiWindowFlags.NoResize)
     {
         Namespace = "brio_settings_namespace";
 
@@ -375,7 +376,7 @@ public class SettingsWindow : Window
                 _configurationService.Configuration.IPC.EnableBrioIPC = enableBrioIpc;
                 _configurationService.ApplyChange();
             }
-            ImGui.Text($"Brio IPC Status: {(_brioIPCService.IsIPCEnabled ? "Active" : "Inactive")}");
+            ImGui.Text($"Brio IPC Status: {(enableBrioIpc ? "Active" : "Inactive")}");
 
             bool enableWebApi = _configurationService.Configuration.IPC.AllowWebAPI;
             if(ImGui.Checkbox("Enable Brio API", ref enableWebApi))

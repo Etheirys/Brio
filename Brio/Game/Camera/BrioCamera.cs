@@ -103,7 +103,7 @@ public struct BrioCamera
         return rotation;
     }
 
-    public readonly Vector3 RotationAsVector3 => new(Angle.X - Pan.X, -Angle.Y - Pan.Y, Roll);
+    public readonly Vector3 RotationAsVector3 => new(Angle.X - Pan.X, -Angle.Y - Pan.Y, 0);
 
     public readonly Quaternion CalculateDirectionAsQuaternion()
         => (new Vector3(-(Angle.Y + Pan.Y), ((Angle.X + MathF.PI) % MathF.Tau) - Pan.X, 0.0f)
