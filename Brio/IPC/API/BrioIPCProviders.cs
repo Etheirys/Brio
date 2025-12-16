@@ -21,11 +21,14 @@ public class BrioIPCProviders : IDisposable
         _providers = [
             ApiVersion.Provider(pi, brioAPI.State),
             IsAvailable.Provider(pi, brioAPI.State),
+            IsValidGPoseSession.Provider(pi, brioAPI.State),
 
             SpawnActor.Provider(pi, brioAPI.Actor),
             DespawnActor.Provider(pi, brioAPI.Actor),
             ActorExists.Provider(pi, brioAPI.Actor),
             GetAllActors.Provider(pi, brioAPI.Actor),
+            LoadMCDF.Provider(pi, brioAPI.Actor),
+            SaveMCDF.Provider(pi, brioAPI.Actor),
 
             SetActorSpeed.Provider(pi, brioAPI.Animation),
             GetActorSpeed.Provider(pi, brioAPI.Animation),
