@@ -45,14 +45,12 @@ public unsafe class SkeletonService : IDisposable
     private readonly Dictionary<Skeleton, SkeletonPosingCapability> _skeletonToPosingCapability = [];
     private readonly List<Skeleton> _skeletonsToUpdate = [];
 
-    // NEW: Real-time animation support
     private readonly Dictionary<ulong, Dictionary<string, BoneTransform>> _directBoneOverrides = [];
     private readonly Dictionary<ulong, Dictionary<string, BoneTransform>> _interpolatedState = [];
     private readonly Dictionary<ulong, Dictionary<int, Dictionary<string, int>>> _boneIndexCache = [];
 
     private readonly object _directOverridesLock = new();
 
-    // Configuration for real-time animation
     public float BoneInterpolationSpeed { get; set; } = 0.2f;
     public bool RealTimeAnimationEnabled { get; set; } = true;
 
@@ -79,7 +77,6 @@ public unsafe class SkeletonService : IDisposable
         RefreshSkeletonCache();
     }
 
-    // NEW: Real-time animation API
     public bool SetBoneTransforms(ulong objectId, Dictionary<string, BoneTransform> bones)
     {
         if(!RealTimeAnimationEnabled)
@@ -132,7 +129,6 @@ public unsafe class SkeletonService : IDisposable
         return _skeletons.FirstOrDefault(x => x!.GameSkeleton == skeleton, null);
     }
 
-    // PRESERVED: Original Brio transform application
     private void ApplyBrioTransforms(Skeleton skeleton, SkeletonPosingCapability posingCapability)
     {
         for(int partialIdx = 0; partialIdx < skeleton.Partials.Count; ++partialIdx)
@@ -176,7 +172,6 @@ public unsafe class SkeletonService : IDisposable
         }
     }
 
-    // NEW: Direct bone override application for real-time animation
     private void ApplyDirectBoneOverrides(Skeleton skeleton)
     {
         if(!RealTimeAnimationEnabled)
@@ -325,7 +320,6 @@ public unsafe class SkeletonService : IDisposable
         }
     }
 
-    // PRESERVED: Original Brio partial reparenting
     private void ReparentPartials(Skeleton skeleton)
     {
         for(int partialIdx = 0; partialIdx < skeleton.Partials.Count; ++partialIdx)
@@ -359,7 +353,6 @@ public unsafe class SkeletonService : IDisposable
         }
     }
 
-    // PRESERVED: Original Brio attachment reparenting
     private void ReparentAttachments(Skeleton skeleton)
     {
         var attach = &skeleton.CharacterBase->Attach;
@@ -401,7 +394,6 @@ public unsafe class SkeletonService : IDisposable
         }
     }
 
-    // ENHANCED: Skeleton update now supports both modes
     private void BeginSkeletonUpdate()
     {
         // This is a very hot path, be careful how much you do here.
@@ -432,7 +424,6 @@ public unsafe class SkeletonService : IDisposable
 
         foreach(var skeleton in _skeletonsToUpdate)
         {
-            // NEW: Apply direct bone overrides first for real-time animation
             try
             {
                 ApplyDirectBoneOverrides(skeleton);
@@ -458,7 +449,6 @@ public unsafe class SkeletonService : IDisposable
         }
     }
 
-    // ENHANCED: Finalization supports both modes
     private void FinalizeSkeletonUpdate()
     {
         if(!_gPoseService.IsGPosing)
@@ -475,7 +465,6 @@ public unsafe class SkeletonService : IDisposable
         EndPosingInverval();
     }
 
-    // PRESERVED: Original Brio snapshot application
     private void ApplySnapshot(hkaPose* pose, Bone bone, BonePoseTransformInfo info)
     {
         Transform temp = default;
@@ -518,7 +507,6 @@ public unsafe class SkeletonService : IDisposable
         modelSpace->Scale = *(hkVector4f*)(&temp.Scale);
     }
 
-    // ENHANCED: Cache refresh now handles real-time data
     public void RefreshSkeletonCache()
     {
         Brio.Log.Debug("Refreshing skeleton cache...");
@@ -540,7 +528,6 @@ public unsafe class SkeletonService : IDisposable
         Brio.Log.Debug("Skeleton cache refreshed.");
     }
 
-    // ENHANCED: Clear skeleton now handles real-time data
     private void ClearSkeleton(Skeleton skeleton)
     {
         _skeletons.Remove(skeleton);
@@ -584,10 +571,8 @@ public unsafe class SkeletonService : IDisposable
         SkeletonUpdateStart?.Invoke();
     }
 
-    // ENHANCED: End posing interval now handles real-time mode
     private void EndPosingInverval()
     {
-        // PRESERVED: Only clear Brio capability mappings when not in real-time mode
         if(!RealTimeAnimationEnabled)
         {
             _skeletonToPosingCapability.Clear();
@@ -653,7 +638,6 @@ public unsafe class SkeletonService : IDisposable
         _monitorService.CharacterBaseMaterialsUpdated -= OnCharacterBaseMaterialsUpdate;
         _monitorService.CharacterBaseDestroyed -= OnCharacterBaseCleanup;
 
-        // NEW: Clean up real-time data
         lock(_directOverridesLock)
         {
             _directBoneOverrides.Clear();
@@ -663,9 +647,6 @@ public unsafe class SkeletonService : IDisposable
     }
 }
 
-/// <summary>
-/// NEW: Bone transform data for direct skeleton manipulation
-/// </summary>
 public class BoneTransform
 {
     public Vector3? Position { get; set; }
