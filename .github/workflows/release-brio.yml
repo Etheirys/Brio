@@ -31,7 +31,7 @@ jobs:
         Expand-Archive -Force latest.zip "$env:AppData\XIVLauncher\addon\Hooks\dev"
 
     - name: Restore Dependencies
-      run: dotnet restore Brio.sln
+      run: dotnet restore Brio.slnx
 
     - name: Build Brio
       run: dotnet build Brio.slnx --no-restore /p:Configuration=Release /p:Version=${{ github.event.inputs.version }}
