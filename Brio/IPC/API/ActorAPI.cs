@@ -1,18 +1,22 @@
-﻿using Brio.API.Interface;
+﻿using Brio.API;
+using Brio.API.Interface;
 using Brio.Capabilities.Actor;
 using Brio.Entities;
 using Brio.Game.Actor;
 using Brio.Game.Actor.Extensions;
 using Brio.Game.Core;
 using Brio.Game.GPose;
+using Brio.MCDF.Game.Services;
 using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Plugin.Services;
+using FFXIVClientStructs.FFXIV.Client.Game.Character;
 using System.Linq;
 
 namespace Brio.IPC.API;
 
-public unsafe class ActorAPI(ActorSpawnService actorSpawnService, IFramework framework, GPoseService gPoseService, EntityManager entityManager) : IActor
+public unsafe class ActorAPI(ActorSpawnService actorSpawnService, MCDFService mCDFService, IFramework framework, GPoseService gPoseService, EntityManager entityManager) : IActor
 {
+    private readonly MCDFService _mCDFService = mCDFService;
     private readonly GPoseService _gPoseService = gPoseService;
     private readonly ActorSpawnService _actorSpawnService = actorSpawnService;
     private readonly EntityManager _entityManager = entityManager;
@@ -39,7 +43,36 @@ public unsafe class ActorAPI(ActorSpawnService actorSpawnService, IFramework fra
         return _entityManager.TryGetAllActorsAsGameObject().ToArray();
     }
 
-    //TODO not done
+    public BrioApiResult LoadMCDF(IGameObject gameObject, string path)
+    {
+        if(_gPoseService.IsGPosing == false) return BrioApiResult.IsNotInGPose;
+
+        if(_entityManager.TryGetEntity(gameObject.Native(), out var entity))
+        {
+            if(entity.TryGetCapability<ActorAppearanceCapability>(out var actorAppearanceCapability))
+            {
+                return actorAppearanceCapability.LoadMCDF(path).Result;
+            }
+        }
+
+        return BrioApiResult.UnknownError;
+    }
+
+    public BrioApiResult SaveMCDF(IGameObject gameObject, string path, string description)
+    {
+        if(_gPoseService.IsGPosing == false) return BrioApiResult.IsNotInGPose;
+
+        if(_entityManager.TryGetEntity(gameObject.Native(), out var entity))
+        {
+            if(entity.TryGetCapability<ActorAppearanceCapability>(out var actorAppearanceCapability))
+            {
+                return actorAppearanceCapability.SaveMcdf(path, description).Result;
+            }
+        }
+
+        return BrioApiResult.UnknownError;
+    }
+
     public IGameObject? Spawn(global::Brio.API.Enums.SpawnFlags spawnFlags, bool selectInHierarchy, bool spawnFrozen)
     {
         if(_gPoseService.IsGPosing == false) return null;
