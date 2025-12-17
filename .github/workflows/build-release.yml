@@ -29,14 +29,14 @@ jobs:
 
     - name: Download Dalamud
       run: |
-        Invoke-WebRequest -Uri https://goatcorp.github.io/dalamud-distrib/api14/latest.zip -OutFile latest.zip
+        Invoke-WebRequest -Uri https://goatcorp.github.io/dalamud-distrib/stg/latest.zip -OutFile latest.zip
         Expand-Archive -Force latest.zip "$env:AppData\XIVLauncher\addon\Hooks\dev"
 
     - name: Restore Dependencies
       run: dotnet restore Brio.sln
       
     - name: Build Brio
-      run: dotnet build --no-restore Brio.sln /p:Configuration=Release /p:DebugType=None /p:DebugSymbols=false /p:Version=0.0.0.1
+      run: dotnet build --no-restore Brio.slnx /p:Configuration=Release /p:DebugType=None /p:DebugSymbols=false /p:Version=0.0.0.1
 
     - name: Zip Release
       uses: TheDoctor0/zip-release@0.6.0
