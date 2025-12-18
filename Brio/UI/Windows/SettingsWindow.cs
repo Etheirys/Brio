@@ -23,7 +23,6 @@ public class SettingsWindow : Window
     private readonly PenumbraService _penumbraService;
     private readonly GlamourerService _glamourerService;
     private readonly WebService _webService;
-    private readonly BrioAPIService _brioIPCService;
     private readonly CustomizePlusService _customizePlusService;
 
     public SettingsWindow(
@@ -31,8 +30,7 @@ public class SettingsWindow : Window
         PenumbraService penumbraService,
         GlamourerService glamourerService,
         WebService webService,
-        CustomizePlusService customizePlusService,
-        BrioAPIService brioIPCService) : base($"{Brio.Name} SETTINGS###brio_settings_window", ImGuiWindowFlags.NoResize)
+        CustomizePlusService customizePlusService) : base($"{Brio.Name} SETTINGS###brio_settings_window", ImGuiWindowFlags.NoResize)
     {
         Namespace = "brio_settings_namespace";
 
@@ -40,7 +38,6 @@ public class SettingsWindow : Window
         _penumbraService = penumbraService;
         _glamourerService = glamourerService;
         _webService = webService;
-        _brioIPCService = brioIPCService;
         _customizePlusService = customizePlusService;
 
         Size = new Vector2(500, 550);

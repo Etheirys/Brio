@@ -140,11 +140,11 @@ public unsafe class FestivalService : IDisposable
     {
         if(applyNow)
         {
-            GameMain.Instance()->SetActiveFestivals(festivals[0], festivals[1], festivals[2], festivals[3]);
+            //GameMain.Instance()->SetActiveFestivals(festivals[0], festivals[1], festivals[2], festivals[3]);
         }
         else
         {
-            GameMain.Instance()->QueueActiveFestivals(festivals[0], festivals[1], festivals[2], festivals[3]);
+            //GameMain.Instance()->QueueActiveFestivals(festivals[0], festivals[1], festivals[2], festivals[3]);
         }
     }
 

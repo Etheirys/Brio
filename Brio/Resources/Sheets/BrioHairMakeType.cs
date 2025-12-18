@@ -21,6 +21,9 @@ public struct BrioHairMakeType : IExcelRow<BrioHairMakeType>
     public RowRef<Tribe> Tribe { get; private set; }
     public Genders Gender { get; private set; }
 
+    public ExcelPage ExcelPage => throw new System.NotImplementedException();
+    public uint RowOffset => throw new System.NotImplementedException();
+
     public RowRef<CharaMakeCustomize>[] HairStyles = new RowRef<CharaMakeCustomize>[EntryCount];
     public RowRef<CharaMakeCustomize>[] FacePaints = new RowRef<CharaMakeCustomize>[EntryCount];
 
