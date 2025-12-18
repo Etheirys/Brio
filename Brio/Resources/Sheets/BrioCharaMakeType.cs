@@ -23,6 +23,8 @@ public unsafe struct BrioCharaMakeType(ExcelPage page, uint offset, uint row) : 
     public const int FaceCount = 8;
     public const int FaceFeatureCount = 7;
 
+    public readonly ExcelPage ExcelPage => page;
+    public readonly uint RowOffset => offset;
     public readonly uint RowId => row;
 
     public readonly Collection<CharaMakeStructStruct> CharaMakeStruct => new(page, offset, offset, &CharaMakeStructCtor, 28);
@@ -33,27 +35,30 @@ public unsafe struct BrioCharaMakeType(ExcelPage page, uint offset, uint row) : 
     public readonly RowRef<Tribe> Tribe => new(page.Module, (uint)page.ReadInt32(offset + 13068), page.Language);
     public readonly sbyte Gender => page.ReadInt8(offset + 13072);
 
-    public ExcelPage ExcelPage => throw new System.NotImplementedException();
-    public uint RowOffset => throw new System.NotImplementedException();
 
     private static CharaMakeStructStruct CharaMakeStructCtor(ExcelPage page, uint parentOffset, uint offset, uint i) => new(page, parentOffset, offset + i * 452);
     private static byte VoiceStructCtor(ExcelPage page, uint parentOffset, uint offset, uint i) => page.ReadUInt8(offset + 12656 + i);
     private static FacialFeatureOptionStruct FacialFeatureOptionCtor(ExcelPage page, uint parentOffset, uint offset, uint i) => new(page, parentOffset, offset + 12668 + i * 28);
-    private static EquipmentStruct EquipmentCtor(ExcelPage page, uint parentOffset, uint offset, uint i) => new(page, parentOffset, offset + 12224 + i * 56);
+    private static EquipmentStruct EquipmentCtor(ExcelPage page, uint parentOffset, uint offset, uint i) => new(page, parentOffset, offset + 12896 + i * 56);
 
     public readonly struct CharaMakeStructStruct(ExcelPage page, uint parentOffset, uint offset)
     {
         public readonly RowRef<Lobby> Menu => new(page.Module, page.ReadUInt32(offset), page.Language);
         public readonly uint SubMenuMask => page.ReadUInt32(offset + 4);
         public readonly uint Customize => page.ReadUInt32(offset + 8);
+
         public readonly Collection<uint> SubMenuParam => new(page, parentOffset, offset, &SubMenuParamCtor, 100);
-        public readonly byte InitVal => page.ReadUInt8(offset + 412);
-        public readonly byte SubMenuType => page.ReadUInt8(offset + 413);
-        public readonly byte SubMenuNum => page.ReadUInt8(offset + 414);
-        public readonly byte LookAt => page.ReadUInt8(offset + 415);
+        public readonly Collection<uint> Unknown0 => new(page, parentOffset, offset, &Unknown0Ctor, 6);
+
+        public readonly byte InitVal => page.ReadUInt8(offset + 436);
+        public readonly byte SubMenuType => page.ReadUInt8(offset + 437);
+        public readonly byte SubMenuNum => page.ReadUInt8(offset + 438);
+        public readonly byte LookAt => page.ReadUInt8(offset + 439);
+
         public readonly Collection<byte> SubMenuGraphic => new(page, parentOffset, offset, &SubMenuGraphicCtor, 10);
 
         private static uint SubMenuParamCtor(ExcelPage page, uint parentOffset, uint offset, uint i) => page.ReadUInt32(offset + 12 + i * 4);
+        private static uint Unknown0Ctor(ExcelPage page, uint parentOffset, uint offset, uint i) => page.ReadUInt32(offset + 412 + i * 4);
         private static byte SubMenuGraphicCtor(ExcelPage page, uint parentOffset, uint offset, uint i) => page.ReadUInt8(offset + 416 + i);
     }
 
