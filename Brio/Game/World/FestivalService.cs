@@ -27,35 +27,34 @@ public unsafe class FestivalService : IDisposable
     private readonly IFramework _framework;
     private readonly GPoseService _gPoseService;
     private readonly ResourceProvider _resourceProvider;
+    private readonly IObjectTable _objectTable;
 
-    private readonly Queue<uint[]> _pendingChanges = new();
-    private uint[]? _originalState;
+    private readonly Queue<GameMain.Festival[]> _pendingChanges = new();
+    private GameMain.Festival[]? _originalState;
 
-    // TODO: Handle festival subid properly (I wonder want this meant (KEN)) 
-
-    public uint[] EngineActiveFestivals
+    public GameMain.Festival[] EngineActiveFestivals
     {
         get
         {
-            uint[] activeFestivals = new uint[4];
+            GameMain.Festival[] activeFestivals = new GameMain.Festival[4];
             var engineFestivals = GameMain.Instance()->ActiveFestivals;
-            for(int i = 0; i < MaxFestivals; i++)
+            for (int i = 0; i < MaxFestivals; i++)
             {
-                fixed(GameMain.Festival* festival = &engineFestivals[i])
-                    activeFestivals[i] = *((uint*)festival);
+                activeFestivals[i] = engineFestivals[i];
             }
 
             return activeFestivals;
         }
     }
 
-    public FestivalService(IClientState clientState, IToastGui toastGui, GameDataProvider gameDataProvider, IFramework framework, GPoseService gPoseService, ResourceProvider resourceProvider)
+    public FestivalService(IClientState clientState, IObjectTable objects, IToastGui toastGui, GameDataProvider gameDataProvider, IFramework framework, GPoseService gPoseService, ResourceProvider resourceProvider)
     {
         _clientState = clientState;
         _toastGui = toastGui;
         _framework = framework;
         _gPoseService = gPoseService;
         _resourceProvider = resourceProvider;
+        _objectTable = objects;
 
         FestivalList = BuildFestivalList(gameDataProvider);
 
@@ -80,15 +79,15 @@ public unsafe class FestivalService : IDisposable
         if(!CheckFestivalRestrictions(festival))
             return false;
 
-        var active = EngineActiveFestivals.ToArray();
+        var active = EngineActiveFestivals;
         var copy = active.ToArray();
 
         for(int i = 0; i < MaxFestivals; ++i)
         {
-            if(active[i] == 0)
+            if(active[i].Id == 0)
             {
                 SnapshotFestivalsIfNeeded();
-                copy[i] = festival;
+                copy[i] = new GameMain.Festival() { Id = festival, Phase = 1 };
                 _pendingChanges.Enqueue(copy);
                 return true;
             }
@@ -102,15 +101,15 @@ public unsafe class FestivalService : IDisposable
         if(!CheckFestivalRestrictions(festival))
             return false;
 
-        var active = EngineActiveFestivals.ToArray();
+        var active = EngineActiveFestivals;
         var copy = active.ToArray();
-
+      
         for(int i = 0; i < MaxFestivals; ++i)
         {
-            if(active[i] == festival)
+            if(active[i].Id == festival)
             {
                 SnapshotFestivalsIfNeeded();
-                copy[i] = 0;
+                copy[i] = new GameMain.Festival() { Id = 0, Phase = 0 };
                 _pendingChanges.Enqueue(copy);
                 return true;
             }
@@ -136,15 +135,23 @@ public unsafe class FestivalService : IDisposable
         }
     }
 
-    private void PublicApply(uint[] festivals, bool applyNow = true)
+    private void PublicApply(GameMain.Festival[] festivals, bool applyNow = true)
     {
         if(applyNow)
         {
-            //GameMain.Instance()->SetActiveFestivals(festivals[0], festivals[1], festivals[2], festivals[3]);
+            GameMain.Instance()->SetActiveFestivals(
+                festivals[0].Id, festivals[0].Phase, 
+                festivals[1].Id, festivals[1].Phase,
+                festivals[2].Id, festivals[2].Phase,
+                festivals[3].Id, festivals[3].Phase);
         }
         else
         {
-            //GameMain.Instance()->QueueActiveFestivals(festivals[0], festivals[1], festivals[2], festivals[3]);
+            GameMain.Instance()->QueueActiveFestivals(
+                festivals[0].Id, festivals[0].Phase,
+                festivals[1].Id, festivals[1].Phase,
+                festivals[2].Id, festivals[2].Phase,
+                festivals[3].Id, festivals[3].Phase);
         }
     }
 
@@ -161,7 +168,7 @@ public unsafe class FestivalService : IDisposable
             {
                 if(_clientState.TerritoryType == festival.AreaExclusion.TerritoryType)
                 {
-                    var localPlayer = _clientState.LocalPlayer;
+                    var localPlayer = _objectTable.LocalPlayer;
                     if(localPlayer == null)
                         return false;
 
