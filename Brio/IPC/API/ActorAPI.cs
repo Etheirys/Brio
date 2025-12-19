@@ -9,7 +9,6 @@ using Brio.Game.GPose;
 using Brio.MCDF.Game.Services;
 using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Plugin.Services;
-using FFXIVClientStructs.FFXIV.Client.Game.Character;
 using System.Linq;
 
 namespace Brio.IPC.API;

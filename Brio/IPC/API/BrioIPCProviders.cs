@@ -2,7 +2,6 @@
 using Brio.API.Helpers;
 using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Plugin;
-using FFXIVClientStructs.FFXIV.Client.Game.Object;
 using System;
 using System.Collections.Generic;
 
@@ -14,7 +13,7 @@ public class BrioIPCProviders : IDisposable
 
     private readonly BrioEventProvider _deinitializedProvider;
     private readonly BrioEventProvider _initializedProvider;
-  
+
     public readonly BrioEventProvider<IGameObject> ActorDespawned;
     public readonly BrioEventProvider<IGameObject> ActorSpawned;
 

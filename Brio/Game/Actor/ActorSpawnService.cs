@@ -10,7 +10,6 @@ using Brio.Game.GPose;
 using Brio.Game.Posing;
 using Brio.Game.Types;
 using Brio.IPC;
-using Brio.IPC.API;
 using Brio.Resources;
 using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Plugin.Services;

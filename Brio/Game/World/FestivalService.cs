@@ -38,7 +38,7 @@ public unsafe class FestivalService : IDisposable
         {
             GameMain.Festival[] activeFestivals = new GameMain.Festival[4];
             var engineFestivals = GameMain.Instance()->ActiveFestivals;
-            for (int i = 0; i < MaxFestivals; i++)
+            for(int i = 0; i < MaxFestivals; i++)
             {
                 activeFestivals[i] = engineFestivals[i];
             }
@@ -103,7 +103,7 @@ public unsafe class FestivalService : IDisposable
 
         var active = EngineActiveFestivals;
         var copy = active.ToArray();
-      
+
         for(int i = 0; i < MaxFestivals; ++i)
         {
             if(active[i].Id == festival)
@@ -140,7 +140,7 @@ public unsafe class FestivalService : IDisposable
         if(applyNow)
         {
             GameMain.Instance()->SetActiveFestivals(
-                festivals[0].Id, festivals[0].Phase, 
+                festivals[0].Id, festivals[0].Phase,
                 festivals[1].Id, festivals[1].Phase,
                 festivals[2].Id, festivals[2].Phase,
                 festivals[3].Id, festivals[3].Phase);

@@ -11,7 +11,7 @@ public class BrioAPIService(ConfigurationService configurationService, StateAPI 
     public const int MinorVersion = 0;
 
     private readonly ConfigurationService _configurationService = configurationService;
-  
+
     public bool IsIPCEnabled => _configurationService.Configuration.IPC.EnableBrioIPC;
 
 
