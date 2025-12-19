@@ -1,4 +1,5 @@
-﻿using Brio.Core;
+﻿using Brio.API;
+using Brio.Core;
 using Brio.Entities;
 using Brio.Entities.Actor;
 using Brio.Entities.Core;
@@ -103,14 +104,14 @@ public class ActorAppearanceCapability : ActorCharacterCapability
         SetSelectedProfile();
     }
 
-    public async Task LoadMCDF(string path)
+    public async Task<BrioApiResult> LoadMCDF(string path)
     {
         try
         {
             if(_mCDFService.IsApplyingMCDF)
             {
                 Brio.NotifyError("Another MCDF is loading, Please wait for it to finish.");
-                return;
+                return BrioApiResult.IsApplyingMCDF;
             }
 
             Entity.LoadingDescription = "Loading MCDF...";
@@ -125,27 +126,38 @@ public class ActorAppearanceCapability : ActorCharacterCapability
         {
             Brio.Log.Warning(ex, "Exception while Loading MCDF");
             Brio.NotifyError("MCDF Loading failed! Try again!");
+
+            return BrioApiResult.UnknownError;
         }
         finally
         {
             Entity.IsLoading = false;
         }
+
+        if(HasMCDF)
+            return BrioApiResult.Success;
+
+        return BrioApiResult.UnknownError;
     }
 
-    public async Task SaveMcdf(string path, string dis)
+    public async Task<BrioApiResult> SaveMcdf(string path, string dis)
     {
         try
         {
             Entity.LoadingDescription = "Saving MCDF...";
             Entity.IsLoading = true;
             await _mCDFService.SaveMCDF(path, dis, GameObject);
+        
+            return BrioApiResult.Success;
         }
         catch(Exception ex)
         {
             Brio.Log.Warning(ex, "Exception while Loading MCDF");
             Brio.NotifyError("MCDF Export failed! Try again!");
+       
+            return BrioApiResult.UnknownError;
         }
-        finally 
+        finally
         {
             Entity.IsLoading = false;
         }

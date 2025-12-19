@@ -2,8 +2,6 @@
 using Brio.Game.Camera;
 using Brio.Game.GPose;
 using Brio.Input;
-using Dalamud.Game;
-using Dalamud.Game.ClientState.Keys;
 using Dalamud.Hooking;
 using Dalamud.Plugin.Services;
 using FFXIVClientStructs.FFXIV.Client.UI;
@@ -114,7 +112,7 @@ public class GameInputService : IDisposable
                 keyboardFrame->KeyState[i] = 0;
             }
         }
-    
+
         if(_configurationService.Configuration.InputManager.Enable)
         {
             if(_requireMod)

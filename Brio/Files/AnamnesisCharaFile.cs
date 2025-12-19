@@ -13,6 +13,7 @@ using System;
 using System.Numerics;
 
 namespace Brio.Files;
+
 public class AnamnesisCharaFileInfo(EntityManager entityManager, ConfigurationService configurationService) : AppliableActorFileInfoBase<AnamnesisCharaFile>(entityManager, configurationService)
 {
     public override string Name => "Character File";

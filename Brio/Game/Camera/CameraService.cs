@@ -4,7 +4,6 @@ using Brio.Entities.Camera;
 using Brio.Game.Cutscene;
 using Brio.Game.GPose;
 using Brio.Input;
-using Dalamud.Game;
 using Dalamud.Hooking;
 using Dalamud.Plugin.Services;
 using FFXIVClientStructs.FFXIV.Client.Game.Control;

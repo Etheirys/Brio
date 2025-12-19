@@ -337,7 +337,7 @@ public static partial class ImBrio
             }
             changed = true;
         }
-     
+
         AttachToolTip($"Increase {tooltip}");
 
         if(hasLabel)

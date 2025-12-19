@@ -11,7 +11,6 @@ using Dalamud.Interface.Textures.TextureWraps;
 using Dalamud.Interface.Windowing;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
-using FFXIVClientStructs.FFXIV.Common.Lua;
 using System;
 using System.Collections.Generic;
 

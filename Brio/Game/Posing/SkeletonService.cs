@@ -6,7 +6,6 @@ using Brio.Game.Actor.Interop;
 using Brio.Game.Core;
 using Brio.Game.GPose;
 using Brio.Game.Posing.Skeletons;
-using Dalamud.Game;
 using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Hooking;
 using Dalamud.Plugin.Services;
@@ -67,7 +66,7 @@ public unsafe class SkeletonService : IDisposable
         _updateBonePhysicsHook = hooking.HookFromAddress<UpdateBonePhysicsDelegate>(scanner.ScanText(updateBonePhysicsAddress), UpdateBonePhysicsDetour);
         _updateBonePhysicsHook.Enable();
 
-        var finalizeSkeletonsHook = "40 53 55 57 41 55 48 83 EC 68"; // JMP in Framework.TaskRenderGraphicsRender
+        var finalizeSkeletonsHook = "40 53 55 57 41 55 48 83 EC ?? ?? 48 ?? ?? ?? ?? ?? ?? ?? 48"; // JMP in Framework.TaskRenderGraphicsRender
         _finalizeSkeletonsHook = hooking.HookFromAddress<FinalizeSkeletonsDelegate>(scanner.ScanText(finalizeSkeletonsHook), FinalizeSkeletonsHook);
         _finalizeSkeletonsHook.Enable();
 

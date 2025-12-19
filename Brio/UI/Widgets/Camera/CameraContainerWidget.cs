@@ -102,7 +102,7 @@ public class CameraContainerWidget(CameraContainerCapability capability) : Widge
 
                 ImGui.EndMenu();
             }
-        
+
             if(ImGui.BeginMenu("Destroy All Cameras###containerwidgetpopup_destroyall"))
             {
                 if(ImGui.MenuItem("Confirm Destruction###containerwidgetpopup_destroyall_confirm"))

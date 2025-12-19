@@ -1,4 +1,5 @@
 ﻿namespace Brio.Input;
+
 public enum InputAction
 {
     // Interface

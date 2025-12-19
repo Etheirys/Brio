@@ -1,6 +1,5 @@
 ﻿using FFXIVClientStructs.FFXIV.Client.Game.Control;
 using MessagePack;
-using System;
 using System.Numerics;
 
 namespace Brio.Game.Camera;

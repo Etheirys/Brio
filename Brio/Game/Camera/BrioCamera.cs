@@ -31,7 +31,7 @@ public struct BrioCamera
     [FieldOffset(0x140)] public Vector2 Angle;
     [FieldOffset(0x160)] public Vector2 Pan;        // Pan, Tilt
     [FieldOffset(0x170)] public float Roll;
-    
+
     [FieldOffset(0x180)] public int Mode;           // 0 = 1st Person. 1 = 3rd Person. 2+ = Restrictive camera control 
 
     [FieldOffset(0x218)] public Vector2 Collide;
@@ -89,7 +89,7 @@ public struct BrioCamera
 
         Brio.Log.Debug($"rotY: {rotY * MathHelpers.RadiansToDegrees}");
 
-        if (rotY == 0f)
+        if(rotY == 0f)
         {
             // apply offset for Y if no other Y rotation is applied
             Brio.Log.Debug("rotY returned 0, applying offset as rotation.Y");
@@ -103,7 +103,7 @@ public struct BrioCamera
         return rotation;
     }
 
-    public readonly Vector3 RotationAsVector3 => new(Angle.X - Pan.X, -Angle.Y - Pan.Y, Roll);
+    public readonly Vector3 RotationAsVector3 => new(Angle.X - Pan.X, -Angle.Y - Pan.Y, 0);
 
     public readonly Quaternion CalculateDirectionAsQuaternion()
         => (new Vector3(-(Angle.Y + Pan.Y), ((Angle.X + MathF.PI) % MathF.Tau) - Pan.X, 0.0f)

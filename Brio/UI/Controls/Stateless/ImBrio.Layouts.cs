@@ -3,6 +3,7 @@ using System;
 using System.Runtime.CompilerServices;
 
 namespace Brio.UI.Controls.Stateless;
+
 public static partial class ImBrio
 {
     [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
@@ -42,7 +43,7 @@ public static partial class ImBrio
 
         float windowWidth = ImGui.GetContentRegionAvail().X;
         float offset = MathF.Max(0, (windowWidth - elementWidth) * 0.5f);
-      
+
         ImGui.SetCursorPosX(ImGui.GetCursorPosX() + offset);
         ImGui.SetNextItemWidth(elementWidth);
     }

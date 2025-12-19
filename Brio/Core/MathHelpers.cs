@@ -10,17 +10,17 @@ public static class MathHelpers
 {
     public const float DegreesToRadians = MathF.PI / 180.0f;
     public const float RadiansToDegrees = 180.0f / MathF.PI;
-   
+
     public const float Deg2Rad = MathF.PI * 2.0f / 360.0f;
     public const float Rad2Deg = 1.0f / Deg2Rad;
 
-    public static Quaternion ToEulerAngles(this Vector3 euler) 
+    public static Quaternion ToEulerAngles(this Vector3 euler)
         => FromEulerRad(euler * Deg2Rad);
 
     public static Quaternion Normalize(Quaternion value)
     {
         var sqrMagnitude = value.X * value.X + value.Y * value.Y + value.Z * value.Z + value.W * value.W;
-     
+
         var length = MathF.Sqrt(sqrMagnitude);
         if(length < float.Epsilon)
             return Quaternion.Identity;

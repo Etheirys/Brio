@@ -8,6 +8,7 @@ using System;
 using System.Numerics;
 
 namespace Brio.UI.Controls.Stateless;
+
 public static partial class ImBrio
 {
 
