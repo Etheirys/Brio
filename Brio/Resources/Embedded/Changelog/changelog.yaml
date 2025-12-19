@@ -15,6 +15,11 @@ changelog:
           - "As a reminder! If you experience any issues please report them on Discord or on GitHub"
           - "(Even more features coming real soon!)"
 
+      - number: "0.6.2.1"
+        icon: ""
+        items:
+          - "Fixed an issue with the Brio API"
+
       - number: "0.6.2"
         icon: ""
         items:
@@ -22,6 +27,8 @@ changelog:
           - "The animation search control now has more filters and can now be pinned as a window"
           - "Update Brio's IPC to v3, Contact me for more information (minmoose)"
           - "Fixed an issue with Bone selection menu, the category buttons are now tristate"
+          - "Added Starlight Celebration (2025) and fixed Starlight Celebration (2024)"
+          - "Fixed an issue with the camera values being duplicated incorrectly"
           - "Optimized a few systems"
 
   - name: v0.6.1
