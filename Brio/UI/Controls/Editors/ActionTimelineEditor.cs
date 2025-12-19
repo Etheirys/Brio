@@ -35,47 +35,101 @@ public class ActionTimelineEditor(CutsceneManager cutsceneManager, GPoseService 
     private static readonly ActionTimelineSelector _globalTimelineSelector = new("global_timeline_selector");
 
     private static bool _startAnimationOnSelect = true;
+    private static bool _isBaseMode = false;
 
     private string _cameraPath = string.Empty;
     private ActionTimelineCapability _capability = null!;
     private bool _delimitSpeed = false;
 
+    private void HandleSelectorChanges()
+    {
+        if(_globalTimelineSelector.SoftSelectionChanged && _globalTimelineSelector.SoftSelected != null)
+        {
+            if(_isBaseMode)
+            {
+                _capability.SlotedBaseAnimation = _globalTimelineSelector.SoftSelected.TimelineId;
+            }
+            else
+            {
+                _capability.SlotedBlendAnimation = _globalTimelineSelector.SoftSelected.TimelineId;
+            }
+        }
+
+        if(_globalTimelineSelector.SelectionChanged && _globalTimelineSelector.Selected != null)
+        {
+            if(_isBaseMode)
+            {
+                _capability.SlotedBaseAnimation = _globalTimelineSelector.Selected.TimelineId;
+                if(_startAnimationOnSelect)
+                    ApplyBaseOverride(_capability, true);
+            }
+            else
+            {
+                _capability.SlotedBlendAnimation = _globalTimelineSelector.Selected.TimelineId;
+                ApplyBlend(_capability);
+            }
+
+            // Close popup if not pinned
+            if(!_globalTimelineSelector.IsPinned)
+                ImGui.CloseCurrentPopup();
+        }
+    }
+
     public void Draw(bool drawAdvanced, ActionTimelineCapability capability)
     {
         _capability = capability;
 
+        _globalTimelineSelector.DrawAsWindow();
+
+        HandleSelectorChanges();
+
         DrawHeder();
 
         ImGui.Separator();
+        ImBrio.VerticalPadding(2);
 
         DrawBaseOverride();
+        ImBrio.VerticalPadding(2);
+
         DrawBlend();
+        ImBrio.VerticalPadding(2);
+
         DrawOverallSpeed(drawAdvanced);
 
         if(drawAdvanced == false)
         {
             ImGui.Separator();
+            ImBrio.VerticalPadding(2);
 
             DrawFirstScrub();
         }
 
         if(drawAdvanced)
         {
+            ImBrio.VerticalPadding(2);
             DrawLips();
+
+            ImBrio.VerticalPadding(4);
 
             if(ImGui.CollapsingHeader("Scrub"))
             {
+                ImBrio.VerticalPadding(2);
                 DrawScrub();
+                ImBrio.VerticalPadding(2);
             }
 
             if(ImGui.CollapsingHeader("Slots"))
             {
+                ImBrio.VerticalPadding(2);
                 DrawSlots();
+                ImBrio.VerticalPadding(2);
             }
 
             if(ImGui.CollapsingHeader("Cutscene Control"))
             {
+                ImBrio.VerticalPadding(2);
                 DrawCutscene();
+                ImBrio.VerticalPadding(2);
             }
         }
     }
@@ -88,6 +142,7 @@ public class ActionTimelineEditor(CutsceneManager cutsceneManager, GPoseService 
         }
 
         ImGui.SameLine();
+        ImBrio.HorizontalPadding(2);
 
         ImBrio.RightAlign(100 * ImGuiHelpers.GlobalScale, 1);
 
@@ -97,6 +152,7 @@ public class ActionTimelineEditor(CutsceneManager cutsceneManager, GPoseService 
         }
 
         ImGui.SameLine();
+        ImBrio.HorizontalPadding(2);
 
         if(ImBrio.FontIconButtonRight("reset", FontAwesomeIcon.Undo, 1, "Reset Animation", _capability.HasOverride))
         {
@@ -109,9 +165,9 @@ public class ActionTimelineEditor(CutsceneManager cutsceneManager, GPoseService 
         using var popup = ImRaii.Popup("animation_control");
         if(popup.Success)
         {
-            ImBrio.VerticalPadding(2);
+            ImBrio.VerticalPadding(1);
 
-            if(ImGui.Button("Freeze All Actors", new Vector2(150, 0)))
+            if(ImBrio.Button("Freeze All Actors", FontAwesomeIcon.Snowflake, new Vector2(180, 0)))
             {
                 foreach(var actor in _entityManager.TryGetAllActors())
                 {
@@ -128,9 +184,9 @@ public class ActionTimelineEditor(CutsceneManager cutsceneManager, GPoseService 
                 }
             }
 
-            ImBrio.VerticalPadding(2);
+            ImBrio.VerticalPadding(1);
 
-            if(ImGui.Button("Un-Freeze All Actors", new Vector2(150, 0)))
+            if(ImBrio.Button("  Un-Freeze All Actors", FontAwesomeIcon.Fire, new Vector2(180, 0)))
             {
                 foreach(var actor in _entityManager.TryGetAllActors())
                 {
@@ -147,9 +203,9 @@ public class ActionTimelineEditor(CutsceneManager cutsceneManager, GPoseService 
                 }
             }
 
-            ImBrio.VerticalPadding(2);
+            ImBrio.VerticalPadding(1);
 
-            if(ImGui.Button("Play all Animations", new Vector2(150, 0)))
+            if(ImBrio.Button("  Play all Animations", FontAwesomeIcon.PlayCircle, new Vector2(180, 0)))
             {
                 foreach(var actor in _entityManager.TryGetAllActors())
                 {
@@ -163,9 +219,9 @@ public class ActionTimelineEditor(CutsceneManager cutsceneManager, GPoseService 
                 }
             }
 
-            ImBrio.VerticalPadding(2);
+            ImBrio.VerticalPadding(1);
 
-            if(ImGui.Button("Stop all Animations", new Vector2(150, 0)))
+            if(ImBrio.Button("  Stop all Animations", FontAwesomeIcon.StopCircle, new Vector2(180, 0)))
             {
                 foreach(var actor in _entityManager.TryGetAllActors())
                 {
@@ -178,9 +234,6 @@ public class ActionTimelineEditor(CutsceneManager cutsceneManager, GPoseService 
                     }
                 }
             }
-
-            ImBrio.VerticalPadding(2);
-
         }
     }
 
@@ -204,6 +257,7 @@ public class ActionTimelineEditor(CutsceneManager cutsceneManager, GPoseService 
         ImGui.Text(baseLabel);
 
         ImGui.SameLine();
+        ImBrio.HorizontalPadding(4);
 
         if(ImBrio.FontIconButtonRight("base_play", FontAwesomeIcon.PlayCircle, 3, "Play", _capability.SlotedBaseAnimation != 0))
             ApplyBaseOverride(_capability);
@@ -220,10 +274,10 @@ public class ActionTimelineEditor(CutsceneManager cutsceneManager, GPoseService 
 
         if(ImBrio.FontIconButtonRight("base_search", FontAwesomeIcon.Search, 1, "Search"))
         {
+            _isBaseMode = true;
             _globalTimelineSelector.Select(null, false);
             _globalTimelineSelector.AllowBlending = false;
             ImGui.OpenPopup("base_search_popup");
-
         }
 
         using(var popup = ImRaii.Popup("base_search_popup"))
@@ -235,21 +289,6 @@ public class ActionTimelineEditor(CutsceneManager cutsceneManager, GPoseService 
                     ImGui.SetTooltip("Start Animation On Select");
 
                 _globalTimelineSelector.Draw();
-
-                if(_globalTimelineSelector.SoftSelectionChanged && _globalTimelineSelector.SoftSelected != null)
-                {
-                    _capability.SlotedBaseAnimation = _globalTimelineSelector.SoftSelected.TimelineId;
-                }
-
-                if(_globalTimelineSelector.SelectionChanged && _globalTimelineSelector.Selected != null)
-                {
-                    _capability.SlotedBaseAnimation = _globalTimelineSelector.Selected.TimelineId;
-
-                    if(_startAnimationOnSelect)
-                        ApplyBaseOverride(_capability, true);
-
-                    ImGui.CloseCurrentPopup();
-                }
             }
         }
     }
@@ -271,6 +310,7 @@ public class ActionTimelineEditor(CutsceneManager cutsceneManager, GPoseService 
         ImGui.Text(blendLabel);
 
         ImGui.SameLine();
+        ImBrio.HorizontalPadding(4);
 
         if(ImBrio.FontIconButtonRight("blend_play", FontAwesomeIcon.PlayCircle, 2, "Play", _capability.SlotedBlendAnimation != 0))
             ApplyBlend(_capability);
@@ -279,11 +319,10 @@ public class ActionTimelineEditor(CutsceneManager cutsceneManager, GPoseService 
 
         if(ImBrio.FontIconButtonRight("blend_search", FontAwesomeIcon.Search, 1, "Search"))
         {
+            _isBaseMode = false;
             _globalTimelineSelector.Select(null, false);
             _globalTimelineSelector.AllowBlending = true;
-
             ImGui.OpenPopup("blend_search_popup");
-
         }
 
         using(var popup = ImRaii.Popup("blend_search_popup"))
@@ -291,18 +330,6 @@ public class ActionTimelineEditor(CutsceneManager cutsceneManager, GPoseService 
             if(popup.Success)
             {
                 _globalTimelineSelector.Draw();
-
-                if(_globalTimelineSelector.SoftSelectionChanged && _globalTimelineSelector.SoftSelected != null)
-                {
-                    _capability.SlotedBlendAnimation = _globalTimelineSelector.SoftSelected.TimelineId;
-                }
-
-                if(_globalTimelineSelector.SelectionChanged && _globalTimelineSelector.Selected != null)
-                {
-                    _capability.SlotedBlendAnimation = _globalTimelineSelector.Selected.TimelineId;
-                    ApplyBlend(_capability);
-                    ImGui.CloseCurrentPopup();
-                }
             }
         }
     }
@@ -399,7 +426,6 @@ public class ActionTimelineEditor(CutsceneManager cutsceneManager, GPoseService 
 
     private unsafe void DrawFirstScrub()
     {
-
         var drawObj = _capability.Character.Native()->GameObject.DrawObject;
         if(drawObj == null)
             return;
@@ -455,7 +481,6 @@ public class ActionTimelineEditor(CutsceneManager cutsceneManager, GPoseService 
 
     private void DrawSlots()
     {
-
         var slots = Enum.GetValues<ActionTimelineSlots>();
 
         foreach(var slot in slots)
@@ -463,6 +488,7 @@ public class ActionTimelineEditor(CutsceneManager cutsceneManager, GPoseService 
             using(ImRaii.PushId((int)slot))
             {
                 DrawSlot(slot);
+                ImBrio.VerticalPadding(2);
                 ImGui.Separator();
             }
         }
@@ -481,6 +507,8 @@ public class ActionTimelineEditor(CutsceneManager cutsceneManager, GPoseService 
         {
             ImGui.Text(slotDescription);
 
+            ImBrio.VerticalPadding(2);
+
             float existingSpeed = _capability.GetSlotSpeed(slot);
             float newSpeed = existingSpeed;
             const string speedLabel = "Slot Speed";
@@ -488,8 +516,8 @@ public class ActionTimelineEditor(CutsceneManager cutsceneManager, GPoseService 
             if(ImGui.SliderFloat($"{speedLabel}", ref newSpeed, 0f, 5f))
                 _capability.SetSlotSpeedOverride(slot, newSpeed);
 
-
             ImGui.SameLine();
+            ImBrio.HorizontalPadding(4);
 
             if(ImBrio.FontIconButtonRight("reset", FontAwesomeIcon.Undo, 1, "Reset Speed", _capability.HasSlotSpeedOverride(slot)))
                 _capability.ResetSlotSpeedOverride(slot);
@@ -529,6 +557,7 @@ public class ActionTimelineEditor(CutsceneManager cutsceneManager, GPoseService 
         ImGui.Text(speedLabel);
 
         ImGui.SameLine();
+        ImBrio.HorizontalPadding(4);
 
         if(ImBrio.FontIconButtonRight("speed_reset", FontAwesomeIcon.Undo, 1, "Reset Speed", _capability.HasSpeedMultiplierOverride))
             _capability.ResetOverallSpeedOverride();
@@ -543,7 +572,7 @@ public class ActionTimelineEditor(CutsceneManager cutsceneManager, GPoseService 
 
     private void DrawCutscene()
     {
-        ImGui.Text("Camera Path ");
+        ImGui.Text("Camera Path");
 
         ImGui.SameLine();
 
@@ -578,27 +607,36 @@ public class ActionTimelineEditor(CutsceneManager cutsceneManager, GPoseService 
         }
 
         ImGui.Separator();
+        ImBrio.VerticalPadding(2);
 
         using(ImRaii.Disabled(string.IsNullOrEmpty(_cameraPath)))
         {
             ImGui.Checkbox("Enable FOV", ref _cutsceneManager.CameraSettings.EnableFOV);
 
+            ImBrio.VerticalPadding(4);
             ImGui.Separator();
+            ImBrio.VerticalPadding(2);
 
-            ImGui.Text("Disabling FOV will make for a less accurate Camera, but might");
-            ImGui.Text("provide for an easer way to support more character sizes without");
-            ImGui.Text("changing the Camera's Scale & Offset!");
+            ImGui.TextWrapped("Disabling FOV will make for a less accurate Camera, but might provide for an easer way to support more character sizes without changing the Camera's Scale & Offset!");
 
+            ImBrio.VerticalPadding(4);
             ImGui.Separator();
+            ImBrio.VerticalPadding(2);
 
             ImGui.InputFloat3("Camera Scale", ref _cutsceneManager.CameraSettings.Scale);
             ImGui.InputFloat3("Camera Offset", ref _cutsceneManager.CameraSettings.Offset);
 
+            ImBrio.VerticalPadding(4);
             ImGui.Separator();
+            ImBrio.VerticalPadding(2);
 
             ImGui.Checkbox("Loop", ref _cutsceneManager.CameraSettings.Loop);
 
             ImGui.Checkbox("Hide Brio On Play  (Press 'Shift + B' to Stop Cutscene)", ref _cutsceneManager.CloseWindowsOnPlay);
+
+            ImBrio.VerticalPadding(4);
+            ImGui.Separator();
+            ImBrio.VerticalPadding(2);
 
             ImGui.Checkbox("###delay_Start", ref _cutsceneManager.DelayStart);
             if(ImGui.IsItemHovered())
@@ -616,7 +654,9 @@ public class ActionTimelineEditor(CutsceneManager cutsceneManager, GPoseService 
             ImGui.SetCursorPosX(LabelStart);
             ImGui.Text("Start Delay");
 
+            ImBrio.VerticalPadding(4);
             ImGui.Separator();
+            ImBrio.VerticalPadding(2);
 
             ImGui.Checkbox("Start All Actors Animations On Play", ref _cutsceneManager.StartAllActorAnimationsOnPlay);
 
@@ -639,27 +679,31 @@ public class ActionTimelineEditor(CutsceneManager cutsceneManager, GPoseService 
                 ImGui.Text("Animation Delay");
             }
 
+            ImBrio.VerticalPadding(4);
             ImGui.Separator();
+            ImBrio.VerticalPadding(2);
 
-            ImGui.Text("The time-scale for the delay functions are in Milliseconds!");
-            ImGui.Text("1000 Milliseconds = 1 Second");
+            ImGui.TextWrapped("The time-scale for the delay functions are in Milliseconds!");
+            ImGui.TextWrapped("1000 Milliseconds = 1 Second");
 
+            ImBrio.VerticalPadding(4);
             ImGui.Separator();
+            ImBrio.VerticalPadding(2);
 
             var isrunning = _cutsceneManager.IsRunning;
             using(ImRaii.Disabled(isrunning))
             {
-                if(ImGui.Button("Play"))
+                if(ImBrio.Button("Play", FontAwesomeIcon.Play, new Vector2(-1, 30)))
                 {
                     _cutsceneManager.StartPlayback();
                 }
             }
 
-            ImGui.SameLine();
+            ImBrio.VerticalPadding(2);
 
             using(ImRaii.Disabled(!isrunning))
             {
-                if(ImGui.Button("Stop"))
+                if(ImBrio.Button("Stop", FontAwesomeIcon.Stop, new Vector2(-1, 30)))
                 {
                     _cutsceneManager.StopPlayback();
                 }

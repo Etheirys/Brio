@@ -88,7 +88,7 @@ public static partial class ImBrio
                             if(i > 0) ImGui.SameLine();
 
                             changed |= ToggleStripButton($"{options[i]}##{id}_{i}", new(buttonWidth, size.Y), ref selected[i], false);
-                          
+
                             if(toolTip is not null)
                             {
                                 var tooltip = selected[i] ? "Disable" : "Enable";

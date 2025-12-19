@@ -228,7 +228,7 @@ public class PosingCapability : ActorCharacterCapability
 
         if(asExpression == false)
             ModelPosing.ImportModelPose(poseFile, options, asScene, applyModelTransform);
-       
+
         if(expressionPhase2)
         {
             var bone = SkeletonPosing.GetBone("j_kao", PoseInfoSlot.Character);

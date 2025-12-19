@@ -1,23 +1,39 @@
 
-tagline: "Whats New in Brio v0.6.1"
-subline: "Emote Props, Bones and Frozen Boobs / MCDF, Dynamic Face Control & Lights!"
+tagline: "Whats New in Brio v0.6.2"
+subline: "7.4 Support & More!"
 changelog:
 
-  - name: v0.6.1
-    tagline: Emote Props, Bones and Frozen Boobs!
-    date: "November 26th 2025"
+  - name: v0.6.2
+    tagline: 7.4 Support & More!
+    date: "December 20th 2025"
     isCurrent: true
     versions:
       - number: "ATTENTION Projects made in this version will be incompatible with the next version of Brio!"
         icon: ""
         items:
-          - "Devs, if you are wanting any changes to Brio's API now is the time before 7.4, Contact me!"
+          - "Happy Holidays Everyone!"
           - "As a reminder! If you experience any issues please report them on Discord or on GitHub"
+          - "(Even more features coming real soon!)"
+
+      - number: "0.6.2"
+        icon: ""
+        items:
+          - "Update Brio to support FFXIV 7.4"
+          - "The animation search control now has more filters and can now be pinned as a window"
+          - "Update Brio's IPC to v3, Contact me for more information (minmoose)"
+          - "Fixed an issue with Bone selection menu, the category buttons are now tristate"
+          - "Optimized a few systems"
+
+  - name: v0.6.1
+    tagline: Emote Props, Bones and Frozen Boobs!
+    date: "November 26th 2025"
+    isCurrent: false
+    versions:
 
       - number: "0.6.1.1"
         icon: ""
         items:
-          - "More Fixes with a errorboxs taking over the Scene Manager"
+          - "More fixes with errorboxs taking over the Scene Manager"
 
       - number: "0.6.1"
         icon: ""
@@ -44,7 +60,7 @@ changelog:
   - name: v0.6.0
     tagline: "MCDF, Dynamic Face Control & Lights!"
     date: "October 8th 2025"
-    isCurrent: true
+    isCurrent: false
     versions:
       
       - number: "0.6.0.3"

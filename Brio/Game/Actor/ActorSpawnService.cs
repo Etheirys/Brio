@@ -39,9 +39,11 @@ public class ActorSpawnService : IDisposable
     private readonly ActorLookAtService _actorLookAtService;
     private readonly CharacterHandlerService _characterHandlerService;
 
+    //private readonly BrioIPCProviders _brioIPCProviders;
+
     private readonly Dictionary<ushort, SpawnFlags> _createdIndexes = [];
 
-    public unsafe ActorSpawnService(ObjectMonitorService monitorService, CustomizePlusService customizePlusService, ActorLookAtService actorLookAtService, CharacterHandlerService characterHandlerService,
+    public unsafe ActorSpawnService(ObjectMonitorService monitorService, /* BrioIPCProviders brioIPCProviders,*/ CustomizePlusService customizePlusService, ActorLookAtService actorLookAtService, CharacterHandlerService characterHandlerService,
         ActorAppearanceService actorAppearanceService, PosingService posingService, GlamourerService glamourerService,
         EntityManager entityManager, IObjectTable objectTable, IClientState clientState, IFramework framework,
         GPoseService gPoseService, ActorRedrawService actorRedrawService, TargetService targetService)
@@ -58,6 +60,8 @@ public class ActorSpawnService : IDisposable
         _posingService = posingService;
         _actorAppearanceService = actorAppearanceService;
         _customizePlusService = customizePlusService;
+
+        //_brioIPCProviders = brioIPCProviders;
 
         _actorLookAtService = actorLookAtService;
         _characterHandlerService = characterHandlerService;
@@ -141,6 +145,7 @@ public class ActorSpawnService : IDisposable
                     _actorRedrawService.DrawWhenReady(companion);
             }
 
+            //_brioIPCProviders.ActorSpawned.Invoke(outCharacter);
 
             return true;
         }
@@ -274,6 +279,8 @@ public class ActorSpawnService : IDisposable
         _actorLookAtService.RemoveObjectFromLook(go);
 
         _ = _characterHandlerService.Revert(go, disposing);
+
+        //_brioIPCProviders.ActorDespawned.Invoke(go);
     }
 
     public void DestroyCompanion(ICharacter character)
@@ -410,11 +417,11 @@ public class ActorSpawnService : IDisposable
 public enum SpawnFlags
 {
     None = 0,
-    ReserveCompanionSlot = 1 << 0,
-    CopyPosition = 1 << 1,
-    IsProp = 1 << 2,
-    IsEffect = 1 << 3,
-    SetDefaultAppearance = 1 << 4,
+    ReserveCompanionSlot = 1 << 1,
+    CopyPosition = 1 << 2,
+    IsProp = 1 << 4,
+    IsEffect = 1 << 8,
+    SetDefaultAppearance = 1 << 16,
 
     Prop = IsProp | SetDefaultAppearance | CopyPosition,
     Effect = IsEffect | SetDefaultAppearance | CopyPosition,

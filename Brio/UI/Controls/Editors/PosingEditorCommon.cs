@@ -10,6 +10,7 @@ using Dalamud.Interface;
 using Dalamud.Interface.Utility.Raii;
 using OneOf.Types;
 using System.Numerics;
+using System.Linq;
 
 namespace Brio.UI.Controls.Editors;
 
@@ -117,41 +118,86 @@ public static class PosingEditorCommon
             }
         }
 
+        var tristateCheckbox = new ImBrio.TristateCheckbox();
+
         foreach(var category in filter.AllCategories)
         {
-            var isEnabled = filter.IsCategoryEnabled(category);
-
             if(category.Type is BoneCategories.BoneCategoryTypes.Category)
             {
-                isEnabled = filter.IsSubCategoryEnabled(category.Id);
+                ImGui.Separator();
+                
+                var childCategories = filter.AllCategories
+                    .Where(c => c.Type is BoneCategories.BoneCategoryTypes.Filter && 
+                               category.Bones.Contains(c.Id))
+                    .ToList();
+
+                int enabledCount = childCategories.Count(c => filter.IsCategoryEnabled(c));
+                sbyte tristateValue = enabledCount == childCategories.Count ? (sbyte)1 :
+                                     enabledCount == 0 ? (sbyte)-1 :
+                                     (sbyte)0;
+
+                if(tristateCheckbox.Draw(category.Name, ref tristateValue))
+                {
+                    if(tristateValue == 1)
+                        filter.EnableSubCategory(category.Id);
+                    else if(tristateValue == -1)
+                        filter.DisableSubCategory(category.Id);
+                    else
+                        filter.EnableSubCategory(category.Id);
+                }
+                
+                if(ImGui.IsItemHovered() && ImGui.IsMouseClicked(ImGuiMouseButton.Right))
+                {
+                    filter.EnableOnly(category);
+                }
+                
                 ImGui.Separator();
             }
-
-            if(ImGui.Checkbox(category.Name, ref isEnabled))
+            else
             {
-                if(category.Type is BoneCategories.BoneCategoryTypes.Category)
-                {
-                    if(isEnabled)
-                        filter.EnableSubCategory(category.Id);
-                    else
-                        filter.DisableSubCategory(category.Id);
-                }
-                else
+                var isEnabled = filter.IsCategoryEnabled(category);
+
+                if(ImGui.Checkbox(category.Name, ref isEnabled))
                 {
                     if(isEnabled)
                         filter.EnableCategory(category);
                     else
                         filter.DisableCategory(category);
+
+                    UpdateParentCategoryState(filter, category);
+                }
+                
+                if(ImGui.IsItemHovered() && ImGui.IsMouseClicked(ImGuiMouseButton.Right))
+                {
+                    filter.EnableOnly(category);
                 }
             }
-            if(ImGui.IsItemHovered() && ImGui.IsMouseClicked(ImGuiMouseButton.Right))
+        }
+    }
+
+    private static void UpdateParentCategoryState(BoneFilter filter, BoneCategories.BoneCategory childCategory)
+    {
+        var parentCategory = filter.AllCategories.FirstOrDefault(c => 
+            c.Type is BoneCategories.BoneCategoryTypes.Category && 
+            c.Bones.Contains(childCategory.Id));
+
+        if(parentCategory != null)
+        {
+            var childCategories = filter.AllCategories
+                .Where(c => c.Type is BoneCategories.BoneCategoryTypes.Filter && 
+                           parentCategory.Bones.Contains(c.Id))
+                .ToList();
+
+            bool allEnabled = childCategories.All(c => filter.IsCategoryEnabled(c));
+            bool allDisabled = childCategories.All(c => !filter.IsCategoryEnabled(c));
+
+            if(allEnabled && !filter.IsSubCategoryEnabled(parentCategory.Id))
             {
-                filter.EnableOnly(category);
+                filter.EnableSubCategory(parentCategory.Id);
             }
-        
-            if(category.Type is BoneCategories.BoneCategoryTypes.Category)
+            else if(allDisabled && filter.IsSubCategoryEnabled(parentCategory.Id))
             {
-                ImGui.Separator();
+                filter.DisableSubCategory(parentCategory.Id);
             }
         }
     }

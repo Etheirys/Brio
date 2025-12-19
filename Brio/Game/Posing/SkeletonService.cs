@@ -6,7 +6,6 @@ using Brio.Game.Actor.Interop;
 using Brio.Game.Core;
 using Brio.Game.GPose;
 using Brio.Game.Posing.Skeletons;
-using Dalamud.Game;
 using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Hooking;
 using Dalamud.Plugin.Services;
@@ -16,6 +15,7 @@ using FFXIVClientStructs.Havok.Common.Base.Math.Vector;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using static FFXIVClientStructs.Havok.Animation.Rig.hkaPose;
 using GameSkeleton = FFXIVClientStructs.FFXIV.Client.Graphics.Render.Skeleton;
 
@@ -38,29 +38,35 @@ public unsafe class SkeletonService : IDisposable
     private readonly GPoseService _gPoseService;
     private readonly IKService _ikService;
     private readonly IFramework _framework;
+    private readonly IObjectTable _objectTable;
 
     private readonly List<Skeleton> _skeletons = [];
     private readonly Dictionary<Skeleton, SkeletonPosingCapability> _skeletonToPosingCapability = [];
-
     private readonly List<Skeleton> _skeletonsToUpdate = [];
 
-    private const int PoseCount = 4;
+    private readonly Dictionary<ulong, Dictionary<string, BoneTransform>> _directBoneOverrides = [];
+    private readonly Dictionary<ulong, Dictionary<string, BoneTransform>> _interpolatedState = [];
+    private readonly Dictionary<ulong, Dictionary<int, Dictionary<string, int>>> _boneIndexCache = [];
 
+    private readonly object _directOverridesLock = new();
 
-    public SkeletonService(EntityManager entityManager, ObjectMonitorService monitorService, GPoseService gPoseService, IKService ikService, IFramework framework, ISigScanner scanner, IGameInteropProvider hooking)
+    public float BoneInterpolationSpeed { get; set; } = 0.2f;
+    public bool RealTimeAnimationEnabled { get; set; } = true;
+
+    public SkeletonService(EntityManager entityManager, ObjectMonitorService monitorService, GPoseService gPoseService, IKService ikService, IObjectTable gameObjects, IFramework framework, ISigScanner scanner, IGameInteropProvider hooking)
     {
         _entityManager = entityManager;
         _monitorService = monitorService;
         _gPoseService = gPoseService;
         _ikService = ikService;
         _framework = framework;
-
+        _objectTable = gameObjects;
 
         var updateBonePhysicsAddress = "48 89 5C 24 ?? 48 89 6C 24 ?? 48 89 74 24 ?? 57 41 54 41 56 48 83 EC ?? 48 8B 59 ?? 45 33 E4";
         _updateBonePhysicsHook = hooking.HookFromAddress<UpdateBonePhysicsDelegate>(scanner.ScanText(updateBonePhysicsAddress), UpdateBonePhysicsDetour);
         _updateBonePhysicsHook.Enable();
 
-        var finalizeSkeletonsHook = "40 53 55 57 41 55 48 83 EC 68"; // JMP in Framework.TaskRenderGraphicsRender
+        var finalizeSkeletonsHook = "40 53 55 57 41 55 48 83 EC ?? ?? 48 ?? ?? ?? ?? ?? ?? ?? 48"; // JMP in Framework.TaskRenderGraphicsRender
         _finalizeSkeletonsHook = hooking.HookFromAddress<FinalizeSkeletonsDelegate>(scanner.ScanText(finalizeSkeletonsHook), FinalizeSkeletonsHook);
         _finalizeSkeletonsHook.Enable();
 
@@ -68,6 +74,42 @@ public unsafe class SkeletonService : IDisposable
         _monitorService.CharacterBaseDestroyed += OnCharacterBaseCleanup;
 
         RefreshSkeletonCache();
+    }
+
+    public bool SetBoneTransforms(ulong objectId, Dictionary<string, BoneTransform> bones)
+    {
+        if(!RealTimeAnimationEnabled)
+            return false;
+
+        lock(_directOverridesLock)
+        {
+            _directBoneOverrides[objectId] = new Dictionary<string, BoneTransform>(bones);
+        }
+        return true;
+    }
+
+    public void ClearDirectBoneOverrides(ulong objectId)
+    {
+        lock(_directOverridesLock)
+        {
+            _directBoneOverrides.Remove(objectId);
+            _interpolatedState.Remove(objectId);
+            _boneIndexCache.Remove(objectId);
+        }
+    }
+
+    public void SetRealTimeAnimation(bool enabled)
+    {
+        RealTimeAnimationEnabled = enabled;
+        if(!enabled)
+        {
+            lock(_directOverridesLock)
+            {
+                _directBoneOverrides.Clear();
+                _interpolatedState.Clear();
+                _boneIndexCache.Clear();
+            }
+        }
     }
 
     public unsafe void RegisterForFrameUpdate(Skeleton? skeleton, SkeletonPosingCapability posingCapability)
@@ -118,13 +160,160 @@ public unsafe class SkeletonService : IDisposable
                     // Transitive actions
                     posingCapability.ExecuteTransitiveActions(bone, bonePoseInfo);
 
-
                     // Apply new stacks
                     for(int i = snapshotCount; i < bonePoseInfo.Stacks.Count; i++)
                     {
                         var info = bonePoseInfo.Stacks[i];
                         ApplySnapshot(pose, bone, info);
                     }
+                }
+            }
+        }
+    }
+
+    private void ApplyDirectBoneOverrides(Skeleton skeleton)
+    {
+        if(!RealTimeAnimationEnabled)
+            return;
+
+        lock(_directOverridesLock)
+        {
+            if(_directBoneOverrides.Count == 0)
+                return;
+
+            foreach(var kvp in _directBoneOverrides)
+            {
+                var objectId = kvp.Key;
+                var targetBones = kvp.Value;
+
+                // Get or create interpolated state
+                if(!_interpolatedState.TryGetValue(objectId, out var current))
+                {
+                    current = [];
+                    foreach(var bone in targetBones)
+                    {
+                        current[bone.Key] = bone.Value;
+                    }
+                    _interpolatedState[objectId] = current;
+                }
+                else
+                {
+                    // Interpolate from current to target
+                    foreach(var targetBone in targetBones)
+                    {
+                        var boneName = targetBone.Key;
+                        var target = targetBone.Value;
+
+                        if(!current.TryGetValue(boneName, out var currentTransform))
+                        {
+                            current[boneName] = target;
+                        }
+                        else
+                        {
+                            var interpolated = InterpolateBoneTransform(currentTransform, target);
+                            current[boneName] = interpolated;
+                        }
+                    }
+                }
+
+                // Apply the interpolated transforms directly to skeleton
+                ApplyDirectTransformsToSkeleton(skeleton, objectId, current);
+            }
+        }
+    }
+
+    private BoneTransform InterpolateBoneTransform(BoneTransform current, BoneTransform target)
+    {
+        var interpolated = new BoneTransform();
+
+        if(target.Position.HasValue && current.Position.HasValue)
+        {
+            interpolated.Position = Vector3.Lerp(current.Position.Value, target.Position.Value, BoneInterpolationSpeed);
+        }
+        else if(target.Position.HasValue)
+        {
+            interpolated.Position = target.Position;
+        }
+
+        if(target.Rotation.HasValue && current.Rotation.HasValue)
+        {
+            interpolated.Rotation = Quaternion.Slerp(current.Rotation.Value, target.Rotation.Value, BoneInterpolationSpeed);
+        }
+        else if(target.Rotation.HasValue)
+        {
+            interpolated.Rotation = target.Rotation;
+        }
+
+        if(target.Scale.HasValue && current.Scale.HasValue)
+        {
+            interpolated.Scale = Vector3.Lerp(current.Scale.Value, target.Scale.Value, BoneInterpolationSpeed);
+        }
+        else if(target.Scale.HasValue)
+        {
+            interpolated.Scale = target.Scale;
+        }
+
+        return interpolated;
+    }
+
+    private void ApplyDirectTransformsToSkeleton(Skeleton skeleton, ulong objectId, Dictionary<string, BoneTransform> transforms)
+    {
+        for(int partialIdx = 0; partialIdx < skeleton.Partials.Count; partialIdx++)
+        {
+            var partial = skeleton.Partials[partialIdx];
+            var pose = partial.GetBestPose();
+            if(pose == null)
+                continue;
+
+            // Build or get bone index cache
+            if(!_boneIndexCache.TryGetValue(objectId, out var partialCaches))
+            {
+                partialCaches = [];
+                _boneIndexCache[objectId] = partialCaches;
+            }
+
+            if(!partialCaches.TryGetValue(partialIdx, out var indexCache))
+            {
+                indexCache = [];
+                var boneCount = pose->Skeleton->Bones.Length;
+                for(int i = 0; i < boneCount; i++)
+                {
+                    var boneName = pose->Skeleton->Bones[i].Name.String;
+                    if(boneName != null)
+                    {
+                        indexCache[boneName] = i;
+                    }
+                }
+                partialCaches[partialIdx] = indexCache;
+            }
+
+            // Apply transforms
+            foreach(var kvp in transforms)
+            {
+                var boneName = kvp.Key;
+                var transform = kvp.Value;
+
+                if(!indexCache.TryGetValue(boneName, out var boneIdx))
+                    continue;
+
+                var modelSpace = pose->AccessBoneModelSpace(boneIdx, PropagateOrNot.Propagate);
+
+                if(transform.Position.HasValue)
+                {
+                    var pos = transform.Position.Value;
+                    modelSpace->Translation = *(hkVector4f*)(&pos);
+                }
+
+                if(transform.Rotation.HasValue)
+                {
+                    var rot = transform.Rotation.Value;
+                    modelSpace->Rotation = *(hkQuaternionf*)(&rot);
+                }
+
+                if(transform.Scale.HasValue)
+                {
+                    var scale = transform.Scale.Value;
+                    modelSpace->Scale = *(hkVector4f*)(&scale);
                 }
             }
         }
@@ -163,7 +352,7 @@ public unsafe class SkeletonService : IDisposable
         }
     }
 
-    private unsafe void ReparentAttachments(Skeleton skeleton)
+    private void ReparentAttachments(Skeleton skeleton)
     {
         var attach = &skeleton.CharacterBase->Attach;
 
@@ -189,7 +378,7 @@ public unsafe class SkeletonService : IDisposable
                 if(attachedSkeleton != null)
                 {
                     var parentSkeleton = _skeletons.FirstOrDefault(x => x!.GameSkeleton == attachedSkeleton, null);
-                    if(parentSkeleton != null && parentSkeleton.Partials.Any())
+                    if(parentSkeleton != null && parentSkeleton.Partials.Count != 0)
                     {
                         var parentPartial = parentSkeleton.Partials[0];
                         var parentBone = parentPartial.GetBone(attachedBone);
@@ -224,11 +413,7 @@ public unsafe class SkeletonService : IDisposable
             if(skeleton.CharacterBase is null)
                 continue;
 
-            if(_skeletonToPosingCapability.ContainsKey(skeleton) is false)
-                continue;
-
             _skeletonsToUpdate.Add(skeleton);
-
         }
 
         foreach(var skeleton in _skeletonsToUpdate)
@@ -238,7 +423,20 @@ public unsafe class SkeletonService : IDisposable
 
         foreach(var skeleton in _skeletonsToUpdate)
         {
-            ApplyBrioTransforms(skeleton, _skeletonToPosingCapability[skeleton]);
+            try
+            {
+                ApplyDirectBoneOverrides(skeleton);
+            }
+            catch(Exception e)
+            {
+                Brio.Log.Error(e, "Error applying direct bone overrides");
+            }
+
+            if(_skeletonToPosingCapability.TryGetValue(skeleton, out var capability))
+            {
+                ApplyBrioTransforms(skeleton, capability);
+            }
+
             skeleton.UpdateCachedTransforms();
             ReparentPartials(skeleton);
             skeleton.UpdateCachedTransforms();
@@ -313,6 +511,7 @@ public unsafe class SkeletonService : IDisposable
         Brio.Log.Debug("Refreshing skeleton cache...");
         _skeletonToPosingCapability.Clear();
         _skeletons.Clear();
+
         foreach(var actor in _monitorService.ObjectTable)
         {
             if(actor is ICharacter chara)
@@ -321,7 +520,7 @@ public unsafe class SkeletonService : IDisposable
                 foreach(var charaBase in bases)
                 {
                     CacheSkeleton(charaBase.CharacterBase);
-                    Brio.Log.Debug($"Skeleton cached {actor.Name}");
+                    Brio.Log.Verbose($"Skeleton cached - [ {actor.Name} ] - ObjectKind: {actor.ObjectKind} :: Slot:{charaBase.Slot} :: Attach:{charaBase.CharacterBase->Attach.Type} ({charaBase.CharacterBase->Attach.AttachmentCount})");
                 }
             }
         }
@@ -332,12 +531,12 @@ public unsafe class SkeletonService : IDisposable
     {
         _skeletons.Remove(skeleton);
         _skeletonToPosingCapability.Remove(skeleton);
+
         skeleton.Dispose();
     }
 
     private void ClearSkeleton(BrioCharacterBase* charaBase)
     {
-
         var temp = _skeletons.FirstOrDefault(x => x!.CharacterBase == charaBase, null);
         if(temp != null)
             ClearSkeleton(temp);
@@ -345,7 +544,6 @@ public unsafe class SkeletonService : IDisposable
 
     private void ClearSkeleton(GameSkeleton* skeleton)
     {
-
         var temp = _skeletons.FirstOrDefault(x => x!.GameSkeleton == skeleton, null);
         if(temp != null)
             ClearSkeleton(temp);
@@ -374,7 +572,10 @@ public unsafe class SkeletonService : IDisposable
 
     private void EndPosingInverval()
     {
-        _skeletonToPosingCapability.Clear();
+        if(!RealTimeAnimationEnabled)
+        {
+            _skeletonToPosingCapability.Clear();
+        }
         SkeletonUpdateEnd?.Invoke();
     }
 
@@ -435,6 +636,19 @@ public unsafe class SkeletonService : IDisposable
         _finalizeSkeletonsHook.Dispose();
         _monitorService.CharacterBaseMaterialsUpdated -= OnCharacterBaseMaterialsUpdate;
         _monitorService.CharacterBaseDestroyed -= OnCharacterBaseCleanup;
+
+        lock(_directOverridesLock)
+        {
+            _directBoneOverrides.Clear();
+            _interpolatedState.Clear();
+            _boneIndexCache.Clear();
+        }
     }
 }
 
+public class BoneTransform
+{
+    public Vector3? Position { get; set; }
+    public Quaternion? Rotation { get; set; }
+    public Vector3? Scale { get; set; }
+}

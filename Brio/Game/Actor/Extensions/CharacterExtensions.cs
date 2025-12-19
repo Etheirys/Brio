@@ -7,11 +7,11 @@ using global::Brio.Game.Posing;
 using global::Brio.Game.Types;
 using System;
 using System.Collections.Generic;
-using StructsDrawObjectData = FFXIVClientStructs.FFXIV.Client.Game.Character.DrawObjectData;
 using StructsBattleCharacter = FFXIVClientStructs.FFXIV.Client.Game.Character.BattleChara;
 using StructsCharacter = FFXIVClientStructs.FFXIV.Client.Game.Character.Character;
 using StructsCharacterBase = FFXIVClientStructs.FFXIV.Client.Graphics.Scene.CharacterBase;
 using StructsDrawDataContainer = FFXIVClientStructs.FFXIV.Client.Game.Character.DrawDataContainer;
+using StructsDrawObjectData = FFXIVClientStructs.FFXIV.Client.Game.Character.DrawObjectData;
 
 public static class CharacterExtensions
 {
@@ -131,7 +131,7 @@ public static class CharacterExtensions
         charaBase = go.GetWeaponCharacterBase(ActorEquipSlot.Prop);
         if(charaBase != null)
             list.Add(new CharacterBaseInfo { CharacterBase = charaBase, Slot = PoseInfoSlot.Prop });
-      
+
         charaBase = go.GetOrnamentBase();
         if(charaBase != null)
             list.Add(new CharacterBaseInfo() { CharacterBase = charaBase, Slot = PoseInfoSlot.Ornament });

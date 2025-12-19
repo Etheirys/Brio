@@ -22,20 +22,24 @@ public abstract class Selector<T> where T : class
     protected volatile T? _selected;
     protected volatile T? _softSelected;
 
-
     private readonly List<T> _items = [];
     private List<T>? _filteredAndSortedItems;
 
     private string _search = "";
+    private string _lastSearch = "";
 
     private bool _scrollToSelected = false;
     private bool _shouldFocusSearch = false;
+
+    protected bool _useAvailableSpace = false;
 
     protected abstract Vector2 MinimumListSize { get; }
     protected abstract float EntrySize { get; }
     protected abstract SelectorFlags Flags { get; }
 
     private Task _taskQueue = Task.CompletedTask;
+
+    private Vector2 _selectableSize = new();
 
     public Selector(string id)
     {
@@ -63,6 +67,7 @@ public abstract class Selector<T> where T : class
     public void ClearSearch()
     {
         _search = string.Empty;
+        _lastSearch = string.Empty;
     }
 
     public void Draw()
@@ -74,7 +79,6 @@ public abstract class Selector<T> where T : class
 
         using(ImRaii.PushId($"selector_{_id}"))
         {
-
             if(Flags.HasFlag(SelectorFlags.AllowSearch))
             {
                 ImGui.SetNextItemWidth(-1);
@@ -84,7 +88,12 @@ public abstract class Selector<T> where T : class
 
                 if(ImGui.InputTextWithHint($"###search", "Search", ref _search, 256))
                 {
-                    UpdateList();
+                    // Only update if search actually changed
+                    if(_search != _lastSearch)
+                    {
+                        _lastSearch = _search;
+                        UpdateList();
+                    }
                 }
             }
             _shouldFocusSearch = false;
@@ -99,7 +108,14 @@ public abstract class Selector<T> where T : class
 
             var listSize = MinimumListSize;
 
-            if(Flags.HasFlag(SelectorFlags.AdaptiveSizing))
+            if(_useAvailableSpace)
+            {
+                // Use all available space in the current context (e.g. pinned window) I hate this, kill it 
+                var availableSize = ImGui.GetContentRegionAvail();
+                listSize.X = availableSize.X;
+                listSize.Y = availableSize.Y;
+            }
+            else if(Flags.HasFlag(SelectorFlags.AdaptiveSizing))
             {
                 var maxSize = ImGui.GetContentRegionAvail();
 
@@ -117,22 +133,23 @@ public abstract class Selector<T> where T : class
 
                 if(listbox.Success)
                 {
-                    int i = 0;
+                    _selectableSize.X = 0;
+                    _selectableSize.Y = EntrySize;
 
-                    foreach(var item in items)
+                    int itemCount = items.Count;
+                    for(int i = 0; i < itemCount; i++)
                     {
-                        ++i;
+                        var item = items[i];
 
                         using(ImRaii.PushId(i))
                         {
                             var startPos = ImGui.GetCursorPos();
                             bool isSoftSelected = IsItemSoftSelected(item);
-                            bool wasSoftSelected = ImGui.Selectable($"###entry", isSoftSelected, ImGuiSelectableFlags.AllowDoubleClick, new Vector2(0, EntrySize));
+                            bool wasSoftSelected = ImGui.Selectable($"###entry", isSoftSelected, ImGuiSelectableFlags.AllowDoubleClick, _selectableSize);
                             bool wasSelected = wasSoftSelected && ImGui.IsMouseDoubleClicked(ImGuiMouseButton.Left);
                             var endPos = ImGui.GetCursorPos();
 
-
-
+                            // Only draw visible items
                             if(ImGui.IsItemVisible())
                             {
                                 ImGui.SetCursorPos(startPos);
@@ -174,8 +191,6 @@ public abstract class Selector<T> where T : class
                             }
                         }
                     }
-                    //_scrollToSelected = false;
-
                 }
             }
         }
@@ -210,7 +225,6 @@ public abstract class Selector<T> where T : class
 
     private void InitList()
     {
-
         _taskQueue = _taskQueue.ContinueWith(_ =>
         {
             PopulateList();
@@ -241,7 +255,6 @@ public abstract class Selector<T> where T : class
             Interlocked.Exchange(ref _filteredAndSortedItems, newList);
 
         }, TaskScheduler.Default);
-
     }
 
     protected virtual bool Filter(T item, string search)

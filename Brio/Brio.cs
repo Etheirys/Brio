@@ -14,13 +14,13 @@ using Brio.Game.Scene;
 using Brio.Game.World;
 using Brio.Input;
 using Brio.IPC;
+using Brio.IPC.API;
 using Brio.Library;
 using Brio.Library.Sources;
 using Brio.MCDF.Game.FileCache;
 using Brio.MCDF.Game.Services;
 using Brio.Resources;
 using Brio.UI;
-using Brio.UI.Controls.Stateless;
 using Brio.UI.Windows;
 using Brio.UI.Windows.Specialized;
 using Brio.Web;
@@ -133,16 +133,23 @@ public class Brio : IDalamudPlugin
         serviceCollection.AddSingleton<CharacterHandlerService>();
         serviceCollection.AddSingleton<LightingService>();
 
+        // API & Web
+        serviceCollection.AddSingleton<BrioAPIService>();
+        serviceCollection.AddSingleton<BrioIPCProviders>();
+        serviceCollection.AddSingleton<WebService>();
+
+        serviceCollection.AddSingleton<StateAPI>();
+        serviceCollection.AddSingleton<ActorAPI>();
+        serviceCollection.AddSingleton<EnvironmentAPI>();
+        serviceCollection.AddSingleton<PosingAPI>();
+        serviceCollection.AddSingleton<AnimationAPI>();
+
         // IPC
-        serviceCollection.AddSingleton<BrioIPCService>();
         serviceCollection.AddSingleton<DynamisService>();
         serviceCollection.AddSingleton<PenumbraService>();
         serviceCollection.AddSingleton<GlamourerService>();
         serviceCollection.AddSingleton<CustomizePlusService>();
         serviceCollection.AddSingleton<KtisisService>();
-
-        // Web
-        serviceCollection.AddSingleton<WebService>();
 
         // Entity
         serviceCollection.AddSingleton<EntityManager>();
@@ -170,8 +177,6 @@ public class Brio : IDalamudPlugin
         serviceCollection.AddSingleton<PhysicsService>();
         serviceCollection.AddSingleton<GameInputService>();
         serviceCollection.AddSingleton<VirtualCameraManager>();
-        serviceCollection.AddSingleton<AutoSaveWindow>();
-        serviceCollection.AddSingleton<MCDFWindow>();
         serviceCollection.AddSingleton<CutsceneManager>();
 
         // Library
@@ -203,10 +208,11 @@ public class Brio : IDalamudPlugin
         serviceCollection.AddSingleton<PosingOverlayToolbarWindow>();
         serviceCollection.AddSingleton<PosingTransformWindow>();
         serviceCollection.AddSingleton<CameraWindow>();
+        serviceCollection.AddSingleton<AutoSaveWindow>();
+        serviceCollection.AddSingleton<MCDFWindow>();
         serviceCollection.AddSingleton<PosingGraphicalWindow>();
         serviceCollection.AddSingleton<LightWindow>();
         serviceCollection.AddSingleton<Sequencer>();
-        // serviceCollection.AddSingleton<ImBrioText>();
 
         return serviceCollection;
     }

@@ -1,13 +1,8 @@
 ﻿using Brio.Capabilities.World;
-using Brio.Game.World;
 using Brio.UI.Controls.Editors;
 using Brio.UI.Controls.Stateless;
 using Brio.UI.Widgets.Core;
 using Dalamud.Bindings.ImGui;
-using Dalamud.Interface;
-using Dalamud.Interface.Utility.Raii;
-using System;
-using System.Numerics;
 
 namespace Brio.UI.Widgets.World.Lights;
 
@@ -27,7 +22,7 @@ public class LightRenderingWidget(LightRenderingCapability lightRenderingCapabil
     }
 
     public unsafe override void DrawBody()
-    {        
+    {
         LightEditor.DrawLightProperties(Capability);
 
         ImBrio.VerticalPadding(5);

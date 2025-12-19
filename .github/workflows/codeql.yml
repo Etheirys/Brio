@@ -57,7 +57,7 @@ jobs:
         # your codebase is analyzed, see https://docs.github.com/en/code-security/code-scanning/creating-an-advanced-setup-for-code-scanning/codeql-code-scanning-for-compiled-languages
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6
       with:
         submodules: recursive
         
@@ -91,8 +91,8 @@ jobs:
       run: |
         Invoke-WebRequest -Uri https://goatcorp.github.io/dalamud-distrib/stg/latest.zip -OutFile latest.zip
         Expand-Archive -Force latest.zip "$env:AppData\XIVLauncher\addon\Hooks\dev"
-        dotnet restore Brio.sln
-        dotnet build --no-restore Brio.sln /p:Configuration=Release /p:Version=0.0.0.1
+        dotnet restore Brio.slnx
+        dotnet build --no-restore Brio.slnx /p:Configuration=Release /p:Version=0.0.0.1
 
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v3

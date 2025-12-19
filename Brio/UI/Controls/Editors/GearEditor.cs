@@ -476,7 +476,7 @@ public class GearEditor()
                                 {
                                     equip = SpecialAppearances.EmperorsMainHand;
                                 }
-                                else if (slot == ActorEquipSlot.OffHand)
+                                else if(slot == ActorEquipSlot.OffHand)
                                 {
 
                                     equip = SpecialAppearances.EmperorsOffHand;

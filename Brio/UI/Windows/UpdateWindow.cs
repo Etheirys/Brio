@@ -1,4 +1,5 @@
-﻿using Brio.Files;
+﻿using Brio.Config;
+using Brio.Files;
 using Brio.Resources;
 using Brio.UI.Controls.Stateless;
 using Dalamud.Bindings.ImGui;
@@ -29,7 +30,7 @@ public class UpdateWindow : Window
     private readonly List<string> _contributors = [];
     private readonly ChangelogFile _changelogFile;
 
-    public UpdateWindow() : base($"  {Brio.Name} WELCOME###brio_welcomewindow", ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoDocking | ImGuiWindowFlags.NoTitleBar | ImGuiWindowFlags.NoDecoration)
+    public UpdateWindow() : base($"   {Brio.Name} CHANGLOG [v{ConfigurationService.Instance.Version}]###brio_welcomewindow", ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoDocking | ImGuiWindowFlags.NoTitleBar | ImGuiWindowFlags.NoDecoration)
     {
         Namespace = "brio_welcomewindow_namespace";
 
@@ -95,14 +96,14 @@ public class UpdateWindow : Window
         var headerWidth = 1000f - (windowPadding.X * 2 * ImGuiHelpers.GlobalScale);
         var headerHeight = 500f * ImGuiHelpers.GlobalScale;
 
-        var headerStart = windowPos - new Vector2(-1, 0);
+        var headerStart = windowPos + new Vector2(1, 25);
 
         // Image
 
-        var image = ResourceProvider.Instance.GetResourceImage($"Changelog.Images.brio-artbk-aug-25.png");
+        var image = ResourceProvider.Instance.GetResourceImage($"Changelog.Images.brio-artbk-dec-19.png");
 
         // Calculate scaling to fill width and maintain aspect ratio
-        var imageAspect = (float)image.Width / image.Height;
+        var imageAspect = (float)(image.Width / image.Height);
         var scaledWidth = headerWidth / 1.4f * ImGuiHelpers.GlobalScale;
         var scaledHeight = scaledWidth / imageAspect;
 

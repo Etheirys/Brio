@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 
 namespace Brio.Library.Tags;
+
 public class Tag : IEquatable<Tag?>
 {
     private static readonly Dictionary<string, Tag> TagCache = new();

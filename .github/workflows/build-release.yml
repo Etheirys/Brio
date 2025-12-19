@@ -18,14 +18,15 @@ jobs:
 
     steps:
     - name: Checkout
-      uses: actions/checkout@v2
+      uses: actions/checkout@v6
       with:
         fetch-depth: 0
+        submodules: true
         
     - name: Install .NET
-      uses: actions/setup-dotnet@v1
+      uses: actions/setup-dotnet@v5
       with:
-        dotnet-version: 9.0.x
+        dotnet-version: 10.0.x
 
     - name: Download Dalamud
       run: |
@@ -33,10 +34,10 @@ jobs:
         Expand-Archive -Force latest.zip "$env:AppData\XIVLauncher\addon\Hooks\dev"
 
     - name: Restore Dependencies
-      run: dotnet restore Brio.sln
+      run: dotnet restore Brio.slnx
       
     - name: Build Brio
-      run: dotnet build --no-restore Brio.sln /p:Configuration=Release /p:DebugType=None /p:DebugSymbols=false /p:Version=0.0.0.1
+      run: dotnet build --no-restore Brio.slnx /p:Configuration=Release /p:DebugType=None /p:DebugSymbols=false /p:Version=0.0.0.1
 
     - name: Zip Release
       uses: TheDoctor0/zip-release@0.6.0

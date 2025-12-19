@@ -6,7 +6,6 @@ using Brio.Game.Camera;
 using Brio.Game.Core;
 using Brio.Game.GPose;
 using Brio.IPC;
-using Dalamud.Game;
 using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Hooking;
 using Dalamud.Plugin.Services;

@@ -4,8 +4,6 @@ using Brio.Game.Actor.Interop;
 using Brio.UI.Controls.Stateless;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface;
-using System;
-using System.Numerics;
 
 namespace Brio.UI.Controls.Editors;
 
