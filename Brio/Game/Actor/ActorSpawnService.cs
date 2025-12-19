@@ -75,7 +75,7 @@ public class ActorSpawnService : IDisposable
     {
         outCharacter = null;
 
-        var localPlayer = _clientState.LocalPlayer;
+        var localPlayer = _objectTable.LocalPlayer;
         if(localPlayer != null)
         {
             if(CloneCharacter(localPlayer, out outCharacter, flags, disableSpawnCompanion: disableSpawnCompanion))

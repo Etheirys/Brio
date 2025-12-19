@@ -21,11 +21,11 @@ public unsafe class DebugCapability : Capability
 
     public bool IsPosing => _ktisisIPC.IsPosing;
 
-    public DebugCapability(IClientState clientState, Entity parent, GPoseService gPoseService, KtisisService ktisisIPC) : base(parent)
+    public DebugCapability(IClientState clientState, IObjectTable objectTable, Entity parent, GPoseService gPoseService, KtisisService ktisisIPC) : base(parent)
     {
         _gPoseService = gPoseService;
         _ktisisIPC = ktisisIPC;
-        Widget = new DebugWidget(this, clientState);
+        Widget = new DebugWidget(this, clientState, objectTable);
     }
 
     public void EnterGPose()

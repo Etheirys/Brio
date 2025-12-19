@@ -55,7 +55,7 @@ public class DalamudService : IDisposable
             IsInCutscene = false;
         }
 
-        var localPlayer = _clientState.LocalPlayer;
+        var localPlayer = _objectTable.LocalPlayer;
         if(localPlayer != null)
         {
             _classJobId = localPlayer.ClassJob.RowId;
@@ -75,12 +75,12 @@ public class DalamudService : IDisposable
 
     public uint GetHomeWorldId()
     {
-        return _clientState.LocalPlayer?.HomeWorld.RowId ?? 0;
+        return _objectTable.LocalPlayer?.HomeWorld.RowId ?? 0;
     }
 
     public bool GetIsPlayerPresent()
     {
-        return _clientState.LocalPlayer != null && _clientState.LocalPlayer.IsValid();
+        return _objectTable.LocalPlayer != null && _objectTable.LocalPlayer.IsValid();
     }
 
     public async Task<bool> GetIsPlayerPresentAsync()
@@ -90,7 +90,7 @@ public class DalamudService : IDisposable
 
     public string GetPlayerName()
     {
-        return _clientState.LocalPlayer?.Name.ToString() ?? "--";
+        return _objectTable.LocalPlayer?.Name.ToString() ?? "--";
     }
 
     public bool IsObjectPresent(IGameObject? obj)
@@ -114,7 +114,7 @@ public class DalamudService : IDisposable
     }
     public IPlayerCharacter GetPlayerCharacter()
     {
-        return _clientState.LocalPlayer!;
+        return _objectTable.LocalPlayer!;
     }
 
     public ICharacter? GetGposeCharacterFromObjectTableByName(string name, bool onlyGposeCharacters = false)

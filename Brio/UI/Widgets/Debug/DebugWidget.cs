@@ -9,7 +9,7 @@ using Dalamud.Plugin.Services;
 
 namespace Brio.UI.Widgets.Debug;
 
-public class DebugWidget(DebugCapability capability, IClientState _clientState) : Widget<DebugCapability>(capability)
+public class DebugWidget(DebugCapability capability, IClientState _clientState, IObjectTable _objectTable) : Widget<DebugCapability>(capability)
 {
     public override string HeaderName => "Debug";
 
@@ -86,8 +86,8 @@ public class DebugWidget(DebugCapability capability, IClientState _clientState) 
 
         ImGui.Text($"MapId - {_clientState.MapId}");
         ImGui.Text($"TerritoryType - {_clientState.TerritoryType}");
-        ImGui.Text($"CurrentWorld - {_clientState.LocalPlayer?.CurrentWorld.Value.Name}");
-        ImGui.Text($"HomeWorld - {_clientState.LocalPlayer?.HomeWorld.Value.Name}");
+        ImGui.Text($"CurrentWorld - {_objectTable.LocalPlayer?.CurrentWorld.Value.Name}");
+        ImGui.Text($"HomeWorld - {_objectTable.LocalPlayer?.HomeWorld.Value.Name}");
 
         ImGui.Text(io.Framerate.ToString("F2") + " FPS");
     }
