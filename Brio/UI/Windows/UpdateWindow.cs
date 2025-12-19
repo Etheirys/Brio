@@ -1,4 +1,5 @@
-﻿using Brio.Files;
+﻿using Brio.Config;
+using Brio.Files;
 using Brio.Resources;
 using Brio.UI.Controls.Stateless;
 using Dalamud.Bindings.ImGui;
@@ -29,7 +30,7 @@ public class UpdateWindow : Window
     private readonly List<string> _contributors = [];
     private readonly ChangelogFile _changelogFile;
 
-    public UpdateWindow() : base($"  {Brio.Name} WELCOME###brio_welcomewindow", ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoDocking | ImGuiWindowFlags.NoTitleBar | ImGuiWindowFlags.NoDecoration)
+    public UpdateWindow() : base($"   {Brio.Name} CHANGLOG [v{ConfigurationService.Instance.Version}]###brio_welcomewindow", ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoDocking | ImGuiWindowFlags.NoTitleBar | ImGuiWindowFlags.NoDecoration)
     {
         Namespace = "brio_welcomewindow_namespace";
 
