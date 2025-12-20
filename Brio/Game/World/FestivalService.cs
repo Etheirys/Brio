@@ -13,7 +13,7 @@ namespace Brio.Game.World;
 
 public unsafe class FestivalService : IDisposable
 {
-    public const int MaxFestivals = 4;
+    public const int MaxFestivals = 8;
 
     public readonly IReadOnlyDictionary<uint, FestivalEntry> FestivalList;
 
@@ -36,7 +36,7 @@ public unsafe class FestivalService : IDisposable
     {
         get
         {
-            GameMain.Festival[] activeFestivals = new GameMain.Festival[4];
+            GameMain.Festival[] activeFestivals = new GameMain.Festival[MaxFestivals];
             var engineFestivals = GameMain.Instance()->ActiveFestivals;
             for(int i = 0; i < MaxFestivals; i++)
             {
@@ -87,7 +87,7 @@ public unsafe class FestivalService : IDisposable
             if(active[i].Id == 0)
             {
                 SnapshotFestivalsIfNeeded();
-                copy[i] = new GameMain.Festival() { Id = festival, Phase = 1 };
+                copy[i] = new GameMain.Festival() { Id = (ushort)festival, Phase = 1 };
                 _pendingChanges.Enqueue(copy);
                 return true;
             }
@@ -140,18 +140,18 @@ public unsafe class FestivalService : IDisposable
         if(applyNow)
         {
             GameMain.Instance()->SetActiveFestivals(
-                festivals[0].Id, festivals[0].Phase,
-                festivals[1].Id, festivals[1].Phase,
-                festivals[2].Id, festivals[2].Phase,
-                festivals[3].Id, festivals[3].Phase);
+                festivals[0], festivals[4],
+                festivals[1], festivals[5],
+                festivals[2], festivals[6],
+                festivals[3], festivals[7]);
         }
         else
         {
             GameMain.Instance()->QueueActiveFestivals(
-                festivals[0].Id, festivals[0].Phase,
-                festivals[1].Id, festivals[1].Phase,
-                festivals[2].Id, festivals[2].Phase,
-                festivals[3].Id, festivals[3].Phase);
+                festivals[0], festivals[4],
+                festivals[1], festivals[5],
+                festivals[2], festivals[6],
+                festivals[3], festivals[7]);
         }
     }
 
