@@ -30,7 +30,7 @@ public class UpdateWindow : Window
     private readonly List<string> _contributors = [];
     private readonly ChangelogFile _changelogFile;
 
-    public UpdateWindow() : base($"   {Brio.Name} CHANGLOG [v{ConfigurationService.Instance.Version}]###brio_welcomewindow", ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoDocking | ImGuiWindowFlags.NoTitleBar | ImGuiWindowFlags.NoDecoration)
+    public UpdateWindow() : base($"   {Brio.Name} CHANGLOG [{ConfigurationService.Instance.Version}]###brio_welcomewindow", ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoDocking | ImGuiWindowFlags.NoTitleBar | ImGuiWindowFlags.NoDecoration)
     {
         Namespace = "brio_welcomewindow_namespace";
 
