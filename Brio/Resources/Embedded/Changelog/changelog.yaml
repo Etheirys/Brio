@@ -14,6 +14,12 @@ changelog:
           - "Happy Holidays Everyone!"
           - "As a reminder! If you experience any issues please report them on Discord or on GitHub"
           - "(Even more features coming real soon!)"
+     
+      - number: "0.6.2.2"
+        icon: ""
+        items:
+          - "Fixed some typos in text"
+          - "Updated Penumbra API"
 
       - number: "0.6.2.1"
         icon: ""
@@ -27,7 +33,7 @@ changelog:
           - "The animation search control now has more filters and can now be pinned as a window"
           - "Update Brio's IPC to v3, Contact me for more information (minmoose)"
           - "Fixed an issue with Bone selection menu, the category buttons are now tristate"
-          - "Added Starlight Celebration (2025) and fixed Starlight Celebration (2024)"
+          - "Added Starlight Celebration (2025) festival and fixed Starlight Celebration (2024) festival text" 
           - "Fixed an issue with the camera values being duplicated incorrectly"
           - "Optimized a few systems"
 
