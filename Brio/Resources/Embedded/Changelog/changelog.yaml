@@ -15,6 +15,12 @@ changelog:
           - "As a reminder! If you experience any issues please report them on Discord or on GitHub"
           - "(Even more features coming real soon!)"
      
+      - number: "0.6.2.3"
+        icon: ""
+        items:
+          - "Fixed the Festivals system"
+          - "Festivals now have a max of 8"
+
       - number: "0.6.2.2"
         icon: ""
         items:
