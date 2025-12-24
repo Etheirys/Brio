@@ -81,6 +81,19 @@ public class MainWindow : Window, IDisposable
                 ImGui.Text("Open GPose to use Brio!");
         }
 
+
+        if(Brio.IsTesting)
+        {
+            using(ImRaii.PushColor(ImGuiCol.Text, UIConstants.GizmoRed))
+            {
+                ImGui.Text("ATTENTION you're using the test vesion of BRIO");
+                ImGui.Text("Please return to the non-testing vesion,");
+                ImGui.Text("Right-click Brio in the Dalamud Plugin manager");
+                ImGui.Text("> \"Receive plugin testing vesions\"");
+                ImGui.Text("then reinstall Brio");
+            }
+        }
+
         var rootEntity = _entityManager.RootEntity;
 
         if(rootEntity is null)
