@@ -252,7 +252,7 @@ public class PosingOverlayWindow : Window, IDisposable
                     bool isSelectedBone = selectedBoneId != null && selectedBoneId.Value.Equals(posing.SkeletonPosing.GetBonePose(bone).Id);
 
                     // Always show the selected bone, even if the overlay filter would hide it
-                    if((!_posingService.OverlayFilter.IsBoneValid(bone, poseSlot) || bone.Name == "n_throw") && !isSelectedBone)
+                    if((!_posingService.OverlayFilter.IsBoneValid(bone, poseSlot)) && !isSelectedBone)
                         continue;
 
                     var boneWorldPosition = Vector3.Transform(bone.LastTransform.Position, modelMatrix);
