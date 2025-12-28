@@ -13,6 +13,7 @@ using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
 using System;
 using System.Collections.Generic;
+using Brio.UI.Controls.Editors;
 
 namespace Brio.UI;
 
@@ -38,6 +39,7 @@ public class UIManager : IDisposable
     private readonly PosingGraphicalWindow _graphicalWindow;
     private readonly CameraWindow _cameraWindow;
     private readonly LightWindow _lightWindow;
+    private readonly Sequencer _sequencer;
 
     private readonly ITextureProvider _textureProvider;
     private readonly IToastGui _toastGui;
@@ -89,6 +91,7 @@ public class UIManager : IDisposable
             AutoSaveWindow autoSaveWindow,
             MCDFWindow mCDFWindow,
             LightWindow lightWindow,
+            Sequencer sequencer,
 
             PenumbraService penumbraService,
             GlamourerService glamourerService
@@ -118,7 +121,8 @@ public class UIManager : IDisposable
         _autoSaveWindow = autoSaveWindow;
         _mCDFWindow = mCDFWindow;
         _lightWindow = lightWindow;
-
+        _sequencer = sequencer;
+        
         _framework = framework;
 
         _penumbraService = penumbraService;
@@ -142,6 +146,7 @@ public class UIManager : IDisposable
         _windowSystem.AddWindow(_autoSaveWindow);
         _windowSystem.AddWindow(_mCDFWindow);
         _windowSystem.AddWindow(_lightWindow);
+        _windowSystem.AddWindow(_sequencer);
 
         _gPoseService.OnGPoseStateChange += OnGPoseStateChange;
         _configurationService.OnConfigurationChanged += ApplySettings;
@@ -181,6 +186,11 @@ public class UIManager : IDisposable
     public void ShowMainWindow()
     {
         _mainWindow.IsOpen = true;
+    }
+
+    public void ShowSequencer()
+    {
+        _sequencer.IsOpen = true;
     }
 
     public void NotifyError(string message)

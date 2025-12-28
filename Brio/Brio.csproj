@@ -21,6 +21,11 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <None Include="UI\Controls\Sequencer\Memory\LICENSE" />
+	  <None Include="UI\Controls\Sequencer\Memory\README" />
+	</ItemGroup>
+
+	<ItemGroup>
 		<PackageReference Include="EmbedIO" Version="3.5.2" />
 		<PackageReference Include="Glamourer.Api" Version="2.8.0" />
 		<PackageReference Include="K4os.Compression.LZ4.Legacy" Version="1.3.8" />
@@ -44,6 +49,12 @@
 
 	<ItemGroup>
 	  <PackageReference Update="DotNet.ReproducibleBuilds" Version="1.2.39" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Reference Include="ImSequencer">
+	    <HintPath>..\..\MockSequencer\ImSequencer\ImSequencer\bin\Debug\net9.0-windows\ImSequencer.dll</HintPath>
+	  </Reference>
 	</ItemGroup>
 
 </Project>

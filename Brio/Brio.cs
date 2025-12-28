@@ -29,6 +29,7 @@ using Dalamud.Plugin.Services;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Diagnostics;
+using Brio.UI.Controls.Editors;
 
 namespace Brio;
 
@@ -211,6 +212,7 @@ public class Brio : IDalamudPlugin
         serviceCollection.AddSingleton<MCDFWindow>();
         serviceCollection.AddSingleton<PosingGraphicalWindow>();
         serviceCollection.AddSingleton<LightWindow>();
+        serviceCollection.AddSingleton<Sequencer>();
 
         return serviceCollection;
     }
