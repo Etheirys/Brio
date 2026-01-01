@@ -429,7 +429,27 @@ public class PosingGraphicalWindow : Window, IDisposable
             var delta = _trackingMatrix.Value.ToTransform().CalculateDiff(originalMatrix.ToTransform());
 
             selected.Switch(
-                boneSelect => posing.SkeletonPosing.GetBonePose(boneSelect).Apply(_trackingMatrix.Value.ToTransform(), originalMatrix.ToTransform()),
+                boneSelect => 
+                {
+                    if(posing.IsMultiSelecting)
+                    {
+                        foreach(var selectedBoneId in posing.SelectedBones)
+                        {
+                            var targetBone = posing.SkeletonPosing.GetBone(selectedBoneId);
+                            if(targetBone != null && !targetBone.Freeze)
+                            {
+                                var bonePose = posing.SkeletonPosing.GetBonePose(selectedBoneId);
+                                var boneTransform = targetBone.LastTransform;
+                                var updatedTransform = boneTransform + delta;
+                                bonePose.Apply(updatedTransform, boneTransform);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        posing.SkeletonPosing.GetBonePose(boneSelect).Apply(_trackingMatrix.Value.ToTransform(), originalMatrix.ToTransform());
+                    }
+                },
                 _ =>
                 {
                     // On first application while starting a gizmo drag, capture before-states for grouped undo
@@ -754,6 +774,7 @@ public class PosingGraphicalWindow : Window, IDisposable
         bool enabled = false;
         bool selected = posing.Selected == entry.Id;
         bool hovered = posing.LastHover == entry.Id;
+        bool multiSelected = false;
         Vector2? parentPosition = null;
         bool branchHovered = false;
         bool branchSelected = false;
@@ -768,6 +789,7 @@ public class PosingGraphicalWindow : Window, IDisposable
                 if(bone != null)
                 {
                     enabled = true;
+                    multiSelected = posing.IsBoneSelected(boneSelect);
 
                     if(bone.Parent != null)
                     {
@@ -832,7 +854,7 @@ public class PosingGraphicalWindow : Window, IDisposable
             }
 
             uint circleColor = lineCol;
-            if(selected)
+            if(selected || multiSelected)
             {
                 circleColor = ImGui.GetColorU32(ImGuiCol.CheckMark);
             }
@@ -856,19 +878,30 @@ public class PosingGraphicalWindow : Window, IDisposable
 
             ImGui.GetWindowDrawList().AddCircle(pos, circleSize, circleColor);
 
-            if(hovered || selected)
+            if(hovered || selected || multiSelected)
             {
                 ImGui.GetWindowDrawList().AddCircleFilled(
                     pos,
                     circleSize - 3,
-                    selected ? ImGui.GetColorU32(ImGuiCol.CheckMark) : ImGui.GetColorU32(ImGuiCol.TextDisabled));
+                    (selected || multiSelected) ? ImGui.GetColorU32(ImGuiCol.CheckMark) : ImGui.GetColorU32(ImGuiCol.TextDisabled));
             }
 
             if(hovered && ImGui.IsWindowHovered())
             {
                 if(ImGui.IsMouseClicked(ImGuiMouseButton.Left))
                 {
-                    posing.Selected = entry.Id;
+                    bool isMultiSelectModifier = ImGui.GetIO().KeyCtrl || ImGui.GetIO().KeyShift;
+                    
+                    if(entry.Id.Value is BonePoseInfoId boneId)
+                    {
+                        posing.SetBoneSelection(boneId, isMultiSelectModifier);
+                    }
+                    else
+                    {
+                        if(!isMultiSelectModifier)
+                            posing.SelectedBones.Clear();
+                        posing.Selected = entry.Id;
+                    }
                 }
 
                 ImGui.SetTooltip(entry.Id.DisplayName);
@@ -915,7 +948,7 @@ public class PosingGraphicalWindow : Window, IDisposable
         public Dictionary<string, PoseImageContainer> PoseImages { get; set; } = [];
 
         public record class PoseImageContainer(string Image, string? Parent, List<PoseImageEntry> Bones);
-        public record class PoseImageEntry(string Name, Vector2 Position);
+        public record class PoseImageEntry(String Name, Vector2 Position);
 
         public void Process()
         {

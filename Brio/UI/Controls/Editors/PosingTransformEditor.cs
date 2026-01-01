@@ -187,8 +187,27 @@ public class PosingTransformEditor
 
             if(didChange && bone is not null && bonePose is not null)
             {
-                posingCapability.SkeletonPosing.GetBonePose(bone).Apply(toApply, before);
-                bonePose.DefaultPropagation = propagate;
+                if(posingCapability.IsMultiSelecting)
+                {
+                    var delta = realTransform.CalculateDiff(beforeMods);
+                    foreach(var selectedBoneId in posingCapability.SelectedBones)
+                    {
+                        var targetBone = posingCapability.SkeletonPosing.GetBone(selectedBoneId);
+                        if(targetBone != null && !targetBone.Freeze)
+                        {
+                            var targetBonePose = posingCapability.SkeletonPosing.GetBonePose(selectedBoneId);
+                            var targetBoneTransform = targetBone.LastTransform;
+                            var updatedTransform = targetBoneTransform + delta;
+                            targetBonePose.Apply(updatedTransform, targetBoneTransform);
+                            targetBonePose.DefaultPropagation = propagate;
+                        }
+                    }
+                }
+                else
+                {
+                    posingCapability.SkeletonPosing.GetBonePose(bone).Apply(toApply, before);
+                    bonePose.DefaultPropagation = propagate;
+                }
             }
 
             if(anyActive)

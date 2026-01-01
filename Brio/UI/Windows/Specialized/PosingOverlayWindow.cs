@@ -117,20 +117,26 @@ public class PosingOverlayWindow : Window, IDisposable
         if(camera == null)
             return;
 
+        var cameraViewMatrix = camera->GetViewMatrix();
+
         var overlayConfig = _configurationService.Configuration.Posing;
         var light = lightCapability.GameLight;
         var clickables = new List<ClickableItem>();
 
-        if(camera->WorldToScreen(light.Position, out var modelScreen))
+        // Check if the light's position is in front of camera, skip if not
+        if(Vector3.Transform(light.Position, cameraViewMatrix).Z < 0)
         {
-            var lightClickable = new ClickableItem
+            if(camera->WorldToScreen(light.Position, out var modelScreen))
             {
-                Name = lightCapability.Entity.FriendlyName,
-                ScreenPosition = ImGui.GetMainViewport().Pos + modelScreen,
-                Size = overlayConfig.BoneCircleSize,
-                CurrentlySelected = _lightingService.SelectedLightEntity?.GameLight.EntityIndex == light.EntityIndex
-            };
-            clickables.Add(lightClickable);
+                var lightClickable = new ClickableItem
+                {
+                    Name = lightCapability.Entity.FriendlyName,
+                    ScreenPosition = ImGui.GetMainViewport().Pos + modelScreen,
+                    Size = overlayConfig.BoneCircleSize,
+                    CurrentlySelected = _lightingService.SelectedLightEntity?.GameLight.EntityIndex == light.EntityIndex
+                };
+                clickables.Add(lightClickable);
+            }
         }
 
         var clicked = new List<ClickableItem>();
@@ -211,17 +217,24 @@ public class PosingOverlayWindow : Window, IDisposable
         if(camera == null)
             return;
 
+        var cameraViewMatrix = camera->GetViewMatrix();
+
         // Model Transform
-        if(camera->WorldToScreen(posing.ModelPosing.Transform.Position, out var modelScreen))
+
+        // Check if the model's position is in front of camera, skip if not
+        if(Vector3.Transform(posing.ModelPosing.Transform.Position, cameraViewMatrix).Z < 0)
         {
-            var modelTransform = new ClickableItem
+            if(camera->WorldToScreen(posing.ModelPosing.Transform.Position, out var modelScreen))
             {
-                Item = PosingSelectionType.ModelTransform,
-                ScreenPosition = ImGui.GetMainViewport().Pos + modelScreen,
-                Size = config.BoneCircleSize,
-            };
-            clickables.Add(modelTransform);
-            modelTransform.CurrentlySelected = posing.Selected.Equals(modelTransform);
+                var modelTransform = new ClickableItem
+                {
+                    Item = PosingSelectionType.ModelTransform,
+                    ScreenPosition = ImGui.GetMainViewport().Pos + modelScreen,
+                    Size = config.BoneCircleSize,
+                };
+                clickables.Add(modelTransform);
+                modelTransform.CurrentlySelected = posing.Selected.Equals(modelTransform);
+            }
         }
 
         // Bone Transforms
@@ -249,22 +262,28 @@ public class PosingOverlayWindow : Window, IDisposable
 
                 foreach(var bone in skeleton.Bones)
                 {
-                    bool isSelectedBone = selectedBoneId != null && selectedBoneId.Value.Equals(posing.SkeletonPosing.GetBonePose(bone).Id);
+                    var boneWorldPosition = Vector3.Transform(bone.LastTransform.Position, modelMatrix);
 
-                    // Always show the selected bone, even if the overlay filter would hide it
-                    if((!_posingService.OverlayFilter.IsBoneValid(bone, poseSlot)) && !isSelectedBone)
+                    // Check if the bone position is in front of camera, skip if not
+                    if(Vector3.Transform(boneWorldPosition, cameraViewMatrix).Z >= 0)
                         continue;
 
-                    var boneWorldPosition = Vector3.Transform(bone.LastTransform.Position, modelMatrix);
+                    var bonePoseId = posing.SkeletonPosing.GetBonePose(bone).Id;
+                    bool isSelectedBone = selectedBoneId != null && selectedBoneId.Value.Equals(bonePoseId);
+                    bool isMultiSelected = posing.IsBoneSelected(bonePoseId);
+
+                    // Always show the selected bone, even if the overlay filter would hide it
+                    if((!_posingService.OverlayFilter.IsBoneValid(bone, poseSlot)) && !isSelectedBone && !isMultiSelected)
+                        continue;
 
                     if(camera->WorldToScreen(boneWorldPosition, out var boneScreen))
                     {
                         var clickItem = new ClickableItem
                         {
-                            Item = posing.SkeletonPosing.GetBonePose(bone).Id,
-                            ScreenPosition = boneScreen,
+                            Item = bonePoseId,
+                            ScreenPosition = ImGui.GetMainViewport().Pos + boneScreen,
                             Size = config.BoneCircleSize,
-                            CurrentlySelected = isSelectedBone
+                            CurrentlySelected = isSelectedBone || isMultiSelected
                         };
                         clickables.Add(clickItem);
 
@@ -292,6 +311,8 @@ public class PosingOverlayWindow : Window, IDisposable
         var clicked = new List<ClickableItem>();
         var hovered = new List<ClickableItem>();
 
+        bool isMultiSelectModifier = ImGui.GetIO().KeyCtrl || ImGui.GetIO().KeyShift;
+
         foreach(var clickable in clickables)
         {
             var start = new Vector2(clickable.ScreenPosition.X - clickable.Size, clickable.ScreenPosition.Y - clickable.Size);
@@ -316,6 +337,18 @@ public class PosingOverlayWindow : Window, IDisposable
         if(clicked.Count != 0)
         {
             posing.Selected = clicked[0].Item;
+
+            if(clicked[0].Item.Value is BonePoseInfoId boneId)
+            {
+                posing.SetBoneSelection(boneId, isMultiSelectModifier);
+            }
+            else if(clicked[0].Item.Value is ModelTransformSelection)
+            {
+                if(!isMultiSelectModifier)
+                {
+                    posing.SelectedBones.Clear();
+                }
+            }
 
             if(clicked.Count > 1)
             {
@@ -344,12 +377,32 @@ public class PosingOverlayWindow : Window, IDisposable
             {
                 if(hovered.Count == 1)
                 {
-                    posing.Selected = hovered[0].Item;
+                    if(hovered[0].Item.Value is BonePoseInfoId wheelBoneId)
+                    {
+                        posing.SetBoneSelection(wheelBoneId, isMultiSelectModifier);
+                    }
+                    else
+                    {
+                        posing.Selected = hovered[0].Item;
+                        if(!isMultiSelectModifier)
+                            posing.SelectedBones.Clear();
+                    }
                 }
                 else
                 {
                     _selectingFrom = hovered;
                     ImGui.OpenPopup(_boneSelectPopupName);
+
+                    if(hovered[0].Item.Value is BonePoseInfoId firstBoneId)
+                    {
+                        posing.SetBoneSelection(firstBoneId, isMultiSelectModifier);
+                    }
+                    else
+                    {
+                        posing.Selected = hovered[0].Item;
+                        if(!isMultiSelectModifier)
+                            posing.SelectedBones.Clear();
+                    }
                 }
             }
         }
@@ -361,17 +414,39 @@ public class PosingOverlayWindow : Window, IDisposable
         if(popup.Success)
         {
             int selectedIndex = -1;
+            bool isMultiSelectModifier = ImGui.GetIO().KeyCtrl || ImGui.GetIO().KeyShift;
+
             foreach(var click in _selectingFrom)
             {
                 bool isSelected = posing.Selected == click.Item;
+                bool isMultiSelected = false;
+
+                if(click.Item.Value is BonePoseInfoId boneId)
+                    isMultiSelected = posing.IsBoneSelected(boneId) && posing.SelectedBones.Count > 1;
+
                 if(isSelected)
                     selectedIndex = _selectingFrom.IndexOf(click);
 
-                if(ImGui.Selectable($"{click.Item.DisplayName}###clickable_{click.GetHashCode()}", isSelected))
+                if(ImGui.Selectable($"{click.Item.DisplayName}###clickable_{click.GetHashCode()}", isSelected || isMultiSelected))
                 {
-                    posing.Selected = click.Item;
+                    if(click.Item.Value is BonePoseInfoId clickedBoneId)
+                    {
+                        posing.SetBoneSelection(clickedBoneId, isMultiSelectModifier);
+
+                    }
+                    else
+                    {
+                        posing.Selected = click.Item;
+
+                        if(!isMultiSelectModifier)
+                        {
+                            posing.SelectedBones.Clear();
+                        }
+                    }
+
                     _selectingFrom = [];
                     ImGui.CloseCurrentPopup();
+
                 }
             }
 
@@ -391,7 +466,17 @@ public class PosingOverlayWindow : Window, IDisposable
                         selectedIndex = _selectingFrom.Count - 1;
                 }
 
-                posing.Selected = _selectingFrom[selectedIndex].Item;
+                if(_selectingFrom[selectedIndex].Item.Value is BonePoseInfoId scrollBoneId)
+                {
+                    posing.SetBoneSelection(scrollBoneId, isMultiSelectModifier);
+                }
+                else
+                {
+                    posing.Selected = _selectingFrom[selectedIndex].Item;
+
+                    if(!isMultiSelectModifier)
+                        posing.SelectedBones.Clear();
+                }
             }
         }
     }
@@ -678,7 +763,23 @@ public class PosingOverlayWindow : Window, IDisposable
             selected.Switch(
                 bone =>
                 {
-                    posing.SkeletonPosing.GetBonePose(bone).Apply(newTransform.Value, lastObserved);
+                    if(posing.IsMultiSelecting)
+                    {
+                        foreach(var selectedBoneId in posing.SelectedBones)
+                        {
+                            var targetBone = posing.SkeletonPosing.GetBone(selectedBoneId);
+                            if(targetBone != null && !targetBone.Freeze)
+                            {
+                                var boneTransform = targetBone.LastTransform;
+                                var updatedTransform = boneTransform + delta;
+                                posing.SkeletonPosing.GetBonePose(selectedBoneId).Apply(updatedTransform, boneTransform);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        posing.SkeletonPosing.GetBonePose(bone).Apply(newTransform.Value, lastObserved);
+                    }
                 },
                 _ =>
                 {

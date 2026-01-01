@@ -178,11 +178,34 @@ public class PosingTransformWindow : Window
         }
 
         if(_trackingMatrix.HasValue)
+        {
+            var delta = _trackingMatrix.Value.ToTransform().CalculateDiff(originalMatrix.ToTransform());
+
             selected.Switch(
-                boneSelect => posing.SkeletonPosing.GetBonePose(boneSelect).Apply(_trackingMatrix.Value.ToTransform(), originalMatrix.ToTransform()),
-                _ => posing.ModelPosing.Transform += _trackingMatrix.Value.ToTransform().CalculateDiff(originalMatrix.ToTransform()),
-                _ => posing.ModelPosing.Transform += _trackingMatrix.Value.ToTransform().CalculateDiff(originalMatrix.ToTransform())
+                boneSelect =>
+                {
+                    if(posing.IsMultiSelecting)
+                    {
+                        foreach(var selectedBoneId in posing.SelectedBones)
+                        {
+                            var targetBone = posing.SkeletonPosing.GetBone(selectedBoneId);
+                            if(targetBone != null && !targetBone.Freeze)
+                            {
+                                var bonePose = posing.SkeletonPosing.GetBonePose(selectedBoneId);
+                                var boneTransform = targetBone.LastTransform;
+                                bonePose.Apply(boneTransform + delta, boneTransform);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        posing.SkeletonPosing.GetBonePose(boneSelect).Apply(_trackingMatrix.Value.ToTransform(), originalMatrix.ToTransform());
+                    }
+                },
+                _ => posing.ModelPosing.Transform += delta,
+                _ => posing.ModelPosing.Transform += delta
             );
+        }
 
         if(!ImBrioGizmo.IsUsing() && _trackingMatrix.HasValue)
         {

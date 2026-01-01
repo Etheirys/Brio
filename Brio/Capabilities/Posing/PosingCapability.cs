@@ -15,6 +15,7 @@ using OneOf;
 using OneOf.Types;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Brio.Capabilities.Posing;
 
@@ -24,11 +25,13 @@ public class PosingCapability : ActorCharacterCapability
     public PosingSelectionType Hover { get; set; } = new None();
     public PosingSelectionType LastHover { get; set; } = new None();
 
+    public List<BonePoseInfoId> SelectedBones { get; set; } = [];
+    public bool IsMultiSelecting => SelectedBones.Count > 1;
+
     public SkeletonPosingCapability SkeletonPosing => Entity.GetCapability<SkeletonPosingCapability>();
     public ModelPosingCapability ModelPosing => Entity.GetCapability<ModelPosingCapability>();
 
     public PosingService PosingService => _posingService;
-
     public ConfigurationService ConfigurationService => _configurationService;
 
     public bool HasOverride
@@ -105,8 +108,6 @@ public class PosingCapability : ActorCharacterCapability
         _groupedUndoService = groupedUndoService;
         _gameInputService = gameInputService;
     }
-
-    public void ClearSelection() => Selected = PosingSelectionType.None;
 
     public void LoadResourcesPose(string resourcesPath, bool freezeOnLoad = false, bool asBody = false)
     {
@@ -454,6 +455,53 @@ public class PosingCapability : ActorCharacterCapability
     {
         ModelPosing.ResetTransform();
         Snapshot(reset: false);
+    }
+
+    public void ClearSelection()
+    {
+        Selected = PosingSelectionType.None;
+        SelectedBones.Clear();
+    }
+
+    public void ToggleBoneSelection(BonePoseInfoId boneId)
+    {
+        var existingBone = SelectedBones.FirstOrDefault(b => b.Equals(boneId));
+        if(!existingBone.Equals(default(BonePoseInfoId)))
+        {
+            SelectedBones.Remove(existingBone);
+            if(SelectedBones.Count == 0)
+            {
+                Selected = PosingSelectionType.None;
+            }
+            else if(Selected.Value is BonePoseInfoId selectedBone && selectedBone.Equals(boneId))
+            {
+                Selected = SelectedBones[0];
+            }
+        }
+        else
+        {
+            SelectedBones.Add(boneId);
+            Selected = boneId;
+        }
+    }
+
+    public void SetBoneSelection(BonePoseInfoId boneId, bool multiSelect)
+    {
+        if(multiSelect)
+        {
+            ToggleBoneSelection(boneId);
+        }
+        else
+        {
+            SelectedBones.Clear();
+            SelectedBones.Add(boneId);
+            Selected = boneId;
+        }
+    }
+
+    public bool IsBoneSelected(BonePoseInfoId boneId)
+    {
+        return SelectedBones.Any(b => b.Equals(boneId));
     }
 
     public record struct PoseStack(PoseInfo Info, Transform ModelTransform);
