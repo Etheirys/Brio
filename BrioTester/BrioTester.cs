@@ -16,6 +16,11 @@ public class BrioTester : IDalamudPlugin
 
     private const string CommandName = "/btw";
 
+    public static IPluginLog Log { get; private set; } = null!;
+
+    [PluginService]
+    public IPluginLog log { get; private set; } = null!;
+
     [PluginService]
     public ICommandManager CommandManager { get; init; } = null!;
 
@@ -60,6 +65,8 @@ public class BrioTester : IDalamudPlugin
         this.WindowSystem = new(PluginName);
         this.WindowSystem.AddWindow(Window);
 
+        Log = log;
+
         Window.IsOpen = true;
     }
 
@@ -101,6 +108,8 @@ public class BrioTester : IDalamudPlugin
 
     public void Dispose()
     {
+        Brio.BrioAPI.Dispose();
+
         Framework.Update -= Update;
 
         this.CommandManager.RemoveHandler(CommandName);

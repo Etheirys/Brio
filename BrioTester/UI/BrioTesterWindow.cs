@@ -33,7 +33,13 @@ public class BrioTesterWindow : Window
         };
     }
 
-    private string logText = "";
+    public static void Message(string message)
+    {
+        BrioTester.Log.Warning(message);
+        logText += $"{message}\n";
+    }
+
+    private static string logText = "";
     public override void Draw()
     {
         var segmentSize = ImGui.GetWindowSize().X / 4.5f;
@@ -55,15 +61,16 @@ public class BrioTesterWindow : Window
             ImGui.PushStyleColor(ImGuiCol.Button, new Vector4(255, 0, 0, 255) / 255);
             if (ImGui.Button("brio v." + ver, buttonSize))
             {
-                if (BrioAPI.IsVersionCompatible())
-                {
-                    ver = BrioAPI.GetVersion();
+                ver = BrioAPI.IsVersionCompatible();
 
-                    if (gameObject is not null && string.IsNullOrWhiteSpace(testURI) == false)
-                        BrioAPI.SetActorPoseFromFilePath(gameObject, testURI);
-                    else if (gameObject is not null)
-                        BrioAPI.SetActorPoseFromJson(gameObject, null!);
-                }
+                //if ()
+                //{
+
+                //    if (gameObject is not null && string.IsNullOrWhiteSpace(testURI) == false)
+                //        BrioAPI.SetActorPoseFromFilePath(gameObject, testURI);
+                //    else if (gameObject is not null)
+                //        BrioAPI.SetActorPoseFromJson(gameObject, null!);
+                //}
             }
             ImGui.PopStyleColor();
             ImGui.SameLine();
@@ -73,7 +80,7 @@ public class BrioTesterWindow : Window
             {
                 _framework.RunOnTick(async () =>
                 {
-                    gameObject = await BrioAPI.SpawnActorAsync(false, true, false);
+                    gameObject = BrioAPI.SpawnActor();
                 });
             }
             ImGui.PopStyleColor();
@@ -96,22 +103,22 @@ public class BrioTesterWindow : Window
             {
                 if (gameObject is not null)
                 {
-                    var act = BrioAPI.GetActorModelTransform(gameObject);
-                    logText += $"{act} \n";
+                    //var act = BrioAPI.GetActorModelTransform(gameObject);
+                    //logText += $"{act} \n";
 
-                    //BrioAPI.SetActorModelTransform(gameObject, act.Position.GetValueOrDefault() + new Vector3(10, 0, 10), act.Rotation.GetValueOrDefault(), act.Scale.GetValueOrDefault(), false);
-                    BrioAPI.SetActorModelTransform(gameObject, new Vector3(10, 0, 10), null, null, true);
-                    //BrioAPI.SetActorPosition(gameObject, new Vector3(10, 0, 10));
+                    ////BrioAPI.SetActorModelTransform(gameObject, act.Position.GetValueOrDefault() + new Vector3(10, 0, 10), act.Rotation.GetValueOrDefault(), act.Scale.GetValueOrDefault(), false);
+                    //BrioAPI.SetActorModelTransform(gameObject, new Vector3(10, 0, 10), null, null, true);
+                    ////BrioAPI.SetActorPosition(gameObject, new Vector3(10, 0, 10));
                 }
             }
             ImGui.PopStyleColor();
             ImGui.PushStyleColor(ImGuiCol.Button, new Vector4(110, 84, 148, 255) / 255);
             if (ImGui.Button("reset Transform", buttonSize))
             {
-                if (gameObject is not null)
-                {
-                    BrioAPI.ResetActorModelTransform(gameObject);
-                }
+                //if (gameObject is not null)
+                //{
+                //    BrioAPI.ResetActorModelTransform(gameObject);
+                //}
             }
             ImGui.PopStyleColor();
 
@@ -120,10 +127,10 @@ public class BrioTesterWindow : Window
             ImGui.PushStyleColor(ImGuiCol.Button, new Vector4(110, 84, 148, 255) / 255);
             if (ImGui.Button("reset Pose", buttonSize))
             {
-                if (gameObject is not null)
-                {
-                    BrioAPI.ResetActorPose(gameObject);
-                }
+                //if (gameObject is not null)
+                //{
+                //    BrioAPI.ResetActorPose(gameObject);
+                //}
             }
             ImGui.PopStyleColor();
 
@@ -132,14 +139,14 @@ public class BrioTesterWindow : Window
             ImGui.PushStyleColor(ImGuiCol.Button, new Vector4(0, 100, 255, 255) / 255);
             if (ImGui.Button("get all " + gameObject?.Name, buttonSize))
             {
-                var (HasAtLeastOne, Actors) = BrioAPI.GetAllActiveActors();
-                if (HasAtLeastOne)
-                {
-                    foreach (var actor in Actors)
-                    {
-                        logText += $"Actor {actor.Name} \n";
-                    }
-                }
+                //var (HasAtLeastOne, Actors) = BrioAPI.GetAllActiveActors();
+                //if (HasAtLeastOne)
+                //{
+                //    foreach (var actor in Actors)
+                //    {
+                //        logText += $"Actor {actor.Name} \n";
+                //    }
+                //}
             }
             ImGui.PopStyleColor();
 
@@ -148,17 +155,17 @@ public class BrioTesterWindow : Window
             ImGui.PushStyleColor(ImGuiCol.Button, new Vector4(0, 100, 255, 255) / 255);
             if (ImGui.Button("Toggle Freeze", buttonSize))
             {
-                if (gameObject is null)
-                    return;
+                //if (gameObject is null)
+                //    return;
 
-                if (BrioAPI.GetActorSpeed(gameObject) == 0)
-                {
-                    BrioAPI.UnFreezeActor(gameObject);
-                }
-                else
-                {
-                    BrioAPI.FreezeActor(gameObject);
-                }
+                //if (BrioAPI.GetActorSpeed(gameObject) == 0)
+                //{
+                //    BrioAPI.UnFreezeActor(gameObject);
+                //}
+                //else
+                //{
+                //    BrioAPI.FreezeActor(gameObject);
+                //}
             }
             ImGui.PopStyleColor();
 
