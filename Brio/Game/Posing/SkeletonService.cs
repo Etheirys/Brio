@@ -27,11 +27,12 @@ public unsafe class SkeletonService : IDisposable
     public event SkeletonUpdateEvent? SkeletonUpdateStart;
     public event SkeletonUpdateEvent? SkeletonUpdateEnd;
 
-    private delegate nint UpdateBonePhysicsDelegate(nint a1);
-    private readonly Hook<UpdateBonePhysicsDelegate> _updateBonePhysicsHook = null!;
+    public delegate nint UpdateBonePhysicsDelegate(nint a1);
 
-    private delegate void FinalizeSkeletonsDelegate(nint a1);
-    private readonly Hook<FinalizeSkeletonsDelegate> _finalizeSkeletonsHook = null!;
+	public readonly Hook<UpdateBonePhysicsDelegate> _updateBonePhysicsHook = null!;
+
+    public delegate void FinalizeSkeletonsDelegate(nint a1);
+    public readonly Hook<FinalizeSkeletonsDelegate> _finalizeSkeletonsHook = null!;
 
     private readonly EntityManager _entityManager;
     private readonly ObjectMonitorService _monitorService;
