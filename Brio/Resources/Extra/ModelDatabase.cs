@@ -17,7 +17,6 @@ public class ModelDatabase
         _modelLookupTable = new();
         _modelsList = [];
 
-
         // From Game
         var items = GameDataProvider.Instance.Items.Values;
         foreach(var item in items)
@@ -38,20 +37,20 @@ public class ModelDatabase
 
         // From JSON
         var knownEntries = _resourceProvider.GetResourceDocument<List<PropsFileEntry>>("Data.Props.json");
-        knownEntries = knownEntries.GroupBy(x => x.Name).Select(g => g.First()).ToList();
+        knownEntries = [.. knownEntries.GroupBy(x => x.Name).Select(g => g.First())];
         foreach(var item in knownEntries)
         {
-            ushort[] result = item.Id.Split(", ").Select(ushort.Parse).ToArray();
+            ushort[] result = [.. item.Id.Split(", ").Select(ushort.Parse)];
             if(result.Length > 2)
             {
                 WeaponModelId weaponItem = new() { Id = result[0], Type = result[1], Variant = (byte)result[2] };
-                var modelInfo = new ModelInfo(weaponItem.Value, 0, $"{item.Name}\n{item.Description?.ToString()}", 0, ActorEquipSlot.Prop, null);
+                var modelInfo = new ModelInfo(weaponItem.Value, 0, $"{item.Name}\n{item.Description}", 0, ActorEquipSlot.Prop, null);
                 AddModel(modelInfo);
             }
             else
             {
                 EquipmentModelId actualItem = new() { Id = result[0], Variant = (byte)result[1] };
-                var modelInfo = new ModelInfo(actualItem.Value, 0, $"{item.Name}\n{item.Description?.ToString()}", 0, ActorEquipSlot.Prop, null);
+                var modelInfo = new ModelInfo(actualItem.Value, 0, $"{item.Name}\n{item.Description}", 0, ActorEquipSlot.Prop, null);
                 AddModel(modelInfo);
             }
         }
