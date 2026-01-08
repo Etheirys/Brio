@@ -4,7 +4,7 @@ using Dalamud.Plugin.Services;
 
 namespace Brio.Services;
 
-public class DalamudServices
+public class DalamudPluginService
 {
     [PluginService] public IDalamudPluginInterface PluginInterface { get; private set; } = null!;
     [PluginService] public IFramework Framework { get; private set; } = null!;
@@ -25,7 +25,7 @@ public class DalamudServices
     [PluginService] public IGameConfig GameConfig { get; private set; } = null!;
 
 
-    public DalamudServices(IDalamudPluginInterface pluginInterface)
+    public DalamudPluginService(IDalamudPluginInterface pluginInterface)
     {
         pluginInterface.Inject(this);
     }
