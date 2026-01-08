@@ -3,7 +3,7 @@ using Brio.Game.GPose;
 using Brio.UI.Windows;
 using System;
 
-namespace Brio.Core;
+namespace Brio.Services;
 
 public class WelcomeService : IDisposable
 {

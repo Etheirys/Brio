@@ -1,11 +1,12 @@
 using Brio.Capabilities.Posing;
+using Brio.Core;
 using Brio.Entities;
 using Brio.Entities.Core;
 using Brio.Game.Posing;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Brio.Core;
+namespace Brio.Services;
 
 public class HistoryService(EntityManager entityManager)
 {

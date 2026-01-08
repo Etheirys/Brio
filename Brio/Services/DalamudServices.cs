@@ -2,7 +2,7 @@
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
 
-namespace Brio.Core;
+namespace Brio.Services;
 
 public class DalamudServices
 {
@@ -21,6 +21,7 @@ public class DalamudServices
     [PluginService] public IChatGui ChatGui { get; private set; } = null!;
     [PluginService] public IKeyState KeyState { get; private set; } = null!;
     [PluginService] public ICondition Conditions { get; private set; } = null!;
+    [PluginService] public IGameGui GameGui { get; private set; } = null!;
     [PluginService] public IGameConfig GameConfig { get; private set; } = null!;
 
 
