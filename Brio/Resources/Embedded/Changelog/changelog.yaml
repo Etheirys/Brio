@@ -15,7 +15,7 @@ changelog:
           - "As a reminder! If you experience any issues please report them on Discord or on GitHub"
           - "And yes, once more, even more features coming soon, like AltherBlend integration, Auto-Save & MCDF Window"
     
-      - number: "0.7.0.1 (We just can't say on a full .0 version for 24 hrs can we? :p )"
+      - number: "0.7.0.1 (We just can't stay on a full .0 version for 24 hrs can we? :p )"
         icon: ""
         items:
           - "Fixed an issue with limbs extending like noodles in certain conditions"
