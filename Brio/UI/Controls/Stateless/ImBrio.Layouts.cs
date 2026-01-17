@@ -47,5 +47,4 @@ public static partial class ImBrio
         ImGui.SetCursorPosX(ImGui.GetCursorPosX() + offset);
         ImGui.SetNextItemWidth(elementWidth);
     }
-
 }

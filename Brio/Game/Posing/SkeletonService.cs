@@ -16,6 +16,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
+using System.Threading;
 using static FFXIVClientStructs.Havok.Animation.Rig.hkaPose;
 using GameSkeleton = FFXIVClientStructs.FFXIV.Client.Graphics.Render.Skeleton;
 
@@ -38,17 +39,16 @@ public unsafe class SkeletonService : IDisposable
     private readonly GPoseService _gPoseService;
     private readonly IKService _ikService;
     private readonly IFramework _framework;
-    private readonly IObjectTable _objectTable;
 
     private readonly List<Skeleton> _skeletons = [];
     private readonly Dictionary<Skeleton, SkeletonPosingCapability> _skeletonToPosingCapability = [];
     private readonly List<Skeleton> _skeletonsToUpdate = [];
 
-    private readonly Dictionary<ulong, Dictionary<string, BoneTransform>> _directBoneOverrides = [];
-    private readonly Dictionary<ulong, Dictionary<string, BoneTransform>> _interpolatedState = [];
+    private readonly Dictionary<ulong, Dictionary<string, Transform>> _directBoneOverrides = [];
+    private readonly Dictionary<ulong, Dictionary<string, Transform>> _interpolatedState = [];
     private readonly Dictionary<ulong, Dictionary<int, Dictionary<string, int>>> _boneIndexCache = [];
 
-    private readonly object _directOverridesLock = new();
+    private readonly Lock _directOverridesLock = new();
 
     public float BoneInterpolationSpeed { get; set; } = 0.2f;
     public bool RealTimeAnimationEnabled { get; set; } = true;
@@ -60,7 +60,6 @@ public unsafe class SkeletonService : IDisposable
         _gPoseService = gPoseService;
         _ikService = ikService;
         _framework = framework;
-        _objectTable = gameObjects;
 
         var updateBonePhysicsAddress = "48 89 5C 24 ?? 48 89 6C 24 ?? 48 89 74 24 ?? 57 41 54 41 56 48 83 EC ?? 48 8B 59 ?? 45 33 E4";
         _updateBonePhysicsHook = hooking.HookFromAddress<UpdateBonePhysicsDelegate>(scanner.ScanText(updateBonePhysicsAddress), UpdateBonePhysicsDetour);
@@ -76,14 +75,14 @@ public unsafe class SkeletonService : IDisposable
         RefreshSkeletonCache();
     }
 
-    public bool SetBoneTransforms(ulong objectId, Dictionary<string, BoneTransform> bones)
+    public bool SetBoneTransforms(ulong objectId, Dictionary<string, Transform> bones)
     {
         if(!RealTimeAnimationEnabled)
             return false;
 
         lock(_directOverridesLock)
         {
-            _directBoneOverrides[objectId] = new Dictionary<string, BoneTransform>(bones);
+            _directBoneOverrides[objectId] = new Dictionary<string, Transform>(bones);
         }
         return true;
     }
@@ -210,8 +209,7 @@ public unsafe class SkeletonService : IDisposable
                         }
                         else
                         {
-                            var interpolated = InterpolateBoneTransform(currentTransform, target);
-                            current[boneName] = interpolated;
+                            current[boneName] = InterpolateBoneTransform(currentTransform, target);
                         }
                     }
                 }
@@ -222,98 +220,68 @@ public unsafe class SkeletonService : IDisposable
         }
     }
 
-    private BoneTransform InterpolateBoneTransform(BoneTransform current, BoneTransform target)
+    private Transform InterpolateBoneTransform(Transform? current, Transform? target)
     {
-        var interpolated = new BoneTransform();
+        var interpolated = new Transform();
 
-        if(target.Position.HasValue && current.Position.HasValue)
+        if(target.HasValue && current.HasValue)
         {
-            interpolated.Position = Vector3.Lerp(current.Position.Value, target.Position.Value, BoneInterpolationSpeed);
+            interpolated.Position = Vector3.Lerp(current.Value.Position, target.Value.Position, BoneInterpolationSpeed);
         }
-        else if(target.Position.HasValue)
+        else if(target.HasValue)
         {
-            interpolated.Position = target.Position;
-        }
-
-        if(target.Rotation.HasValue && current.Rotation.HasValue)
-        {
-            interpolated.Rotation = Quaternion.Slerp(current.Rotation.Value, target.Rotation.Value, BoneInterpolationSpeed);
-        }
-        else if(target.Rotation.HasValue)
-        {
-            interpolated.Rotation = target.Rotation;
+            interpolated.Position = target.Value.Position;
         }
 
-        if(target.Scale.HasValue && current.Scale.HasValue)
+        if(target.HasValue && current.HasValue)
         {
-            interpolated.Scale = Vector3.Lerp(current.Scale.Value, target.Scale.Value, BoneInterpolationSpeed);
+            interpolated.Rotation = Quaternion.Slerp(current.Value.Rotation, target.Value.Rotation, BoneInterpolationSpeed);
         }
-        else if(target.Scale.HasValue)
+        else if(target.HasValue)
         {
-            interpolated.Scale = target.Scale;
+            interpolated.Rotation = target.Value.Rotation;
+        }
+
+        if(target.HasValue && current.HasValue)
+        {
+            interpolated.Scale = Vector3.Lerp(current.Value.Scale, target.Value.Scale, BoneInterpolationSpeed);
+        }
+        else if(target.HasValue)
+        {
+            interpolated.Scale = target.Value.Scale;
         }
 
         return interpolated;
     }
 
-    private void ApplyDirectTransformsToSkeleton(Skeleton skeleton, ulong objectId, Dictionary<string, BoneTransform> transforms)
+    private void ApplyDirectTransformsToSkeleton(Skeleton skeleton, ulong objectId, Dictionary<string, Transform> transforms)
     {
         for(int partialIdx = 0; partialIdx < skeleton.Partials.Count; partialIdx++)
         {
             var partial = skeleton.Partials[partialIdx];
+
             var pose = partial.GetBestPose();
+
             if(pose == null)
                 continue;
 
-            // Build or get bone index cache
-            if(!_boneIndexCache.TryGetValue(objectId, out var partialCaches))
+            var boneLength = pose->Skeleton->Bones.Length;
+            for(int boneIdx = 0; boneIdx < boneLength; ++boneIdx)
             {
-                partialCaches = [];
-                _boneIndexCache[objectId] = partialCaches;
-            }
+                var bone = partial.GetBone(boneIdx);
 
-            if(!partialCaches.TryGetValue(partialIdx, out var indexCache))
-            {
-                indexCache = [];
-                var boneCount = pose->Skeleton->Bones.Length;
-                for(int i = 0; i < boneCount; i++)
-                {
-                    var boneName = pose->Skeleton->Bones[i].Name.String;
-                    if(boneName != null)
-                    {
-                        indexCache[boneName] = i;
-                    }
-                }
-                partialCaches[partialIdx] = indexCache;
-            }
-
-            // Apply transforms
-            foreach(var kvp in transforms)
-            {
-                var boneName = kvp.Key;
-                var transform = kvp.Value;
-
-                if(!indexCache.TryGetValue(boneName, out var boneIdx))
+                if(bone is null)
                     continue;
 
-                var modelSpace = pose->AccessBoneModelSpace(boneIdx, PropagateOrNot.Propagate);
-
-                if(transform.Position.HasValue)
+                if(transforms.ContainsKey(bone.Name) is true)
                 {
-                    var pos = transform.Position.Value;
-                    modelSpace->Translation = *(hkVector4f*)(&pos);
-                }
+                    var transform = transforms[bone.Name];
+                    var modelSpace = pose->AccessBoneModelSpace(boneIdx, PropagateOrNot.Propagate);
 
-                if(transform.Rotation.HasValue)
-                {
-                    var rot = transform.Rotation.Value;
-                    modelSpace->Rotation = *(hkQuaternionf*)(&rot);
-                }
-
-                if(transform.Scale.HasValue)
-                {
-                    var scale = transform.Scale.Value;
-                    modelSpace->Scale = *(hkVector4f*)(&scale);
+                    modelSpace->Translation = *(hkVector4f*)(&transform.Position);
+                    if(transform.Rotation.IsApproximatelySame(Quaternion.Identity) is false)
+                        modelSpace->Rotation = *(hkQuaternionf*)(&transform.Rotation);
+                    modelSpace->Scale = *(hkVector4f*)(&transform.Scale);
                 }
             }
         }
@@ -423,14 +391,7 @@ public unsafe class SkeletonService : IDisposable
 
         foreach(var skeleton in _skeletonsToUpdate)
         {
-            try
-            {
-                ApplyDirectBoneOverrides(skeleton);
-            }
-            catch(Exception e)
-            {
-                Brio.Log.Error(e, "Error applying direct bone overrides");
-            }
+            ApplyDirectBoneOverrides(skeleton);
 
             if(_skeletonToPosingCapability.TryGetValue(skeleton, out var capability))
             {
@@ -644,11 +605,4 @@ public unsafe class SkeletonService : IDisposable
             _boneIndexCache.Clear();
         }
     }
-}
-
-public class BoneTransform
-{
-    public Vector3? Position { get; set; }
-    public Quaternion? Rotation { get; set; }
-    public Vector3? Scale { get; set; }
 }

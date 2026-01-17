@@ -1,8 +1,8 @@
-﻿using Brio.Core;
-using Brio.Entities;
+﻿using Brio.Entities;
 using Brio.Entities.Core;
 using Brio.Game.GPose;
 using Brio.Input;
+using Brio.Services;
 using Brio.UI.Theming;
 using Brio.UI.Widgets.Core;
 using Dalamud.Bindings.ImGui;
@@ -20,7 +20,6 @@ public class EntityHierarchyView(EntityManager entityManager, GPoseService gPose
     private readonly float offsetWidth = 18f;
 
     private EntityId? _lastSelectedId;
-    private Entity? _lastSelectedEntityRef;
 
     public void Draw(Entity root)
     {
@@ -46,7 +45,7 @@ public class EntityHierarchyView(EntityManager entityManager, GPoseService gPose
                 }
             }
         }
-
+        
         using(ImRaii.PushId($"entity_hierarchy_{root.Id}"))
         {
             foreach(var item in root.Children)
@@ -80,7 +79,12 @@ public class EntityHierarchyView(EntityManager entityManager, GPoseService gPose
         if(selectedEntityId != null && entity.Id.Equals(selectedEntityId))
             isSelected = true;
 
-        if(entityManager.SelectedEntityIds.Contains(entity.Id))
+        var currentSelected = entityManager.SelectedEntity;
+        var currentSupportsMultiSelect = currentSelected?.Flags.HasFlag(EntityFlags.AllowMultiSelect) ?? false;
+
+        var entityAllowsMultiSelect = entity.Flags.HasFlag(EntityFlags.AllowMultiSelect);
+
+        if(entityManager.SelectedEntityIds.Contains(entity.Id) && entityAllowsMultiSelect)
             isMutiSelected = true;
 
         using(ImRaii.PushColor(ImGuiCol.ButtonActive, 0))
@@ -101,14 +105,20 @@ public class EntityHierarchyView(EntityManager entityManager, GPoseService gPose
                     var io = ImGui.GetIO();
 
                     // Ctrl+Click toggles selection
-                    if(InputManagerService.ActionKeysPressed(InputAction.Brio_Ctrl))
+                    if(InputManagerService.ActionKeysPressed(InputAction.Brio_Ctrl) && entityAllowsMultiSelect)
                     {
-                        if(entityManager.SelectedEntityIds.Contains(entity.Id))
-                            entityManager.RemoveSelectedEntity(entity.Id);
+                        if(!currentSupportsMultiSelect && currentSelected != null)
+                        {
+                            groupedUndoService.Clear();
+                            Select(entity);
+                        }
                         else
-                            entityManager.AddSelectedEntity(entity.Id);
-
-                        _lastSelectedEntityRef = entity;
+                        {
+                            if(entityManager.SelectedEntityIds.Contains(entity.Id))
+                                entityManager.RemoveSelectedEntity(entity.Id);
+                            else
+                                entityManager.AddSelectedEntity(entity.Id);
+                        }
                     }
                     else
                     {

@@ -613,20 +613,17 @@ public class ActionTimelineEditor(CutsceneManager cutsceneManager, GPoseService 
         {
             ImGui.Checkbox("Enable FOV", ref _cutsceneManager.CameraSettings.EnableFOV);
 
-            ImBrio.VerticalPadding(4);
             ImGui.Separator();
             ImBrio.VerticalPadding(2);
 
             ImGui.TextWrapped("Disabling FOV will make for a less accurate Camera, but might provide for an easer way to support more character sizes without changing the Camera's Scale & Offset!");
 
-            ImBrio.VerticalPadding(4);
             ImGui.Separator();
             ImBrio.VerticalPadding(2);
 
             ImGui.InputFloat3("Camera Scale", ref _cutsceneManager.CameraSettings.Scale);
             ImGui.InputFloat3("Camera Offset", ref _cutsceneManager.CameraSettings.Offset);
 
-            ImBrio.VerticalPadding(4);
             ImGui.Separator();
             ImBrio.VerticalPadding(2);
 
@@ -634,7 +631,6 @@ public class ActionTimelineEditor(CutsceneManager cutsceneManager, GPoseService 
 
             ImGui.Checkbox("Hide Brio On Play  (Press 'Shift + B' to Stop Cutscene)", ref _cutsceneManager.CloseWindowsOnPlay);
 
-            ImBrio.VerticalPadding(4);
             ImGui.Separator();
             ImBrio.VerticalPadding(2);
 
@@ -654,7 +650,6 @@ public class ActionTimelineEditor(CutsceneManager cutsceneManager, GPoseService 
             ImGui.SetCursorPosX(LabelStart);
             ImGui.Text("Start Delay");
 
-            ImBrio.VerticalPadding(4);
             ImGui.Separator();
             ImBrio.VerticalPadding(2);
 
@@ -679,21 +674,19 @@ public class ActionTimelineEditor(CutsceneManager cutsceneManager, GPoseService 
                 ImGui.Text("Animation Delay");
             }
 
-            ImBrio.VerticalPadding(4);
             ImGui.Separator();
             ImBrio.VerticalPadding(2);
 
             ImGui.TextWrapped("The time-scale for the delay functions are in Milliseconds!");
             ImGui.TextWrapped("1000 Milliseconds = 1 Second");
 
-            ImBrio.VerticalPadding(4);
             ImGui.Separator();
             ImBrio.VerticalPadding(2);
 
             var isrunning = _cutsceneManager.IsRunning;
             using(ImRaii.Disabled(isrunning))
             {
-                if(ImBrio.Button("Play", FontAwesomeIcon.Play, new Vector2(-1, 30)))
+                if(ImBrio.Button("Play", FontAwesomeIcon.Play, new Vector2(-1, 30), centerTest: true))
                 {
                     _cutsceneManager.StartPlayback();
                 }
@@ -703,7 +696,7 @@ public class ActionTimelineEditor(CutsceneManager cutsceneManager, GPoseService 
 
             using(ImRaii.Disabled(!isrunning))
             {
-                if(ImBrio.Button("Stop", FontAwesomeIcon.Stop, new Vector2(-1, 30)))
+                if(ImBrio.Button("Stop", FontAwesomeIcon.Stop, new Vector2(-1, 30), centerTest: true))
                 {
                     _cutsceneManager.StopPlayback();
                 }

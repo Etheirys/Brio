@@ -50,6 +50,6 @@ public enum AttachType : uint
     None = 0,
     Unknown1 = 1,
     Unknown2 = 2,
-    CharacterBase = 3, // CharacterBase*
-    Skeleton = 4, // Skeleton*
+    CharacterBase = 3,  // CharacterBase*
+    Skeleton = 4,       // Skeleton*
 }

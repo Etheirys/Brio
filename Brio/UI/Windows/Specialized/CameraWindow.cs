@@ -66,8 +66,6 @@ public class CameraWindow : Window, IDisposable
 
         ImBrio.AttachToolTip("Current Camera");
 
-        ImBrio.VerticalPadding(5);
-
         ImGui.Separator();
 
         if(_virtualCameraService.SelectedCameraEntity is null || _virtualCameraService.SelectedCameraEntity.IsAttached == false)

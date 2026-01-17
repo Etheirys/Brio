@@ -8,7 +8,7 @@ public class StateAPI(GPoseService gPoseService) : IState
 
     private readonly GPoseService _gPoseService = gPoseService;
 
-    public (int Breaking, int Feature) ApiVersion => (BrioAPIService.MajorVersion, BrioAPIService.MinorVersion);
+    public (int Breaking, int Feature) ApiVersion => (Brio.MajorAPIVersion, Brio.MinorAPIVersion);
 
     public bool IsAvailable => true;
 

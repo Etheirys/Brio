@@ -13,7 +13,7 @@ namespace Brio.UI.Widgets.World;
 public class FestivalWidget : Widget<FestivalCapability>
 {
     public override string HeaderName => "Festivals";
-    public override WidgetFlags Flags => WidgetFlags.DefaultOpen | WidgetFlags.DrawBody;
+    public override WidgetFlags Flags => WidgetFlags.DrawBody;
 
     private int _selectedFestival;
 
@@ -33,12 +33,12 @@ public class FestivalWidget : Widget<FestivalCapability>
 
     private void DrawControls()
     {
-        List<uint> festivals = new(Capability.ActiveFestivals);
+        List<uint> festivals = [.. Capability.ActiveFestivals];
 
         using(ImRaii.Disabled(!Capability.CanModify))
         {
             ImGui.SetNextItemWidth(-1);
-            using(var listbox = ImRaii.ListBox("###festival_active_list", new Vector2(0, (ImGui.GetTextLineHeight() * 1.3f) * 4)))
+            using(var listbox = ImRaii.ListBox("###festival_active_list", new Vector2(0, (ImGui.GetTextLineHeight() * 1.3f) * 6)))
             {
                 if(listbox.Success)
                 {

@@ -8,6 +8,7 @@ using Brio.Game.Input;
 using Brio.Game.Posing;
 using Brio.Game.Posing.Skeletons;
 using Brio.Resources;
+using Brio.Services;
 using Brio.UI.Widgets.Posing;
 using Brio.UI.Windows.Specialized;
 using Dalamud.Plugin.Services;
@@ -281,18 +282,32 @@ public class PosingCapability : ActorCharacterCapability
         _undoStack.Push(new PoseStack(SkeletonPosing.PoseInfo.Clone(), ModelPosing.Transform));
         _undoStack = _undoStack.Trim(undoStackSize + 1);
 
-        //var bone = SkeletonPosing.GetBone("j_kao", PoseInfoSlot.Character);
-        //if(bone != null)
-        //{
-        //    var face = SkeletonPosing.PoseInfo.GetPoseInfo(bone);
-        //    var parent = face.Parent;
-        //    if(parent.IsOverridden)
-        //    {
-        //        face.Apply(bone.LastTransform, bone.LastRawTransform, TransformComponents.All, TransformComponents.Rotation, BoneIKInfo.Disabled, PoseMirrorMode.None, true);
-        //        face.ClearStacks();
-        //        Reconcile(false);
-        //    }
-        //}
+        var bone = SkeletonPosing.GetBone("j_kao", PoseInfoSlot.Character);
+        if(bone != null)
+        {
+            var face = SkeletonPosing.PoseInfo.GetPoseInfo(bone);
+
+            // Check if j_kao or any of its parent bones are overridden
+            bool hasOverriddenParent = false;
+            var currentBone = bone.Parent;
+            while(currentBone != null)
+            {
+                var parentPoseInfo = SkeletonPosing.PoseInfo.GetPoseInfo(currentBone);
+                if(parentPoseInfo.HasStacks)
+                {
+                    hasOverriddenParent = true;
+                    break;
+                }
+                currentBone = currentBone.Parent;
+            }
+
+            if(face.HasStacks || hasOverriddenParent)
+            {
+                Reconcile(true, false);
+                face.Apply(bone.LastTransform, bone.LastRawTransform, TransformComponents.All, TransformComponents.Rotation, BoneIKInfo.Disabled, PoseMirrorMode.None, false);
+                return;
+            }
+        }
 
         if(reconcile)
             Reconcile(reset);

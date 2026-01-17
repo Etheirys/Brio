@@ -10,6 +10,7 @@ public class CharacterDataEX
     public Dictionary<ObjectKind, string> CustomizePlusScale { get; set; } = [];
     public Dictionary<ObjectKind, HashSet<FileReplacement>> FileReplacements { get; set; } = [];
     public Dictionary<ObjectKind, string> GlamourerString { get; set; } = [];
+
     public string HeelsData { get; set; } = string.Empty;
     public string HonorificData { get; set; } = string.Empty;
     public string ManipulationString { get; set; } = string.Empty;
@@ -51,7 +52,7 @@ public class CharacterDataEX
             {
                 return new FileReplacementData()
                 {
-                    GamePaths = g.SelectMany(f => f.GamePaths).Distinct(StringComparer.OrdinalIgnoreCase).ToArray(),
+                    GamePaths = [.. g.SelectMany(f => f.GamePaths).Distinct(StringComparer.OrdinalIgnoreCase)],
                     Hash = g.First().Hash,
                 };
             }).ToList());

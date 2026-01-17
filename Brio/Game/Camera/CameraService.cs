@@ -74,7 +74,7 @@ public unsafe class CameraService : IDisposable
             if(_virtualCameraService.CurrentCamera is not null)
             {
                 Vector3 currentPos = camera->Camera.CameraBase.SceneCamera.Object.Position;
-                var newPos = _virtualCameraService.CurrentCamera.PositionOffset + currentPos;
+                var newPos = _virtualCameraService.CurrentCamera.PositionOffset + _virtualCameraService.CurrentCamera.TargetOffset + currentPos;
                 camera->Camera.CameraBase.SceneCamera.Object.Position = newPos;
 
                 Vector3 currentLookAt = camera->Camera.CameraBase.SceneCamera.LookAtVector;

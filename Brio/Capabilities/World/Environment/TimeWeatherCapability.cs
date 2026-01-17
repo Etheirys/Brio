@@ -7,12 +7,12 @@ namespace Brio.Capabilities.World;
 
 public class TimeWeatherCapability : Capability
 {
-    public WeatherService WeatherService { get; }
+    public EnvironmentService EnvironmentService { get; }
     public TimeService TimeService { get; }
 
-    public TimeWeatherCapability(Entity parent, TimeService timeService, WeatherService weatherService) : base(parent)
+    public TimeWeatherCapability(Entity parent, TimeService timeService, EnvironmentService weatherService) : base(parent)
     {
-        WeatherService = weatherService;
+        EnvironmentService = weatherService;
         TimeService = timeService;
 
         Widget = new TimeWeatherWidget(this);

@@ -1,9 +1,11 @@
-﻿using Brio.Entities.Actor;
+﻿using Brio.Entities;
+using Brio.Entities.Actor;
 using Brio.Game.Actor;
 using Brio.Game.Camera;
 using Brio.Game.GPose;
 using Brio.UI.Widgets.Actor;
 using Dalamud.Game.ClientState.Objects.Types;
+using FFXIVClientStructs.FFXIV.Client.Game.Object;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Numerics;
@@ -16,16 +18,23 @@ public class ActorDynamicPoseCapability : ActorCharacterCapability
     private readonly ActorAppearanceService _actorAppearanceService;
     private readonly GPoseService _gposeService;
     private readonly VirtualCameraManager _virtualCameraManager;
+    private readonly EntityManager _entityManager;
 
     public VirtualCamera? Camera => _virtualCameraManager.CurrentCamera;
     public bool IsEnabled { get; set; }
 
-    public ActorDynamicPoseCapability(ActorEntity parent, ActorLookAtService actorLookAtService, VirtualCameraManager virtualCameraManager, ActorAppearanceService actorAppearanceService, GPoseService gPoseService) : base(parent)
+    public string SelectedActorName = "Select an actor to track";
+    public bool IsSelectingActor;
+
+    public EntityManager EntityManager => _entityManager;
+
+    public ActorDynamicPoseCapability(ActorEntity parent, EntityManager entityManager, ActorLookAtService actorLookAtService, VirtualCameraManager virtualCameraManager, ActorAppearanceService actorAppearanceService, GPoseService gPoseService) : base(parent)
     {
         _actorLookAtService = actorLookAtService;
         _actorAppearanceService = actorAppearanceService;
         _gposeService = gPoseService;
         _virtualCameraManager = virtualCameraManager;
+        _entityManager = entityManager;
 
         Widget = new ActorDynamicPoseWidget(this);
     }
@@ -53,6 +62,11 @@ public class ActorDynamicPoseCapability : ActorCharacterCapability
     public void SetTargetType(LookAtTargetType lookAtTarget)
     {
         _actorLookAtService.SetTargetType(GameObject, lookAtTarget);
+    }
+
+    public void SetActorTarget(bool doLock, LookAtTargetType targetType, GameObjectId targetActorID)
+    {
+        _actorLookAtService.SetActorTarget(GameObject, doLock, targetType, targetActorID);
     }
 
     public LookAtDataHolder? GetData()

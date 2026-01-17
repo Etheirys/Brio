@@ -101,7 +101,7 @@ public static class BrioStyle
         ImGui.PushStyleVar(ImGuiStyleVar.ItemInnerSpacing, new Vector2(4, 4));
 
         ImGui.PushStyleVar(ImGuiStyleVar.IndentSpacing, 21.0f);
-        ImGui.PushStyleVar(ImGuiStyleVar.ScrollbarSize, 5.0f);
+        ImGui.PushStyleVar(ImGuiStyleVar.ScrollbarSize, 9.0f);
         ImGui.PushStyleVar(ImGuiStyleVar.GrabMinSize, 20.0f);
 
         ImGui.PushStyleVar(ImGuiStyleVar.WindowBorderSize, 1f);

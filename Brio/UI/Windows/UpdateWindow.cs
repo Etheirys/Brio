@@ -100,7 +100,7 @@ public class UpdateWindow : Window
 
         // Image
 
-        var image = ResourceProvider.Instance.GetResourceImage($"Changelog.Images.brio-artbk-dec-19.png");
+        var image = ResourceProvider.Instance.GetResourceImage($"Changelog.Images.brio-artbk-jan-16.png");
 
         // Calculate scaling to fill width and maintain aspect ratio
         var imageAspect = (float)(image.Width / image.Height);

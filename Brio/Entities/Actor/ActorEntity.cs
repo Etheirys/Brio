@@ -14,98 +14,97 @@ using Dalamud.Interface.Utility.Raii;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 
-namespace Brio.Entities.Actor
+namespace Brio.Entities.Actor;
+
+public class ActorEntity(IGameObject gameObject, IServiceProvider provider) : Entity(new EntityId(gameObject), provider)
 {
-    public class ActorEntity(IGameObject gameObject, IServiceProvider provider) : Entity(new EntityId(gameObject), provider)
+    public readonly IGameObject GameObject = gameObject;
+
+    private readonly ConfigurationService _configService = provider.GetRequiredService<ConfigurationService>();
+
+    public string RawName = "";
+    public override string FriendlyName
     {
-        public readonly IGameObject GameObject = gameObject;
-
-        private readonly ConfigurationService _configService = provider.GetRequiredService<ConfigurationService>();
-
-        public string RawName = "";
-        public override string FriendlyName
+        get
         {
-            get
+            if(string.IsNullOrEmpty(RawName))
             {
-                if(string.IsNullOrEmpty(RawName))
-                {
-                    return _configService.Configuration.Interface.CensorActorNames ? GameObject.GetCensoredName() : GameObject.GetFriendlyName();
-                }
-
-                return GameObject.GetAsCustomName(RawName);
-            }
-            set
-            {
-                RawName = value;
-            }
-        }
-        public override FontAwesomeIcon Icon => IsProp ? FontAwesomeIcon.Cube : GameObject.GetFriendlyIcon();
-
-        public unsafe override bool IsVisible => true;
-
-        public override EntityFlags Flags => EntityFlags.AllowDoubleClick | EntityFlags.HasContextButton | EntityFlags.DefaultOpen;
-
-        public override int ContextButtonCount => 1;
-
-        public bool IsProp => ActorType == ActorType.Prop;
-
-        public ActorType ActorType => GetActorType();
-
-        private ActorType GetActorType()
-        {
-            if(SpawnFlag.HasFlag(SpawnFlags.IsEffect))
-                return ActorType.Effect;
-            if(SpawnFlag.HasFlag(SpawnFlags.IsProp))
-                return ActorType.Prop;
-
-            return ActorType.BrioActor;
-        }
-
-        public override void OnDoubleClick()
-        {
-            var aac = GetCapability<ActorAppearanceCapability>();
-            RenameActorModal.Open(aac.Actor);
-        }
-
-        public override void DrawContextButton()
-        {
-            var aac = GetCapability<ActorAppearanceCapability>();
-
-            using(ImRaii.PushColor(ImGuiCol.Button, ThemeManager.CurrentTheme.Accent.AccentColor, aac.IsHidden))
-            {
-                string toolTip = aac.IsHidden ? $"Show {aac.Actor.FriendlyName}" : $"Hide {aac.Actor.FriendlyName}";
-                if(ImBrio.FontIconButtonRight($"###{Id}_hideActor", aac.IsHidden ? FontAwesomeIcon.EyeSlash : FontAwesomeIcon.Eye, 1f, toolTip, bordered: false))
-                {
-                    aac.ToggleHide();
-                }
-            }
-        }
-
-        public override void OnAttached()
-        {
-            AddCapability(ActivatorUtilities.CreateInstance<ActorLifetimeCapability>(_serviceProvider, this));
-            AddCapability(ActivatorUtilities.CreateInstance<ActorAppearanceCapability>(_serviceProvider, this));
-
-            if(ActorType is ActorType.BrioActor)
-                AddCapability(ActorDynamicPoseCapability.CreateIfEligible(_serviceProvider, this));
-
-            AddCapability(ActivatorUtilities.CreateInstance<SkeletonPosingCapability>(_serviceProvider, this));
-            AddCapability(ActivatorUtilities.CreateInstance<ModelPosingCapability>(_serviceProvider, this));
-            AddCapability(ActivatorUtilities.CreateInstance<PosingCapability>(_serviceProvider, this));
-
-            AddCapability(ActionTimelineCapability.CreateIfEligible(_serviceProvider, this));
-
-            if(ActorType is not ActorType.Prop)
-            {
-                if(ActorType is not ActorType.Effect)
-                {
-                    AddCapability(CompanionCapability.CreateIfEligible(_serviceProvider, this));
-                }
-
-                AddCapability(StatusEffectCapability.CreateIfEligible(_serviceProvider, this));
+                return _configService.Configuration.Interface.CensorActorNames ? GameObject.GetCensoredName() : GameObject.GetFriendlyName();
             }
 
-            AddCapability(ActivatorUtilities.CreateInstance<ActorDebugCapability>(_serviceProvider, this));
+            return GameObject.GetAsCustomName(RawName);
         }
+        set
+        {
+            RawName = value;
+        }
+    }
+    public override FontAwesomeIcon Icon => IsProp ? FontAwesomeIcon.Cube : GameObject.GetFriendlyIcon();
+
+    public override bool IsVisible => true;
+
+    public override EntityFlags Flags => EntityFlags.AllowDoubleClick | EntityFlags.HasContextButton | EntityFlags.DefaultOpen | EntityFlags.AllowMultiSelect;
+
+    public override int ContextButtonCount => 1;
+
+    public bool IsProp => ActorType == ActorType.Prop;
+
+    public ActorType ActorType => GetActorType();
+
+    private ActorType GetActorType()
+    {
+        if(SpawnFlag.HasFlag(SpawnFlags.IsEffect))
+            return ActorType.Effect;
+        if(SpawnFlag.HasFlag(SpawnFlags.IsProp))
+            return ActorType.Prop;
+
+        return ActorType.BrioActor;
+    }
+
+    public override void OnDoubleClick()
+    {
+        var aac = GetCapability<ActorAppearanceCapability>();
+        RenameActorModal.Open(aac.Actor);
+    }
+
+    public override void DrawContextButton()
+    {
+        var aac = GetCapability<ActorAppearanceCapability>();
+
+        using(ImRaii.PushColor(ImGuiCol.Button, ThemeManager.CurrentTheme.Accent.AccentColor, aac.IsHidden))
+        {
+            string toolTip = aac.IsHidden ? $"Show {aac.Actor.FriendlyName}" : $"Hide {aac.Actor.FriendlyName}";
+            if(ImBrio.FontIconButtonRight($"###{Id}_hideActor", aac.IsHidden ? FontAwesomeIcon.EyeSlash : FontAwesomeIcon.Eye, 1f, toolTip, bordered: false))
+            {
+                aac.ToggleHide();
+            }
+        }
+    }
+
+    public override void OnAttached()
+    {
+        AddCapability(ActivatorUtilities.CreateInstance<ActorLifetimeCapability>(_serviceProvider, this));
+        AddCapability(ActivatorUtilities.CreateInstance<ActorAppearanceCapability>(_serviceProvider, this));
+
+        if(ActorType is ActorType.BrioActor)
+            AddCapability(ActorDynamicPoseCapability.CreateIfEligible(_serviceProvider, this));
+
+        AddCapability(ActivatorUtilities.CreateInstance<SkeletonPosingCapability>(_serviceProvider, this));
+        AddCapability(ActivatorUtilities.CreateInstance<ModelPosingCapability>(_serviceProvider, this));
+        AddCapability(ActivatorUtilities.CreateInstance<PosingCapability>(_serviceProvider, this));
+
+        AddCapability(ActionTimelineCapability.CreateIfEligible(_serviceProvider, this));
+
+        if(ActorType is not ActorType.Prop)
+        {
+            if(ActorType is not ActorType.Effect)
+            {
+                AddCapability(CompanionCapability.CreateIfEligible(_serviceProvider, this));
+            }
+
+            AddCapability(StatusEffectCapability.CreateIfEligible(_serviceProvider, this));
+        }
+
+        AddCapability(ActivatorUtilities.CreateInstance<ActorDebugCapability>(_serviceProvider, this));
     }
 }

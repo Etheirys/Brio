@@ -39,7 +39,7 @@ public unsafe class ActorAPI(ActorSpawnService actorSpawnService, MCDFService mC
     {
         if(_gPoseService.IsGPosing == false) return null;
 
-        return _entityManager.TryGetAllActorsAsGameObject().ToArray();
+        return [.. _entityManager.TryGetAllActorsAsGameObject()];
     }
 
     public BrioApiResult LoadMCDF(IGameObject gameObject, string path)

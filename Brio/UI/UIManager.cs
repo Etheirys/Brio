@@ -173,6 +173,11 @@ public class UIManager : IDisposable
         _projectWindow.IsOpen = !_projectWindow.IsOpen;
     }
 
+    public void ToggleMCDFWindow()
+    {
+        _mCDFWindow.IsOpen = !_mCDFWindow.IsOpen;
+    }
+
     public void ShowSettingsWindow()
     {
         _settingsWindow.IsOpen = true;

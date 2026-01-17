@@ -1,6 +1,6 @@
 ﻿using Brio.Config;
+using Brio.Core;
 using Brio.IPC;
-using Brio.MCDF.Utils;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -113,7 +113,7 @@ public class FileCacheService : IDisposable
             var fi = new FileInfo(fileCache.ResolvedFilepath);
             fileCache.Size = fi.Length;
             fileCache.CompressedSize = null;
-            fileCache.Hash = Crypto.GetFileHash(fileCache.ResolvedFilepath);
+            fileCache.Hash = BLAKE3.HashFile(fileCache.ResolvedFilepath);
             fileCache.LastModifiedDateTicks = fi.LastWriteTimeUtc.Ticks.ToString(CultureInfo.InvariantCulture);
         }
         RemoveHashedFile(oldHash, prefixedPath);
@@ -143,7 +143,7 @@ public class FileCacheService : IDisposable
 
     private FileCacheEntity? CreateFileCacheEntity(FileInfo fileInfo, string prefixedPath, string? hash = null)
     {
-        hash ??= Crypto.GetFileHash(fileInfo.FullName);
+        hash ??= BLAKE3.HashFile(fileInfo.FullName);
         var entity = new FileCacheEntity(hash, prefixedPath, fileInfo.LastWriteTimeUtc.Ticks.ToString(CultureInfo.InvariantCulture), fileInfo.Length);
         entity = ReplacePathPrefixes(entity);
         AddHashedFile(entity);

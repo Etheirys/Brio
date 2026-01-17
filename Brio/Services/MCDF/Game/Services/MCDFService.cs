@@ -263,6 +263,7 @@ public class MCDFService : IDisposable
     {
         Guid? cPlusId = null;
         Guid penumbraCollection;
+
         try
         {
             DataApplicationProgress = "Reverting previous Application";
@@ -303,8 +304,6 @@ public class MCDFService : IDisposable
             {
                 Brio.Log.Debug($"{DataApplicationProgress}");
                 cPlusId = await _customizePlusService.SetBodyScaleAsync(tempHandler.GameObject, customizeData).ConfigureAwait(false);
-                //Brio.Log.Warning("LOOK AT ME I' M MR MESEECKS {customizeData}");
-                //Brio.Log.Warning(customizeData);
             }
             else
             {

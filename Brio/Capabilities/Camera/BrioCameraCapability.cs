@@ -1,4 +1,5 @@
 ﻿using Brio.Config;
+using Brio.Entities;
 using Brio.Entities.Camera;
 using Brio.Game.Camera;
 using Brio.Game.GPose;
@@ -11,14 +12,16 @@ public class BrioCameraCapability : CameraCapability
 {
     private readonly CameraWindow _cameraWindow;
     private readonly VirtualCameraManager _virtualCameraService;
-    public readonly ConfigurationService configurationService;
+    public readonly ConfigurationService _configurationService;
+    public readonly EntityManager _entityManager;
 
-    public BrioCameraCapability(CameraEntity parent, VirtualCameraManager virtualCameraService, GPoseService gPoseService, CameraWindow cameraWindow, ConfigurationService configService) : base(parent, gPoseService)
+    public BrioCameraCapability(CameraEntity parent, EntityManager entityManager, VirtualCameraManager virtualCameraService, GPoseService gPoseService, CameraWindow cameraWindow, ConfigurationService configService) : base(parent, gPoseService)
     {
         _virtualCameraService = virtualCameraService;
         _cameraWindow = cameraWindow;
+        _entityManager = entityManager;
 
-        configurationService = configService;
+        _configurationService = configService;
 
         Widget = new BrioCameraWidget(this);
     }

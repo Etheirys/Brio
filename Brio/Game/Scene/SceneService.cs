@@ -12,12 +12,13 @@ using Brio.Game.Actor.Appearance;
 using Brio.Game.Actor.Extensions;
 using Brio.Game.Camera;
 using Brio.Game.Core;
+using Brio.IPC;
 using Dalamud.Plugin.Services;
 using System.Threading.Tasks;
 
 namespace Brio.Game.Scene;
 
-public class SceneService(EntityManager _entityManager, VirtualCameraManager _virtualCameraManager, IFramework _framework)
+public class SceneService(EntityManager _entityManager, VirtualCameraManager _virtualCameraManager, IPCManager _ipcManager, IFramework _framework)
 {
     public bool IsLoading { get; private set; }
 
@@ -48,7 +49,7 @@ public class SceneService(EntityManager _entityManager, VirtualCameraManager _vi
             var wrc = environmentEntity.GetCapability<WorldRenderingCapability>();
             sceneFile.EnvironmentData = new EnvironmentData
             {
-                CurrentWeather = wc.WeatherService.CurrentWeather,
+                CurrentWeather = wc.EnvironmentService.CurrentWeather,
                 IsTimeFrozen = wc.TimeService.IsTimeFrozen,
                 EorzeaTime = wc.TimeService.EorzeaTime,
                 DayOfMonth = wc.TimeService.DayOfMonth,
@@ -117,7 +118,7 @@ public class SceneService(EntityManager _entityManager, VirtualCameraManager _vi
             var wc = environmentEntity.GetCapability<TimeWeatherCapability>();
             var wrc = environmentEntity.GetCapability<WorldRenderingCapability>();
 
-            wc.WeatherService.CurrentWeather = sceneFile.EnvironmentData.CurrentWeather;
+            wc.EnvironmentService.CurrentWeather = sceneFile.EnvironmentData.CurrentWeather;
             wc.TimeService.IsTimeFrozen = sceneFile.EnvironmentData.IsTimeFrozen;
             wc.TimeService.EorzeaTime = sceneFile.EnvironmentData.EorzeaTime;
             wc.TimeService.DayOfMonth = sceneFile.EnvironmentData.DayOfMonth;

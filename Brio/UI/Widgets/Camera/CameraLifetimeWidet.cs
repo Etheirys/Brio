@@ -1,4 +1,6 @@
 ﻿using Brio.Capabilities.Camera;
+using Brio.Game.Actor;
+using Brio.Game.World;
 using Brio.UI.Controls;
 using Brio.UI.Controls.Editors;
 using Brio.UI.Controls.Stateless;
@@ -9,8 +11,17 @@ using Dalamud.Interface.Utility.Raii;
 
 namespace Brio.UI.Widgets.Camera;
 
-public class CameraLifetimeWidget(CameraLifetimeCapability capability) : Widget<CameraLifetimeCapability>(capability)
+public class CameraLifetimeWidget : Widget<CameraLifetimeCapability>
 {
+    private readonly ActorSpawnService _actorSpawnService;
+    private readonly LightingService _lightingService;
+
+    public CameraLifetimeWidget(CameraLifetimeCapability capability, ActorSpawnService actorSpawnService, LightingService lightingService) : base(capability)
+    {
+        _actorSpawnService = actorSpawnService;
+        _lightingService = lightingService;
+    }
+
     public override string HeaderName => "Lifetime";
 
     public override WidgetFlags Flags => WidgetFlags.DrawPopup | WidgetFlags.DrawQuickIcons;
@@ -19,11 +30,11 @@ public class CameraLifetimeWidget(CameraLifetimeCapability capability) : Widget<
     {
         using(ImRaii.Disabled(Capability.IsAllowed == false))
         {
-            if(ImBrio.FontIconButton("CameraLifetime_spawnnew", FontAwesomeIcon.Plus, "New Camera"))
+            if(ImBrio.FontIconButton("CameraLifetime_spawnnew", FontAwesomeIcon.Plus, "Spawn New"))
             {
-                ImGui.OpenPopup("DrawSpawnMenuPopup");
+                ImGui.OpenPopup("UnifiedSpawnMenuPopup");
             }
-            CameraEditor.DrawSpawnMenu(Capability.VirtualCameraManager);
+            SpawnMenuEditor.DrawUnifiedSpawnMenu(_actorSpawnService, Capability.VirtualCameraManager, _lightingService);
 
             ImGui.SameLine();
 

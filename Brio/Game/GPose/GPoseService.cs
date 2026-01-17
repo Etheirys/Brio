@@ -1,4 +1,6 @@
 ﻿using Brio.Config;
+using Brio.Services;
+using Brio.Services.MediatorMessages;
 using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Hooking;
 using Dalamud.Plugin.Services;
@@ -6,6 +8,7 @@ using FFXIVClientStructs.FFXIV.Client.Game.Event;
 using FFXIVClientStructs.FFXIV.Client.System.Framework;
 using FFXIVClientStructs.FFXIV.Client.UI;
 using System;
+
 using NativeCharacter = FFXIVClientStructs.FFXIV.Client.Game.Character.Character;
 
 namespace Brio.Game.GPose;
@@ -48,14 +51,16 @@ public unsafe class GPoseService : IDisposable
     private readonly IFramework _framework;
     private readonly IClientState _clientState;
     private readonly ConfigurationService _configService;
+    private readonly Mediator _mediator;
 
     public const string BrioHiddenName = "[HIDDEN]";
 
-    public GPoseService(IFramework framework, IClientState clientState, ConfigurationService configService, IGameInteropProvider interopProvider, ISigScanner scanner)
+    public GPoseService(IFramework framework, IClientState clientState, Mediator mediator, ConfigurationService configService, IGameInteropProvider interopProvider, ISigScanner scanner)
     {
         _framework = framework;
         _clientState = clientState;
         _configService = configService;
+        _mediator = mediator;
 
         _isInGPose = _clientState.IsGPosing;
 
@@ -118,7 +123,9 @@ public unsafe class GPoseService : IDisposable
     private void ExitingGPoseDetour(UIModule* uiModule)
     {
         _exitGPoseHook.Original.Invoke(uiModule);
+
         HandleGPoseStateChange(false);
+        _mediator.Publish(new GposeEndMessage());
     }
 
     private bool EnteringGPoseDetour(UIModule* uiModule)
@@ -126,6 +133,7 @@ public unsafe class GPoseService : IDisposable
         bool didEnter = _enterGPoseHook.Original.Invoke(uiModule);
 
         HandleGPoseStateChange(didEnter);
+        _mediator.Publish(new GposeStartMessage());
 
         return didEnter;
     }

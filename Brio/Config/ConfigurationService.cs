@@ -1,10 +1,16 @@
 ﻿using Dalamud.Plugin;
 using System;
+using System.Reflection;
 
 namespace Brio.Config;
 
 public class ConfigurationService : IDisposable
 {
+
+    public const string WorldOfEtheirysRepo = "https://raw.githubusercontent.com/etheirys/worldofetheirys/main/repo.json";
+    public const string SeaOfStarsRepo = "https://raw.githubusercontent.com/ottermandias/seaofstars/main/repo.json";
+    public const string BrioRepo = "https://raw.githubusercontent.com/etheirys/brio/main/repo.json";
+
     public Configuration Configuration { get; private set; } = null!;
 
     private readonly IDalamudPluginInterface _pluginInterface;
@@ -54,8 +60,21 @@ public class ConfigurationService : IDisposable
     private static bool s_isDebug => false;
 #endif
 
-    private static readonly string s_version = typeof(Brio).Assembly.GetName().Version?.ToString() ?? "(Unknown Version)";
+    public static readonly string s_version = typeof(Brio).Assembly.GetName().Version?.ToString() ?? "(Unknown Version)";
 
     public bool IsDebug => s_isDebug || Configuration.ForceDebug;
     public string Version => IsDebug ? "(Debug)" : $"v{s_version}";
+    public string CommitHash => GetType().Assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion ?? "Unknown";
+
+    public bool IsFromTrustedSource => !IsDebug || IsTrustedRepo(_pluginInterface);
+
+    private static bool IsTrustedRepo(IDalamudPluginInterface pi) =>
+        pi.SourceRepository?.Trim().ToLowerInvariant() switch
+        {
+            null => false,
+            WorldOfEtheirysRepo => true,
+            SeaOfStarsRepo => true,
+            BrioRepo => true,
+            _ => false,
+        };
 }

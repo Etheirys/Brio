@@ -1,6 +1,5 @@
 ﻿using Brio.Capabilities.Actor;
 using Brio.Game.Actor;
-using Brio.UI.Controls.Core;
 using Brio.UI.Controls.Stateless;
 using Brio.UI.Widgets.Core;
 using Dalamud.Bindings.ImGui;
@@ -52,6 +51,8 @@ public class ActorDynamicPoseWidget(ActorDynamicPoseCapability capability) : Wid
         using(ImRaii.Disabled(!Capability.IsEnabled))
         {
             ImGui.Separator();
+         
+            ImBrio.VerticalPadding(5);
 
             if(ImBrio.ButtonSelectorStrip("DynamicFaceControlSelector", new Vector2(ImBrio.GetRemainingWidth(), ImBrio.GetLineHeight()), ref selected, ["Camera", "Position", "Actor"]))
             {
@@ -68,25 +69,31 @@ public class ActorDynamicPoseWidget(ActorDynamicPoseCapability capability) : Wid
                         Capability.SetMode(LookAtTargetMode.Position);
                         break;
                     case 2:
-                        Capability.SetMode(LookAtTargetMode.None);
+                        Capability.SetMode(LookAtTargetMode.Target);
                         break;
                 }
             }
-
+           
+          
             switch(selected)
             {
                 case 0:
+                    ImBrio.VerticalPadding(5);
                     DrawCamera();
+                    ImBrio.VerticalPadding(5);
                     break;
                 case 1:
+                    ImBrio.VerticalPadding(5);
                     DrawPosition();
+                    ImBrio.VerticalPadding(5);
                     break;
                 case 2:
-                    using(ImRaii.PushColor(ImGuiCol.Text, UIConstants.GizmoRed))
-                    {
-                        ImGui.Text("Feature currently unavailable.");
-                        ImGui.Text("Check back in a future update!");
-                    }
+                    ImBrio.VerticalPadding(5);
+                    DrawActor();
+                    ImBrio.VerticalPadding(5);
+                    break;
+                default:
+                    ImBrio.VerticalPadding(5);
                     break;
             }
 
@@ -102,6 +109,44 @@ public class ActorDynamicPoseWidget(ActorDynamicPoseCapability capability) : Wid
         eyesLock = false;
         bodyLock = false;
         headLock = false;
+    }
+
+    public void DrawActor()
+    {
+        ImBrio.CenterNextElementWithPadding(75);
+        if(ImGui.BeginCombo($"###actorsWidget_{Capability.Entity.Id}_list", Capability.SelectedActorName))
+        {
+            foreach(var value in Capability.EntityManager.TryGetAllActors())
+            {
+                if(value == Capability.Actor)
+                    continue;
+
+                if(ImGui.Selectable($"[ {value.FriendlyName} ]"))
+                {
+                    Capability.SetTargetType(LookAtTargetType.All);
+
+                    Capability.SetActorTarget(true, LookAtTargetType.All, value.GameObject.GameObjectId);
+
+                    Capability.SelectedActorName = value.FriendlyName;
+                    Capability.IsSelectingActor = true;
+                }
+            }
+            ImGui.EndCombo();
+        }
+
+        ImGui.SameLine();
+
+        if(ImBrio.FontIconButtonRight("reset_selected", FontAwesomeIcon.Undo, 1f, "Reset Selected Actor", Capability.IsSelectingActor))
+        {
+            Capability.SetMode(LookAtTargetMode.None);
+
+            Capability.SetTargetType(LookAtTargetType.None);
+
+            Capability.SetActorTarget(false, LookAtTargetType.All, 0);
+
+            Capability.IsSelectingActor = false;
+            Capability.SelectedActorName = "Select an actor to track";
+        }
     }
 
     public void DrawCamera()

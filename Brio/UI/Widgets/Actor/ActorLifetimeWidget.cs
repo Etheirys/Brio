@@ -1,5 +1,9 @@
 ﻿using Brio.Capabilities.Actor;
+using Brio.Game.Actor;
+using Brio.Game.Camera;
+using Brio.Game.World;
 using Brio.UI.Controls;
+using Brio.UI.Controls.Editors;
 using Brio.UI.Controls.Stateless;
 using Brio.UI.Widgets.Core;
 using Dalamud.Bindings.ImGui;
@@ -7,24 +11,36 @@ using Dalamud.Interface;
 
 namespace Brio.UI.Widgets.Actor;
 
-public class ActorLifetimeWidget(ActorLifetimeCapability capability) : Widget<ActorLifetimeCapability>(capability)
+public class ActorLifetimeWidget : Widget<ActorLifetimeCapability>
 {
+    private readonly ActorSpawnService _actorSpawnService;
+    private readonly VirtualCameraManager _cameraManager;
+    private readonly LightingService _lightingService;
+
+    public ActorLifetimeWidget(ActorLifetimeCapability capability, ActorSpawnService actorSpawnService, VirtualCameraManager cameraManager, LightingService lightingService) : base(capability)
+    {
+        _actorSpawnService = actorSpawnService;
+        _cameraManager = cameraManager;
+        _lightingService = lightingService;
+    }
+
     public override string HeaderName => "Lifetime";
 
     public override WidgetFlags Flags => WidgetFlags.DrawPopup | WidgetFlags.DrawQuickIcons;
 
     public override void DrawQuickIcons()
     {
-        if(ImBrio.FontIconButton("lifetimewidget_spawnnew", FontAwesomeIcon.Plus, "Spawn New Actor"))
+        if(ImBrio.FontIconButton("lifetimewidget_spawnnew", FontAwesomeIcon.Plus, "Spawn New"))
         {
-            Capability.SpawnNewActor(false, false, true);
+            ImGui.OpenPopup("UnifiedSpawnMenuPopup");
         }
+        SpawnMenuEditor.DrawUnifiedSpawnMenu(_actorSpawnService, _cameraManager, _lightingService);
 
         ImGui.SameLine();
 
-        if(ImBrio.FontIconButton("lifetimewidget_spawnnewwithcompanionslot", FontAwesomeIcon.PlusSquare, "Spawn New Actor with Companion slot"))
+        if(ImBrio.FontIconButton("lifetimewidget_spawn_prop", FontAwesomeIcon.Cubes, "Spawn Prop"))
         {
-            Capability.SpawnNewActor(false, true, false);
+            Capability.SpawnNewProp(false);
         }
 
         ImGui.SameLine();
@@ -32,13 +48,6 @@ public class ActorLifetimeWidget(ActorLifetimeCapability capability) : Widget<Ac
         if(ImBrio.FontIconButton("lifetimewidget_clone", FontAwesomeIcon.Clone, "Clone", Capability.CanClone))
         {
             Capability.Clone(false);
-        }
-
-        ImGui.SameLine();
-
-        if(ImBrio.FontIconButton("lifetimewidget_spawn_prop", FontAwesomeIcon.Cubes, "Spawn Prop"))
-        {
-            Capability.SpawnNewProp(true);
         }
 
         ImGui.SameLine();

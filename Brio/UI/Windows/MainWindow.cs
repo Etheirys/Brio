@@ -1,10 +1,11 @@
 ﻿using Brio.Config;
-using Brio.Core;
 using Brio.Entities;
+using Brio.Entities.Core;
 using Brio.Game.Core;
 using Brio.Game.GPose;
 using Brio.Game.Scene;
 using Brio.MCDF.Game.Services;
+using Brio.Services;
 using Brio.UI.Controls.Core;
 using Brio.UI.Controls.Stateless;
 using Brio.UI.Entitites;
@@ -34,6 +35,8 @@ public class MainWindow : Window, IDisposable
     private readonly HistoryService _groupedUndoService;
     private readonly MCDFService _mCDFService;
 
+    private float MaxHeight => (1050 * ImGuiHelpers.GlobalScale);
+
     public MainWindow(
         ConfigurationService configService,
         SettingsWindow settingsWindow,
@@ -47,7 +50,7 @@ public class MainWindow : Window, IDisposable
         AutoSaveService autoSaveService,
         MCDFService mCDFService
         )
-        : base($" {Brio.Name} [{configService.Version}]###brio_main_window", ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.AlwaysAutoResize)
+        : base($" {Brio.Name} [{configService.Version}]###brio_main_window", ImGuiWindowFlags.AlwaysAutoResize)
     {
         Namespace = "brio_main_namespace";
 
@@ -66,13 +69,40 @@ public class MainWindow : Window, IDisposable
 
         SizeConstraints = new WindowSizeConstraints
         {
-            MaximumSize = new Vector2(280, 1200),
+            MaximumSize = new Vector2(280, MaxHeight),
             MinimumSize = new Vector2(280, 200)
         };
     }
 
+    private bool _hasAdjustedForScrollbar = false;
     public override void Draw()
     {
+        bool hasScrollbar = ImGui.GetScrollMaxY() > 0;
+        if(hasScrollbar && _hasAdjustedForScrollbar is false)
+        {
+            var style = ImGui.GetStyle();
+
+            SizeConstraints = new WindowSizeConstraints
+            {
+                MaximumSize = new Vector2(280 + style.ScrollbarSize, MaxHeight),
+                MinimumSize = new Vector2(280 + style.ScrollbarSize, 200)
+            };
+
+            _hasAdjustedForScrollbar = true;
+        }
+        else if(hasScrollbar is false && _hasAdjustedForScrollbar is true)
+        {
+            _hasAdjustedForScrollbar = false;
+
+            SizeConstraints = new WindowSizeConstraints
+            {
+                MaximumSize = new Vector2(280, MaxHeight),
+                MinimumSize = new Vector2(280, 200)
+            };
+        }
+
+        //
+
         DrawHeaderButtons();
 
         if(_gPoseService.IsGPosing == false)
@@ -80,13 +110,31 @@ public class MainWindow : Window, IDisposable
             using(ImRaii.PushColor(ImGuiCol.Text, UIConstants.GizmoRed))
                 ImGui.Text("Open GPose to use Brio!");
         }
-
+      
         var rootEntity = _entityManager.RootEntity;
-
         if(rootEntity is null)
             return;
 
-        using(var container = ImRaii.Child("###entity_hierarchy_container", new Vector2(-1, ImGui.GetTextLineHeight() * 18f), true))
+        try
+        {
+            DrawEntitySelector(rootEntity);
+
+            EntityHelpers.DrawEntitySection(_entityManager.SelectedEntity);
+        }
+        catch(Exception ex)
+        {
+            Brio.Log.Error(ex, $"Failed to draw entity section: [ {_entityManager?.SelectedEntity?.FriendlyName ?? "Unknown"} ] ");
+        }
+    }
+
+
+    private float? _entitySelectorHeight;
+    private bool _isDraggingEntitySelector = false;
+    public void DrawEntitySelector(Entity rootEntity)
+    {
+        var containerHeight = _entitySelectorHeight ?? (ImGui.GetTextLineHeight() * 18f);
+
+        using(var container = ImRaii.Child("###entity_hierarchy_container", new Vector2(-1, containerHeight), true))
         {
             if(container.Success)
             {
@@ -100,13 +148,42 @@ public class MainWindow : Window, IDisposable
             }
         }
 
-        try
+        // Dragging of the bottom edge of the EntitySelector
+        var childMax = ImGui.GetItemRectMax();
+        var childX = ImGui.GetContentRegionAvail().X;
+        var dragZoneMin = new Vector2(childMax.X - childX, childMax.Y - 4);
+        var dragZoneSize = new Vector2(childX, 8);
+
+        // Invisible button to capture input
+        ImGui.SetCursorScreenPos(dragZoneMin);
+        ImGui.InvisibleButton("###entity_hierarchy_resize_handler", dragZoneSize);
+        bool isHovered = ImGui.IsItemHovered();
+
+        if(isHovered)
         {
-            EntityHelpers.DrawEntitySection(_entityManager.SelectedEntity);
+            ImGui.SetMouseCursor(ImGuiMouseCursor.ResizeNs);
+
+            if(isHovered && ImGui.IsMouseClicked(ImGuiMouseButton.Left))
+            {
+                _isDraggingEntitySelector = true;
+            }
         }
-        catch(Exception ex)
+
+        if(_isDraggingEntitySelector)
         {
-            Brio.Log.Error(ex, $"Failed to draw entity section: [ {_entityManager?.SelectedEntity?.FriendlyName ?? "Unknown"} ] ");
+            if(ImGui.IsMouseDown(ImGuiMouseButton.Left))
+            {
+                containerHeight += ImGui.GetIO().MouseDelta.Y;
+                containerHeight = Math.Clamp(containerHeight, ImGui.GetTextLineHeight() * 5f, ImGui.GetTextLineHeight() * 35f);
+
+                _entitySelectorHeight = containerHeight;
+
+                ImGui.SetMouseCursor(ImGuiMouseCursor.ResizeNs);
+            }
+            else
+            {
+                _isDraggingEntitySelector = false;
+            }
         }
     }
 

@@ -1,13 +1,19 @@
 ﻿using Brio.Capabilities.Posing;
 using Brio.Core;
+using Brio.Entities;
+using Brio.Entities.Actor;
+using Brio.Entities.Core;
 using Brio.Game.Posing;
 using Brio.Input;
+using Brio.Services;
 using Brio.UI.Controls.Stateless;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface;
 using Dalamud.Interface.Utility;
 using Dalamud.Interface.Utility.Raii;
 using OneOf.Types;
+using System.Collections.Generic;
+using System.Linq;
 using System.Numerics;
 
 namespace Brio.UI.Controls.Editors;
@@ -16,6 +22,7 @@ public class PosingTransformEditor
 {
     private Transform? _trackingTransform;
     private Vector3? _trackingEuler;
+    private List<(EntityId id, PoseInfo info, Transform model)>? _groupedPendingSnapshot = null;
 
     public void Draw(string id, PosingCapability posingCapability, bool compactMode = false)
     {
@@ -188,7 +195,7 @@ public class PosingTransformEditor
             if(didChange && bone is not null && bonePose is not null)
             {
                 if(posingCapability.IsMultiSelecting)
-                {
+                {    
                     var delta = realTransform.CalculateDiff(beforeMods);
                     foreach(var selectedBoneId in posingCapability.SelectedBones)
                     {
@@ -229,6 +236,37 @@ public class PosingTransformEditor
     }
 
     private void DrawModelTransformEditor(PosingCapability posingCapability, bool compactMode = false)
+    {
+        // Check if multiple actors are selected
+        if(!Brio.TryGetService(out EntityManager entityManager))
+        {
+            DrawModelTransformEditorSingle(posingCapability, compactMode);
+            return;
+        }
+
+        var selectedActors = new List<(ActorEntity actor, PosingCapability capability, Transform transform)>();
+        
+        foreach(var entityId in entityManager.SelectedEntityIds)
+        {
+            if(entityManager.TryGetEntity(entityId, out var entity) && 
+               entity is ActorEntity actorEntity &&
+               actorEntity.TryGetCapability<PosingCapability>(out var cap))
+            {
+                selectedActors.Add((actorEntity, cap, cap.ModelPosing.Transform));
+            }
+        }
+
+        if(selectedActors.Count > 1)
+        {
+            DrawModelTransformEditorMulti(selectedActors, posingCapability, compactMode);
+        }
+        else
+        {
+            DrawModelTransformEditorSingle(posingCapability, compactMode);
+        }
+    }
+
+    private void DrawModelTransformEditorSingle(PosingCapability posingCapability, bool compactMode = false)
     {
         var before = posingCapability.ModelPosing.Transform;
         var isProp = posingCapability.Actor.IsProp;
@@ -290,6 +328,122 @@ public class PosingTransformEditor
                 if(_trackingEuler.HasValue || _trackingTransform.HasValue)
                 {
                     posingCapability.Snapshot(false, false);
+                }
+
+                _trackingTransform = null;
+                _trackingEuler = null;
+            }
+        }
+    }
+
+    private void DrawModelTransformEditorMulti(List<(ActorEntity actor, PosingCapability capability, Transform transform)> selectedActors, PosingCapability primaryCapability, bool compactMode = false)
+    {
+        var centroid = GroupedTransformHelper.CalculateCentroid(selectedActors.Select(a => a.transform));
+
+        var offset = primaryCapability.ModelPosing.TransformOffset;
+        var primaryTransform = _trackingTransform ?? primaryCapability.ModelPosing.Transform;
+        var beforeMods = primaryTransform;
+        var realEuler = _trackingEuler ?? primaryTransform.Rotation.ToEuler();
+
+        bool anyFrozen = selectedActors.Any(a => a.capability.ModelPosing.Freeze);
+
+        using(ImRaii.Disabled(anyFrozen))
+        {
+            bool didChange = false;
+            bool anyActive = false;
+
+            (var pdidChange, var panyActive) = ImBrio.DragFloat3($"###_transformPosition_1", ref primaryTransform.Position, offset, FontAwesomeIcon.ArrowsUpDownLeftRight, "Position (Group)", enableExpanded: compactMode);
+            ImBrio.VerticalPadding(2);
+            (var rdidChange, var ranyActive) = ImBrio.DragFloat3($"###_transformRotation_1", ref realEuler, offset * 100, FontAwesomeIcon.ArrowsSpin, "Rotation (Pivot)", enableExpanded: compactMode);
+            ImBrio.VerticalPadding(2);
+            (var sdidChange, var sanyActive) = ImBrio.DragFloat3($"###_transformScale_1", ref primaryTransform.Scale, offset, FontAwesomeIcon.ExpandAlt, "Scale (Group)", enableExpanded: compactMode);
+            ImBrio.VerticalPadding(2);
+
+            didChange |= pdidChange || rdidChange || sdidChange;
+            anyActive |= panyActive || ranyActive || sanyActive;
+
+            primaryTransform.Rotation = realEuler.ToQuaternion();
+
+            if(didChange)
+            {
+                if(_groupedPendingSnapshot == null && Brio.TryGetService(out HistoryService? historyService))
+                {
+                    var list = new List<(EntityId, PoseInfo, Transform)>();
+                    if(Brio.TryGetService(out EntityManager? entityManager))
+                    {
+                        foreach(var id in entityManager.SelectedEntityIds)
+                        {
+                            if(!entityManager.TryGetEntity(id, out var ent))
+                                continue;
+
+                            if(!ent.TryGetCapability<PosingCapability>(out var cap))
+                                continue;
+
+                            list.Add((id, cap.SkeletonPosing.PoseInfo.Clone(), cap.ModelPosing.Transform));
+                        }
+                    }
+                    _groupedPendingSnapshot = list;
+                }
+
+                var delta = primaryTransform.CalculateDiff(beforeMods);
+
+                foreach(var (actor, capability, originalTransform) in selectedActors)
+                {
+                    if(capability.ModelPosing.Freeze)
+                        continue;
+
+                    Transform newTransform;
+
+                    if(rdidChange)
+                    {
+                        var rotationDelta = delta.Rotation;
+                        newTransform = GroupedTransformHelper.ApplyRotationDeltaAroundPivot(
+                            originalTransform,
+                            centroid,
+                            rotationDelta
+                        );
+
+                        if(pdidChange)
+                            newTransform.Position += delta.Position;
+                        if(sdidChange)
+                            newTransform.Scale += delta.Scale;
+                    }
+                    else
+                    {
+                        newTransform = originalTransform + delta;
+                    }
+
+                    capability.ModelPosing.Transform = newTransform;
+                }
+
+                if(pdidChange || rdidChange)
+                {
+                    centroid = GroupedTransformHelper.CalculateCentroid(selectedActors.Select(a => a.capability.ModelPosing.Transform));
+                }
+            }
+
+            if(anyActive)
+            {
+                _trackingTransform = primaryTransform;
+                _trackingEuler = realEuler;
+            }
+            else
+            {
+                if(_trackingEuler.HasValue || _trackingTransform.HasValue)
+                {
+                    if(_groupedPendingSnapshot != null && _groupedPendingSnapshot.Count > 0)
+                    {
+                        if(Brio.TryGetService(out HistoryService? historyService))
+                        {
+                            historyService.Snapshot(_groupedPendingSnapshot);
+                        }
+                        _groupedPendingSnapshot = null;
+                    }
+
+                    foreach(var (_, capability, _) in selectedActors)
+                    {
+                        capability.Snapshot(false, false);
+                    }
                 }
 
                 _trackingTransform = null;

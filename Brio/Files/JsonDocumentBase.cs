@@ -13,7 +13,6 @@ public abstract class JsonDocumentBaseFileInfo<T> : FileTypeInfoBase<T>
 
 [Serializable]
 [MessagePackObject(keyAsPropertyName: true)]
-[Union(0, typeof(SceneFile))]
 [Union(1, typeof(AnamnesisCharaFile))]
 [Union(2, typeof(PoseFile))]
 public abstract class JsonDocumentBase : IFileMetadata

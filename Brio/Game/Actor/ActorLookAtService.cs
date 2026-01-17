@@ -32,7 +32,7 @@ public unsafe class ActorLookAtService : IDisposable
     private readonly GPoseService _gPoseService;
     private readonly VirtualCameraManager _virtualCameraManager;
 
-    private unsafe delegate* unmanaged<CharacterLookAtController*, LookAtTarget*, uint, nint, void> _updateLookAt;
+    private delegate* unmanaged<CharacterLookAtController*, LookAtTarget*, uint, nint, void> _updateLookAt;
 
     public delegate nint ActorLookAtLoopDelegate(ContainerInterface* args);
     public Hook<ActorLookAtLoopDelegate> _actorLookAtLoop = null!;
@@ -57,7 +57,7 @@ public unsafe class ActorLookAtService : IDisposable
         _gPoseService.OnGPoseStateChange += OnGPoseStateChange;
     }
 
-    public unsafe nint ActorLookAtDetour(ContainerInterface* args)
+    public nint ActorLookAtDetour(ContainerInterface* args)
     {
         if(_gPoseService.IsGPosing)
         {
@@ -98,7 +98,7 @@ public unsafe class ActorLookAtService : IDisposable
         return _actorLookAtLoop.Original(args);
     }
 
-    public unsafe void StopLookAt(IGameObject gameobj)
+    public void StopLookAt(IGameObject gameobj)
     {
         if(_lookAtHandles.TryGetValue(gameobj.GameObjectId, out var obj))
         {
@@ -108,7 +108,7 @@ public unsafe class ActorLookAtService : IDisposable
         }
     }
 
-    public unsafe void AddObjectToLook(IGameObject gameobj)
+    public void AddObjectToLook(IGameObject gameobj)
     {
         var camera = _virtualCameraManager?.CurrentCamera;
 
@@ -152,6 +152,7 @@ public unsafe class ActorLookAtService : IDisposable
             },
         };
     }
+
     public void RemoveObjectFromLook(IGameObject gameobj)
     {
         if(_lookAtHandles.ContainsKey(gameobj.GameObjectId))
@@ -160,30 +161,43 @@ public unsafe class ActorLookAtService : IDisposable
         }
     }
 
-    public unsafe void SetTargetType(IGameObject obj, LookAtTargetType lookAtTarget)
+    public void SetTargetType(IGameObject obj, LookAtTargetType lookAtTarget)
     {
         if(obj is not null && _lookAtHandles.TryGetValue(obj.GameObjectId, out LookAtDataHolder value))
         {
             value.TargetType = lookAtTarget;
         }
     }
-    public unsafe void SetTargetMode(IGameObject obj, LookAtTargetMode lookAtTargetMode)
+    public void SetTargetMode(IGameObject obj, LookAtTargetMode lookAtTargetMode)
     {
         if(obj is not null && _lookAtHandles.TryGetValue(obj.GameObjectId, out LookAtDataHolder value))
         {
             value.TargetMode = lookAtTargetMode;
         }
     }
-    public unsafe void SetTargetLock(IGameObject obj, bool doLock, LookAtTargetType targetType, Vector3 Target)
+
+    public void SetTargetLock(IGameObject obj, bool doLock, LookAtTargetType targetType, Vector3 Target)
     {
         if(obj is not null && _lookAtHandles.TryGetValue(obj.GameObjectId, out LookAtDataHolder value))
         {
             value.SetTargetLock(doLock, targetType, Target);
         }
     }
+    public unsafe void SetActorTarget(IGameObject obj, bool doLock, LookAtTargetType targetType, GameObjectId targetActorID)
+    {
+        if(obj is not null && _lookAtHandles.TryGetValue(obj.GameObjectId, out LookAtDataHolder value))
+        {
+            value.SetActorLock(doLock, targetType, targetActorID);
+
+            if(obj is ICharacter actor)
+            {
+                actor.Native()->SetTargetId(targetActorID);
+            }
+        }
+    }
 
 #nullable enable
-    public unsafe LookAtDataHolder? GetTargetDataHolder(IGameObject obj)
+    public LookAtDataHolder? GetTargetDataHolder(IGameObject obj)
     {
         if(obj is not null && _lookAtHandles.TryGetValue(obj.GameObjectId, out LookAtDataHolder? value))
         {
@@ -233,12 +247,24 @@ public class LookAtDataHolder
     public Vector3 BodyTarget { get => Target.Body.LookAtTarget.Position; set => Target.Body.LookAtTarget.Position = value; }
     public Vector3 HeadTarget { get => Target.Head.LookAtTarget.Position; set => Target.Head.LookAtTarget.Position = value; }
 
+    public GameObjectId EyesActorTarget { get => Target.Eyes.LookAtTarget.ActorTarget; set => Target.Eyes.LookAtTarget.ActorTarget = value; }
+    public GameObjectId BodyActorTarget { get => Target.Body.LookAtTarget.ActorTarget; set => Target.Body.LookAtTarget.ActorTarget = value; }
+    public GameObjectId HeadActorTarget { get => Target.Head.LookAtTarget.ActorTarget; set => Target.Head.LookAtTarget.ActorTarget = value; }
+
     public bool EyesTargetLock;
     public bool BodyTargetLock;
     public bool HeadTargetLock;
 
+    public bool HasActorLock;
+
+    public bool EyesActorTargetLock;
+    public bool BodyActorTargetLock;
+    public bool HeadActorTargetLock;
+
     public void SetTargetLock(bool doLock, LookAtTargetType targetType, Vector3 Target)
     {
+        LookMode = LookMode.Position;
+
         if(targetType.HasFlag(LookAtTargetType.Eyes))
         {
             EyesTarget = Target;
@@ -255,12 +281,29 @@ public class LookAtDataHolder
             HeadTargetLock = doLock;
         }
     }
+
+    public void SetActorLock(bool doLock, LookAtTargetType targetType, GameObjectId TargetID)
+    {
+        LookMode = LookMode.Target;
+
+        EyesActorTarget = TargetID;
+        EyesTargetLock = doLock;
+        EyesActorTargetLock = doLock;
+
+        BodyActorTarget = TargetID;
+        BodyTargetLock = doLock;
+        BodyActorTargetLock = doLock;
+
+        HeadActorTarget = TargetID;
+        HeadTargetLock = doLock;
+        HeadActorTargetLock = doLock;
+    }
 }
 
 public enum LookAtTargetMode
 {
     None,
-    Forward,
+    Target,
     Camera,
     Position
 }
@@ -270,8 +313,8 @@ public enum LookAtTargetType
 {
     None = 0,
     Body = 1,
-    Head = 4,
-    Eyes = 8,
+    Head = 2,
+    Eyes = 4,
 
     All = (Eyes | Head | Body)
 }
@@ -296,13 +339,13 @@ public struct LookAtTarget
 {
     [FieldOffset(0x08)] public LookMode LookMode;
     [FieldOffset(0x10)] public Vector3 Position;
-    [FieldOffset(0x10)] public GameObjectId Target;
+    [FieldOffset(0x10)] public GameObjectId ActorTarget;
 }
 
 public enum LookMode
 {
     None = 0,
-    Frozen = 1,
+    Target = 1,
     Pivot = 2,
     Position = 3,
 }

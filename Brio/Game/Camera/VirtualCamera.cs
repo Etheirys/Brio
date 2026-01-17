@@ -39,7 +39,11 @@ public unsafe partial class VirtualCamera
 
     public Vector3 Position = Vector3.Zero;
     public Vector3 PositionOffset = Vector3.Zero;
+    public Vector3 TargetOffset = Vector3.Zero;
     public Vector3 Rotation = Vector3.Zero;
+
+    public bool IsSelectingActor  => TargetOffset != Vector3.Zero;
+    public string SelectedActorName = "Select an actor to track";
 
     public float PivotRotation
     {
@@ -160,6 +164,9 @@ public unsafe partial class VirtualCamera
         FoV = 0f;
         Angle = Vector2.Zero;
         Pan = Vector2.Zero;
+
+        SelectedActorName = "Select an actor to track";
+        TargetOffset = Vector3.Zero;
     }
 
     public void SaveCameraState()

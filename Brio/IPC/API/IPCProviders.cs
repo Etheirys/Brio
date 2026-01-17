@@ -1,5 +1,7 @@
 ﻿using Brio.API;
 using Brio.API.Helpers;
+using Brio.Services;
+using Brio.Services.MediatorMessages;
 using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Plugin;
 using System;
@@ -7,7 +9,7 @@ using System.Collections.Generic;
 
 namespace Brio.IPC.API;
 
-public class BrioIPCProviders : IDisposable
+public class IPCProviders : MediatorSubscriberBase
 {
     private readonly List<IDisposable> _providers;
 
@@ -17,14 +19,16 @@ public class BrioIPCProviders : IDisposable
     public readonly BrioEventProvider<IGameObject> ActorDespawned;
     public readonly BrioEventProvider<IGameObject> ActorSpawned;
 
-
-    public BrioIPCProviders(IDalamudPluginInterface pi, BrioAPIService brioAPI)
+    public IPCProviders(Mediator mediator, IDalamudPluginInterface pi, BrioAPIService brioAPI) : base(mediator)
     {
         _deinitializedProvider = Deinitialized.Provider(pi);
         _initializedProvider = Initialized.Provider(pi);
 
         ActorDespawned = global::Brio.API.ActorDestroyed.Provider(pi);
         ActorSpawned = global::Brio.API.ActorSpawned.Provider(pi);
+
+        Mediator.Subscribe<ActorSpawnedMessage>(this, (IGameObject) => ActorSpawned.Invoke(IGameObject.GameObject));
+        Mediator.Subscribe<ActorDespawnedMessage>(this, (IGameObject) => ActorDespawned.Invoke(IGameObject.GameObject));
 
         _providers = [
             ApiVersion.Provider(pi, brioAPI.State),
@@ -58,13 +62,12 @@ public class BrioIPCProviders : IDisposable
         _initializedProvider.Invoke();
     }
 
-    public void Dispose()
+    public override void Dispose()
     {
         foreach(var provider in _providers)
         {
             provider.Dispose();
         }
-
 
         _initializedProvider.Dispose();
         _deinitializedProvider.Invoke();
@@ -72,5 +75,7 @@ public class BrioIPCProviders : IDisposable
 
         ActorDespawned.Dispose();
         ActorSpawned.Dispose();
+       
+        base.Dispose();
     }
 }

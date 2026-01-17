@@ -23,9 +23,9 @@ public class TimeWeatherWidget(TimeWeatherCapability weatherCapability) : Widget
 
     public override void DrawBody()
     {
-        var isWeatherOverrideEnabledLocked = Capability.WeatherService.WeatherOverrideEnabled;
+        var isWeatherOverrideEnabledLocked = Capability.EnvironmentService.WeatherOverrideEnabled;
         var isWeatherOverrideEnabledLockedPrevious = isWeatherOverrideEnabledLocked;
-        var currentWeather = (int)Capability.WeatherService.CurrentWeather;
+        var currentWeather = (int)Capability.EnvironmentService.CurrentWeather;
         var previousWeather = currentWeather;
 
         var isTimeFrozen = Capability.TimeService.IsTimeFrozen;
@@ -78,41 +78,45 @@ public class TimeWeatherWidget(TimeWeatherCapability weatherCapability) : Widget
         //
         //
 
-        ImBrio.VerticalPadding(5);
+        ImBrio.VerticalPadding(10);
         ImGui.Separator();
-        ImBrio.VerticalPadding(5);
-
-        if(ImBrio.BorderedGameIcon("current_weather", (WeatherUnion)Capability.WeatherService.CurrentWeather, showText: false))
-        {
-            _weatherSelector.SetNaturalWeathers(Capability.WeatherService.TerritoryWeatherTable);
-            _weatherSelector.Select(Capability.WeatherService.CurrentWeather);
-            ImGui.OpenPopup("weather_selector");
-        }
-
-        ImBrio.VerticalPadding(1);
-        ImGui.SameLine();
-        ImBrio.VerticalPadding(1);
-
-        var startAt = ImGui.GetCursorPos();
 
         unlockPos = ImGui.GetCursorPos();
 
-        ImGui.SetCursorPosX(startAt.X);
-        ImGui.SetCursorPosY(startAt.Y + (ImGui.GetTextLineHeight() * 1.2f));
-
+        ImGui.Text("Current Weather /"u8);
+        ImGui.SameLine();
         WeatherUnion union = (WeatherId)currentWeather;
         union.Switch(
-            row => ImGui.Text(row.Name.ToString()),
-            none => ImGui.NewLine()
+            row => ImGui.Text($"[{row.Name.ToString()}]"),
+            none => ImGui.Text("Unknown Weather"u8)
         );
+        ImBrio.VerticalPadding(5);
+       
+        var preservePos = ImGui.GetCursorPos();
+
+        ImGui.SetCursorPos(unlockPos);
+        if(ImBrio.FontIconButtonRight("weatherLock", isWeatherOverrideEnabledLocked ? FontAwesomeIcon.Unlock : FontAwesomeIcon.Lock, 1, isWeatherOverrideEnabledLocked ? "Unlock Weather" : "Lock Weather", bordered: false))
+            isWeatherOverrideEnabledLocked = !isWeatherOverrideEnabledLocked;
+        ImGui.SetCursorPos(preservePos);
 
         ImBrio.CenterNextElementWithPadding(10);
-        ImGui.InputInt("###current_weather_input", ref currentWeather, 0, 0, default, ImGuiInputTextFlags.EnterReturnsTrue);
-        ImBrio.AttachToolTip("Weather ID");
+        if(ImBrio.BorderedWeatherGameIcon("current_weather", (WeatherUnion)Capability.EnvironmentService.CurrentWeather, showText: false))
+        {
+            _weatherSelector.SetNaturalWeathers(Capability.EnvironmentService.TerritoryWeatherTable);
+            _weatherSelector.Select(Capability.EnvironmentService.CurrentWeather);
+            ImGui.OpenPopup("weather_selector"u8);
+        }
 
+        var startAt = ImGui.GetCursorPos();       
+
+        ImGui.SameLine();
+
+        ImBrio.CenterNextElementWithPadding(10);
         ImBrio.VerticalPadding(5);
-
-        using(var popup = ImRaii.Popup("weather_selector"))
+        ImGui.InputInt("###current_weather_input"u8, ref currentWeather, 0, 0, default, ImGuiInputTextFlags.EnterReturnsTrue);
+        ImBrio.AttachToolTip("Weather ID");
+      
+        using(var popup = ImRaii.Popup("weather_selector"u8))
         {
             if(popup.Success)
             {
@@ -131,27 +135,13 @@ public class TimeWeatherWidget(TimeWeatherCapability weatherCapability) : Widget
             }
         }
 
-        var preservePos = ImGui.GetCursorPos();
-        ImGui.SetCursorPos(unlockPos);
-        if(isWeatherOverrideEnabledLocked)
-        {
-            if(ImBrio.FontIconButtonRight("lock", FontAwesomeIcon.Unlock, 1, "Unlock Weather", bordered: false))
-                isWeatherOverrideEnabledLocked = false;
-        }
-        else
-        {
-            if(ImBrio.FontIconButtonRight("lock", FontAwesomeIcon.Lock, 1, "Lock Weather", bordered: false))
-                isWeatherOverrideEnabledLocked = true;
-        }
-        ImGui.SetCursorPos(preservePos);
-
         if(currentWeather != previousWeather)
         {
             isWeatherOverrideEnabledLocked = true;
-            Capability.WeatherService.CurrentWeather = currentWeather;
+            Capability.EnvironmentService.CurrentWeather = currentWeather;
         }
 
         if(isWeatherOverrideEnabledLocked != isWeatherOverrideEnabledLockedPrevious)
-            Capability.WeatherService.WeatherOverrideEnabled = isWeatherOverrideEnabledLocked;
+            Capability.EnvironmentService.WeatherOverrideEnabled = isWeatherOverrideEnabledLocked;
     }
 }

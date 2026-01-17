@@ -68,6 +68,17 @@ public class ActorContainerCapability : Capability
         throw new Exception("Failed to create prop");
     }
 
+    public void SpawnNewProp(bool selectInHierarchy)
+    {
+        if(_actorSpawnService.SpawnNewProp(out ICharacter? character))
+        {
+            if(selectInHierarchy)
+            {
+                _entityManager.SetSelectedEntity(character!);
+            }
+        }
+    }
+
     public void DestroyCharacter(ActorEntity entity)
     {
         _actorSpawnService.DestroyObject(entity.GameObject);

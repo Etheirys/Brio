@@ -1,4 +1,5 @@
-﻿using Brio.UI;
+﻿using Brio.Services;
+using Brio.UI;
 using Dalamud.Game.Command;
 using Dalamud.Plugin.Services;
 using System;
@@ -14,12 +15,14 @@ public class CommandHandlerService : IDisposable
     private readonly ICommandManager _commandManager;
     private readonly IChatGui _chatGui;
     private readonly UIManager _uiManager;
+    private readonly Mediator _mediator;
 
-    public CommandHandlerService(ICommandManager commandManager, IChatGui chatGui, UIManager uiManager)
+    public CommandHandlerService(ICommandManager commandManager, IChatGui chatGui, UIManager uiManager, Mediator mediator)
     {
         _commandManager = commandManager;
         _chatGui = chatGui;
         _uiManager = uiManager;
+        _mediator = mediator;
 
         _commandManager.AddHandler(BrioCommandName, new CommandInfo(OnCommand)
         {
@@ -40,6 +43,12 @@ public class CommandHandlerService : IDisposable
 
     private void OnCommand(string command, string arguments)
     {
+        if(command == MCDFCommandName)
+        {
+            _uiManager.ToggleMCDFWindow();
+            return;
+        }
+
         if(arguments.Length == 0)
             arguments = "window";
 
@@ -57,6 +66,14 @@ public class CommandHandlerService : IDisposable
 
             case "about":
                 _uiManager.ToggleWelcomeWindow();
+                break;
+
+            case "mcdf":
+                _uiManager.ToggleMCDFWindow();
+                break;
+
+            case "mediator":
+                _mediator.PrintSubscriberInfo();
                 break;
 
             case "help":

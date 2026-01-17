@@ -1,4 +1,5 @@
-﻿using Brio.Resources;
+﻿using Brio.Core;
+using Brio.Resources;
 using Brio.UI.Controls.Core;
 using Brio.UI.Theming;
 using Dalamud.Bindings.ImGui;
@@ -6,6 +7,7 @@ using Dalamud.Interface;
 using Dalamud.Interface.Textures.TextureWraps;
 using Dalamud.Interface.Utility;
 using Dalamud.Interface.Utility.Raii;
+using Dalamud.Utility;
 using System;
 using System.Numerics;
 using System.Runtime.CompilerServices;
@@ -39,6 +41,21 @@ public static partial class ImBrio
         using(ImRaii.PushFont(UiBuilder.IconFont))
         {
             clicked = ImGui.Button(icon.ToIconString(), size);
+        }
+
+        return clicked;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+    public static bool SliderAngle(string id, ref float angle, float min, float max)
+    {
+        bool clicked = false;
+
+        float rad = angle * MathHelpers.Deg2Rad;
+        if(ImGui.SliderAngle(id, ref rad, min, max))
+        {
+            angle = rad * MathHelpers.Rad2Deg;
+            clicked = true;
         }
 
         return clicked;
@@ -79,6 +96,9 @@ public static partial class ImBrio
         return wasClicked;
     }
 
+    public static Vector2 ScrollbarSize { get; } = ImGui.CalcTextSize("XXII");
+
+
     [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
     public static bool FontIconButtonRight(string id, FontAwesomeIcon icon, float position, string? tooltip = null, bool enabled = true, bool bordered = true, uint? textColor = null, Vector2? size = null)
     {
@@ -89,9 +109,13 @@ public static partial class ImBrio
         if(enabled is false)
             ImGui.BeginDisabled();
 
-        var pixelPos = ImGui.GetWindowSize().X - ((ImGui.CalcTextSize("XXII").X + (ImGui.GetStyle().FramePadding.X * 2)) * position);
+        bool hasScrollbar = ImGui.GetScrollMaxY() > 0;
 
-        ImGui.SetCursorPosX(pixelPos);
+        var style = ImGui.GetStyle();
+        float scrollbarWidth = hasScrollbar ? style.ScrollbarSize : 0;
+        var cursorPos = ImGui.GetWindowSize().X - scrollbarWidth - ((ScrollbarSize.X + (style.FramePadding.X * 2)) * position);
+
+        ImGui.SetCursorPosX(cursorPos);
 
         if(bordered is false)
             ImGui.PushStyleColor(ImGuiCol.Button, UIConstants.Transparent);
@@ -263,6 +287,29 @@ public static partial class ImBrio
         iconTex ??= ResourceProvider.Instance.GetResourceImage(fallback);
 
         return BorderedGameIcon(id, iconTex, description, flags, size);
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+    public static bool BorderedGameTex(string id, string texPath, string? fallback = null, string? description = null, ImGuiButtonFlags flags = ImGuiButtonFlags.MouseButtonLeft, Vector2? size = null)
+    {
+        IDalamudTextureWrap? iconTex = null;
+        try
+        {
+            if(texPath.IsNullOrEmpty() is false)
+                iconTex = UIManager.Instance.TextureProvider.GetFromGame(texPath).GetWrapOrEmpty();
+        }
+        catch
+        {
+            // ignored
+        }
+
+        if(fallback is not null)
+            iconTex ??= ResourceProvider.Instance.GetResourceImage(fallback);
+
+        if(iconTex is not null)
+            return BorderedGameIcon(id, iconTex, description, flags, size);
+       
+        return false;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]

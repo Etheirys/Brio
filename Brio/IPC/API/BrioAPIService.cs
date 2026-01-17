@@ -7,9 +7,6 @@ namespace Brio.IPC.API;
 
 public class BrioAPIService(ConfigurationService configurationService, StateAPI stateAPI, ActorAPI actorAPI, EnvironmentAPI environmentAPI, PosingAPI posingAPI, AnimationAPI animationAPI) : IBrioAPI, IDisposable
 {
-    public const int MajorVersion = 3;
-    public const int MinorVersion = 0;
-
     private readonly ConfigurationService _configurationService = configurationService;
 
     public bool IsIPCEnabled => _configurationService.Configuration.IPC.EnableBrioIPC;

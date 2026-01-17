@@ -24,7 +24,6 @@ public class DalamudPluginService
     [PluginService] public IGameGui GameGui { get; private set; } = null!;
     [PluginService] public IGameConfig GameConfig { get; private set; } = null!;
 
-
     public DalamudPluginService(IDalamudPluginInterface pluginInterface)
     {
         pluginInterface.Inject(this);

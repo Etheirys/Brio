@@ -36,6 +36,18 @@ public class ActorFile
 
     public bool IsProp { get; set; }
 
+    public bool HasPenumbra { get; set; }
+    public bool HasGlamourer { get; set; }
+    public bool HasCustomizePlus { get; set; }
+
+    public bool WasMCDF { get; set; }
+    public bool WasOtherPlayer { get; set; }
+
+    public Guid? PenumbraCollection { get; set; }
+    public Guid? GlamourerDesign { get; set; }
+
+    public Guid? CustomizePlusProfile { get; set; }
+
     public static unsafe implicit operator ActorFile(ActorEntity actorEntity)
     {
         var appearanceCapability = actorEntity.GetCapability<ActorAppearanceCapability>();
@@ -60,7 +72,6 @@ public class ActorFile
             IsProp = actorEntity.IsProp,
             PropData = new PropData
             {
-                //PropID = appearanceCapability.GetProp(),
                 PropTransformAbsolute = modelCapability.Transform,
                 PropTransformDifference = modelCapability.Transform.CalculateDiff(modelCapability.OriginalTransform)
             }
@@ -96,13 +107,19 @@ public class ChildActor
     public required CompanionContainer Companion { get; set; }
 
     public PoseFile? PoseFile { get; set; }
+
+    public bool HasPenumbra { get; set; }
+
+    public bool WasMCDF { get; set; }
+
+    public Guid? PenumbraCollection { get; set; }
+
 }
 
 [Serializable]
 [MessagePackObject(keyAsPropertyName: true)]
 public class PropData
 {
-    //public FFXIVClientStructs.FFXIV.Client.Game.Character.WeaponModelId PropID { get; set; }
     public Transform PropTransformDifference { get; set; }
     public Transform PropTransformAbsolute { get; set; }
 }

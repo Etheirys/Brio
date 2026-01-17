@@ -1,7 +1,68 @@
 
-tagline: "Whats New in Brio v0.6.2"
-subline: "7.4 Support & More!"
+tagline: "Whats New for Brio 0.7.0, Brio's 3rd Anniversary!"
+subline: "Multi-Bone, Multi-Actor Selection, Advanced Environment & More!"
 changelog:
+
+  - name: v0.7.0
+    tagline: Multi-Bone, Multi-Actor Selection, Advanced Environment & Brio's 3rd Birthday!
+    date: "Jan 16th 2026"
+    isCurrent: true
+    versions:
+      - number: "Reminder: Projects that where made in last version are incompatible with this version of Brio!"
+        icon: ""
+        items:
+          - "Happy New Year, and Happy Birthday to Brio!"
+          - "As a reminder! If you experience any issues please report them on Discord or on GitHub"
+          - "And yes, once more, even more features coming soon, like AltherBlend integration, Auto-Save & MCDF Window"
+
+      - number: "Dynamic Face Control"
+        icon: ""
+        items:
+          - "Added `Select actor to Track` to Dynamic Face Control (Thank you once more to Enth)"
+          - "Select the `Actor` tab once you enable dynamic face control to use it"
+          - "This will also let you Deselect an actor if your character was targeting one when you went into GPose"
+
+      - number: "Added Multi Actor Selection"
+        icon: ""
+        items:
+          - "You can now select multiple actors at a time"
+          - "Press `Ctrl` in the entity selector when clicking an actors to start selection"
+          - "The overlay will now display a button under all actors that you can click on too!"
+          - "You can press `Shift` with the new Overlay dots start selection on them"
+
+      - number: "Added Multi Bone Selection"
+        icon: ""
+        items:
+          - "I think this one is also quite clear!"
+          - "Press `Shift` when clicking a Bone to start selection"
+ 
+      - number: "Advanced Environment Settings!"
+        icon: ""
+        items:
+          - "From changing the sky the clouds or the particles falling from the sky"
+          - "You can access these settings from the Environment tab under `Sky` & `Environment`"
+          - "Made multiple improvements to the visual design of the time and weather controls"
+
+      - number: "Multiple core technical improvements"
+        icon: ""
+        items:
+          - "MCDFs now generate slightly faster by moving to BLAKE3"
+          - "Added core technical infrastructure called a `Mediator` (using darkarchon's implementation from Mare, thanks!)"
+          - "Refreshed the folder structure of Brio's source code for better organization"
+          - "Changed some internal structures of the `scene` system, please look forward to its advancement in 0.7.1!"
+
+      - number: "General changes in 0.7.0"
+        icon: ""
+        items:
+          - "The `+` or Spawn new buttton is now a unified Spawn button that lets you spawn any Brio entity"
+          - "Projects that where made in last version are incompatible with this version of Brio!"
+          - "The entity selector can now be resized across the vertical axis"   
+          - "Added two New buttons to the advanced section in the settings that will help with Support requests"
+          - "You can now hold `Ctrl` and click on an actor in the entity selector to deselected it"
+          - "A scroll bar will now appear automatically to the Main Brio window"
+          - "Slight visual fixes when if scrollbar is present on certain windows"
+          - "Fixed An issue where the overlay's Gizmo would not correctly move face bones"
+          - "Fixed an issue where the overlay's bones sometimes would display from off sreen"
 
   - name: v0.6.2
     tagline: 7.4 Support & More!
