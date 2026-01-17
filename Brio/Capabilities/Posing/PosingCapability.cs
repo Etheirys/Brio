@@ -303,7 +303,7 @@ public class PosingCapability : ActorCharacterCapability
 
             if(face.HasStacks || hasOverriddenParent)
             {
-                Reconcile(true, false);
+                Reconcile(false, false);
                 face.Apply(bone.LastTransform, bone.LastRawTransform, TransformComponents.All, TransformComponents.Rotation, BoneIKInfo.Disabled, PoseMirrorMode.None, false);
                 return;
             }
