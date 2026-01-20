@@ -78,7 +78,7 @@ public class MainWindow : Window, IDisposable
     public override void Draw()
     {
         bool hasScrollbar = ImGui.GetScrollMaxY() > 0;
-        if(hasScrollbar && _hasAdjustedForScrollbar is false)
+        if(hasScrollbar)
         {
             var style = ImGui.GetStyle();
 
@@ -90,7 +90,7 @@ public class MainWindow : Window, IDisposable
 
             _hasAdjustedForScrollbar = true;
         }
-        else if(hasScrollbar is false && _hasAdjustedForScrollbar is true)
+        else if(hasScrollbar is false)
         {
             _hasAdjustedForScrollbar = false;
 
