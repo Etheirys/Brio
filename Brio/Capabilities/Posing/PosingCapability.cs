@@ -282,6 +282,8 @@ public class PosingCapability : ActorCharacterCapability
         _undoStack.Push(new PoseStack(SkeletonPosing.PoseInfo.Clone(), ModelPosing.Transform));
         _undoStack = _undoStack.Trim(undoStackSize + 1);
 
+
+        // Holy hell, This took me so long to fix and it stil breaks IK
         var bone = SkeletonPosing.GetBone("j_kao", PoseInfoSlot.Character);
         if(bone != null)
         {
@@ -303,8 +305,8 @@ public class PosingCapability : ActorCharacterCapability
 
             if(face.HasStacks || hasOverriddenParent)
             {
-                Reconcile(false, false);
-                face.Apply(bone.LastTransform, bone.LastRawTransform, TransformComponents.All, TransformComponents.Rotation, BoneIKInfo.Disabled, PoseMirrorMode.None, false);
+                // Reconcile ONLY j_kao and its descendants to fix gizmo without affecting limbs
+                ReconcileChildren(bone);
                 return;
             }
         }
@@ -358,6 +360,38 @@ public class PosingCapability : ActorCharacterCapability
 
         if(generateSnapshot)
             Snapshot(reset);
+    }
+
+    private void ReconcileChildren(Bone bone)
+    {
+        // We create a partial pose so we can properly reconcile,
+        // This was designed to work with j_kao and descendant, but it might work with other bones too
+        var partialPoseFile = new PoseFile();
+
+        ExportFaceBone(bone);
+        ClearFaceStacks(bone);
+
+        var options = new PoseImporterOptions(new BoneFilter(_posingService), TransformComponents.All, true);
+        SkeletonPosing.ImportSkeletonPose(partialPoseFile, options, false);
+
+        void ExportFaceBone(Bone bone)
+        {
+            partialPoseFile.Bones[bone.Name] = bone.LastRawTransform;
+            foreach(var child in bone.Children)
+            {
+                ExportFaceBone(child);
+            }
+        }
+
+        void ClearFaceStacks(Bone bone)
+        {
+            var poseInfo = SkeletonPosing.PoseInfo.GetPoseInfo(bone);
+            poseInfo.ClearStacks();
+            foreach(var child in bone.Children)
+            {
+                ClearFaceStacks(child);
+            }
+        }
     }
 
     private void Reconcile(bool reset = true, bool generateSnapshot = true)
