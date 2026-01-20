@@ -58,12 +58,12 @@ public class ActionTimelineSelector(string id) : Selector<ActionTimelineSelector
 
     public void DrawAsWindow()
     {
-        if(!_isPinned || !_isWindowOpen)
+        if(!_isPinned)
             return;
 
         ImGui.SetNextWindowSize(new Vector2(400, 500), ImGuiCond.FirstUseEver);
 
-        if(ImGui.Begin($"Animation Search Selector ###{_id}_window", ref _isWindowOpen, ImGuiWindowFlags.None))
+        if(ImGui.Begin($"Animation Search Selector ###{_id}_window2", ref _isWindowOpen, ImGuiWindowFlags.NoCollapse))
         {
             if(!_isWindowOpen)
             {
