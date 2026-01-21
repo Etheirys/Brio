@@ -47,6 +47,26 @@ public static partial class ImBrio
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+    public static bool DrawIconButton(FontAwesomeIcon icon, string text, Vector2 size)
+    {
+        var cursorPos = ImGui.GetCursorPos();
+        bool clicked = ImGui.Button($"##{text}", size);
+
+        ImGui.SetCursorPos(cursorPos + new Vector2(5 * ImGuiHelpers.GlobalScale, ImGui.GetStyle().FramePadding.Y));
+
+        using(ImRaii.PushFont(UiBuilder.IconFont))
+        {
+            ImGui.Text(icon.ToIconString());
+        }
+
+        ImGui.SameLine();
+        ImGui.SetCursorPosY(cursorPos.Y + ImGui.GetStyle().FramePadding.Y);
+        ImGui.Text(text);
+
+        return clicked;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
     public static bool SliderAngle(string id, ref float angle, float min, float max)
     {
         bool clicked = false;

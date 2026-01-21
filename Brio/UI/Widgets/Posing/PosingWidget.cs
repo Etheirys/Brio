@@ -1,6 +1,7 @@
 ﻿using Brio.Capabilities.Actor;
 using Brio.Capabilities.Posing;
 using Brio.Input;
+using Brio.UI.Controls.Core;
 using Brio.UI.Controls.Editors;
 using Brio.UI.Controls.Stateless;
 using Brio.UI.Widgets.Core;
@@ -108,7 +109,15 @@ public class PosingWidget(PosingCapability capability) : Widget<PosingCapability
 
         if(ImBrio.FontIconButtonRight("reset", FontAwesomeIcon.Undo, 1, "Reset Pose", Capability.HasOverride()))
         {
-            Capability.Reset(false, false, true);
+            ImGui.OpenPopup("widget_reset_pose_popup");
+        }
+
+        using(var popup = ImRaii.Popup("widget_reset_pose_popup", ImGuiWindowFlags.AlwaysAutoResize))
+        {
+            if(popup.Success)
+            {
+                DrawResetMenu();
+            }
         }
 
         using(var popup = ImRaii.Popup("widget_bone_search_popup", ImGuiWindowFlags.AlwaysAutoResize))
@@ -125,6 +134,41 @@ public class PosingWidget(PosingCapability capability) : Widget<PosingCapability
         PosingEditorCommon.DrawSelectionName(Capability);
 
         _posingTransformEditor.Draw("posing_widget_transform", Capability, true);
+    }
+
+    private void DrawResetMenu()
+    {
+        using(ImRaii.PushStyle(ImGuiStyleVar.ButtonTextAlign, new Vector2(0, 0.5f)))
+        using(ImRaii.PushColor(ImGuiCol.Button, UIConstants.Transparent))
+        {
+            {
+                var buttonSize = new Vector2(155 * ImGuiHelpers.GlobalScale, 0);
+                if(ImBrio.DrawIconButton(FontAwesomeIcon.Undo, "Reset Pose", buttonSize))
+                {
+                    Capability.Reset(false, false);
+                    ImGui.CloseCurrentPopup();
+                }
+
+                using(ImRaii.Disabled(!Capability.HasOverride(Capability.SkeletonPosing.FilterNonFaceBones)))
+                {
+                    if(ImBrio.DrawIconButton(FontAwesomeIcon.ChildReaching, "Reset Body", buttonSize))
+                    {
+                        Capability.Snapshot(false, reconcile: false);
+                        Capability.SkeletonPosing.PoseInfo.Clear(Capability.SkeletonPosing.FilterNonFaceBones);
+                        ImGui.CloseCurrentPopup();
+                    }
+                }
+
+                using(ImRaii.Disabled(!Capability.HasOverride(Capability.SkeletonPosing.FilterFaceBones)))
+                {
+                    if(ImBrio.DrawIconButton(FontAwesomeIcon.Smile, "Reset Face", buttonSize))
+                    {
+                        Capability.SkeletonPosing.PoseInfo.Clear(Capability.SkeletonPosing.FilterFaceBones);
+                        ImGui.CloseCurrentPopup();
+                    }
+                }
+            }
+        }
     }
 
     public override void ToggleAdvancedWindow()
