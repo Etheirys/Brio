@@ -68,12 +68,6 @@ public class PosingTransformEditor
 
                 using(ImRaii.Disabled(isBone == false))
                 {
-                    //if(ImBrio.FontIconButton("flipBoneModelButton", FontAwesomeIcon.Repeat, "Flip Bone"))
-                    //{
-                    //    posingCapability.FlipBoneModel();
-                    //}
-
-                    //ImGui.SameLine();
 
                     if(ImBrio.FontIconButton("propagate", FontAwesomeIcon.Compress, "Propagate", realBone?.EligibleForIK == true))
                         ImGui.OpenPopup("transform_propagate_popup");
@@ -121,7 +115,7 @@ public class PosingTransformEditor
                 {
                     ImGui.SameLine();
 
-                    if(ImBrio.FontIconButtonRight("resetTransform", FontAwesomeIcon.Recycle, 1, tooltip: "Reset Bone"))
+                    if(ImBrio.FontIconButtonRight("resetTransform", FontAwesomeIcon.Retweet, 1, tooltip: "Reset Bone"))
                     {
                         posingCapability.ResetSelectedBone();
                     }

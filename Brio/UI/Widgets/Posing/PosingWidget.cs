@@ -87,6 +87,13 @@ public class PosingWidget(PosingCapability capability) : Widget<PosingCapability
 
         ImGui.SameLine();
 
+        if(ImBrio.FontIconButton("flipButton", FontAwesomeIcon.Repeat, "Mirror Pose"))
+        {
+            Capability.MirrorPose();
+        }
+
+        ImGui.SameLine();
+
         if(Capability.Actor.IsProp == false)
         {
             if(ImBrio.ToggelFontIconButton("freezeActor", FontAwesomeIcon.Snowflake, new Vector2(0), timelineCapability.SpeedMultiplier == 0, hoverText: timelineCapability.SpeedMultiplierOverride == 0 ? "Un-Freeze Character" : "Freeze Character") || InputManagerService.ActionKeysPressedLastFrame(InputAction.Posing_Freeze))
