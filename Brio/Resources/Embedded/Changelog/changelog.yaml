@@ -4,7 +4,7 @@ subline: "Multi-Bone/Actor, Selection, Advanced Environment!"
 changelog:
 
   - name: v0.7.1
-    tagline: Pose Fliping!
+    tagline: Pose Flipping!
     date: "Jan 20th 2026"
     isCurrent: true
     versions:
