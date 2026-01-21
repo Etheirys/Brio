@@ -22,7 +22,7 @@ changelog:
       - number: "Reset Body & Face"
         icon: ""
         items:
-          - "Added both a `Reset Body` & `Reset Face` Button to both the overlay"
+          - "Added both a `Reset Body` & `Reset Face` Button to both the overlay (From live pose, thanks Caraxi!)" 
 
       - number: "General changes and fixes in 0.7.1"
         icon: ""
