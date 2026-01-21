@@ -16,7 +16,7 @@ namespace Brio.Game.Posing;
 public unsafe class ModelTransformService : IDisposable
 {
     public delegate void SetPositionDelegate(StructsGameObject* gameObject, float x, float y, float z);
-    private readonly Hook<SetPositionDelegate> _setPositionHook = null!;
+    public readonly Hook<SetPositionDelegate> _setPositionHook = null!;
 
     private readonly EntityManager _entityManager;
     private readonly GPoseService _gPoseService;

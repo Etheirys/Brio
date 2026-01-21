@@ -1,4 +1,6 @@
 ﻿using Brio.Config;
+using Brio.Game.Posing;
+
 using Dalamud.Plugin;
 using Dalamud.Plugin.Ipc;
 
@@ -34,6 +36,7 @@ public class KtisisService : BrioIPC
 
     private readonly ICallGateSubscriber<bool>? _ktisisRefreshActors;
     private readonly ICallGateSubscriber<bool>? _ktisisIsPosing;
+	private readonly ICallGateSubscriber<bool, bool>? _ktisisPosingChanged;
 
 
     public KtisisService(IDalamudPluginInterface pluginInterface, ConfigurationService configurationService)
@@ -44,7 +47,10 @@ public class KtisisService : BrioIPC
         _ktisisApiVersion = _pluginInterface.GetIpcSubscriber<(int, int)>("Ktisis.ApiVersion");
         _ktisisRefreshActors = _pluginInterface.GetIpcSubscriber<bool>("Ktisis.RefreshActors");
         _ktisisIsPosing = _pluginInterface.GetIpcSubscriber<bool>("Ktisis.IsPosing");
-    }
+
+		_ktisisPosingChanged = _pluginInterface.GetIpcSubscriber<bool, bool>("Ktisis.PosingChanged");
+		_ktisisPosingChanged.Subscribe(this.PosingChanged);
+	}
 
     public bool IsPosing => ((_ktisisIsPosing?.HasFunction ?? false) && (_ktisisIsPosing?.InvokeFunc() ?? false));
 
@@ -55,6 +61,20 @@ public class KtisisService : BrioIPC
             _ktisisRefreshActors?.InvokeFunc();
         }
     }
+
+	private void PosingChanged(bool isPosing) {
+		Brio.TryGetService<SkeletonService>(out var skeletonService);
+		Brio.TryGetService<ModelTransformService>(out var modelTransformService);
+		if (isPosing) {
+			skeletonService._updateBonePhysicsHook.Disable();
+			skeletonService._finalizeSkeletonsHook.Disable();
+			modelTransformService._setPositionHook.Disable();
+		} else {
+			skeletonService._updateBonePhysicsHook.Enable();
+			skeletonService._finalizeSkeletonsHook.Enable();
+			modelTransformService._setPositionHook.Enable();
+		}
+	}
 
     public override void Dispose()
     {
