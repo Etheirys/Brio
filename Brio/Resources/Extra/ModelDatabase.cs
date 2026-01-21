@@ -70,7 +70,9 @@ public class ModelDatabase
 
         return null;
     }
-    public ModelInfo? GetModelById(WeaponModelId modelId, ActorEquipSlot slot) => GetModelById(modelId.Value, slot);
+
+    // Weapon model IDs contain the dye ID in them (Stain0 specifcally). Mask it out.
+    public ModelInfo? GetModelById(WeaponModelId modelId, ActorEquipSlot slot) => GetModelById(modelId.Value & 0x0000FFFFFFFFFFFF, slot);
     public ModelInfo? GetModelById(EquipmentModelId modelId, ActorEquipSlot slot) => GetModelById((ulong)modelId.Value & 0x00FFFFFF, slot);
 
     public IEnumerable<ModelInfo> GetEquippableInSlots(ActorEquipSlot slots)
