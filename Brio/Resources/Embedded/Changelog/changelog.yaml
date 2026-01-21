@@ -1,31 +1,28 @@
 
-tagline: "Brio 0.7.1, Brio's 3rd Anniversary! (Now with pose flipping!)"
+tagline: "Brio 0.7.1, Brio's 3rd Anniversary! (Now with pose mirroring!)"
 subline: "Multi-Bone/Actor, Selection, Advanced Environment!"
 changelog:
 
   - name: v0.7.1
-    tagline: Pose Flipping!
+    tagline: Pose Mirroring!
     date: "Jan 20th 2026"
     isCurrent: true
     versions:
       - number: "As a reminder! If you experience any issues please report them on Discord or on GitHub"
         icon: ""
         items:
+          - "I have gotten successful bullied by other devs, so I made pose mirroring"
           - "Still yet, more features coming soon, like AltherBlend integration, Auto-Save & MCDF Window"
    
-      - number: "Flip Pose"
+      - number: "Mirror Pose"
         icon: ""
         items:
-          - "Added a `Flip Pose` Button to both the overlay and the transform"
-          - "Select the `Actor` tab once you enable dynamic face control to use it"
-          - "This will also let you Deselect an actor if your character was targeting one when you went into GPose"
+          - "Added a `Mirror Pose` Button to both the overlay and the transform"
    
       - number: "Reset Body & Face"
         icon: ""
         items:
           - "Added both a `Reset Body` & `Reset Face` Button to both the overlay"
-          - "Select the `Actor` tab once you enable dynamic face control to use it"
-          - "This will also let you Deselect an actor if your character was targeting one when you went into GPose"
 
       - number: "General changes and fixes in 0.7.1"
         icon: ""
