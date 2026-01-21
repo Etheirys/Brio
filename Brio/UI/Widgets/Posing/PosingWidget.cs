@@ -106,7 +106,7 @@ public class PosingWidget(PosingCapability capability) : Widget<PosingCapability
             ImGui.SameLine();
         }
 
-        if(ImBrio.FontIconButtonRight("reset", FontAwesomeIcon.Undo, 1, "Reset Pose", Capability.HasOverride))
+        if(ImBrio.FontIconButtonRight("reset", FontAwesomeIcon.Undo, 1, "Reset Pose", Capability.HasOverride()))
         {
             Capability.Reset(false, false, true);
         }

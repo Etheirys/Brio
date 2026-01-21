@@ -1,4 +1,5 @@
 ﻿using Brio.Capabilities.Actor;
+using Brio.Capabilities.Core;
 using Brio.Capabilities.Posing;
 using Brio.Capabilities.World;
 using Brio.Config;
@@ -17,6 +18,7 @@ using Dalamud.Interface;
 using Dalamud.Interface.Colors;
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Interface.Windowing;
+using Dalamud.Plugin.Services;
 using OneOf.Types;
 using System;
 using System.Numerics;
@@ -35,13 +37,15 @@ public class PosingOverlayToolbarWindow : Window
     private readonly GameInputService _gameInputService;
     private readonly LightingService _lightingService;
 
+    private readonly IFramework _framework;
+
     private readonly BoneSearchControl _boneSearchControl = new();
 
     private bool _pushedStyle = false;
 
     private const string _boneFilterPopupName = "bone_filter_popup";
 
-    public PosingOverlayToolbarWindow(PosingOverlayWindow overlayWindow, LightWindow lightWindow, LightingService lightingService, HistoryService groupedUndoService, GameInputService gameInputService, EntityManager entityManager, PosingTransformWindow overlayTransformWindow, PosingService posingService, ConfigurationService configurationService) : base($"{Brio.Name} OVERLAY###brio_posing_overlay_toolbar_window", ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoCollapse)
+    public PosingOverlayToolbarWindow(PosingOverlayWindow overlayWindow, IFramework framework, LightWindow lightWindow, LightingService lightingService, HistoryService groupedUndoService, GameInputService gameInputService, EntityManager entityManager, PosingTransformWindow overlayTransformWindow, PosingService posingService, ConfigurationService configurationService) : base($"{Brio.Name} OVERLAY###brio_posing_overlay_toolbar_window", ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoCollapse)
     {
         Namespace = "brio_posing_overlay_toolbar_namespace";
 
@@ -54,6 +58,7 @@ public class PosingOverlayToolbarWindow : Window
         _gameInputService = gameInputService;
         _lightWindow = lightWindow;
         _lightingService = lightingService;
+        _framework = framework;
 
         ShowCloseButton = false;
     }
@@ -717,7 +722,7 @@ public class PosingOverlayToolbarWindow : Window
         {
             using(ImRaii.Disabled(hasMultipleActorsSelected || (!posing?.CanResetBone(bone) ?? false)))
             {
-                if(ImGui.Button($"{FontAwesomeIcon.Recycle.ToIconString()}###reset_bone", new Vector2(button4XSize)))
+                if(ImGui.Button($"{FontAwesomeIcon.Retweet.ToIconString()}###reset_bone", new Vector2(button4XSize)))
                     posing?.ResetSelectedBone();
             }
         }
@@ -725,13 +730,70 @@ public class PosingOverlayToolbarWindow : Window
 
         ImGui.SameLine();
 
+        using(ImRaii.PushFont(UiBuilder.IconFont))
+        {
+            using(ImRaii.Disabled(hasMultipleActorsSelected))
+            {
+                if(ImGui.Button($"{FontAwesomeIcon.Repeat.ToIconString()}###MirrorPose", new Vector2(button4XSize)))
+                    posing?.MirrorPose();
+            }
+        }
+        ImBrio.AttachToolTip("Mirror Pose");
+
+        //
+
+        using(ImRaii.PushFont(UiBuilder.IconFont))
+        {
+            using(ImRaii.Disabled(!posing.HasOverride(posing.SkeletonPosing.FilterNonFaceBones)))
+            {
+                if(ImGui.Button($"{FontAwesomeIcon.Undo.ToIconString()}###reset_body_pose", new Vector2(button3XSize)))
+                {
+                    posing.Snapshot(false, reconcile: false);
+                    posing.SkeletonPosing.PoseInfo.Clear(posing.SkeletonPosing.FilterNonFaceBones);
+                }
+
+                ImGui.GetWindowDrawList().AddText(ImGui.GetItemRectMin() + ImGui.GetItemRectSize() / 2, ImGui.GetColorU32(ImGuiCol.Text), FontAwesomeIcon.ChildReaching.ToIconString());
+
+            }
+        }
+
+        ImBrio.AttachToolTip("Reset Body");
+
+        ImGui.SameLine();
+
+        using(ImRaii.PushFont(UiBuilder.IconFont))
+        {
+            using(ImRaii.Disabled(!posing.HasOverride(posing.SkeletonPosing.FilterFaceBones)))
+            {
+                if(ImGui.Button($"{FontAwesomeIcon.Undo.ToIconString()}###reset_face_pose", new Vector2(button3XSize)))
+                {
+                    //posing.Snapshot(false, reconcile: false);
+                    posing.SkeletonPosing.PoseInfo.Clear(posing.SkeletonPosing.FilterFaceBones);
+
+                    _framework.RunOnTick(() =>
+                    {
+                        var facebone = posing.SkeletonPosing.GetBone("j_kao", PoseInfoSlot.Character);
+                        if(facebone != null)
+                            posing.ReconcileChildren(facebone);
+                    }, delayTicks: 2);
+                }
+
+                ImGui.GetWindowDrawList().AddText(ImGui.GetItemRectMin() + ImGui.GetItemRectSize() / 2, ImGui.GetColorU32(ImGuiCol.Text), FontAwesomeIcon.Smile.ToIconString());
+
+            }
+        }
+
+        ImBrio.AttachToolTip("Reset Face");
+
+        ImGui.SameLine();
+
         // Reset Pose Button
 
         using(ImRaii.PushFont(UiBuilder.IconFont))
         {
-            using(ImRaii.Disabled(hasMultipleActorsSelected || (!posing?.HasOverride ?? false)))
+            using(ImRaii.Disabled(hasMultipleActorsSelected || (!posing?.HasOverride() ?? false)))
             {
-                if(ImGui.Button($"{FontAwesomeIcon.Undo.ToIconString()}###reset_pose", new Vector2(button4XSize)))
+                if(ImGui.Button($"{FontAwesomeIcon.Undo.ToIconString()}###reset_pose", new Vector2(button3XSize)))
                     posing?.Reset(false, false);
             }
         }

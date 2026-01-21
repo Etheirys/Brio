@@ -36,20 +36,17 @@ public class PosingCapability : ActorCharacterCapability
     public PosingService PosingService => _posingService;
     public ConfigurationService ConfigurationService => _configurationService;
 
-    public bool HasOverride
+    public bool HasOverride(Predicate<BonePoseInfoId>? predicate = null)
     {
-        get
-        {
-            if(Entity.TryGetCapability<SkeletonPosingCapability>(out var skeletonPosing))
-                if(skeletonPosing.PoseInfo.IsOverridden)
-                    return true;
+        if(Entity.TryGetCapability<SkeletonPosingCapability>(out var skeletonPosing))
+            if(skeletonPosing.PoseInfo.IsOverridden(predicate))
+                return true;
 
-            if(Entity.TryGetCapability<ModelPosingCapability>(out var modelPosing))
-                if(modelPosing.HasOverride)
-                    return true;
+        if(Entity.TryGetCapability<ModelPosingCapability>(out var modelPosing))
+            if(modelPosing.HasOverride)
+                return true;
 
-            return false;
-        }
+        return false;
     }
 
     public bool CanResetBone(Bone? bone) => ModelPosing.HasOverride == false || !(bone is not null && !SkeletonPosing.PoseInfo.GetPoseInfo(bone).HasStacks);
@@ -363,7 +360,7 @@ public class PosingCapability : ActorCharacterCapability
             Snapshot(reset);
     }
 
-    private void ReconcileChildren(Bone bone)
+    public void ReconcileChildren(Bone bone)
     {
         // We create a partial pose so we can properly reconcile,
         // This was designed to work with j_kao and descendant, but it might work with other bones too

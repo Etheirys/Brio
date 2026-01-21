@@ -230,6 +230,22 @@ public class SkeletonPosingCapability : ActorCharacterCapability
         CharacterIsDawntrail = CharacterSkeleton?.GetFirstVisibleBone("j_f_bero_01") != null;
     }
 
+    public bool FilterFaceBones(BonePoseInfoId obj)
+    {
+        var skeleton = obj.Slot switch
+        {
+            PoseInfoSlot.Character => CharacterSkeleton,
+            _ => null
+        };
+
+        var bone = skeleton?.GetFirstVisibleBone(obj.BoneName);
+        if(bone == null) return false;
+
+        return bone.IsFaceBone;
+    }
+
+    public bool FilterNonFaceBones(BonePoseInfoId obj) => !FilterFaceBones(obj);
+
     private void OnSkeletonUpdateStart()
     {
         UpdateCache();

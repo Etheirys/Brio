@@ -144,6 +144,7 @@ public class Brio : IDalamudPlugin
         serviceCollection.AddSingleton<ActorLookAtService>();
         serviceCollection.AddSingleton<CharacterHandlerService>();
         serviceCollection.AddSingleton<LightingService>();
+        serviceCollection.AddSingleton<TimelineIdentification>();
 
         // API & Web
         serviceCollection.AddSingleton<BrioAPIService>();

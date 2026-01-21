@@ -2,6 +2,7 @@
 using Brio.Resources;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using static FFXIVClientStructs.FFXIV.Client.Graphics.Scene.CharacterBase;
 
 namespace Brio.Game.Posing.Skeletons;
@@ -65,6 +66,17 @@ public class Bone(int index, Skeleton skeleton, PartialSkeleton partial)
     }
 
     public unsafe bool EligibleForIK => Parent != null && !Parent.IsHidden;
+ 
+    private bool? isFaceBone;
+    public bool IsFaceBone
+    {
+        get
+        {
+            if(isFaceBone.HasValue) return isFaceBone.Value;
+            isFaceBone = Name == "j_kao" || GetBonesToDepth(int.MaxValue, false).Any(b => b.Name == "j_kao");
+            return isFaceBone.Value;
+        }
+    }
 
     public Bone? GetFirstVisibleParent()
     {

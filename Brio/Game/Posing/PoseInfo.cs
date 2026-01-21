@@ -20,7 +20,10 @@ public class PoseInfo
         return _poses[id] = new BonePoseInfo(id, this);
     }
 
-    public bool IsOverridden => _poses.Any(x => x.Value.HasStacks);
+    public bool IsOverridden(Predicate<BonePoseInfoId>? predicate = null)
+    {
+        return _poses.Any(p => (predicate == null || predicate(p.Key)) && p.Value.HasStacks);
+    }
 
     public bool HasIKStacks => _poses.Any(x => x.Value.Stacks.Any(s => s.IKInfo.Enabled));
 
@@ -39,13 +42,28 @@ public class PoseInfo
     }
 
     public unsafe BonePoseInfo GetPoseInfo(Bone bone, PoseInfoSlot slot = PoseInfoSlot.Character) => GetPoseInfo(new BonePoseInfoId(bone.Name, bone.PartialId, slot));
-
-    public void Clear()
+    
+    public void Clear(Predicate<BonePoseInfoId>? predicate = null)
     {
         foreach(var pose in _poses)
         {
-            pose.Value.ClearStacks();
+            if(predicate == null || predicate(pose.Key))
+            {
+                Brio.Log.Debug($"Clearing stacks for pose {pose.Key}");
+                pose.Value.ClearStacks();
+            }
         }
+    }
+
+    public PoseInfo Clone(Predicate<BonePoseInfoId>? predicate = null)
+    {
+        var clone = new PoseInfo();
+        foreach(var pose in _poses)
+        {
+            if(predicate == null || predicate(pose.Key))
+                clone._poses.Add(pose.Key, pose.Value.Clone(clone));
+        }
+        return clone;
     }
 
     public PoseInfo Clone()
