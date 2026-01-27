@@ -13,7 +13,7 @@ namespace Brio.UI.Widgets.World;
 public class SkyEditorWidget(SkyEditorCapability skyEditorCapability) : Widget<SkyEditorCapability>(skyEditorCapability)
 {
     public override string HeaderName => "Sky";
-    public override WidgetFlags Flags => WidgetFlags.DefaultOpen | WidgetFlags.DrawBody;
+    public override WidgetFlags Flags => WidgetFlags.DrawBody;
 
     int selected = 0;
     private readonly TextureSelector _skyTextureSelector = new("sky_texture_selector", TextureType.Sky);

@@ -471,7 +471,15 @@ public class PosingCapability : ActorCharacterCapability
 
             // Skip j_ex bones (PartialId 4) &
             // Skip partial root bones & skeleton root
-            if(bone == null || (bone.IsPartialRoot && !bone.IsSkeletonRoot) || bone.PartialId == 4)
+
+            if(bone == null) continue;
+
+            if(bone.Name.Contains("iv_shiri") || bone.Name.Contains("iv_kougan"))
+            {
+                continue;
+            }
+
+            if(bone.IsPartialRoot && !bone.IsSkeletonRoot)
             {
                 mirroredPose.Bones[boneName] = transform;
                 continue;

@@ -14,7 +14,7 @@ namespace Brio.UI.Widgets.World;
 public class EnvironmentEditorWidget(EnvironmentEditorCapability capability) : Widget<EnvironmentEditorCapability>(capability)
 {
     public override string HeaderName => "Environment";
-    public override WidgetFlags Flags => WidgetFlags.DefaultOpen | WidgetFlags.DrawBody;
+    public override WidgetFlags Flags => WidgetFlags.DrawBody;
 
     int selected = 0;
     private readonly TextureSelector _textureSelector = new("particle_texture_selector", TextureType.Particle);
