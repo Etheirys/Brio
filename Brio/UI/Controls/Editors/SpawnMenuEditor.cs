@@ -91,7 +91,7 @@ public static class SpawnMenuEditor
                     ImGui.CloseCurrentPopup();
                 }
 
-                if(ImBrio.DrawIconButton(FontAwesomeIcon.Circle, "Spawn Area Light", buttonSize))
+                if(ImBrio.DrawIconButton(FontAwesomeIcon.Circle, "Spawn Point Light", buttonSize))
                 {
                     lightingService.SpawnLight(LightType.AreaLight);
                     ImGui.CloseCurrentPopup();
