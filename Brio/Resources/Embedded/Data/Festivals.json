@@ -467,6 +467,11 @@
     "Unsafe": false
   },
   {
+    "Id": 137,
+    "Name": "Special Event Flag",
+    "Unsafe": false
+  },
+  {
     "Id": 138,
     "Name": "Little Ladies Day (2023)",
     "Unsafe": false
@@ -698,6 +703,11 @@
     "Unsafe": false
   },
   {
+    "Id": 163,
+    "Name": "Valentione's Day (2026)",
+    "Unsafe": false
+  },
+  {
     "Id": 164,
     "Name": "All Saint's Wake (2025)",
     "Unsafe": false
@@ -713,8 +723,75 @@
     "Unsafe": false
   },
   {
+    "Id": 167,
+    "Name": "Heavensturn (2026)",
+    "Unsafe": false
+  },
+  {
     "Id": 169,
-    "Name": "Little Ladies Day (2025)",
+    "Name": "Little Ladies Day (2026)",
+    "Unsafe": false
+  },
+  {
+    "Id": 172,
+    "Name": "Hatching Tide (2026)",
+    "Unsafe": false
+  },
+  {
+    "Id": 173,
+    "Name": "Make It Rain (2026)",
+    "Unsafe": false
+  },
+  {
+    "Id": 174,
+    "Name": "Moonfire Faire (2026)",
+    "Unsafe": true,
+    "AreaExclusion": {
+      "Reason": "Interactive Area",
+      "TerritoryType": 137,
+      "Polygon": [
+        {
+          "X": 653.117,
+          "Y": 341.158
+        },
+        {
+          "X": 870.673,
+          "Y": 344.013
+        },
+        {
+          "X": 867.6,
+          "Y": 580.759
+        },
+        {
+          "X": 658.786,
+          "Y": 580.759
+        },
+        {
+          "X": 844.241,
+          "Y": 515.06146
+        },
+        {
+          "X": 825.698,
+          "Y": 580.192
+        },
+        {
+          "X": 779.8968,
+          "Y": 532.01373
+        },
+        {
+          "X": 720.6542,
+          "Y": 499.47015
+        },
+        {
+          "X": 731.2376,
+          "Y": 367.99554
+        }
+      ]
+    }
+  },
+  {
+    "Id": 175,
+    "Name": "The Rising (2026)",
     "Unsafe": false
   }
 ]
