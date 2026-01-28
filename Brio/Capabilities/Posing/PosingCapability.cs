@@ -392,6 +392,20 @@ public class PosingCapability : ActorCharacterCapability
         }
     }
 
+    public void ClearStacks(Predicate<BonePoseInfoId>? predicate = null)
+    {
+        SkeletonPosing.PoseInfo.Clear(predicate);
+
+        var facebone = SkeletonPosing.GetBone("j_kao", PoseInfoSlot.Character);
+        if(facebone != null)
+        {
+            _framework.RunOnTick(() =>
+            {
+                ReconcileChildren(facebone);
+            }, delayTicks: 2);
+        }
+    }
+
     private void Reconcile(bool reset = true, bool generateSnapshot = true)
     {
         _framework.RunOnTick(() =>
@@ -627,7 +641,19 @@ public class PosingCapability : ActorCharacterCapability
             if(poseInfo.HasStacks)
             {
                 poseInfo.ClearStacks();
-                Snapshot(reset: false);
+
+                var facebone = SkeletonPosing.GetBone("j_kao", PoseInfoSlot.Character);
+                if(facebone != null)
+                {
+                    _framework.RunOnTick(() =>
+                    {
+                        ReconcileChildren(bone);
+                    }, delayTicks: 2);
+                }
+                else
+                {
+                    Snapshot(reset: false);
+                }
             }
         }
     }
