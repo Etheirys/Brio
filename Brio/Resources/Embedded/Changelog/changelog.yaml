@@ -14,6 +14,15 @@ changelog:
           - "I have gotten successful bullied by other devs, so I made pose mirroring"
           - "Still yet, more features coming soon, like AltherBlend integration, Auto-Save & MCDF Window"
    
+      - number: "0.7.1.1"
+        icon: ""
+        items:
+          - "Fixed a few issues with flipping a pose, like your butt being inversed!"
+          - "Fixed an Issue with reset bone, not resetting face bones"
+          - "Advanced Environment widgets are no longer open by default"
+          - "Updated Festivals List (Valentione's Day, Heavensturn, Little Ladies Day, Hatching Tide & more, for 2026)"
+          - "Updated Supporter list"
+
       - number: "Mirror Pose"
         icon: ""
         items:
@@ -40,6 +49,7 @@ changelog:
           - "When moving the face bones with IK on, the face jumps!"
           - "As workaound move your IK bones before changed any face/head bones!"
           - "Pose flipping starts to behave weirdly after you do it about.. 70 times"
+          - "Occasionally Brio Keybinds are sent to the game incorrectly"
 
   - name: v0.7.0
     tagline: Multi-Bone, Multi-Actor Selection, Advanced Environment & Brio's 3rd Birthday!
