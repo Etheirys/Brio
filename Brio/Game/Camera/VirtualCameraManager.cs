@@ -442,6 +442,12 @@ public class VirtualCameraManager : IDisposable
         }
         else
         {
+            // Ensure camera locking resets to unlocked when entering GPose
+            if(_entityManager.TryGetEntity("cameras", out var camContainer))
+            {
+                camContainer.IsLocked = false;
+            }
+
             var defaultCam = _entityManager.GetEntity<CameraEntity>(new Entities.Core.CameraId(0));
             if(defaultCam is not null)
             {
