@@ -769,6 +769,23 @@ public class PosingOverlayWindow : Window, IDisposable
                 lightTransformCapability.Snapshot();
         }
 
+        // Draw yellow directional line when light is selected
+        if(_lightingService.SelectedLightEntity is not null && _lightingService.SelectedLightEntity == lightTransformCapability.Entity)
+        {
+            var gameLight = lightTransformCapability.GameLight.GameLight;
+            if(gameLight->LightRenderObject != null)
+            {
+                var range = gameLight->LightRenderObject->Range;
+                var position = lightTransformCapability.GameLight.Position;
+                var rotation = lightTransformCapability.GameLight.Rotation;
+
+                var forward = Vector3.Transform(new Vector3(0, 0, 1), rotation);
+                var endPosition = position + (forward * range);
+
+                DrawLineWorld(position, endPosition, 0xFF00FFFF, 2f);
+            }
+        }
+
         ImGuizmo.SetID(_gizmoId);
     }
 
