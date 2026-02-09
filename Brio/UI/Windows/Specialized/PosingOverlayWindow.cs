@@ -775,14 +775,20 @@ public class PosingOverlayWindow : Window, IDisposable
             var gameLight = lightTransformCapability.GameLight.GameLight;
             if(gameLight->LightRenderObject != null)
             {
-                var range = gameLight->LightRenderObject->Range;
-                var position = lightTransformCapability.GameLight.Position;
-                var rotation = lightTransformCapability.GameLight.Rotation;
+                var render = gameLight->LightRenderObject;
 
-                var forward = Vector3.Transform(new Vector3(0, 0, 1), rotation);
-                var endPosition = position + (forward * range);
+                // Only show directional line for spot or flat lights
+                if(render->EmissionType == LightType.SpotLight || render->EmissionType == LightType.FlatLight)
+                {
+                    var range = render->Range;
+                    var position = lightTransformCapability.GameLight.Position;
+                    var rotation = lightTransformCapability.GameLight.Rotation;
 
-                DrawLineWorld(position, endPosition, 0xFF00FFFF, 2f);
+                    var forward = Vector3.Transform(new Vector3(0, 0, 1), rotation);
+                    var endPosition = position + (forward * range);
+
+                    DrawLineWorld(position, endPosition, 0xFF00FFFF, 2f);
+                }
             }
         }
 
