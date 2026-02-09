@@ -80,6 +80,19 @@ public class LightTransformCapability : LightCapability
         Widget = new LightTransformWidget(this);
     }
 
+    public override void OnEntitySelected()
+    {
+        if(_configurationService.Configuration.Posing.AutoSelectTransformOnEntitySelect)
+        {
+            IsGismoVisible = true;
+        }
+    }
+
+    public override void OnEntityDeselected()
+    {
+        IsGismoVisible = false;
+    }
+
     public void Redo()
     {
         if(_redoStack.TryPop(out var redoStack))

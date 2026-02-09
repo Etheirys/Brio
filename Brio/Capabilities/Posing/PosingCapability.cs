@@ -110,7 +110,7 @@ public class PosingCapability : ActorCharacterCapability
 
     public override void OnEntitySelected()
     {
-        if(_configurationService.Configuration.Posing.AutoSelectModelTransformOnActorSelect)
+        if(_configurationService.Configuration.Posing.AutoSelectTransformOnEntitySelect)
         {
             Selected = PosingSelectionType.ModelTransform;
             SelectedBones.Clear();

@@ -451,10 +451,10 @@ public class SettingsWindow : Window
                 _configurationService.ApplyChange();
             }
 
-            bool autoSelectModelTransform = _configurationService.Configuration.Posing.AutoSelectModelTransformOnActorSelect;
-            if(ImGui.Checkbox("Select Model Transform on Actor Select", ref autoSelectModelTransform))
+            bool autoSelectModelTransform = _configurationService.Configuration.Posing.AutoSelectTransformOnEntitySelect;
+            if(ImGui.Checkbox("Select Model Transform Bone/Origin on Entity Select", ref autoSelectModelTransform))
             {
-                _configurationService.Configuration.Posing.AutoSelectModelTransformOnActorSelect = autoSelectModelTransform;
+                _configurationService.Configuration.Posing.AutoSelectTransformOnEntitySelect = autoSelectModelTransform;
                 _configurationService.ApplyChange();
             }
         }

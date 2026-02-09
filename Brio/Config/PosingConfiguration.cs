@@ -38,7 +38,7 @@ public class PosingConfiguration
     // Targeting
     public bool GPoseTargetChangesWithBrio { get; set; } = false;
     public bool BrioTargetChangesWithGPose { get; set; } = true;
-    public bool AutoSelectModelTransformOnActorSelect { get; set; } = false;
+    public bool AutoSelectTransformOnEntitySelect { get; set; } = false;
 
     // Undo / Redo
     public int UndoStackSize { get; set; } = 50;
