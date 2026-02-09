@@ -108,6 +108,15 @@ public class PosingCapability : ActorCharacterCapability
         _gameInputService = gameInputService;
     }
 
+    public override void OnEntitySelected()
+    {
+        if(_configurationService.Configuration.Posing.AutoSelectModelTransformOnActorSelect)
+        {
+            Selected = PosingSelectionType.ModelTransform;
+            SelectedBones.Clear();
+        }
+    }
+
     public void LoadResourcesPose(string resourcesPath, bool freezeOnLoad = false, bool asBody = false)
     {
         var option = _posingService.SceneImporterOptions;

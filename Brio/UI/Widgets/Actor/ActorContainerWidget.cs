@@ -102,6 +102,7 @@ public class ActorContainerWidget(ActorContainerCapability capability) : Widget<
                     if(ImGui.Selectable($"{child.FriendlyName}###actorcontainerwidget_{Capability.Entity.Id}_item_{actorEntity.Id}", isSelected, ImGuiSelectableFlags.AllowDoubleClick))
                     {
                         _selectedActor = actorEntity;
+                        Capability.SelectActorInHierarchy(actorEntity);
                     }
                 }
             }

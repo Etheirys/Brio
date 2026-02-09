@@ -450,6 +450,13 @@ public class SettingsWindow : Window
                 _configurationService.Configuration.Posing.GPoseTargetChangesWithBrio = enableGPoseTargetChange;
                 _configurationService.ApplyChange();
             }
+
+            bool autoSelectModelTransform = _configurationService.Configuration.Posing.AutoSelectModelTransformOnActorSelect;
+            if(ImGui.Checkbox("Select Model Transform on Actor Select", ref autoSelectModelTransform))
+            {
+                _configurationService.Configuration.Posing.AutoSelectModelTransformOnActorSelect = autoSelectModelTransform;
+                _configurationService.ApplyChange();
+            }
         }
     }
 
