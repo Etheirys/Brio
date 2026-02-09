@@ -22,7 +22,7 @@ public class CameraContainerEntity(IServiceProvider provider) : Entity("cameras"
 
     public override FontAwesomeIcon Icon => FontAwesomeIcon.Camera;
 
-    public override int ContextButtonCount => 1;
+    public override int ContextButtonCount => 2;
 
     public override EntityFlags Flags => EntityFlags.DefaultOpen | EntityFlags.HasContextButton;
 
@@ -30,6 +30,17 @@ public class CameraContainerEntity(IServiceProvider provider) : Entity("cameras"
     {
         using(ImRaii.PushColor(ImGuiCol.Button, ThemeManager.CurrentTheme.Accent.AccentColor))
         {
+            // Lock/unlock cameras button
+            // Show closed lock when locked, open/unlock icon when unlocked.
+            var lockIcon = IsLocked ? FontAwesomeIcon.Lock : FontAwesomeIcon.Unlock;
+            var lockToolTip = IsLocked ? "Unlock Cameras" : "Lock Cameras";
+            if(ImBrio.FontIconButtonRight($"###{Id}_cameras_lock", lockIcon, 2f, lockToolTip, bordered: false))
+            {
+                IsLocked = !IsLocked;
+            }
+
+            ImGui.SameLine();
+
             string toolTip = $"New Camera";
             if(ImBrio.FontIconButtonRight($"###{Id}_cameras_contextButton", FontAwesomeIcon.Plus, 1f, toolTip, bordered: false))
             {

@@ -42,6 +42,16 @@ public class VirtualCameraManager : IDisposable
         _moveSpeed = configurationService.Configuration.Interface.DefaultFreeCameraMovementSpeed;
     }
 
+    public bool CamerasLocked
+    {
+        get
+        {
+            if(_entityManager.TryGetEntity("cameras", out var camContainer))
+                return camContainer.IsLocked;
+            return false;
+        }
+    }
+
     private readonly Vector3 Up = new(0f, 1f, 0f);
 
     private int _nextCameraId = 1;

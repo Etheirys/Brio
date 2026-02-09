@@ -146,6 +146,28 @@ public class GameInputService : IDisposable
                         keyboardFrame->KeyState[18] = 0; // Alt
                     }
                 }
+
+                // If cameras are locked, consume mouse movement and movement keys so
+                // no camera movement can occur.
+                if(_virtualCameraService.CamerasLocked)
+                {
+                    if(mouseFrame is not null)
+                    {
+                        // Prevent mouse movement from affecting the camera, but keep
+                        // button presses so game UI interactions still work.
+                        mouseFrame->DeltaX = 0;
+                        mouseFrame->DeltaY = 0;
+                        // Prevent scroll wheel from zooming the camera
+                        mouseFrame->ScrollValue = 0;
+                    }
+
+                    // Block free-camera movement keys only; leave modifiers and
+                    // other keys intact so vanilla interactions continue to work.
+                    keyboardFrame->KeyState[_freeW] = 0;
+                    keyboardFrame->KeyState[_freeA] = 0;
+                    keyboardFrame->KeyState[_freeS] = 0;
+                    keyboardFrame->KeyState[_freeD] = 0;
+                }
             }
 
             if(AllowEscape is false)
