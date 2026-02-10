@@ -313,4 +313,32 @@ public class FileEntry : ItemEntryBase
 
         FileTypeInfo?.DrawActions(this, isModal);
     }
+
+    protected override void AddTag(string tag)
+    {
+        if(_fileInfo?.IsFileType<JsonDocumentBase>() == true)
+        {
+            JsonDocumentBase? file = _fileInfo.Load(FilePath) as JsonDocumentBase;
+            if(file != null && file.Author != tag)
+            {
+                file.Tags?.Add(tag);
+                this.Tags.Add(tag);
+                ResourceProvider.Instance.SaveFileDocument(this.FilePath, file);
+            }
+        }
+    }
+
+    protected override void RemoveTag(string tag)
+    {
+        if(_fileInfo?.IsFileType<JsonDocumentBase>() == true)
+        {
+            JsonDocumentBase? file = _fileInfo.Load(FilePath) as JsonDocumentBase;
+            if(file != null && file.Author != tag)
+            {
+                file.Tags?.Remove(tag);
+                this.Tags.Remove(tag);
+                ResourceProvider.Instance.SaveFileDocument(this.FilePath, file);
+            }
+        }
+    }
 }

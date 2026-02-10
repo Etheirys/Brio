@@ -754,7 +754,7 @@ public class LibraryWindow : Window
                                     ImGui.SameLine();
                                     ImGui.SetCursorPosY(0);
 
-                                    if(ImBrio.DrawTag(tag))
+                                    if(ImBrio.DrawTag(tag) == ImBrio.MouseAction.Left)
                                     {
                                         toRemove = tag;
                                     }
@@ -900,8 +900,8 @@ public class LibraryWindow : Window
                     // click tags
                     if(availableTags.Count > 0)
                     {
-                        Tag? selected = ImBrio.DrawTags(availableTags);
-                        if(selected != null)
+                        var (selected, action) = ImBrio.DrawTags(availableTags);
+                        if(selected != null && action == ImBrio.MouseAction.Left)
                         {
                             TagFilter.Add(selected);
                             _searchNeedsFocus = true;

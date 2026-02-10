@@ -25,6 +25,7 @@ public abstract class ItemEntryBase : EntryBase
     {
     }
 
+    private string _newTagText = String.Empty;
     public virtual string? Description { get; }
     public virtual string? Author { get; }
     public virtual string? Version { get; }
@@ -32,6 +33,10 @@ public abstract class ItemEntryBase : EntryBase
     public abstract Type LoadsType { get; }
 
     public abstract object? Load();
+
+    protected virtual void AddTag(string tag) { }
+    protected virtual void RemoveTag(string tag) { }
+    private Tag? ContextSource = null;
 
     public override bool PassesFilters(params FilterBase[] filters)
     {
@@ -94,11 +99,78 @@ public abstract class ItemEntryBase : EntryBase
 
         ImGui.Text("Tags:");
         ImGui.SameLine();
-        Tag? selected = ImBrio.DrawTags(this.Tags);
+
+        var (selected, action) = ImBrio.DrawTags(this.Tags);
         if(selected != null)
         {
-            window.TagFilter.Add(selected);
-            window.TryRefresh(true);
+            switch (action)
+            {
+                case ImBrio.MouseAction.Left: 
+                    window.TagFilter.Add(selected);
+                    window.TryRefresh(true);
+                    break;
+
+                case ImBrio.MouseAction.Right:
+                    ImGui.OpenPopup("tag_context_menu");
+                    ContextSource = selected;
+                    break;
+
+                default:
+                    break;
+            }
+        }
+
+        ImGui.SameLine();
+        if(ImGui.SmallButton("+"))
+        {
+            _newTagText = "";
+            ImGui.OpenPopup("new_tag_popup");
+        }
+
+        bool openRenamePopup = false;
+        if(ContextSource != null && ImGui.BeginPopup("tag_context_menu"))
+        {
+            if(ImGui.MenuItem("Rename"))
+            {
+                _newTagText = ContextSource.Name;
+                openRenamePopup = true;
+            }
+            if(ImGui.MenuItem("Delete") )
+            {
+                RemoveTag(ContextSource.Name);
+            }
+            ImGui.EndPopup();
+        }
+
+        if(ImGui.BeginPopup("new_tag_popup"))
+        {
+            ImGui.SetKeyboardFocusHere();
+
+            ImGui.Text("Tag name:");
+            if(ImGui.InputText("###new_tag_input", ref _newTagText, 64, ImGuiInputTextFlags.EnterReturnsTrue))
+            {
+                AddTag(_newTagText);
+                ImGui.CloseCurrentPopup();
+            }
+
+            ImGui.EndPopup();
+        }
+        
+        if(openRenamePopup)
+            ImGui.OpenPopup("rename_tag_popup");
+        if(ContextSource != null && ImGui.BeginPopup("rename_tag_popup"))
+        {
+            ImGui.SetKeyboardFocusHere();
+
+            ImGui.Text("New tag name");
+            if(ImGui.InputText("###rename_tag_input", ref _newTagText, 64, ImGuiInputTextFlags.EnterReturnsTrue))
+            {
+                RemoveTag(ContextSource.Name);
+                AddTag(_newTagText);
+                ImGui.CloseCurrentPopup();
+            }
+
+            ImGui.EndPopup();
         }
     }
 
