@@ -111,8 +111,11 @@ public abstract class ItemEntryBase : EntryBase
                     break;
 
                 case ImBrio.MouseAction.Right:
-                    ImGui.OpenPopup("tag_context_menu");
-                    ContextSource = selected;
+                    if(selected.Name == Author)
+                        ImGui.OpenPopup("author_tag_context_menu");
+                    else
+                        ImGui.OpenPopup("tag_context_menu");
+                    _contextSource = selected;
                     break;
 
                 default:
@@ -139,6 +142,12 @@ public abstract class ItemEntryBase : EntryBase
             {
                 RemoveTag(_contextSource.Name);
             }
+            ImGui.EndPopup();
+        }
+
+        if(ImGui.BeginPopup("author_tag_context_menu"))
+        {
+            ImGui.Text("Author");
             ImGui.EndPopup();
         }
 
