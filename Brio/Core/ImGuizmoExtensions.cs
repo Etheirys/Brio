@@ -2,6 +2,7 @@
 using Dalamud.Bindings.ImGui;
 using Dalamud.Bindings.ImGuizmo;
 using System.Numerics;
+using Brio.Config;
 
 namespace Brio.Core;
 
@@ -10,6 +11,9 @@ public static class ImGuizmoExtensions
     public static bool MouseWheelManipulate(ref Matrix4x4 matrix)
     {
         if(ImGui.IsAnyMouseDown())
+            return false;
+
+        if(ConfigurationService.Instance.Configuration.InputManager.DisableScrollWheelOnInputs)
             return false;
 
         float mouseWheel = ImGui.GetIO().MouseWheel / 100;

@@ -1,5 +1,6 @@
 ﻿using Brio.Core;
 using Brio.Input;
+using Brio.Config;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface.Utility;
 using System.Numerics;
@@ -84,11 +85,14 @@ public static partial class ImBrio
             if(string.IsNullOrEmpty(toolTip) == false)
                 ImGui.SetTooltip(toolTip);
 
-            float mouseWheel = ImGui.GetIO().MouseWheel / 10;
-            if(mouseWheel != 0)
+            if(!ConfigurationService.Instance.Configuration.InputManager.DisableScrollWheelOnInputs)
             {
-                value += isAngle ? mouseWheel * step * MathHelpers.DegreesToRadians : mouseWheel * step;
-                changed = true;
+                float mouseWheel = ImGui.GetIO().MouseWheel / 10;
+                if(mouseWheel != 0)
+                {
+                    value += isAngle ? mouseWheel * step * MathHelpers.DegreesToRadians : mouseWheel * step;
+                    changed = true;
+                }
             }
         }
 

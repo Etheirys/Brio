@@ -5,6 +5,7 @@ using Dalamud.Interface.Utility.Raii;
 using FFXIVClientStructs.FFXIV.Client.Game.Control;
 using System;
 using System.Numerics;
+using Brio.Config;
 
 namespace Brio.UI.Controls.Stateless;
 
@@ -180,32 +181,35 @@ public static partial class ImBrioGizmo
                     }
                     else
                     {
-                        float mouseWheel = ImGui.GetIO().MouseWheel / 100;
-
-                        if(mouseWheel != 0)
+                        if(!ConfigurationService.Instance.Configuration.InputManager.DisableScrollWheelOnInputs)
                         {
-                            if(InputManagerService.ActionKeysPressed(InputAction.Interface_IncrementSmallModifier))
-                                mouseWheel /= 10;
+                            float mouseWheel = ImGui.GetIO().MouseWheel / 100;
 
-                            if(InputManagerService.ActionKeysPressed(InputAction.Interface_IncrementLargeModifier))
-                                mouseWheel *= 10;
+                            if(mouseWheel != 0)
+                            {
+                                if(InputManagerService.ActionKeysPressed(InputAction.Interface_IncrementSmallModifier))
+                                    mouseWheel /= 10;
 
-                            Quaternion rot = Quaternion.Identity;
-                            if(closestMouseAxis == Axis.X)
-                            {
-                                rot = Quaternion.CreateFromAxisAngle(Vector3.UnitX, mouseWheel);
-                            }
-                            if(closestMouseAxis == Axis.Y)
-                            {
-                                rot = Quaternion.CreateFromAxisAngle(Vector3.UnitY, -mouseWheel);
-                            }
-                            if(closestMouseAxis == Axis.Z)
-                            {
-                                rot = Quaternion.CreateFromAxisAngle(Vector3.UnitZ, mouseWheel);
-                            }
+                                if(InputManagerService.ActionKeysPressed(InputAction.Interface_IncrementLargeModifier))
+                                    mouseWheel *= 10;
 
-                            rotation *= rot;
-                            changed = true;
+                                Quaternion rot = Quaternion.Identity;
+                                if(closestMouseAxis == Axis.X)
+                                {
+                                    rot = Quaternion.CreateFromAxisAngle(Vector3.UnitX, mouseWheel);
+                                }
+                                if(closestMouseAxis == Axis.Y)
+                                {
+                                    rot = Quaternion.CreateFromAxisAngle(Vector3.UnitY, -mouseWheel);
+                                }
+                                if(closestMouseAxis == Axis.Z)
+                                {
+                                    rot = Quaternion.CreateFromAxisAngle(Vector3.UnitZ, mouseWheel);
+                                }
+
+                                rotation *= rot;
+                                changed = true;
+                            }
                         }
                     }
 

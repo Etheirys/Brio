@@ -8,6 +8,7 @@ using Dalamud.Interface.Utility.Raii;
 using System.Collections.Generic;
 using System.Numerics;
 using System.Runtime.CompilerServices;
+using Brio.Config;
 
 namespace Brio.UI.Controls.Stateless;
 
@@ -128,11 +129,14 @@ public static partial class ImBrio
         if(ImGui.IsItemHovered())
         {
             ImGui.SetTooltip($" X {toolTip ?? ""}");
-            float mouseWheel = ImGui.GetIO().MouseWheel / 10;
-            if(mouseWheel != 0)
+            if(!ConfigurationService.Instance.Configuration.InputManager.DisableScrollWheelOnInputs)
             {
-                value.X += mouseWheel * step;
-                changed = true;
+                float mouseWheel = ImGui.GetIO().MouseWheel / 10;
+                if(mouseWheel != 0)
+                {
+                    value.X += mouseWheel * step;
+                    changed = true;
+                }
             }
         }
         active |= ImGui.IsItemActive();
@@ -144,11 +148,14 @@ public static partial class ImBrio
         if(ImGui.IsItemHovered())
         {
             ImGui.SetTooltip($" Y {toolTip ?? ""}");
-            float mouseWheel = ImGui.GetIO().MouseWheel / 10;
-            if(mouseWheel != 0)
+            if(!ConfigurationService.Instance.Configuration.InputManager.DisableScrollWheelOnInputs)
             {
-                value.Y += mouseWheel * step;
-                changed = true;
+                float mouseWheel = ImGui.GetIO().MouseWheel / 10;
+                if(mouseWheel != 0)
+                {
+                    value.Y += mouseWheel * step;
+                    changed = true;
+                }
             }
         }
         active |= ImGui.IsItemActive();
@@ -160,11 +167,14 @@ public static partial class ImBrio
         if(ImGui.IsItemHovered())
         {
             ImGui.SetTooltip($" Z {toolTip ?? ""}");
-            float mouseWheel = ImGui.GetIO().MouseWheel / 10;
-            if(mouseWheel != 0)
+            if(!ConfigurationService.Instance.Configuration.InputManager.DisableScrollWheelOnInputs)
             {
-                value.Z += mouseWheel * step;
-                changed = true;
+                float mouseWheel = ImGui.GetIO().MouseWheel / 10;
+                if(mouseWheel != 0)
+                {
+                    value.Z += mouseWheel * step;
+                    changed = true;
+                }
             }
         }
         active |= ImGui.IsItemActive();
@@ -213,11 +223,14 @@ public static partial class ImBrio
         if(ImGui.IsItemHovered())
         {
             ImGui.SetTooltip($"{tooltip}");
-            float mouseWheel = ImGui.GetIO().MouseWheel / 10;
-            if(mouseWheel != 0)
+            if(!ConfigurationService.Instance.Configuration.InputManager.DisableScrollWheelOnInputs)
             {
-                value += mouseWheel * step;
-                changed = true;
+                float mouseWheel = ImGui.GetIO().MouseWheel / 10;
+                if(mouseWheel != 0)
+                {
+                    value += mouseWheel * step;
+                    changed = true;
+                }
             }
         }
 
@@ -304,22 +317,25 @@ public static partial class ImBrio
         if(ImGui.IsItemHovered())
         {
             ImGui.SetTooltip($"{tooltip}");
-            float mouseWheel = ImGui.GetIO().MouseWheel / 10;
-            if(mouseWheel != 0)
+            if(!ConfigurationService.Instance.Configuration.InputManager.DisableScrollWheelOnInputs)
             {
-                if(value + (mouseWheel * step) <= min)
+                float mouseWheel = ImGui.GetIO().MouseWheel / 10;
+                if(mouseWheel != 0)
                 {
-                    value = min;
+                    if(value + (mouseWheel * step) <= min)
+                    {
+                        value = min;
+                    }
+                    else if(value + (mouseWheel * step) >= max)
+                    {
+                        value = max;
+                    }
+                    else
+                    {
+                        value += mouseWheel * step;
+                    }
+                    changed = true;
                 }
-                else if(value + (mouseWheel * step) >= max)
-                {
-                    value = max;
-                }
-                else
-                {
-                    value += mouseWheel * step;
-                }
-                changed = true;
             }
         }
 

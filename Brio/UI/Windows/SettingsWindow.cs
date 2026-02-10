@@ -796,6 +796,13 @@ public class SettingsWindow : Window
             _configurationService.ApplyChange();
         }
 
+        bool disableScrollOnInputs = _configurationService.Configuration.InputManager.DisableScrollWheelOnInputs;
+        if(ImGui.Checkbox("Disable scroll wheel for input boxes and gizmos", ref disableScrollOnInputs))
+        {
+            _configurationService.Configuration.InputManager.DisableScrollWheelOnInputs = disableScrollOnInputs;
+            _configurationService.ApplyChange();
+        }
+
         if(ImGui.CollapsingHeader("Free Camera", ImGuiTreeNodeFlags.DefaultOpen))
         {
             DrawKeyBind(InputAction.FreeCamera_Forward);
