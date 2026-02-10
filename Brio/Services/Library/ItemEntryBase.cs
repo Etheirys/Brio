@@ -25,7 +25,6 @@ public abstract class ItemEntryBase : EntryBase
     {
     }
 
-    private string _newTagText = String.Empty;
     public virtual string? Description { get; }
     public virtual string? Author { get; }
     public virtual string? Version { get; }
@@ -36,7 +35,8 @@ public abstract class ItemEntryBase : EntryBase
 
     protected virtual void AddTag(string tag) { }
     protected virtual void RemoveTag(string tag) { }
-    private Tag? ContextSource = null;
+    private Tag? _contextSource = null;
+    private string _newTagText = String.Empty;
 
     public override bool PassesFilters(params FilterBase[] filters)
     {
@@ -128,16 +128,16 @@ public abstract class ItemEntryBase : EntryBase
         }
 
         bool openRenamePopup = false;
-        if(ContextSource != null && ImGui.BeginPopup("tag_context_menu"))
+        if(_contextSource != null && ImGui.BeginPopup("tag_context_menu"))
         {
             if(ImGui.MenuItem("Rename"))
             {
-                _newTagText = ContextSource.Name;
+                _newTagText = _contextSource.Name;
                 openRenamePopup = true;
             }
             if(ImGui.MenuItem("Delete") )
             {
-                RemoveTag(ContextSource.Name);
+                RemoveTag(_contextSource.Name);
             }
             ImGui.EndPopup();
         }
@@ -158,14 +158,14 @@ public abstract class ItemEntryBase : EntryBase
         
         if(openRenamePopup)
             ImGui.OpenPopup("rename_tag_popup");
-        if(ContextSource != null && ImGui.BeginPopup("rename_tag_popup"))
+        if(_contextSource != null && ImGui.BeginPopup("rename_tag_popup"))
         {
             ImGui.SetKeyboardFocusHere();
 
             ImGui.Text("New tag name");
             if(ImGui.InputText("###rename_tag_input", ref _newTagText, 64, ImGuiInputTextFlags.EnterReturnsTrue))
             {
-                RemoveTag(ContextSource.Name);
+                RemoveTag(_contextSource.Name);
                 AddTag(_newTagText);
                 ImGui.CloseCurrentPopup();
             }
