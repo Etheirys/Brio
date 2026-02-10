@@ -3,6 +3,7 @@ using Brio.Entities.Actor;
 using Brio.Game.Actor;
 using Brio.Game.Actor.Extensions;
 using Brio.Game.Camera;
+using Brio.Capabilities.Posing;
 using Brio.Game.Core;
 using Brio.Game.World;
 using Brio.UI.Widgets.Actor;
@@ -17,14 +18,43 @@ public class ActorLifetimeCapability : ActorCapability
     private readonly ActorSpawnService _actorSpawnService;
     private readonly ActorAppearanceService _actorAppearanceService;
     private readonly EntityManager _entityManager;
+    private readonly VirtualCameraManager _cameraManager;
     public ActorLifetimeCapability(ActorEntity parent, TargetService targetService, ActorAppearanceService actorAppearanceService, ActorSpawnService actorSpawnService, EntityManager entityManager, VirtualCameraManager cameraManager, LightingService lightingService) : base(parent)
     {
         _targetService = targetService;
         _actorSpawnService = actorSpawnService;
         _entityManager = entityManager;
         _actorAppearanceService = actorAppearanceService;
+        _cameraManager = cameraManager;
 
         Widget = new ActorLifetimeWidget(this, actorSpawnService, cameraManager, lightingService);
+    }
+
+    public void MoveToCamera()
+    {
+        if(_cameraManager.CurrentCamera is null)
+            return;
+
+        var cam = _cameraManager.CurrentCamera;
+        System.Numerics.Vector3 camPos;
+        if(cam.IsFreeCamera)
+        {
+            camPos = cam.Position;
+        }
+        else
+        {
+            unsafe
+            {
+                camPos = cam.BrioCamera->Position;
+            }
+        }
+
+        if(Actor.TryGetCapability<ModelPosingCapability>(out var modelPosing))
+        {
+            var t = modelPosing.Transform;
+            t.Position = camPos;
+            modelPosing.Transform = t;
+        }
     }
 
     public void Target()

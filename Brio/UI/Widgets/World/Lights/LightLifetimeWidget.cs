@@ -37,6 +37,13 @@ public class LightLifetimeWidget : Widget<LightLifetimeCapability>
 
         ImGui.SameLine();
 
+        if(ImBrio.FontIconButton("lifetimewidget_move_to_camera", FontAwesomeIcon.Thumbtack, "Move to Camera"))
+        {
+            Capability.MoveToCamera();
+        }
+
+        ImGui.SameLine();
+
         if(ImBrio.FontIconButton("lifetimewidget_clone", FontAwesomeIcon.Clone, "Clone Light", Capability.CanClone))
         {
             Capability.Clone();
@@ -66,6 +73,11 @@ public class LightLifetimeWidget : Widget<LightLifetimeCapability>
 
     public override void DrawPopup()
     {
+        if(ImGui.MenuItem("Move to Camera###actorlifetime_move_to_camera"))
+        {
+            Capability.MoveToCamera();
+        }
+
         if(Capability.CanClone)
         {
             if(ImGui.MenuItem("Clone###actorlifetime_clone"))
