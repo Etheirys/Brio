@@ -7,9 +7,12 @@ using Brio.UI.Controls.Stateless;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface;
 using Dalamud.Interface.Textures.TextureWraps;
+using EmbedIO.Utilities;
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
+using System.Numerics;
 using System.Runtime.InteropServices;
 
 namespace Brio.Library.Sources;
@@ -164,6 +167,14 @@ public class FileEntry : ItemEntryBase
     private string? _description;
     private string? _author;
     private string? _version;
+    private string _editDescription = String.Empty;
+    private string _editAuthor = String.Empty;
+    private string _editVersion = String.Empty;
+    private string _editTags = String.Empty;
+    private string? _editBase64Image;
+    private IDalamudTextureWrap? _editPreviewImage;
+    private bool _isEditWindowOpen = false;
+    private int? _editPreviewImageFileSize;
 
     public FileEntry(FileSource source, string path, FileTypeInfoBase fileInfo)
         : base(source)
@@ -211,6 +222,7 @@ public class FileEntry : ItemEntryBase
     public override IDalamudTextureWrap? Icon => GetIcon();
     public override IDalamudTextureWrap? PreviewImage => GetPreviewImage();
     public override Type LoadsType => _fileInfo.Type;
+    public override bool EditAble => true;
     public FileTypeInfoBase FileTypeInfo => _fileInfo;
 
     public override bool IsVisible
@@ -247,14 +259,11 @@ public class FileEntry : ItemEntryBase
 
         try
         {
-            if(_fileInfo?.IsFileType<JsonDocumentBase>() == true)
+            string? base64Image = GetBase64ImageData();
+            if(base64Image != null)
             {
-                JsonDocumentBase? file = _fileInfo.Load(FilePath) as JsonDocumentBase;
-                if(file != null && file.Base64Image != null)
-                {
-                    byte[] imgData = Convert.FromBase64String(file.Base64Image);
-                    _previewImage = UIManager.Instance.LoadImage(imgData);
-                }
+                byte[] imgData = Convert.FromBase64String(base64Image);
+                _previewImage = UIManager.Instance.LoadImage(imgData);
             }
         }
         catch(Exception)
@@ -266,10 +275,48 @@ public class FileEntry : ItemEntryBase
         return _previewImage;
     }
 
+    private string? GetBase64ImageData()
+    {
+        try
+        {
+            if(_fileInfo?.IsFileType<JsonDocumentBase>() == true)
+            {
+                JsonDocumentBase? file = _fileInfo.Load(FilePath) as JsonDocumentBase;
+                if(file != null && file.Base64Image != null)
+                {
+                    return file.Base64Image;
+                }
+            }
+        }
+        catch(Exception)
+        {
+        }
+
+        return null;
+    }
+
+    public void LoadNewPreviewImage(string filePath)
+    {
+        try
+        {
+            var (imgBase64, img) = ResourceProvider.Instance.GetNewPreviewImage(filePath);
+            _editBase64Image = imgBase64;
+            if(_editPreviewImage != _previewImage)
+                _editPreviewImage?.Dispose();
+            _editPreviewImage = img;
+            _editPreviewImageFileSize = _editBase64Image != null ? System.Text.Encoding.UTF8.GetByteCount(_editBase64Image) : null;
+        }
+        catch(Exception ex)
+        {
+            Brio.Log.Error(ex, "Failed to load new preview image.");
+        }
+    }
+
     public override void Dispose()
     {
         base.Dispose();
         _previewImage?.Dispose();
+        _editPreviewImage?.Dispose();
     }
 
     protected override string GetpublicId()
@@ -312,5 +359,175 @@ public class FileEntry : ItemEntryBase
         }
 
         FileTypeInfo?.DrawActions(this, isModal);
+    }
+
+    // Need a named delegate because of the ref
+    private delegate void EditDetailsDelegate(ref JsonDocumentBase handler);
+
+    private void EditDetails(EditDetailsDelegate handler)
+    {
+        try
+        {
+            if(_fileInfo?.IsFileType<JsonDocumentBase>() == true)
+            {
+                JsonDocumentBase? file = _fileInfo.Load(FilePath) as JsonDocumentBase;
+                if(file != null)
+                {
+                    handler(ref file);
+                    ResourceProvider.Instance.SaveFileDocument(this.FilePath, file);
+                }
+            }
+        }
+        catch(Exception ex)
+        {
+            Brio.Log.Error(ex, "Exception while trying to modify a pose file!");
+        }
+    }
+
+    public override void AddTag(string tag)
+    {
+        EditDetails((ref file) => {
+            if(tag != file.Author && !tag.IsWhiteSpace())
+            {
+                file.Tags?.Add(tag); 
+                this.Tags.Add(tag);
+            }
+        });
+    }
+
+    public override void RemoveTag(string tag)
+    {
+        EditDetails((ref file) => {
+            if(tag != file.Author)
+            {
+                file.Tags?.Remove(tag);
+                this.Tags.Remove(tag);
+            }
+        });
+    }
+
+    public override void EditDetailsPopup(bool openPopup)
+    {
+        if(openPopup)
+        {
+            _isEditWindowOpen = true;
+            _editAuthor = _author ?? "";
+            _editVersion = _version ?? "";
+            _editDescription = _description ?? "";
+            _editTags = Tags != null ? string.Join(", ", Tags.Where(x => x.Name != _author).Select(x => x.Name)) : "";
+            _editPreviewImage = GetPreviewImage();
+            _editBase64Image = GetBase64ImageData();
+            _editPreviewImageFileSize = _editBase64Image != null ? System.Text.Encoding.UTF8.GetByteCount(_editBase64Image) : null;
+            // Without this the auto resize will show the old window size for 1 frame if the previous window was bigger then the current
+            ImGui.SetNextWindowSize(new Vector2(0, 1)); 
+        }
+
+        if(_isEditWindowOpen is false)
+            return;
+
+        ImGui.Begin("Details", ImGuiWindowFlags.AlwaysAutoResize);
+
+        ImGui.Text("Author:");
+        ImGui.SameLine();
+        ImGui.SetCursorPosX(ImGui.GetCursorPosX() + ImGui.CalcTextSize("Version:").X - ImGui.CalcTextSize("Author:").X);
+        ImGui.InputText("##author", ref _editAuthor);
+
+        ImGui.Text("Version:");
+        ImGui.SameLine();
+        ImGui.InputText("##version", ref _editVersion);
+
+        ImGui.Text("Tags:");
+        ImGui.SameLine();
+        ImGui.SetCursorPosX(ImGui.GetCursorPosX() + ImGui.CalcTextSize("Version:").X - ImGui.CalcTextSize("Tags:").X);
+        ImGui.InputText("##tags", ref _editTags);
+
+        ImGui.Text("Description:");
+        ImGui.InputTextMultiline("##description", ref _editDescription, 1024, new Vector2(-1, 5 * ImGui.GetTextLineHeight()));
+
+        ImGui.Text("Image:");
+        ImGui.SameLine();
+        if(ImGui.Button(_editPreviewImage == null ? "Add##change_preview_image" : "Replace##change_preview_image"))
+            FileUIHelpers.ShowImportPreviewImageModal(this);
+
+        if(_editPreviewImage != null)
+        {
+            ImGui.SameLine();
+            if(ImGui.Button("Remove##remove_preview_image"))
+            {
+                if(_editPreviewImage != _previewImage)
+                    _editPreviewImage?.Dispose();
+                _editPreviewImage = null;
+                _editBase64Image = null;
+                _editPreviewImageFileSize = null;
+            }
+        }
+
+        if(_editPreviewImage != null && _editPreviewImageFileSize != null)
+        {
+            ImGui.SameLine();
+            ImBrio.HorizontalPadding(10);
+            ImGui.Text($"{_editPreviewImage.Width} x {_editPreviewImage.Height} px");
+            ImGui.SameLine();
+            ImBrio.HorizontalPadding(10);
+            if(_editPreviewImageFileSize > (1 << 20))
+                ImGui.Text($"{_editPreviewImageFileSize >> 20:f2} MB");
+            else
+                ImGui.Text($"{_editPreviewImageFileSize >> 10} KB");
+
+            // Dont't want to center the image vertically so we need to calc new height in advance
+            float width = _editPreviewImage.Width;
+            float height = _editPreviewImage.Height;
+            float aspectRatio = width / height;
+            float scaledHeight = Math.Min(500 / aspectRatio, 500);
+            ImBrio.ImageFit(_editPreviewImage, new Vector2(500, scaledHeight));
+        }
+
+        ImBrio.VerticalPadding(ImGui.GetTextLineHeight() / 2);
+        float buttonsWidth = ImGui.CalcTextSize("Save").X + ImGui.CalcTextSize("Cancel").X + ImGui.GetStyle().FramePadding.X * 4f
+            + ImGui.GetStyle().ItemSpacing.X;
+        ImBrio.RightAlign(buttonsWidth);
+        
+        if(ImGui.Button("Save##edit_details_save"))
+        {
+            Tags?.Clear();
+            Tags?.AddRange(_editTags.Split(',').Select(tag => tag.Trim()).Where(x => x != _author).Where(x => !x.IsWhiteSpace()));
+            TagCollection autoTags = new();
+            _author = _editAuthor.NullIfEmpty();
+            _version = _editVersion.NullIfEmpty();
+            _description = _editDescription.NullIfEmpty();
+
+            EditDetails((ref file) => {
+                file.Author = _author;
+                file.Version = _version;
+                file.Description = _description;
+                file.Base64Image = _editBase64Image;
+
+                if(Tags != null)
+                    file.Tags = Tags;
+                file.GetAutoTags(ref autoTags);
+            });
+
+            Tags?.AddRange(autoTags);
+
+            if(_editPreviewImage != _previewImage)
+            {
+                _previewImage?.Dispose();
+                _previewImage = _editPreviewImage;
+            }
+            _editPreviewImage = null;
+
+            _isEditWindowOpen = false;
+        }
+        ImGui.SameLine();
+        if(ImGui.Button("Cancel##edit_details_cancel"))
+        {
+            if(_editPreviewImage != _previewImage)
+                _editPreviewImage?.Dispose();
+            _editPreviewImage= null;
+
+            _isEditWindowOpen = false;
+        }
+
+        ImGui.End();
     }
 }

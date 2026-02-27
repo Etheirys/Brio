@@ -38,6 +38,7 @@ public class Configuration : IPluginConfiguration
     public string LastMCDFPath { get; set; } = string.Empty;
     public string LastExportPath { get; set; } = string.Empty;
     public string LastXATPath { get; set; } = string.Empty;
+    public string LastPreviewImagePath { get; set; } = string.Empty;
 
     public string LastScenePath { get; set; } = string.Empty;
 

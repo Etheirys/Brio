@@ -1,5 +1,6 @@
 ﻿using Brio.Files.Converters;
 using System;
+using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -15,7 +16,10 @@ public static class JsonSerializer
         _serializeOptions = new()
         {
             WriteIndented = true,
-            AllowTrailingCommas = true
+            AllowTrailingCommas = true,
+            // Since these files aren't used in a web browser we don't need the html safety escaping.
+            // This option reduces the size of base64 encoded content by around 7%
+            Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping  
         };
 
         _serializeOptions.Converters.Add(new JsonStringEnumConverter());

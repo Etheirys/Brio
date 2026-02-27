@@ -11,6 +11,7 @@ using Brio.Game.Posing;
 using Brio.Game.Types;
 using Brio.Library;
 using Brio.Library.Filters;
+using Brio.Library.Sources;
 using Brio.Services;
 using Brio.UI.Controls.Core;
 using Brio.UI.Controls.Editors;
@@ -460,6 +461,30 @@ public class FileUIHelpers
                 throw new IOException("The file selected is not a valid scene file");
             }
         }, true);
+    }
+
+    public static void ShowImportPreviewImageModal(FileEntry fileEntry)
+    {
+        UIManager.Instance.FileDialogManager.OpenFileDialog(
+            "Import image file###import_preview_image_window", 
+            "Image Files (*.png | *.jpg | *.jpeg){.png,.jpg,.jpeg}",
+            (success, paths) =>
+            {
+                if(success && paths.Count == 1)
+                {
+                    var path = paths[0];
+                    var directory = Path.GetDirectoryName(path);
+                    if(directory is not null)
+                    {
+                        ConfigurationService.Instance.Configuration.LastPreviewImagePath = directory;
+                        ConfigurationService.Instance.Save();
+                    }
+                    fileEntry.LoadNewPreviewImage(path);
+                }
+            }, 
+            1, 
+            ConfigurationService.Instance.Configuration.LastPreviewImagePath, 
+            false);
     }
 }
 

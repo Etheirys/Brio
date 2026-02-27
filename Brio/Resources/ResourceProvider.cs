@@ -61,6 +61,18 @@ public class ResourceProvider : IDisposable
         return stream ?? throw new Exception($"Resource {name} not found.");
     }
 
+    public (string, IDalamudTextureWrap) GetNewPreviewImage(string filePath)
+    {
+        using var stream = GetFileStream(filePath);
+        using var reader = new BinaryReader(stream);
+        var imgBin = reader.ReadBytes((int)stream.Length);
+        var imgBase64 = Convert.ToBase64String(imgBin);
+        var imgTask = _textureProvider.CreateFromImageAsync(imgBin);
+        imgTask.Wait(); // TODO: Don't block
+        var img = imgTask.Result;
+        return (imgBase64, img);
+    }
+
     public string GetRawResourceString(string name)
     {
         using var stream = GetRawResourceStream(name);

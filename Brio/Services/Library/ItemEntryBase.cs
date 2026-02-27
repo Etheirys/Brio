@@ -33,6 +33,20 @@ public abstract class ItemEntryBase : EntryBase
 
     public abstract object? Load();
 
+    public virtual bool EditAble { get; }
+    public virtual void AddTag(string tag) { }
+    public virtual void RemoveTag(string tag) { }
+    public virtual void EditDetailsPopup(bool openPopup) { }
+    private Tag? _contextSource = null;
+    private string _tagName = String.Empty;
+    private TagAction _tagAction = TagAction.New;
+
+    private enum TagAction
+    {
+        New,
+        Rename
+    }
+
     public override bool PassesFilters(params FilterBase[] filters)
     {
         foreach(FilterBase filter in filters)
@@ -63,7 +77,7 @@ public abstract class ItemEntryBase : EntryBase
         {
             Vector2 size = ImGui.GetContentRegionAvail();
 
-            size.Y = Math.Min(size.X, size.Y * 0.5f);
+            size.Y = Math.Min(size.X, size.Y * 0.75f);
             using(var child = ImRaii.Child($"library_info_image", size, false, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoInputs))
             {
                 if(!child.Success)
@@ -94,11 +108,85 @@ public abstract class ItemEntryBase : EntryBase
 
         ImGui.Text("Tags:");
         ImGui.SameLine();
-        Tag? selected = ImBrio.DrawTags(this.Tags);
+        DrawTags(window);
+    }
+
+    private void DrawTags(LibraryWindow window)
+    {
+        bool openTagNamePopup = false;
+        var (selected, action) = ImBrio.DrawTags(this.Tags);
         if(selected != null)
         {
-            window.TagFilter.Add(selected);
-            window.TryRefresh(true);
+            switch(action)
+            {
+                case ImBrio.MouseAction.Left:
+                    window.TagFilter.Add(selected);
+                    window.TryRefresh(true);
+                    break;
+
+                case ImBrio.MouseAction.Right:
+                    if(!EditAble)
+                        break;
+                    if(selected.Name == Author)
+                        ImGui.OpenPopup("author_tag_context_menu");
+                    else
+                        ImGui.OpenPopup("tag_context_menu");
+                    _contextSource = selected;
+                    break;
+
+                default:
+                    break;
+            }
+        }
+
+        if(!EditAble)
+            return;
+
+        ImGui.SameLine();
+        if(ImGui.SmallButton("+"))
+        {
+            _tagName = "";
+            _tagAction = TagAction.New;
+            openTagNamePopup = true;
+        }
+
+        if(_contextSource != null && ImGui.BeginPopup("tag_context_menu"))
+        {
+            if(ImGui.MenuItem("Rename"))
+            {
+                _tagName = _contextSource.Name;
+                _tagAction = TagAction.Rename;
+                openTagNamePopup = true;
+            }
+            if(ImGui.MenuItem("Delete"))
+            {
+                RemoveTag(_contextSource.Name);
+            }
+            ImGui.EndPopup();
+        }
+
+        if(ImGui.BeginPopup("author_tag_context_menu"))
+        {
+            ImGui.Text("Author");
+            ImGui.EndPopup();
+        }
+
+        if(openTagNamePopup)
+            ImGui.OpenPopup("tag_name_popup");
+        if(ImGui.BeginPopup("tag_name_popup"))
+        {
+            ImGui.SetKeyboardFocusHere();
+
+            ImGui.Text(_tagAction == TagAction.Rename ? "New tag name:" : "Tag name:");
+            if(ImGui.InputText("###tag_name_input", ref _tagName, 64, ImGuiInputTextFlags.EnterReturnsTrue))
+            {
+                if(_tagAction == TagAction.Rename && _contextSource != null)
+                    RemoveTag(_contextSource.Name);
+                AddTag(_tagName);
+                ImGui.CloseCurrentPopup();
+            }
+
+            ImGui.EndPopup();
         }
     }
 
@@ -132,6 +220,20 @@ public abstract class ItemEntryBase : EntryBase
 
         if(ImGui.IsItemHovered())
             ImGui.SetTooltip(isFavorite ? "Remove from favorites" : "Add to favorites");
+
+        ImGui.SameLine();
+
+        if(EditAble is false)
+            return;
+
+        bool openPopup = false;
+        if(ImBrio.FontIconButton(FontAwesomeIcon.FilePen))
+            openPopup = true;
+        
+        if(ImGui.IsItemHovered())
+            ImGui.SetTooltip("Edit details");
+
+        EditDetailsPopup(openPopup);
 
         ImGui.SameLine();
     }
