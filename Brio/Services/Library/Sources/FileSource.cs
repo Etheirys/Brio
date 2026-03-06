@@ -316,7 +316,8 @@ public class FileEntry : ItemEntryBase
     {
         base.Dispose();
         _previewImage?.Dispose();
-        _editPreviewImage?.Dispose();
+        if(_editPreviewImage != _previewImage)
+            _editPreviewImage?.Dispose();
     }
 
     protected override string GetpublicId()
@@ -415,6 +416,8 @@ public class FileEntry : ItemEntryBase
             _editVersion = _version ?? "";
             _editDescription = _description ?? "";
             _editTags = Tags != null ? string.Join(", ", Tags.Where(x => x.Name != _author).Select(x => x.Name)) : "";
+            if(_editPreviewImage != _previewImage)
+                _editPreviewImage?.Dispose();
             _editPreviewImage = GetPreviewImage();
             _editBase64Image = GetBase64ImageData();
             _editPreviewImageFileSize = _editBase64Image != null ? System.Text.Encoding.UTF8.GetByteCount(_editBase64Image) : null;
