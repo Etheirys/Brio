@@ -42,6 +42,9 @@ public class VirtualCameraManager : IDisposable
         _moveSpeed = configurationService.Configuration.Interface.DefaultFreeCameraMovementSpeed;
     }
 
+    // This implementation is a bit odd for me, it's not how I thought .IsLocked should be used, but maybe it works well
+    // I also don't know if I want it per-camera or just a global lock for all cameras,
+    // but this works for now and we can change it later when I rework the camera system
     public bool CamerasLocked
     {
         get
@@ -303,7 +306,7 @@ public class VirtualCameraManager : IDisposable
 
     public unsafe void Update(MouseFrame* mouseFrame)
     {
-        if(mouseFrame is null || CurrentCamera is null)
+        if(mouseFrame is null || CurrentCamera is null || CamerasLocked)
         {
             return;
         }

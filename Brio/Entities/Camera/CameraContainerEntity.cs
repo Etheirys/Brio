@@ -30,8 +30,6 @@ public class CameraContainerEntity(IServiceProvider provider) : Entity("cameras"
     {
         using(ImRaii.PushColor(ImGuiCol.Button, ThemeManager.CurrentTheme.Accent.AccentColor))
         {
-            // Lock/unlock cameras button
-            // Show closed lock when locked, open/unlock icon when unlocked.
             var lockIcon = IsLocked ? FontAwesomeIcon.Lock : FontAwesomeIcon.Unlock;
             var lockToolTip = IsLocked ? "Unlock Cameras" : "Lock Cameras";
             if(ImBrio.FontIconButtonRight($"###{Id}_cameras_lock", lockIcon, 2f, lockToolTip, bordered: false))

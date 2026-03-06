@@ -96,15 +96,7 @@ public class GameInputService : IDisposable
 
             if(_configurationService.Configuration.InputManager.EnableConsumeAllInput)
             {
-                for(int i = 0; i < KeyboardFrame.KeyStateLength; i++)
-                {
-                    if(i == 27) // VirtualKey.ESCAPE
-                        continue;
-                    if(i == 13) // VirtualKey.RETURN
-                        continue;
-
-                    keyboardFrame->KeyState[i] = 0;
-                }
+                ConsumeAllInput(keyboardFrame);
             }
 
             if(_configurationService.Configuration.InputManager.Enable)
@@ -157,16 +149,10 @@ public class GameInputService : IDisposable
                         // button presses so game UI interactions still work.
                         mouseFrame->DeltaX = 0;
                         mouseFrame->DeltaY = 0;
-                        // Prevent scroll wheel from zooming the camera
                         mouseFrame->ScrollValue = 0;
                     }
 
-                    // Block free-camera movement keys only; leave modifiers and
-                    // other keys intact so vanilla interactions continue to work.
-                    keyboardFrame->KeyState[_freeW] = 0;
-                    keyboardFrame->KeyState[_freeA] = 0;
-                    keyboardFrame->KeyState[_freeS] = 0;
-                    keyboardFrame->KeyState[_freeD] = 0;
+                    ConsumeAllInput(keyboardFrame);
                 }
             }
 
@@ -174,6 +160,19 @@ public class GameInputService : IDisposable
             {
                 keyboardFrame->KeyState[27] = 0; // ESCAPE
             }
+        }
+    }
+
+    public unsafe void ConsumeAllInput(KeyboardFrame* keyboardFrame)
+    {
+        for(int i = 0; i < KeyboardFrame.KeyStateLength; i++)
+        {
+            if(i == 27) // VirtualKey.ESCAPE
+                continue;
+            if(i == 13) // VirtualKey.RETURN
+                continue;
+
+            keyboardFrame->KeyState[i] = 0;
         }
     }
 
