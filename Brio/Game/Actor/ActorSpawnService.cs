@@ -22,6 +22,7 @@ using System.Diagnostics.CodeAnalysis;
 using CharacterCopyFlags = FFXIVClientStructs.FFXIV.Client.Game.Character.CharacterSetupContainer.CopyFlags;
 using ClientObjectManager = FFXIVClientStructs.FFXIV.Client.Game.Object.ClientObjectManager;
 using NativeCharacter = FFXIVClientStructs.FFXIV.Client.Game.Character.Character;
+using StructsObject = FFXIVClientStructs.FFXIV.Client.Game.Object.GameObject;
 
 namespace Brio.Game.Actor;
 
@@ -343,9 +344,9 @@ public class ActorSpawnService : MediatorSubscriberBase
             var newObject = com->GetObjectByIndex(newId);
             if(newObject == null) return false;
 
-            var newPlayer = (NativeCharacter*)newObject;
+            var newPlayer = newObject;
 
-            newObject->CalculateAndSetName(newId); // Brio One etc
+            ((StructsObject*)newObject)->CalculateAndSetName(newId); // Brio One etc
 
             _gPoseService.AddCharacterToGPose(newPlayer);
 

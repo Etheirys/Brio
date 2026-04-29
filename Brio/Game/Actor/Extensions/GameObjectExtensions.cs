@@ -2,8 +2,9 @@
 using Dalamud.Game.ClientState.Objects.Enums;
 using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Interface;
-using StructsObject = FFXIVClientStructs.FFXIV.Client.Game.Object.GameObject;
+
 using NativeCharacter = FFXIVClientStructs.FFXIV.Client.Game.Character.Character;
+using StructsObject = FFXIVClientStructs.FFXIV.Client.Game.Object.GameObject;
 
 namespace Brio.Game.Actor.Extensions;
 
@@ -76,9 +77,7 @@ public static class GameObjectExtensions
 
     public unsafe static void SetName(this IGameObject gameObject, string name) => gameObject.Native()->SetName(name);
 
-    public unsafe static void CalculateAndSetName(this ref StructsObject gameObject, int index) => gameObject.SetName(index.ToBrioName());
-
-    public unsafe static void CalculateAndSetName(this NativeCharacter gameObject, int index) => gameObject.NameString = index.ToBrioName();
+    public unsafe static void CalculateAndSetName(this ref StructsObject character, int index) => character.SetName(index.ToBrioName());
 
     public static unsafe T* GetDrawObject<T>(this IGameObject go) where T : unmanaged
     {
