@@ -227,11 +227,12 @@ public abstract class ItemEntryBase : EntryBase
             return;
 
         bool openPopup = false;
-        if(ImBrio.FontIconButton(FontAwesomeIcon.FilePen))
-            openPopup = true;
-        
+        using(var disabled = ImRaii.Disabled(true))
+            if(ImBrio.FontIconButton(FontAwesomeIcon.FilePen))
+                openPopup = true;
+
         if(ImGui.IsItemHovered())
-            ImGui.SetTooltip("Edit details");
+            ImGui.SetTooltip("Edit details (coming soon)");
 
         EditDetailsPopup(openPopup);
 

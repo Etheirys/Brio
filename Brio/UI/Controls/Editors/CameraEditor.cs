@@ -204,6 +204,8 @@ public static class CameraEditor
 
                     ImGui.SameLine();
 
+                    ImBrio.CenterNextElementWithPadding(40);
+
                     if(ImGui.BeginCombo($"###CameraContainerActorsWidget_{capability.Entity.Id}_list", capability.VirtualCamera.SelectedActorName))
                     {
                         foreach(var value in capability._entityManager.TryGetAllActors())
