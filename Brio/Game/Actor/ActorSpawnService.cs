@@ -391,7 +391,7 @@ public class ActorSpawnService : MediatorSubscriberBase
         }
     }
 
-    private void OnTerritoryChanged(ushort obj)
+    private void OnTerritoryChanged(uint obj)
     {
         _createdIndexes.Clear();
     }

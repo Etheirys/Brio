@@ -157,8 +157,7 @@ public abstract class Selector<T> where T : class
                                 {
                                     using(var itemGroup = ImRaii.Group())
                                     {
-                                        if(itemGroup.Success)
-                                            DrawItem(item, isSoftSelected);
+                                        DrawItem(item, isSoftSelected);
                                     }
                                     if(ImGui.IsItemHovered())
                                         DrawTooltip(item);

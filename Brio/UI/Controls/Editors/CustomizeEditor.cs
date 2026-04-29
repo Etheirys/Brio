@@ -330,7 +330,6 @@ public class CustomizeEditor()
 
         using(var group = ImRaii.Group())
         {
-            if(group.Success)
             {
 
                 ImGui.SetNextItemWidth(MaxItemWidth);
@@ -503,9 +502,7 @@ public class CustomizeEditor()
 
         using(var group = ImRaii.Group())
         {
-            if(group.Success)
             {
-
                 ImGui.SetNextItemWidth(MaxItemWidth);
                 if(ImGui.InputInt("###facepaint_id", ref currentFacepaintIdx, 1, 1, default, ImGuiInputTextFlags.EnterReturnsTrue))
                 {
@@ -572,7 +569,6 @@ public class CustomizeEditor()
 
             using(var group = ImRaii.Group())
             {
-                if(group.Success)
                 {
                     ImGui.SetNextItemWidth(MaxItemWidth);
                     if(ImGui.InputInt("###feature_ids", ref currentFeatures, 1, 1, default, ImGuiInputTextFlags.EnterReturnsTrue))
@@ -637,7 +633,6 @@ public class CustomizeEditor()
 
         using(var group = ImRaii.Group())
         {
-            if(group.Success)
             {
                 ImGui.SetNextItemWidth(MaxItemWidth);
                 if(ImGui.InputInt($"###{customizeIndex}", ref value, 1, 1, default, ImGuiInputTextFlags.EnterReturnsTrue))

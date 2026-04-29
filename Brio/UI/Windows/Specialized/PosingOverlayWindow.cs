@@ -48,7 +48,7 @@ public class PosingOverlayWindow : Window, IDisposable
     private List<ClickableItem> _selectingFrom = [];
     private Transform? _trackingTransform;
     private readonly PosingTransformEditor _posingTransformEditor = new();
-    private List<(EntityId id, PoseInfo info, Transform model)>? _groupedPendingSnapshot = null;
+    private List<(EntityId id, PosingCapability info, Transform model)>? _groupedPendingSnapshot = null;
 
     private const int _gizmoId = 142857;
     private const string _boneSelectPopupName = "brio_bone_select_popup";
@@ -119,18 +119,18 @@ public class PosingOverlayWindow : Window, IDisposable
 
         DrawActorContent(posing, uiState, overlayConfig);
 
-        if(InputManagerService.Instance.IsKeyDown(VirtualKey.TAB))
-        {
-            var pos = ImGui.GetMousePos();
-            if(_gameGui.ScreenToWorld(pos, out var res))
-            {
-                var col = Get(EColor.RedBright, EColor.YellowBright);
-                DrawRingWorld(res, 0.5f, col.ToUint(), 1f);
-                var l = MathF.Sqrt(1f) / 2f * 0.5f;
-                DrawLineWorld(res + new Vector3(-l, 0, -l), res + new Vector3(l, 0, l), col.ToUint(), 2f);
-                DrawLineWorld(res + new Vector3(l, 0, -l), res + new Vector3(-l, 0, l), col.ToUint(), 2f);
-            }
-        }
+        //if(InputManagerService.Instance.IsKeyDown(VirtualKey.TAB))
+        //{
+        //    var pos = ImGui.GetMousePos();
+        //    if(_gameGui.ScreenToWorld(pos, out var res))
+        //    {
+        //        var col = Get(EColor.RedBright, EColor.YellowBright);
+        //        DrawRingWorld(res, 0.5f, col.ToUint(), 1f);
+        //        var l = MathF.Sqrt(1f) / 2f * 0.5f;
+        //        DrawLineWorld(res + new Vector3(-l, 0, -l), res + new Vector3(l, 0, l), col.ToUint(), 2f);
+        //        DrawLineWorld(res + new Vector3(l, 0, -l), res + new Vector3(-l, 0, l), col.ToUint(), 2f);
+        //    }
+        //}
     }
 
     public override void PostDraw()
@@ -980,10 +980,10 @@ public class PosingOverlayWindow : Window, IDisposable
                 // Multi-actor model transform
                 if(_groupedPendingSnapshot == null && ImGuizmo.IsUsing())
                 {
-                    var list = new List<(EntityId, PoseInfo, Transform)>();
+                    var list = new List<(EntityId, PosingCapability, Transform)>();
                     foreach(var (actor, capability, _) in selectedActors)
                     {
-                        list.Add((actor.Id, capability.SkeletonPosing.PoseInfo.Clone(), capability.ModelPosing.Transform));
+                        list.Add((actor.Id, capability, capability.ModelPosing.Transform));
                     }
                     _groupedPendingSnapshot = list;
                 }
@@ -1055,7 +1055,7 @@ public class PosingOverlayWindow : Window, IDisposable
                     {
                         if(_groupedPendingSnapshot == null && ImGuizmo.IsUsing())
                         {
-                            var list = new List<(EntityId, PoseInfo, Transform)>();
+                            var list = new List<(EntityId, PosingCapability, Transform)>();
                             foreach(var id in _entityManager.SelectedEntityIds)
                             {
                                 if(!_entityManager.TryGetEntity(id, out var ent))
@@ -1064,7 +1064,7 @@ public class PosingOverlayWindow : Window, IDisposable
                                 if(!ent.TryGetCapability<PosingCapability>(out var cap))
                                     continue;
 
-                                list.Add((id, cap.SkeletonPosing.PoseInfo.Clone(), cap.ModelPosing.Transform));
+                                list.Add((id, cap, cap.ModelPosing.Transform));
                             }
                             _groupedPendingSnapshot = list;
                         }
@@ -1115,7 +1115,7 @@ public class PosingOverlayWindow : Window, IDisposable
         var result = GetAdjustedLine(a, b);
         if(result.posA == null) return;
         ImGui.GetWindowDrawList().PathLineTo(new Vector2(result.posA.Value.X, result.posA.Value.Y));
-        ImGui.GetWindowDrawList().PathLineTo(new Vector2(result.posB.Value.X, result.posB.Value.Y));
+        ImGui.GetWindowDrawList().PathLineTo(new Vector2(result.posB!.Value.X, result.posB.Value.Y));
         ImGui.GetWindowDrawList().PathStroke(color, ImDrawFlags.None, thickness);
     }
 

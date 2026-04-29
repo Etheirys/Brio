@@ -9,7 +9,7 @@ using System.Runtime.InteropServices;
 
 namespace Brio.Game.World;
 
-[StructLayout(LayoutKind.Explicit, Size = 0x910)]
+[StructLayout(LayoutKind.Explicit, Size = 0xBF0)]
 public struct BrioEnvManager
 {
     [FieldOffset(0x000)] public EnvManager Manager;

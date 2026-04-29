@@ -120,7 +120,6 @@ public class ActorAppearanceWidget(ActorAppearanceCapability capability) : Widge
 
             using(var group = ImRaii.Group())
             {
-                if(group.Success)
                 {
                     string description = $"{model?.Name ?? "Unknown"}";
 

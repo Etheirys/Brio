@@ -49,7 +49,7 @@ public unsafe class CameraService : IDisposable
         _projectionHook = hooking.HookFromAddress<ProjectionMatrix>(scanner.ScanText(cameraProjection), ProjectionDetour);
         _projectionHook.Enable();
 
-        var cameraCollisionAddr = "E8 ?? ?? ?? ?? 4C 8D 45 ?? 89 83";
+        var cameraCollisionAddr = "E8 ?? ?? ?? ?? 4C 8D 44 24 40 89 83 14 ?? ?? ??";
         _cameraCollisionHook = hooking.HookFromAddress<CameraCollisionDelegate>(scanner.ScanText(cameraCollisionAddr), CameraCollisionDetour);
         _cameraCollisionHook.Enable();
 

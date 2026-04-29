@@ -234,7 +234,7 @@ public unsafe class FestivalService : IDisposable
         }
     }
 
-    private void OnTerritoryChanged(ushort obj)
+    private void OnTerritoryChanged(uint obj)
     {
         _pendingChanges.Clear();
         _originalState = null;

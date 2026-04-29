@@ -175,11 +175,9 @@ public class AnamnesisCharaFile : JsonDocumentBase
         var shaders = new BrioHuman.ShaderParams
         {
             SkinColor = chara.SkinColor ?? Vector3.One,
-            SkinGloss = chara.SkinGloss ?? Vector3.One,
             LeftEyeColor = chara.LeftEyeColor ?? Vector3.One,
             RightEyeColor = chara.RightEyeColor ?? Vector3.One,
             HairColor = chara.HairColor ?? Vector3.One,
-            HairGloss = chara.HairGloss ?? Vector3.One,
             HairHighlight = chara.HairHighlight ?? Vector3.One,
             MouthColor = chara.MouthColor ?? Vector4.One,
             MuscleTone = chara.MuscleTone,
@@ -254,11 +252,9 @@ public class AnamnesisCharaFile : JsonDocumentBase
         if(shaders.HasValue)
         {
             charaFile.SkinColor = shaders.Value.SkinColor;
-            charaFile.SkinGloss = shaders.Value.SkinGloss;
             charaFile.LeftEyeColor = shaders.Value.LeftEyeColor;
             charaFile.RightEyeColor = shaders.Value.RightEyeColor;
             charaFile.HairColor = shaders.Value.HairColor;
-            charaFile.HairGloss = shaders.Value.HairGloss;
             charaFile.HairHighlight = shaders.Value.HairHighlight;
             charaFile.MouthColor = shaders.Value.MouthColor;
             charaFile.MuscleTone = shaders.Value.MuscleTone;

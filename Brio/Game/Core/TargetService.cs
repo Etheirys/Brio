@@ -87,7 +87,7 @@ public unsafe class TargetService : IDisposable
     {
         var targetName = "Invalid Target";
         var canApply = _gPoseService.IsGPosing && HasGPoseTarget
-            && GPoseTarget!.ObjectKind == ObjectKind.Player;
+            && GPoseTarget!.ObjectKind == ObjectKind.Pc;
 
         if(canApply)
         {

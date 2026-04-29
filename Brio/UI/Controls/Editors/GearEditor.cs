@@ -187,7 +187,6 @@ public class GearEditor()
 
             using(var group = ImRaii.Group())
             {
-                if(group.Success)
                 {
                     ImGui.SetNextItemWidth(ImGui.CalcTextSize("XXXXX").X);
                     if(ImGui.InputInt("##id", ref equipId, 0, 0, default, ImGuiInputTextFlags.EnterReturnsTrue))
@@ -368,7 +367,6 @@ public class GearEditor()
 
             using(var group = ImRaii.Group())
             {
-                if(group.Success)
                 {
                     ImGui.SetNextItemWidth(ImGui.CalcTextSize("XXXXX").X);
                     if(ImGui.InputInt("##id", ref equipId, 0, 0, default, ImGuiInputTextFlags.EnterReturnsTrue))
@@ -535,7 +533,6 @@ public class GearEditor()
 
             using(var group = ImRaii.Group())
             {
-                if(group.Success)
                 {
 
                     ImGui.SetNextItemWidth(ImGui.CalcTextSize("XXXXX").X);
@@ -620,7 +617,6 @@ public class GearEditor()
 
             using(var group = ImRaii.Group())
             {
-                if(group.Success)
                 {
 
                     ImGui.SetNextItemWidth(ImGui.CalcTextSize("XXXXX").X);

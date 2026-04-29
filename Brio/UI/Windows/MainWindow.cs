@@ -73,7 +73,6 @@ public class MainWindow : Window, IDisposable
         };
     }
 
-    private bool _hasAdjustedForScrollbar = false;
     public override void Draw()
     {
         bool hasScrollbar = ImGui.GetScrollMaxY() > 0;
@@ -86,13 +85,9 @@ public class MainWindow : Window, IDisposable
                 MaximumSize = new Vector2(280 + style.ScrollbarSize, MaxHeight),
                 MinimumSize = new Vector2(280 + style.ScrollbarSize, 200)
             };
-
-            _hasAdjustedForScrollbar = true;
         }
         else if(hasScrollbar is false)
         {
-            _hasAdjustedForScrollbar = false;
-
             SizeConstraints = new WindowSizeConstraints
             {
                 MaximumSize = new Vector2(280, MaxHeight),

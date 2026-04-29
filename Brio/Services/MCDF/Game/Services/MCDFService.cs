@@ -130,7 +130,7 @@ public class MCDFService : IDisposable
     private static readonly ILogger logger = Log.Logger.ForContext(typeof(MCDFService));
     public async Task ApplyMCDF(IGameObject gameObject)
     {
-        if(gameObject.Address == IntPtr.Zero || gameObject.ObjectKind != ObjectKind.Player)
+        if(gameObject.Address == IntPtr.Zero || gameObject.ObjectKind != ObjectKind.Pc)
             return;
 
         var name = gameObject.Name.TextValue;
@@ -522,7 +522,7 @@ public class MCDFService : IDisposable
     private async Task<CharacterDataFragment> CreateCharacterData(IGameObject playerRelatedObject, CancellationToken ct)
     {
         var objectKind = playerRelatedObject.ObjectKind;
-        CharacterDataFragment fragment = objectKind == ObjectKind.Player ? new CharacterDataFragmentPlayer() : new();
+        CharacterDataFragment fragment = objectKind == ObjectKind.Pc ? new CharacterDataFragmentPlayer() : new();
 
         Brio.Log.Verbose("Building character data for {obj}", playerRelatedObject);
 
@@ -548,7 +548,7 @@ public class MCDFService : IDisposable
         ct.ThrowIfCancellationRequested();
 
         Dictionary<string, List<ushort>>? boneIndices =
-            objectKind != ObjectKind.Player
+            objectKind != ObjectKind.Pc
             ? null
             : await _framework.RunOnFrameworkThread(() => GetSkeletonBoneIndices(playerRelatedObject)).ConfigureAwait(false);
 
@@ -615,7 +615,7 @@ public class MCDFService : IDisposable
         fragment.CustomizePlusScale = await getCustomizeData.ConfigureAwait(false) ?? string.Empty;
         Brio.Log.Verbose("Customize is now: {data}", fragment.CustomizePlusScale);
 
-        if(objectKind == ObjectKind.Player)
+        if(objectKind == ObjectKind.Pc)
         {
             var playerFragment = (fragment as CharacterDataFragmentPlayer)!;
             playerFragment.ManipulationString = _penumbraService.GetMetaManipulations();
@@ -652,7 +652,7 @@ public class MCDFService : IDisposable
 
         ct.ThrowIfCancellationRequested();
 
-        if(objectKind == ObjectKind.Player)
+        if(objectKind == ObjectKind.Pc)
         {
             try
             {

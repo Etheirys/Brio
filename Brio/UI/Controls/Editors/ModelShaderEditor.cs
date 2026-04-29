@@ -70,12 +70,6 @@ public class ModelShaderEditor()
             didChange |= true;
         }
         ImGui.SameLine();
-        if(AppearanceEditorCommon.DrawExtendedColor(ref original.SkinGloss, "skinGloss", "Skin Gloss"))
-        {
-            apply.SkinGloss = original.SkinGloss;
-            didChange |= true;
-        }
-        ImGui.SameLine();
 
         // This is still not working right (TODO FIX Ken)
         if(AppearanceEditorCommon.DrawExtendedColor(ref original.MouthColor, "mouthColor", "Mouth Color"))
@@ -139,13 +133,6 @@ public class ModelShaderEditor()
         if(AppearanceEditorCommon.DrawExtendedColor(ref original.HairHighlight, "hairHighlight", "Hair Highlight"))
         {
             apply.HairHighlight = original.HairHighlight;
-            didChange |= true;
-        }
-        ImGui.SameLine();
-
-        if(AppearanceEditorCommon.DrawExtendedColor(ref original.HairGloss, "hairGloss", "Hair Gloss"))
-        {
-            apply.HairGloss = original.HairGloss;
             didChange |= true;
         }
         ImGui.SameLine();

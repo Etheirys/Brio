@@ -93,7 +93,7 @@ public class EnvironmentService : MediatorSubscriberBase
 
     private readonly List<Weather> _territoryWeatherTable = [];
 
-    private ushort? _currentCachedTerritory;
+    private uint? _currentCachedTerritory;
 
     public IEnumerable<Weather> AllWeatherCollection => _gameDataProvider.Weathers.Values;
 
@@ -121,7 +121,7 @@ public class EnvironmentService : MediatorSubscriberBase
 
         //
 
-        var envpartAddr = scanner.ScanText("48 89 5C 24 10 57 48 83 EC 30 80 B9 02 03 00 00 00");
+        var envpartAddr = scanner.ScanText("48 89 5C 24 10 57 48 83 EC 30 80 B9 ?? ?? ?? ?? ?? 49 8b f8 0f ?? ?? ?? ?? 48 ?? ?? 0F 28");
         _updateEnvironmentPartHook = hooking.HookFromAddress<UpdateEnvironmentPartDelegate>(envpartAddr, UpdateEnvDetour);
         _updateEnvironmentPartHook.Enable();
 
@@ -145,7 +145,7 @@ public class EnvironmentService : MediatorSubscriberBase
         _gPoseService.OnGPoseStateChange += OnGposeStateChanged;
     }
 
-    private void OnTerritoryChanged(ushort e)
+    private void OnTerritoryChanged(uint e)
     {
         UpdateWeathersForCurrentTerritory();
         WeatherOverrideEnabled = false;

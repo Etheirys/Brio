@@ -644,7 +644,7 @@ public unsafe struct GameLightVirtualTable
     public unsafe delegate* unmanaged<GameLight*, void> Cleanup;
 }
 
-[StructLayout(LayoutKind.Explicit, Size = 0xA0)]
+[StructLayout(LayoutKind.Explicit, Size = 0xB0)]
 public unsafe struct GameLight
 {
     [FieldOffset(0x00)] public unsafe GameLightVirtualTable* VirtualTable;
@@ -653,7 +653,6 @@ public unsafe struct GameLight
     [FieldOffset(0x50)] public StructsTransforms Transform;
     [FieldOffset(0x88)] public byte LightFlags;                      // This seems to be only useful for visibility? (0 = off, 79 = on)
     [FieldOffset(0x90)] public LightRenderObject* LightRenderObject; // GetObjectType() == 5
-
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public unsafe void Destroy()

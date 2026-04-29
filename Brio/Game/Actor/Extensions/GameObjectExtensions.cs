@@ -3,6 +3,7 @@ using Dalamud.Game.ClientState.Objects.Enums;
 using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Interface;
 using StructsObject = FFXIVClientStructs.FFXIV.Client.Game.Object.GameObject;
+using NativeCharacter = FFXIVClientStructs.FFXIV.Client.Game.Character.Character;
 
 namespace Brio.Game.Actor.Extensions;
 
@@ -12,8 +13,8 @@ public static class GameObjectExtensions
     {
         return go.ObjectKind switch
         {
-            ObjectKind.Player => FontAwesomeIcon.User,
-            ObjectKind.MountType => FontAwesomeIcon.Horse,
+            ObjectKind.Pc => FontAwesomeIcon.User,
+            ObjectKind.Mount => FontAwesomeIcon.Horse,
             ObjectKind.EventNpc => FontAwesomeIcon.Robot,
             ObjectKind.Companion => FontAwesomeIcon.Paw,
             ObjectKind.Ornament => FontAwesomeIcon.Umbrella,
@@ -34,7 +35,7 @@ public static class GameObjectExtensions
         {
             case ObjectKind.Ornament:
                 return $"Ornament ({go.ObjectIndex})";
-            case ObjectKind.MountType:
+            case ObjectKind.Mount:
                 return $"Mount ({go.ObjectIndex})";
             default:
                 return $"{go.Name} ({go.ObjectIndex})";
@@ -77,7 +78,7 @@ public static class GameObjectExtensions
 
     public unsafe static void CalculateAndSetName(this ref StructsObject gameObject, int index) => gameObject.SetName(index.ToBrioName());
 
-    public unsafe static void CalculateAndSetName(this IGameObject gameObject, int index) => gameObject.Native()->CalculateAndSetName(index);
+    public unsafe static void CalculateAndSetName(this NativeCharacter gameObject, int index) => gameObject.NameString = index.ToBrioName();
 
     public static unsafe T* GetDrawObject<T>(this IGameObject go) where T : unmanaged
     {

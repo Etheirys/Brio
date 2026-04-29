@@ -744,12 +744,12 @@ public class PosingOverlayToolbarWindow : Window
 
         using(ImRaii.PushFont(UiBuilder.IconFont))
         {
-            using(ImRaii.Disabled(!posing.HasOverride(posing.SkeletonPosing.FilterNonFaceBones)))
+            using(ImRaii.Disabled(!posing?.HasOverride(posing.SkeletonPosing.FilterNonFaceBones) ?? true))
             {
                 if(ImGui.Button($"{FontAwesomeIcon.Undo.ToIconString()}###reset_body_pose", button3x3Vector2))
                 {
-                    posing.Snapshot(false, reconcile: false);
-                    posing.ClearStacks(posing.SkeletonPosing.FilterNonFaceBones);
+                    posing!.Snapshot(false, reconcile: false);
+                    posing!.ClearStacks(posing.SkeletonPosing.FilterNonFaceBones);
                 }
 
                 ImGui.GetWindowDrawList().AddText(ImGui.GetItemRectMin() + ImGui.GetItemRectSize() / 2, ImGui.GetColorU32(ImGuiCol.Text), FontAwesomeIcon.ChildReaching.ToIconString());
@@ -762,11 +762,11 @@ public class PosingOverlayToolbarWindow : Window
         ImGui.SameLine();
 
         using(ImRaii.PushFont(UiBuilder.IconFont))
-        using(ImRaii.Disabled(!posing.HasOverride(posing.SkeletonPosing.FilterFaceBones)))
+        using(ImRaii.Disabled(!posing?.HasOverride(posing.SkeletonPosing.FilterFaceBones) ?? false))
         {
             if(ImGui.Button($"{FontAwesomeIcon.Undo.ToIconString()}###reset_face_pose", button3x3Vector2))
             {
-                posing.ClearStacks(posing.SkeletonPosing.FilterFaceBones);
+                posing?.ClearStacks(posing.SkeletonPosing.FilterFaceBones);
             }
 
             ImGui.GetWindowDrawList().AddText(ImGui.GetItemRectMin() + ImGui.GetItemRectSize() / 2, ImGui.GetColorU32(ImGuiCol.Text), FontAwesomeIcon.Smile.ToIconString());

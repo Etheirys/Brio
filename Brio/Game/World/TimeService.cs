@@ -107,7 +107,7 @@ public class TimeService : IDisposable
         IsTimeFrozen = false;
     }
 
-    private void OnTerritoryChanged(ushort obj)
+    private void OnTerritoryChanged(uint obj)
     {
         IsTimeFrozen = false;
     }

@@ -19,7 +19,7 @@ using System.Threading.Tasks;
 
 namespace Brio.Services;
 
-public class SceneService(EntityManager _entityManager, VirtualCameraManager _virtualCameraManager, IPCManager _ipcManager, IFramework _framework)
+public class SceneService(EntityManager _entityManager, VirtualCameraManager _virtualCameraManager, IFramework _framework)
 {
     public bool IsLoading { get; private set; }
 

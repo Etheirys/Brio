@@ -154,7 +154,6 @@ public class ActorAppearanceService : IDisposable
                         var human = character.GetHuman();
                         if(human != null)
                         {
-
                             byte[] data = new byte[108];
                             fixed(byte* ptr = data)
                             {
@@ -175,8 +174,11 @@ public class ActorAppearanceService : IDisposable
                                 {
                                     Buffer.MemoryCopy(existingAppearance.Equipment.Data, ptr + 32, 80, 80);
                                 }
+                               
+                                Human.DrawData act = new Human.DrawData();
+                                act.CustomizeData.Data[0] = (byte)ptr;
 
-                                var didUpdate = human->Human.UpdateDrawData(ptr, false);
+                                var didUpdate = human->Human.UpdateDrawData(&act, true);
                                 needsRedraw |= !didUpdate;
                             }
                         }
@@ -213,10 +215,10 @@ public class ActorAppearanceService : IDisposable
                 {
 
                     if(!existingAppearance.Weapons.MainHand.Equals(appearance.Weapons.MainHand))
-                        native->DrawData.LoadWeapon(DrawDataContainer.WeaponSlot.MainHand, appearance.Weapons.MainHand, 0, 0, 0, 0);
+                        native->DrawData.LoadWeapon(DrawDataContainer.WeaponSlot.MainHand, appearance.Weapons.MainHand, 0, 0, 0, 0, true);
 
                     if(!existingAppearance.Weapons.OffHand.Equals(appearance.Weapons.OffHand))
-                        native->DrawData.LoadWeapon(DrawDataContainer.WeaponSlot.OffHand, appearance.Weapons.OffHand, 0, 0, 0, 0);
+                        native->DrawData.LoadWeapon(DrawDataContainer.WeaponSlot.OffHand, appearance.Weapons.OffHand, 0, 0, 0, 0, true);
                 }
 
                 native->DrawData.Weapon(DrawDataContainer.WeaponSlot.MainHand).ModelId = appearance.Weapons.MainHand;

@@ -252,9 +252,9 @@ public class UIManager : IDisposable
     {
         foreach(var window in _windowSystem.Windows)
         {
-            if(window.IsOpen == true)
+            if(window.IsOpen == true && window is Window win)
             {
-                _hiddenWindows.Add(window);
+                _hiddenWindows.Add(win);
                 window.IsOpen = false;
             }
         }

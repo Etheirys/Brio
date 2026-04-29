@@ -29,28 +29,28 @@ public struct BrioHuman
         [FieldOffset(0x0C)]
         public float MuscleTone;
 
-        [FieldOffset(0x10)]
-        public Vector3 SkinGloss;
+        //[FieldOffset(0x10)]
+        //public Vector3 SkinGloss;
 
-        [FieldOffset(0x20)]
+        [FieldOffset(0x10)]
         public Vector4 MouthColor;
 
         [FieldOffset(0x30)]
         public Vector3 HairColor;
 
-        [FieldOffset(0x40)]
-        public Vector3 HairGloss;
+        //[FieldOffset(0x40)]
+        //public Vector3 HairGloss;
 
-        [FieldOffset(0x50)]
+        [FieldOffset(0x40)]
         public Vector3 HairHighlight;
 
-        [FieldOffset(0x60)]
+        [FieldOffset(0x50)]
         public Vector3 LeftEyeColor;
 
-        [FieldOffset(0x70)]
+        [FieldOffset(0x60)]
         public Vector3 RightEyeColor;
 
-        [FieldOffset(0x80)]
+        [FieldOffset(0x70)]
         public Vector3 FeatureColor;
     }
 }
