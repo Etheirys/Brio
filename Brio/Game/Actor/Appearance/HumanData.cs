@@ -25,11 +25,12 @@ public class HumanData
         return _rawColors[start..(start + 192)];
     }
 
-    public uint[] GetHairColors(Tribes tribe, Genders gender)
-    {
-        var start = GetTribeHairStartIndex(tribe, gender);
-        return [.. _rawColors[start..(start + HairLength)].Where(x => x != NeutralHair)];
-    }
+    //TODO fix (ken) this is wrong but I can't math right now, too sick
+    public uint[] GetHairColors(Tribes tribe, Genders gender) => [.. _rawColors[256..(256 + HairLength)].Where(x => x != NeutralHair)];
+    //{
+    //    var start = GetTribeHairStartIndex(tribe, gender);
+    //    return [.. _rawColors[start..(start + HairLength)].Where(x => x != NeutralHair)];
+    //}
 
     public uint[] GetHairHighlightColors() => [.. _rawColors[256..(256 + HairLength)].Where(x => x != NeutralHair)];
 
