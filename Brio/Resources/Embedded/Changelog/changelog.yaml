@@ -1,12 +1,35 @@
 
-tagline: "Brio 0.7.1, Brio's 3rd Anniversary! (Now with pose mirroring!)"
-subline: "Multi-Bone/Actor, Selection, Advanced Environment!"
+tagline: "Brio 0.7.2 - 7.5 Support"
+subline: "P.S. I'm sick, someone send me Nyquil"
 changelog:
+
+  - name: v0.7.2
+    tagline: 7.5 Support!
+    date: "April 29th 2026"
+    isCurrent: true
+    versions:
+      - number: "ATTENTION! SE removed `SkinGloss` and `HairGloss` from the game; so they are no longer available!"
+        icon: ""
+        items:
+          - "As a reminder! If you experience any issues please report them on Discord or on GitHub"
+          - "(yes, this time for real, more features coming real soon! I promise!)"
+          - "P.S. I'm sick, someone send me Nyquil"
+     
+      - number: "0.7.2"
+        icon: ""
+        items:
+          - "Update Brio to support FFXIV 7.5"
+          - "Removed `SkinGloss` and `HairGloss` (thanks SE)"
+          - "Rendering brio actors is now significantly faster (In some cases you now get 10x pef in large crowds)"
+          - "Facewear now works properly!"
+          - "There is now a `lock camera button` on the camera widget.\n\tPlease tell me what you think about it (thanks SolarisFFXIV)"
+          - "A yellow line now emanates from certain light types. (thanks SolarisFFXIV)"
+          - "Smaller changes across Brio, I will talk about them once 0.8.0 comes out soon"
 
   - name: v0.7.1
     tagline: Pose Mirroring!
     date: "Jan 20th 2026"
-    isCurrent: true
+    isCurrent: false
     versions:
       - number: "As a reminder! If you experience any issues please report them on Discord or on GitHub"
         icon: ""
@@ -63,7 +86,7 @@ changelog:
   - name: v0.7.0
     tagline: Multi-Bone, Multi-Actor Selection, Advanced Environment & Brio's 3rd Birthday!
     date: "Jan 16th 2026"
-    isCurrent: true
+    isCurrent: false
     versions:
     
       - number: "0.7.0.1 (We just can't stay on a full .0 version for 24 hrs can we? :p )"
