@@ -1,5 +1,6 @@
 ﻿using Brio.Capabilities.Actor;
 using Brio.Game.Actor.Extensions;
+using Brio.Game.VFX.Intertop;
 using Brio.IPC;
 using Brio.UI.Widgets.Core;
 using Dalamud.Bindings.ImGui;
@@ -14,7 +15,7 @@ public class ActorDebugWidget(ActorDebugCapability capability) : Widget<ActorDeb
     public override WidgetFlags Flags => Capability.IsDebug ? WidgetFlags.DrawBody : WidgetFlags.None;
 
     // TODO: Store this properly in a list or whatever so it can be cleaned up
-    private static nint _spawnedGoopInstance;
+    private unsafe static VfxData* _spawnedGoopInstance;
 
     public unsafe override void DrawBody()
     {
@@ -43,7 +44,7 @@ public class ActorDebugWidget(ActorDebugCapability capability) : Widget<ActorDeb
                     {
                         if(DynamisService.Instance != null)
                         {
-                            ImGui.Text("Character Base ");
+                            ImGui.Text("Character BaseObject ");
                             ImGui.SameLine();
                             DynamisService.Instance.DrawPointer((nint)charaBase);
                         }
@@ -116,10 +117,17 @@ public class ActorDebugWidget(ActorDebugCapability capability) : Widget<ActorDeb
 
                     }
 
+                    if(DynamisService.Instance != null)
+                    {
+                        ImGui.Text("VfxData: ");
+                        ImGui.SameLine();
+                        DynamisService.Instance.DrawPointer((nint)_spawnedGoopInstance);
+                    }
+
                     if(ImGui.Button("Destroy Goop"))
                     {
                         Capability.VFXService.DestroyVFX(_spawnedGoopInstance);
-                        _spawnedGoopInstance = 0;
+                        _spawnedGoopInstance = null;
                     }
                 }
             }
