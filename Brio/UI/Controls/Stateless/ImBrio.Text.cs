@@ -6,14 +6,13 @@ using Dalamud.Interface.Utility.Raii;
 using Dalamud.Plugin;
 using System;
 using System.Numerics;
+using System.Runtime.CompilerServices;
 
 namespace Brio.UI.Controls.Stateless;
 
 public static partial class ImBrio
 {
-
-
-
+    [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
     public static void TextCentered(string text, float width)
     {
         float textWidth = ImGui.CalcTextSize(text).X;
@@ -27,11 +26,13 @@ public static partial class ImBrio
         ImGui.TextWrapped(text);
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
     public static void Text(string text, uint color = 0xFFFFFF)
     {
         ImGui.TextColored(ImGui.ColorConvertU32ToFloat4(color), text);
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
     public static void Icon(FontAwesomeIcon icon)
     {
         if(icon == FontAwesomeIcon.None) return;
