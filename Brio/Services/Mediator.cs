@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Brio.Core;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,21 +10,31 @@ using System.Threading.Tasks;
 
 namespace Brio.Services;
 
+// This is based on Mare's Mediator; thanks Dark!
+//
+
 public class Mediator() : IDisposable
 {
     private readonly Lock _addRemoveLock = new();
 
-    private readonly CancellationTokenSource _loopCts = new();
+    private readonly CancellationTokenSource _loopCTS = new();
     private readonly ConcurrentDictionary<object, DateTime> _lastErrorTime = [];
 
     private readonly ConcurrentQueue<MessageBase> _messageQueue = new();
     private readonly ConcurrentDictionary<Type, MethodInfo?> _genericExecuteMethods = new();
-    private readonly ConcurrentDictionary<Type, HashSet<SubscriberAction>> _subscriberDict = [];
+    private readonly ConcurrentDictionary<Type, HashSet<SubscriberAction>> _subscribers = [];
+   
+    private DiagnosticTracker _perfTracker = new("Mediator", logInterval: 700, slowFrameThresholdMs: 5.0, slowFrameCooldownFrames: 8000,
+        new Dictionary<string, DiagnosticTrace>
+        {
+                 //  "null", new DiagnosticTrace() },
+        }
+    ); 
 
     public void PrintSubscriberInfo()
     {
         Brio.Log.Info("=== Mediator Subscriber Info ===");
-        foreach(var subscriber in _subscriberDict.SelectMany(c => c.Value.Select(v => v.Subscriber))
+        foreach(var subscriber in _subscribers.SelectMany(c => c.Value.Select(v => v.Subscriber))
             .DistinctBy(p => p).OrderBy(p => p.GetType().FullName, StringComparer.Ordinal).ToList())
         {
             Brio.Log.Info("Subscriber {type}: {sub}", subscriber.GetType().Name, subscriber?.ToString() ?? "Unknown Subscriber");
@@ -31,7 +42,7 @@ public class Mediator() : IDisposable
             StringBuilder sb = new();
             sb.Append("=> ");
 
-            var list = _subscriberDict.Where(item => item.Value.Any(v => v.Subscriber == subscriber)).ToList();
+            var list = _subscribers.Where(item => item.Value.Any(v => v.Subscriber == subscriber)).ToList();
             for(int i = 0; i < list.Count; i++)
                 sb.Append(list[i].Key.Name).Append(", ");
 
@@ -48,17 +59,22 @@ public class Mediator() : IDisposable
 
         _ = Task.Run(async () =>
         {
-            while(!_loopCts.Token.IsCancellationRequested)
+            while(!_loopCTS.Token.IsCancellationRequested)
             {
-                await Task.Delay(100, _loopCts.Token).ConfigureAwait(false);
+                await Task.Delay(100, _loopCTS.Token).ConfigureAwait(false);
 
                 HashSet<MessageBase> processedMessages = [];
                 while(_messageQueue.TryDequeue(out var message))
                 {
-                    if(processedMessages.Contains(message)) { continue; }
+                    if(processedMessages.Contains(message))
+                        continue;
+
                     processedMessages.Add(message);
 
-                    ExecuteMessage(message);
+                    using(Diagnostics.MeasureTime(ref _perfTracker.Trace))
+                        ExecuteMessage(message);
+
+                    _perfTracker.Tick();
                 }
             }
         }, cancellationToken);
@@ -70,8 +86,11 @@ public class Mediator() : IDisposable
     public Task StopAsync(CancellationToken cancellationToken)
     {
         _messageQueue.Clear();
-        _loopCts.Cancel();
-        _loopCts.Dispose();
+
+        if(!_loopCTS.IsCancellationRequested)
+            _loopCTS.Cancel();
+        
+        _loopCTS.Dispose();
         return Task.CompletedTask;
     }
 
@@ -91,9 +110,9 @@ public class Mediator() : IDisposable
     {
         lock(_addRemoveLock)
         {
-            _subscriberDict.TryAdd(typeof(T), []);
+            _subscribers.TryAdd(typeof(T), []);
 
-            if(!_subscriberDict[typeof(T)].Add(new(subscriber, action)))
+            if(!_subscribers[typeof(T)].Add(new(subscriber, action)))
             {
                 throw new InvalidOperationException("Already subscribed");
             }
@@ -103,9 +122,9 @@ public class Mediator() : IDisposable
     {
         lock(_addRemoveLock)
         {
-            if(_subscriberDict.ContainsKey(typeof(T)))
+            if(_subscribers.ContainsKey(typeof(T)))
             {
-                _subscriberDict[typeof(T)].RemoveWhere(p => p.Subscriber == subscriber);
+                _subscribers[typeof(T)].RemoveWhere(p => p.Subscriber == subscriber);
             }
         }
     }
@@ -113,9 +132,9 @@ public class Mediator() : IDisposable
     {
         lock(_addRemoveLock)
         {
-            foreach(Type kvp in _subscriberDict.Select(k => k.Key))
+            foreach(Type kvp in _subscribers.Select(k => k.Key))
             {
-                int unSubbed = _subscriberDict[kvp]?.RemoveWhere(p => p.Subscriber == subscriber) ?? 0;
+                int unSubbed = _subscribers[kvp]?.RemoveWhere(p => p.Subscriber == subscriber) ?? 0;
                 if(unSubbed > 0)
                 {
                     Brio.Log.Debug("{sub} unsubscribed from {msg}", subscriber.GetType().Name, kvp.Name);
@@ -126,7 +145,7 @@ public class Mediator() : IDisposable
 
     private void ExecuteMessage(MessageBase message)
     {
-        if(!_subscriberDict.TryGetValue(message.GetType(), out HashSet<SubscriberAction>? subscribers) || subscribers == null || !subscribers.Any()) return;
+        if(!_subscribers.TryGetValue(message.GetType(), out HashSet<SubscriberAction>? subscribers) || subscribers == null || subscribers.Count == 0) return;
 
         List<SubscriberAction> subscribersCopy = [];
         lock(_addRemoveLock)
@@ -134,7 +153,6 @@ public class Mediator() : IDisposable
             subscribersCopy = subscribers?.Where(s => s.Subscriber != null).OrderBy(k => k.Subscriber is IHighPriorityMediatorSubscriber ? 0 : 1).ToList() ?? [];
         }
 
-#pragma warning disable S3011 // Reflection should not be used to increase accessibility of classes, methods, or fields
         var msgType = message.GetType();
         if(!_genericExecuteMethods.TryGetValue(msgType, out var methodInfo))
         {
@@ -144,7 +162,6 @@ public class Mediator() : IDisposable
         }
 
         methodInfo!.Invoke(this, [subscribersCopy, message]);
-#pragma warning restore S3011 // Reflection should not be used to increase accessibility of classes, methods, or fields
     }
     private void ExecuteReflected<T>(List<SubscriberAction> subscribers, T message) where T : MessageBase
     {
@@ -173,16 +190,16 @@ public class Mediator() : IDisposable
         GC.SuppressFinalize(this);
     }
 
-    private sealed class SubscriberAction
+    private sealed class SubscriberAction(IMediatorSubscriber subscriber, object action)
     {
-        public SubscriberAction(IMediatorSubscriber subscriber, object action)
-        {
-            Subscriber = subscriber;
-            Action = action;
-        }
+        public object Action { get; } = action;
+        public IMediatorSubscriber Subscriber { get; } = subscriber;
 
-        public object Action { get; }
-        public IMediatorSubscriber Subscriber { get; }
+        public override bool Equals(object? obj)
+            => obj is SubscriberAction other && Subscriber == other.Subscriber;
+
+        public override int GetHashCode()
+            => Subscriber.GetHashCode();
     }
 }
 
@@ -195,14 +212,9 @@ public interface IMediatorSubscriber : IDisposable
     Mediator Mediator { get; }
 }
 
-public abstract class MediatorSubscriberBase : IMediatorSubscriber
+public abstract class MediatorSubscriberBase(Mediator mediator) : IMediatorSubscriber
 {
-    public MediatorSubscriberBase(Mediator mediator)
-    {
-        Mediator = mediator;
-    }
-
-    public Mediator Mediator { get; }
+    public Mediator Mediator { get; } = mediator;
 
     public virtual void Dispose()
     {

@@ -1,4 +1,6 @@
-﻿using Dalamud.Game.ClientState.Conditions;
+﻿using Brio.Services;
+using Brio.Services.MediatorMessages;
+using Dalamud.Game.ClientState.Conditions;
 using Dalamud.Game.ClientState.Objects.SubKinds;
 using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Plugin.Services;
@@ -10,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace Brio.Game.Core;
 
-public class DalamudService : IDisposable
+public class DalamudService : MediatorSubscriberBase
 {
     public bool IsWine { get; init; }
 
@@ -23,7 +25,8 @@ public class DalamudService : IDisposable
 
     private uint? _classJobId = 0;
 
-    public DalamudService(ICondition condition, IObjectTable gameObjects, IClientState clientState, IGameConfig gameConfig, IDataManager dataManager, IFramework framework)
+    public DalamudService(ICondition condition, IObjectTable gameObjects, IClientState clientState, IGameConfig gameConfig, IDataManager dataManager, IFramework framework, Mediator mediator)
+        : base(mediator)
     {
         _condition = condition;
         _clientState = clientState;
@@ -46,6 +49,8 @@ public class DalamudService : IDisposable
 
     private void FrameworkOnUpdate(IFramework framework)
     {
+        Mediator.Publish(new FrameworkUpdateMessage());
+
         if(_condition[ConditionFlag.WatchingCutscene] && !IsInCutscene)
         {
             IsInCutscene = true;
@@ -138,10 +143,10 @@ public class DalamudService : IDisposable
         return func.Invoke();
     }
 
-    public void Dispose()
+    public override void Dispose()
     {
-        _framework.Update -= FrameworkOnUpdate;
+        base.Dispose();
 
-        GC.SuppressFinalize(this);
+        _framework.Update -= FrameworkOnUpdate;
     }
 }
