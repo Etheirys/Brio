@@ -114,6 +114,24 @@ public class GlamourerService : BrioIPC
         return key == GlamourerApiEc.InvalidKey;
     }
 
+    public bool CopyTo(IGameObject? character, IGameObject? targetCharacter)
+    {
+        if(IsAvailable == false || character is null || targetCharacter is null)
+            return false;
+
+        var (key, customization) = _glamourerGetState.Invoke(character!.ObjectIndex);
+
+        if(key is not GlamourerApiEc.Success || customization is null)
+        {
+            Brio.Log.Info($"Glamourer CopyTo was not Successful: {key}");
+            return false;
+        }
+
+        _glamourerApplyState.Invoke(customization, targetCharacter!.ObjectIndex);
+
+        return true;
+    }
+
     public bool UnlockAndRevertCharacterByName(string name)
     {
         if(IsAvailable == false || name.IsNullOrEmpty())
