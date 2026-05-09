@@ -34,7 +34,7 @@ public static class AppearanceEditorCommon
     private const string _collectionLabelDesign = "Design";
     private const string _collectionLabelProfile = "Profile";
 
-    private static float _lableWidth => ImGui.CalcTextSize(_collectionLabel).X - (44 * ImGuiHelpers.GlobalScale) + 125;
+    private static float _lableWidth => ImGui.CalcTextSize(_collectionLabel).X - (44 * ImGuiHelpers.GlobalScale) + 110;
 
     //
 
