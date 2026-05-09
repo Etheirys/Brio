@@ -15,7 +15,7 @@ public class CameraContainerWidget(CameraContainerCapability capability) : Widge
 {
     public override string HeaderName => "Cameras";
 
-    public override WidgetFlags Flags => WidgetFlags.DefaultOpen | WidgetFlags.DrawBody | WidgetFlags.DrawPopup | WidgetFlags.DrawQuickIcons;
+    public override WidgetFlags Flags => WidgetFlags.DrawPopup | WidgetFlags.DrawQuickIcons;
 
     private CameraEntity? _selectedEntity;
 
@@ -91,11 +91,13 @@ public class CameraContainerWidget(CameraContainerCapability capability) : Widge
 
             if(ImGui.BeginMenu("New...###containerwidgetpopup_new"))
             {
-                if(ImGui.MenuItem("New Camera###containerwidgetpopup_newcamera"))
+                ImGui.Separator();
+
+                if(ImGui.MenuItem("Camera###containerwidgetpopup_newcamera"))
                 {
                     Capability.VirtualCameraManager.CreateCamera(CameraType.Game);
                 }
-                if(ImGui.MenuItem("New Free-Cam###containerwidgetpopup_newfreecamera"))
+                if(ImGui.MenuItem("Free-Cam###containerwidgetpopup_newfreecamera"))
                 {
                     Capability.VirtualCameraManager.CreateCamera(CameraType.Free);
                 }
@@ -103,11 +105,16 @@ public class CameraContainerWidget(CameraContainerCapability capability) : Widge
                 ImGui.EndMenu();
             }
 
-            if(ImGui.BeginMenu("Destroy All Cameras###containerwidgetpopup_destroyall"))
+            if(ImGui.BeginMenu("Destroy All...###containerwidgetpopup_destroy"))
             {
-                if(ImGui.MenuItem("Confirm Destruction###containerwidgetpopup_destroyall_confirm"))
+                if(ImGui.BeginMenu("Cameras###containerwidgetpopup_destroyallCameras"))
                 {
-                    Capability.VirtualCameraManager.DestroyAll();
+                    if(ImGui.MenuItem("Confirm Destruction###containerwidgetpopup_destroyall_confirmCameras"))
+                    {
+                        Capability.VirtualCameraManager.DestroyAll();
+                    }
+
+                    ImGui.EndMenu();
                 }
 
                 ImGui.EndMenu();
