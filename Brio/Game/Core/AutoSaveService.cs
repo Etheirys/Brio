@@ -1,40 +1,62 @@
-﻿using Brio.Config;
+﻿using Brio.Capabilities.Posing;
+using Brio.Config;
+using Brio.Entities;
 using Brio.Files;
-using Brio.Game.GPose;
 using Brio.MCDF.Game.Services;
 using Brio.Resources;
 using Brio.Services;
-using Brio.UI;
+using Brio.Services.MediatorMessages;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
-using Dalamud.Utility;
 using MessagePack;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Timers;
 
 namespace Brio.Game.Core;
 
-public class AutoSaveService : IDisposable
+public record class AutoSaveEntry
+{
+    public required string FolderPath { get; init; }
+    public required string DisplayName { get; init; }
+    public required bool HasPoses { get; init; }
+
+    public string BrioSavePath => Path.Combine(FolderPath, "SceneAutoSave.brioautosave");
+    public bool IsValid => File.Exists(BrioSavePath);
+}
+
+public record class AutoSavePoseEntry
+{
+    public required string ActorName { get; init; }
+    public required string FilePath { get; init; }
+
+    public bool IsCompanion => ActorName.EndsWith("-Companion", StringComparison.OrdinalIgnoreCase);
+}
+
+public class AutoSaveService : IDisposable, IMediatorSubscriber
 {
     private readonly IDalamudPluginInterface _pluginInterface;
     private readonly IFramework _framework;
-    private readonly GPoseService _gPoseService;
     private readonly SceneService _sceneService;
     private readonly MCDFService _mCDFService;
+    private readonly Mediator _mediator;
+
+    public Mediator Mediator => _mediator;
 
     public bool IsEnabled = true;
 
-    public AutoSaveService(IDalamudPluginInterface pluginInterface, IFramework framework, SceneService sceneService, MCDFService mCDFService, GPoseService gPoseService)
+    public AutoSaveService(IDalamudPluginInterface pluginInterface, IFramework framework, Mediator mediator, SceneService sceneService, MCDFService mCDFService)
     {
         _pluginInterface = pluginInterface;
         _framework = framework;
-        _gPoseService = gPoseService;
         _sceneService = sceneService;
         _mCDFService = mCDFService;
+        _mediator = mediator;
 
-        gPoseService.OnGPoseStateChange += GPoseService_OnGPoseStateChange;
+        _mediator.Subscribe<GposeEndMessage>(this, _ => OnGPoseStateChange(false));
+        _mediator.Subscribe<GposeStartMessage>(this, _ => OnGPoseStateChange(true));
     }
 
     private Timer? _timer = null;
@@ -135,37 +157,6 @@ public class AutoSaveService : IDisposable
         }
     }
 
-    public void ShowAutoSaves()
-    {
-        UIManager.Instance.FileDialogManager.CustomSideBarItems.Clear();
-        UIManager.Instance.FileDialogManager.OpenFileDialog(
-            "Load AutoSave",
-            ".brioautosave",
-            (success, paths) =>
-            {
-                if(success && paths.Count == 1)
-                {
-                    string path = paths[0];
-                    if(path.IsNullOrEmpty() == false)
-                    {
-                        try
-                        {
-                            var result = MessagePackSerializer.Deserialize<SceneFile>(File.ReadAllBytes(path));
-                            _sceneService.LoadScene(result, true);
-                        }
-                        catch(Exception ex)
-                        {
-                            Brio.NotifyError("Brio AutoSave save was corrupted!");
-                            Brio.Log.Error(ex, "Exception while loading an AutoSave!");
-                        }
-                    }
-                }
-            },
-            1,
-            AutoSaveFolder,
-            true);
-    }
-
     internal void Update()
     {
         Brio.Log.Verbose($"AutoSave: Update");
@@ -175,6 +166,56 @@ public class AutoSaveService : IDisposable
         {
             _timer.Interval = timeInterval;
         }
+    }
+
+    public IReadOnlyList<AutoSaveEntry> GetAutoSaves()
+    {
+        if(Directory.Exists(AutoSaveFolder) == false)
+            return [];
+
+        return [.. Directory.EnumerateDirectories(AutoSaveFolder)
+            .Select(d => new DirectoryInfo(d))
+            .OrderByDescending(d => d.LastWriteTime)
+            .Select(d => new AutoSaveEntry
+            {
+                FolderPath = d.FullName,
+                DisplayName = $"Auto-Save {d.LastWriteTime:g}",
+                HasPoses = Directory.Exists(Path.Combine(d.FullName, "Poses"))
+            })];
+    }
+
+    public void LoadAutoSave(AutoSaveEntry entry, bool destroyAll = false)
+    {
+        try
+        {
+            var result = MessagePackSerializer.Deserialize<SceneFile>(File.ReadAllBytes(entry.BrioSavePath));
+            _sceneService.LoadScene(result, destroyAll);
+        }
+        catch(Exception ex)
+        {
+            Brio.NotifyError("Brio AutoSave was corrupted!");
+            Brio.Log.Error(ex, "Exception while loading an AutoSave!");
+        }
+    }
+
+    public void LoadPoseOnActor(AutoSavePoseEntry poseEntry, PosingCapability capability)
+    {
+        capability.ImportPose(poseEntry.FilePath);
+    }
+
+    public IReadOnlyList<AutoSavePoseEntry> GetAllAutoSavePoses(AutoSaveEntry entry)
+    {
+        var posesPath = Path.Combine(entry.FolderPath, "Poses");
+        if(Directory.Exists(posesPath) == false)
+            return [];
+
+        return [.. Directory.EnumerateFiles(posesPath, "*.pose")
+            .OrderBy(f => f)
+            .Select(f => new AutoSavePoseEntry
+            {
+                ActorName = Path.GetFileNameWithoutExtension(f),
+                FilePath = f
+            })];
     }
 
     public void CleanOldSaves()
@@ -224,7 +265,7 @@ public class AutoSaveService : IDisposable
         }
     }
 
-    private void GPoseService_OnGPoseStateChange(bool newState)
+    private void OnGPoseStateChange(bool newState)
     {
         if(newState)
         {
@@ -241,6 +282,9 @@ public class AutoSaveService : IDisposable
     public void Dispose()
     {
         Stop();
-        _gPoseService.OnGPoseStateChange -= GPoseService_OnGPoseStateChange;
+
+        Mediator.UnsubscribeAll(this);
+
+        GC.SuppressFinalize(this);
     }
 }
