@@ -9,6 +9,7 @@ using Brio.Game.Actor.Interop;
 using Brio.Game.Core;
 using Brio.Game.Posing;
 using Brio.Game.Types;
+using Brio.Input;
 using Brio.Library;
 using Brio.Library.Filters;
 using Brio.Library.Sources;
@@ -18,6 +19,7 @@ using Brio.UI.Controls.Editors;
 using Brio.UI.Windows;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface;
+using Dalamud.Interface.Utility;
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Utility;
 using MessagePack;
@@ -47,7 +49,7 @@ public class FileUIHelpers
 
                 if(ImGui.Button("View Auto-Saves"))
                 {
-                    autoSaveService.ShowAutoSaves();
+                    UIManager.Instance.ToggleAutoSaveWindow();
                 }
                 if(ImGui.IsItemHovered())
                     ImGui.SetTooltip("View Scene Auto-Saves");
@@ -74,135 +76,175 @@ public class FileUIHelpers
     static bool freezeOnLoad = false;
     static bool smartDefaults = false;
 
+    static bool doTransform = false;
     static bool doExpression = false;
     static bool doBody = false;
-    static bool doTransform = false;
+    static bool[] _importType = [false, false];
+
     static TransformComponents? transformComponents = null;
     public static void DrawImportPoseMenuPopup(string tag, PosingCapability? capability, bool showImportOptions = true)
     {
         using var popup = ImRaii.Popup($"DrawImportPoseMenuPopup");
-        if(popup.Success)
+        if(!popup.Success)
+            return;
+
+        if(capability is null)
+            return;
+
+        using(ImRaii.PushColor(ImGuiCol.Button, UIConstants.Transparent))
         {
-            var imIO = ImGui.GetIO();
-            var _lastGlobalScale = imIO.FontGlobalScale;
-            imIO.FontGlobalScale = 1f;
+            var sizeRaw = new Vector2(245, 44);
 
-            if(capability is null)
-                return;
+            var size = sizeRaw * ImGuiHelpers.GlobalScale;
+            var height = 25 * ImGuiHelpers.GlobalScale;
+            var width = size.X;
 
-            using(ImRaii.PushColor(ImGuiCol.Button, UIConstants.Transparent))
+            var buttonSize = (sizeRaw / 8);
+
+            ImGui.Checkbox("IsTransformFrozen Actor on Import", ref freezeOnLoad);
+
+            using(ImRaii.Disabled(true))
+                ImGui.Checkbox("Smart Import", ref smartDefaults); // Smart Import will automatically select import options based on the pose file being imported.
+            ImBrio.AttachToolTip("Under development");
+
+            ImBrio.SeparatorText("Import Type");
+
+            _importType[0] = doBody;
+            _importType[1] = doExpression;
+            if(ImBrio.ToggleSelecterStrip("importTypeStrip", new(width, height), ref _importType, ["Body", "Expression"], "Import"))
             {
-                var size = new Vector2(245, 400)
+                doBody = _importType[0];
+                doExpression = _importType[1];
+            }
+
+            ImBrio.SeparatorText("Options");
+
+            transformComponents ??= capability.PosingService.DefaultImporterOptions.TransformComponents;
+
+            using(ImRaii.Disabled(smartDefaults))
+            {
+                using(ImRaii.Disabled(doExpression))
                 {
-                    Y = 44
-                };
-
-                var buttonSize = size / 8;
-
-                ImGui.Checkbox("Freeze Actor on Import", ref freezeOnLoad);
-
-                ImGui.Separator();
-
-                using(ImRaii.Disabled(true))
-                    ImGui.Checkbox("Smart Import", ref smartDefaults);
-
-                transformComponents ??= capability.PosingService.DefaultImporterOptions.TransformComponents;
-
-                using(ImRaii.Disabled(smartDefaults))
-                {
-                    using(ImRaii.Disabled(doExpression))
+                    if(ImBrio.ToggelFontIconButton("ImportPosition", FontAwesomeIcon.ArrowsUpDownLeftRight, buttonSize, transformComponents.Value.HasFlag(TransformComponents.Position), hoverText: "Import Position"))
                     {
-                        if(ImBrio.ToggelFontIconButton("ImportPosition", FontAwesomeIcon.ArrowsUpDownLeftRight, buttonSize, transformComponents.Value.HasFlag(TransformComponents.Position), hoverText: "Import Position"))
-                        {
-                            if(transformComponents.Value.HasFlag(TransformComponents.Position))
-                                transformComponents &= ~TransformComponents.Position;
-                            else
-                                transformComponents |= TransformComponents.Position;
-                        }
-                        ImGui.SameLine();
-                        if(ImBrio.ToggelFontIconButton("ImportRotation", FontAwesomeIcon.ArrowsSpin, buttonSize, transformComponents.Value.HasFlag(TransformComponents.Rotation), hoverText: "Import Rotation"))
-                        {
-                            if(transformComponents.Value.HasFlag(TransformComponents.Rotation))
-                                transformComponents &= ~TransformComponents.Rotation;
-                            else
-                                transformComponents |= TransformComponents.Rotation;
-                        }
-                        ImGui.SameLine();
-                        if(ImBrio.ToggelFontIconButton("ImportScale", FontAwesomeIcon.ExpandAlt, buttonSize, transformComponents.Value.HasFlag(TransformComponents.Scale), hoverText: "Import Scale"))
-                        {
-                            if(transformComponents.Value.HasFlag(TransformComponents.Scale))
-                                transformComponents &= ~TransformComponents.Scale;
-                            else
-                                transformComponents |= TransformComponents.Scale;
-                        }
+                        if(transformComponents.Value.HasFlag(TransformComponents.Position))
+                            transformComponents &= ~TransformComponents.Position;
+                        else
+                            transformComponents |= TransformComponents.Position;
                     }
-
                     ImGui.SameLine();
-                    if(ImBrio.ToggelFontIconButton("ImportTransform", FontAwesomeIcon.ArrowsToCircle, buttonSize, doTransform, hoverText: "Import Model Transform"))
+                    if(ImBrio.ToggelFontIconButton("ImportRotation", FontAwesomeIcon.ArrowsSpin, buttonSize, transformComponents.Value.HasFlag(TransformComponents.Rotation), hoverText: "Import Rotation"))
                     {
-                        doTransform = !doTransform;
+                        if(transformComponents.Value.HasFlag(TransformComponents.Rotation))
+                            transformComponents &= ~TransformComponents.Rotation;
+                        else
+                            transformComponents |= TransformComponents.Rotation;
                     }
-
-                    if(smartDefaults == true)
+                    ImGui.SameLine();
+                    if(ImBrio.ToggelFontIconButton("ImportScale", FontAwesomeIcon.ExpandAlt, buttonSize, transformComponents.Value.HasFlag(TransformComponents.Scale), hoverText: "Import Scale"))
                     {
-                        transformComponents = null;
+                        if(transformComponents.Value.HasFlag(TransformComponents.Scale))
+                            transformComponents &= ~TransformComponents.Scale;
+                        else
+                            transformComponents |= TransformComponents.Scale;
                     }
                 }
 
-                ImGui.Separator();
-
-                if(ImBrio.ToggelButton("Import Body", new(size.X, 35), doBody))
+                ImGui.SameLine();
+                if(ImBrio.ToggelFontIconButton("ImportTransform", FontAwesomeIcon.ArrowsToCircle, buttonSize, doTransform, hoverText: "Import Model Transform"))
                 {
-                    doBody = !doBody;
+                    doTransform = !doTransform;
                 }
 
-                if(ImBrio.ToggelButton("Import Expression", new(size.X, 35), doExpression))
+                if(smartDefaults)
                 {
-                    doExpression = !doExpression;
-                }
-
-                using(ImRaii.Disabled(doExpression || doBody))
-                {
-                    if(ImBrio.Button("Import Options", FontAwesomeIcon.Cog, new(size.X, 25), centerTest: true, tooltip: "Import Options"))
-                        ImGui.OpenPopup($"import_{tag}_optionsImportPoseMenuPopup");
-                }
-
-                ImGui.Separator();
-
-                if(ImGui.Button("Import", new(size.X, 25)))
-                {
-                    ShowImportPoseModal(capability, freezeOnLoad: freezeOnLoad, transformComponents: transformComponents, applyModelTransformOverride: doTransform);
-                }
-
-                ImGui.Separator();
-
-                if(ImGui.Button("Import A-Pose", new(size.X, 25)))
-                {
-                    capability.LoadResourcesPose("Data.BrioAPose.pose", freezeOnLoad: freezeOnLoad, asBody: true);
-                    ImGui.CloseCurrentPopup();
-                }
-
-                if(ImGui.Button("Import T-Pose", new(size.X, 25)))
-                {
-                    capability.LoadResourcesPose("Data.BrioTPose.pose", freezeOnLoad: freezeOnLoad, asBody: true);
-                    ImGui.CloseCurrentPopup();
-                }
-
-                using(var popup2 = ImRaii.Popup($"import_{tag}_optionsImportPoseMenuPopup"))
-                {
-                    if(popup2.Success && showImportOptions && Brio.TryGetService<PosingService>(out var service))
-                    {
-                        PosingEditorCommon.DrawImportOptionEditor(service.DefaultImporterOptions, service, true);
-                    }
+                    transformComponents = null;
                 }
             }
 
-            ImGui.GetIO().FontGlobalScale = _lastGlobalScale;
+            ImBrio.VerticalPadding(4);
+
+            using(ImRaii.Disabled(doExpression || doBody))
+            {
+                if(ImBrio.Button("Custom Bone Import Options", FontAwesomeIcon.Cog, new(width, height), centerTest: true, tooltip: "Import Options"))
+                    ImGui.OpenPopup($"import_{tag}_optionsImportPoseMenuPopup");
+            }
+
+            ImBrio.SeparatorText("Import");
+
+            if(ImBrio.Button("Import Pose from File", FontAwesomeIcon.FileDownload, new(width, height), centerTest: true, tooltip: "Import Pose"))
+            {
+                ShowImportPoseModal(capability, transformComponents: transformComponents, applyModelTransformOverride: doTransform);
+            }
+
+            using(ImRaii.Disabled(false))
+                if(ImBrio.Button("Import Pose from Clipboard", FontAwesomeIcon.Paste,
+                    new(width, height), centerTest: true,
+                    tooltip: "Import Pose from Clipboard"))
+                {
+                    var data = ImGui.GetClipboardText();
+                    Clipboard.FromCompressedBase64<PoseFile>(data, out var pose);
+
+                    if(pose is null)
+                    {
+                        Brio.NotifyError("Failed to import pose from clipboard! Data on clipboard is not a valid pose.");
+                        Brio.Log.Error("Failed to import pose from clipboard. Data on clipboard is not a valid pose.");
+                        return;
+                    }
+
+                    try
+                    {
+                        ImportPose(capability, pose, transformComponents: transformComponents, applyModelTransformOverride: doTransform);
+                    }
+                    catch(Exception ex)
+                    {
+                        Brio.NotifyError("Failed to import pose from clipboard!");
+                        Brio.Log.Error("Failed to import pose from clipboard", ex);
+                    }
+                }
+
+            if(ImBrio.Button("Copy Pose to Clipboard", FontAwesomeIcon.Copy, new(width, height), centerTest: true, tooltip: "Copy Pose to Clipboard"))
+            {
+                try
+                {
+                    var pose = capability.ExportPose();
+                    var poseJson = JsonSerializer.Serialize(pose);
+                    var data = Clipboard.ToCompressedBase64(pose, version: 1);
+                    ImGui.SetClipboardText(data);
+                }
+                catch(Exception ex)
+                {
+                    Brio.NotifyError("Failed to copy pose to clipboard!");
+                    Brio.Log.Error("Failed to copy pose to clipboard", ex);
+                }
+            }
+
+            ImBrio.SeparatorText("Presets");
+
+            if(ImGui.Button("Import A-Pose", new(width, height)))
+            {
+                capability.LoadResourcesPose("Data.BrioAPose.pose", freezeOnLoad: freezeOnLoad, asBody: true);
+                ImGui.CloseCurrentPopup();
+            }
+
+            if(ImGui.Button("Import T-Pose", new(width, height)))
+            {
+                capability.LoadResourcesPose("Data.BrioTPose.pose", freezeOnLoad: freezeOnLoad, asBody: true);
+                ImGui.CloseCurrentPopup();
+            }
+
+            using(var popup2 = ImRaii.Popup($"import_{tag}_optionsImportPoseMenuPopup"))
+            {
+                if(popup2.Success && showImportOptions && Brio.TryGetService<PosingService>(out var service))
+                {
+                    PosingEditorCommon.DrawImportOptionEditor(service.DefaultImporterOptions, service, true);
+                }
+            }
         }
     }
 
     public static void ShowImportPoseModal(PosingCapability capability, PoseImporterOptions? options = null, bool asExpression = false,
-        bool asBody = false, bool freezeOnLoad = false, TransformComponents? transformComponents = null, bool? applyModelTransformOverride = false)
+        bool asBody = false, TransformComponents? transformComponents = null, bool? applyModelTransformOverride = false)
     {
         TypeFilter filter = new("Poses", typeof(CMToolPoseFile), typeof(PoseFile));
 
@@ -466,7 +508,7 @@ public class FileUIHelpers
     public static void ShowImportPreviewImageModal(FileEntry fileEntry)
     {
         UIManager.Instance.FileDialogManager.OpenFileDialog(
-            "Import image file###import_preview_image_window", 
+            "Import image file###import_preview_image_window",
             "Image Files (*.png | *.jpg | *.jpeg){.png,.jpg,.jpeg}",
             (success, paths) =>
             {
@@ -481,9 +523,9 @@ public class FileUIHelpers
                     }
                     fileEntry.LoadNewPreviewImage(path);
                 }
-            }, 
-            1, 
-            ConfigurationService.Instance.Configuration.LastPreviewImagePath, 
+            },
+            1,
+            ConfigurationService.Instance.Configuration.LastPreviewImagePath,
             false);
     }
 }
