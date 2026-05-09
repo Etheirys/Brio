@@ -1,7 +1,8 @@
-﻿using Brio.Core;
+﻿using Brio.Config;
+using Brio.Core;
 using Brio.Input;
-using Brio.Config;
 using Dalamud.Bindings.ImGui;
+using Dalamud.Interface;
 using Dalamud.Interface.Utility;
 using System.Numerics;
 
@@ -55,7 +56,7 @@ public static partial class ImBrio
             step *= 10;
 
 
-        if(ImGui.Button($"◀##{label}_decrease", new Vector2(25 * ImGuiHelpers.GlobalScale)))
+        if(FontIconButton(FontAwesomeIcon.ChevronLeft, new Vector2(25 * ImGuiHelpers.GlobalScale)))
         {
             value -= isAngle ? step * MathHelpers.DegreesToRadians : step;
             changed = true;
@@ -97,7 +98,7 @@ public static partial class ImBrio
         }
 
         ImGui.SameLine();
-        if(ImGui.Button($"▶##{label}_increase", new Vector2(25 * ImGuiHelpers.GlobalScale)))
+        if(FontIconButton(FontAwesomeIcon.ChevronRight, new Vector2(25 * ImGuiHelpers.GlobalScale)))
         {
             value += isAngle ? step * MathHelpers.DegreesToRadians : step;
             changed = true;
