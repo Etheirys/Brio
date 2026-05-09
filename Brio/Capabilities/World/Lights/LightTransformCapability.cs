@@ -13,7 +13,7 @@ using StructsVector3 = FFXIVClientStructs.FFXIV.Common.Math.Vector3;
 
 namespace Brio.Capabilities.World;
 
-public class LightTransformCapability : LightCapability
+public class LightTransformCapability : LightCapability, ITransformable
 {
     public bool OverlayOpen
     {
@@ -47,6 +47,10 @@ public class LightTransformCapability : LightCapability
     private readonly PosingOverlayWindow _overlayWindow;
     private readonly GameInputService _gameInputService;
     private readonly ConfigurationService _configurationService;
+    private readonly LightWindow _lightWindow;
+
+    public bool ShouldHideBodyInHierarchy =>
+        _lightWindow.IsOpen && _configurationService.Configuration.Posing.IfLightWindowisOpenDontUseSceneManager;
 
     public bool TransformWindowOpen
     {
@@ -55,10 +59,45 @@ public class LightTransformCapability : LightCapability
     }
 
     public bool IsTransformDraggingActive = false;
+
+    public bool IsTransformFrozen { get; set; }
+    public bool TransformOverride => rotation != Vector3.Zero || position != Vector3.Zero || scale != Vector3.Zero;
+
+    public Transform Transform
+    {
+        get
+        {
+            _originalTransform ??= field;
+            return field;
+        }
+        set 
+        { 
+            _originalTransform ??= field;
+            StructsTransform = new StructsTransforms()
+            {
+                Position = value.Position,
+                Rotation = Quaternion.Multiply(Quaternion.CreateFromYawPitchRoll(rotation.Y, rotation.X, rotation.Z), Transform.Rotation),
+                Scale = value.Scale
+            };
+
+            ApplyTransform(value);
+
+            field = value;
+        }
+    }
+
+    public Transform OriginalTransform
+    {
+        get => _originalTransform ?? default;
+        set => _originalTransform = value;
+    }
+
+    private Transform? _originalTransform = null;
+
     public Vector3 rotation = Vector3.Zero;
     public Vector3 position = Vector3.Zero;
     public Vector3 scale = Vector3.Zero;
-    public StructsTransforms Transform = new()
+    public StructsTransforms StructsTransform = new()
     {
         Position = Vector3.Zero,
         Rotation = Quaternion.Zero,
@@ -69,13 +108,22 @@ public class LightTransformCapability : LightCapability
         GameInputService gameInputService,
         ConfigurationService configurationService,
         PosingTransformWindow overlayTransformWindow,
-        PosingOverlayWindow window)
+        PosingOverlayWindow window,
+        LightWindow lightWindow)
         : base(parent)
     {
         _overlayWindow = window;
         _gameInputService = gameInputService;
         _overlayTransformWindow = overlayTransformWindow;
         _configurationService = configurationService;
+        _lightWindow = lightWindow;
+
+        Transform = new Transform
+        {
+            Position = GameLight.SpawnPosition,
+            Rotation = GameLight.SpawnRotation,
+            Scale = GameLight.SpawnScale
+        };
 
         Widget = new LightTransformWidget(this);
     }
@@ -115,9 +163,16 @@ public class LightTransformCapability : LightCapability
 
     public unsafe void Reset(bool generateSnapshot = true, bool clearHistStack = true)
     {
-        Transform.Position = Light.GameLight.GameLight->Transform.Position = Light.GameLight.SpawnPosition;
-        Transform.Rotation = Light.GameLight.GameLight->Transform.Rotation = Light.GameLight.SpawnRotation;
-        Transform.Scale = Light.GameLight.GameLight->Transform.Scale = Light.GameLight.SpawnScale;
+        StructsTransform.Position = Light.GameLight.GameLight->Transform.Position = Light.GameLight.SpawnPosition;
+        StructsTransform.Rotation = Light.GameLight.GameLight->Transform.Rotation = Light.GameLight.SpawnRotation;
+        StructsTransform.Scale = Light.GameLight.GameLight->Transform.Scale = Light.GameLight.SpawnScale;
+
+        Transform = new Transform()
+        {
+            Position = Light.GameLight.SpawnPosition,
+            Rotation = Light.GameLight.SpawnRotation,
+            Scale = Light.GameLight.SpawnScale
+        };
 
         rotation = Vector3.Zero;
         position = Vector3.Zero;
@@ -145,7 +200,7 @@ public class LightTransformCapability : LightCapability
         if(_undoStack.Count == 0)
             _undoStack.Push(new LightStack(GameLight.SpawnPosition, GameLight.SpawnRotation, GameLight.SpawnScale));
 
-        _undoStack.Push(new LightStack(Transform.Position, Transform.Rotation, Transform.Scale));
+        _undoStack.Push(new LightStack(StructsTransform.Position, StructsTransform.Rotation, StructsTransform.Scale));
         _undoStack = _undoStack.Trim(undoStackSize + 1);
     }
 
@@ -155,10 +210,27 @@ public class LightTransformCapability : LightCapability
         position = state.Position;
         scale = state.Scale;
 
-        Light.GameLight.GameLight->Transform.Position = Transform.Position = state.Position;
-        Light.GameLight.GameLight->Transform.Rotation = Transform.Rotation = state.Rotation;
-        Light.GameLight.GameLight->Transform.Scale = Transform.Scale = state.Scale;
+        Light.GameLight.GameLight->Transform.Position = StructsTransform.Position = state.Position;
+        Light.GameLight.GameLight->Transform.Rotation = StructsTransform.Rotation = state.Rotation;
+        Light.GameLight.GameLight->Transform.Scale = StructsTransform.Scale = state.Scale;
+
+        Transform = new Transform()
+        {
+            Position = Light.GameLight.SpawnPosition,
+            Rotation = Light.GameLight.SpawnRotation,
+            Scale = Light.GameLight.SpawnScale
+        };
+    }
+
+    private unsafe void ApplyTransform(Transform state)
+    {
+        rotation = state.Rotation.ToEuler();
+        position = state.Position;
+        scale = state.Scale;
+
+        Light.GameLight.GameLight->Transform.Position = StructsTransform.Position = state.Position;
+        Light.GameLight.GameLight->Transform.Rotation = StructsTransform.Rotation = state.Rotation;
+        Light.GameLight.GameLight->Transform.Scale = StructsTransform.Scale = state.Scale;
     }
 }
-
 public record struct LightStack(StructsVector3 Position, StructsQuaternion Rotation, StructsVector3 Scale);
