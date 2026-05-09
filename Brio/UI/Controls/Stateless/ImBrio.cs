@@ -129,13 +129,14 @@ public static partial class ImBrio
         if(enabled is false)
             ImGui.BeginDisabled();
 
-        bool hasScrollbar = ImGui.GetScrollMaxY() > 0;
-
+        var buttonSize = size.Value * ImGuiHelpers.GlobalScale;
         var style = ImGui.GetStyle();
-        float scrollbarWidth = hasScrollbar ? style.ScrollbarSize : 0;
-        var cursorPos = ImGui.GetWindowSize().X - scrollbarWidth - ((ScrollbarSize.X + (style.FramePadding.X * 2)) * position);
 
-        ImGui.SetCursorPosX(cursorPos);
+        float totalStep = buttonSize.X + style.ItemSpacing.X;
+        float offsetFromRight = (position - 1f) * totalStep;
+        float cursorPosX = ImGui.GetCursorPosX() + ImGui.GetContentRegionAvail().X - buttonSize.X - offsetFromRight;
+
+        ImGui.SetCursorPosX(cursorPosX);
 
         if(bordered is false)
             ImGui.PushStyleColor(ImGuiCol.Button, UIConstants.Transparent);
@@ -287,6 +288,62 @@ public static partial class ImBrio
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+    public static bool ToggelFontIconButtonRight(string id, FontAwesomeIcon icon, float position, bool isToggled, uint toggledColor = 0,
+        string? tooltip = null, bool enabled = true, bool bordered = true, uint? textColor = null, Vector2? size = null)
+    {
+        size ??= new Vector2(25);
+
+        bool wasClicked = false;
+
+        if(toggledColor == 0)
+            toggledColor = ThemeManager.CurrentTheme.Accent.AccentColor;
+
+        if(enabled is false)
+            ImGui.BeginDisabled();
+
+        var buttonSize = size.Value * ImGuiHelpers.GlobalScale;
+        var style = ImGui.GetStyle();
+
+        float totalStep = buttonSize.X + style.ItemSpacing.X;
+        float offsetFromRight = (position - 1f) * totalStep;
+        float cursorPosX = ImGui.GetCursorPosX() + ImGui.GetContentRegionAvail().X - buttonSize.X - offsetFromRight;
+
+        ImGui.SetCursorPosX(cursorPosX);
+
+        if(isToggled)
+            ImGui.PushStyleColor(ImGuiCol.Button, toggledColor);
+
+        if(bordered is false)
+            ImGui.PushStyleColor(ImGuiCol.Button, UIConstants.Transparent);
+
+        if(textColor.HasValue)
+            ImGui.PushStyleColor(ImGuiCol.Text, textColor.Value);
+
+        using(ImRaii.PushFont(UiBuilder.IconFont))
+        {
+            if(ImGui.Button($"{icon.ToIconString()}###{id}", size.Value * ImGuiHelpers.GlobalScale))
+                wasClicked = true;
+        }
+
+        if(textColor.HasValue)
+            ImGui.PopStyleColor();
+
+        if(bordered is false)
+            ImGui.PopStyleColor();
+
+        if(isToggled)
+            ImGui.PopStyleColor();
+
+        if(tooltip is not null)
+            AttachToolTip(tooltip);
+
+        if(enabled is false)
+            ImGui.EndDisabled();
+
+        return wasClicked;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
     public static bool IsItemConfirmed() => ImGui.IsItemDeactivated() && (ImGui.IsKeyPressed(ImGuiKey.Enter) || ImGui.IsKeyPressed(ImGuiKey.KeypadEnter));
 
 
@@ -416,12 +473,217 @@ public static partial class ImBrio
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+    public static bool SeparatorTextButton(string label, FontAwesomeIcon icon, string? tooltip = null, bool enabled = true)
+    {
+        var style = ImGui.GetStyle();
+        float availWidth = ImGui.GetContentRegionAvail().X;
+        if(availWidth <= 0) return false;
+
+        float buttonSize = 25 * ImGuiHelpers.GlobalScale;
+        float lineThickness = ImGuiHelpers.GlobalScale;
+        float innerSpacing = style.ItemInnerSpacing.X;
+
+        float textWidth = ImGui.CalcTextSize(label).X;
+        float lineHeight = ImGui.GetTextLineHeight();
+
+        float rowHeight = MathF.Max(lineHeight, buttonSize);
+        float lineY_offset = rowHeight * 0.5f;
+
+        var cursorPos = ImGui.GetCursorPos();
+        var screenPos = ImGui.GetCursorScreenPos();
+
+        float lineY = screenPos.Y + lineY_offset;
+
+        float leftArmEnd = screenPos.X + innerSpacing * 2f;
+        float textStartX = leftArmEnd + innerSpacing;
+        float textEndX = textStartX + textWidth;
+        float rightArmStart = textEndX + innerSpacing;
+
+        float buttonScreenX = screenPos.X + availWidth - buttonSize;
+        float rightArmEnd = buttonScreenX - innerSpacing;
+
+        uint lineColor = ImGui.GetColorU32(ImGuiCol.Separator);
+        uint textColor = ImGui.GetColorU32(ImGuiCol.Text);
+
+        ImGui.Dummy(new Vector2(availWidth, rowHeight));
+
+        var drawList = ImGui.GetWindowDrawList();
+
+        drawList.AddLine(new Vector2(screenPos.X, lineY), new Vector2(leftArmEnd, lineY), lineColor, lineThickness);
+
+        if(rightArmStart < rightArmEnd)
+            drawList.AddLine(new Vector2(rightArmStart, lineY), new Vector2(rightArmEnd, lineY), lineColor, lineThickness);
+
+        float textY = screenPos.Y + (rowHeight - lineHeight) * 0.5f;
+        drawList.AddText(new Vector2(textStartX, textY), textColor, label);
+
+        float buttonY = cursorPos.Y + (rowHeight - buttonSize) * 0.5f;
+        ImGui.SetCursorPos(new Vector2(cursorPos.X + availWidth - buttonSize, buttonY));
+
+        bool wasClicked = false;
+
+        if(!enabled) ImGui.BeginDisabled();
+
+        using(ImRaii.PushFont(UiBuilder.IconFont))
+        {
+            if(ImGui.Button($"{icon.ToIconString()}###{label}", new Vector2(buttonSize)))
+                wasClicked = true;
+        }
+
+        if(tooltip is not null)
+            AttachToolTip(tooltip);
+
+        if(!enabled) ImGui.EndDisabled();
+
+        ImGui.SetCursorPos(new Vector2(cursorPos.X, cursorPos.Y + rowHeight + style.ItemSpacing.Y));
+
+        return wasClicked;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+    public static void SeparatorText(string label)
+    {
+        var style = ImGui.GetStyle();
+        var drawList = ImGui.GetWindowDrawList();
+        var screenPos = ImGui.GetCursorScreenPos();
+        float availWidth = ImGui.GetContentRegionAvail().X;
+        float lineHeight = ImGui.GetTextLineHeight();
+
+        ImGui.Dummy(new Vector2(availWidth, lineHeight));
+
+        if(!ImGui.IsItemVisible())
+            return;
+
+        float innerSpacing = style.ItemInnerSpacing.X;
+        float lineY = (screenPos.Y + (lineHeight * 0.5f));
+
+        float leftArmEnd = screenPos.X + (innerSpacing * 2f);
+        float textStartX = leftArmEnd + innerSpacing;
+        float textEndX = textStartX + ImGui.CalcTextSize(label).X;
+        float rightArmStart = textEndX + innerSpacing;
+        float rightArmEnd = screenPos.X + availWidth;
+
+        uint lineColor = ImGui.GetColorU32(ImGuiCol.Separator);
+        uint textColor = ImGui.GetColorU32(ImGuiCol.Text);
+
+        float lineThickness = ImGuiHelpers.GlobalScale;
+
+        drawList.AddLine(new Vector2(screenPos.X, lineY), new Vector2(leftArmEnd, lineY), lineColor, lineThickness);
+
+        if(rightArmStart < rightArmEnd)
+            drawList.AddLine(new Vector2(rightArmStart, lineY), new Vector2(rightArmEnd, lineY), lineColor, lineThickness);
+
+        drawList.AddText(new Vector2(textStartX, screenPos.Y), textColor, label);
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
     public static void PillDummyBox(ref ImDrawListPtr dl, float width, float height, uint color)
     {
         var pillPosZ = ImGui.GetCursorScreenPos();
         dl.AddRectFilled(pillPosZ, pillPosZ + new Vector2(width * ImGuiHelpers.GlobalScale, height * ImGuiHelpers.GlobalScale), color);
         ImGui.Dummy(new Vector2(width * ImGuiHelpers.GlobalScale, height * ImGuiHelpers.GlobalScale));
 
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+    public static bool BoneOverlayVisibilityButton(string id, bool isVisible, Vector2 size, string? tooltip = null, bool enabled = true)
+    {
+        var buttonSize = size * ImGuiHelpers.GlobalScale;
+
+        uint baseBoneColor = 0xFFFFBF7A;
+        uint hiddenBoneColor = 0xFF444444;
+        uint baseJointColor = 0xFFFFFFFF;
+        uint hiddenJointColor = 0xFF3A3A3A;
+        uint slashColor = 0xCC4444CC;
+     
+        uint boneColor = isVisible ? baseBoneColor : hiddenBoneColor;
+        uint jointsColor = isVisible ? baseJointColor : hiddenJointColor;
+
+        using var _ = ImRaii.Disabled(!enabled);
+
+        bool clicked = ImGui.InvisibleButton($"##{id}", buttonSize);
+        bool hovered = ImGui.IsItemHovered();
+
+        if(tooltip is not null)
+            AttachToolTip(tooltip);
+
+        var drawList = ImGui.GetWindowDrawList();
+        var rectMin = ImGui.GetItemRectMin();
+        var rectMax = ImGui.GetItemRectMax();
+        
+        var rectSize = rectMax - rectMin;
+
+        float iconSize = MathF.Min(rectSize.X, rectSize.Y);
+        
+        float centerX = rectMin.X + (rectSize.X * 0.5f);
+        float centerY = rectMin.Y + (rectSize.Y * 0.5f) - (iconSize * 0.04f);
+       
+        float skeletonScale = iconSize * 0.36f;
+        float lineThickness = MathF.Max(1f, iconSize * 0.038f);
+        float jointRadius = MathF.Max(1.5f, iconSize * 0.055f);
+
+        drawList.AddRectFilled(rectMin, rectMax,
+            hovered ? ImGui.GetColorU32(ImGuiCol.ButtonHovered)
+                    : ImGui.GetColorU32(ImGuiCol.Button), 4f);
+
+        // bone & joint positions 
+        var head = new Vector2(centerX, centerY - skeletonScale);
+        var neck = new Vector2(centerX, centerY - (skeletonScale * 0.58f));
+        var mid = new Vector2(centerX, centerY - (skeletonScale * 0.05f));
+       
+        var pelvis = new Vector2(centerX, centerY + (skeletonScale * 0.28f));
+        
+        var lShoulder = new Vector2(centerX - (skeletonScale * 0.42f), centerY - (skeletonScale * 0.32f));
+        var rShoulder = new Vector2(centerX + (skeletonScale * 0.42f), centerY - (skeletonScale * 0.32f));
+       
+        var lElbow = new Vector2(centerX - (skeletonScale * 0.52f), centerY + (skeletonScale * 0.08f));
+        var rElbow = new Vector2(centerX + (skeletonScale * 0.52f), centerY + (skeletonScale * 0.08f));
+       
+        var lHip = new Vector2(centerX - (skeletonScale * 0.24f), centerY + (skeletonScale * 0.28f));
+        var rHip = new Vector2(centerX + (skeletonScale * 0.24f), centerY + (skeletonScale * 0.28f));
+       
+        var lKnee = new Vector2(centerX - (skeletonScale * 0.28f), centerY + (skeletonScale * 0.70f));
+        var rKnee = new Vector2(centerX + (skeletonScale * 0.28f), centerY + (skeletonScale * 0.70f));
+
+        ReadOnlySpan<(Vector2, Vector2)> bones =
+        [
+            (neck,      mid),
+            (mid,       pelvis),
+            (lShoulder, neck),      (rShoulder, neck),
+            (lShoulder, lElbow),    (rShoulder, rElbow),
+            (lHip,      pelvis),    (rHip,      pelvis),
+            (lHip,      lKnee),     (rHip,      rKnee),
+        ];
+
+        foreach(var (x, y) in bones)
+            drawList.AddLine(x, y, boneColor, lineThickness);
+
+        // head
+        drawList.AddCircle(head, iconSize * 0.09f, boneColor, 12, lineThickness);
+
+        ReadOnlySpan<Vector2> jointPoints =
+        [
+            neck, mid, pelvis,
+            lShoulder, rShoulder,
+            lElbow,    rElbow,
+            lHip,      rHip,
+            lKnee,     rKnee,
+        ];
+
+        foreach(var joint in jointPoints)
+            drawList.AddCircleFilled(joint, jointRadius, jointsColor);
+
+        if(!isVisible)
+        {
+            float slashRadius = skeletonScale * 1.05f;
+            float slashOffset = slashRadius / MathF.Sqrt(2f);
+            drawList.AddLine(
+                new Vector2(centerX - slashOffset, centerY - slashOffset),
+                new Vector2(centerX + slashOffset, centerY + slashOffset),
+                slashColor, lineThickness + 1.5f);
+        }
+
+        return clicked;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
