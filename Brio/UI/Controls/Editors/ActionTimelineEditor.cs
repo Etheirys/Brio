@@ -85,26 +85,19 @@ public class ActionTimelineEditor(CutsceneManager cutsceneManager, GPoseService 
 
         DrawHeder();
 
-        ImGui.Separator();
-        ImBrio.VerticalPadding(2);
+        ImBrio.SeparatorText("Current Animation");
 
         DrawBaseOverride();
-        ImBrio.VerticalPadding(2);
-
         DrawBlend();
-        ImBrio.VerticalPadding(2);
-
         DrawOverallSpeed(drawAdvanced);
 
-        if(drawAdvanced == false)
+        if(!drawAdvanced)
         {
-            ImGui.Separator();
-            ImBrio.VerticalPadding(2);
+            ImBrio.SeparatorText("Animation Scruber");
 
             DrawFirstScrub();
         }
-
-        if(drawAdvanced)
+        else
         {
             ImBrio.VerticalPadding(2);
             DrawLips();
@@ -136,7 +129,7 @@ public class ActionTimelineEditor(CutsceneManager cutsceneManager, GPoseService 
 
     private void DrawHeder()
     {
-        if(ImBrio.ToggelButton("Freeze Physics", new Vector2(95, 25), _physicsService.IsFreezeEnabled, hoverText: _physicsService.IsFreezeEnabled ? "Un-Freeze Physics" : "Freeze Physics"))
+        if(ImBrio.ToggelButton("Freeze Physics", new Vector2(110, 25), _physicsService.IsFreezeEnabled, hoverText: _physicsService.IsFreezeEnabled ? "Un-Freeze Physics" : "Freeze Physics"))
         {
             _physicsService.FreezeToggle();
         }
@@ -257,7 +250,6 @@ public class ActionTimelineEditor(CutsceneManager cutsceneManager, GPoseService 
         ImGui.Text(baseLabel);
 
         ImGui.SameLine();
-        ImBrio.HorizontalPadding(4);
 
         if(ImBrio.FontIconButtonRight("base_play", FontAwesomeIcon.PlayCircle, 3, "Play", _capability.SlotedBaseAnimation != 0))
             ApplyBaseOverride(_capability);
@@ -310,7 +302,6 @@ public class ActionTimelineEditor(CutsceneManager cutsceneManager, GPoseService 
         ImGui.Text(blendLabel);
 
         ImGui.SameLine();
-        ImBrio.HorizontalPadding(4);
 
         if(ImBrio.FontIconButtonRight("blend_play", FontAwesomeIcon.PlayCircle, 2, "Play", _capability.SlotedBlendAnimation != 0))
             ApplyBlend(_capability);
@@ -466,17 +457,12 @@ public class ActionTimelineEditor(CutsceneManager cutsceneManager, GPoseService 
         var duration = anim->Duration;
         var time = control->hkaAnimationControl.LocalTime;
 
-        ImGui.SetNextItemWidth(-ImGui.CalcTextSize("ScrubX").X);
+        ImBrio.CenterNextElementWithPadding(10);
         if(ImGui.SliderFloat($"###scrub_001", ref time, 0f, duration, "%.2f", ImGuiSliderFlags.AlwaysClamp))
         {
             control->hkaAnimationControl.LocalTime = time;
-        }
-        if(ImGui.IsItemClicked(ImGuiMouseButton.Left))
-        {
             _capability.SetOverallSpeedOverride(0f);
         }
-        ImGui.SameLine();
-        ImGui.Text("Scrub");
     }
 
     private void DrawSlots()
@@ -557,7 +543,6 @@ public class ActionTimelineEditor(CutsceneManager cutsceneManager, GPoseService 
         ImGui.Text(speedLabel);
 
         ImGui.SameLine();
-        ImBrio.HorizontalPadding(4);
 
         if(ImBrio.FontIconButtonRight("speed_reset", FontAwesomeIcon.Undo, 1, "Reset Speed", _capability.HasSpeedMultiplierOverride))
             _capability.ResetOverallSpeedOverride();
