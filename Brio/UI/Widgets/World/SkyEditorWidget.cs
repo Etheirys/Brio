@@ -25,9 +25,6 @@ public class SkyEditorWidget(SkyEditorCapability skyEditorCapability) : Widget<S
         var env = BrioEnvManager.Instance();
         if(env == null) return;
 
-        Vector2 unlockPos;
-        Vector2 preservedPOS;
-
         ImBrio.VerticalPadding(3);
 
         ImBrio.ButtonSelectorStrip("stars_filters_selector", new Vector2(ImBrio.GetRemainingWidth(), ImBrio.GetLineHeight()), ref selected, ["Sky", "Stars", "Clouds"]);
@@ -36,17 +33,12 @@ public class SkyEditorWidget(SkyEditorCapability skyEditorCapability) : Widget<S
         {
             case 1:
                 ImBrio.VerticalPadding(3);
-
-                unlockPos = ImGui.GetCursorPos();
-                ImGui.Text("Star Count and Star Intensity:"u8);
-
-                var isStars = Capability.Environment.EnvironmentOverrideState.HasFlag(EnvironmentOverrideState.Stars);
-
-                preservedPOS = ImGui.GetCursorPos();
-                ImGui.SetCursorPos(unlockPos - new Vector2(0, 4));
-                if(ImBrio.FontIconButtonRight("###resetStars", FontAwesomeIcon.Redo, 1, "Reset Stars", bordered: false, enabled: isStars))
+               
+                if(ImBrio.SeparatorTextButton("Stars", FontAwesomeIcon.Redo, "Reset All Stars Properties",
+                    Capability.Environment.EnvironmentOverrideState.HasFlag(EnvironmentOverrideState.Stars)))
+                {
                     Capability.Environment.EnvironmentOverrideState &= ~EnvironmentOverrideState.Stars;
-                ImGui.SetCursorPos(preservedPOS);
+                }
 
                 ImBrio.CenterNextElementWithPadding(15);
                 var didSkyChange2 = ImGui.SliderFloat("###starcount"u8, ref env->EnvState.Stars.StarCount, 0.0f, 20.0f);
@@ -57,7 +49,7 @@ public class SkyEditorWidget(SkyEditorCapability skyEditorCapability) : Widget<S
                 ImBrio.AttachToolTip("Star Intensity");
 
                 ImBrio.VerticalPadding(5);
-                ImGui.Text("Moon Color and Moon Brightness:"u8);
+                ImBrio.SeparatorText("Moon Color and Moon Brightness");
 
                 ImBrio.CenterNextElementWithPadding(15);
                 didSkyChange2 |= ImGui.ColorEdit4("###moonColor"u8, ref env->EnvState.Stars.MoonColor);
@@ -68,7 +60,7 @@ public class SkyEditorWidget(SkyEditorCapability skyEditorCapability) : Widget<S
                 ImBrio.AttachToolTip("Moon Brightness");
 
                 ImBrio.VerticalPadding(5);
-                ImGui.Text("Constellations:"u8);
+                ImBrio.SeparatorText("Constellation Properties");
 
                 ImBrio.CenterNextElementWithPadding(15);
                 didSkyChange2 |= ImGui.SliderFloat("###constellationCount"u8, ref env->EnvState.Stars.ConstellationCount, 0.0f, 10.0f);
@@ -91,16 +83,11 @@ public class SkyEditorWidget(SkyEditorCapability skyEditorCapability) : Widget<S
             case 0:
                 ImBrio.VerticalPadding(3);
 
-                unlockPos = ImGui.GetCursorPos();
-                ImGui.Text("Sky:"u8);
-
-                var isSky = Capability.Environment.EnvironmentOverrideState.HasFlag(EnvironmentOverrideState.Sky);
-
-                preservedPOS = ImGui.GetCursorPos();
-                ImGui.SetCursorPos(unlockPos - new Vector2(0, 4));
-                if(ImBrio.FontIconButtonRight("###resetSky", FontAwesomeIcon.Redo, 1, "Reset Sky", bordered: false, enabled: isSky))
+                if(ImBrio.SeparatorTextButton("Sky", FontAwesomeIcon.Redo, "Reset All Sky Properties",
+                    Capability.Environment.EnvironmentOverrideState.HasFlag(EnvironmentOverrideState.Sky)))
+                {
                     Capability.Environment.EnvironmentOverrideState &= ~EnvironmentOverrideState.Sky;
-                ImGui.SetCursorPos(preservedPOS);
+                }
 
                 if(ImBrio.BorderedGameTex("##skyTexturePreview", _skyTextureSelector.GetTexturePath(env->EnvState.SkyTextureID)))
                 {
@@ -142,21 +129,16 @@ public class SkyEditorWidget(SkyEditorCapability skyEditorCapability) : Widget<S
                 if(didSkyChange)
                     Capability.Environment.EnvironmentOverrideState |= EnvironmentOverrideState.Sky;
 
-                ImGui.Separator();
                 ImBrio.VerticalPadding(5);
-                ImGui.Text("Ambient Lighting:"u8);
+
+                if(ImBrio.SeparatorTextButton("Ambient Lighting", FontAwesomeIcon.Redo, "Reset All Lighting Properties",
+                    Capability.Environment.EnvironmentOverrideState.HasFlag(EnvironmentOverrideState.EnvironmentLighting)))
+                {
+                    Capability.Environment.EnvironmentOverrideState &= ~EnvironmentOverrideState.EnvironmentLighting;
+                }
 
                 ImBrio.VerticalPadding(2);
-                unlockPos = ImGui.GetCursorPos();
-                ImGui.Text("Temperature & Saturation:"u8);
-
-                var isLighting = Capability.Environment.EnvironmentOverrideState.HasFlag(EnvironmentOverrideState.EnvironmentLighting);
-
-                preservedPOS = ImGui.GetCursorPos();
-                ImGui.SetCursorPos(unlockPos - new Vector2(0, 4));
-                if(ImBrio.FontIconButtonRight("###resetLight", FontAwesomeIcon.Redo, 1, "Reset Lighting", bordered: false, enabled: isLighting))
-                    Capability.Environment.EnvironmentOverrideState &= ~EnvironmentOverrideState.EnvironmentLighting;
-                ImGui.SetCursorPos(preservedPOS);
+                ImBrio.SeparatorText("Temperature & Saturation");
 
                 ImBrio.CenterNextElementWithPadding(15);
                 var didSkyChange3 = ImGui.SliderFloat("###temperatureColor"u8, ref env->EnvState.EnvironmentLighting.AmbientTemperature, -2.5f, 2.5f);
@@ -167,14 +149,14 @@ public class SkyEditorWidget(SkyEditorCapability skyEditorCapability) : Widget<S
                 ImBrio.AttachToolTip("Ambient Saturation Color");
 
                 ImBrio.VerticalPadding(5);
-                ImGui.Text("Ambient Color:"u8);
+                ImBrio.SeparatorText("Ambient Color");
 
                 ImBrio.CenterNextElementWithPadding(15);
                 didSkyChange3 |= ImGui.ColorEdit3("##ambientColor"u8, ref env->EnvState.EnvironmentLighting.AmbientColor);
                 ImBrio.AttachToolTip("Ambient Color");
 
                 ImBrio.VerticalPadding(5);
-                ImGui.Text("Sunlight & Moonlight Color:"u8);
+                ImBrio.SeparatorText("Sunlight & Moonlight Color");
 
                 ImBrio.CenterNextElementWithPadding(15);
                 didSkyChange3 |= ImGui.ColorEdit3("###sunlightColor"u8, ref env->EnvState.EnvironmentLighting.SunlightColor);
@@ -193,17 +175,12 @@ public class SkyEditorWidget(SkyEditorCapability skyEditorCapability) : Widget<S
             case 2:
 
                 ImBrio.VerticalPadding(3);
-
-                unlockPos = ImGui.GetCursorPos();
-                ImGui.Text("Cloud:"u8);
-
-                var isClouds = Capability.Environment.EnvironmentOverrideState.HasFlag(EnvironmentOverrideState.Clouds);
-
-                preservedPOS = ImGui.GetCursorPos();
-                ImGui.SetCursorPos(unlockPos - new Vector2(0, 4));
-                if(ImBrio.FontIconButtonRight("###resetClouds", FontAwesomeIcon.Redo, 1, "Reset Clouds", bordered: false, enabled: isClouds))
+           
+                if(ImBrio.SeparatorTextButton("Cloud", FontAwesomeIcon.Redo, "Reset All Cloud Properties",
+                    Capability.Environment.EnvironmentOverrideState.HasFlag(EnvironmentOverrideState.Clouds)))
+                {
                     Capability.Environment.EnvironmentOverrideState &= ~EnvironmentOverrideState.Clouds;
-                ImGui.SetCursorPos(preservedPOS);
+                }
 
                 if(ImBrio.BorderedGameTex("##cloudTexturePreview", _cloudTextureSelector.GetTexturePath(env->EnvState.Clouds.CloudTexture)))
                 {
@@ -269,7 +246,7 @@ public class SkyEditorWidget(SkyEditorCapability skyEditorCapability) : Widget<S
                 didSkyChange4 |= ImGui.InputUInt("###CloudSideTexture"u8, ref env->EnvState.Clouds.CloudSideTexture);
                 ImBrio.AttachToolTip("Cloud Side Texture ID");
 
-                ImGui.Text("Cloud Color:"u8);
+                ImBrio.SeparatorText("Cloud Color");
 
                 ImBrio.CenterNextElementWithPadding(15);
                 didSkyChange4 |= ImGui.ColorEdit3("###leftCloudColor", ref env->EnvState.Clouds.CloudColor1);
@@ -280,7 +257,7 @@ public class SkyEditorWidget(SkyEditorCapability skyEditorCapability) : Widget<S
                 ImBrio.AttachToolTip("Cloud Side Color");
 
                 ImBrio.VerticalPadding(5);
-                ImGui.Text("Other Cloud Properties:"u8);
+                ImBrio.SeparatorText("Cloud Other");
 
                 ImBrio.CenterNextElementWithPadding(15);
                 didSkyChange4 |= ImGui.SliderFloat("###gradientStop", ref env->EnvState.Clouds.ShadowStop, 0.0f, 2.0f);

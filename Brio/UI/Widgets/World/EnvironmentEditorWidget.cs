@@ -26,24 +26,16 @@ public class EnvironmentEditorWidget(EnvironmentEditorCapability capability) : W
         var env = BrioEnvManager.Instance();
         if(env == null) return;
 
-        Vector2 unlockPos;
-        Vector2 preservedPOS;
-
         switch(selected)
         {
             case 0:
                 ImBrio.VerticalPadding(3);
 
-                unlockPos = ImGui.GetCursorPos();
-                ImGui.Text("Particle Texture:"u8);
-
-                var isParticles = Capability.Environment.EnvironmentOverrideState.HasFlag(EnvironmentOverrideState.Particles);
-
-                preservedPOS = ImGui.GetCursorPos();
-                ImGui.SetCursorPos(unlockPos - new Vector2(0, 4));
-                if(ImBrio.FontIconButtonRight("###resetParticles", FontAwesomeIcon.Redo, 1, "Reset Particles", bordered: false, enabled: isParticles))
+                if(ImBrio.SeparatorTextButton("Particles", FontAwesomeIcon.Redo, "Reset All Particle Properties", 
+                     Capability.Environment.EnvironmentOverrideState.HasFlag(EnvironmentOverrideState.Particles)))
+                {
                     Capability.Environment.EnvironmentOverrideState &= ~EnvironmentOverrideState.Particles;
-                ImGui.SetCursorPos(preservedPOS);
+                }
 
                 var path = $"bgcommon/nature/dust/texture/dust_{Math.Max(0, env->EnvState.Particles.TextureId - 2):D3}.tex";
                 if(ImBrio.BorderedGameTex("##particleTexturePreview", path))
@@ -80,7 +72,7 @@ public class EnvironmentEditorWidget(EnvironmentEditorCapability capability) : W
                 ImBrio.AttachToolTip("Particle Texture ID");
 
                 ImBrio.VerticalPadding(5);
-                ImGui.Text("Particle Properties:"u8);
+                ImBrio.SeparatorText("Particle Properties");
 
                 ImBrio.CenterNextElementWithPadding(15);
                 didParticlesChange |= ImGui.SliderFloat("###particleIntensity"u8, ref env->EnvState.Particles.Intensity, 0.0f, 1.0f);
@@ -99,7 +91,7 @@ public class EnvironmentEditorWidget(EnvironmentEditorCapability capability) : W
                 ImBrio.AttachToolTip("Particle Glow");
 
                 ImBrio.VerticalPadding(5);
-                ImGui.Text("Particle Sub-Properties:"u8);
+                ImBrio.SeparatorText("Particle Sub-Properties");
 
                 ImBrio.CenterNextElementWithPadding(15);
                 didParticlesChange |= ImGui.SliderFloat("###particleSpread"u8, ref env->EnvState.Particles.Spread, 0.0f, 10.0f);
@@ -126,16 +118,11 @@ public class EnvironmentEditorWidget(EnvironmentEditorCapability capability) : W
             case 1:
                 ImBrio.VerticalPadding(3);
 
-                unlockPos = ImGui.GetCursorPos();
-                ImGui.Text("Rain Properties:"u8);
-
-                var isRain = Capability.Environment.EnvironmentOverrideState.HasFlag(EnvironmentOverrideState.Rain);
-
-                preservedPOS = ImGui.GetCursorPos();
-                ImGui.SetCursorPos(unlockPos - new Vector2(0, 4));
-                if(ImBrio.FontIconButtonRight("###resetRain", FontAwesomeIcon.Redo, 1, "Reset Rain", bordered: false, enabled: isRain))
+                if(ImBrio.SeparatorTextButton("Rain", FontAwesomeIcon.Redo, "Reset All Rain Properties",
+                    Capability.Environment.EnvironmentOverrideState.HasFlag(EnvironmentOverrideState.Rain)))
+                {
                     Capability.Environment.EnvironmentOverrideState &= ~EnvironmentOverrideState.Rain;
-                ImGui.SetCursorPos(preservedPOS);
+                }
 
                 ImBrio.CenterNextElementWithPadding(15);
                 var didRainChange = ImGui.SliderFloat("###rainIntensity"u8, ref env->EnvState.Rain.Intensity, 0.0f, 1.0f);
@@ -150,15 +137,15 @@ public class EnvironmentEditorWidget(EnvironmentEditorCapability capability) : W
                 ImBrio.AttachToolTip("Rain Weight");
 
                 ImBrio.VerticalPadding(5);
-                ImGui.Text("Color:"u8);
+                ImBrio.SeparatorText("Color");
 
                 ImBrio.CenterNextElementWithPadding(15);
                 didRainChange |= ImGui.ColorEdit4("###rainColor"u8, ref env->EnvState.Rain.Color);
                 ImBrio.AttachToolTip("Rain Color");
 
                 ImBrio.VerticalPadding(5);
-                ImGui.Text("Advanced:"u8);
-
+                ImBrio.SeparatorText("Advanced");
+         
                 ImBrio.CenterNextElementWithPadding(15);
                 didRainChange |= ImGui.SliderFloat("###rainScattering"u8, ref env->EnvState.Rain.Scatter, 0.0f, 10.0f);
                 ImBrio.AttachToolTip("Rain Scattering");
@@ -175,17 +162,12 @@ public class EnvironmentEditorWidget(EnvironmentEditorCapability capability) : W
                 break;
             case 2:
                 ImBrio.VerticalPadding(3);
-
-                unlockPos = ImGui.GetCursorPos();
-                ImGui.Text("Wind, Direction / Angle / Speed"u8);
-
-                var isWind = Capability.Environment.EnvironmentOverrideState.HasFlag(EnvironmentOverrideState.Wind);
-
-                preservedPOS = ImGui.GetCursorPos();
-                ImGui.SetCursorPos(unlockPos - new Vector2(0, 4));
-                if(ImBrio.FontIconButtonRight("###resetWind", FontAwesomeIcon.Redo, 1, "Reset Wind", bordered: false, enabled: isWind))
+               
+                if(ImBrio.SeparatorTextButton("Wind", FontAwesomeIcon.Redo, "Reset All Rain Properties",
+                    Capability.Environment.EnvironmentOverrideState.HasFlag(EnvironmentOverrideState.Wind)))
+                {
                     Capability.Environment.EnvironmentOverrideState &= ~EnvironmentOverrideState.Wind;
-                ImGui.SetCursorPos(preservedPOS);
+                }
 
                 ImBrio.CenterNextElementWithPadding(15);
                 var didWindChange = ImBrio.SliderAngle("###windDirectionu", ref env->EnvState.Wind.Direction, 0.0f, MathF.PI);
@@ -207,17 +189,12 @@ public class EnvironmentEditorWidget(EnvironmentEditorCapability capability) : W
                 break;
             case 3:
                 ImBrio.VerticalPadding(3);
-
-                unlockPos = ImGui.GetCursorPos();
-                ImGui.Text("Fog Properties:"u8);
-
-                var isFog = Capability.Environment.EnvironmentOverrideState.HasFlag(EnvironmentOverrideState.Fog);
-
-                preservedPOS = ImGui.GetCursorPos();
-                ImGui.SetCursorPos(unlockPos - new Vector2(0, 4));
-                if(ImBrio.FontIconButtonRight("###resetFog", FontAwesomeIcon.Redo, 1, "Reset Fog", bordered: false, enabled: isFog))
+            
+                if(ImBrio.SeparatorTextButton("Fog", FontAwesomeIcon.Redo, "Reset All Fog Properties",
+                     Capability.Environment.EnvironmentOverrideState.HasFlag(EnvironmentOverrideState.Fog)))
+                {
                     Capability.Environment.EnvironmentOverrideState &= ~EnvironmentOverrideState.Fog;
-                ImGui.SetCursorPos(preservedPOS);
+                }
 
                 ImBrio.CenterNextElementWithPadding(15);
                 var didFogChange = ImGui.ColorEdit4("###fogColor"u8, ref env->EnvState.Fog.Color);
@@ -236,7 +213,7 @@ public class EnvironmentEditorWidget(EnvironmentEditorCapability capability) : W
                 ImBrio.AttachToolTip("Fog Opacity");
 
                 ImBrio.VerticalPadding(5);
-                ImGui.Text("Sky Opacity & Smoothness"u8);
+                ImBrio.SeparatorText("Sky Opacity & Smoothness");
 
                 ImBrio.CenterNextElementWithPadding(15);
                 didFogChange |= ImGui.SliderFloat("###skyOpacity"u8, ref env->EnvState.Fog.SkyOpacity, 0.0f, 10f);
