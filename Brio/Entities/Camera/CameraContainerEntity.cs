@@ -1,7 +1,10 @@
-﻿using Brio.Capabilities.Camera;
+﻿using Brio.Capabilities.Actor;
+using Brio.Capabilities.Camera;
 using Brio.Entities.Core;
+using Brio.Game.Actor;
 using Brio.Game.Camera;
 using Brio.Game.Input;
+using Brio.Game.World;
 using Brio.UI.Controls.Editors;
 using Brio.UI.Controls.Stateless;
 using Brio.UI.Theming;
@@ -16,15 +19,17 @@ namespace Brio.Entities.Camera;
 public class CameraContainerEntity(IServiceProvider provider) : Entity("cameras", provider)
 {
     private readonly VirtualCameraManager _virtualCameraManager = provider.GetRequiredService<VirtualCameraManager>();
+    private readonly ActorSpawnService _actorSpawnService = provider.GetRequiredService<ActorSpawnService>();
     private readonly GameInputService _gameInputService = provider.GetRequiredService<GameInputService>();
+    private readonly LightingService _lightingService = provider.GetRequiredService<LightingService>();
 
-    public override string FriendlyName => "Cameras";
+    public override string FriendlyName => "Entities";
 
-    public override FontAwesomeIcon Icon => FontAwesomeIcon.Camera;
+    public override FontAwesomeIcon Icon => FontAwesomeIcon.GroupArrowsRotate;
 
     public override int ContextButtonCount => 2;
 
-    public override EntityFlags Flags => EntityFlags.DefaultOpen | EntityFlags.HasContextButton;
+    public override EntityFlags Flags => EntityFlags.HasContextButton;
 
     public override void DrawContextButton()
     {
@@ -39,15 +44,16 @@ public class CameraContainerEntity(IServiceProvider provider) : Entity("cameras"
 
             ImGui.SameLine();
 
-            string toolTip = $"New Camera";
+            string toolTip = $"New...";
+
             if(ImBrio.FontIconButtonRight($"###{Id}_cameras_contextButton", FontAwesomeIcon.Plus, 1f, toolTip, bordered: false))
             {
-                ImGui.OpenPopup("DrawSpawnMenuPopup");
+                ImGui.OpenPopup("UnifiedSpawnMenuPopup");
             }
-            CameraEditor.DrawSpawnMenu(_virtualCameraManager);
+
+            SpawnMenuEditor.DrawUnifiedSpawnMenu(_actorSpawnService, _virtualCameraManager, _lightingService);
         }
     }
-
     public override void OnAttached()
     {
         AddCapability(ActivatorUtilities.CreateInstance<CameraContainerCapability>(_serviceProvider, this));
