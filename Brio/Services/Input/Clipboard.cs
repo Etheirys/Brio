@@ -8,27 +8,31 @@
 //
 //
 
+using Brio.Core;
 using Brio.UI.Controls.Stateless;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface.Utility.Raii;
-using Newtonsoft.Json;
 using System;
 using System.IO;
 using System.IO.Compression;
 using System.Numerics;
+using System.Runtime.InteropServices;
 using System.Text;
 
 namespace Brio.Input;
 
-public static class ClipboardServices
+public static class Clipboard
 {
     // Compress any type to a base64 encoding of its compressed json representation, prepended with a version byte.
     // Returns an empty string on failure.
     public static unsafe string ToCompressedBase64<T>(T data, byte version)
     {
+        if(data is null)
+            return string.Empty;
+
         try
         {
-            var json = JsonConvert.SerializeObject(data, Formatting.None);
+            var json = JsonSerializer.Serialize(data);
             var bytes = Encoding.UTF8.GetBytes(json);
             using var compressedStream = new MemoryStream();
             using(var zipStream = new GZipStream(compressedStream, CompressionMode.Compress))
@@ -60,7 +64,7 @@ public static class ClipboardServices
             bytes = resultStream.ToArray();
             version = bytes[0];
             var json = Encoding.UTF8.GetString(bytes, 1, bytes.Length - 1);
-            data = JsonConvert.DeserializeObject<T>(json);
+            data = JsonSerializer.Deserialize<T>(json);
         }
         catch
         {
