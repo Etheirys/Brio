@@ -66,21 +66,21 @@ public static partial class ImBrio
 
         if(isExpanded && enableExpanded)
         {
-            ImGui.PushStyleColor(ImGuiCol.FrameBg, UIConstants.GizmoRed);
+            ImGui.PushStyleColor(ImGuiCol.Border, UIConstants.GizmoRed);
 
             float x = vectorValue.X;
             (var pdidChange, var panyActive) = DragFloat($"###{label}_x", ref x, step, $"{tooltip} X");
             vectorValue.X = x;
 
             ImGui.PopStyleColor();
-            ImGui.PushStyleColor(ImGuiCol.FrameBg, UIConstants.GizmoGreen);
+            ImGui.PushStyleColor(ImGuiCol.Border, UIConstants.GizmoGreen);
 
             float y = vectorValue.Y;
             (var rdidChange, var ranyActive) = DragFloat($"###{label}_y", ref y, step, $"{tooltip} Y");
             vectorValue.Y = y;
 
             ImGui.PopStyleColor();
-            ImGui.PushStyleColor(ImGuiCol.FrameBg, UIConstants.GizmoBlue);
+            ImGui.PushStyleColor(ImGuiCol.Border, UIConstants.GizmoBlue);
 
             float z = vectorValue.Z;
             (var sdidChange, var sanyActive) = DragFloat($"###{label}_z", ref z, step, $"{tooltip} Z");
@@ -124,9 +124,9 @@ public static partial class ImBrio
 
         float pillWidth = 3;
         float pillHeight = 24;
-     
+
         float entryWidth = ((size.X - (ImGui.GetStyle().ItemSpacing.X * 2)) / 3) - ((pillWidth * ImGuiHelpers.GlobalScale) * 3);
-     
+
         ImDrawListPtr dl = ImGui.GetWindowDrawList();
 
         PillDummyBox(ref dl, pillWidth, pillHeight, UIConstants.GizmoRed);
@@ -178,7 +178,7 @@ public static partial class ImBrio
         active |= ImGui.IsItemActive();
 
         ImGui.SameLine();
-        
+
         PillDummyBox(ref dl, pillWidth, pillHeight, UIConstants.GizmoBlue);
 
         ImGui.SameLine();
@@ -219,7 +219,7 @@ public static partial class ImBrio
 
         float buttonWidth = 32;
         ImGui.SetNextItemWidth(buttonWidth);
-        if(ImGui.Button($"◀ ###{label}_decrease", new Vector2(25 * ImGuiHelpers.GlobalScale)))
+        if(FontIconButton(FontAwesomeIcon.ChevronLeft, new Vector2(25 * ImGuiHelpers.GlobalScale)))
         {
             value -= step;
             changed = true;
@@ -232,16 +232,15 @@ public static partial class ImBrio
         bool hasLabel = !label.StartsWith("##");
 
         if(hasLabel)
-        {
             ImGui.SetNextItemWidth((ImGui.GetWindowWidth() * 0.65f) - (buttonWidth * 2) - ImGui.GetStyle().CellPadding.X);
-        }
         else
-        {
             ImGui.SetNextItemWidth(GetRemainingWidth() - buttonWidth + ImGui.GetStyle().ItemSpacing.X);
-        }
 
-        changed |= ImGui.DragFloat($"##{label}_drag", ref value, step / 10.0f);
-        active |= ImGui.IsItemActive();
+        using(ImRaii.PushStyle(ImGuiStyleVar.FrameBorderSize, 1f))
+        {
+            changed |= ImGui.DragFloat($"##{label}_drag", ref value, step / 10.0f);
+            active |= ImGui.IsItemActive();
+        }
 
         if(ImGui.IsItemHovered())
         {
@@ -259,7 +258,7 @@ public static partial class ImBrio
 
         ImGui.SameLine();
         ImGui.SetNextItemWidth(buttonWidth);
-        if(ImGui.Button($"▶ ###{label}_increase", new Vector2(25 * ImGuiHelpers.GlobalScale)))
+        if(FontIconButton(FontAwesomeIcon.ChevronRight, new Vector2(25 * ImGuiHelpers.GlobalScale)))
         {
             value += step;
             changed = true;
@@ -290,7 +289,7 @@ public static partial class ImBrio
 
         float buttonWidth = 32 * ImGuiHelpers.GlobalScale;
         ImGui.SetNextItemWidth(buttonWidth);
-        if(ImGui.Button($"◀ ###{label}_decrease", new Vector2(25 * ImGuiHelpers.GlobalScale)))
+        if(FontIconButton(FontAwesomeIcon.ChevronLeft, new Vector2(25 * ImGuiHelpers.GlobalScale)))
         {
             if(value - step <= min)
             {
@@ -364,7 +363,7 @@ public static partial class ImBrio
 
         ImGui.SameLine();
         ImGui.SetNextItemWidth(buttonWidth);
-        if(ImGui.Button($"▶ ###{label}_increase", new Vector2(25 * ImGuiHelpers.GlobalScale)))
+        if(FontIconButton(FontAwesomeIcon.ChevronRight, new Vector2(25 * ImGuiHelpers.GlobalScale)))
         {
             if(value + step >= max)
             {
