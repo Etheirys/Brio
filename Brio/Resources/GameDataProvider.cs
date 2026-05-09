@@ -38,6 +38,7 @@ public class GameDataProvider
     public readonly IReadOnlyDictionary<uint, BrioHairMakeType> HairMakeTypes;
     public readonly IReadOnlyDictionary<uint, Item> Items;
     public readonly IReadOnlyDictionary<uint, Glasses> Glasses;
+    public readonly IReadOnlyDictionary<uint, TerritoryType> TerritoryType;
 
     public readonly ModelDatabase ModelDatabase;
 
@@ -92,6 +93,8 @@ public class GameDataProvider
         Items = dataManager.GetExcelSheet<Item>()!.ToDictionary(x => x.RowId, x => x).AsReadOnly();
 
         Glasses = dataManager.GetExcelSheet<Glasses>()!.ToDictionary(x => x.RowId, x => x).AsReadOnly();
+
+        TerritoryType = dataManager.GetExcelSheet<TerritoryType>()!.ToDictionary(x => x.RowId, x => x).AsReadOnly();
 
         HumanData = new HumanData(dataManager.GetFile("chara/xls/charamake/human.cmp")!.Data);
 
