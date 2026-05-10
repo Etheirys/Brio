@@ -3,20 +3,21 @@
 // Brio's lights would not be possible without the help of the following projects:
 // Massive Help with Dynamis: https://github.com/Exter-N/Dynamis by Exter-N (Ny)
 // LightsCameraAction: https://github.com/NeNeppie/LightsCameraAction by NeNeppie
-// ZoomTilt https://github.com/Tenrys/ZoomTilt
-// Some signatures from Ktisis: https://github.com/ktisis-tools/Ktisis
 //
 
 using Brio.Core;
 using Brio.Entities;
+using Brio.Entities.Core;
 using Brio.Entities.World;
 using Brio.Game.Camera;
 using Brio.Game.GPose;
+using Brio.Services;
 using Dalamud.Bindings.ImGuizmo;
 using Dalamud.Hooking;
 using Dalamud.Plugin.Services;
 using FFXIVClientStructs.FFXIV.Client.Game.Event;
 using FFXIVClientStructs.FFXIV.Client.Graphics.Scene;
+using InteropGenerator.Runtime;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
@@ -25,14 +26,12 @@ using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
+using StructsAABounds = FFXIVClientStructs.FFXIV.Common.Math.AxisAlignedBounds;
 using StructsTransforms = FFXIVClientStructs.FFXIV.Client.Graphics.Transform;
 
 namespace Brio.Game.World;
 
-
-// TODO (Ken) Separate this file's types into their own files
-
-public unsafe class LightingService : IDisposable
+public unsafe class LightingService : MediatorSubscriberBase
 {
     public LightGizmoOperation Operation { get; set; } = LightGizmoOperation.Universal;
     public LightGizmoCoordinateMode CoordinateMode { get; set; } = LightGizmoCoordinateMode.Local;
@@ -41,24 +40,21 @@ public unsafe class LightingService : IDisposable
 
     private readonly IFramework _framework;
     private readonly IServiceProvider _serviceProvider;
+    private readonly IGameInteropProvider _hooks;
     private readonly GPoseService _gPoseService;
     private readonly EntityManager _entityManager;
     private readonly VirtualCameraManager _virtualCameraManager;
 
-    // Spawn Lights
-    private readonly unsafe delegate* unmanaged<GameLight*, void> _spawnGameLight;
-    private readonly unsafe delegate* unmanaged<GameLight*, void> _spawnGameLightCreate;
-    private readonly unsafe delegate* unmanaged<GameLight*, void> _spawnGameLightFinalize;
+    private readonly delegate* unmanaged<EventGPoseControllerEX*, uint, char> _toggleGPoseLight;
+    private readonly delegate* unmanaged<LightType, CStringPointer, BrioLight*, BrioLight*> _createGameLight;
 
-    // Update Lights
-    private readonly unsafe delegate* unmanaged<LightRenderObject*, char, void> _updateGameLightRange;
-    private readonly unsafe delegate* unmanaged<GameLight*, void> _updateGameLightCulling;
-    private readonly unsafe delegate* unmanaged<GameLight*, void> _updateGameLightMaterial;
+    private delegate BrioLight* LightDelegate(BrioLight* light);
+    private readonly Hook<LightDelegate> _lightCtorHook = null!;
 
-    private delegate bool ToggleLightDelegate(EventGPoseControllerEX* state, uint index);
-    private readonly Hook<ToggleLightDelegate> _toggleLightHook = null!;
+    public delegate* unmanaged<BrioLight*, bool, void> Destructor;
 
-    private readonly unsafe delegate* unmanaged<EventGPoseControllerEX*, uint, char> _toggleGPoseLight;
+    private delegate void LightDtorDelegate(BrioLight* thisPtr, bool free);
+    private Hook<LightDtorDelegate> _lightDtorHook = null!;
 
     //
     //
@@ -66,7 +62,7 @@ public unsafe class LightingService : IDisposable
     private readonly ComponentSet<IGameLight> _spawnedLights = [];
     private readonly ComponentSet<LightEntity> _lightEntities = [];
 
-    public unsafe EventGPoseControllerEX* CurrentGPoseState => (EventGPoseControllerEX*)&EventFramework.Instance()->EventSceneModule.EventGPoseController;
+    public EventGPoseControllerEX* CurrentGPoseState => (EventGPoseControllerEX*)&EventFramework.Instance()->EventSceneModule.EventGPoseController;
 
     public int SpawnedLightEntitiesCount => _lightEntities.ActiveCount;
     public List<LightEntity> SpawnedLightEntities => [.. _lightEntities];
@@ -77,114 +73,102 @@ public unsafe class LightingService : IDisposable
 
     //
 
-    public unsafe LightingService(IServiceProvider serviceProvider, EntityManager entityManager, GPoseService gPoseService, VirtualCameraManager virtualCameraManager, IFramework framework, ISigScanner sigScanner, IGameInteropProvider hooks)
+    public LightingService(IServiceProvider serviceProvider, EntityManager entityManager, GPoseService gPoseService, VirtualCameraManager virtualCameraManager, IFramework framework, ISigScanner sigScanner, IGameInteropProvider hooks, Mediator mediator) : base(mediator)
     {
         _serviceProvider = serviceProvider;
         _gPoseService = gPoseService;
         _entityManager = entityManager;
         _virtualCameraManager = virtualCameraManager;
         _framework = framework;
+        _hooks = hooks;
 
-        var spawnGameLightAddress = sigScanner.ScanText("E8 ?? ?? ?? ?? 48 89 84 ?? ?? ?? ?? ?? 48 85 C0 0F ?? ?? ?? ?? ?? 48 8B C8");
-        _spawnGameLight = (delegate* unmanaged<GameLight*, void>)spawnGameLightAddress;
-
-        var createGameLightAddress = sigScanner.ScanText("E8 ?? ?? ?? ?? 48 8B 0D ?? ?? ?? ?? 48 8B D3 E8 ?? ?? ?? ?? 48 8B CB E8 ?? ?? ?? ?? 48 8B ?? ?? ?? ?? ?? 40 0F");
-        _spawnGameLightCreate = (delegate* unmanaged<GameLight*, void>)createGameLightAddress;
-
-        var finalizeGameLightAddress = sigScanner.ScanText("F6 41 38 01 ?? ?? 48 8B ?? ?? ?? ?? ?? 48");
-        _spawnGameLightFinalize = (delegate* unmanaged<GameLight*, void>)finalizeGameLightAddress;
-
-        var updateGameLightTypeRangeAddress = sigScanner.ScanText("E8 ?? ?? ?? ?? 48 8D 8F ?? ?? ?? ?? FF 15 ?? ?? ?? ?? 48 8D 8F ?? ?? ?? ?? 48 8D 55");
-        _updateGameLightRange = (delegate* unmanaged<LightRenderObject*, char, void>)updateGameLightTypeRangeAddress;
-
-        var updateGameLightCullingAddress = sigScanner.ScanText("48 89 5C 24 ?? 57 48 83 EC 40 48 8B B9 ?? ?? ?? ??");
-        _updateGameLightCulling = (delegate* unmanaged<GameLight*, void>)updateGameLightCullingAddress;
-
-        var updateGameLightMaterialAddress = sigScanner.ScanText("40 53 48 83 EC 20 0F B6 81 ?? ?? ?? ?? 48 8B D9 A8 04 75 45 0C 04 B2 05");
-        _updateGameLightMaterial = (delegate* unmanaged<GameLight*, void>)updateGameLightMaterialAddress;
+        var createGameLightAddress = sigScanner.ScanText("48 89 5C 24 ?? 57 48 83 EC 20 49 8B D8 8B F9");   // Light.Create
+        _createGameLight = (delegate* unmanaged<LightType, CStringPointer, BrioLight*, BrioLight*>)createGameLightAddress;
 
         var toggleLightHookAddress = sigScanner.ScanText("48 83 EC 28 4C 8B C1 83 FA 03 ?? ?? 8B C2");
-
         _toggleGPoseLight = (delegate* unmanaged<EventGPoseControllerEX*, uint, char>)toggleLightHookAddress;
 
-        _toggleLightHook = hooks.HookFromAddress<ToggleLightDelegate>(toggleLightHookAddress, ToggleLightDetour);
-        _toggleLightHook.Enable();
+        var _lightCtorAddress = sigScanner.ScanText("E8 ?? ?? ?? ?? 48 89 84 ?? ?? ?? ?? ?? 48 85 C0 0F ?? ?? ?? ?? ?? 48 8B C8");   // Light.ctor
+        _lightCtorHook = hooks.HookFromAddress<LightDelegate>(_lightCtorAddress, LightCtor);
+        _lightCtorHook.Enable();
 
         _gPoseService.OnGPoseStateChange += OnGPoseStateChange;
         _framework.Update += OnFrameworkUpdate;
     }
 
-    public char ToggleGPoseLight(EventGPoseControllerEX* ptr, uint index) => _toggleGPoseLight(ptr, index);
+    public char ToggleGPoseLight(EventGPoseControllerEX* ptr, uint index)
+        => _toggleGPoseLight(ptr, index);
 
-    public unsafe bool ToggleLightDetour(EventGPoseControllerEX* state, uint index)
+    public BrioLight* LightCtor(BrioLight* light)
     {
-        //
-        // This is using a similar method that Ktisis' uses for a OnGposeLightToggle
-        // It has issues like when using the Gpose Load/Save light preset it will desync from Brio
-        // This is because this only fires when you "click" the light toggle buttons in Gpose
-        //
+        Brio.Log.Debug($"Light Created at address: {(nint)light}");
+        var value = _lightCtorHook.Original(light);
 
-        var result = _toggleLightHook.Original(state, index);
-
-        try
+        if(Destructor == null)
         {
-            var gposeLight = state->GetLight(index);
-
-            if(gposeLight != null)
-            {
-                Light light = new(gposeLight, gposeLight->Transform.Position, gposeLight->Transform.Rotation, gposeLight->Transform.Scale)
+            Destructor = light->VirtualTable->Destructor;
+            _framework.RunOnTick(() =>
                 {
-                    IsGPoseLight = true,
-                    GposeLightIndex = index
-                };
-                light.SetIndex(_spawnedLights.Add(light));
+                    _lightDtorHook = _hooks.HookFromAddress<LightDtorDelegate>((nint)Destructor, LightDtor);
+                    _lightDtorHook.Enable();
+                });
+        }
 
-                SpawnGPoseLight(light);
-            }
-            else if(gposeLight == null)
+        if(_gPoseService.IsGPosing is false)
+            return value;
+
+        _framework.RunOnTick(() =>
+        {
+            var gposeController = (EventGPoseControllerEX*)&EventFramework.Instance()->EventSceneModule.EventGPoseController;
+            for(uint i = 0; i < 3; i++)
             {
-                var lightToRemove = _spawnedLights.AsEnumerable().FirstOrDefault(x => x.IsGPoseLight && x.GposeLightIndex == index);
-
-                if(lightToRemove is not null)
-                    RemoveGposeLight(lightToRemove);
+                var gposeLight = gposeController->GetLight(i);
+                if(gposeLight != null && (nint)gposeLight == (nint)light)
+                {
+                    Light blight = new(gposeLight, gposeLight->Transform.Position,
+                        gposeLight->Transform.Rotation, gposeLight->Transform.Scale)
+                    {
+                        IsGPoseLight = true,
+                        GposeLightIndex = i
+                    };
+                    blight.SetIndex(_spawnedLights.Add(blight));
+                    SpawnGPoseLight(blight);
+                    break;
+                }
             }
-        }
-        catch(Exception ex)
-        {
-            Brio.Log.Error(ex, "An Exception while trying to handle a Gpose light toggle");
-        }
+        }, delayTicks: 2);
 
-        return result;
+        return value;
     }
 
-    //
-
-    public void UpdateLight(GameLight* light)
+    public void LightDtor(BrioLight* light, bool free)
     {
-        if(light is not null)
+        Brio.Log.Debug($"Light Destroyed at address: {(nint)light}");
+
+        if(_gPoseService.IsGPosing is false)
         {
-            _updateGameLightCulling(light);
-            _updateGameLightMaterial(light);
+            _lightDtorHook.Original(light, free);
+
+            return;
         }
+
+        var lightToRemove = _spawnedLights.AsEnumerable()
+            .FirstOrDefault(x => x.IsGPoseLight && (nint)x.Address == (nint)light);
+
+        if(lightToRemove is not null)
+            RemoveGposeLight(lightToRemove);
+
+        _lightDtorHook.Original(light, free);
     }
 
-    public unsafe void SpawnGPoseLight(Light light)
+    public void SpawnGPoseLight(Light light)
     {
         LightEntity camEnt = ActivatorUtilities.CreateInstance<LightEntity>(_serviceProvider, light);
 
-        if(_entityManager.TryGetEntity("environment", out var ent))
-        {
-            _entityManager.AttachEntity(camEnt, ent);
-
-            light.SetEntityIndex(_lightEntities.Add(camEnt));
-        }
-        else
-        {
-            // TODO: Remove the light we just created if the entity is not found
-        }
+        CreateEntity(light);
     }
 
-    public unsafe void SpawnLight(LightType lightType)
+    public void SpawnLight(LightType lightType)
     {
         _framework.RunOnFrameworkThread(() =>
         {
@@ -193,37 +177,28 @@ public unsafe class LightingService : IDisposable
             Light light = new(gamelight, gamelight->Transform.Position, gamelight->Transform.Rotation, gamelight->Transform.Scale);
             light.SetIndex(_spawnedLights.Add(light));
 
-            UpdateLight(gamelight);
+            gamelight->Update();
 
-            LightEntity camEnt = ActivatorUtilities.CreateInstance<LightEntity>(_serviceProvider, light);
-
-            if(_entityManager.TryGetEntity("environment", out var ent))
-            {
-                _entityManager.AttachEntity(camEnt, ent);
-
-                light.SetEntityIndex(_lightEntities.Add(camEnt));
-            }
-            else
-            {
-                // TODO: Remove the light we just created if the entity is not found
-            }
+            CreateEntity(light);
 
             foreach(var gameLight in _spawnedLights.AsEnumerable())
             {
-                Brio.Log.Debug($"GameLight addres: {gameLight.Address}");
+                Brio.Log.Debug($"BrioLight addres: {gameLight.Address}");
             }
 
         });
     }
 
-    public unsafe GameLight* SpawnGameLight(LightType lightType)
+    public Entity CreateEntity(Light light)
     {
-        // This causes memory fragmentation over time I think, maybe we can implement a pooling system later?
-        GameLight* light = (GameLight*)NativeHelpers.AllocateAlignedMemory(sizeof(GameLight), 8).Aligned;
+        var entity = _entityManager.CreateEntityOnEntityContainer<LightEntity>(light);
+        light.SetEntityIndex(_lightEntities.Add(entity));
+        return entity;
+    }
 
-        _spawnGameLight(light);
-        _spawnGameLightCreate(light);
-        _spawnGameLightFinalize(light);
+    public BrioLight* SpawnGameLight(LightType lightType)
+    {
+        BrioLight* light = _createGameLight(lightType, null, null);
 
         if(_virtualCameraManager.CurrentCamera is not null)
         {
@@ -239,26 +214,26 @@ public unsafe class LightingService : IDisposable
             }
         }
 
-        if(light->LightRenderObject != null)
+        if(light->RenderLight != null)
         {
-            light->LightRenderObject->EmissionType = lightType;
-            light->LightRenderObject->Transform = &light->Transform;
-            light->LightRenderObject->LightFlags = LightFlags.Reflection;
+            light->RenderLight->EmissionType = lightType;
+            light->RenderLight->Transform = &light->Transform;
+            light->RenderLight->LightFlags = LightFlags.Reflection;
 
-            light->LightRenderObject->Color = new Vector3(20f);
-            light->LightRenderObject->Intensity = 1f;
+            light->RenderLight->Color = new Vector3(20f);
+            light->RenderLight->Intensity = 1f;
 
-            light->LightRenderObject->FalloffType = FalloffType.Quadratic;
-            light->LightRenderObject->Falloff = 1f;
-            light->LightRenderObject->LightAngle = 45.0f;
-            light->LightRenderObject->FalloffAngle = 0.5f;
+            light->RenderLight->FalloffType = FalloffType.Quadratic;
+            light->RenderLight->FalloffFactor = 1f;
+            light->RenderLight->SpotLightAngleDegrees = 45.0f;
+            light->RenderLight->AngularFalloffDegrees = 0.5f;
 
-            light->LightRenderObject->Range = 35;
-            light->LightRenderObject->Angle = Vector2.Zero;
+            light->RenderLight->Range = 35;
+            light->RenderLight->FlatLightSkewAngleDegrees = Vector2.Zero;
 
-            light->LightRenderObject->CharacterShadowRange = 110f;
-            light->LightRenderObject->ShadowPlaneNear = 0.01f;
-            light->LightRenderObject->ShadowPlaneFar = 17.0f;
+            light->RenderLight->CharacterShadowRange = 110f;
+            light->RenderLight->ShadowPlaneNear = 0.01f;
+            light->RenderLight->ShadowPlaneFar = 17.0f;
         }
 
         return light;
@@ -275,7 +250,7 @@ public unsafe class LightingService : IDisposable
         _framework.RunOnFrameworkThread(() =>
         {
             // Spawn a new GameLight
-            var clonedGameLight = SpawnGameLight(sourceLight.GameLight->LightRenderObject->EmissionType);
+            var clonedGameLight = SpawnGameLight(sourceLight.GameLight->RenderLight->EmissionType);
 
             Light clonedLight = new(clonedGameLight, clonedGameLight->Transform.Position, clonedGameLight->Transform.Rotation, clonedGameLight->Transform.Scale);
             clonedLight.SetIndex(_spawnedLights.Add(clonedLight));
@@ -284,36 +259,26 @@ public unsafe class LightingService : IDisposable
             clonedGameLight->Transform.Position = sourceLight.GameLight->Transform.Position;
             clonedGameLight->Transform.Rotation = sourceLight.GameLight->Transform.Rotation;
 
-            if(clonedGameLight->LightRenderObject != null && sourceLight.GameLight->LightRenderObject != null)
+            if(clonedGameLight->RenderLight != null && sourceLight.GameLight->RenderLight != null)
             {
-                clonedGameLight->LightRenderObject->Color = sourceLight.GameLight->LightRenderObject->Color;
-                clonedGameLight->LightRenderObject->Intensity = sourceLight.GameLight->LightRenderObject->Intensity;
-                clonedGameLight->LightRenderObject->Range = sourceLight.GameLight->LightRenderObject->Range;
-                clonedGameLight->LightRenderObject->Falloff = sourceLight.GameLight->LightRenderObject->Falloff;
-                clonedGameLight->LightRenderObject->LightAngle = sourceLight.GameLight->LightRenderObject->LightAngle;
-                clonedGameLight->LightRenderObject->FalloffAngle = sourceLight.GameLight->LightRenderObject->FalloffAngle;
-                clonedGameLight->LightRenderObject->CharacterShadowRange = sourceLight.GameLight->LightRenderObject->CharacterShadowRange;
-                clonedGameLight->LightRenderObject->ShadowPlaneNear = sourceLight.GameLight->LightRenderObject->ShadowPlaneNear;
-                clonedGameLight->LightRenderObject->ShadowPlaneFar = sourceLight.GameLight->LightRenderObject->ShadowPlaneFar;
+                clonedGameLight->RenderLight->Color = sourceLight.GameLight->RenderLight->Color;
+                clonedGameLight->RenderLight->Intensity = sourceLight.GameLight->RenderLight->Intensity;
+                clonedGameLight->RenderLight->Range = sourceLight.GameLight->RenderLight->Range;
+                clonedGameLight->RenderLight->FalloffFactor = sourceLight.GameLight->RenderLight->FalloffFactor;
+                clonedGameLight->RenderLight->SpotLightAngleDegrees = sourceLight.GameLight->RenderLight->SpotLightAngleDegrees;
+                clonedGameLight->RenderLight->AngularFalloffDegrees = sourceLight.GameLight->RenderLight->AngularFalloffDegrees;
+                clonedGameLight->RenderLight->CharacterShadowRange = sourceLight.GameLight->RenderLight->CharacterShadowRange;
+                clonedGameLight->RenderLight->ShadowPlaneNear = sourceLight.GameLight->RenderLight->ShadowPlaneNear;
+                clonedGameLight->RenderLight->ShadowPlaneFar = sourceLight.GameLight->RenderLight->ShadowPlaneFar;
             }
 
-            UpdateLight(clonedGameLight);
+            clonedGameLight->Update();
 
-            if(_entityManager.TryGetEntity("environment", out var ent))
-            {
-                var camEnt = ActivatorUtilities.CreateInstance<LightEntity>(_serviceProvider, clonedLight);
-                _entityManager.AttachEntity(camEnt, ent);
-
-                clonedLight.SetEntityIndex(_lightEntities.Add(camEnt));
-            }
-            else
-            {
-                // TODO: Remove the light we just created if the entity is not found
-            }
+            CreateEntity(clonedLight);
 
             foreach(var gameLight in _spawnedLights.AsEnumerable())
             {
-                Brio.Log.Debug($"Cloned GameLight address: {gameLight.Address}");
+                Brio.Log.Debug($"Cloned BrioLight address: {gameLight.Address}");
             }
         });
     }
@@ -334,16 +299,16 @@ public unsafe class LightingService : IDisposable
             {
                 AbsolutePosition = light.Position,
                 Rotation = light.Rotation,
-                Color = light.GameLight->LightRenderObject->Color,
-                Intensity = light.GameLight->LightRenderObject->Intensity,
-                Range = light.GameLight->LightRenderObject->Range,
-                Falloff = light.GameLight->LightRenderObject->Falloff,
-                LightAngle = light.GameLight->LightRenderObject->LightAngle,
-                FalloffAngle = light.GameLight->LightRenderObject->FalloffAngle,
-                CharacterShadowRange = light.GameLight->LightRenderObject->CharacterShadowRange,
-                ShadowPlaneNear = light.GameLight->LightRenderObject->ShadowPlaneNear,
-                ShadowPlaneFar = light.GameLight->LightRenderObject->ShadowPlaneFar,
-                LightType = light.GameLight->LightRenderObject->EmissionType
+                Color = light.GameLight->RenderLight->Color,
+                Intensity = light.GameLight->RenderLight->Intensity,
+                Range = light.GameLight->RenderLight->Range,
+                Falloff = light.GameLight->RenderLight->FalloffFactor,
+                LightAngle = light.GameLight->RenderLight->SpotLightAngleDegrees,
+                FalloffAngle = light.GameLight->RenderLight->AngularFalloffDegrees,
+                CharacterShadowRange = light.GameLight->RenderLight->CharacterShadowRange,
+                ShadowPlaneNear = light.GameLight->RenderLight->ShadowPlaneNear,
+                ShadowPlaneFar = light.GameLight->RenderLight->ShadowPlaneFar,
+                LightType = light.GameLight->RenderLight->EmissionType
             };
         }
         catch(Exception ex)
@@ -368,7 +333,7 @@ public unsafe class LightingService : IDisposable
 
             _framework.RunOnFrameworkThread(() =>
             {
-                GameLight* gameLight = igameLight.GameLight;
+                BrioLight* gameLight = igameLight.GameLight;
 
                 if(gameLight is null)
                     gameLight = SpawnGameLight(lightData.LightType);
@@ -380,31 +345,25 @@ public unsafe class LightingService : IDisposable
 
                 gameLight->Transform.Rotation = lightData.Rotation;
 
-                if(gameLight->LightRenderObject != null)
+                if(gameLight->RenderLight != null)
                 {
-                    gameLight->LightRenderObject->Color = lightData.Color;
-                    gameLight->LightRenderObject->Intensity = lightData.Intensity;
-                    gameLight->LightRenderObject->Range = lightData.Range;
-                    gameLight->LightRenderObject->Falloff = lightData.Falloff;
-                    gameLight->LightRenderObject->LightAngle = lightData.LightAngle;
-                    gameLight->LightRenderObject->FalloffAngle = lightData.FalloffAngle;
-                    gameLight->LightRenderObject->CharacterShadowRange = lightData.CharacterShadowRange;
-                    gameLight->LightRenderObject->ShadowPlaneNear = lightData.ShadowPlaneNear;
-                    gameLight->LightRenderObject->ShadowPlaneFar = lightData.ShadowPlaneFar;
+                    gameLight->RenderLight->Color = lightData.Color;
+                    gameLight->RenderLight->Intensity = lightData.Intensity;
+                    gameLight->RenderLight->Range = lightData.Range;
+                    gameLight->RenderLight->FalloffFactor = lightData.Falloff;
+                    gameLight->RenderLight->SpotLightAngleDegrees = lightData.LightAngle;
+                    gameLight->RenderLight->AngularFalloffDegrees = lightData.FalloffAngle;
+                    gameLight->RenderLight->CharacterShadowRange = lightData.CharacterShadowRange;
+                    gameLight->RenderLight->ShadowPlaneNear = lightData.ShadowPlaneNear;
+                    gameLight->RenderLight->ShadowPlaneFar = lightData.ShadowPlaneFar;
                 }
 
-                UpdateLight(gameLight);
+                gameLight->Update();
 
                 var light = new Light(gameLight, gameLight->Transform.Position, gameLight->Transform.Rotation, gameLight->Transform.Scale);
                 light.SetIndex(_spawnedLights.Add(light));
 
-                if(_entityManager.TryGetEntity("environment", out var ent))
-                {
-                    var camEnt = ActivatorUtilities.CreateInstance<LightEntity>(_serviceProvider, light);
-                    _entityManager.AttachEntity(camEnt, ent);
-
-                    light.SetEntityIndex(_lightEntities.Add(camEnt));
-                }
+                CreateEntity(light);
             });
 
             Brio.Log.Info($"Light loaded from {igameLight.Index}");
@@ -417,25 +376,25 @@ public unsafe class LightingService : IDisposable
 
     //
 
-    public unsafe void RemoveGposeLight(IGameLight light)
+    public void RemoveGposeLight(IGameLight light)
     {
         _spawnedLights.Remove(light.Index);
 
         _framework.RunOnFrameworkThread(() =>
         {
-            if(light.IsValid && _entityManager.TryGetEntity("environment", out var ent))
+            if(light.IsValid)
             {
                 var camEnt = _lightEntities.Components[light.Index];
                 if(camEnt is not null)
                 {
-                    ent.RemoveChild(camEnt);
+                    _entityManager.RemoveEntityFromEntityContainer(camEnt);
                     _lightEntities.Remove(light.Index);
                 }
             }
         });
     }
 
-    public unsafe void Destroy(IGameLight light)
+    public void Destroy(IGameLight light)
     {
         _spawnedLights.Remove(light.Index);
 
@@ -448,19 +407,16 @@ public unsafe class LightingService : IDisposable
 
             light.Destroy();
 
-            if(_entityManager.TryGetEntity("environment", out var ent))
+            var camEnt = _lightEntities.Components[light.Index];
+            if(camEnt is not null)
             {
-                var camEnt = _lightEntities.Components[light.Index];
-                if(camEnt is not null)
-                {
-                    ent.RemoveChild(camEnt);
-                    _lightEntities.Remove(light.Index);
-                }
+                _entityManager.RemoveEntityFromEntityContainer(camEnt);
+                _lightEntities.Remove(light.Index);
             }
         });
     }
 
-    public unsafe void DestroyAllLights()
+    public void DestroyAllLights()
     {
         if(_framework.IsFrameworkUnloading)
             return;
@@ -483,10 +439,10 @@ public unsafe class LightingService : IDisposable
         {
             foreach(var light in _spawnedLights.AsEnumerable().Where(x => x.IsValid))
             {
-                if(light.GameLight->LightFlags == 0)
+                if(light.GameLight->VisibilityFlags == 0)
                     continue;
 
-                UpdateLight(light.GameLight);
+                light.Update();
             }
         }
     }
@@ -499,16 +455,17 @@ public unsafe class LightingService : IDisposable
         }
     }
 
-    public void Dispose()
+    public override void Dispose()
     {
-        _toggleLightHook.Dispose();
+        base.Dispose();
+
+        _lightCtorHook?.Dispose();
+        _lightDtorHook?.Dispose();
 
         _gPoseService.OnGPoseStateChange -= OnGPoseStateChange;
         _framework.Update -= OnFrameworkUpdate;
 
         DestroyAllLights();
-
-        GC.SuppressFinalize(this);
     }
 }
 
@@ -519,7 +476,7 @@ public struct EventGPoseControllerEX
 
     [FieldOffset(0x0E0)] public unsafe fixed ulong Lights[3];
 
-    public unsafe GameLight* GetLight(uint index) => (GameLight*)Lights[index];
+    public unsafe BrioLight* GetLight(uint index) => (BrioLight*)Lights[index];
 }
 
 public class LightData
@@ -544,7 +501,7 @@ public class LightData
 
 public unsafe class Light : IGameLight, IDisposable
 {
-    private GameLight* _gameLight;
+    private BrioLight* _gameLight;
     private int _index;
     private int _entityIndex;
 
@@ -552,7 +509,7 @@ public unsafe class Light : IGameLight, IDisposable
     public int EntityIndex => _entityIndex;
     public bool IsValid => GameLight != null;
 
-    public GameLight* GameLight => _gameLight;
+    public BrioLight* GameLight => _gameLight;
     public IntPtr Address => (nint)GameLight;
 
     public Vector3 Position => GameLight->Transform.Position;
@@ -568,7 +525,7 @@ public unsafe class Light : IGameLight, IDisposable
     public bool IsGPoseLight { get; set; }
     public uint GposeLightIndex { get; set; }
 
-    public Light(GameLight* gameLight, Vector3 position, Quaternion rotation, Vector3 scale)
+    public Light(BrioLight* gameLight, Vector3 position, Quaternion rotation, Vector3 scale)
     {
         _gameLight = gameLight;
 
@@ -593,9 +550,17 @@ public unsafe class Light : IGameLight, IDisposable
         {
             GameLight->Destroy();
 
-            NativeHelpers.FreeMemory((nint)GameLight); // Is this overkill?
+            // NativeHelpers.FreeMemory((nint)GameLight); // Is this overkill?
 
             _gameLight = null;
+        }
+    }
+
+    public void Update()
+    {
+        if(IsValid)
+        {
+            GameLight->Update();
         }
     }
 
@@ -613,13 +578,13 @@ public unsafe interface IGameLight
     public int EntityIndex { get; }
     public bool IsValid { get; }
     public bool NeedsUpdate { get; set; }
-    public bool IsVisible => GameLight != null && GameLight->LightFlags != 0;
+    public bool IsVisible => GameLight != null && GameLight->VisibilityFlags != 0;
 
     public Vector3 SpawnPosition { get; set; }
     public Quaternion SpawnRotation { get; set; }
     public Vector3 SpawnScale { get; set; }
 
-    public GameLight* GameLight { get; }
+    public BrioLight* GameLight { get; }
     public IntPtr Address { get; }
 
     public Vector3 Position { get; }
@@ -631,58 +596,105 @@ public unsafe interface IGameLight
     public uint GposeLightIndex { get; set; }
 
     public void Destroy();
-    public void ToggleLight() => GameLight->LightFlags = (byte)(GameLight->LightFlags == 0 ? 79 : 0);
+    public void Update();
+    public void ToggleLight() => GameLight->VisibilityFlags = (byte)(GameLight->VisibilityFlags == 0 ? 79 : 0);
+    public void SetVisibility(bool visible) => GameLight->VisibilityFlags = (byte)(visible ? 79 : 0);
 }
 
-[StructLayout(LayoutKind.Explicit)]
-public unsafe struct GameLightVirtualTable
-{
-    [FieldOffset(0)]
-    public unsafe delegate* unmanaged<GameLight*, bool, void> Destructor;
-
-    [FieldOffset(8)]
-    public unsafe delegate* unmanaged<GameLight*, void> Cleanup;
-}
 
 [StructLayout(LayoutKind.Explicit, Size = 0xB0)]
-public unsafe struct GameLight
+public unsafe struct BrioLight
 {
-    [FieldOffset(0x00)] public unsafe GameLightVirtualTable* VirtualTable;
+    [StructLayout(LayoutKind.Explicit)]
+    public struct GameLightVirtualTable
+    {
+        [FieldOffset(0)]
+        public delegate* unmanaged<BrioLight*, bool, void> Destructor;
+
+        [FieldOffset(8)]
+        public delegate* unmanaged<BrioLight*, void> Cleanup;
+    }
+
+    [FieldOffset(0x00)] public GameLightVirtualTable* VirtualTable;
 
     [FieldOffset(0x00)] public DrawObject DrawObject;
+
     [FieldOffset(0x50)] public StructsTransforms Transform;
-    [FieldOffset(0x88)] public byte LightFlags;                      // This seems to be only useful for visibility? (0 = off, 79 = on)
-    [FieldOffset(0x90)] public LightRenderObject* LightRenderObject; // GetObjectType() == 5
+
+    [FieldOffset(0x88)] public byte VisibilityFlags;
+
+    [FieldOffset(0x90)] public LightRenderObject* RenderLight;
+
+    //[FieldOffset(0x98)] public TextureResourceHandle* ProjectedCubemapTexture;
+
+    public bool IsVisible
+    {
+        get => DrawObject.IsVisible;
+        set => DrawObject.IsVisible = value;
+    }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public unsafe void Destroy()
+    public void Update()
     {
-        VirtualTable->Cleanup((GameLight*)Unsafe.AsPointer(ref this));
-        VirtualTable->Destructor((GameLight*)Unsafe.AsPointer(ref this), false);
+        UpdateCulling();
+        UpdateMaterials();
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public void Destroy()
+    {
+        VirtualTable->Cleanup((BrioLight*)Unsafe.AsPointer(ref this));
+        VirtualTable->Destructor((BrioLight*)Unsafe.AsPointer(ref this), true);
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public void UpdateCulling()
+    {
+        DrawObject.VirtualTable->UpdateCulling((DrawObject*)Unsafe.AsPointer(in this));
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public void UpdateTransforms(bool a2_unk)
+    {
+        DrawObject.VirtualTable->UpdateTransforms((DrawObject*)Unsafe.AsPointer(in this), a2_unk);
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public void UpdateMaterials()
+    {
+        DrawObject.VirtualTable->UpdateMaterials((DrawObject*)Unsafe.AsPointer(in this));
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public void UpdateRender()
+    {
+        DrawObject.VirtualTable->UpdateRender((DrawObject*)Unsafe.AsPointer(in this));
     }
 }
 
 [StructLayout(LayoutKind.Explicit, Size = 0x160)]
 public unsafe struct LightRenderObject
 {
-    [FieldOffset(0x00)] public nint* VirtualTable;
-
     [FieldOffset(0x18)] public LightFlags LightFlags;
     [FieldOffset(0x1C)] public LightType EmissionType;
     [FieldOffset(0x20)] public StructsTransforms* Transform;
-    [FieldOffset(0x28)] public Vector3 Color;
-    [FieldOffset(0x34)] public float Intensity;
-    [FieldOffset(0x40)] public Vector3 MaxRangeNegative;            // Gpose lights have "unlimited" (-10000) range
-    [FieldOffset(0x50)] public Vector3 MaxRangePositive;            // Gpose lights have "unlimited" (10000) range
+    [FieldOffset(0x28)] public Vector4 ColorIntensity;
+    [FieldOffset(0x40)] public StructsAABounds MaxRange;
     [FieldOffset(0x60)] public float ShadowPlaneNear;
     [FieldOffset(0x64)] public float ShadowPlaneFar;
     [FieldOffset(0x68)] public FalloffType FalloffType;             // Type 1: 2 (Cubic), Type 2: 1 (Quadratic), Type 3: 0 (Linear)
-    [FieldOffset(0x70)] public Vector2 Angle;
-    [FieldOffset(0x80)] public float Falloff;
-    [FieldOffset(0x84)] public float LightAngle;
-    [FieldOffset(0x88)] public float FalloffAngle;
+    [FieldOffset(0x70)] public Vector2 FlatLightSkewAngleDegrees;
+    [FieldOffset(0x80)] public float FalloffFactor;
+    [FieldOffset(0x84)] public float SpotLightAngleDegrees;
+    [FieldOffset(0x88)] public float AngularFalloffDegrees;
     [FieldOffset(0x8C)] public float Range;                         // Seems to be centered on the player
     [FieldOffset(0x90)] public float CharacterShadowRange;
+
+    [FieldOffset(0xA0)] public StructsAABounds CullingBounds;
+    [FieldOffset(0xC0)] public StructsAABounds RangeBounds;
+
+    public Vector3 Color { readonly get => new(ColorIntensity.X, ColorIntensity.Y, ColorIntensity.Z); set => ColorIntensity = new Vector4(value, ColorIntensity.W); }
+    public float Intensity { readonly get => ColorIntensity.W; set => ColorIntensity.W = value; }
 }
 
 [Flags]
