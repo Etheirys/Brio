@@ -42,7 +42,7 @@ public class LightEditor
 
     public static unsafe void DrawAdvancedShadows(LightRenderingCapability Capability)
     {
-        var light = Capability.GameLight.GameLight != null ? Capability.GameLight.GameLight->LightRenderObject : null;
+        var light = Capability.GameLight.GameLight != null ? Capability.GameLight.GameLight->RenderLight : null;
         if(light == null) return;
 
         ImGui.Text("Character Shadow Range:"u8);
@@ -60,7 +60,7 @@ public class LightEditor
 
     public static unsafe void DrawAdvancedSettings(LightRenderingCapability Capability)
     {
-        var light = Capability.GameLight.GameLight != null ? Capability.GameLight.GameLight->LightRenderObject : null;
+        var light = Capability.GameLight.GameLight != null ? Capability.GameLight.GameLight->RenderLight : null;
         if(light == null) return;
 
         ImBrio.VerticalPadding(5);
@@ -79,12 +79,12 @@ public class LightEditor
             }
             ImGui.EndCombo();
         }
-        ImBrio.AttachToolTip("Light Falloff Type");
+        ImBrio.AttachToolTip("Light Falloff Factor Type");
 
         // Falloff Power
         ImBrio.CenterNextElementWithPadding(15);
-        ImGui.DragFloat("###falloffPower"u8, ref light->Falloff, 0.01f, 0.0f, 1000.0f);
-        ImBrio.AttachToolTip("Light Falloff Power");
+        ImGui.DragFloat("###falloffPower"u8, ref light->FalloffFactor, 0.01f, 0.0f, 1000.0f);
+        ImBrio.AttachToolTip("Light Falloff Factor Power");
 
         // Range
         ImBrio.CenterNextElementWithPadding(15);
@@ -116,11 +116,10 @@ public class LightEditor
         //
         // Body 
 
-        var light = Capability.GameLight.GameLight != null ? Capability.GameLight.GameLight->LightRenderObject : null;
+        var light = Capability.GameLight.GameLight != null ? Capability.GameLight.GameLight->RenderLight : null;
         if(light == null) return;
 
-        ImGui.Separator();
-        ImGui.Text("Light Type"u8);
+        ImBrio.SeparatorText("Light Properties");
 
         if(Capability.SelectedLightType == -1)
         {
@@ -164,28 +163,28 @@ public class LightEditor
         {
             case LightType.SpotLight:
                 ImBrio.CenterNextElementWithPadding(15);
-                ImGui.SliderFloat("###lightAngle"u8, ref light->LightAngle, 0.0f, 180.0f, "%0.0f Degrees"u8);
+                ImGui.SliderFloat("###lightAngle"u8, ref light->SpotLightAngleDegrees, 0.0f, 180.0f, "%0.0f Degrees"u8);
                 ImBrio.AttachToolTip("Spot Light Angle");
 
                 ImBrio.CenterNextElementWithPadding(15);
-                ImGui.SliderFloat("###lightSmothing"u8, ref light->FalloffAngle, 0.0f, 180.0f, "%0.0f Degrees"u8);
+                ImGui.SliderFloat("###lightSmothing"u8, ref light->AngularFalloffDegrees, 0.0f, 180.0f, "%0.0f Degrees"u8);
                 ImBrio.AttachToolTip("Spot Light Smothing");
                 break;
 
             case LightType.FlatLight:
                 using(ImRaii.ItemWidth((ImGui.CalcItemWidth() / 2) - ImGui.GetStyle().ItemInnerSpacing.X))
                 {
-                    ImGui.SliderAngle("###lightAngle_x"u8, ref light->Angle.X, -90, 90);
+                    ImGui.SliderAngle("###lightAngle_x"u8, ref light->FlatLightSkewAngleDegrees.X, -90, 90);
                     ImBrio.AttachToolTip("Flat Light X");
 
                     ImGui.SameLine();
 
-                    ImGui.SliderAngle("###lightAngle_y"u8, ref light->Angle.Y, -90, 90);
+                    ImGui.SliderAngle("###lightAngle_y"u8, ref light->FlatLightSkewAngleDegrees.Y, -90, 90);
                     ImBrio.AttachToolTip("Flat Light Y");
                 }
 
                 ImBrio.CenterNextElementWithPadding(15);
-                ImGui.SliderFloat("###lightAngleSlider"u8, ref light->FalloffAngle, 0.0f, 180.0f, "%0.0f Degrees"u8);
+                ImGui.SliderFloat("###lightAngleSlider"u8, ref light->AngularFalloffDegrees, 0.0f, 180.0f, "%0.0f Degrees"u8);
                 ImBrio.AttachToolTip("Flat Light Falloff");
                 break;
         }
@@ -193,8 +192,7 @@ public class LightEditor
         //
 
         ImBrio.VerticalPadding(5);
-        ImGui.Separator();
-        ImGui.Text("Color & Intensity"u8);
+        ImBrio.SeparatorText("Color & Intensity");
 
         var color = Vector3.SquareRoot(light->Color / 6);
         ImBrio.CenterNextElementWithPadding(15);
@@ -204,15 +202,18 @@ public class LightEditor
         }
         ImBrio.AttachToolTip("Light Color");
 
+        var intensity = light->Intensity;
         ImBrio.CenterNextElementWithPadding(15);
-        ImGui.DragFloat("###intensity"u8, ref light->Intensity, 0.01f, 0.0f, 100.0f);
+        if(ImGui.DragFloat("###intensity"u8, ref intensity, 0.01f, 0.0f, 100.0f))
+        {
+            light->Intensity = intensity;
+        }
         ImBrio.AttachToolTip("Intensity");
 
         //
 
         ImBrio.VerticalPadding(5);
-        ImGui.Separator();
-        ImGui.Text("Shadows & Reflections"u8);
+        ImBrio.SeparatorText("Shadows & Reflections");
 
         var flag = light->LightFlags.HasFlag(LightFlags.Reflection);
         if(ImGui.Checkbox("Enable Material Reflections"u8, ref flag))
@@ -240,11 +241,8 @@ public class LightEditor
         }
     }
 
-    public static unsafe void DrawLightTransform(LightTransformCapability Capability, ref bool activeState)
+    public static unsafe void DrawLightTransformHeader(LightTransformCapability Capability)
     {
-        //
-        // Hedder Buttons
-
         var overlayOpen = Capability.OverlayOpen;
         if(ImBrio.FontIconButton($"overlay_{Capability.Entity.Id}", overlayOpen ? FontAwesomeIcon.EyeSlash : FontAwesomeIcon.Eye, overlayOpen ? "Close Overlay" : "Open Overlay"))
         {
@@ -277,56 +275,6 @@ public class LightEditor
         if(ImBrio.FontIconButtonRight($"reset_{Capability.Entity.Id}", FontAwesomeIcon.Undo, 1, "Reset Light Transform", Capability.HasOverride))
         {
             Capability.Reset();
-        }
-
-        //
-        // Body 
-
-        var light = Capability.GameLight.GameLight != null ? Capability.GameLight.GameLight->LightRenderObject : null;
-        if(light == null) return;
-
-        using var child1 = ImRaii.Child("LightPropertiesChild", new Vector2(0, (35 * 3) * ImGuiHelpers.GlobalScale), true);
-        if(child1.Success)
-        {
-            bool didChange = false;
-            bool anyActive = false;
-
-            if(Capability.rotation == Vector3.Zero)
-                Capability.rotation = (Capability.Transform.Rotation = light->Transform->Rotation).EulerAngles;
-            if(Capability.position == Vector3.Zero)
-                Capability.position = (Capability.Transform.Position = light->Transform->Position);
-            if(Capability.scale == Vector3.Zero)
-                Capability.scale = (Capability.Transform.Scale = light->Transform->Scale);
-
-            ImBrio.VerticalPadding(2);
-            (var pdidChange, var panyActive) = ImBrio.DragFloat3($"###_transform_Light_Position_0", ref Capability.position, 0.1f, FontAwesomeIcon.ArrowsUpDownLeftRight, "Position", enableExpanded: false);
-            ImBrio.VerticalPadding(2);
-            (var rdidChange, var ranyActive) = ImBrio.DragFloat3($"###_transform_Light_Rotation_0", ref Capability.rotation, 1f * 10, FontAwesomeIcon.ArrowsSpin, "Rotation", enableExpanded: false);
-            ImBrio.VerticalPadding(2);
-            (var sdidChange, var sanyActive) = ImBrio.DragFloat3($"###_transform_Light_Scale_0", ref Capability.scale, 1f, FontAwesomeIcon.ExpandAlt, "Scale", enableExpanded: false);
-
-            didChange |= pdidChange |= rdidChange |= sdidChange;
-            anyActive |= panyActive |= ranyActive |= sanyActive;
-
-            if(anyActive)
-            {
-                Capability.IsTransformDraggingActive = true;
-                activeState = true;
-
-                light->Transform->Position = Capability.Transform.Position = Capability.position;
-                light->Transform->Rotation = Capability.Transform.Rotation = Capability.rotation.ToEulerAngles();
-                light->Transform->Scale = Capability.Transform.Scale = Capability.scale;
-            }
-            else if(Capability.IsTransformDraggingActive && activeState)
-            {
-                Capability.IsTransformDraggingActive = false;
-                activeState = false;
-
-                Capability.Transform.Position = Capability.position;
-                Capability.Transform.Rotation = Capability.rotation.ToEulerAngles();
-                Capability.Transform.Scale = Capability.scale;
-                Capability.Snapshot();
-            }
         }
     }
 }

@@ -20,14 +20,14 @@ public class LightDebugWidget(LightDebugCapability capability) : Widget<LightDeb
         else
             ImGui.TextColored(ImGuiColors.DalamudRed, "CurrentGPoseState is NUll!");
 
-        ImGui.Text("GameLight");
+        ImGui.Text("BrioLight");
         ImGui.SameLine();
         Capability.DynamisIPC.DrawPointer(Capability.GameLight.Address);
 
         ImGui.Separator();
 
-        ImGui.Text("LightRenderObject");
+        ImGui.Text("RenderLight");
         ImGui.SameLine();
-        Capability.DynamisIPC.DrawPointer((nint)Capability.GameLight.GameLight->LightRenderObject);
+        Capability.DynamisIPC.DrawPointer((nint)Capability.GameLight.GameLight->RenderLight);
     }
 }

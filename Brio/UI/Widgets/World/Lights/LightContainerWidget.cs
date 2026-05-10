@@ -29,6 +29,8 @@ public class LightContainerWidget(LightContainerCapability capability) : Widget<
 
             if(ImGui.BeginMenu("New...###containerwidgetpopup_new"))
             {
+                ImGui.Separator();
+
                 if(ImGui.MenuItem("Spot Light###containerwidgetpopup_spawn_SpotLight"))
                 {
                     Capability.LightingService.SpawnLight(LightType.SpotLight);
@@ -44,11 +46,15 @@ public class LightContainerWidget(LightContainerCapability capability) : Widget<
                 ImGui.EndMenu();
             }
 
-            if(ImGui.BeginMenu("Destroy All Lights###containerwidgetpopup_destroy"))
+            if(ImGui.BeginMenu("Destroy All...###containerwidgetpopup_destroy"))
             {
-                if(ImGui.MenuItem("Confirm Destruction##containerwidgetpopup_destroyall"))
+                if(ImGui.BeginMenu("Lights###containerwidgetpopup_destroyLights"))
                 {
-                    Capability.LightingService.DestroyAllLights();
+                    if(ImGui.MenuItem("Confirm Destruction##containerwidgetpopup_destroyallLights"))
+                    {
+                        Capability.LightingService.DestroyAllLights();
+                    }
+                    ImGui.EndMenu();
                 }
                 ImGui.EndMenu();
             }

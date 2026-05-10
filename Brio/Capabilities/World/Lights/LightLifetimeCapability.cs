@@ -20,7 +20,7 @@ public class LightLifetimeCapability : LightCapability
         _lightWindow = lightWindow;
         _cameraManager = cameraManager;
 
-        this.Widget = new LightLifetimeWidget(this, actorSpawnService, cameraManager, lightingService);
+        this.Widget = new LightLifetimeWidget(this);
     }
 
     public bool CanDestroy => true;

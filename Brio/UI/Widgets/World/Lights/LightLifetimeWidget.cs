@@ -11,19 +11,8 @@ using Dalamud.Interface;
 
 namespace Brio.UI.Widgets.World.Lights;
 
-public class LightLifetimeWidget : Widget<LightLifetimeCapability>
+public class LightLifetimeWidget(LightLifetimeCapability lightLifetimeCapability) : Widget<LightLifetimeCapability>(lightLifetimeCapability)
 {
-    private readonly ActorSpawnService _actorSpawnService;
-    private readonly VirtualCameraManager _cameraManager;
-    private readonly LightingService _lightingService;
-
-    public LightLifetimeWidget(LightLifetimeCapability lightLifetimeCapability, ActorSpawnService actorSpawnService, VirtualCameraManager cameraManager, LightingService lightingService) : base(lightLifetimeCapability)
-    {
-        _actorSpawnService = actorSpawnService;
-        _cameraManager = cameraManager;
-        _lightingService = lightingService;
-    }
-
     public override string HeaderName => "Lifetime";
     public override WidgetFlags Flags => WidgetFlags.DrawPopup | WidgetFlags.DrawQuickIcons;
 
@@ -31,9 +20,8 @@ public class LightLifetimeWidget : Widget<LightLifetimeCapability>
     {
         if(ImBrio.FontIconButton("lifetimewidget_spawnnew", FontAwesomeIcon.Plus, "Spawn New"))
         {
-            ImGui.OpenPopup("UnifiedSpawnMenuPopup");
+            SpawnMenu.OpenUnifiedSpawnMenu();
         }
-        SpawnMenuEditor.DrawUnifiedSpawnMenu(_actorSpawnService, _cameraManager, _lightingService);
 
         ImGui.SameLine();
 

@@ -1,4 +1,5 @@
 ﻿using Brio.Capabilities.World;
+using Brio.Core;
 using Brio.Entities.Core;
 using Brio.Game.World;
 using Brio.UI.Controls.Stateless;
@@ -11,7 +12,7 @@ using System;
 
 namespace Brio.Entities.World;
 
-public class LightEntity(IGameLight gameLight, IServiceProvider provider) : Entity(new EntityId(gameLight), provider)
+public class LightEntity(IGameLight gameLight, IServiceProvider provider) : TransformableEntity(new EntityId(gameLight), provider), ITransformable
 {
     public string RawName = "";
     public override string FriendlyName
@@ -38,15 +39,15 @@ public class LightEntity(IGameLight gameLight, IServiceProvider provider) : Enti
 
     public override int ContextButtonCount => 1;
 
-    public unsafe override bool IsVisible => true;
+    public override bool IsVisible => true;
 
-    public override EntityFlags Flags => EntityFlags.AllowDoubleClick | EntityFlags.HasContextButton | EntityFlags.DefaultOpen;
+    public override EntityFlags Flags => EntityFlags.AllowDoubleClick | EntityFlags.HasContextButton | EntityFlags.DefaultOpen | EntityFlags.AllowMultiSelect;
 
     public override FontAwesomeIcon Icon => FontAwesomeIcon.Lightbulb;
 
     public IGameLight GameLight => gameLight;
 
-    public override unsafe void DrawContextButton()
+    public override void DrawContextButton()
     {
         using(ImRaii.PushColor(ImGuiCol.Button, ThemeManager.CurrentTheme.Accent.AccentColor, GameLight.IsVisible))
         {
@@ -58,10 +59,22 @@ public class LightEntity(IGameLight gameLight, IServiceProvider provider) : Enti
         }
     }
 
+    public unsafe override void SetVisibility(bool visible)
+    {
+        if(!GameLight.IsValid) return;
+
+        GameLight.SetVisibility(visible);
+    }
+
+    public override void Snapshot()
+        => Transformable?.Snapshot();
+
     public override void OnAttached()
     {
         AddCapability(ActivatorUtilities.CreateInstance<LightLifetimeCapability>(_serviceProvider, this));
-        AddCapability(ActivatorUtilities.CreateInstance<LightTransformCapability>(_serviceProvider, this));
+
+        AddTransformable<LightTransformCapability>();
+
         AddCapability(ActivatorUtilities.CreateInstance<LightRenderingCapability>(_serviceProvider, this));
 
         AddCapability(ActivatorUtilities.CreateInstance<LightDebugCapability>(_serviceProvider, this));
