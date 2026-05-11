@@ -1,0 +1,13 @@
+using Brio.Capabilities.Core;
+using Brio.Entities.WorldObjects;
+using Brio.Entities.Core;
+using Brio.Game.WorldObjects;
+using System;
+
+namespace Brio.Capabilities.WorldObjects;
+
+public class WorldObjectCapability(Entity parent) : Capability(parent), IDisposable
+{
+    public WorldObjectEntity BgObjectEntity => (Entity as WorldObjectEntity)!;
+    public WorldObjectBase GameBgObject => (WorldObjectBase)BgObjectEntity.GameBgObject; // TODO (Ken) fix this so it doesn't box by adding this to the iterface
+}
