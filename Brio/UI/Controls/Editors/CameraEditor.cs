@@ -1,11 +1,16 @@
 ﻿using Brio.Capabilities.Camera;
+using Brio.Capabilities.Core;
 using Brio.Config;
+using Brio.Core;
 using Brio.Entities.Actor;
 using Brio.Entities.Camera;
+using Brio.Entities.World;
+using Brio.Entities.WorldObjects;
 using Brio.Files;
 using Brio.Game.Actor.Extensions;
 using Brio.Game.Camera;
 using Brio.Game.Cutscene;
+using Brio.Game.WorldObjects;
 using Brio.UI.Controls.Core;
 using Brio.UI.Controls.Stateless;
 using Dalamud.Bindings.ImGui;
@@ -56,7 +61,7 @@ public static class CameraEditor
         {
             using(ImRaii.Disabled(!capability.IsAllowed))
             {
-                var width = -ImGui.CalcTextSize("XXXXXXXx").X;
+                var width = -ImGui.CalcTextSize("XxxxxX").X;
 
                 if(ImBrio.ToggelButton("Enable Movement", new Vector2(135, 25), camera.FreeCamValues.IsMovementEnabled, hoverText: camera.FreeCamValues.IsMovementEnabled ?
                     "Disable Free-Cam Movement" : "Enabled Free-Cam Movement"))
@@ -76,32 +81,48 @@ public static class CameraEditor
 
                 ImGui.SameLine();
 
+                if(ImBrio.ToggelFontIconButton("portraitMode", FontAwesomeIcon.Mobile, new Vector2(0, 0), camera.IsPortraitMode, hoverText: "Portrait Mode"))
+                    camera.TogglePortraitMode();
+
+                ImGui.SameLine();
+
                 if(ImBrio.FontIconButtonRight("reset", FontAwesomeIcon.Undo, 1f, "Reset Camera", camera.IsOverridden))
                     camera.ResetCamera();
 
+                ImBrio.SeparatorText("Target Actor");
+
                 //
-                ImGui.Separator();
+
+                DrawCameraActorSelect(capability);
+
                 //
+
+                ImBrio.SeparatorText("Properties");
 
                 {
                     ImBrio.Icon(FontAwesomeIcon.ArrowsToCircle);
 
                     ImGui.SameLine();
-
                     ImGui.SetNextItemWidth(width);
+               
                     var position = camera.Position;
-                    if(ImGui.DragFloat3("Position", ref position, 0.001f))
+                    if(ImGui.DragFloat3("###Position", ref position, 0.001f))
                         camera.Position = position;
+                
+                    ImGui.SameLine();
+
+                    if(ImBrio.FontIconButtonRight("resetPosition", FontAwesomeIcon.Undo, 1f, "Reset Position", camera.Position != camera.SpawnPosition))
+                        camera.Position = camera.SpawnPosition;
                 }
 
                 {
                     ImBrio.Icon(FontAwesomeIcon.ArrowsSpin);
 
-                    ImGui.SameLine();
-
+                    ImGui.SameLine();                    
                     ImGui.SetNextItemWidth(width);
+
                     var rotation = camera.Rotation;
-                    if(ImBrio.DragFloat2V3("Pan", ref rotation, -360, 360, "%.3f", true, ImGuiSliderFlags.AlwaysClamp))
+                    if(ImBrio.DragFloat2V3("###Pan", ref rotation, -360, 360, "%.3f", true, ImGuiSliderFlags.AlwaysClamp))
                         camera.Rotation = rotation;
                 }
 
@@ -113,6 +134,11 @@ public static class CameraEditor
                     var fov = camera.FoV;
                     if(ImBrio.SliderAngle("##FoV", ref fov, -44, 120, "%.2f", ImGuiSliderFlags.AlwaysClamp))
                         camera.FoV = fov;
+
+                    ImGui.SameLine();
+
+                    if(ImBrio.FontIconButtonRight("resetFOV", FontAwesomeIcon.Undo, 1f, "Reset FoV", camera.FoV != 0))
+                        camera.FoV = 0;
                 }
 
                 {
@@ -130,7 +156,7 @@ public static class CameraEditor
                         camera.PivotRotation = 0;
                 }
 
-                ImGui.Separator();
+                ImBrio.SeparatorText("Movement Speed");
 
                 {
                     ImBrio.Icon(FontAwesomeIcon.Walking);
@@ -162,7 +188,7 @@ public static class CameraEditor
                         camera.FreeCamValues.MouseSensitivity = capability._configurationService.Configuration.Interface.DefaultFreeCameraMouseSensitivity;
                 }
 
-                ImGui.Separator();
+                ImBrio.SeparatorText("Advanced");
 
                 var delimit = camera.FreeCamValues.DelimitAngle;
                 if(ImGui.Checkbox("Delimit Camera Angle", ref delimit))
@@ -183,49 +209,20 @@ public static class CameraEditor
                 {
 
                     var width = -ImGui.CalcTextSize("XXXXXXXXXx").X;
+                 
+                    if(ImBrio.ToggelFontIconButton("portraitMode", FontAwesomeIcon.Mobile, new Vector2(0, 0), camera.IsPortraitMode, hoverText: "Portrait Mode"))
+                        camera.TogglePortraitMode();
+
+                    ImGui.SameLine();
 
                     if(ImBrio.FontIconButtonRight("reset", FontAwesomeIcon.Undo, 1f, "Reset", camera.IsOverridden))
                         camera.ResetCamera();
 
-                    //
-                    ImGui.Separator();
-                    //
+                    ImBrio.SeparatorText("Target Actor");
 
-                    using(ImRaii.Disabled(capability._entityManager.SelectedEntity is not ActorEntity))
-                        if(ImBrio.FontIconButton("recenter_on_selected", FontAwesomeIcon.Bullseye, "Recenter on Selected Actor"))
-                        {
-                            var entity = capability._entityManager.SelectedEntity;
-                            if(entity is ActorEntity actor)
-                            {
-                                capability.VirtualCamera.SelectedActorName = $"Selected: [ {actor.FriendlyName} ]";
-                                camera.TargetOffset = (actor.GameObject.GetDrawObject<DrawObject>()->Object.Position - ((GameObject*)actor.GameObject.Address)->Position);
-                            }
-                        }
-
-                    ImGui.SameLine();
-
-                    ImBrio.CenterNextElementWithPadding(40);
-
-                    if(ImGui.BeginCombo($"###CameraContainerActorsWidget_{capability.Entity.Id}_list", capability.VirtualCamera.SelectedActorName))
-                    {
-                        foreach(var value in capability._entityManager.TryGetAllActors())
-                        {
-                            if(ImGui.Selectable($"[ {value.FriendlyName} ]"))
-                            {
-                                capability.VirtualCamera.SelectedActorName = $"Selected: [ {value.FriendlyName} ]";
-                                camera.TargetOffset = (value.GameObject.GetDrawObject<DrawObject>()->Object.Position - ((GameObject*)value.GameObject.Address)->Position);
-                            }
-                        }
-                        ImGui.EndCombo();
-                    }
-
-                    ImGui.SameLine();
-
-                    if(ImBrio.FontIconButtonRight("reset_selected", FontAwesomeIcon.Undo, 1f, "Reset Selected Actor", camera.IsSelectingActor))
-                    {
-                        camera.TargetOffset = new Vector3(0);
-                        camera.SelectedActorName = "Select an actor to track";
-                    }
+                    DrawCameraActorSelect(capability);
+                 
+                    ImBrio.SeparatorText("Properties");
 
                     {
                         const string offsetText = "Position";
@@ -314,7 +311,7 @@ public static class CameraEditor
                     if(ImGui.DragFloat2(angleText, ref angle, 0.001f))
                         camera.Angle = angle;
 
-                    ImGui.Separator();
+                    ImBrio.SeparatorText("Advanced");
 
                     var disable = camera.DisableCollision;
                     if(ImGui.Checkbox("Disable Collision", ref disable))
@@ -328,6 +325,72 @@ public static class CameraEditor
                 }
             }
         }
+    }
+
+
+    public static unsafe void DrawCameraActorSelect(BrioCameraCapability capability)
+    {
+        var camera = capability.VirtualCamera;
+
+        using(ImRaii.Disabled(capability._entityManager.SelectedEntity is not ActorEntity))
+            if(ImBrio.FontIconButton("recenter_on_selected", FontAwesomeIcon.Bullseye, "Recenter on Selected Actor"))
+            {
+                var entity = capability._entityManager.SelectedEntity;
+                if(entity is ActorEntity actor)
+                {
+                    capability.VirtualCamera.SelectedActorName = $"Selected: [ {actor.FriendlyName} ]";
+                    camera.TargetOffset = (actor.GameObject.GetDrawObject<DrawObject>()->Object.Position - ((GameObject*)actor.GameObject.Address)->Position);
+                }
+            }
+
+        ImGui.SameLine();
+
+        float btnWidth = ImGui.GetFrameHeight();
+
+        ImBrio.CenterNextElementBetweenTwoElements(btnWidth - 5, btnWidth + 5);
+
+        if(ImGui.BeginCombo($"###CameraContainerActorsWidget_{capability.Entity.Id}_list", capability.VirtualCamera.SelectedActorName))
+        {
+            foreach(var value in capability._entityManager.TryGetAllTransformableActors())
+            {
+                if(ImGui.Selectable($"[ {value.FriendlyName} ]"))
+                {
+                    camera.TargetOffset = GetEntityDrawOffset(value);
+                }
+            }
+            ImGui.EndCombo();
+        }
+
+        ImGui.SameLine();
+
+        if(ImBrio.FontIconButtonRight("reset_selected", FontAwesomeIcon.Undo, 1f, "Reset Selected Actor", camera.IsSelectingActor))
+        {
+            camera.TargetOffset = new Vector3(0);
+            camera.SelectedActorName = "Select an actor to track";
+        }
+    }
+
+    // TODO FIX (ken) this does not yet work
+    private static unsafe Vector3 GetEntityDrawOffset(TransformableEntity entity)
+    {
+        if(entity is ActorEntity actorEntity)
+            return actorEntity.GameObject.GetDrawObject<DrawObject>()->Object.Position - ((GameObject*)actorEntity.GameObject.Address)->Position;
+
+        if(entity is WorldObjectEntity worldObjectEntity && worldObjectEntity.GameBgObject.ObjectType == WorldObjectType.BgObject)
+        {
+            var bgo = (BgObject*)worldObjectEntity.GameBgObject.Address;
+
+            if(bgo != null)
+                return bgo->DrawObject.Object.Position - bgo->Position;
+        }
+
+        if(entity is LightEntity lightEntity)
+        {
+            if(lightEntity.GameLight != null)
+                return lightEntity.GameLight.GameLight->DrawObject.Object.Position - lightEntity.GameLight.GameLight->Transform.Position;
+        }
+
+        return entity.Transform.Position;
     }
 
     //

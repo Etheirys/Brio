@@ -2,7 +2,9 @@
 using Brio.Game.GPose;
 using Brio.Input;
 using Brio.IPC;
+using Brio.Services;
 using Brio.UI.Controls;
+using Brio.UI.Controls.Editors;
 using Brio.UI.Windows;
 using Brio.UI.Windows.Specialized;
 using Dalamud.Bindings.ImGui;
@@ -39,6 +41,9 @@ public class UIManager : IDisposable
     private readonly CameraWindow _cameraWindow;
     private readonly LightWindow _lightWindow;
 
+    private readonly FurnitureCatalogWindow _furnitureCatalogWindow;
+    private readonly ReferenceImageService _referenceImageService;
+
     private readonly ITextureProvider _textureProvider;
     private readonly IToastGui _toastGui;
 
@@ -60,6 +65,7 @@ public class UIManager : IDisposable
 
     public static UIManager Instance { get; private set; } = null!;
 
+    public static bool IsOverlayWindowOpen => Instance._overlayWindow.IsOpen;
     public static bool IsPosingGraphicalWindowOpen => Instance._graphicalWindow.IsOpen;
 
     public bool IsActorAppearanceWindowOpen => _actorAppearanceWindow.IsOpen;
@@ -89,6 +95,8 @@ public class UIManager : IDisposable
             AutoSaveWindow autoSaveWindow,
             MCDFWindow mCDFWindow,
             LightWindow lightWindow,
+            FurnitureCatalogWindow furnitureCatalogWindow,
+            ReferenceImageService referenceImageService,
 
             PenumbraService penumbraService,
             GlamourerService glamourerService
@@ -118,6 +126,8 @@ public class UIManager : IDisposable
         _autoSaveWindow = autoSaveWindow;
         _mCDFWindow = mCDFWindow;
         _lightWindow = lightWindow;
+        _furnitureCatalogWindow = furnitureCatalogWindow;
+        _referenceImageService = referenceImageService;
 
         _framework = framework;
 
@@ -142,6 +152,7 @@ public class UIManager : IDisposable
         _windowSystem.AddWindow(_autoSaveWindow);
         _windowSystem.AddWindow(_mCDFWindow);
         _windowSystem.AddWindow(_lightWindow);
+        _windowSystem.AddWindow(_furnitureCatalogWindow);
 
         _gPoseService.OnGPoseStateChange += OnGPoseStateChange;
         _configurationService.OnConfigurationChanged += ApplySettings;
@@ -168,6 +179,11 @@ public class UIManager : IDisposable
         _graphicalWindow.IsOpen = !_graphicalWindow.IsOpen;
     }
 
+    public void ToggleFurnitureCatalogWindow()
+    {
+        _furnitureCatalogWindow.IsOpen = !_furnitureCatalogWindow.IsOpen;
+    }
+
     public void ToggleProjectWindow()
     {
         _projectWindow.IsOpen = !_projectWindow.IsOpen;
@@ -176,6 +192,11 @@ public class UIManager : IDisposable
     public void ToggleMCDFWindow()
     {
         _mCDFWindow.IsOpen = !_mCDFWindow.IsOpen;
+    }
+
+    public void ToggleAutoSaveWindow()
+    {
+        _autoSaveWindow.IsOpen = !_autoSaveWindow.IsOpen;
     }
 
     public void ShowSettingsWindow()
@@ -196,6 +217,7 @@ public class UIManager : IDisposable
     public void ToggleMainWindow() => _mainWindow.IsOpen = !_mainWindow.IsOpen;
     public void ToggleSettingsWindow() => _settingsWindow.IsOpen = !_settingsWindow.IsOpen;
     public void ToggleWelcomeWindow() => _updateWindow.IsOpen = !_updateWindow.IsOpen;
+    public void ToggleOverlayWindow() => _overlayWindow.IsOpen = !_overlayWindow.IsOpen;
 
     private void OnGPoseStateChange(bool newState)
     {
@@ -219,11 +241,23 @@ public class UIManager : IDisposable
         {
             BrioStyle.PushStyle();
             _windowSystem.Draw();
+            _referenceImageService.DrawWindows();
             FileDialogManager.Draw();
             _libraryWindow.DrawModal();
             RenameActorModal.DrawModal();
-
             UpdateKeyBinds();
+
+            if(SpawnMenu.NeedsActivation)
+            {
+                ImGui.OpenPopup("UnifiedSpawnMenuPopup");
+            }
+
+            SpawnMenu.DrawUnifiedSpawnMenu();
+
+        }
+        catch (Exception ex)
+        {
+            Brio.Log.Error($"Exception while drawing UI: {ex}");
         }
         finally
         {

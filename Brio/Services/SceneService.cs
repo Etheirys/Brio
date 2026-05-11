@@ -27,7 +27,7 @@ public class SceneService(EntityManager _entityManager, VirtualCameraManager _vi
     {
         SceneFile sceneFile = new();
 
-        var entity = _entityManager.GetEntity<ActorContainerEntity>("actorContainer")!;
+        var entity = _entityManager.EntityManagerContainer;
 
         foreach(var child in entity.Children)
         {
@@ -66,7 +66,7 @@ public class SceneService(EntityManager _entityManager, VirtualCameraManager _vi
     {
         IsLoading = true;
 
-        ActorContainerEntity actorContainerEntity = _entityManager.GetEntity<ActorContainerEntity>("actorContainer")!;
+        var actorContainerEntity = _entityManager.EntityManagerContainer;
 
         var actorCapability = actorContainerEntity.GetCapability<ActorContainerCapability>();
 

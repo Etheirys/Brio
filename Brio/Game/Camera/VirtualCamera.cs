@@ -15,6 +15,8 @@ public unsafe partial class VirtualCamera
     {
         CameraID = cameraID;
 
+        SpawnPosition = BrioCamera->GetPosition();
+
         ResetCamera();
     }
 
@@ -31,10 +33,11 @@ public unsafe partial class VirtualCamera
     [IgnoreMember] public bool IsActiveCamera { get; set; } = false;
     public bool IsFreeCamera { get; set; } = false;
     public bool IsCutsceneCamera { get; set; } = false;
+    public bool IsPortraitMode { get; private set; } = false;
 
     [IgnoreMember] public int CameraID { get; private set; } = -1;
 
-    public Vector3 SpawnPosition = Vector3.Zero; // TODO (KEN) Implement spawn position logic
+    public Vector3 SpawnPosition = Vector3.Zero;
 
     public Vector3 RealPosition => BrioCamera->GetPosition();
 
@@ -163,6 +166,7 @@ public unsafe partial class VirtualCamera
         DisableCollision = false;
         DelimitCamera = false;
 
+        IsPortraitMode = false;
         PivotRotation = 0;
         Zoom = 2.5f;
         FoV = 0f;
@@ -197,6 +201,12 @@ public unsafe partial class VirtualCamera
     public void SetCameraID(int id)
     {
         CameraID = id;
+    }
+
+    public void TogglePortraitMode()
+    {
+        IsPortraitMode = !IsPortraitMode;
+        PivotRotation += IsPortraitMode ? MathF.PI / 2f : -MathF.PI / 2f;
     }
 
     public void ToFreeCam()
