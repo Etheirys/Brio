@@ -1,4 +1,5 @@
 ﻿using Brio.Capabilities.Debug;
+using Brio.Game.Actor.Extensions;
 using Brio.Game.World;
 using Brio.IPC;
 using Brio.UI.Controls.Stateless;
@@ -6,10 +7,11 @@ using Brio.UI.Widgets.Core;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Plugin.Services;
+using FFXIVClientStructs.FFXIV.Common.Math;
 
 namespace Brio.UI.Widgets.Debug;
 
-public class DebugWidget(DebugCapability capability, IClientState _clientState, IObjectTable _objectTable) : Widget<DebugCapability>(capability)
+public class DebugWidget(DebugCapability capability, IFramework framework, IClientState _clientState, IObjectTable _objectTable) : Widget<DebugCapability>(capability)
 {
     public override string HeaderName => "Debug";
 
@@ -38,8 +40,27 @@ public class DebugWidget(DebugCapability capability, IClientState _clientState, 
                     if(item.Success)
                         DrawMisc();
                 }
+
+                using(var item = ImRaii.TabItem("Objects"))
+                {
+                    if(item.Success)
+                        DrawObjects();
+                }
+
+                using(var item = ImRaii.TabItem("World"))
+                {
+                    if(item.Success)
+                    {
+
+                    }
+                }
             }
         }
+    }
+
+    private unsafe void DrawObjects()
+    {
+
     }
 
     private void DrawGPose()

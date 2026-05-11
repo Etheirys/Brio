@@ -10,14 +10,15 @@ namespace Brio.Entities.Core;
 
 public abstract class Entity : IDisposable
 {
+    protected List<Entity> _children = [];
+    protected IServiceProvider _serviceProvider;
+    private readonly Dictionary<Type, Capability> _capabilities = [];
+
     public EntityId Id { get; private set; }
-
     public Entity? Parent { get; protected set; }
-
     public SpawnFlags SpawnFlag { get; protected set; }
 
     public IReadOnlyCollection<Entity> Children => _children.AsReadOnly();
-
     public IReadOnlyList<Capability> Capabilities => _capabilities.Values.ToList().AsReadOnly();
 
     string name = "";
@@ -39,25 +40,23 @@ public abstract class Entity : IDisposable
     }
 
 
-    public virtual FontAwesomeIcon Icon => FontAwesomeIcon.Question;
-    public virtual bool IsVisible => true;
-    public virtual bool IsAttached => Parent != null;
     public virtual EntityFlags Flags => EntityFlags.DefaultOpen;
+    public virtual FontAwesomeIcon Icon => FontAwesomeIcon.Question;
 
     public virtual int ContextButtonCount => 0;
 
-    public virtual bool IsLoading { get; set; } = false;
-    public virtual bool IsLocked { get; set; } = false;
-
     public virtual string LoadingDescription { get; set; } = string.Empty;
 
+    public virtual bool IsVisible => true;
+    public virtual bool IsAttached => Parent != null;
     public virtual bool IsDisabled { get; set; } = false;
-
-    protected List<Entity> _children = [];
-
-    protected IServiceProvider _serviceProvider;
-
-    private readonly Dictionary<Type, Capability> _capabilities = [];
+    public virtual bool IsLoading { get; set; } = false;
+    public virtual bool IsLocked { get; set; } = false;
+    public virtual bool IsOverlayVisible { get; set; } = true;
+    
+    public virtual bool IsSynced => false;
+    public virtual bool IsLoadedFromProject => false;
+    public virtual bool IsBodyHidden { get; set; } = true;
 
     public Entity(EntityId id, IServiceProvider serviceProvider, IEnumerable<Entity>? children = null)
     {
@@ -125,6 +124,8 @@ public abstract class Entity : IDisposable
     {
 
     }
+
+    public virtual void SetVisibility(bool visible) { }
 
     public virtual void DrawContextButton()
     {
@@ -248,12 +249,16 @@ public abstract class Entity : IDisposable
 }
 
 [Flags]
-public enum EntityFlags
+public enum EntityFlags : int
 {
-    None,
+    None = 0,
     DefaultOpen = 1 << 0,
     HasContextButton = 1 << 1,
     AllowOutsideGpose = 1 << 2,
-    AllowDoubleClick = 1 << 4,
-    AllowMultiSelect = 1 << 8,
+    AllowDoubleClick = 1 << 3,
+    AllowMultiSelect = 1 << 4,
+    IsFolder = 1 << 5,
+    DisableSelection = 1 << 6,
+    DisableDraw = 1 << 7,
+    DisableChildren = 1 << 8,
 }

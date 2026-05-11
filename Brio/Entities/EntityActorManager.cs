@@ -20,7 +20,6 @@ public unsafe class EntityActorManager : IDisposable
     private readonly IObjectTable _objects;
     private readonly IFramework _framework;
 
-    private readonly ActorContainerEntity _actorContainerEntity;
     private readonly ActorSpawnService _actorSpawnService;
 
     public EntityActorManager(EntityManager entityManager, ActorSpawnService actorSpawnService, IServiceProvider serviceProvider, ObjectMonitorService monitorService, IObjectTable objects, IFramework framework)
@@ -34,22 +33,13 @@ public unsafe class EntityActorManager : IDisposable
 
         _monitorService.CharacterInitialized += OnCharacterInitialized;
         _monitorService.CharacterDestroyed += OnCharacterDestroyed;
-
-        _actorContainerEntity = ActivatorUtilities.CreateInstance<ActorContainerEntity>(_serviceProvider);
     }
 
-    public void AttachContainer()
-    {
-        _entityManager.AttachEntity(_actorContainerEntity, null);
-
-        PopulateExistingActors();
-    }
-
-    private void PopulateExistingActors()
+    public void Initialize()
     {
         foreach(var go in _objects)
         {
-            AttachActor(go, _actorContainerEntity);
+            AttachActor(go, _entityManager.EntityManagerContainer);
         }
     }
 
@@ -150,7 +140,7 @@ public unsafe class EntityActorManager : IDisposable
         {
             var go = _objects.CreateObjectReference((nint)chara);
             if(go != null)
-                AttachActor(go, _actorContainerEntity);
+                AttachActor(go, _entityManager.EntityManagerContainer);
         });
     }
 

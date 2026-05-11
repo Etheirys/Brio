@@ -99,7 +99,7 @@ public class EntityHierarchyView(EntityManager entityManager, GPoseService gPose
         if(entityManager.SelectedEntitys.Contains(entity.Id) && entityAllowsMultiSelect)
             isMutiSelected = true;
 
-        if(entity.Flags.HasFlag(EntityFlags.DisableDrawInEntityHierarchy))
+        if(entity.Flags.HasFlag(EntityFlags.DisableDraw))
         {
             DrawChildren(entity, selectedEntityId, 3, hasChildren, drawChildren);
             return;
@@ -126,12 +126,15 @@ public class EntityHierarchyView(EntityManager entityManager, GPoseService gPose
             {
                 if(InputManagerService.ActionKeysPressed(InputAction.Brio_Ctrl) && entityAllowsMultiSelect)
                 {
+                    var diableSelection = entity.Flags.HasFlag(EntityFlags.DisableSelection);
+
                     if(!currentSupportsMultiSelect && currentSelected != null)
                     {
                         groupedUndoService.Clear();
-                        Select(entity);
+                        if(diableSelection is false)
+                            Select(entity);
                     }
-                    else
+                    else if(diableSelection is false)
                     {
                         if(entityManager.SelectedEntitys.Contains(entity.Id))
                             entityManager.RemoveSelectedEntity(entity.Id);
@@ -327,7 +330,7 @@ public class EntityHierarchyView(EntityManager entityManager, GPoseService gPose
 
     public void DrawChildren(Entity entity, EntityId? selectedEntityId, float lastOffset, bool hasChildren, bool drawChildren)
     {
-        if(entity.Flags.HasFlag(EntityFlags.DisableChildrenInEntityHierarchy) == false && hasChildren && drawChildren)
+        if(entity.Flags.HasFlag(EntityFlags.DisableChildren) == false && hasChildren && drawChildren)
         {
             foreach(var child in entity.Children)
             {
