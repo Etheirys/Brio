@@ -51,11 +51,11 @@ public class CameraEntity(IServiceProvider provider, int cameraID, CameraType ca
 
     public VirtualCameraManager VirtualCameraManager => _virtualCameraManager;
 
-    public CameraContainerEntity? CameraContainer => Parent as CameraContainerEntity;
+    public EntityManagerContainer? CameraContainer => Parent as EntityManagerContainer;
 
     public override EntityFlags Flags => EntityFlags.AllowDoubleClick | EntityFlags.HasContextButton | EntityFlags.DefaultOpen;
 
-    public override int ContextButtonCount => VirtualCamera.IsFreeCamera ? 2 : 1;
+    public override int ContextButtonCount => VirtualCamera.IsFreeCamera ? 3 : 2;
 
     public override FontAwesomeIcon Icon => GetIcon();
 
@@ -96,18 +96,27 @@ public class CameraEntity(IServiceProvider provider, int cameraID, CameraType ca
 
             if(VirtualCamera.IsFreeCamera)
             {
-                var pixelPos = ImGui.GetWindowSize().X - ((ImGui.CalcTextSize("XXX").X + (ImGui.GetStyle().FramePadding.X * 2)) * 2);
-
-                ImGui.SetCursorPosX(pixelPos);
-
                 string toolTip1 = $"Toggle as Camera Movement";
                 using(ImRaii.PushColor(ImGuiCol.Button, 0))
-                    if(ImBrio.ToggelFontIconButton($"###{Id}_camera_movement", FontAwesomeIcon.Walking, new System.Numerics.Vector2(0), VirtualCamera.FreeCamValues.IsMovementEnabled, hoverText: toolTip1))
+                {
+                    if(ImBrio.ToggelFontIconButtonRight($"###{Id}_camera_movement", FontAwesomeIcon.Walking, 3f, VirtualCamera.FreeCamValues.IsMovementEnabled, tooltip: toolTip1))
                     {
                         VirtualCamera.FreeCamValues.IsMovementEnabled = !VirtualCamera.FreeCamValues.IsMovementEnabled;
                     }
+                }
             }
 
+            ImGui.SameLine();
+         
+            string toolTip2 = $"Toggle Lock Camera";
+            using(ImRaii.PushColor(ImGuiCol.Button, 0))
+            {
+                if(ImBrio.ToggelFontIconButtonRight($"###{Id}_camera_Lock", FontAwesomeIcon.Lock, 2f, IsLocked, tooltip: toolTip2))
+                {
+                    IsLocked = !IsLocked;
+                }
+            }
+          
             ImGui.SameLine();
 
             string toolTip = $"Set as Active Camera";

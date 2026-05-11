@@ -1,6 +1,7 @@
 ﻿using Brio.Capabilities.Actor;
 using Brio.Capabilities.Posing;
 using Brio.Config;
+using Brio.Core;
 using Brio.Entities.Core;
 using Brio.Game.Actor;
 using Brio.Game.Actor.Extensions;
@@ -16,11 +17,13 @@ using System;
 
 namespace Brio.Entities.Actor;
 
-public class ActorEntity(IGameObject gameObject, IServiceProvider provider) : Entity(new EntityId(gameObject), provider)
+public class ActorEntity(IGameObject gameObject, IServiceProvider provider) : TransformableEntity(new EntityId(gameObject), provider)
 {
     public readonly IGameObject GameObject = gameObject;
 
     private readonly ConfigurationService _configService = provider.GetRequiredService<ConfigurationService>();
+
+    private ActorAppearanceCapability _actorAppearanceCapability = null!;
 
     public string RawName = "";
     public override string FriendlyName
@@ -61,15 +64,31 @@ public class ActorEntity(IGameObject gameObject, IServiceProvider provider) : En
         return ActorType.BrioActor;
     }
 
+    public override void Snapshot() 
+    {
+        if(TryGetCapability<PosingCapability>(out var cap)) 
+            cap.Snapshot(false, false);
+    }
+
     public override void OnDoubleClick()
     {
-        var aac = GetCapability<ActorAppearanceCapability>();
-        RenameActorModal.Open(aac.Actor);
+        RenameActorModal.Open(this);
+    }
+
+    public override void SetVisibility(bool visible)
+    {
+        if(_actorAppearanceCapability is not null)
+        {
+            if(visible) 
+                _actorAppearanceCapability.Show();
+            else 
+                _actorAppearanceCapability.Hide();
+        }
     }
 
     public override void DrawContextButton()
     {
-        var aac = GetCapability<ActorAppearanceCapability>();
+        var aac = _actorAppearanceCapability;
 
         using(ImRaii.PushColor(ImGuiCol.Button, ThemeManager.CurrentTheme.Accent.AccentColor, aac.IsHidden))
         {
@@ -84,13 +103,15 @@ public class ActorEntity(IGameObject gameObject, IServiceProvider provider) : En
     public override void OnAttached()
     {
         AddCapability(ActivatorUtilities.CreateInstance<ActorLifetimeCapability>(_serviceProvider, this));
-        AddCapability(ActivatorUtilities.CreateInstance<ActorAppearanceCapability>(_serviceProvider, this));
+        AddCapability(_actorAppearanceCapability = ActivatorUtilities.CreateInstance<ActorAppearanceCapability>(_serviceProvider, this));
 
         if(ActorType is ActorType.BrioActor)
             AddCapability(ActorDynamicPoseCapability.CreateIfEligible(_serviceProvider, this));
 
         AddCapability(ActivatorUtilities.CreateInstance<SkeletonPosingCapability>(_serviceProvider, this));
-        AddCapability(ActivatorUtilities.CreateInstance<ModelPosingCapability>(_serviceProvider, this));
+
+        AddTransformable<ModelPosingCapability>();
+
         AddCapability(ActivatorUtilities.CreateInstance<PosingCapability>(_serviceProvider, this));
 
         AddCapability(ActionTimelineCapability.CreateIfEligible(_serviceProvider, this));
