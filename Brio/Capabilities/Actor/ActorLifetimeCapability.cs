@@ -8,6 +8,8 @@ using Brio.Game.Core;
 using Brio.Game.World;
 using Brio.UI.Widgets.Actor;
 using Dalamud.Game.ClientState.Objects.Types;
+using Brio.UI.Entitites;
+using Brio.Entities.Core;
 
 namespace Brio.Capabilities.Actor;
 
@@ -27,7 +29,7 @@ public class ActorLifetimeCapability : ActorCapability
         _actorAppearanceService = actorAppearanceService;
         _cameraManager = cameraManager;
 
-        Widget = new ActorLifetimeWidget(this, actorSpawnService, cameraManager, lightingService);
+        Widget = new ActorLifetimeWidget(this);
     }
 
     public void MoveToCamera()
@@ -62,7 +64,7 @@ public class ActorLifetimeCapability : ActorCapability
         _targetService.GPoseTarget = GameObject;
     }
 
-    public bool CanClone => Actor.Parent is ActorContainerEntity && GameObject is ICharacter;
+    public bool CanClone => Actor.Parent is EntityManagerContainer or FolderEntity && GameObject is ICharacter;
 
     public void SpawnNewActor(bool selectInHierarchy, bool spawnCompanion, bool disableSpawnCompanion)
     {
@@ -108,7 +110,7 @@ public class ActorLifetimeCapability : ActorCapability
     }
 
     public bool CanDestroy =>
-        Actor.Parent is ActorContainerEntity ||
+        Actor.Parent is EntityManagerContainer or FolderEntity ||
         (Actor.Parent is ActorEntity parentEntity && parentEntity.GameObject is ICharacter character && character.HasSpawnedCompanion());
 
     public void Destroy()
@@ -116,7 +118,7 @@ public class ActorLifetimeCapability : ActorCapability
         if(!CanDestroy)
             return;
 
-        if(Actor.Parent is ActorContainerEntity)
+        if(Actor.Parent is EntityManagerContainer or FolderEntity)
             _actorSpawnService.DestroyObject(GameObject);
         else if(Actor.Parent is ActorEntity actorEntity)
             _actorSpawnService.DestroyCompanion((ICharacter)((ActorEntity)Actor.Parent).GameObject);

@@ -40,7 +40,7 @@ public static class PosingEditorCommon
             }
             else
             {
-                if(posing.ModelPosing.Freeze)
+                if(posing.ModelPosing.IsTransformFrozen)
                 {
                     ImGui.Text("This actor's transform values are frozen.");
                 }

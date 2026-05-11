@@ -329,7 +329,7 @@ public class PosingCapability : ActorCharacterCapability
 
     public void Redo()
     {
-        if(_entityManager.SelectedEntityIds.Count > 1)
+        if(_entityManager.SelectedEntitys.Count > 1)
         {
             _groupedUndoService.Redo();
             return;
@@ -345,7 +345,7 @@ public class PosingCapability : ActorCharacterCapability
 
     public void Undo()
     {
-        if(_entityManager.SelectedEntityIds.Count > 1)
+        if(_entityManager.SelectedEntitys.Count > 1)
         {
             _groupedUndoService.Undo();
             return;

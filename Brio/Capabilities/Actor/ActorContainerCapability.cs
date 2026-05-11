@@ -20,7 +20,7 @@ public class ActorContainerCapability : Capability
 
     public bool CanControlCharacters => _gPoseService.IsGPosing;
 
-    public ActorContainerCapability(ActorContainerEntity parent, EntityManager entityManager, ActorSpawnService actorSpawnService, TargetService targetService, GPoseService gPoseService) : base(parent)
+    public ActorContainerCapability(Entity parent, EntityManager entityManager, ActorSpawnService actorSpawnService, TargetService targetService, GPoseService gPoseService) : base(parent)
     {
         _entityManager = entityManager;
         _actorSpawnService = actorSpawnService;

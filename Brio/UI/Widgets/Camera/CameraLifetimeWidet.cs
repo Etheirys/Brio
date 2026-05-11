@@ -11,17 +11,8 @@ using Dalamud.Interface.Utility.Raii;
 
 namespace Brio.UI.Widgets.Camera;
 
-public class CameraLifetimeWidget : Widget<CameraLifetimeCapability>
+public class CameraLifetimeWidget(CameraLifetimeCapability capability) : Widget<CameraLifetimeCapability>(capability)
 {
-    private readonly ActorSpawnService _actorSpawnService;
-    private readonly LightingService _lightingService;
-
-    public CameraLifetimeWidget(CameraLifetimeCapability capability, ActorSpawnService actorSpawnService, LightingService lightingService) : base(capability)
-    {
-        _actorSpawnService = actorSpawnService;
-        _lightingService = lightingService;
-    }
-
     public override string HeaderName => "Lifetime";
 
     public override WidgetFlags Flags => WidgetFlags.DrawPopup | WidgetFlags.DrawQuickIcons;
@@ -32,9 +23,8 @@ public class CameraLifetimeWidget : Widget<CameraLifetimeCapability>
         {
             if(ImBrio.FontIconButton("CameraLifetime_spawnnew", FontAwesomeIcon.Plus, "Spawn New"))
             {
-                ImGui.OpenPopup("UnifiedSpawnMenuPopup");
+                SpawnMenu.OpenUnifiedSpawnMenu();
             }
-            SpawnMenuEditor.DrawUnifiedSpawnMenu(_actorSpawnService, Capability.VirtualCameraManager, _lightingService);
 
             ImGui.SameLine();
 

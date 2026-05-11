@@ -1,7 +1,4 @@
 ﻿using Brio.Capabilities.Actor;
-using Brio.Game.Actor;
-using Brio.Game.Camera;
-using Brio.Game.World;
 using Brio.UI.Controls;
 using Brio.UI.Controls.Editors;
 using Brio.UI.Controls.Stateless;
@@ -11,43 +8,17 @@ using Dalamud.Interface;
 
 namespace Brio.UI.Widgets.Actor;
 
-public class ActorLifetimeWidget : Widget<ActorLifetimeCapability>
+public class ActorLifetimeWidget(ActorLifetimeCapability capability) : Widget<ActorLifetimeCapability>(capability)
 {
-    private readonly ActorSpawnService _actorSpawnService;
-    private readonly VirtualCameraManager _cameraManager;
-    private readonly LightingService _lightingService;
-
-    public ActorLifetimeWidget(ActorLifetimeCapability capability, ActorSpawnService actorSpawnService, VirtualCameraManager cameraManager, LightingService lightingService) : base(capability)
-    {
-        _actorSpawnService = actorSpawnService;
-        _cameraManager = cameraManager;
-        _lightingService = lightingService;
-    }
-
     public override string HeaderName => "Lifetime";
 
     public override WidgetFlags Flags => WidgetFlags.DrawPopup | WidgetFlags.DrawQuickIcons;
 
     public override void DrawQuickIcons()
     {
-        if(ImBrio.FontIconButton("lifetimewidget_spawnnew", FontAwesomeIcon.Plus, "Spawn New"))
+        if(ImBrio.FontIconButton("lifetimewidget_spawnnew", FontAwesomeIcon.Plus, "Reload New"))
         {
-            ImGui.OpenPopup("UnifiedSpawnMenuPopup");
-        }
-        SpawnMenuEditor.DrawUnifiedSpawnMenu(_actorSpawnService, _cameraManager, _lightingService);
-
-        ImGui.SameLine();
-
-        if(ImBrio.FontIconButton("lifetimewidget_spawn_prop", FontAwesomeIcon.Cubes, "Spawn Prop"))
-        {
-            Capability.SpawnNewProp(false);
-        }
-
-        ImGui.SameLine();
-
-        if(ImBrio.FontIconButton("lifetimewidget_move_to_camera", FontAwesomeIcon.Thumbtack, "Move to Camera"))
-        {
-            Capability.MoveToCamera();
+            SpawnMenu.OpenUnifiedSpawnMenu();
         }
 
         ImGui.SameLine();
@@ -81,11 +52,6 @@ public class ActorLifetimeWidget : Widget<ActorLifetimeCapability>
 
     public override void DrawPopup()
     {
-        if(ImGui.MenuItem("Move to Camera###actorlifetime_move_to_camera"))
-        {
-            Capability.MoveToCamera();
-        }
-
         if(Capability.CanClone)
         {
             if(ImGui.MenuItem("Clone###actorlifetime_clone"))
@@ -119,5 +85,9 @@ public class ActorLifetimeWidget : Widget<ActorLifetimeCapability>
             Capability.Target();
         }
 
+        if(ImGui.MenuItem("Move to Camera###actorlifetime_move_to_camera"))
+        {
+            Capability.MoveToCamera();
+        }
     }
 }

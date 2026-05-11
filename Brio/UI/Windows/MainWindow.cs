@@ -6,6 +6,7 @@ using Brio.Game.GPose;
 using Brio.MCDF.Game.Services;
 using Brio.Services;
 using Brio.UI.Controls.Core;
+using Brio.UI.Controls.Editors;
 using Brio.UI.Controls.Stateless;
 using Brio.UI.Entitites;
 using Brio.UI.Theming;
@@ -52,6 +53,8 @@ public class MainWindow : Window, IDisposable
         : base($" {Brio.Name} [{configService.Version}]###brio_main_window", ImGuiWindowFlags.AlwaysAutoResize)
     {
         Namespace = "brio_main_namespace";
+
+        //this.AllowBackgroundBlur = true;
 
         _configurationService = configService;
         _settingsWindow = settingsWindow;
@@ -132,12 +135,12 @@ public class MainWindow : Window, IDisposable
         {
             if(container.Success)
             {
-                _entitySelector.Draw(rootEntity);
+                _entitySelector.Draw(rootEntity, _entityManager.DebugEntity);
 
-                if(_entityManager.SelectedEntityIds.Count > 1)
+                if(_entityManager.SelectedEntitys.Count > 1)
                 {
                     using var color = ImRaii.PushColor(ImGuiCol.Text, ThemeManager.CurrentTheme.Accent.AccentColor);
-                    ImGui.Text($"{_entityManager.SelectedEntityIds.Count} selected");
+                    ImGui.Text($"{_entityManager.SelectedEntitys.Count} selected");
                 }
             }
         }
