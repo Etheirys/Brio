@@ -5,6 +5,7 @@ using Brio.Library.Sources;
 using Brio.Library.Tags;
 using Brio.UI.Controls.Core;
 using Brio.UI.Controls.Stateless;
+using Brio.UI.Theming;
 using Brio.UI.Windows;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface;
@@ -198,7 +199,7 @@ public abstract class ItemEntryBase : EntryBase
         var config = ConfigurationService.Instance.Configuration;
         bool isFavorite = config.Library.Favorites.Contains(this.Identifier);
 
-        ImGui.PushStyleColor(ImGuiCol.Text, isFavorite ? UIConstants.GizmoRed : UIConstants.ToggleButtonInactive);
+        ImGui.PushStyleColor(ImGuiCol.Text, isFavorite ? UIConstants.GizmoRed : ThemeManager.CurrentTheme.Text.Text);
 
         //
 

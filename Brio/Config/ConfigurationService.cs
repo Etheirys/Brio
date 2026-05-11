@@ -1,4 +1,5 @@
-﻿using Dalamud.Plugin;
+﻿using Brio.UI.Theming;
+using Dalamud.Plugin;
 using System;
 using System.Reflection;
 
@@ -27,6 +28,8 @@ public class ConfigurationService : IDisposable
         Instance = this;
         _pluginInterface = pluginInterface;
         Configuration = _pluginInterface.GetPluginConfig() as Configuration ?? new Configuration();
+
+        ThemeManager.SetThemeByName(Configuration.Appearance.Theme);
     }
 
     public void Save()

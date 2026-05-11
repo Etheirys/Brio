@@ -1,6 +1,7 @@
 ﻿using Brio.Capabilities.World;
 using Brio.Config;
 using Brio.Entities;
+using Brio.Entities.World;
 using Brio.Game.GPose;
 using Brio.Game.World;
 using Brio.UI.Controls;
@@ -47,10 +48,19 @@ public class LightWindow : Window, IDisposable
         return base.DrawConditions();
     }
 
-    bool state = false;
+    private readonly ITransformableEditor _lightTransformEditor = new();
+
     public override void Draw()
     {
         ImBrio.VerticalPadding(2);
+
+        if(_configService.Configuration.Posing.AutoSelectLightWhenClickingOnALight && _entityManager.SelectedEntity is LightEntity lightEntity)
+        {
+            if(lightEntity != _lightingService.SelectedLightEntity)
+            {
+                _lightingService.SelectedLightEntity = lightEntity;
+            }
+        }
 
         ImGui.Text("Select Light to Edit:");
         ImBrio.CenterNextElementWithPadding(15);
@@ -85,7 +95,7 @@ public class LightWindow : Window, IDisposable
         //
         // Hedder
 
-        if(ImBrio.FontIconButton("lifetimewidget_spawnnew", FontAwesomeIcon.Plus, "Spawn New Light"))
+        if(ImBrio.FontIconButton("lifetimewidget_spawnnew", FontAwesomeIcon.Plus, "Reload New Light"))
         {
             ImGui.OpenPopup("DrawLightSpawnMenuPopup");
         }
@@ -142,7 +152,8 @@ public class LightWindow : Window, IDisposable
 
         if(ImGui.CollapsingHeader("Light Transform"u8, ImGuiTreeNodeFlags.DefaultOpen))
         {
-            LightEditor.DrawLightTransform(lightGizmo, ref state);
+            LightEditor.DrawLightTransformHeader(lightGizmo);
+            _lightTransformEditor.Draw($"light_transform_{lightGizmo.Entity.Id}", lightGizmo.Light, 0.1f);
         }
 
         if(ImGui.CollapsingHeader("Light Properties"u8, ImGuiTreeNodeFlags.DefaultOpen))

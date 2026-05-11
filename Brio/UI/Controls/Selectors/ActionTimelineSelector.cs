@@ -2,6 +2,7 @@
 using Brio.Resources.Sheets;
 using Brio.UI.Controls.Core;
 using Brio.UI.Controls.Stateless;
+using Brio.UI.Theming;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface;
 using System;
@@ -85,7 +86,7 @@ public class ActionTimelineSelector(string id) : Selector<ActionTimelineSelector
     private void DrawPinButton()
     {
         var pinIcon = _isPinned ? FontAwesomeIcon.Thumbtack : FontAwesomeIcon.Thumbtack;
-        var pinColor = _isPinned ? UIConstants.GizmoRed : UIConstants.ToggleButtonInactive;
+        var pinColor = _isPinned ? UIConstants.GizmoRed : ThemeManager.CurrentTheme.Text.Text;
 
         var tooltip = _isPinned ? "Unpin (close window)" : "Pin to keep open";
 

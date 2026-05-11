@@ -3,6 +3,7 @@ using Brio.Core;
 using Brio.Entities;
 using Brio.Files;
 using Brio.Game.Actor;
+using Brio.Game.WorldObjects;
 using Brio.Game.Camera;
 using Brio.Game.Chat;
 using Brio.Game.Core;
@@ -21,6 +22,7 @@ using Brio.MCDF.Game.Services;
 using Brio.Resources;
 using Brio.Services;
 using Brio.UI;
+using Brio.UI.Controls.Editors;
 using Brio.UI.Windows;
 using Brio.UI.Windows.Specialized;
 using Brio.Web;
@@ -86,8 +88,10 @@ public class Brio : IDalamudPlugin
                     // Setup default entities
                     Log.Debug($"Setting up default entitites...");
                     _services.GetRequiredService<EntityManager>().SetupDefaultEntities();
-                    _services.GetRequiredService<EntityActorManager>().AttachContainer();
+                    _services.GetRequiredService<EntityActorManager>().Initialize();
+
                     _services.GetRequiredService<Mediator>().StartAsync(CancellationToken.None);
+                    _services.GetRequiredService<SpawnMenu>().Initialize(_services);
 
                     // Trigger GPose events to ensure the plugin is in the correct state
                     Log.Debug($"Triggering initial GPose state...");
@@ -130,6 +134,7 @@ public class Brio : IDalamudPlugin
         serviceCollection.AddSingleton(dalamudServices.GameConfig);
 
         // Core / Misc
+        serviceCollection.AddSingleton<SpawnMenu>();
         serviceCollection.AddSingleton<Mediator>();
         serviceCollection.AddSingleton<EventBus>();
         serviceCollection.AddSingleton<DalamudService>();
@@ -149,6 +154,8 @@ public class Brio : IDalamudPlugin
         serviceCollection.AddSingleton<CharacterHandlerService>();
         serviceCollection.AddSingleton<LightingService>();
         serviceCollection.AddSingleton<TimelineIdentification>();
+        serviceCollection.AddSingleton<WorldObjectService>();
+        serviceCollection.AddSingleton<ReferenceImageService>();
 
         // API & Web
         serviceCollection.AddSingleton<BrioAPIService>();
@@ -178,7 +185,8 @@ public class Brio : IDalamudPlugin
         serviceCollection.AddSingleton<ActorSpawnService>();
         serviceCollection.AddSingleton<ActorRedrawService>();
         serviceCollection.AddSingleton<ActorAppearanceService>();
-        serviceCollection.AddSingleton<ActorVFXService>();
+        serviceCollection.AddSingleton<VFXService>();
+        serviceCollection.AddSingleton<SGLService>();
         serviceCollection.AddSingleton<ActionTimelineService>();
         serviceCollection.AddSingleton<GPoseService>();
         serviceCollection.AddSingleton<CommandHandlerService>();
@@ -230,6 +238,7 @@ public class Brio : IDalamudPlugin
         serviceCollection.AddSingleton<AutoSaveWindow>();
         serviceCollection.AddSingleton<MCDFWindow>();
         serviceCollection.AddSingleton<PosingGraphicalWindow>();
+        serviceCollection.AddSingleton<FurnitureCatalogWindow>();
         serviceCollection.AddSingleton<LightWindow>();
 
         return serviceCollection;
@@ -256,6 +265,13 @@ public class Brio : IDalamudPlugin
     public static void NotifyError(string message)
     {
         EventBus.Instance.NotifyError(message);
+    }
+
+    public void Dispose()
+    {
+        _services?.Dispose();
+
+        GC.SuppressFinalize(this);
     }
 
     //
@@ -362,7 +378,7 @@ public class Brio : IDalamudPlugin
         [
             "Glamourer", "Penumbra", "CustomizePlus", "VfxEditor", "Ktisis",
             "IllusioVitae", "Aetherment", "GagSpeak", "ProjectGagSpeak", "RoleplayingVoiceDalamud", "AQuestReborn",
-            "LoporritSync", "HonseFarm.Client", "LightlessSync", "Snowcloak", "MareSempiterne"
+            "LoporritSync", "HonseFarm.Client", "LightlessSync", "Snowcloak", "MareSempiterne", "Sundouleia", "Loci"
         ];
 
         var plugins = _services?.GetService<IDalamudPluginInterface>()?.InstalledPlugins
@@ -381,13 +397,6 @@ public class Brio : IDalamudPlugin
                     sb.Append($"> **`{data.Name + ':',-29}`** {data.Version}{(data.IsLoaded ? string.Empty : " (Disabled)")}\n");
             }
         }
-    }
-
-    public void Dispose()
-    {
-        _services?.Dispose();
-
-        GC.SuppressFinalize(this);
     }
 }
 
