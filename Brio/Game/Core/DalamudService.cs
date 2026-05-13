@@ -1,4 +1,5 @@
-﻿using Brio.Services;
+﻿using Brio.Game.GPose;
+using Brio.Services;
 using Brio.Services.MediatorMessages;
 using Dalamud.Game.ClientState.Conditions;
 using Dalamud.Game.ClientState.Objects.SubKinds;
@@ -22,22 +23,26 @@ public class DalamudService : MediatorSubscriberBase
     private readonly IGameConfig _gameConfig;
     private readonly IDataManager _dataManager;
     private readonly IObjectTable _objectTable;
+    private readonly GPoseService _gPoseService;
 
     private uint? _classJobId = 0;
 
-    public DalamudService(ICondition condition, IObjectTable gameObjects, IClientState clientState, IGameConfig gameConfig, IDataManager dataManager, IFramework framework, Mediator mediator)
+    public DalamudService(ICondition condition, IObjectTable gameObjects, IClientState clientState, GPoseService gPoseService, IGameConfig gameConfig, IDataManager dataManager, IFramework framework, Mediator mediator)
         : base(mediator)
     {
         _condition = condition;
-        _clientState = clientState;
+        _gPoseService = gPoseService;
         _framework = framework;
         _gameConfig = gameConfig;
         _dataManager = dataManager;
         _objectTable = gameObjects;
+        _clientState = clientState;
 
         IsWine = Util.IsWine();
 
-        _framework.Update += FrameworkOnUpdate;
+        _framework.Update += FrameworkUpdate;
+        _clientState.TerritoryChanged += TerritoryChanged;
+
     }
 
     public bool IsInCutscene { get; private set; } = false;
@@ -47,9 +52,9 @@ public class DalamudService : MediatorSubscriberBase
     public bool IsLodEnabled { get; private set; }
     public uint ClassJobId => _classJobId!.Value;
 
-    private void FrameworkOnUpdate(IFramework framework)
+    private void FrameworkUpdate(IFramework framework)
     {
-        Mediator.Publish(new FrameworkUpdateMessage());
+        Mediator.Publish(new PriorityFrameworkUpdateMessage(framework));
 
         if(_condition[ConditionFlag.WatchingCutscene] && !IsInCutscene)
         {
@@ -58,6 +63,11 @@ public class DalamudService : MediatorSubscriberBase
         else if(!_condition[ConditionFlag.WatchingCutscene] && IsInCutscene)
         {
             IsInCutscene = false;
+        }
+
+        if(_gPoseService.IsGPosing)
+        {
+            Mediator.Publish(new FrameworkUpdateMessage(framework));
         }
 
         var localPlayer = _objectTable.LocalPlayer;
@@ -71,6 +81,13 @@ public class DalamudService : MediatorSubscriberBase
         {
             IsLodEnabled = lodEnabled;
         }
+
+        Mediator.Publish(new DelayedFrameworkUpdateMessage(framework));
+    }
+
+    private void TerritoryChanged(uint obj)
+    {
+        Mediator.Publish(new TerritoryChangedMessage(obj));
     }
 
     public async Task<uint> GetHomeWorldIdAsync()
@@ -147,6 +164,7 @@ public class DalamudService : MediatorSubscriberBase
     {
         base.Dispose();
 
-        _framework.Update -= FrameworkOnUpdate;
+        _clientState.TerritoryChanged -= TerritoryChanged;
+        _framework.Update -= FrameworkUpdate;
     }
 }

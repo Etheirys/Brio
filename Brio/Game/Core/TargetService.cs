@@ -2,6 +2,8 @@
 using Brio.Entities;
 using Brio.Entities.Actor;
 using Brio.Game.GPose;
+using Brio.Services;
+using Brio.Services.MediatorMessages;
 using Dalamud.Game.ClientState.Objects.Enums;
 using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Plugin.Services;
@@ -9,7 +11,7 @@ using System;
 
 namespace Brio.Game.Core;
 
-public unsafe class TargetService : IDisposable
+public unsafe class TargetService : MediatorSubscriberBase
 {
     private readonly EntityManager _entityManager;
     private readonly ITargetManager _targetManager;
@@ -44,7 +46,7 @@ public unsafe class TargetService : IDisposable
     private nint _lastBrioTarget = 0;
     private nint _lastGPoseTarget = 0;
 
-    public TargetService(EntityManager entityManager, DalamudService dalamudService, GPoseService gPoseService, ITargetManager targetManager, IFramework framework, ConfigurationService configService)
+    public TargetService(EntityManager entityManager, Mediator mediator, DalamudService dalamudService, GPoseService gPoseService, ITargetManager targetManager, IFramework framework, ConfigurationService configService) : base(mediator)
     {
         _entityManager = entityManager;
         _targetManager = targetManager;
@@ -53,10 +55,10 @@ public unsafe class TargetService : IDisposable
         _gPoseService = gPoseService;
         _dalamudService = dalamudService;
 
-        _framework.Update += OnFrameworkUpdate;
+        mediator.Subscribe<FrameworkUpdateMessage>(this, (state) => OnFrameworkUpdate());
     }
 
-    private void OnFrameworkUpdate(IFramework framework)
+    private void OnFrameworkUpdate()
     {
         var currentBrioAddr = BrioTarget?.Address ?? 0;
         if(currentBrioAddr != 0 && _lastBrioTarget != currentBrioAddr)
@@ -97,10 +99,10 @@ public unsafe class TargetService : IDisposable
         return (canApply, targetName, GPoseTarget!);
     }
 
-    public void Dispose()
+    public override void Dispose()
     {
-        _framework.Update -= OnFrameworkUpdate;
-
+        base.Dispose();
+        
         GC.SuppressFinalize(this);
     }
 }

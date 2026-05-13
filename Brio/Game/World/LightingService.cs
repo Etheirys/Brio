@@ -12,6 +12,7 @@ using Brio.Entities.World;
 using Brio.Game.Camera;
 using Brio.Game.GPose;
 using Brio.Services;
+using Brio.Services.MediatorMessages;
 using Dalamud.Bindings.ImGuizmo;
 using Dalamud.Hooking;
 using Dalamud.Plugin.Services;
@@ -92,8 +93,8 @@ public unsafe class LightingService : MediatorSubscriberBase
         _lightCtorHook = hooks.HookFromAddress<LightDelegate>(_lightCtorAddress, LightCtor);
         _lightCtorHook.Enable();
 
-        _gPoseService.OnGPoseStateChange += OnGPoseStateChange;
-        _framework.Update += OnFrameworkUpdate;
+        mediator.Subscribe<GposeStateChangedMessage>(this, (state) => OnGPoseStateChange(state.NewState));
+        mediator.Subscribe<FrameworkUpdateMessage>(this, (state) => OnFrameworkUpdate(state.Framework));
     }
 
     public char ToggleGPoseLight(EventGPoseControllerEX* ptr, uint index)
@@ -466,6 +467,8 @@ public unsafe class LightingService : MediatorSubscriberBase
         _framework.Update -= OnFrameworkUpdate;
 
         DestroyAllLights();
+
+        GC.SuppressFinalize(this);
     }
 }
 

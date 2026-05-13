@@ -1,6 +1,8 @@
 ﻿using Brio.Core;
 using Brio.Game.GPose;
 using Brio.Resources;
+using Brio.Services;
+using Brio.Services.MediatorMessages;
 using Dalamud.Plugin.Services;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using FFXIVClientStructs.FFXIV.Client.LayoutEngine;
@@ -11,7 +13,7 @@ using System.Numerics;
 
 namespace Brio.Game.World;
 
-public unsafe class FestivalService : IDisposable
+public unsafe class FestivalService : MediatorSubscriberBase
 {
     public const int MaxFestivals = 8;
 
@@ -47,7 +49,7 @@ public unsafe class FestivalService : IDisposable
         }
     }
 
-    public FestivalService(IClientState clientState, IObjectTable objects, IToastGui toastGui, GameDataProvider gameDataProvider, IFramework framework, GPoseService gPoseService, ResourceProvider resourceProvider)
+    public FestivalService(IClientState clientState, IObjectTable objects, IToastGui toastGui, Mediator mediator, GameDataProvider gameDataProvider, IFramework framework, GPoseService gPoseService, ResourceProvider resourceProvider) : base(mediator)
     {
         _clientState = clientState;
         _toastGui = toastGui;
@@ -58,9 +60,9 @@ public unsafe class FestivalService : IDisposable
 
         FestivalList = BuildFestivalList(gameDataProvider);
 
-        _framework.Update += OnFrameworkUpdate;
-        _gPoseService.OnGPoseStateChange += OnGPoseStateChanged;
-        _clientState.TerritoryChanged += OnTerritoryChanged;
+        mediator.Subscribe<GposeStateChangedMessage>(this, (state) => OnGPoseStateChanged(state.NewState));
+        mediator.Subscribe<FrameworkUpdateMessage>(this, (state) => OnFrameworkUpdate(state.Framework));
+        mediator.Subscribe<TerritoryChangedMessage>(this, (state) => OnTerritoryChanged(state.TerritoryId));
     }
 
     private void OnFrameworkUpdate(IFramework framework)
@@ -240,14 +242,11 @@ public unsafe class FestivalService : IDisposable
         _originalState = null;
     }
 
-
-    public void Dispose()
+    public override void Dispose()
     {
         ResetFestivals(true);
 
-        _framework.Update -= OnFrameworkUpdate;
-        _gPoseService.OnGPoseStateChange -= OnGPoseStateChanged;
-        _clientState.TerritoryChanged -= OnTerritoryChanged;
+        base.Dispose();
 
         GC.SuppressFinalize(this);
     }

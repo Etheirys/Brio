@@ -1,4 +1,6 @@
 ﻿using Brio.Core;
+using Dalamud.Bindings.ImGui;
+using Dalamud.Interface.Windowing;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Immutable;
@@ -244,6 +246,18 @@ public interface IMediatorSubscriber : IDisposable
 public abstract class MediatorSubscriberBase(Mediator mediator) : IMediatorSubscriber
 {
     public Mediator Mediator { get; } = mediator;
+
+    public virtual void Dispose()
+    {
+        Mediator.UnsubscribeAll(this);
+        GC.SuppressFinalize(this);
+    }
+}
+
+public abstract class MediatorWindow(Mediator mediator, string name, ImGuiWindowFlags flags = ImGuiWindowFlags.None, bool forceMainWindow = false) 
+    : Window(name, flags, forceMainWindow), IMediatorSubscriber
+{
+    public Mediator Mediator { get; init; } = mediator;
 
     public virtual void Dispose()
     {

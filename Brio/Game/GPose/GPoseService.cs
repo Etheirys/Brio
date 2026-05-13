@@ -1,4 +1,5 @@
 ﻿using Brio.Config;
+using Brio.Game.World;
 using Brio.Services;
 using Brio.Services.MediatorMessages;
 using Dalamud.Game.ClientState.Objects.Types;
@@ -13,7 +14,7 @@ using NativeCharacter = FFXIVClientStructs.FFXIV.Client.Game.Character.Character
 
 namespace Brio.Game.GPose;
 
-public unsafe class GPoseService : IDisposable
+public unsafe class GPoseService : MediatorSubscriberBase
 {
     public bool IsGPosing => _isInFakeGPose || _isInGPose;
 
@@ -51,16 +52,14 @@ public unsafe class GPoseService : IDisposable
     private readonly IFramework _framework;
     private readonly IClientState _clientState;
     private readonly ConfigurationService _configService;
-    private readonly Mediator _mediator;
 
     public const string BrioHiddenName = "[HIDDEN]";
 
-    public GPoseService(IFramework framework, IClientState clientState, Mediator mediator, ConfigurationService configService, IGameInteropProvider interopProvider, ISigScanner scanner)
+    public GPoseService(IFramework framework, IClientState clientState, Mediator mediator, ConfigurationService configService, IGameInteropProvider interopProvider, ISigScanner scanner) : base(mediator)
     {
         _framework = framework;
         _clientState = clientState;
         _configService = configService;
-        _mediator = mediator;
 
         _isInGPose = _clientState.IsGPosing;
 
@@ -80,7 +79,7 @@ public unsafe class GPoseService : IDisposable
         var targetNameAddr = "E8 ?? ?? ?? ?? 48 8D 8D ?? ?? ?? ?? 48 83 C4 28"; // sig from, Ktisis GuiHooks.cs line 43 (https://github.com/ktisis-tools/Ktisis/blob/main/Ktisis/Interop/Hooks/GuiHooks.cs)
         _targetNameDelegateHook = interopProvider.HookFromAddress<TargetNameDelegate>(scanner.ScanText(targetNameAddr), TargetNameDetour);
 
-        _framework.Update += OnFrameworkUpdate;
+        mediator.Subscribe<FrameworkUpdateMessage>(this, msg => OnFrameworkUpdate(msg.Framework));
 
         UpdateDynamicHooks();
     }
@@ -125,7 +124,6 @@ public unsafe class GPoseService : IDisposable
         _exitGPoseHook.Original.Invoke(uiModule);
 
         HandleGPoseStateChange(false);
-        _mediator.Publish(new GposeEndMessage());
     }
 
     private bool EnteringGPoseDetour(UIModule* uiModule)
@@ -133,7 +131,6 @@ public unsafe class GPoseService : IDisposable
         bool didEnter = _enterGPoseHook.Original.Invoke(uiModule);
 
         HandleGPoseStateChange(didEnter);
-        _mediator.Publish(new GposeStartMessage());
 
         return didEnter;
     }
@@ -160,6 +157,13 @@ public unsafe class GPoseService : IDisposable
 
         _isInGPose = newState;
 
+        Mediator.Publish(new GposeStateChangedMessage(newState));
+
+        if(newState)
+            Mediator.Publish(new GposeStartMessage());
+        else
+            Mediator.Publish(new GposeEndMessage());
+
         UpdateDynamicHooks();
 
         TriggerGPoseChange();
@@ -184,14 +188,17 @@ public unsafe class GPoseService : IDisposable
         }
     }
 
-    public void Dispose()
+    public override void Dispose()
     {
-        _framework.Update -= OnFrameworkUpdate;
+        base.Dispose();
 
         _targetNameDelegateHook.Dispose();
         _enterGPoseHook.Dispose();
         _exitGPoseHook.Dispose();
         _mouseHoverHook.Dispose();
+
+        _yesNoDelegateHook?.Dispose();
+        _tempHook?.Dispose();
 
         GC.SuppressFinalize(this);
     }
