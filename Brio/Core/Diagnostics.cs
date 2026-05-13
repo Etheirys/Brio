@@ -80,6 +80,11 @@ public ref struct DiagnosticScope : IDisposable
             _trace.Log(_logLabel);
         }
     }
+
+    public void Record()
+    {
+        _trace.Record(Stopwatch.GetTimestamp() - _start, _customData);
+    }
 }
 
 public struct DiagnosticTrace()
@@ -193,12 +198,18 @@ public struct DiagnosticTracker(string tag, int logInterval, double slowFrameThr
         if(_dynamicTraces == null)
             return;
 
+        double totalAverage = 0; 
         foreach(var tracesKVP in _dynamicTraces)
         {
             var trace = tracesKVP.Value;
             Brio.Log.Verbose($"  [Diagnostics]:[{tracesKVP.Key}] avg={trace.AvgMs:F3}ms max={trace.MaxMs:F3}ms");
+            totalAverage += trace.AvgMs;
             trace.Reset();
         }
+        Brio.Log.Verbose($"  -----------------------------------------------------");
+        Brio.Log.Verbose($"  [Diagnostics]:[Total Average] avg={totalAverage:F3}ms");
+        Brio.Log.Verbose($"  -----------------------------------------------------");
+
     }
 }
 
