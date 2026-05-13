@@ -3,7 +3,6 @@ using Brio.Core;
 using Brio.Entities;
 using Brio.Files;
 using Brio.Game.Actor;
-using Brio.Game.WorldObjects;
 using Brio.Game.Camera;
 using Brio.Game.Chat;
 using Brio.Game.Core;
@@ -12,6 +11,7 @@ using Brio.Game.GPose;
 using Brio.Game.Input;
 using Brio.Game.Posing;
 using Brio.Game.World;
+using Brio.Game.WorldObjects;
 using Brio.Input;
 using Brio.IPC;
 using Brio.IPC.API;
@@ -35,79 +35,122 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 
 using static Brio.Core.Win32;
 
 namespace Brio;
 
-public class Brio : IDalamudPlugin
+public class Brio(IDalamudPluginInterface pluginInterface) : IAsyncDalamudPlugin
 {
     public const int MajorAPIVersion = 3;
     public const int MinorAPIVersion = 0;
 
     public const string Name = "BRIO";
 
+    private readonly IDalamudPluginInterface _pluginInterface = pluginInterface;
     private static ServiceProvider? _services = null;
 
     public static IPluginLog Log { get; private set; } = null!;
     public static IFramework Framework { get; private set; } = null!;
 
-    public Brio(IDalamudPluginInterface pluginInterface)
-    {
-        // Setup dalamud services
-        var dalamudServices = new DalamudPluginService(pluginInterface);
-        Log = dalamudServices.Log;
-        Framework = dalamudServices.Framework;
+    private DiagnosticTracker _perfTracker = new("ServiceStartup", logInterval: 1, slowFrameThresholdMs: 1, slowFrameCooldownFrames: 1, []);
 
-        dalamudServices.Framework.RunOnTick(() =>
+    public Task LoadAsync(CancellationToken cancellationToken)
+    {
+        return Task.Run(() =>
         {
-            var trace = new DiagnosticTrace();
-            using(Diagnostics.MeasureTime(ref trace, logOnDispose: true, logLabel: "StartUp"))
+            var stopwatch = new Stopwatch();
+            stopwatch.Start();
+
+            // Setup dalamud services
+            var dalamudServices = new DalamudPluginService(_pluginInterface);
+            Log = dalamudServices.Log;
+            Framework = dalamudServices.Framework;
+
+            try
             {
-                var stopwatch = new Stopwatch();
-                stopwatch.Start();
                 Log.Info($"Starting {Name}...");
 
-                try
+                using(Diagnostics.MeasureTime(ref _perfTracker.Trace, logOnDispose: true, logLabel: "StartUp"))
                 {
                     // Setup plugin services
                     var serviceCollection = SetupServices(dalamudServices);
 
                     _services = serviceCollection.BuildServiceProvider(new ServiceProviderOptions { ValidateOnBuild = true });
 
-                    // Initialize the singletons
-                    foreach(var service in serviceCollection)
+                    Framework.RunOnTick(() =>
                     {
-                        if(service.Lifetime == ServiceLifetime.Singleton)
+                        // Initialize the singletons
+                        foreach(var service in serviceCollection)
                         {
-                            Log.Debug($"Initializing {service.ServiceType}...");
-                            _services.GetRequiredService(service.ServiceType);
+                            var trace = new DiagnosticTrace();
+
+                            var tick = Diagnostics.MeasureTime(ref trace, logOnDispose: false, logLabel: service.ServiceType.Name);
+                            if(service.Lifetime == ServiceLifetime.Singleton)
+                            {
+                                Log.Debug($"Initializing {service.ServiceType}...");
+                                _services.GetRequiredService(service.ServiceType);
+                            }
+                            tick.Record();
+
+                            try
+                            {
+                                _perfTracker.AddTrace($"{service.ServiceType}", ref trace);
+                            }
+                            catch(Exception) { }
                         }
-                    }
 
-                    // Setup default entities
-                    Log.Debug($"Setting up default entitites...");
-                    _services.GetRequiredService<EntityManager>().SetupDefaultEntities();
-                    _services.GetRequiredService<EntityActorManager>().Initialize();
+                        // Setup default entities
+                        Log.Debug($"Setting up default entitites...");
+                        _services.GetRequiredService<EntityManager>().SetupDefaultEntities();
+                        _services.GetRequiredService<EntityActorManager>().Initialize();
 
-                    _services.GetRequiredService<Mediator>().StartAsync(CancellationToken.None);
-                    _services.GetRequiredService<SpawnMenu>().Initialize(_services);
+                        _services.GetRequiredService<Mediator>().StartAsync(CancellationToken.None);
+                        _services.GetRequiredService<SpawnMenu>().Initialize(_services);
 
-                    // Trigger GPose events to ensure the plugin is in the correct state
-                    Log.Debug($"Triggering initial GPose state...");
-                    _services.GetRequiredService<GPoseService>().TriggerGPoseChange();
+                        // Trigger GPose events to ensure the plugin is in the correct state
+                        Log.Debug($"Triggering initial GPose state...");
+                        _services.GetRequiredService<GPoseService>().TriggerGPoseChange();
 
-                    Log.Info($"Started {Name} in {stopwatch.ElapsedMilliseconds}ms");
+                        _perfTracker.Log();
+
+                    }, delayTicks: 2); // TODO: Why do we need to wait several frames for some users?
                 }
-                catch(Exception e)
+
+                Log.Info($"Started {Name} in {stopwatch.ElapsedMilliseconds}ms");
+            }
+            catch(Exception e)
+            {
+                Log.Fatal(e, $"Failed to start {Name} in {stopwatch.ElapsedMilliseconds}ms", e);
+                throw;
+            }
+        }, cancellationToken);
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        await Framework.RunOnFrameworkThread(() =>
+        {
+            foreach(var service in _services?.GetServices<IDisposable>() ?? [])
+            {
+                try
                 {
-                    Log.Error(e, $"Failed to start {Name} in {stopwatch.ElapsedMilliseconds}ms");
-                    _services?.Dispose();
-                    throw;
+                    service.Dispose();
+
+                    Log.Debug($"Disposed service {service.GetType().FullName}");
+                }
+                catch(Exception ex)
+                {
+                    Log.Error(ex, $"Error disposing service {service.GetType().FullName}");
                 }
             }
+            _services?.Dispose();
+           
+            Log.Info($"Disposed {Name}!");
+        });
 
-        }, delayTicks: 2); // TODO: Why do we need to wait several frames for some users?
+        GC.SuppressFinalize(this);
     }
 
     private static ServiceCollection SetupServices(DalamudPluginService dalamudServices)
@@ -136,7 +179,6 @@ public class Brio : IDalamudPlugin
         // Core / Misc
         serviceCollection.AddSingleton<SpawnMenu>();
         serviceCollection.AddSingleton<Mediator>();
-        serviceCollection.AddSingleton<EventBus>();
         serviceCollection.AddSingleton<DalamudService>();
         serviceCollection.AddSingleton<ConfigurationService>();
         serviceCollection.AddSingleton<ResourceProvider>();
@@ -409,6 +451,7 @@ public class Brio : IDalamudPlugin
 //
 // -------------------------------------------------------------
 
+
 /*                                                                                                                                                
                                                                                                                                                  
                                                                                                  +#                                              
@@ -489,4 +532,14 @@ public class Brio : IDalamudPlugin
                                           ++###################################++++++++++++++++++++++++++++++##########+                         
                                           ++###################################++++++++++++++++++++++++++++++##########+                         
                                                                                                                                                                                                                                                                                                   
+
+ 
 */
+
+// -------------------------------------------------------------
+
+//
+// Brio is Licensed under the AGPL-3.0 License (https://www.gnu.org/licenses/agpl-3.0)
+//
+
+// -------------------------------------------------------------
