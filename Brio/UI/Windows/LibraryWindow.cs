@@ -25,7 +25,7 @@ using System.Numerics;
 
 namespace Brio.UI.Windows;
 
-public class LibraryWindow : Window
+public class LibraryWindow : Window, IDisposable
 {
     private static float WindowContentWidth => ImGui.GetWindowContentRegionMax().X - ImGui.GetWindowContentRegionMin().X;
     private static float WindowContentHeight => ImGui.GetWindowContentRegionMax().Y - ImGui.GetWindowContentRegionMin().Y;
@@ -1239,5 +1239,12 @@ public class LibraryWindow : Window
         sw.Stop();
         _lastRefreshTimeMs = sw.ElapsedMilliseconds;
         _isRefreshing = false;
+    }
+
+    public void Dispose()
+    {
+        _libraryManager.OnScanFinished -= OnLibraryScanFinished;
+        _configurationService.OnConfigurationChanged -= OnConfigurationChanged;
+        _gPoseService.OnGPoseStateChange -= OnGPoseStateChange;
     }
 }

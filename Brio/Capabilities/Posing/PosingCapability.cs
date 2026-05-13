@@ -113,7 +113,6 @@ public class PosingCapability : ActorCharacterCapability
         if(_configurationService.Configuration.Posing.AutoSelectTransformOnEntitySelect)
         {
             Selected = PosingSelectionType.ModelTransform;
-            SelectedBones.Clear();
         }
     }
 
@@ -686,7 +685,7 @@ public class PosingCapability : ActorCharacterCapability
     public void ToggleBoneSelection(BonePoseInfoId boneId)
     {
         var existingBone = SelectedBones.FirstOrDefault(b => b.Equals(boneId));
-        if(!existingBone.Equals(default(BonePoseInfoId)))
+        if(!existingBone.Equals(default))
         {
             SelectedBones.Remove(existingBone);
             if(SelectedBones.Count == 0)

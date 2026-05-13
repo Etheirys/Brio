@@ -15,7 +15,7 @@ public class EnvLifetimeWidget(EnvironmentLifetimeCapability environmentLifetime
 
     public override void DrawQuickIcons()
     {
-        using(ImRaii.Disabled(environmentLifetimeCapability.GPoseService.IsGPosing is false))
+        using(ImRaii.Disabled(Capability.GPoseService.IsGPosing is false))
             if(ImBrio.FontIconButton("lifetimewidget_spawnnew", FontAwesomeIcon.Plus, "Spawn New"))
             {
                 SpawnMenu.OpenUnifiedSpawnMenu();

@@ -11,7 +11,7 @@ public class PosingService
 
     public bool GizmoStaysWhenAllBonesAreDisabled { get; set; } = false;
 
-    public BoneCategories BoneCategories { get; } = new();
+    public BoneCategories BoneCategories { get { field ??= new BoneCategories(); return field; } }
 
     public BoneFilter OverlayFilter { get; }
 

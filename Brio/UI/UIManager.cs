@@ -255,7 +255,7 @@ public class UIManager : IDisposable
             SpawnMenu.DrawUnifiedSpawnMenu();
 
         }
-        catch (Exception ex)
+        catch(Exception ex)
         {
             Brio.Log.Error($"Exception while drawing UI: {ex}");
         }

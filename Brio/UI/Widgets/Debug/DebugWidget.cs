@@ -7,11 +7,10 @@ using Brio.UI.Widgets.Core;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Plugin.Services;
-using FFXIVClientStructs.FFXIV.Common.Math;
 
 namespace Brio.UI.Widgets.Debug;
 
-public class DebugWidget(DebugCapability capability, IFramework framework, IClientState _clientState, IObjectTable _objectTable) : Widget<DebugCapability>(capability)
+public class DebugWidget(DebugCapability capability, IClientState _clientState, IObjectTable _objectTable) : Widget<DebugCapability>(capability)
 {
     public override string HeaderName => "Debug";
 

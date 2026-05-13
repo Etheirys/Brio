@@ -52,11 +52,11 @@ public abstract class Entity : IDisposable
     public virtual bool IsDisabled { get; set; } = false;
     public virtual bool IsLoading { get; set; } = false;
     public virtual bool IsLocked { get; set; } = false;
-    public virtual bool IsOverlayVisible { get; set; } = true;
+    public virtual bool IsOverlayVisible { get; set; } = false;
     
     public virtual bool IsSynced => false;
     public virtual bool IsLoadedFromProject => false;
-    public virtual bool IsBodyHidden { get; set; } = true;
+    public virtual bool IsWidgetBodyHidden { get; set; } = true;
 
     public Entity(EntityId id, IServiceProvider serviceProvider, IEnumerable<Entity>? children = null)
     {

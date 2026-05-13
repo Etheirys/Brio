@@ -15,6 +15,7 @@ using Brio.Services;
 using Brio.UI.Controls.Core;
 using Brio.UI.Controls.Editors;
 using Brio.UI.Controls.Stateless;
+using Brio.UI.Theming;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface;
 using Dalamud.Interface.Utility.Raii;
@@ -218,7 +219,7 @@ public class PosingGraphicalWindow : Window, IDisposable
 
         ImGui.SameLine();
 
-        using(ImRaii.PushColor(ImGuiCol.Text, posing.TransformWindowOpen ? UIConstants.ToggleButtonActive : UIConstants.ToggleButtonInactive))
+        using(ImRaii.PushColor(ImGuiCol.Text, posing.TransformWindowOpen ? UIConstants.ToggleButtonActive : ThemeManager.CurrentTheme.Text.Text))
         {
             if(ImBrio.FontIconButton(FontAwesomeIcon.LocationCrosshairs, new(buttonWidth, 0)))
                 posing.TransformWindowOpen = !posing.TransformWindowOpen;
@@ -282,7 +283,7 @@ public class PosingGraphicalWindow : Window, IDisposable
 
         ImGui.SameLine();
 
-        using(ImRaii.PushColor(ImGuiCol.Text, _hideControlPane ? UIConstants.ToggleButtonActive : UIConstants.ToggleButtonInactive))
+        using(ImRaii.PushColor(ImGuiCol.Text, _hideControlPane ? UIConstants.ToggleButtonActive : ThemeManager.CurrentTheme.Button.Button))
         {
             if(ImBrio.FontIconButton(_hideControlPane ? FontAwesomeIcon.SlidersH : FontAwesomeIcon.SlidersH, new(buttonWidth, 0)))
                 _hideControlPane = !_hideControlPane;
@@ -421,7 +422,7 @@ public class PosingGraphicalWindow : Window, IDisposable
 
         if(ImBrioGizmo.DrawRotation(ref matrix, gizmoSize, _posingService.CoordinateMode == PosingCoordinateMode.World))
         {
-            if(!posing.ModelPosing.Freeze && !(selectedBone != null && selectedBone.Freeze))
+            if(!posing.ModelPosing.IsTransformFrozen && !(selectedBone != null && selectedBone.Freeze))
                 _trackingMatrix = matrix;
         }
 
@@ -454,46 +455,18 @@ public class PosingGraphicalWindow : Window, IDisposable
                 _ =>
                 {
                     if(_groupedSnapshotPending == null && ImBrioGizmo.IsUsing())
-                    {
                         _groupedSnapshotPending = _entityManager.GetAllSelectedActors();
-                    }
 
-                    // apply delta to all selected entities
-                    foreach(var id in _entityManager.SelectedEntityIds)
-                    {
-                        if(!_entityManager.TryGetEntity(id, out var ent))
-                            continue;
-
-                        if(!ent.TryGetCapability<PosingCapability>(out var cap))
-                            continue;
-
-                        if(cap.ModelPosing.Freeze)
-                            continue;
-
-                        cap.ModelPosing.Transform += delta;
-                    }
+                    foreach(var (_, target, _) in _entityManager.GetAllSelectedTransformables())
+                        TransformHelper.ApplyDelta(target, delta);
                 },
                 _ =>
                 {
                     if(_groupedSnapshotPending == null && ImBrioGizmo.IsUsing())
-                    {
                         _groupedSnapshotPending = _entityManager.GetAllSelectedActors();
-                    }
 
-                    // apply delta to all selected entities
-                    foreach(var id in _entityManager.SelectedEntityIds)
-                    {
-                        if(!_entityManager.TryGetEntity(id, out var ent))
-                            continue;
-
-                        if(!ent.TryGetCapability<PosingCapability>(out var cap))
-                            continue;
-
-                        if(cap.ModelPosing.Freeze)
-                            continue;
-
-                        cap.ModelPosing.Transform += delta;
-                    }
+                    foreach(var (_, target, _) in _entityManager.GetAllSelectedTransformables())
+                        TransformHelper.ApplyDelta(target, delta);
                 }
             );
         }
@@ -506,16 +479,7 @@ public class PosingGraphicalWindow : Window, IDisposable
                 _groupedSnapshotPending = null;
             }
 
-            foreach(var eid in _entityManager.SelectedEntityIds)
-            {
-                if(!_entityManager.TryGetEntity(eid, out var ent))
-                    continue;
-
-                if(!ent.TryGetCapability<PosingCapability>(out var cap))
-                    continue;
-
-                cap.Snapshot(false, false);
-            }
+            TransformHelper.SnapshotAll(_entityManager.GetAllSelectedTransformables().Select(x => x.target));
 
             _trackingMatrix = null;
         }

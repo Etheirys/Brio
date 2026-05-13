@@ -246,6 +246,9 @@ public class TransientResourceService : IDisposable
         _penumbraService.OnPenumbraResourceLoaded -= Manager_PenumbraResourceLoadEvent;
         Framework.Update -= Framework_Update;
 
+        _sendTransientCts?.Cancel();
+        _sendTransientCts?.Dispose();
+
         TransientResources.Clear();
         SemiTransientResources.Clear();
     }

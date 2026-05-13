@@ -18,7 +18,6 @@ public class TimeWeatherWidget(TimeWeatherCapability weatherCapability) : Widget
     public override string HeaderName => "Time & Weather";
     public override WidgetFlags Flags => WidgetFlags.DefaultOpen | WidgetFlags.DrawBody;
 
-
     private static readonly WeatherSelector _weatherSelector = new("global_weather_selector");
 
     public override void DrawBody()
@@ -38,15 +37,10 @@ public class TimeWeatherWidget(TimeWeatherCapability weatherCapability) : Widget
 
         var dateTime = new DateTime().AddMinutes(minuteOfDay);
 
-        ImBrio.VerticalPadding(5);
-        ImGui.Text("Time of Day"u8);
-        ImBrio.VerticalPadding(5);
-
-        var preservePostime = ImGui.GetCursorPos();
-        ImGui.SetCursorPos(unlockPos);
-        if(ImBrio.FontIconButtonRight("timeLock", isTimeFrozen ? FontAwesomeIcon.Unlock : FontAwesomeIcon.Lock, 1, isTimeFrozen ? "Unlock Time" : "Lock Time", bordered: false))
+        if(ImBrio.SeparatorTextButton("Time of Day", isTimeFrozen ? FontAwesomeIcon.Unlock : FontAwesomeIcon.Lock, isTimeFrozen ? "Unlock Time" : "Lock Time"))
+        {
             isTimeFrozen = !isTimeFrozen;
-        ImGui.SetCursorPos(preservePostime);
+        }
 
         ImBrio.CenterNextElementWithPadding(15);
         var realTime = ImGui.SliderInt("##time_real"u8, ref minuteOfDay, 0, DayTime - 1, dateTime.ToShortTimeString(), ImGuiSliderFlags.NoInput);
@@ -76,28 +70,19 @@ public class TimeWeatherWidget(TimeWeatherCapability weatherCapability) : Widget
             Capability.TimeService.IsTimeFrozen = isTimeFrozen;
 
         //
-        //
+        // Weather
 
-        ImBrio.VerticalPadding(10);
-        ImGui.Separator();
-
-        unlockPos = ImGui.GetCursorPos();
-
-        ImGui.Text("Current Weather /"u8);
-        ImGui.SameLine();
         WeatherUnion union = (WeatherId)currentWeather;
-        union.Switch(
-            row => ImGui.Text($"[{row.Name.ToString()}]"),
-            none => ImGui.Text("Unknown Weather"u8)
+        string weatherName = union.Match(
+            row => row.Name.ToString(),
+            none => "Weather Override"
         );
+
         ImBrio.VerticalPadding(5);
-
-        var preservePos = ImGui.GetCursorPos();
-
-        ImGui.SetCursorPos(unlockPos);
-        if(ImBrio.FontIconButtonRight("weatherLock", isWeatherOverrideEnabledLocked ? FontAwesomeIcon.Unlock : FontAwesomeIcon.Lock, 1, isWeatherOverrideEnabledLocked ? "Unlock Weather" : "Lock Weather", bordered: false))
+        if(ImBrio.SeparatorTextButton($"Current Weather - {weatherName}", isWeatherOverrideEnabledLocked ? FontAwesomeIcon.Unlock : FontAwesomeIcon.Lock, isWeatherOverrideEnabledLocked ? "Unlock Weather" : "Lock Weather"))
+        {
             isWeatherOverrideEnabledLocked = !isWeatherOverrideEnabledLocked;
-        ImGui.SetCursorPos(preservePos);
+        }
 
         ImBrio.CenterNextElementWithPadding(10);
         if(ImBrio.BorderedWeatherGameIcon("current_weather", (WeatherUnion)Capability.EnvironmentService.CurrentWeather, showText: false))

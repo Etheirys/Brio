@@ -7,7 +7,6 @@ using Brio.Entities.Camera;
 using Brio.Entities.Core;
 using Brio.Entities.Debug;
 using Brio.Entities.World;
-using Brio.IPC.API;
 using Dalamud.Game.ClientState.Objects.Types;
 using Microsoft.Extensions.DependencyInjection;
 using System;
@@ -103,7 +102,7 @@ public partial class EntityManager(IServiceProvider serviceProvider, Configurati
         parent ??= RootEntity;
 
         _entityMap[entity.Id] = entity;
-        
+
         if(entity is TransformableEntity transformableEntity)
             _transformableEntities.Add(transformableEntity);
 
@@ -114,7 +113,7 @@ public partial class EntityManager(IServiceProvider serviceProvider, Configurati
     public void DetachEntity(Entity entity, bool dispose)
     {
         entity.OnDetached();
-        
+
         if(entity is TransformableEntity transformableEntity)
             _transformableEntities.Remove(transformableEntity);
 
@@ -190,6 +189,9 @@ public partial class EntityManager(IServiceProvider serviceProvider, Configurati
 
     public void SetSelectedEntity(EntityId? id)
     {
+        if(id.HasValue == false)
+            return;
+
         foreach(var eId in _selectedEntities)
         {
             if(TryGetEntity(eId, out var ent))
@@ -199,8 +201,7 @@ public partial class EntityManager(IServiceProvider serviceProvider, Configurati
         }
 
         _selectedEntities.Clear();
-        if(id.HasValue)
-            _selectedEntities.Add(id.Value);
+        _selectedEntities.Add(id.Value);
 
         SelectedEntity?.OnSelected();
     }
