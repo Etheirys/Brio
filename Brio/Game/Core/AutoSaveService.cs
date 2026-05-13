@@ -35,7 +35,7 @@ public record class AutoSavePoseEntry
     public bool IsCompanion => ActorName.EndsWith("-Companion", StringComparison.OrdinalIgnoreCase);
 }
 
-public class AutoSaveService : IDisposable, IMediatorSubscriber
+public class AutoSaveService : MediatorSubscriberBase, IDisposable
 {
     private readonly IDalamudPluginInterface _pluginInterface;
     private readonly IFramework _framework;
@@ -43,11 +43,9 @@ public class AutoSaveService : IDisposable, IMediatorSubscriber
     private readonly MCDFService _mCDFService;
     private readonly Mediator _mediator;
 
-    public Mediator Mediator => _mediator;
-
     public bool IsEnabled = true;
 
-    public AutoSaveService(IDalamudPluginInterface pluginInterface, IFramework framework, Mediator mediator, SceneService sceneService, MCDFService mCDFService)
+    public AutoSaveService(IDalamudPluginInterface pluginInterface, IFramework framework, Mediator mediator, SceneService sceneService, MCDFService mCDFService) : base(mediator)
     {
         _pluginInterface = pluginInterface;
         _framework = framework;
@@ -64,7 +62,7 @@ public class AutoSaveService : IDisposable, IMediatorSubscriber
 
     public void Start()
     {
-        if(Directory.Exists(AutoSaveFolder) == false)
+        if(Directory.Exists(AutoSaveFolder))
         {
             Directory.CreateDirectory(AutoSaveFolder);
         }
@@ -94,7 +92,9 @@ public class AutoSaveService : IDisposable, IMediatorSubscriber
     private void OnElapsed(object? sender, ElapsedEventArgs e)
     {
         if(IsEnabled)
+        {
             _framework.RunOnFrameworkThread(AutoSave);
+        }
     }
 
     private void AutoSave()
@@ -279,11 +279,11 @@ public class AutoSaveService : IDisposable, IMediatorSubscriber
         }
     }
 
-    public void Dispose()
+    public override void Dispose()
     {
+        base.Dispose();
+        
         Stop();
-
-        Mediator.UnsubscribeAll(this);
 
         GC.SuppressFinalize(this);
     }
