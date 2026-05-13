@@ -79,9 +79,9 @@ public class PoseFile : JsonDocumentBase
     public Dictionary<string, Bone> Prop { get; set; } = [];
     public Dictionary<string, Bone> Ornament { get; set; } = [];
 
-    public Vector3 Position { get; set; }  // legacy & for better support for other pose tools
-    public Quaternion Rotation { get; set; } // legacy & for better support for other pose tools
-    public Vector3 Scale { get; set; } // legacy & for better support for other pose tools
+    public Vector3 Position { get; set; }       // legacy & for better support for other pose tools
+    public Quaternion Rotation { get; set; }    // legacy & for better support for other pose tools
+    public Vector3 Scale { get; set; }          // legacy & for better support for other pose tools
 
     [MessagePackObject(keyAsPropertyName: true)]
     public class Bone
