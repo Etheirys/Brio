@@ -134,13 +134,11 @@ public class PosingTransformWindow : Window
         // Check for multi-actor selection
         var selectedActors = _entityManager.GetAllSelectedActors();
 
-        bool isMultiActorSelection = selectedActors.Count > 1;
-        Vector3? multiActorCentroid = null;
-
-        if(isMultiActorSelection)
-        {
-            multiActorCentroid = GroupedTransformHelper.CalculateCentroid(selectedActors.Select(a => a.transform));
-        }
+        var allTransformables = _entityManager.GetAllSelectedTransformables();
+        bool isMultiEntitySelection = allTransformables.Count > 1;
+        Vector3? multiEntityCentroid = isMultiEntitySelection
+            ? TransformHelper.GetCentroidForGivenTransforms(allTransformables.Select(x => x.target.Transform))
+            : null;
 
         var currentTransform = posing.ModelPosing.Transform;
 
@@ -149,7 +147,7 @@ public class PosingTransformWindow : Window
         Matrix4x4? targetMatrix = selected.Match<Matrix4x4?>(
             (boneSelect) =>
             {
-                if(isMultiActorSelection)
+                if(isMultiEntitySelection)
                     return null;
 
                 var bone = posing.SkeletonPosing.GetBone(boneSelect);
@@ -174,11 +172,11 @@ public class PosingTransformWindow : Window
                     Scale = (Vector3)charaBase->CharacterBase.DrawObject.Object.Scale * charaBase->ScaleFactor
                 }.ToMatrix();
             },
-            _ => isMultiActorSelection ?
-                new Transform { Position = multiActorCentroid!.Value, Rotation = Quaternion.Identity, Scale = Vector3.One }.ToMatrix() :
+            _ => isMultiEntitySelection ?
+                new Transform { Position = multiEntityCentroid!.Value, Rotation = Quaternion.Identity, Scale = Vector3.One }.ToMatrix() :
                 posing.ModelPosing.Transform.ToMatrix(),
-            _ => isMultiActorSelection ?
-                new Transform { Position = multiActorCentroid!.Value, Rotation = Quaternion.Identity, Scale = Vector3.One }.ToMatrix() :
+            _ => isMultiEntitySelection ?
+                new Transform { Position = multiEntityCentroid!.Value, Rotation = Quaternion.Identity, Scale = Vector3.One }.ToMatrix() :
                 posing.ModelPosing.Transform.ToMatrix()
         );
 
@@ -195,21 +193,21 @@ public class PosingTransformWindow : Window
         if(ImGui.IsItemHovered())
             ImGui.SetTooltip(_posingService.CoordinateMode == PosingCoordinateMode.World ? "Switch to Local" : "Switch to World");
 
-        if(isMultiActorSelection)
+        if(isMultiEntitySelection)
         {
             ImGui.SameLine();
-            ImGui.TextColored(new Vector4(0.3f, 0.8f, 1f, 1), $"({selectedActors.Count} actors)");
+            ImGui.TextColored(new Vector4(0.3f, 0.8f, 1f, 1), $"({allTransformables.Count} entities)");
         }
 
         Vector2 gizmoSize = new(ImGui.GetContentRegionAvail().X, ImGui.GetContentRegionAvail().X);
 
         if(ImBrioGizmo.DrawRotation(ref matrix, gizmoSize, _posingService.CoordinateMode == PosingCoordinateMode.World))
         {
-            bool canEdit = !posing.ModelPosing.Freeze && !(selectedBone != null && selectedBone.Freeze);
+            bool canEdit = !posing.ModelPosing.IsTransformFrozen && !(selectedBone != null && selectedBone.Freeze);
 
-            if(isMultiActorSelection)
+            if(isMultiEntitySelection)
             {
-                canEdit = selectedActors.Any(a => !a.capability.ModelPosing.Freeze);
+                canEdit = allTransformables.Any(x => !x.target.IsTransformFrozen);
             }
 
             if(canEdit)
@@ -227,21 +225,9 @@ public class PosingTransformWindow : Window
         {
             var delta = _trackingMatrix.Value.ToTransform().CalculateDiff(originalMatrix.ToTransform());
 
-            if(isMultiActorSelection)
+            if(isMultiEntitySelection)
             {
-                foreach(var (actor, capability, originalTransform) in selectedActors)
-                {
-                    if(capability.ModelPosing.Freeze)
-                        continue;
-
-                    var newTransform = GroupedTransformHelper.ApplyRotationDeltaAroundPivot(
-                        originalTransform,
-                        multiActorCentroid!.Value,
-                        delta.Rotation
-                    );
-
-                    capability.ModelPosing.Transform = newTransform;
-                }
+                TransformHelper.ApplyDeltaToMultiple(allTransformables, delta, multiEntityCentroid!.Value, true);
             }
             else
             {
@@ -266,11 +252,12 @@ public class PosingTransformWindow : Window
                             posing.SkeletonPosing.GetBonePose(boneSelect).Apply(_trackingMatrix.Value.ToTransform(), originalMatrix.ToTransform());
                         }
                     },
-                    _ => posing.ModelPosing.Transform += delta,
-                    _ => posing.ModelPosing.Transform += delta
+                    _ => TransformHelper.ApplyDelta(posing.Actor, delta),
+                    _ => TransformHelper.ApplyDelta(posing.Actor, delta)
                 );
             }
         }
+
 
         if(!ImBrioGizmo.IsUsing() && _trackingMatrix.HasValue)
         {
@@ -280,18 +267,10 @@ public class PosingTransformWindow : Window
                 _groupedPendingSnapshot = null;
             }
 
-            foreach(var eid in _entityManager.SelectedEntityIds)
-            {
-                if(!_entityManager.TryGetEntity(eid, out var ent))
-                    continue;
-
-                if(!ent.TryGetCapability<PosingCapability>(out var cap))
-                    continue;
-
-                cap.Snapshot(false, false);
-            }
+            TransformHelper.SnapshotAll(_entityManager.GetAllSelectedTransformables().Select(x => x.target));
 
             _trackingMatrix = null;
         }
     }
 }
+

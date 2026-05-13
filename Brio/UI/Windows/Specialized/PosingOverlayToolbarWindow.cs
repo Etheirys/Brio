@@ -19,7 +19,6 @@ using Dalamud.Interface.Utility.Raii;
 using Dalamud.Interface.Windowing;
 using Dalamud.Plugin.Services;
 using OneOf.Types;
-using System;
 using System.Numerics;
 
 namespace Brio.UI.Windows.Specialized;
@@ -75,7 +74,6 @@ public class PosingOverlayToolbarWindow : Window
 
         base.PreOpenCheck();
     }
-
     public override bool DrawConditions()
     {
         _gameInputService.AllowEscape = true;
@@ -89,6 +87,16 @@ public class PosingOverlayToolbarWindow : Window
         ImGui.PushStyleVar(ImGuiStyleVar.WindowBorderSize, 0);
         _pushedStyle = true;
     }
+    public override void PostDraw()
+    {
+        if(_pushedStyle)
+        {
+            _pushedStyle = false;
+            ImGui.PopStyleVar(1);
+        }
+
+        base.PostDraw();
+    }
 
     public override void Draw()
     {
@@ -101,7 +109,7 @@ public class PosingOverlayToolbarWindow : Window
         _entityManager.TryGetCapabilityFromSelectedEntity<PosingCapability>(out var posing);
         _entityManager.TryGetCapabilityFromSelectedEntity<ActionTimelineCapability>(out var timelineCapability);
 
-        bool hasMultipleActorsSelected = _entityManager.SelectedEntityIds.Count > 1;
+        bool hasMultipleActorsSelected = _entityManager.SelectedEntitys.Count > 1;
 
         if(posing?.Selected.Value is not null and BonePoseInfoId)
         {
@@ -118,7 +126,7 @@ public class PosingOverlayToolbarWindow : Window
 
             if(InputManagerService.ActionKeysPressed(InputAction.Posing_Esc))
             {
-                var primaryEntityId = _entityManager.SelectedEntityId;
+                var primaryEntityId = _entityManager.SelectedEntityById;
                 if(primaryEntityId.HasValue)
                 {
                     _entityManager.SetSelectedEntity(primaryEntityId.Value);
@@ -144,7 +152,7 @@ public class PosingOverlayToolbarWindow : Window
         {
             ImGui.PushStyleColor(ImGuiCol.Button, UIConstants.Transparent);
 
-            using(ImRaii.PushColor(ImGuiCol.Text, _overlayTransformWindow.IsOpen ? UIConstants.ToggleButtonActive : UIConstants.ToggleButtonInactive))
+            using(ImRaii.PushColor(ImGuiCol.Text, _overlayTransformWindow.IsOpen ? UIConstants.ToggleButtonActive : ThemeManager.CurrentTheme.Text.Text))
             {
                 using(ImRaii.PushFont(UiBuilder.IconFont))
                 {
@@ -156,7 +164,7 @@ public class PosingOverlayToolbarWindow : Window
 
             ImGui.SameLine();
 
-            using(ImRaii.PushColor(ImGuiCol.Text, _lightWindow.IsOpen ? UIConstants.ToggleButtonActive : UIConstants.ToggleButtonInactive))
+            using(ImRaii.PushColor(ImGuiCol.Text, _lightWindow.IsOpen ? UIConstants.ToggleButtonActive : ThemeManager.CurrentTheme.Text.Text))
             {
                 using(ImRaii.PushFont(UiBuilder.IconFont))
                 {
@@ -177,22 +185,14 @@ public class PosingOverlayToolbarWindow : Window
 
             ImGui.PopStyleColor();
 
-            ImGui.TextColored(ImGuiColors.DalamudRed, "Attention! No valid,");
-            ImGui.TextColored(ImGuiColors.DalamudRed, "Actor or Light Selected!");
-            ImGui.TextColored(ImGuiColors.DalamudRed, "Please selected one,");
-            ImGui.TextColored(ImGuiColors.DalamudRed, "in the Scene Manager!");
+            ImGui.TextColored(ImGuiColors.WarningForeground,
+                                                      "\nCurrently selected entity" +
+                                                      "\ncannot be modified by" +
+                                                      "\nthe overlay toolbar.");
+            ImGui.TextColored(ImGuiColors.WarningForeground,
+                                                      "\nPlease selected one\n" +
+                                                      "in the Scene Manager!");
         }
-    }
-
-    public override void PostDraw()
-    {
-        if(_pushedStyle)
-        {
-            _pushedStyle = false;
-            ImGui.PopStyleVar(1);
-        }
-
-        base.PostDraw();
     }
 
     public float button3XSize => ImGui.GetTextLineHeight() * 3.2f;
@@ -219,7 +219,7 @@ public class PosingOverlayToolbarWindow : Window
 
         ImGui.SameLine();
 
-        using(ImRaii.PushColor(ImGuiCol.Text, _lightWindow.IsOpen ? UIConstants.ToggleButtonActive : UIConstants.ToggleButtonInactive))
+        using(ImRaii.PushColor(ImGuiCol.Text, _lightWindow.IsOpen ? UIConstants.ToggleButtonActive : ThemeManager.CurrentTheme.Text.Text))
         {
             using(ImRaii.PushFont(UiBuilder.IconFont))
             {
@@ -246,7 +246,7 @@ public class PosingOverlayToolbarWindow : Window
         ImGui.Separator();
         ImBrio.VerticalPadding(5);
 
-        using(ImRaii.PushColor(ImGuiCol.Text, _lightingService.Operation == LightGizmoOperation.Translate ? UIConstants.ToggleButtonActive : UIConstants.ToggleButtonInactive))
+        using(ImRaii.PushColor(ImGuiCol.Text, _lightingService.Operation == LightGizmoOperation.Translate ? UIConstants.ToggleButtonActive : ThemeManager.CurrentTheme.Text.Text))
         {
             using(ImRaii.PushFont(UiBuilder.IconFont))
             {
@@ -259,7 +259,7 @@ public class PosingOverlayToolbarWindow : Window
         ImGui.SameLine();
 
 
-        using(ImRaii.PushColor(ImGuiCol.Text, _lightingService.Operation == LightGizmoOperation.Rotate ? UIConstants.ToggleButtonActive : UIConstants.ToggleButtonInactive))
+        using(ImRaii.PushColor(ImGuiCol.Text, _lightingService.Operation == LightGizmoOperation.Rotate ? UIConstants.ToggleButtonActive : ThemeManager.CurrentTheme.Text.Text))
         {
             using(ImRaii.PushFont(UiBuilder.IconFont))
             {
@@ -271,7 +271,7 @@ public class PosingOverlayToolbarWindow : Window
 
         ImGui.SameLine();
 
-        using(ImRaii.PushColor(ImGuiCol.Text, _lightingService.Operation == LightGizmoOperation.Universal ? UIConstants.ToggleButtonActive : UIConstants.ToggleButtonInactive))
+        using(ImRaii.PushColor(ImGuiCol.Text, _lightingService.Operation == LightGizmoOperation.Universal ? UIConstants.ToggleButtonActive : ThemeManager.CurrentTheme.Text.Text))
         {
             using(ImRaii.PushFont(UiBuilder.IconFont))
             {
@@ -376,16 +376,14 @@ public class PosingOverlayToolbarWindow : Window
     {
         ImGui.PushStyleColor(ImGuiCol.Button, UIConstants.Transparent);
 
-        using(ImRaii.PushFont(UiBuilder.IconFont))
+        if(ImBrio.BoneOverlayVisibilityButton("bones_visible", posing?.Actor.IsOverlayVisible ?? false, button4XSizeVector2))
         {
-            if(ImGui.Button($"{(_posingService.CoordinateMode == PosingCoordinateMode.Local ? FontAwesomeIcon.Globe.ToIconString() : FontAwesomeIcon.Atom.ToIconString())}###select_mode", button4XSizeVector2) || InputManagerService.ActionKeysPressedLastFrame(InputAction.Posing_ToggleWorld))
-                _posingService.CoordinateMode = _posingService.CoordinateMode == PosingCoordinateMode.Local ? PosingCoordinateMode.World : PosingCoordinateMode.Local;
+            posing?.Actor.IsOverlayVisible = !posing.Actor.IsOverlayVisible;
         }
-        ImBrio.AttachToolTip(_posingService.CoordinateMode == PosingCoordinateMode.Local ? "Switch to World" : "Switch to Local");
 
         ImGui.SameLine();
 
-        using(ImRaii.PushColor(ImGuiCol.Text, _overlayTransformWindow.IsOpen ? UIConstants.ToggleButtonActive : UIConstants.ToggleButtonInactive))
+        using(ImRaii.PushColor(ImGuiCol.Text, _overlayTransformWindow.IsOpen ? UIConstants.ToggleButtonActive : ThemeManager.CurrentTheme.Text.Text))
         {
             using(ImRaii.PushFont(UiBuilder.IconFont))
             {
@@ -397,7 +395,7 @@ public class PosingOverlayToolbarWindow : Window
 
         ImGui.SameLine();
 
-        using(ImRaii.PushColor(ImGuiCol.Text, _lightWindow.IsOpen ? UIConstants.ToggleButtonActive : UIConstants.ToggleButtonInactive))
+        using(ImRaii.PushColor(ImGuiCol.Text, _lightWindow.IsOpen ? UIConstants.ToggleButtonActive : ThemeManager.CurrentTheme.Text.Text))
         {
             using(ImRaii.PushFont(UiBuilder.IconFont))
             {
@@ -406,7 +404,6 @@ public class PosingOverlayToolbarWindow : Window
             }
         }
         ImBrio.AttachToolTip("Toggle Light Window");
-
 
         ImGui.SameLine();
 
@@ -419,13 +416,16 @@ public class PosingOverlayToolbarWindow : Window
 
         //
         // -------------
+        if(ImBrio.SeparatorTextButton("Gizmo",
+            _posingService.CoordinateMode == PosingCoordinateMode.Local ? FontAwesomeIcon.Globe : FontAwesomeIcon.Atom,
+            tooltip: _posingService.CoordinateMode == PosingCoordinateMode.Local ? "Switch to World" : "Switch to Local")
+            || InputManagerService.ActionKeysPressedLastFrame(InputAction.Posing_ToggleWorld))
+        {
+            _posingService.CoordinateMode = _posingService.CoordinateMode == PosingCoordinateMode.Local ? PosingCoordinateMode.World : PosingCoordinateMode.Local;
+        }
         //
 
-        ImBrio.VerticalPadding(5);
-        ImGui.Separator();
-        ImBrio.VerticalPadding(5);
-
-        using(ImRaii.PushColor(ImGuiCol.Text, _posingService.Operation == PosingOperation.Translate ? UIConstants.ToggleButtonActive : UIConstants.ToggleButtonInactive))
+        using(ImRaii.PushColor(ImGuiCol.Text, _posingService.Operation == PosingOperation.Translate ? UIConstants.ToggleButtonActive : ThemeManager.CurrentTheme.Text.Text))
         {
             using(ImRaii.PushFont(UiBuilder.IconFont))
             {
@@ -438,7 +438,7 @@ public class PosingOverlayToolbarWindow : Window
         ImGui.SameLine();
 
 
-        using(ImRaii.PushColor(ImGuiCol.Text, _posingService.Operation == PosingOperation.Rotate ? UIConstants.ToggleButtonActive : UIConstants.ToggleButtonInactive))
+        using(ImRaii.PushColor(ImGuiCol.Text, _posingService.Operation == PosingOperation.Rotate ? UIConstants.ToggleButtonActive : ThemeManager.CurrentTheme.Text.Text))
         {
             using(ImRaii.PushFont(UiBuilder.IconFont))
             {
@@ -450,7 +450,7 @@ public class PosingOverlayToolbarWindow : Window
 
         ImGui.SameLine();
 
-        using(ImRaii.PushColor(ImGuiCol.Text, _posingService.Operation == PosingOperation.Scale ? UIConstants.ToggleButtonActive : UIConstants.ToggleButtonInactive))
+        using(ImRaii.PushColor(ImGuiCol.Text, _posingService.Operation == PosingOperation.Scale ? UIConstants.ToggleButtonActive : ThemeManager.CurrentTheme.Text.Text))
         {
             using(ImRaii.PushFont(UiBuilder.IconFont))
             {
@@ -462,7 +462,7 @@ public class PosingOverlayToolbarWindow : Window
 
         ImGui.SameLine();
 
-        using(ImRaii.PushColor(ImGuiCol.Text, _posingService.Operation == PosingOperation.Universal ? UIConstants.ToggleButtonActive : UIConstants.ToggleButtonInactive))
+        using(ImRaii.PushColor(ImGuiCol.Text, _posingService.Operation == PosingOperation.Universal ? UIConstants.ToggleButtonActive : ThemeManager.CurrentTheme.Text.Text))
         {
             using(ImRaii.PushFont(UiBuilder.IconFont))
             {
@@ -478,9 +478,7 @@ public class PosingOverlayToolbarWindow : Window
         // -------------
         //
 
-        ImBrio.VerticalPadding(5);
-        ImGui.Separator();
-        ImBrio.VerticalPadding(5);
+        ImBrio.SeparatorText("Bone");
 
         var bone = posing?.Selected.Match(
               boneSelect => posing.SkeletonPosing.GetBone(boneSelect),
@@ -512,18 +510,6 @@ public class PosingOverlayToolbarWindow : Window
 
             ImGui.SameLine();
 
-            // Bone Filter Button
-
-            using(ImRaii.Disabled(hasMultipleActorsSelected))
-            using(ImRaii.PushFont(UiBuilder.IconFont))
-            {
-                if(ImGui.Button($"{FontAwesomeIcon.Bone.ToIconString()}###toggle_filter_window", new Vector2(button4XSize)))
-                    ImGui.OpenPopup(_boneFilterPopupName);
-            }
-            ImBrio.AttachToolTip("Bone Filter");
-
-            ImGui.SameLine();
-
             // Select Parent Button
 
             var parentBone = bone?.Parent;
@@ -540,55 +526,6 @@ public class PosingOverlayToolbarWindow : Window
 
             ImGui.SameLine();
 
-            // MirrorMode Button
-
-            PosingEditorCommon.DrawMirrorModeSelect(posing, new Vector2(button4XSize));
-
-            //
-            // -------------
-            //
-
-            ImBrio.VerticalPadding(5);
-
-            // Set IK Button
-
-            using(ImRaii.Disabled(posing?.SkeletonPosing.PoseInfo.HasIKStacks is false))
-            {
-                using(ImRaii.PushFont(UiBuilder.IconFont))
-                    if(ImGui.Button($"{FontAwesomeIcon.Lock.ToIconString()}###clear_ik", new Vector2(button4XSize)))
-                        posing?.SkeletonPosing.ResetIK();
-                ImBrio.AttachToolTip($"Set IK Changes{(!posing?.SkeletonPosing.PoseInfo.HasIKStacks ?? false ? ". Enable IK & make a change with IK to 'Lock in' IK changes using this button." : "")}");
-
-                var center = ImGui.GetItemRectMin() + (ImGui.GetItemRectSize() / 2);
-                var radius = MathF.Ceiling(ImGui.GetTextLineHeight() * 0.9f);
-                var thickness = MathF.Ceiling(ImGui.GetTextLineHeight() * 0.1f);
-
-                ImGui.GetWindowDrawList().AddCircle(center, radius, ImGui.GetColorU32(ImGuiCol.Text) & 0x80FFFFFF, 32, thickness);
-
-                if(posing?.SkeletonPosing.PoseInfo.HasIKStacks is false)
-                {
-                    thickness += 0.2f;
-                    var offset = (radius - thickness) / MathF.Sqrt(2.0f);
-                    var lineStart = center + new Vector2(-offset, -offset);
-                    var lineEnd = center + new Vector2(offset, offset);
-                    ImGui.GetWindowDrawList().AddLine(lineStart, lineEnd, 0x400000FF, thickness);
-                }
-            }
-
-            ImGui.SameLine();
-
-            // Bone Search Button
-
-            using(ImRaii.Disabled(hasMultipleActorsSelected))
-            using(ImRaii.PushFont(UiBuilder.IconFont))
-            {
-                if(ImGui.Button($"{FontAwesomeIcon.Search.ToIconString()}###bone_search", new Vector2(button4XSize)))
-                    ImGui.OpenPopup("overlay_bone_search_popup");
-            }
-            ImBrio.AttachToolTip("Bone Search");
-
-            ImGui.SameLine();
-
             // Clear Button
 
             using(ImRaii.PushFont(UiBuilder.IconFont))
@@ -599,7 +536,7 @@ public class PosingOverlayToolbarWindow : Window
                     {
                         if(hasMultipleActorsSelected)
                         {
-                            var primaryEntityId = _entityManager.SelectedEntityId;
+                            var primaryEntityId = _entityManager.SelectedEntityById;
                             if(primaryEntityId.HasValue)
                             {
                                 _entityManager.SetSelectedEntity(primaryEntityId.Value);
@@ -616,73 +553,70 @@ public class PosingOverlayToolbarWindow : Window
 
             ImGui.SameLine();
 
-            // Freeze Button
+            // MirrorMode Button
 
-            bool allFrozen = true;
-            if(hasMultipleActorsSelected)
-            {
-                foreach(var entityId in _entityManager.SelectedEntityIds)
-                {
-                    if(_entityManager.TryGetEntity(entityId, out var entity))
-                    {
-                        if(entity.TryGetCapability<ActionTimelineCapability>(out var cap))
-                        {
-                            if(cap.SpeedMultiplierOverride != 0)
-                            {
-                                allFrozen = false;
-                                break;
-                            }
-                        }
-                    }
-                }
-            }
-            else
-            {
-                allFrozen = timelineCapability?.SpeedMultiplierOverride == 0;
-            }
+            PosingEditorCommon.DrawMirrorModeSelect(posing, new Vector2(button4XSize));
 
-            using(ImRaii.PushColor(ImGuiCol.Text, allFrozen ? UIConstants.ToggleButtonActive : UIConstants.ToggleButtonInactive))
+            //
+            // -------------
+            //
+
+            // Set IK Button
+
+            //using(ImRaii.Disabled(posing?.SkeletonPosing.PoseInfo.HasIKStacks is false))
+            //{
+            //    using(ImRaii.PushFont(UiBuilder.IconFont))
+            //        if(ImGui.Button($"{FontAwesomeIcon.Lock.ToIconString()}###clear_ik", new Vector2(button4XSize)))
+            //            posing?.SkeletonPosing.ResetIK();
+            //    ImBrio.AttachToolTip($"Set IK Changes{(!posing?.SkeletonPosing.PoseInfo.HasIKStacks ?? false ? ". Enable IK & make a change with IK to 'Lock in' IK changes using this button." : "")}");
+
+            //    var center = ImGui.GetItemRectMin() + (ImGui.GetItemRectSize() / 2);
+            //    var radius = MathF.Ceiling(ImGui.GetTextLineHeight() * 0.9f);
+            //    var thickness = MathF.Ceiling(ImGui.GetTextLineHeight() * 0.1f);
+
+            //    ImGui.GetWindowDrawList().AddCircle(center, radius, ImGui.GetColorU32(ImGuiCol.Text) & 0x80FFFFFF, 32, thickness);
+
+            //    if(posing?.SkeletonPosing.PoseInfo.HasIKStacks is false)
+            //    {
+            //        thickness += 0.2f;
+            //        var offset = (radius - thickness) / MathF.Sqrt(2.0f);
+            //        var lineStart = center + new Vector2(-offset, -offset);
+            //        var lineEnd = center + new Vector2(offset, offset);
+            //        ImGui.GetWindowDrawList().AddLine(lineStart, lineEnd, 0x400000FF, thickness);
+            //    }
+            //}
+
+            //ImGui.SameLine();
+
+            // Bone Filter Button
+
+            using(ImRaii.Disabled(hasMultipleActorsSelected))
             using(ImRaii.PushFont(UiBuilder.IconFont))
             {
-                if(ImGui.Button($"{FontAwesomeIcon.Snowflake.ToIconString()}###freeze_toggle", new Vector2(button4XSize)) || InputManagerService.ActionKeysPressedLastFrame(InputAction.Posing_Freeze))
-                {
-                    if(hasMultipleActorsSelected)
-                    {
-                        bool shouldFreeze = !allFrozen;
-                        foreach(var entityId in _entityManager.SelectedEntityIds)
-                        {
-                            if(_entityManager.TryGetEntity(entityId, out var entity))
-                            {
-                                if(entity.TryGetCapability<ActionTimelineCapability>(out var cap))
-                                {
-                                    if(shouldFreeze)
-                                        cap.SetOverallSpeedOverride(0f);
-                                    else
-                                        cap.ResetOverallSpeedOverride();
-                                }
-                            }
-                        }
-                    }
-                    else
-                    {
-                        if(timelineCapability?.SpeedMultiplierOverride == 0)
-                            timelineCapability?.ResetOverallSpeedOverride();
-                        else
-                            timelineCapability?.SetOverallSpeedOverride(0f);
-                    }
-                }
+                if(ImGui.Button($"{FontAwesomeIcon.Bone.ToIconString()}###toggle_filter_window", button2XSizeVector2))
+                    ImGui.OpenPopup(_boneFilterPopupName);
             }
-            ImBrio.AttachToolTip($"{(allFrozen ? "Un-" : "")}Freeze Character{(hasMultipleActorsSelected ? "s" : "")}");
+            ImBrio.AttachToolTip("Bone Filter");
 
+            ImGui.SameLine();
+
+
+            // Bone Search Button
+
+            using(ImRaii.Disabled(hasMultipleActorsSelected))
+            using(ImRaii.PushFont(UiBuilder.IconFont))
+            {
+                if(ImGui.Button($"{FontAwesomeIcon.Search.ToIconString()}###bone_search", button2XSizeVector2))
+                    ImGui.OpenPopup("overlay_bone_search_popup");
+            }
+            ImBrio.AttachToolTip("Bone Search");
         }
 
         //
         // -------------
         //
 
-        ImBrio.VerticalPadding(5);
-        ImGui.Separator();
-        ImBrio.VerticalPadding(5);
+        ImBrio.SeparatorText("Pose");
 
         // Undo Button
 
@@ -716,6 +650,20 @@ public class PosingOverlayToolbarWindow : Window
 
         ImGui.SameLine();
 
+        DrawFrezeButton(timelineCapability, hasMultipleActorsSelected);
+
+        ImGui.SameLine();
+
+        using(ImRaii.PushFont(UiBuilder.IconFont))
+        {
+            using(ImRaii.Disabled(hasMultipleActorsSelected))
+            {
+                if(ImGui.Button($"{FontAwesomeIcon.Repeat.ToIconString()}###MirrorPose", new Vector2(button4XSize)))
+                    posing?.MirrorPose();
+            }
+        }
+        ImBrio.AttachToolTip("Mirror Pose");
+
         // Reset Pose Button
 
         using(ImRaii.PushFont(UiBuilder.IconFont))
@@ -732,21 +680,9 @@ public class PosingOverlayToolbarWindow : Window
 
         using(ImRaii.PushFont(UiBuilder.IconFont))
         {
-            using(ImRaii.Disabled(hasMultipleActorsSelected))
-            {
-                if(ImGui.Button($"{FontAwesomeIcon.Repeat.ToIconString()}###MirrorPose", new Vector2(button4XSize)))
-                    posing?.MirrorPose();
-            }
-        }
-        ImBrio.AttachToolTip("Mirror Pose");
-
-        //
-
-        using(ImRaii.PushFont(UiBuilder.IconFont))
-        {
             using(ImRaii.Disabled(!posing?.HasOverride(posing.SkeletonPosing.FilterNonFaceBones) ?? true))
             {
-                if(ImGui.Button($"{FontAwesomeIcon.Undo.ToIconString()}###reset_body_pose", button3x3Vector2))
+                if(ImGui.Button($"{FontAwesomeIcon.Undo.ToIconString()}###reset_body_pose", new Vector2(button4XSize)))
                 {
                     posing!.Snapshot(false, reconcile: false);
                     posing!.ClearStacks(posing.SkeletonPosing.FilterNonFaceBones);
@@ -764,7 +700,7 @@ public class PosingOverlayToolbarWindow : Window
         using(ImRaii.PushFont(UiBuilder.IconFont))
         using(ImRaii.Disabled(!posing?.HasOverride(posing.SkeletonPosing.FilterFaceBones) ?? false))
         {
-            if(ImGui.Button($"{FontAwesomeIcon.Undo.ToIconString()}###reset_face_pose", button3x3Vector2))
+            if(ImGui.Button($"{FontAwesomeIcon.Undo.ToIconString()}###reset_face_pose", new Vector2(button4XSize)))
             {
                 posing?.ClearStacks(posing.SkeletonPosing.FilterFaceBones);
             }
@@ -783,7 +719,7 @@ public class PosingOverlayToolbarWindow : Window
         {
             using(ImRaii.Disabled(hasMultipleActorsSelected || (!posing?.HasOverride() ?? false)))
             {
-                if(ImGui.Button($"{FontAwesomeIcon.Undo.ToIconString()}###reset_pose", button3x3Vector2))
+                if(ImGui.Button($"{FontAwesomeIcon.Undo.ToIconString()}###reset_pose", new Vector2(button4XSize)))
                     posing?.Reset(false, false);
             }
         }
@@ -793,9 +729,7 @@ public class PosingOverlayToolbarWindow : Window
         // -------------
         //
 
-        ImBrio.VerticalPadding(5);
-        ImGui.Separator();
-        ImBrio.VerticalPadding(5);
+        ImBrio.SeparatorText("File");
 
         // Load Pose Button
 
@@ -842,6 +776,67 @@ public class PosingOverlayToolbarWindow : Window
                 }
             }
         }
+    }
+
+    private void DrawFrezeButton(ActionTimelineCapability? timelineCapability, bool hasMultipleActorsSelected)
+    {
+        // Freeze Button
+
+        bool allFrozen = true;
+        if(hasMultipleActorsSelected)
+        {
+            foreach(var entityId in _entityManager.SelectedEntitys)
+            {
+                if(_entityManager.TryGetEntity(entityId, out var entity))
+                {
+                    if(entity.TryGetCapability<ActionTimelineCapability>(out var cap))
+                    {
+                        if(cap.SpeedMultiplierOverride != 0)
+                        {
+                            allFrozen = false;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        else
+        {
+            allFrozen = timelineCapability?.SpeedMultiplierOverride == 0;
+        }
+
+        using(ImRaii.PushColor(ImGuiCol.Text, allFrozen ? UIConstants.ToggleButtonActive : ThemeManager.CurrentTheme.Text.Text))
+        using(ImRaii.PushFont(UiBuilder.IconFont))
+        {
+            if(ImGui.Button($"{FontAwesomeIcon.Snowflake.ToIconString()}###freeze_toggle", new Vector2(button4XSize)) || InputManagerService.ActionKeysPressedLastFrame(InputAction.Posing_Freeze))
+            {
+                if(hasMultipleActorsSelected)
+                {
+                    bool shouldFreeze = !allFrozen;
+                    foreach(var entityId in _entityManager.SelectedEntitys)
+                    {
+                        if(_entityManager.TryGetEntity(entityId, out var entity))
+                        {
+                            if(entity.TryGetCapability<ActionTimelineCapability>(out var cap))
+                            {
+                                if(shouldFreeze)
+                                    cap.SetOverallSpeedOverride(0f);
+                                else
+                                    cap.ResetOverallSpeedOverride();
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    if(timelineCapability?.SpeedMultiplierOverride == 0)
+                        timelineCapability?.ResetOverallSpeedOverride();
+                    else
+                        timelineCapability?.SetOverallSpeedOverride(0f);
+                }
+            }
+        }
+        ImBrio.AttachToolTip($"{(allFrozen ? "Un-" : "")}IsTransformFrozen Character{(hasMultipleActorsSelected ? "s" : "")}");
     }
 
     private void DrawBoneFilterPopup()

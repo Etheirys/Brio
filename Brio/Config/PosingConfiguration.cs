@@ -1,4 +1,7 @@
-﻿namespace Brio.Config;
+﻿using System.Collections.Generic;
+using System.Numerics;
+
+namespace Brio.Config;
 
 public class PosingConfiguration
 {
@@ -24,6 +27,9 @@ public class PosingConfiguration
     public bool HideToolbarWhenAdvandedPosingOpen { get; set; } = false;
     public bool HideSkeletonWhenGizmoActive { get; set; } = false;
 
+    public bool UsePerCategoryLineColors { get; set; } = false;
+    public Dictionary<string, uint> BoneCategoryLineColors { get; set; } = [];
+
     public bool ModelTransformStandout { get; set; } = true;
     public uint ModelTransformCircleStandOutColor { get; set; } = 0xFFE02B70;
 
@@ -44,4 +50,7 @@ public class PosingConfiguration
     public int UndoStackSize { get; set; } = 50;
 
     public bool FreezeActorOnPoseImport { get; set; } = false;
+
+    public bool UseOverlayOffset { get; set; } = true;
+    public Dictionary<string, Vector3> BoneOverlayOffsets { get; set; } = [];
 }
