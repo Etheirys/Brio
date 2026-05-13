@@ -7,6 +7,7 @@ using Brio.UI.Controls.Stateless;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface;
 using Dalamud.Interface.Textures.TextureWraps;
+using Dalamud.Interface.Utility.Raii;
 using EmbedIO.Utilities;
 using System;
 using System.Diagnostics;
@@ -113,9 +114,9 @@ public interface IFileMetadata
 
 public class DirectoryEntry : GroupEntryBase
 {
-    private string _name;
-    private IDalamudTextureWrap _icon;
-    private string _path;
+    private readonly IDalamudTextureWrap _icon;
+    private readonly string _name;
+    private readonly string _path;
 
     public DirectoryEntry(FileSource source, string path)
         : base(source)
@@ -124,7 +125,7 @@ public class DirectoryEntry : GroupEntryBase
         _name = Path.GetFileNameWithoutExtension(path);
         if(_name.Length >= 60)
         {
-            _name = Name.Substring(0, 55) + "...";
+            _name = string.Concat(_name.AsSpan(0, 55), "...");
         }
 
         _icon = ResourceProvider.Instance.GetResourceImage("Images.FileIcon_Directory.png");
@@ -173,29 +174,26 @@ public class FileEntry : ItemEntryBase
     private string _editTags = String.Empty;
     private string? _editBase64Image;
     private IDalamudTextureWrap? _editPreviewImage;
-    private bool _isEditWindowOpen = false;
     private int? _editPreviewImageFileSize;
 
-    public FileEntry(FileSource source, string path, FileTypeInfoBase fileInfo)
-        : base(source)
+    public FileEntry(FileSource source, string path, FileTypeInfoBase fileInfo) : base(source)
     {
         _fileInfo = fileInfo;
 
-        this.FilePath = path;
-        this.SourceInfo = Path.GetRelativePath(source.DirectoryPath, path);
+        FilePath = path;
+        SourceInfo = Path.GetRelativePath(source.DirectoryPath, path);
 
         _name = Path.GetFileNameWithoutExtension(path);
         if(_name.Length >= 60)
         {
-            _name = _name.Substring(0, 55) + "...";
+            _name = string.Concat(_name.AsSpan(0, 55), "...");
         }
 
         try
         {
             if(_fileInfo.IsFileType<IFileMetadata>() == true)
             {
-                IFileMetadata? file = _fileInfo.Load(path) as IFileMetadata;
-                if(file != null)
+                if(_fileInfo.Load(path) is IFileMetadata file)
                 {
                     if(file.Tags != null)
                         Tags.AddRange(file.Tags);
@@ -281,8 +279,7 @@ public class FileEntry : ItemEntryBase
         {
             if(_fileInfo?.IsFileType<JsonDocumentBase>() == true)
             {
-                JsonDocumentBase? file = _fileInfo.Load(FilePath) as JsonDocumentBase;
-                if(file != null && file.Base64Image != null)
+                if(_fileInfo.Load(FilePath) is JsonDocumentBase file && file.Base64Image != null)
                 {
                     return file.Base64Image;
                 }
@@ -371,8 +368,7 @@ public class FileEntry : ItemEntryBase
         {
             if(_fileInfo?.IsFileType<JsonDocumentBase>() == true)
             {
-                JsonDocumentBase? file = _fileInfo.Load(FilePath) as JsonDocumentBase;
-                if(file != null)
+                if(_fileInfo.Load(FilePath) is JsonDocumentBase file)
                 {
                     handler(ref file);
                     ResourceProvider.Instance.SaveFileDocument(this.FilePath, file);
@@ -411,7 +407,6 @@ public class FileEntry : ItemEntryBase
     {
         if(openPopup)
         {
-            _isEditWindowOpen = true;
             _editAuthor = _author ?? "";
             _editVersion = _version ?? "";
             _editDescription = _description ?? "";
@@ -421,34 +416,65 @@ public class FileEntry : ItemEntryBase
             _editPreviewImage = GetPreviewImage();
             _editBase64Image = GetBase64ImageData();
             _editPreviewImageFileSize = _editBase64Image != null ? System.Text.Encoding.UTF8.GetByteCount(_editBase64Image) : null;
-            // Without this the auto resize will show the old window size for 1 frame if the previous window was bigger then the current
-            ImGui.SetNextWindowSize(new Vector2(0, 1)); 
+
+            ImGui.OpenPopup($"Details - {Name}##edit_details_modal");
         }
 
-        if(_isEditWindowOpen is false)
+        var center = ImGui.GetIO().DisplaySize / 2;
+        ImGui.SetNextWindowPos(center, ImGuiCond.Always, new Vector2(0.5f, 0.5f));
+
+        ImGui.SetNextWindowSize(new Vector2(450, 650));
+        using var popup = ImRaii.PopupModal($"Details - {Name}##edit_details_modal", ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoMove);
+        if(!popup.Success)
             return;
 
-        ImGui.Begin("Details", ImGuiWindowFlags.AlwaysAutoResize);
+        ImBrio.SeparatorText("Metadata");
 
-        ImGui.Text("Author:");
-        ImGui.SameLine();
-        ImGui.SetCursorPosX(ImGui.GetCursorPosX() + ImGui.CalcTextSize("Version:").X - ImGui.CalcTextSize("Author:").X);
-        ImGui.InputText("##author", ref _editAuthor);
+        float labelColumnWidth = ImGui.CalcTextSize("Description:").X + ImGui.GetStyle().ItemSpacing.X;
 
-        ImGui.Text("Version:");
-        ImGui.SameLine();
-        ImGui.InputText("##version", ref _editVersion);
+        if(ImGui.BeginTable("##details_fields", 2, ImGuiTableFlags.None))
+        {
+            ImGui.TableSetupColumn("##label", ImGuiTableColumnFlags.WidthFixed, labelColumnWidth);
+            ImGui.TableSetupColumn("##input", ImGuiTableColumnFlags.WidthStretch);
 
-        ImGui.Text("Tags:");
-        ImGui.SameLine();
-        ImGui.SetCursorPosX(ImGui.GetCursorPosX() + ImGui.CalcTextSize("Version:").X - ImGui.CalcTextSize("Tags:").X);
-        ImGui.InputText("##tags", ref _editTags);
+            ImGui.TableNextRow();
+            ImGui.TableNextColumn();
+            ImGui.AlignTextToFramePadding();
+            ImGui.Text("Author:");
+            ImGui.TableNextColumn();
+            ImGui.SetNextItemWidth(-1);
+            ImGui.InputText("##author", ref _editAuthor);
 
-        ImGui.Text("Description:");
-        ImGui.InputTextMultiline("##description", ref _editDescription, 1024, new Vector2(-1, 5 * ImGui.GetTextLineHeight()));
+            ImGui.TableNextRow();
+            ImGui.TableNextColumn();
+            ImGui.AlignTextToFramePadding();
+            ImGui.Text("Version:");
+            ImGui.TableNextColumn();
+            ImGui.SetNextItemWidth(-1);
+            ImGui.InputText("##version", ref _editVersion);
 
-        ImGui.Text("Image:");
-        ImGui.SameLine();
+            ImGui.TableNextRow();
+            ImGui.TableNextColumn();
+            ImGui.AlignTextToFramePadding();
+            ImGui.Text("Tags:");
+            ImGui.TableNextColumn();
+            ImGui.SetNextItemWidth(-1);
+            ImGui.InputText("##tags", ref _editTags);
+            ImBrio.AttachToolTip("Comma-separated list of tags");
+
+            ImGui.TableNextRow();
+            ImGui.TableNextColumn();
+            ImGui.AlignTextToFramePadding();
+            ImGui.Text("Description:");
+            ImGui.TableNextColumn();
+            ImGui.SetNextItemWidth(-1);
+            ImGui.InputTextMultiline("##description", ref _editDescription, 1024, new Vector2(-1, 5 * ImGui.GetTextLineHeight()));
+
+            ImGui.EndTable();
+        }
+
+        ImBrio.SeparatorText("Preview Image");
+
         if(ImGui.Button(_editPreviewImage == null ? "Add##change_preview_image" : "Replace##change_preview_image"))
             FileUIHelpers.ShowImportPreviewImageModal(this);
 
@@ -472,12 +498,13 @@ public class FileEntry : ItemEntryBase
             ImGui.Text($"{_editPreviewImage.Width} x {_editPreviewImage.Height} px");
             ImGui.SameLine();
             ImBrio.HorizontalPadding(10);
-            if(_editPreviewImageFileSize > (1 << 20))
-                ImGui.Text($"{_editPreviewImageFileSize >> 20:f2} MB");
-            else
-                ImGui.Text($"{_editPreviewImageFileSize >> 10} KB");
 
-            // Dont't want to center the image vertically so we need to calc new height in advance
+            long fileSize = _editPreviewImageFileSize.Value;
+            string sizeLabel = fileSize >= (1 << 20)
+                ? $"{fileSize / (float)(1 << 20):f2} MB"
+                : $"{fileSize >> 10} KB";
+            ImGui.Text(sizeLabel);
+
             float width = _editPreviewImage.Width;
             float height = _editPreviewImage.Height;
             float aspectRatio = width / height;
@@ -486,10 +513,11 @@ public class FileEntry : ItemEntryBase
         }
 
         ImBrio.VerticalPadding(ImGui.GetTextLineHeight() / 2);
-        float buttonsWidth = ImGui.CalcTextSize("Save").X + ImGui.CalcTextSize("Cancel").X + ImGui.GetStyle().FramePadding.X * 4f
-            + ImGui.GetStyle().ItemSpacing.X;
-        ImBrio.RightAlign(buttonsWidth);
-        
+
+        float buttonWidth = ImGui.CalcTextSize("Save").X + ImGui.CalcTextSize("Cancel").X
+            + ImGui.GetStyle().FramePadding.X * 4f + ImGui.GetStyle().ItemSpacing.X;
+        ImBrio.RightAlign(buttonWidth);
+
         if(ImGui.Button("Save##edit_details_save"))
         {
             Tags?.Clear();
@@ -519,18 +547,18 @@ public class FileEntry : ItemEntryBase
             }
             _editPreviewImage = null;
 
-            _isEditWindowOpen = false;
+            ImGui.CloseCurrentPopup();
         }
+
         ImGui.SameLine();
+
         if(ImGui.Button("Cancel##edit_details_cancel"))
         {
             if(_editPreviewImage != _previewImage)
                 _editPreviewImage?.Dispose();
-            _editPreviewImage= null;
+            _editPreviewImage = null;
 
-            _isEditWindowOpen = false;
+            ImGui.CloseCurrentPopup();
         }
-
-        ImGui.End();
     }
 }

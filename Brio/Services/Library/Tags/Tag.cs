@@ -5,46 +5,32 @@ namespace Brio.Library.Tags;
 
 public class Tag : IEquatable<Tag?>
 {
-    private static readonly Dictionary<string, Tag> TagCache = new();
+    private static readonly Dictionary<string, Tag> TagCache = [];
 
-    private readonly string name;
-    private HashSet<string> aliases = [];
-
-    private Tag(string name)
+    private Tag(string name, bool isToolGenerated)
     {
-        this.name = name;
+        _name = name;
+        IsToolGenerated = isToolGenerated;
     }
+   
+    // TODO: a lookup in resources for tag name (I don't know what this means - ken)
+    private readonly string _name;
+    public string DisplayName => _name;
+    public string Name => _name;
+   
+    private readonly HashSet<string> _aliases = [];
+    public IReadOnlyCollection<string> Aliases => _aliases;
 
-    public string Name => this.name;
-    public IReadOnlyCollection<string> Aliases => this.aliases;
+    public bool IsToolGenerated { get; private set; } = false;
 
-    // TODO: a lookup in resources for tag name
-    public string DisplayName => this.name;
-
-    public static implicit operator Tag(string name)
-    {
-        return Tag.Get(name);
-    }
-
-    public static bool operator ==(Tag? left, Tag? right)
-    {
-        return EqualityComparer<Tag>.Default.Equals(left, right);
-    }
-
-    public static bool operator !=(Tag? left, Tag? right)
-    {
-        return !(left == right);
-    }
-
-    public static Tag Get(string name)
+    public static Tag Get(string name, bool isToolGenerated = false)
     {
         lock(TagCache)
         {
-            Tag? tag = null;
-            if(TagCache.TryGetValue(name, out tag) && tag != null)
+            if(TagCache.TryGetValue(name, out Tag? tag) && tag != null)
                 return tag;
 
-            tag = new(name);
+            tag = new(name, isToolGenerated);
             TagCache.Add(name, tag);
             return tag;
         }
@@ -65,7 +51,7 @@ public class Tag : IEquatable<Tag?>
         if(alias == null)
             return this;
 
-        this.aliases.Add(alias);
+        this._aliases.Add(alias);
         return this;
     }
 
@@ -77,7 +63,7 @@ public class Tag : IEquatable<Tag?>
         if(SearchUtility.Matches(this.DisplayName, query))
             return true;
 
-        foreach(string alias in this.aliases)
+        foreach(string alias in this._aliases)
         {
             if(SearchUtility.Matches(alias, query))
             {
@@ -88,18 +74,12 @@ public class Tag : IEquatable<Tag?>
         return false;
     }
 
-    public override bool Equals(object? obj)
-    {
-        return this.Equals(obj as Tag);
-    }
+    public static implicit operator Tag(string name) => Get(name);
+    public static bool operator ==(Tag? left, Tag? right) => EqualityComparer<Tag>.Default.Equals(left, right);
+    public static bool operator !=(Tag? left, Tag? right) => !(left == right);
 
-    public bool Equals(Tag? other)
-    {
-        return other is not null && this.Name == other.Name;
-    }
+    public override bool Equals(object? obj) => Equals(obj as Tag);
+    public bool Equals(Tag? other) => other is not null && Name == other.Name;
 
-    public override int GetHashCode()
-    {
-        return HashCode.Combine(this.Name);
-    }
+    public override int GetHashCode() => HashCode.Combine(Name);
 }

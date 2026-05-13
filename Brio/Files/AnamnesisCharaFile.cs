@@ -102,9 +102,9 @@ public class AnamnesisCharaFile : JsonDocumentBase
     {
         base.GetAutoTags(ref tags);
 
-        tags.Add(this.Race.ToDisplayName());
-        tags.Add(this.Gender.ToDisplayName());
-        tags.Add(this.Tribe.ToDisplayName());
+        tags.Add(this.Race.ToDisplayName(), true);
+        tags.Add(this.Gender.ToDisplayName(), true);
+        tags.Add(this.Tribe.ToDisplayName(), true);
     }
 
     public static implicit operator ActorAppearance(AnamnesisCharaFile chara)
