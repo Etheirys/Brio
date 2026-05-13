@@ -418,7 +418,7 @@ public class Brio(IDalamudPluginInterface pluginInterface) : IAsyncDalamudPlugin
     {
         ReadOnlySpan<string> relevantPlugins =
         [
-            "Glamourer", "Penumbra", "CustomizePlus", "VfxEditor", "Ktisis",
+            "Glamourer", "Penumbra", "CustomizePlus", "VfxEditor", "Ktisis", "PovPlus",
             "IllusioVitae", "Aetherment", "GagSpeak", "ProjectGagSpeak", "RoleplayingVoiceDalamud", "AQuestReborn",
             "LoporritSync", "HonseFarm.Client", "LightlessSync", "Snowcloak", "MareSempiterne", "Sundouleia", "Loci"
         ];
