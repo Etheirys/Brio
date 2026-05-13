@@ -334,7 +334,7 @@ public class ActorSpawnService : MediatorSubscriberBase
             if(idCheck == 0xffffffff)
             {
                 Brio.Log.Warning("Failed to create character, invalid ID was returned.");
-                EventBus.Instance.NotifyError("Failed to create character.");
+                Brio.NotifyError("Failed to create character.");
                 return false;
             }
             ushort newId = (ushort)idCheck;

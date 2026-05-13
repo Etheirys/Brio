@@ -307,7 +307,7 @@ public class ActorAppearanceCapability : ActorCharacterCapability
         var doc = ResourceProvider.Instance.GetFileDocument<AnamnesisCharaFile>(file);
         if(doc.Race == 0 && doc.ModelType == 0)
         {
-            EventBus.Instance.NotifyError("Invalid character appearance file.");
+            Brio.NotifyError("Invalid character appearance file.");
             return;
         }
 

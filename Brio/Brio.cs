@@ -306,14 +306,7 @@ public class Brio(IDalamudPluginInterface pluginInterface) : IAsyncDalamudPlugin
 
     public static void NotifyError(string message)
     {
-        EventBus.Instance.NotifyError(message);
-    }
-
-    public void Dispose()
-    {
-        _services?.Dispose();
-
-        GC.SuppressFinalize(this);
+        UIManager.Instance.NotifyError(message);
     }
 
     //
