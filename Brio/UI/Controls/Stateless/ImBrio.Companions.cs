@@ -12,7 +12,7 @@ public static partial class ImBrio
         var (description, icon) = union.Match(
            companion => ($"{GameDataProvider.Instance.GetCompanionName(companion.RowId)}\n{companion.RowId}\nModel: {companion.Model.RowId}", companion.Icon),
            mount => ($"{GameDataProvider.Instance.GetMountName(mount.RowId)}\n{mount.RowId}\nModel: {mount.ModelChara.RowId}", mount.Icon),
-           ornament => ($"{ornament.Singular}\n{ornament.RowId}\nModel: {ornament.Model}", ornament.Icon),
+           ornament => ($"{GameDataProvider.Instance.GetOrnamentName(ornament.RowId)}\n{ornament.RowId}\nModel: {ornament.Model}", ornament.Icon),
            none => ("None", (uint)0)
        );
 

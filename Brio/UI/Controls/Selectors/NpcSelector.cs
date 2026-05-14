@@ -55,11 +55,7 @@ public class NpcSelector(string id) : Selector<NpcSelectorEntry>(id)
 
         foreach(var ornament in gameDataProvider.Ornaments)
         {
-            var name = ornament.Singular.ToString();
-
-            if(string.IsNullOrEmpty(name))
-                name = $"Ornament {ornament.RowId}";
-
+            var name = GameDataProvider.Instance.GetOrnamentName(ornament.RowId);
             AddItem(new NpcSelectorEntry(name, ornament.Icon, ornament));
         }
     }

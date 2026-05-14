@@ -18,8 +18,13 @@ public class GameDataOrnamentSource : GameDataAppearanceSourceBase
         foreach(var ornament in Lumina.Ornaments)
         {
             string rowName = $"Ornament {ornament.RowId}";
-            var entry = new GameDataAppearanceEntry(this, EntityManager, ornament.RowId, ornament.Singular.ToString() ?? rowName, ornament.Icon, ornament, $"{ornament.RowId}");
+            var name = GameDataProvider.Instance.GetOrnamentName(ornament.RowId);
+            var entry = new GameDataAppearanceEntry(this, EntityManager, ornament.RowId, name, ornament.Icon, ornament, $"{ornament.RowId}");
             entry.Tags.Add("Ornament").WithAlias("Fashion Accessory");
+
+            if(name != rowName)
+                entry.Tags.Add("Named");
+
             entry.SourceInfo = rowName;
             Add(entry);
         }

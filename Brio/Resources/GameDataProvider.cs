@@ -121,6 +121,8 @@ public class GameDataProvider
 
     public string GetMountName(uint mountId) => SeStringEvaluator.EvaluateActStr(ActionKind.Mount, mountId) is { Length: not 0 } name ? name : $"Mount {mountId}";
 
+    public string GetOrnamentName(uint ornamentId) => SeStringEvaluator.EvaluateActStr(ActionKind.Ornament, ornamentId) is { Length: not 0 } name ? name : $"Ornament {ornamentId}";
+
     public string? ResolveName(string name)
     {
         if(NpcNames.TryGetValue(name, out var nameOverride))

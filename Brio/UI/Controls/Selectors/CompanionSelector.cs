@@ -76,7 +76,7 @@ public class CompanionSelector(string id) : Selector<CompanionRowUnion>(id)
         var searchText = item.Match(
             companion => $"{GameDataProvider.Instance.GetCompanionName(companion.RowId)} {companion.Plural} {companion.RowId} {companion.Model.RowId}",
             mount => $"{GameDataProvider.Instance.GetMountName(mount.RowId)} {mount.Plural} {mount.RowId} {mount.ModelChara.RowId}",
-            ornament => $"{ornament.Singular} {ornament.Plural} {ornament.RowId} {ornament.Model}",
+            ornament => $"{GameDataProvider.Instance.GetOrnamentName(ornament.RowId)} {ornament.Plural} {ornament.RowId} {ornament.Model}",
             none => "none"
         );
 
@@ -100,14 +100,14 @@ public class CompanionSelector(string id) : Selector<CompanionRowUnion>(id)
         var textA = itemA.Match(
             companion => GameDataProvider.Instance.GetCompanionName(companion.RowId),
             mount => GameDataProvider.Instance.GetMountName(mount.RowId),
-            ornament => ornament.Singular.ToString(),
+            ornament => GameDataProvider.Instance.GetOrnamentName(ornament.RowId),
             none => ""
         );
 
         var textB = itemB.Match(
             companion => GameDataProvider.Instance.GetCompanionName(companion.RowId),
             mount => GameDataProvider.Instance.GetMountName(mount.RowId),
-            ornament => ornament.Singular.ToString(),
+            ornament => GameDataProvider.Instance.GetOrnamentName(ornament.RowId),
             none => ""
         );
 
