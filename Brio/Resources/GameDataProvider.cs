@@ -48,6 +48,8 @@ public class GameDataProvider
 
     public readonly HumanData HumanData;
 
+    public readonly IReadOnlyDictionary<string, string> NpcNames;
+
     public GameDataProvider(IDataManager dataManager, ISeStringEvaluator seStringEvaluator, ResourceProvider resourceProvider)
     {
         Instance = this;
@@ -106,6 +108,8 @@ public class GameDataProvider
 
         HumanData = new HumanData(dataManager.GetFile("chara/xls/charamake/human.cmp")!.Data);
 
+        NpcNames = ResourceProvider.GetResourceDocument<IReadOnlyDictionary<string, string>>("Data.NpcNames.json");
+
         ModelDatabase = new(resourceProvider, this);
     }
 
@@ -119,9 +123,7 @@ public class GameDataProvider
 
     public string? ResolveName(string name)
     {
-        var names = ResourceProvider.GetResourceDocument<IReadOnlyDictionary<string, string>>("Data.NpcNames.json");
-
-        if(names.TryGetValue(name, out var nameOverride))
+        if(NpcNames.TryGetValue(name, out var nameOverride))
             name = nameOverride;
 
         if(name.StartsWith("N:"))
