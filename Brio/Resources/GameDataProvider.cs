@@ -1,11 +1,11 @@
 ﻿using Brio.Game.Actor.Appearance;
 using Brio.Resources.Extra;
 using Brio.Resources.Sheets;
+using Dalamud.Game;
+using Dalamud.Game.ClientState.Objects.Enums;
 using Dalamud.Plugin.Services;
+using Lumina.Excel;
 using Lumina.Excel.Sheets;
-using System.Collections.Generic;
-using System.Linq;
-using Glasses = Lumina.Excel.Sheets.Glasses;
 
 namespace Brio.Resources;
 
@@ -15,88 +15,100 @@ public class GameDataProvider
 
     public IDataManager DataManager { get; private set; }
 
-    public readonly IReadOnlyDictionary<uint, TerritoryType> TerritoryTypes;
-    public readonly IReadOnlyDictionary<uint, Weather> Weathers;
-    public readonly IReadOnlyDictionary<uint, WeatherRate> WeatherRates;
-    public readonly IReadOnlyDictionary<uint, Companion> Companions;
-    public readonly IReadOnlyDictionary<uint, Ornament> Ornaments;
-    public readonly IReadOnlyDictionary<uint, Mount> Mounts;
-    public readonly IReadOnlyDictionary<uint, Festival> Festivals;
-    public readonly IReadOnlyDictionary<uint, Status> Statuses;
-    public readonly IReadOnlyDictionary<uint, BrioActionTimeline> ActionTimelines;
-    public readonly IReadOnlyDictionary<uint, Emote> Emotes;
-    public readonly IReadOnlyDictionary<uint, Action> Actions;
-    public readonly IReadOnlyDictionary<uint, ENpcBase> ENpcBases;
-    public readonly IReadOnlyDictionary<uint, ENpcResident> ENpcResidents;
-    public readonly IReadOnlyDictionary<uint, BNpcBase> BNpcBases;
-    public readonly IReadOnlyDictionary<uint, BNpcCustomize> BNpcCustomizations;
-    public readonly IReadOnlyDictionary<uint, BNpcName> BNpcNames;
-    public readonly IReadOnlyDictionary<uint, NpcEquip> NpcEquips;
-    public readonly IReadOnlyDictionary<uint, Stain> Stains;
-    public readonly IReadOnlyDictionary<uint, CharaMakeCustomize> CharaMakeCustomizations;
-    public readonly IReadOnlyDictionary<uint, BrioCharaMakeType> CharaMakeTypes;
-    public readonly IReadOnlyDictionary<uint, BrioHairMakeType> HairMakeTypes;
-    public readonly IReadOnlyDictionary<uint, Item> Items;
-    public readonly IReadOnlyDictionary<uint, Glasses> Glasses;
+    public ISeStringEvaluator SeStringEvaluator { get; private set; }
+
+    public readonly ExcelSheet<TerritoryType> TerritoryTypes;
+    public readonly ExcelSheet<Weather> Weathers;
+    public readonly ExcelSheet<WeatherRate> WeatherRates;
+    public readonly ExcelSheet<Companion> Companions;
+    public readonly ExcelSheet<Ornament> Ornaments;
+    public readonly ExcelSheet<Mount> Mounts;
+    public readonly ExcelSheet<Festival> Festivals;
+    public readonly ExcelSheet<Status> Statuses;
+    public readonly ExcelSheet<BrioActionTimeline> ActionTimelines;
+    public readonly ExcelSheet<Emote> Emotes;
+    public readonly ExcelSheet<Action> Actions;
+    public readonly ExcelSheet<ENpcBase> ENpcBases;
+    public readonly ExcelSheet<ENpcResident> ENpcResidents;
+    public readonly ExcelSheet<BNpcBase> BNpcBases;
+    public readonly ExcelSheet<BNpcCustomize> BNpcCustomizations;
+    public readonly ExcelSheet<BNpcName> BNpcNames;
+    public readonly ExcelSheet<NpcEquip> NpcEquips;
+    public readonly ExcelSheet<Stain> Stains;
+    public readonly ExcelSheet<CharaMakeCustomize> CharaMakeCustomizations;
+    public readonly ExcelSheet<BrioCharaMakeType> CharaMakeTypes;
+    public readonly ExcelSheet<BrioHairMakeType> HairMakeTypes;
+    public readonly ExcelSheet<Item> Items;
+    public readonly ExcelSheet<Glasses> Glasses;
 
     public readonly ModelDatabase ModelDatabase;
 
     public readonly HumanData HumanData;
 
-    public GameDataProvider(IDataManager dataManager, ResourceProvider _resourceProvider)
+    public GameDataProvider(IDataManager dataManager, ISeStringEvaluator seStringEvaluator, ResourceProvider _resourceProvider)
     {
         Instance = this;
 
-        TerritoryTypes = dataManager.GetExcelSheet<TerritoryType>()!.ToDictionary(x => x.RowId, x => x).AsReadOnly();
+        DataManager = dataManager;
 
-        Weathers = dataManager.GetExcelSheet<Weather>()!.ToDictionary(x => x.RowId, x => x).AsReadOnly();
+        SeStringEvaluator = seStringEvaluator;
 
-        WeatherRates = dataManager.GetExcelSheet<WeatherRate>()!.ToDictionary(x => x.RowId, x => x).AsReadOnly();
+        TerritoryTypes = dataManager.GetExcelSheet<TerritoryType>();
 
-        Companions = dataManager.GetExcelSheet<Companion>()!.ToDictionary(x => x.RowId, x => x).AsReadOnly();
+        Weathers = dataManager.GetExcelSheet<Weather>();
 
-        Ornaments = dataManager.GetExcelSheet<Ornament>()!.ToDictionary(x => x.RowId, x => x).AsReadOnly();
+        WeatherRates = dataManager.GetExcelSheet<WeatherRate>();
 
-        Mounts = dataManager.GetExcelSheet<Mount>()!.ToDictionary(x => x.RowId, x => x).AsReadOnly();
+        Companions = dataManager.GetExcelSheet<Companion>();
 
-        Festivals = dataManager.GetExcelSheet<Festival>()!.ToDictionary(x => x.RowId, x => x).AsReadOnly();
+        Ornaments = dataManager.GetExcelSheet<Ornament>();
 
-        Statuses = dataManager.GetExcelSheet<Status>()!.ToDictionary(x => x.RowId, x => x).AsReadOnly();
+        Mounts = dataManager.GetExcelSheet<Mount>();
 
-        ActionTimelines = dataManager.GetExcelSheet<BrioActionTimeline>()!.ToDictionary(x => x.RowId, x => x).AsReadOnly();
+        Festivals = dataManager.GetExcelSheet<Festival>();
 
-        Emotes = dataManager.GetExcelSheet<Emote>()!.ToDictionary(x => x.RowId, x => x).AsReadOnly();
+        Statuses = dataManager.GetExcelSheet<Status>();
 
-        Actions = dataManager.GetExcelSheet<Action>()!.ToDictionary(x => x.RowId, x => x).AsReadOnly();
+        ActionTimelines = dataManager.GetExcelSheet<BrioActionTimeline>();
 
-        ENpcBases = dataManager.GetExcelSheet<ENpcBase>()!.ToDictionary(x => x.RowId, x => x).AsReadOnly();
+        Emotes = dataManager.GetExcelSheet<Emote>();
 
-        ENpcResidents = dataManager.GetExcelSheet<ENpcResident>()!.ToDictionary(x => x.RowId, x => x).AsReadOnly();
+        Actions = dataManager.GetExcelSheet<Action>();
 
-        BNpcBases = dataManager.GetExcelSheet<BNpcBase>()!.ToDictionary(x => x.RowId, x => x).AsReadOnly();
+        ENpcBases = dataManager.GetExcelSheet<ENpcBase>();
 
-        BNpcCustomizations = dataManager.GetExcelSheet<BNpcCustomize>()!.ToDictionary(x => x.RowId, x => x).AsReadOnly();
+        ENpcResidents = dataManager.GetExcelSheet<ENpcResident>();
 
-        BNpcNames = dataManager.GetExcelSheet<BNpcName>()!.ToDictionary(x => x.RowId, x => x).AsReadOnly();
+        BNpcBases = dataManager.GetExcelSheet<BNpcBase>();
 
-        NpcEquips = dataManager.GetExcelSheet<NpcEquip>()!.ToDictionary(x => x.RowId, x => x).AsReadOnly();
+        BNpcCustomizations = dataManager.GetExcelSheet<BNpcCustomize>();
 
-        Stains = dataManager.GetExcelSheet<Stain>()!.ToDictionary(x => x.RowId, x => x).AsReadOnly();
+        BNpcNames = dataManager.GetExcelSheet<BNpcName>();
 
-        CharaMakeCustomizations = dataManager.GetExcelSheet<CharaMakeCustomize>()!.ToDictionary(x => x.RowId, x => x).AsReadOnly();
+        NpcEquips = dataManager.GetExcelSheet<NpcEquip>();
 
-        CharaMakeTypes = dataManager.GetExcelSheet<BrioCharaMakeType>()!.ToDictionary(x => x.RowId, x => x).AsReadOnly();
+        Stains = dataManager.GetExcelSheet<Stain>();
 
-        HairMakeTypes = dataManager.GetExcelSheet<BrioHairMakeType>()!.ToDictionary(x => x.RowId, x => x).AsReadOnly();
+        CharaMakeCustomizations = dataManager.GetExcelSheet<CharaMakeCustomize>();
 
-        Items = dataManager.GetExcelSheet<Item>()!.ToDictionary(x => x.RowId, x => x).AsReadOnly();
+        CharaMakeTypes = dataManager.GetExcelSheet<BrioCharaMakeType>();
 
-        Glasses = dataManager.GetExcelSheet<Glasses>()!.ToDictionary(x => x.RowId, x => x).AsReadOnly();
+        HairMakeTypes = dataManager.GetExcelSheet<BrioHairMakeType>();
+
+        Items = dataManager.GetExcelSheet<Item>();
+
+        Glasses = dataManager.GetExcelSheet<Glasses>();
 
         HumanData = new HumanData(dataManager.GetFile("chara/xls/charamake/human.cmp")!.Data);
 
-        ModelDatabase = new(_resourceProvider);
-
-        DataManager = dataManager;
+        ModelDatabase = new(_resourceProvider, this);
     }
+
+    public string GetENpcName(uint eNpcNameId) => SeStringEvaluator.EvaluateObjStr(ObjectKind.EventNpc, eNpcNameId);
+
+    public string GetBNpcName(uint bNpcNameId) => SeStringEvaluator.EvaluateObjStr(ObjectKind.BattleNpc, bNpcNameId);
+
+    public string GetCompanionName(uint companionId) => SeStringEvaluator.EvaluateObjStr(ObjectKind.Companion, companionId);
+
+    public string GetMountName(uint mountId) => SeStringEvaluator.EvaluateActStr(ActionKind.Mount, mountId);
 }

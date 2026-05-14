@@ -16,7 +16,7 @@ public class GameDataNpcSource : GameDataAppearanceSourceBase
 
     public override void Scan()
     {
-        foreach(var (_, npc) in Lumina.BNpcBases)
+        foreach(var npc in Lumina.BNpcBases)
         {
             string name = $"B:{npc.RowId:D7}";
             string? displayName = ResolveName(name);
@@ -31,17 +31,12 @@ public class GameDataNpcSource : GameDataAppearanceSourceBase
             Add(entry);
         }
 
-        foreach(var (_, npc) in Lumina.ENpcBases)
+        foreach(var npc in Lumina.ENpcBases)
         {
             string name = $"E:{npc.RowId:D7}";
-            string? displayName = null;
+            var displayName = Lumina.GetENpcName(npc.RowId);
 
-            var resident = Lumina.ENpcResidents[npc.RowId];
-            if(!string.IsNullOrEmpty(resident.Singular.ToString()))
-            {
-                displayName = resident.Singular.ToString();
-            }
-            else
+            if(string.IsNullOrEmpty(displayName))
             {
                 displayName = ResolveName(name);
             }
@@ -57,7 +52,7 @@ public class GameDataNpcSource : GameDataAppearanceSourceBase
         }
     }
 
-    public static string? ResolveName(string name)
+    public string? ResolveName(string name)
     {
         var names = ResourceProvider.Instance.GetResourceDocument<IReadOnlyDictionary<string, string>>("Data.NpcNames.json");
 
@@ -67,12 +62,11 @@ public class GameDataNpcSource : GameDataAppearanceSourceBase
         if(name.StartsWith("N:"))
         {
             var nameId = uint.Parse(name.Substring(2));
-            if(GameDataProvider.Instance.BNpcNames.TryGetValue(nameId, out var nameRef))
+            var bNpcName = Lumina.GetBNpcName(nameId);
+
+            if(!string.IsNullOrEmpty(bNpcName))
             {
-                if(!string.IsNullOrEmpty(nameRef.Singular.ToString()))
-                {
-                    return nameRef.Singular.ToString();
-                }
+                return bNpcName;
             }
         }
 

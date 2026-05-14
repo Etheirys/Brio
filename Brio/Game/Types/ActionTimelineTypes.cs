@@ -10,7 +10,7 @@ public partial class ActionTimelineUnion : OneOfBase<BrioActionTimeline, None>
 {
     public static implicit operator ActionTimelineUnion(ActionTimelineId actionTimelineId)
     {
-        if(actionTimelineId.Id != 0 && GameDataProvider.Instance.ActionTimelines.TryGetValue(actionTimelineId.Id, out var timeline))
+        if(actionTimelineId.Id != 0 && GameDataProvider.Instance.ActionTimelines.TryGetRow(actionTimelineId.Id, out var timeline))
             return timeline;
 
         return new None();

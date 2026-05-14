@@ -1,6 +1,7 @@
-﻿using Brio.Game.Types;
+﻿using System.Numerics;
+using Brio.Game.Types;
+using Brio.Resources;
 using Dalamud.Bindings.ImGui;
-using System.Numerics;
 
 namespace Brio.UI.Controls.Stateless;
 
@@ -9,8 +10,8 @@ public static partial class ImBrio
     public static bool BorderedGameIcon(string id, CompanionRowUnion union, bool showText = true, ImGuiButtonFlags flags = ImGuiButtonFlags.MouseButtonLeft, Vector2? size = null)
     {
         var (description, icon) = union.Match(
-           companion => ($"{companion.Singular}\n{companion.RowId}\nModel: {companion.Model.RowId}", companion.Icon),
-           mount => ($"{mount.Singular}\n{mount.RowId}\nModel: {mount.ModelChara.RowId}", mount.Icon),
+           companion => ($"{GameDataProvider.Instance.GetCompanionName(companion.RowId)}\n{companion.RowId}\nModel: {companion.Model.RowId}", companion.Icon),
+           mount => ($"{GameDataProvider.Instance.GetMountName(mount.RowId)}\n{mount.RowId}\nModel: {mount.ModelChara.RowId}", mount.Icon),
            ornament => ($"{ornament.Singular}\n{ornament.RowId}\nModel: {ornament.Model}", ornament.Icon),
            none => ("None", (uint)0)
        );

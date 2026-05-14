@@ -15,7 +15,7 @@ public class GameDataOrnamentSource : GameDataAppearanceSourceBase
 
     public override void Scan()
     {
-        foreach(var (_, ornament) in Lumina.Ornaments)
+        foreach(var ornament in Lumina.Ornaments)
         {
             string rowName = $"Ornament {ornament.RowId}";
             var entry = new GameDataAppearanceEntry(this, EntityManager, ornament.RowId, ornament.Singular.ToString() ?? rowName, ornament.Icon, ornament, $"{ornament.RowId}");

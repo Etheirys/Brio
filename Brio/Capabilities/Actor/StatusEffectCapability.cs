@@ -50,6 +50,6 @@ public class StatusEffectCapability : ActorCapability
 
     public Status? GetStatus(uint rowId)
     {
-        return GameDataProvider.Instance.Statuses.TryGetValue(rowId, out var status) ? status : null;
+        return GameDataProvider.Instance.Statuses.TryGetRow(rowId, out var status) ? status : null;
     }
 }

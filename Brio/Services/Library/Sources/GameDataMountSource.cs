@@ -15,11 +15,11 @@ public class GameDataMountSource : GameDataAppearanceSourceBase
 
     public override void Scan()
     {
-        foreach(var (_, mount) in Lumina.Mounts)
+        foreach(var mount in Lumina.Mounts)
         {
             string rowName = $"Mount {mount.RowId}";
 
-            string name = mount.Singular.ToString();
+            string name = Lumina.GetMountName(mount.RowId);
             if(string.IsNullOrEmpty(name))
                 name = rowName;
 
