@@ -32,34 +32,54 @@ public class NpcSelector(string id) : Selector<NpcSelectorEntry>(id)
         foreach(var npc in gameDataProvider.BNpcBases)
         {
             var name = ResolveName($"B:{npc.RowId:D7}");
-            AddItem(new NpcSelectorEntry(name ?? $"BNpc {npc.RowId}", 0, npc));
+
+            if(string.IsNullOrEmpty(name))
+                name = $"BNpc {npc.RowId}";
+
+            AddItem(new NpcSelectorEntry(name, 0, npc));
         }
 
         foreach(var npc in gameDataProvider.ENpcBases)
         {
             var name = gameDataProvider.GetENpcName(npc.RowId);
 
-            if (string.IsNullOrEmpty(name))
+            if(string.IsNullOrEmpty(name))
                 name = ResolveName($"E:{npc.RowId:D7}");
 
-            AddItem(new NpcSelectorEntry(name ?? $"ENpc {npc.RowId}", 0, npc));
+            if(string.IsNullOrEmpty(name))
+                name = $"ENpc {npc.RowId}";
+
+            AddItem(new NpcSelectorEntry(name, 0, npc));
         }
 
         foreach(var mount in gameDataProvider.Mounts)
         {
             var name = GameDataProvider.Instance.GetMountName(mount.RowId);
-            AddItem(new NpcSelectorEntry(name ?? $"Mount {mount.RowId}", mount.Icon, mount));
+
+            if(string.IsNullOrEmpty(name))
+                name = $"Mount {mount.RowId}";
+
+            AddItem(new NpcSelectorEntry(name, mount.Icon, mount));
         }
 
         foreach(var companion in gameDataProvider.Companions)
         {
             var name = gameDataProvider.GetCompanionName(companion.RowId);
-            AddItem(new NpcSelectorEntry(name ?? $"Companion {companion.RowId}", companion.Icon, companion));
+
+            if(string.IsNullOrEmpty(name))
+                name = $"Companion {companion.RowId}";
+
+            AddItem(new NpcSelectorEntry(name, companion.Icon, companion));
         }
 
         foreach(var ornament in gameDataProvider.Ornaments)
         {
-            AddItem(new NpcSelectorEntry(ornament.Singular.ToString() ?? $"Ornament {ornament.RowId}", ornament.Icon, ornament));
+            var name = ornament.Singular.ToString();
+
+            if(string.IsNullOrEmpty(name))
+                name = $"Ornament {ornament.RowId}";
+
+            AddItem(new NpcSelectorEntry(name, ornament.Icon, ornament));
         }
     }
 
