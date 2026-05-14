@@ -95,7 +95,7 @@ public class EnvironmentService : MediatorSubscriberBase
 
     private uint? _currentCachedTerritory;
 
-    public IEnumerable<Weather> AllWeatherCollection => _gameDataProvider.Weathers.Values;
+    public IEnumerable<Weather> AllWeatherCollection => _gameDataProvider.Weathers;
 
     private readonly IClientState _clientState;
     private readonly GameDataProvider _gameDataProvider;
@@ -183,7 +183,7 @@ public class EnvironmentService : MediatorSubscriberBase
             if(weatherId == 0)
                 continue;
 
-            if(!_gameDataProvider.Weathers.TryGetValue((uint)weatherId, out var weather))
+            if(!_gameDataProvider.Weathers.TryGetRow((uint)weatherId, out var weather))
                 continue;
 
             if(!_territoryWeatherTable.Any(x => x.RowId == weather.RowId))

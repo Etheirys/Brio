@@ -24,7 +24,7 @@ public class StatusEffectSelector(string id) : Selector<StatusEffectSelectorHold
 
     protected override void PopulateList()
     {
-        foreach(var item in GameDataProvider.Instance.Statuses.Values)
+        foreach(var item in GameDataProvider.Instance.Statuses)
         {
             AddItem(new StatusEffectSelectorHolder { Status = item });
         }

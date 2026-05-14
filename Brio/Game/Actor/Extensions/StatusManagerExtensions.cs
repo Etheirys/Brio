@@ -16,7 +16,7 @@ public static class StatusManagerExtensions
         {
             var effect = (ushort)sm.GetStatusId(i);
             if(effect != 0)
-                if(GameDataProvider.Instance.Statuses.TryGetValue(effect, out var status))
+                if(GameDataProvider.Instance.Statuses.TryGetRow(effect, out var status))
                     list.Add(status);
 
 

@@ -23,13 +23,13 @@ public class CompanionSelector(string id) : Selector<CompanionRowUnion>(id)
 
     protected override void PopulateList()
     {
-        foreach(var companion in GameDataProvider.Instance.Companions.Values)
+        foreach(var companion in GameDataProvider.Instance.Companions)
             AddItem(companion);
 
-        foreach(var mount in GameDataProvider.Instance.Mounts.Values)
+        foreach(var mount in GameDataProvider.Instance.Mounts)
             AddItem(mount);
 
-        foreach(var ornament in GameDataProvider.Instance.Ornaments.Values)
+        foreach(var ornament in GameDataProvider.Instance.Ornaments)
             AddItem(ornament);
 
         AddItem(new None());

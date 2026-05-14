@@ -18,8 +18,7 @@ public class ModelDatabase
         _modelsList = [];
 
         // From Game
-        var items = GameDataProvider.Instance.Items.Values;
-        foreach(var item in items)
+        foreach(var item in GameDataProvider.Instance.Items)
         {
             var slots = item.EquipSlotCategory.ValueNullable?.GetEquipSlots() ?? ActorEquipSlot.None;
             if(slots != ActorEquipSlot.None)

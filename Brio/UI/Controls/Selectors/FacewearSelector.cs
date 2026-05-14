@@ -18,7 +18,7 @@ public class FacewearSelector(string id) : Selector<FacewearUnion>(id)
 
     protected override void PopulateList()
     {
-        foreach(var glasses in GameDataProvider.Instance.Glasses.Values)
+        foreach(var glasses in GameDataProvider.Instance.Glasses)
             AddItem(glasses);
 
         AddItem(new None());

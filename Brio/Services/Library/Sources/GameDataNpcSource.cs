@@ -16,7 +16,7 @@ public class GameDataNpcSource : GameDataAppearanceSourceBase
 
     public override void Scan()
     {
-        foreach(var (_, npc) in Lumina.BNpcBases)
+        foreach(var npc in Lumina.BNpcBases)
         {
             string name = $"B:{npc.RowId:D7}";
             string? displayName = ResolveName(name);
@@ -31,7 +31,7 @@ public class GameDataNpcSource : GameDataAppearanceSourceBase
             Add(entry);
         }
 
-        foreach(var (_, npc) in Lumina.ENpcBases)
+        foreach(var npc in Lumina.ENpcBases)
         {
             string name = $"E:{npc.RowId:D7}";
             string? displayName = null;
@@ -67,7 +67,7 @@ public class GameDataNpcSource : GameDataAppearanceSourceBase
         if(name.StartsWith("N:"))
         {
             var nameId = uint.Parse(name.Substring(2));
-            if(GameDataProvider.Instance.BNpcNames.TryGetValue(nameId, out var nameRef))
+            if(GameDataProvider.Instance.BNpcNames.TryGetRow(nameId, out var nameRef))
             {
                 if(!string.IsNullOrEmpty(nameRef.Singular.ToString()))
                 {

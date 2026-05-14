@@ -15,7 +15,7 @@ public class GameDataMountSource : GameDataAppearanceSourceBase
 
     public override void Scan()
     {
-        foreach(var (_, mount) in Lumina.Mounts)
+        foreach(var mount in Lumina.Mounts)
         {
             string rowName = $"Mount {mount.RowId}";
 

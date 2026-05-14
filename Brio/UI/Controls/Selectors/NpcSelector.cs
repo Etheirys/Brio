@@ -27,14 +27,14 @@ public class NpcSelector(string id) : Selector<NpcSelectorEntry>(id)
 
     protected override void PopulateList()
     {
-        foreach(var (_, npc) in GameDataProvider.Instance.BNpcBases)
+        foreach(var npc in GameDataProvider.Instance.BNpcBases)
         {
             string name = $"B:{npc.RowId:D7}";
             name = ResolveName(name);
             AddItem(new NpcSelectorEntry(name, 0, npc));
         }
 
-        foreach(var (_, npc) in GameDataProvider.Instance.ENpcBases)
+        foreach(var npc in GameDataProvider.Instance.ENpcBases)
         {
             string name = $"E:{npc.RowId:D7}";
 
@@ -47,17 +47,17 @@ public class NpcSelector(string id) : Selector<NpcSelectorEntry>(id)
             AddItem(new NpcSelectorEntry(name, 0, npc));
         }
 
-        foreach(var (_, mount) in GameDataProvider.Instance.Mounts)
+        foreach(var mount in GameDataProvider.Instance.Mounts)
         {
             AddItem(new NpcSelectorEntry(mount.Singular.ToString() ?? $"Mount {mount.RowId}", mount.Icon, mount));
         }
 
-        foreach(var (_, companion) in GameDataProvider.Instance.Companions)
+        foreach(var companion in GameDataProvider.Instance.Companions)
         {
             AddItem(new NpcSelectorEntry(companion.Singular.ToString() ?? $"Companion {companion.RowId}", companion.Icon, companion));
         }
 
-        foreach(var (_, ornament) in GameDataProvider.Instance.Ornaments)
+        foreach(var ornament in GameDataProvider.Instance.Ornaments)
         {
             AddItem(new NpcSelectorEntry(ornament.Singular.ToString() ?? $"Ornament {ornament.RowId}", ornament.Icon, ornament));
         }
@@ -73,7 +73,7 @@ public class NpcSelector(string id) : Selector<NpcSelectorEntry>(id)
         if(name.StartsWith("N:"))
         {
             var nameId = uint.Parse(name.Substring(2));
-            if(GameDataProvider.Instance.BNpcNames.TryGetValue(nameId, out var nameRef))
+            if(GameDataProvider.Instance.BNpcNames.TryGetRow(nameId, out var nameRef))
                 if(!string.IsNullOrEmpty(nameRef.Singular.ToString()))
                     name = nameRef.Singular.ToString();
         }
