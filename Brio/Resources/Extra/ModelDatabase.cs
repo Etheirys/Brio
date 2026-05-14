@@ -12,13 +12,13 @@ public class ModelDatabase
     private readonly MultiValueDictionary<ulong, ModelInfo> _modelLookupTable;
     private readonly List<ModelInfo> _modelsList;
 
-    public ModelDatabase(ResourceProvider _resourceProvider)
+    public ModelDatabase(ResourceProvider _resourceProvider, GameDataProvider gameDataProvider)
     {
         _modelLookupTable = new();
         _modelsList = [];
 
         // From Game
-        foreach(var item in GameDataProvider.Instance.Items)
+        foreach(var item in gameDataProvider.Items)
         {
             var slots = item.EquipSlotCategory.ValueNullable?.GetEquipSlots() ?? ActorEquipSlot.None;
             if(slots != ActorEquipSlot.None)

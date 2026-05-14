@@ -118,6 +118,7 @@ public class Brio : IDalamudPlugin
         serviceCollection.AddSingleton(dalamudServices.SigScanner);
         serviceCollection.AddSingleton(dalamudServices.ObjectTable);
         serviceCollection.AddSingleton(dalamudServices.DataManager);
+        serviceCollection.AddSingleton(dalamudServices.SeStringEvaluator);
         serviceCollection.AddSingleton(dalamudServices.CommandManager);
         serviceCollection.AddSingleton(dalamudServices.ToastGui);
         serviceCollection.AddSingleton(dalamudServices.TargetManager);

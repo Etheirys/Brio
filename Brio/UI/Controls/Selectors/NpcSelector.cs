@@ -1,11 +1,11 @@
-﻿using Brio.Game.Types;
+﻿using System;
+using System.Collections.Generic;
+using System.Numerics;
+using Brio.Game.Types;
 using Brio.Resources;
 using Brio.UI.Controls.Stateless;
 using Dalamud.Bindings.ImGui;
 using Lumina.Excel.Sheets;
-using System;
-using System.Collections.Generic;
-using System.Numerics;
 using static Brio.UI.Controls.Selectors.NpcSelector;
 
 namespace Brio.UI.Controls.Selectors;
@@ -27,37 +27,37 @@ public class NpcSelector(string id) : Selector<NpcSelectorEntry>(id)
 
     protected override void PopulateList()
     {
-        foreach(var npc in GameDataProvider.Instance.BNpcBases)
+        var gameDataProvider = GameDataProvider.Instance;
+
+        foreach(var npc in gameDataProvider.BNpcBases)
         {
-            string name = $"B:{npc.RowId:D7}";
-            name = ResolveName(name);
-            AddItem(new NpcSelectorEntry(name, 0, npc));
+            var name = ResolveName($"B:{npc.RowId:D7}");
+            AddItem(new NpcSelectorEntry(name ?? $"BNpc {npc.RowId}", 0, npc));
         }
 
-        foreach(var npc in GameDataProvider.Instance.ENpcBases)
+        foreach(var npc in gameDataProvider.ENpcBases)
         {
-            string name = $"E:{npc.RowId:D7}";
+            var name = gameDataProvider.GetENpcName(npc.RowId);
 
-            var resident = GameDataProvider.Instance.ENpcResidents[npc.RowId];
+            if (string.IsNullOrEmpty(name))
+                name = ResolveName($"E:{npc.RowId:D7}");
 
-            if(!string.IsNullOrEmpty(resident.Singular.ToString()))
-                name = resident.Singular.ToString();
-
-            name = ResolveName(name);
-            AddItem(new NpcSelectorEntry(name, 0, npc));
+            AddItem(new NpcSelectorEntry(name ?? $"ENpc {npc.RowId}", 0, npc));
         }
 
-        foreach(var mount in GameDataProvider.Instance.Mounts)
+        foreach(var mount in gameDataProvider.Mounts)
         {
-            AddItem(new NpcSelectorEntry(mount.Singular.ToString() ?? $"Mount {mount.RowId}", mount.Icon, mount));
+            var name = GameDataProvider.Instance.GetMountName(mount.RowId);
+            AddItem(new NpcSelectorEntry(name ?? $"Mount {mount.RowId}", mount.Icon, mount));
         }
 
-        foreach(var companion in GameDataProvider.Instance.Companions)
+        foreach(var companion in gameDataProvider.Companions)
         {
-            AddItem(new NpcSelectorEntry(companion.Singular.ToString() ?? $"Companion {companion.RowId}", companion.Icon, companion));
+            var name = gameDataProvider.GetCompanionName(companion.RowId);
+            AddItem(new NpcSelectorEntry(name ?? $"Companion {companion.RowId}", companion.Icon, companion));
         }
 
-        foreach(var ornament in GameDataProvider.Instance.Ornaments)
+        foreach(var ornament in gameDataProvider.Ornaments)
         {
             AddItem(new NpcSelectorEntry(ornament.Singular.ToString() ?? $"Ornament {ornament.RowId}", ornament.Icon, ornament));
         }
@@ -73,9 +73,9 @@ public class NpcSelector(string id) : Selector<NpcSelectorEntry>(id)
         if(name.StartsWith("N:"))
         {
             var nameId = uint.Parse(name.Substring(2));
-            if(GameDataProvider.Instance.BNpcNames.TryGetRow(nameId, out var nameRef))
-                if(!string.IsNullOrEmpty(nameRef.Singular.ToString()))
-                    name = nameRef.Singular.ToString();
+            var bNpcName = GameDataProvider.Instance.GetBNpcName(nameId);
+            if(!string.IsNullOrEmpty(bNpcName))
+                name = bNpcName;
         }
 
         return name;

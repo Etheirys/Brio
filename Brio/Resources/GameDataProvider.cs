@@ -1,6 +1,8 @@
 ﻿using Brio.Game.Actor.Appearance;
 using Brio.Resources.Extra;
 using Brio.Resources.Sheets;
+using Dalamud.Game;
+using Dalamud.Game.ClientState.Objects.Enums;
 using Dalamud.Plugin.Services;
 using Lumina.Excel;
 using Lumina.Excel.Sheets;
@@ -12,6 +14,8 @@ public class GameDataProvider
     public static GameDataProvider Instance { get; private set; } = null!;
 
     public IDataManager DataManager { get; private set; }
+
+    public ISeStringEvaluator SeStringEvaluator { get; private set; }
 
     public readonly ExcelSheet<TerritoryType> TerritoryTypes;
     public readonly ExcelSheet<Weather> Weathers;
@@ -41,13 +45,13 @@ public class GameDataProvider
 
     public readonly HumanData HumanData;
 
-    public GameDataProvider(IDataManager dataManager, ResourceProvider _resourceProvider)
+    public GameDataProvider(IDataManager dataManager, ISeStringEvaluator seStringEvaluator, ResourceProvider _resourceProvider)
     {
         Instance = this;
 
         DataManager = dataManager;
 
-        ModelDatabase = new(_resourceProvider);
+        SeStringEvaluator = seStringEvaluator;
 
         TerritoryTypes = dataManager.GetExcelSheet<TerritoryType>();
 
@@ -96,5 +100,15 @@ public class GameDataProvider
         Glasses = dataManager.GetExcelSheet<Glasses>();
 
         HumanData = new HumanData(dataManager.GetFile("chara/xls/charamake/human.cmp")!.Data);
+
+        ModelDatabase = new(_resourceProvider, this);
     }
+
+    public string GetENpcName(uint eNpcNameId) => SeStringEvaluator.EvaluateObjStr(ObjectKind.EventNpc, eNpcNameId);
+
+    public string GetBNpcName(uint bNpcNameId) => SeStringEvaluator.EvaluateObjStr(ObjectKind.BattleNpc, bNpcNameId);
+
+    public string GetCompanionName(uint companionId) => SeStringEvaluator.EvaluateObjStr(ObjectKind.Companion, companionId);
+
+    public string GetMountName(uint mountId) => SeStringEvaluator.EvaluateActStr(ActionKind.Mount, mountId);
 }
