@@ -161,7 +161,7 @@ public class ActorWebController(IFramework framework, PosingAPI posingAPI, Skele
             Brio.Log.Debug($"Bone: {kvp.Key}, Pos: {boneTransforms[kvp.Key].Position}, Rot: {boneTransforms[kvp.Key].Rotation}, Scale: {boneTransforms[kvp.Key].Scale}");
         }
 
-        success = skeletonService.SetBoneTransforms(objectId, boneTransforms);
+        //success = skeletonService.SetBoneTransforms(objectId, boneTransforms);
 
         Response.StatusCode = 200;
     }
