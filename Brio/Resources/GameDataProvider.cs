@@ -1,4 +1,5 @@
-﻿using Brio.Game.Actor.Appearance;
+﻿using System.Collections.Generic;
+using Brio.Game.Actor.Appearance;
 using Brio.Resources.Extra;
 using Brio.Resources.Sheets;
 using Dalamud.Game;
@@ -13,9 +14,11 @@ public class GameDataProvider
 {
     public static GameDataProvider Instance { get; private set; } = null!;
 
-    public IDataManager DataManager { get; private set; }
+    public IDataManager DataManager { get; }
 
-    public ISeStringEvaluator SeStringEvaluator { get; private set; }
+    public ISeStringEvaluator SeStringEvaluator { get; }
+
+    public ResourceProvider ResourceProvider { get; }
 
     public readonly ExcelSheet<TerritoryType> TerritoryTypes;
     public readonly ExcelSheet<Weather> Weathers;
@@ -45,13 +48,15 @@ public class GameDataProvider
 
     public readonly HumanData HumanData;
 
-    public GameDataProvider(IDataManager dataManager, ISeStringEvaluator seStringEvaluator, ResourceProvider _resourceProvider)
+    public GameDataProvider(IDataManager dataManager, ISeStringEvaluator seStringEvaluator, ResourceProvider resourceProvider)
     {
         Instance = this;
 
         DataManager = dataManager;
 
         SeStringEvaluator = seStringEvaluator;
+
+        ResourceProvider = resourceProvider;
 
         TerritoryTypes = dataManager.GetExcelSheet<TerritoryType>();
 
@@ -101,14 +106,35 @@ public class GameDataProvider
 
         HumanData = new HumanData(dataManager.GetFile("chara/xls/charamake/human.cmp")!.Data);
 
-        ModelDatabase = new(_resourceProvider, this);
+        ModelDatabase = new(resourceProvider, this);
     }
 
-    public string GetENpcName(uint eNpcNameId) => SeStringEvaluator.EvaluateObjStr(ObjectKind.EventNpc, eNpcNameId);
+    public string GetENpcName(uint eNpcNameId) => SeStringEvaluator.EvaluateObjStr(ObjectKind.EventNpc, eNpcNameId) is { Length: not 0 } name ? name : ResolveName($"E:{eNpcNameId:D7}") ?? $"ENpc {eNpcNameId}";
 
-    public string GetBNpcName(uint bNpcNameId) => SeStringEvaluator.EvaluateObjStr(ObjectKind.BattleNpc, bNpcNameId);
+    public string GetBNpcName(uint bNpcNameId) => SeStringEvaluator.EvaluateObjStr(ObjectKind.BattleNpc, bNpcNameId) is { Length: not 0 } name ? name : ResolveName($"B:{bNpcNameId:D7}") ?? $"BNpc {bNpcNameId}";
 
-    public string GetCompanionName(uint companionId) => SeStringEvaluator.EvaluateObjStr(ObjectKind.Companion, companionId);
+    public string GetCompanionName(uint companionId) => SeStringEvaluator.EvaluateObjStr(ObjectKind.Companion, companionId) is { Length: not 0 } name ? name : $"Companion {companionId}";
 
-    public string GetMountName(uint mountId) => SeStringEvaluator.EvaluateActStr(ActionKind.Mount, mountId);
+    public string GetMountName(uint mountId) => SeStringEvaluator.EvaluateActStr(ActionKind.Mount, mountId) is { Length: not 0 } name ? name : $"Mount {mountId}";
+
+    public string? ResolveName(string name)
+    {
+        var names = ResourceProvider.GetResourceDocument<IReadOnlyDictionary<string, string>>("Data.NpcNames.json");
+
+        if(names.TryGetValue(name, out var nameOverride))
+            name = nameOverride;
+
+        if(name.StartsWith("N:"))
+        {
+            var nameId = uint.Parse(name.Substring(2));
+            var bNpcName = GetBNpcName(nameId);
+
+            if(!string.IsNullOrEmpty(bNpcName))
+            {
+                return bNpcName;
+            }
+        }
+
+        return null;
+    }
 }

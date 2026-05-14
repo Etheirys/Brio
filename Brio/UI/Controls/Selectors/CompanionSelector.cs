@@ -3,7 +3,6 @@ using Brio.Game.Types;
 using Brio.Resources;
 using Brio.UI.Controls.Stateless;
 using Dalamud.Bindings.ImGui;
-using Lumina.Excel.Sheets;
 using OneOf.Types;
 
 namespace Brio.UI.Controls.Selectors;
@@ -75,8 +74,8 @@ public class CompanionSelector(string id) : Selector<CompanionRowUnion>(id)
             return false;
 
         var searchText = item.Match(
-            companion => $"{GetCompanionNameWithFallback(companion)} {companion.Plural} {companion.RowId} {companion.Model.RowId}",
-            mount => $"{GetMountNameWithFallback(mount)} {mount.Plural} {mount.RowId} {mount.ModelChara.RowId}",
+            companion => $"{GameDataProvider.Instance.GetCompanionName(companion.RowId)} {companion.Plural} {companion.RowId} {companion.Model.RowId}",
+            mount => $"{GameDataProvider.Instance.GetMountName(mount.RowId)} {mount.Plural} {mount.RowId} {mount.ModelChara.RowId}",
             ornament => $"{ornament.Singular} {ornament.Plural} {ornament.RowId} {ornament.Model}",
             none => "none"
         );
@@ -99,15 +98,15 @@ public class CompanionSelector(string id) : Selector<CompanionRowUnion>(id)
 
         // Get name
         var textA = itemA.Match(
-            companion => GetCompanionNameWithFallback(companion),
-            mount => GetMountNameWithFallback(mount),
+            companion => GameDataProvider.Instance.GetCompanionName(companion.RowId),
+            mount => GameDataProvider.Instance.GetMountName(mount.RowId),
             ornament => ornament.Singular.ToString(),
             none => ""
         );
 
         var textB = itemB.Match(
-            companion => GetCompanionNameWithFallback(companion),
-            mount => GetMountNameWithFallback(mount),
+            companion => GameDataProvider.Instance.GetCompanionName(companion.RowId),
+            mount => GameDataProvider.Instance.GetMountName(mount.RowId),
             ornament => ornament.Singular.ToString(),
             none => ""
         );
@@ -122,7 +121,4 @@ public class CompanionSelector(string id) : Selector<CompanionRowUnion>(id)
         // Alphabetical
         return string.Compare(textA, textB, System.StringComparison.InvariantCultureIgnoreCase);
     }
-
-    private static string GetCompanionNameWithFallback(Companion companion) => GameDataProvider.Instance.GetCompanionName(companion.RowId) is { Length: not 0 } companionName ? companionName : $"Companion {companion.RowId}";
-    private static string GetMountNameWithFallback(Mount mount) => GameDataProvider.Instance.GetMountName(mount.RowId) is { Length: not 0 } mountName ? mountName : $"Mount {mount.RowId}";
 }

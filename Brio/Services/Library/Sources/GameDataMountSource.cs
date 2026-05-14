@@ -18,10 +18,7 @@ public class GameDataMountSource : GameDataAppearanceSourceBase
         foreach(var mount in Lumina.Mounts)
         {
             string rowName = $"Mount {mount.RowId}";
-
             string name = Lumina.GetMountName(mount.RowId);
-            if(string.IsNullOrEmpty(name))
-                name = rowName;
 
             var entry = new GameDataAppearanceEntry(this, EntityManager, mount.RowId, name, mount.Icon, mount, $"{mount.RowId}");
             entry.Tags.Add("Mount");

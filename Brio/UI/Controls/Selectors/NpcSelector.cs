@@ -31,44 +31,25 @@ public class NpcSelector(string id) : Selector<NpcSelectorEntry>(id)
 
         foreach(var npc in gameDataProvider.BNpcBases)
         {
-            var name = ResolveName($"B:{npc.RowId:D7}");
-
-            if(string.IsNullOrEmpty(name))
-                name = $"BNpc {npc.RowId}";
-
+            var name = gameDataProvider.GetBNpcName(npc.RowId);
             AddItem(new NpcSelectorEntry(name, 0, npc));
         }
 
         foreach(var npc in gameDataProvider.ENpcBases)
         {
             var name = gameDataProvider.GetENpcName(npc.RowId);
-
-            if(string.IsNullOrEmpty(name))
-                name = ResolveName($"E:{npc.RowId:D7}");
-
-            if(string.IsNullOrEmpty(name))
-                name = $"ENpc {npc.RowId}";
-
             AddItem(new NpcSelectorEntry(name, 0, npc));
         }
 
         foreach(var mount in gameDataProvider.Mounts)
         {
-            var name = GameDataProvider.Instance.GetMountName(mount.RowId);
-
-            if(string.IsNullOrEmpty(name))
-                name = $"Mount {mount.RowId}";
-
+            var name = gameDataProvider.GetMountName(mount.RowId);
             AddItem(new NpcSelectorEntry(name, mount.Icon, mount));
         }
 
         foreach(var companion in gameDataProvider.Companions)
         {
             var name = gameDataProvider.GetCompanionName(companion.RowId);
-
-            if(string.IsNullOrEmpty(name))
-                name = $"Companion {companion.RowId}";
-
             AddItem(new NpcSelectorEntry(name, companion.Icon, companion));
         }
 
@@ -81,24 +62,6 @@ public class NpcSelector(string id) : Selector<NpcSelectorEntry>(id)
 
             AddItem(new NpcSelectorEntry(name, ornament.Icon, ornament));
         }
-    }
-
-    private static string ResolveName(string name)
-    {
-        var names = ResourceProvider.Instance.GetResourceDocument<IReadOnlyDictionary<string, string>>("Data.NpcNames.json");
-
-        if(names.TryGetValue(name, out var nameOverride))
-            name = nameOverride;
-
-        if(name.StartsWith("N:"))
-        {
-            var nameId = uint.Parse(name.Substring(2));
-            var bNpcName = GameDataProvider.Instance.GetBNpcName(nameId);
-            if(!string.IsNullOrEmpty(bNpcName))
-                name = bNpcName;
-        }
-
-        return name;
     }
 
     protected override void DrawOptions()
