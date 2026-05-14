@@ -23,7 +23,7 @@ public class GameDataNpcSource : GameDataAppearanceSourceBase
             entry.SourceInfo = $"BNpc {npc.RowId}";
             entry.Tags.Add("NPC");
 
-            if(!string.IsNullOrEmpty(displayName) && displayName != rowName)
+            if(!string.IsNullOrEmpty(displayName) && displayName != rowName && displayName != $"BNpc {npc.RowId}")
                 entry.Tags.Add("Named");
 
             Add(entry);
@@ -37,7 +37,7 @@ public class GameDataNpcSource : GameDataAppearanceSourceBase
             entry.SourceInfo = $"ENpc {npc.RowId}";
             entry.Tags.Add("NPC");
 
-            if(!string.IsNullOrEmpty(displayName) && displayName != rowName)
+            if(!string.IsNullOrEmpty(displayName) && displayName != rowName && displayName != $"ENpc {npc.RowId}")
                 entry.Tags.Add("Named");
 
             Add(entry);
