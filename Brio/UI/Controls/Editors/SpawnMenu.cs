@@ -1,14 +1,14 @@
 using Brio.Entities;
 using Brio.Entities.Camera;
+using Brio.Entities.Core;
 using Brio.Game.Actor;
-using Brio.Game.WorldObjects;
 using Brio.Game.Camera;
 using Brio.Game.World;
+using Brio.Game.World.Interop;
+using Brio.Game.WorldObjects;
 using Brio.Services;
-using Brio.UI;
 using Brio.UI.Controls.Core;
 using Brio.UI.Controls.Stateless;
-using Brio.UI.Entitites;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface;
 using Dalamud.Interface.Utility;
@@ -16,7 +16,6 @@ using Dalamud.Interface.Utility.Raii;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Numerics;
-using Brio.Entities.Core;
 
 namespace Brio.UI.Controls.Editors;
 
@@ -32,8 +31,6 @@ public class SpawnMenu
     private static WorldObjectService _worldObjectService => Instance!.provider.GetRequiredService<WorldObjectService>();
     private static EntityManager _entityManager => Instance!.provider.GetRequiredService<EntityManager>();
     private static ReferenceImageService _referenceImageService => Instance!.provider.GetRequiredService<ReferenceImageService>();
-
-    private static string _pendingPath = "bgcommon/hou/outdoor/general/0332/asset/gar_b0_m0332.sgb"; // this has to be a valid path or we go booom
 
     static SpawnMenu Instance = null!;
     public void Initialize(IServiceProvider serviceProvider)
@@ -89,67 +86,58 @@ public class SpawnMenu
                 {
                     _actorSpawnService.CreateCharacter(out _, SpawnFlags.WithCompanionSlot, false);
                 }
+            }
 
+            if(_worldObjectService != null)
+            {
+                ImGui.Spacing();
                 ImBrio.SeparatorText("Objects");
 
                 if(ImBrio.DrawIconButton(FontAwesomeIcon.Cubes, "Prop", buttonSize))
                 {
                     _worldObjectService.SpawnProp(new FFXIVClientStructs.FFXIV.Client.Graphics.Scene.WeaponCreateInfo
                     {
-                        WeaponModelId =                                             
-                        {
-                            Id = 9001,
-                            Type = 249,
-                            Variant = 1,
-                            Stain0 = 1,
-                            Stain1 = 1,
-                        },
+                        // this is an apple
+                        WeaponModelId =
+                            {
+                                Id = 9001,
+                                Type = 249,
+                                Variant = 1,
+                                Stain0 = 1,
+                                Stain1 = 1,
+                            },
                         AnimationVariant = 0,
                     });
                 }
-            
+
                 if(ImBrio.DrawIconButton(FontAwesomeIcon.Couch, "Open Object Catalog", buttonSize))
                 {
                     UIManager.Instance.ToggleFurnitureCatalogWindow();
                     ImGui.CloseCurrentPopup();
                 }
 
-                ImGui.SetNextItemWidth(buttonSize.X - ImGui.CalcTextSize("Path").X);
-                ImGui.InputText("Path###spawn_furniture_path", ref _pendingPath, 512);
-
                 if(ImBrio.DrawIconButton(FontAwesomeIcon.Chair, "Furniture Item", buttonSize))
                 {
-                    if(!string.IsNullOrWhiteSpace(_pendingPath))
-                    {
-                        _worldObjectService.SpawnFurniture(_pendingPath);
-                        ImGui.CloseCurrentPopup();
-                    }
+                    _worldObjectService.SpawnFurniture("bgcommon/hou/outdoor/general/0332/asset/gar_b0_m0332.sgb");
+                    ImGui.CloseCurrentPopup();
                 }
 
                 if(ImBrio.DrawIconButton(FontAwesomeIcon.Boxes, "World Object", buttonSize))
                 {
-                    if(!string.IsNullOrWhiteSpace(_pendingPath))
-                    {
-                        _worldObjectService.SpawnBgObject(_pendingPath);
-                        ImGui.CloseCurrentPopup();
-                    }
+                    _worldObjectService.SpawnBgObject("bg/ffxiv/fst_f1/twn/common/bgparts/f1t0_a0_taru1.mdl");
+                    ImGui.CloseCurrentPopup();
                 }
 
                 if(ImBrio.DrawIconButton(FontAwesomeIcon.Burst, "VFX", buttonSize))
                 {
-                    if(!string.IsNullOrWhiteSpace(_pendingPath))
-                    {
-                        _worldObjectService.SpawnStaticVfx(_pendingPath);
-                        ImGui.CloseCurrentPopup();
-                    }
+                    _worldObjectService.SpawnStaticVfx("bgcommon/world/common/vfx_for_bg/eff/val_obj001_o.avfx");
+                    ImGui.CloseCurrentPopup();
                 }
             }
 
             if(_lightingService != null)
             {
-                if(_actorSpawnService != null || _cameraManager != null)
-                    ImGui.Spacing();
-
+                ImGui.Spacing();
                 ImBrio.SeparatorText("Lights");
 
                 if(ImBrio.DrawIconButton(FontAwesomeIcon.Lightbulb, "Spot Light", buttonSize))
@@ -170,9 +158,7 @@ public class SpawnMenu
 
             if(_cameraManager != null)
             {
-                if(_actorSpawnService != null)
-                    ImGui.Spacing();
-
+                ImGui.Spacing();
                 ImBrio.SeparatorText("Cameras");
 
                 if(ImBrio.DrawIconButton(FontAwesomeIcon.Camera, "Brio Camera", buttonSize))
@@ -188,6 +174,7 @@ public class SpawnMenu
                 }
             }
 
+            ImGui.Spacing();
             ImBrio.SeparatorText("Other");
 
             if(ImBrio.DrawIconButton(FontAwesomeIcon.Image, "Reference Image", buttonSize))
