@@ -33,16 +33,7 @@ public unsafe class WorldObjectService : MediatorSubscriberBase
     public int SpawnedCount => _worldObjectEntities.ActiveCount;
     public List<WorldObjectEntity> SpawnedEntities => [.. _worldObjectEntities];
 
-    public WorldObjectService(
-        IServiceProvider serviceProvider,
-        IObjectTable gameObjects,
-        IFramework framework,
-        EntityManager entityManager,
-        GPoseService gPoseService,
-        VFXService vFXService,
-        SGLService sGLService,
-        VirtualCameraManager cameraManager,
-        Mediator mediator) : base(mediator)
+    public WorldObjectService(IServiceProvider serviceProvider, IObjectTable gameObjects, IFramework framework, EntityManager entityManager, GPoseService gPoseService, VFXService vFXService, SGLService sGLService, VirtualCameraManager cameraManager, Mediator mediator) : base(mediator)
     {
         _serviceProvider = serviceProvider;
         _entityManager = entityManager;
@@ -76,10 +67,12 @@ public unsafe class WorldObjectService : MediatorSubscriberBase
                     if(vfx.IsDirty)
                     {
                         vfx.IsDirty = false;
+                        vfx.IsVisible = false;
+
                         _framework.RunOnTick(() =>
                         {
                             vfx.IsVisible = true;
-                        }, delayTicks: 1);
+                        }, delayTicks: 2);
 
                         vfx.VFX->Update(0f);
                     }
@@ -111,6 +104,8 @@ public unsafe class WorldObjectService : MediatorSubscriberBase
             }
         }
     }
+
+    //
 
     public void SpawnBgObject(string path) =>
         _framework.RunOnFrameworkThread(() => SpawnBgObjectInternal(path));
@@ -186,6 +181,8 @@ public unsafe class WorldObjectService : MediatorSubscriberBase
         var entity = _entityManager.CreateEntityOnEntityContainer<WorldObjectEntity>(obj);
         obj.SetEntityIndex(_worldObjectEntities.Add(entity));
     }
+
+    //
 
     public void Clone(IWorldObject obj)
     {
@@ -279,5 +276,7 @@ public unsafe class WorldObjectService : MediatorSubscriberBase
         DestroyAll();
 
         base.Dispose();
+
+        GC.SuppressFinalize(this);
     }
 }

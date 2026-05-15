@@ -67,5 +67,7 @@ public class WorldObjectEntity(IWorldObject gameObject, IServiceProvider provide
         AddCapability(ActivatorUtilities.CreateInstance<WorldObjectLifetimeCapability>(_serviceProvider, this));
 
         AddTransformable<WorldObjectTransformCapability>();
+
+        AddCapability(ActivatorUtilities.CreateInstance<DebugWorldObjectCapability>(_serviceProvider, this));
     }
 }
