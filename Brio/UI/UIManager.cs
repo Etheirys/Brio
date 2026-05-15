@@ -68,6 +68,10 @@ public class UIManager : IDisposable
     public static bool IsOverlayWindowOpen => Instance._overlayWindow.IsOpen;
     public static bool IsPosingGraphicalWindowOpen => Instance._graphicalWindow.IsOpen;
 
+    public static bool IsAnyPosingWindowOpen => Instance._overlayWindow.IsOpen || Instance._graphicalWindow.IsOpen;
+    public static bool IsLightWindowOpen => Instance._lightWindow.IsOpen;
+    public static bool IsCameraWindowOpen => Instance._cameraWindow.IsOpen;
+
     public bool IsActorAppearanceWindowOpen => _actorAppearanceWindow.IsOpen;
     public bool IsActorPoseWindowOpen => _graphicalWindow.IsOpen;
 
