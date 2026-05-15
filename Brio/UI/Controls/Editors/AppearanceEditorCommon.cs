@@ -110,7 +110,7 @@ public static class AppearanceEditorCommon
     {
         if(!capability.HasGlamourerIntegration)
             return;
-        ImBrio.VerticalPadding(1);
+        ImBrio.VerticalPadding(2);
 
         if(ImBrio.FontIconButton(FontAwesomeIcon.TheaterMasks))
         {
@@ -184,7 +184,7 @@ public static class AppearanceEditorCommon
         if(!capability.HasCustomizePlusIntegration)
             return;
 
-        ImBrio.VerticalPadding(1);
+        ImBrio.VerticalPadding(2);
 
         if(ImGui.Button("C+", new Vector2(25 * ImGuiHelpers.GlobalScale)))
         {

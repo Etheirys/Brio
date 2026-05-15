@@ -1,9 +1,11 @@
 ﻿using Brio.Capabilities.Camera;
+using Brio.Config;
 using Brio.Core;
 using Brio.Entities.Core;
 using Brio.Game.Camera;
 using Brio.Game.GPose;
 using Brio.Game.Input;
+using Brio.UI;
 using Brio.UI.Controls;
 using Brio.UI.Controls.Stateless;
 using Brio.UI.Theming;
@@ -58,6 +60,8 @@ public class CameraEntity(IServiceProvider provider, int cameraID, CameraType ca
     public override int ContextButtonCount => VirtualCamera.IsFreeCamera ? 3 : 2;
 
     public override FontAwesomeIcon Icon => GetIcon();
+
+    public override bool IsWidgetBodyHidden => (ConfigurationService.Instance.Configuration.Posing.IfCameraWindowisOpenDontUseSceneManager && UIManager.IsCameraWindowOpen);
 
     public CameraType CameraType { get; private set; } = cameraType;
 

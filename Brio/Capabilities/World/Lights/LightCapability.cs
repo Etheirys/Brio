@@ -1,7 +1,7 @@
 ﻿using Brio.Capabilities.Core;
 using Brio.Entities.Core;
 using Brio.Entities.World;
-using Brio.Game.World;
+using Brio.Game.World.Lights;
 using System;
 
 namespace Brio.Capabilities.World;

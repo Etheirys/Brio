@@ -56,7 +56,7 @@ public abstract class Entity : IDisposable
     
     public virtual bool IsSynced => false;
     public virtual bool IsLoadedFromProject => false;
-    public virtual bool IsWidgetBodyHidden { get; set; } = true;
+    public virtual bool IsWidgetBodyHidden { get; set; } = false;
 
     public Entity(EntityId id, IServiceProvider serviceProvider, IEnumerable<Entity>? children = null)
     {

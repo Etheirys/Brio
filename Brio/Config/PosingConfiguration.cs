@@ -46,6 +46,10 @@ public class PosingConfiguration
     public bool BrioTargetChangesWithGPose { get; set; } = true;
     public bool AutoSelectTransformOnEntitySelect { get; set; } = false;
 
+    public bool AutoSelectLightWhenClickingOnALight { get; set; } = true;
+    public bool IfLightWindowisOpenDontUseSceneManager { get; set; } = false;
+    public bool IfCameraWindowisOpenDontUseSceneManager { get; set; } = false;
+
     // Undo / Redo
     public int UndoStackSize { get; set; } = 50;
 

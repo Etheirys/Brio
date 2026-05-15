@@ -397,7 +397,7 @@ public class PosingTransformEditor
             else
             {
                 ImBrio.DragFloat($"##transformSpeed_1", ref posingCapability.ModelPosing.TransformOffset, 0.001f, 10f, 0.01f, "Offset", 50);
-                bool freezeTransforms = posingCapability.ModelPosing.Freeze;
+                bool freezeTransforms = posingCapability.ModelPosing.IsTransformFrozen;
                 if(ImGui.Checkbox("Freeze Transforms", ref freezeTransforms))
                 {
                     posingCapability.ModelPosing.IsTransformFrozen = freezeTransforms;

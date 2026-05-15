@@ -10,10 +10,11 @@ public class LightTransformWidget(LightTransformCapability lightGizmoCapability)
 
     public override WidgetFlags Flags => WidgetFlags.DrawBody | WidgetFlags.DefaultOpen | WidgetFlags.CanHide;
 
+    private readonly ITransformableEditor _transformableEditor = new();
 
-    bool state = false;
-    public unsafe override void DrawBody()
+    public override void DrawBody()
     {
-        LightEditor.DrawLightTransform(Capability, ref state);
+        LightEditor.DrawLightTransformHeader(Capability);
+        _transformableEditor.Draw($"light_transform_{Capability.Entity.Id}", Capability.Light, 0.1f);
     }
 }

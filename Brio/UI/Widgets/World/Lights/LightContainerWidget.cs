@@ -1,5 +1,5 @@
 ﻿using Brio.Capabilities.World;
-using Brio.Game.World;
+using Brio.Game.World.Interop;
 using Brio.UI.Widgets.Core;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface.Utility.Raii;

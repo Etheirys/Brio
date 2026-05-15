@@ -1,7 +1,9 @@
 ﻿using Brio.Capabilities.World;
+using Brio.Config;
 using Brio.Core;
 using Brio.Entities.Core;
-using Brio.Game.World;
+using Brio.Game.World.Lights;
+using Brio.UI;
 using Brio.UI.Controls.Stateless;
 using Brio.UI.Theming;
 using Dalamud.Bindings.ImGui;
@@ -46,6 +48,8 @@ public class LightEntity(IGameLight gameLight, IServiceProvider provider) : Tran
     public override FontAwesomeIcon Icon => FontAwesomeIcon.Lightbulb;
 
     public IGameLight GameLight => gameLight;
+
+    public override bool IsWidgetBodyHidden => (ConfigurationService.Instance.Configuration.Posing.IfLightWindowisOpenDontUseSceneManager && UIManager.IsLightWindowOpen);
 
     public override void DrawContextButton()
     {

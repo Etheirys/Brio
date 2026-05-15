@@ -197,8 +197,8 @@ public unsafe class GPoseService : MediatorSubscriberBase
         _exitGPoseHook.Dispose();
         _mouseHoverHook.Dispose();
 
-        _yesNoDelegateHook?.Dispose();
-        _tempHook?.Dispose();
+        //_yesNoDelegateHook?.Dispose();
+        //_tempHook?.Dispose();
 
         GC.SuppressFinalize(this);
     }

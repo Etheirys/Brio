@@ -1,11 +1,9 @@
 ﻿using Brio.Capabilities.Actor;
 using Brio.Capabilities.Posing;
-using Brio.Capabilities.World;
 using Brio.Config;
 using Brio.Entities;
 using Brio.Game.Input;
 using Brio.Game.Posing;
-using Brio.Game.World;
 using Brio.Input;
 using Brio.Services;
 using Brio.UI.Controls.Core;
@@ -14,7 +12,6 @@ using Brio.UI.Controls.Stateless;
 using Brio.UI.Theming;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface;
-using Dalamud.Interface.Colors;
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Interface.Windowing;
 using Dalamud.Plugin.Services;
@@ -25,37 +22,33 @@ namespace Brio.UI.Windows.Specialized;
 
 public class PosingOverlayToolbarWindow : Window
 {
-    private readonly PosingOverlayWindow _overlayWindow;
-    private readonly EntityManager _entityManager;
-    private readonly HistoryService _groupedUndoService;
-    private readonly PosingTransformWindow _overlayTransformWindow;
-    private readonly LightWindow _lightWindow;
-    private readonly PosingService _posingService;
-    private readonly ConfigurationService _configurationService;
-    private readonly GameInputService _gameInputService;
-    private readonly LightingService _lightingService;
-
-    private readonly IFramework _framework;
+    private const string _boneFilterPopupName = "bone_filter_popup";
 
     private readonly BoneSearchControl _boneSearchControl = new();
 
+    private readonly PosingTransformWindow _overlayTransformWindow;
+    private readonly ConfigurationService _configurationService;
+    private readonly HistoryService _groupedUndoService;
+    private readonly GameInputService _gameInputService;
+    private readonly PosingOverlayWindow _overlayWindow;
+    private readonly PosingService _posingService;
+    private readonly EntityManager _entityManager;
+    private readonly LightWindow _lightWindow;
+    private readonly IFramework _framework;
+
     private bool _pushedStyle = false;
-
-    private const string _boneFilterPopupName = "bone_filter_popup";
-
-    public PosingOverlayToolbarWindow(PosingOverlayWindow overlayWindow, IFramework framework, LightWindow lightWindow, LightingService lightingService, HistoryService groupedUndoService, GameInputService gameInputService, EntityManager entityManager, PosingTransformWindow overlayTransformWindow, PosingService posingService, ConfigurationService configurationService) : base($"{Brio.Name} OVERLAY###brio_posing_overlay_toolbar_window", ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoCollapse)
+    public PosingOverlayToolbarWindow(PosingOverlayWindow overlayWindow, IFramework framework, LightWindow lightWindow, HistoryService groupedUndoService, GameInputService gameInputService, EntityManager entityManager, PosingTransformWindow overlayTransformWindow, PosingService posingService, ConfigurationService configurationService) : base($"{Brio.Name} OVERLAY###brio_posing_overlay_toolbar_window", ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoCollapse)
     {
         Namespace = "brio_posing_overlay_toolbar_namespace";
 
-        _overlayWindow = overlayWindow;
-        _entityManager = entityManager;
         _overlayTransformWindow = overlayTransformWindow;
-        _posingService = posingService;
         _configurationService = configurationService;
         _groupedUndoService = groupedUndoService;
         _gameInputService = gameInputService;
+        _overlayWindow = overlayWindow;
+        _entityManager = entityManager;
+        _posingService = posingService;
         _lightWindow = lightWindow;
-        _lightingService = lightingService;
         _framework = framework;
 
         ShowCloseButton = false;
@@ -138,61 +131,8 @@ public class PosingOverlayToolbarWindow : Window
             _gameInputService.AllowEscape = true;
         }
 
-        if(posing is not null)
-        {
-            DrawButtons(posing, timelineCapability, hasMultipleActorsSelected);
-            DrawBoneFilterPopup();
-        }
-        else if(_lightingService.SelectedLightEntity is not null)
-        {
-            _lightingService.SelectedLightEntity.TryGetCapability<LightTransformCapability>(out var lightCap);
-            DrawLightButtons(lightCap);
-        }
-        else
-        {
-            ImGui.PushStyleColor(ImGuiCol.Button, UIConstants.Transparent);
-
-            using(ImRaii.PushColor(ImGuiCol.Text, _overlayTransformWindow.IsOpen ? UIConstants.ToggleButtonActive : ThemeManager.CurrentTheme.Text.Text))
-            {
-                using(ImRaii.PushFont(UiBuilder.IconFont))
-                {
-                    if(ImGui.Button($"{FontAwesomeIcon.LocationCrosshairs.ToIconString()}###toggle_transforms_window", button3XSizeVector2))
-                        _overlayTransformWindow.IsOpen = !_overlayTransformWindow.IsOpen;
-                }
-            }
-            ImBrio.AttachToolTip("Toggle Transform Window");
-
-            ImGui.SameLine();
-
-            using(ImRaii.PushColor(ImGuiCol.Text, _lightWindow.IsOpen ? UIConstants.ToggleButtonActive : ThemeManager.CurrentTheme.Text.Text))
-            {
-                using(ImRaii.PushFont(UiBuilder.IconFont))
-                {
-                    if(ImGui.Button($"{FontAwesomeIcon.Lightbulb.ToIconString()}###toggle_light_window", button3XSizeVector2))
-                        _lightWindow.IsOpen = !_lightWindow.IsOpen;
-                }
-            }
-            ImBrio.AttachToolTip("Toggle Light Window");
-
-            ImGui.SameLine();
-
-            using(ImRaii.PushFont(UiBuilder.IconFont))
-            {
-                if(ImGui.Button($"{FontAwesomeIcon.WindowClose.ToIconString()}###close_overlay", button3XSizeVector2))
-                    _overlayWindow.IsOpen = false;
-            }
-            ImBrio.AttachToolTip("Close Overlay");
-
-            ImGui.PopStyleColor();
-
-            ImGui.TextColored(ImGuiColors.WarningForeground,
-                                                      "\nCurrently selected entity" +
-                                                      "\ncannot be modified by" +
-                                                      "\nthe overlay toolbar.");
-            ImGui.TextColored(ImGuiColors.WarningForeground,
-                                                      "\nPlease selected one\n" +
-                                                      "in the Scene Manager!");
-        }
+        DrawButtons(posing, timelineCapability, hasMultipleActorsSelected);
+        DrawBoneFilterPopup();
     }
 
     public float button3XSize => ImGui.GetTextLineHeight() * 3.2f;
@@ -204,182 +144,18 @@ public class PosingOverlayToolbarWindow : Window
     public Vector2 button3XSizeVector2 => new(button3XSize, button3XSize / 1.2f);
     public Vector2 button4XSizeVector2 => new(button4XSize, button3XSize);
 
-
-    // This is awful I hate it. but I need this done fast (FAST)
-    public void DrawLightButtons(LightTransformCapability? lightTransformCapability)
-    {
-        ImGui.PushStyleColor(ImGuiCol.Button, UIConstants.Transparent);
-
-        using(ImRaii.PushFont(UiBuilder.IconFont))
-        {
-            if(ImGui.Button($"{(_lightingService.CoordinateMode == LightGizmoCoordinateMode.Local ? FontAwesomeIcon.Globe.ToIconString() : FontAwesomeIcon.Atom.ToIconString())}###select_mode", button3XSizeVector2) || InputManagerService.ActionKeysPressedLastFrame(InputAction.Posing_ToggleWorld))
-                _lightingService.CoordinateMode = _lightingService.CoordinateMode == LightGizmoCoordinateMode.Local ? LightGizmoCoordinateMode.World : LightGizmoCoordinateMode.Local;
-        }
-        ImBrio.AttachToolTip(_lightingService.CoordinateMode == LightGizmoCoordinateMode.Local ? "Switch to World" : "Switch to Local");
-
-        ImGui.SameLine();
-
-        using(ImRaii.PushColor(ImGuiCol.Text, _lightWindow.IsOpen ? UIConstants.ToggleButtonActive : ThemeManager.CurrentTheme.Text.Text))
-        {
-            using(ImRaii.PushFont(UiBuilder.IconFont))
-            {
-                if(ImGui.Button($"{FontAwesomeIcon.Lightbulb.ToIconString()}###toggle_light_window", button3XSizeVector2))
-                    _lightWindow.IsOpen = !_lightWindow.IsOpen;
-            }
-        }
-        ImBrio.AttachToolTip("Toggle Light Window");
-
-        ImGui.SameLine();
-
-        using(ImRaii.PushFont(UiBuilder.IconFont))
-        {
-            if(ImGui.Button($"{FontAwesomeIcon.WindowClose.ToIconString()}###close_overlay", button3XSizeVector2))
-                _overlayWindow.IsOpen = false;
-        }
-        ImBrio.AttachToolTip("Close Overlay");
-
-        //
-        // -------------
-        //
-
-        ImBrio.VerticalPadding(5);
-        ImGui.Separator();
-        ImBrio.VerticalPadding(5);
-
-        using(ImRaii.PushColor(ImGuiCol.Text, _lightingService.Operation == LightGizmoOperation.Translate ? UIConstants.ToggleButtonActive : ThemeManager.CurrentTheme.Text.Text))
-        {
-            using(ImRaii.PushFont(UiBuilder.IconFont))
-            {
-                if(ImGui.Button($"{FontAwesomeIcon.ArrowsUpDownLeftRight.ToIconString()}###select_position", button3XSizeVector2) || InputManagerService.ActionKeysPressed(InputAction.Posing_Translate))
-                    _lightingService.Operation = LightGizmoOperation.Translate;
-            }
-        }
-        ImBrio.AttachToolTip("Position");
-
-        ImGui.SameLine();
-
-
-        using(ImRaii.PushColor(ImGuiCol.Text, _lightingService.Operation == LightGizmoOperation.Rotate ? UIConstants.ToggleButtonActive : ThemeManager.CurrentTheme.Text.Text))
-        {
-            using(ImRaii.PushFont(UiBuilder.IconFont))
-            {
-                if(ImGui.Button($"{FontAwesomeIcon.ArrowsSpin.ToIconString()}###select_rotate", button3XSizeVector2) || InputManagerService.ActionKeysPressed(InputAction.Posing_Rotate))
-                    _lightingService.Operation = LightGizmoOperation.Rotate;
-            }
-        }
-        ImBrio.AttachToolTip("Rotation");
-
-        ImGui.SameLine();
-
-        using(ImRaii.PushColor(ImGuiCol.Text, _lightingService.Operation == LightGizmoOperation.Universal ? UIConstants.ToggleButtonActive : ThemeManager.CurrentTheme.Text.Text))
-        {
-            using(ImRaii.PushFont(UiBuilder.IconFont))
-            {
-                if(ImGui.Button($"{FontAwesomeIcon.Cubes.ToIconString()}###select_universal", button3XSizeVector2) || InputManagerService.ActionKeysPressed(InputAction.Posing_Universal))
-                {
-                    _lightingService.Operation = LightGizmoOperation.Universal;
-                }
-            }
-        }
-        ImBrio.AttachToolTip("Universal");
-        //
-        // -------------
-        //
-
-        ImBrio.VerticalPadding(5);
-        ImGui.Separator();
-        ImBrio.VerticalPadding(5);
-
-        // Undo Button
-
-        using(ImRaii.PushFont(UiBuilder.IconFont))
-        {
-            using(ImRaii.Disabled(!lightTransformCapability?.CanUndo ?? false))
-            {
-                if(ImGui.Button($"{FontAwesomeIcon.Backward.ToIconString()}###undo_pose", button3XSizeVector2) || (InputManagerService.ActionKeysPressedLastFrame(InputAction.Posing_Undo) && (lightTransformCapability?.CanUndo ?? false)))
-                {
-                    lightTransformCapability?.Undo();
-                }
-            }
-        }
-        ImBrio.AttachToolTip("Undo last Light Action");
-
-        ImGui.SameLine();
-
-        // Redo Button
-
-        using(ImRaii.PushFont(UiBuilder.IconFont))
-        {
-            using(ImRaii.Disabled(!lightTransformCapability?.CanRedo ?? false))
-            {
-                if(ImGui.Button($"{FontAwesomeIcon.Forward.ToIconString()}###redo_pose", button3XSizeVector2) || (InputManagerService.ActionKeysPressedLastFrame(InputAction.Posing_Redo) && (lightTransformCapability?.CanRedo ?? false)))
-                {
-                    lightTransformCapability?.Redo();
-                }
-            }
-        }
-        ImBrio.AttachToolTip("Redo last Light Action");
-
-        ImGui.SameLine();
-
-        // Reset Pose Button
-
-        using(ImRaii.PushFont(UiBuilder.IconFont))
-        {
-            using(ImRaii.Disabled(!lightTransformCapability?.HasOverride ?? false))
-            {
-                if(ImGui.Button($"{FontAwesomeIcon.Undo.ToIconString()}###reset_pose", button3XSizeVector2))
-                    lightTransformCapability?.Reset(false, false);
-            }
-        }
-        ImBrio.AttachToolTip("Reset Light Transform");
-
-        //
-        // -------------
-        //
-
-        ImBrio.VerticalPadding(5);
-        ImGui.Separator();
-        ImBrio.VerticalPadding(5);
-
-        // Load Pose Button
-
-        using(ImRaii.Disabled(true))
-        {
-            using(ImRaii.PushFont(UiBuilder.IconFont))
-            {
-                if(ImGui.Button($"{FontAwesomeIcon.FileDownload.ToIconString()}###import_pose", button2XSizeVector2))
-                {
-
-                }
-            }
-            ImBrio.AttachToolTip("Load Light from Clipboard");
-
-            ImGui.SameLine();
-
-            // Save Pose Button
-
-            using(ImRaii.PushFont(UiBuilder.IconFont))
-            {
-                if(ImGui.Button($"{FontAwesomeIcon.Save.ToIconString()}###export_pose", button2XSizeVector2))
-                {
-
-                }
-            }
-            ImBrio.AttachToolTip("Save Light to Clipboard");
-        }
-
-        ImGui.PopStyleColor();
-    }
-
     private void DrawButtons(PosingCapability? posing, ActionTimelineCapability? timelineCapability, bool hasMultipleActorsSelected)
     {
         ImGui.PushStyleColor(ImGuiCol.Button, UIConstants.Transparent);
 
-        if(ImBrio.BoneOverlayVisibilityButton("bones_visible", posing?.Actor.IsOverlayVisible ?? false, button4XSizeVector2))
+        using(ImRaii.Disabled(posing is null))
         {
-            posing?.Actor.IsOverlayVisible = !posing.Actor.IsOverlayVisible;
+            if(ImBrio.BoneOverlayVisibilityButton("bones_visible", posing?.Actor.IsOverlayVisible ?? false, button4XSizeVector2))
+            {
+                posing?.Actor.IsOverlayVisible = !posing.Actor.IsOverlayVisible;
+            }
         }
+        ImBrio.AttachToolTip(posing is null ? "(This Entity has no Bones)" : posing?.Actor.IsOverlayVisible ?? false ? "Hide Actor's bones in overlay" : "Always show Actor's bones in overlay");
 
         ImGui.SameLine();
 
@@ -415,7 +191,8 @@ public class PosingOverlayToolbarWindow : Window
         ImBrio.AttachToolTip("Close Overlay");
 
         //
-        // -------------
+        // ------------- Gizmo
+
         if(ImBrio.SeparatorTextButton("Gizmo",
             _posingService.CoordinateMode == PosingCoordinateMode.Local ? FontAwesomeIcon.Globe : FontAwesomeIcon.Atom,
             tooltip: _posingService.CoordinateMode == PosingCoordinateMode.Local ? "Switch to World" : "Switch to Local")
@@ -423,6 +200,7 @@ public class PosingOverlayToolbarWindow : Window
         {
             _posingService.CoordinateMode = _posingService.CoordinateMode == PosingCoordinateMode.Local ? PosingCoordinateMode.World : PosingCoordinateMode.Local;
         }
+
         //
 
         using(ImRaii.PushColor(ImGuiCol.Text, _posingService.Operation == PosingOperation.Translate ? UIConstants.ToggleButtonActive : ThemeManager.CurrentTheme.Text.Text))
@@ -436,7 +214,6 @@ public class PosingOverlayToolbarWindow : Window
         ImBrio.AttachToolTip("Position");
 
         ImGui.SameLine();
-
 
         using(ImRaii.PushColor(ImGuiCol.Text, _posingService.Operation == PosingOperation.Rotate ? UIConstants.ToggleButtonActive : ThemeManager.CurrentTheme.Text.Text))
         {
@@ -475,10 +252,10 @@ public class PosingOverlayToolbarWindow : Window
         ImBrio.AttachToolTip("Universal");
 
         //
-        // -------------
+        // ------------- Entity Specific
         //
 
-        ImBrio.SeparatorText("Bone");
+        ImBrio.SeparatorText(hasMultipleActorsSelected ? "Multiple Selected" : _entityManager.SelectedEntity?.FriendlyName ?? "No Selection");
 
         var bone = posing?.Selected.Match(
               boneSelect => posing.SkeletonPosing.GetBone(boneSelect),
@@ -488,7 +265,6 @@ public class PosingOverlayToolbarWindow : Window
 
         using(ImRaii.Disabled(posing is null))
         {
-
             // IK Button
             bool enabled = false;
             if(posing?.Selected.Value is BonePoseInfoId boneId)
@@ -557,10 +333,6 @@ public class PosingOverlayToolbarWindow : Window
 
             PosingEditorCommon.DrawMirrorModeSelect(posing, new Vector2(button4XSize));
 
-            //
-            // -------------
-            //
-
             // Set IK Button
 
             //using(ImRaii.Disabled(posing?.SkeletonPosing.PoseInfo.HasIKStacks is false))
@@ -613,7 +385,7 @@ public class PosingOverlayToolbarWindow : Window
         }
 
         //
-        // -------------
+        // ------------- Pose
         //
 
         ImBrio.SeparatorText("Pose");
@@ -726,7 +498,7 @@ public class PosingOverlayToolbarWindow : Window
         ImBrio.AttachToolTip("Reset Pose");
 
         //
-        // -------------
+        // ------------- File
         //
 
         ImBrio.SeparatorText("File");
@@ -754,6 +526,9 @@ public class PosingOverlayToolbarWindow : Window
         ImBrio.AttachToolTip("Save Pose");
 
         ImGui.PopStyleColor();
+
+        // popups
+        //
 
         FileUIHelpers.DrawImportPoseMenuPopup("postingOverlay", posing, true);
 
@@ -836,7 +611,8 @@ public class PosingOverlayToolbarWindow : Window
                 }
             }
         }
-        ImBrio.AttachToolTip($"{(allFrozen ? "Un-" : "")}IsTransformFrozen Character{(hasMultipleActorsSelected ? "s" : "")}");
+      
+        ImBrio.AttachToolTip($"{(allFrozen ? "Un-" : "")}Freeze Character{(hasMultipleActorsSelected ? "s" : "")}");
     }
 
     private void DrawBoneFilterPopup()

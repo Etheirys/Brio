@@ -16,7 +16,7 @@ public class ActorLifetimeWidget(ActorLifetimeCapability capability) : Widget<Ac
 
     public override void DrawQuickIcons()
     {
-        if(ImBrio.FontIconButton("lifetimewidget_spawnnew", FontAwesomeIcon.Plus, "Reload New"))
+        if(ImBrio.FontIconButton("lifetimewidget_spawnnew", FontAwesomeIcon.Plus, "Spawn New"))
         {
             SpawnMenu.OpenUnifiedSpawnMenu();
         }

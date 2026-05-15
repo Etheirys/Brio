@@ -101,7 +101,7 @@ public class FileUIHelpers
 
             var buttonSize = (sizeRaw / 8);
 
-            ImGui.Checkbox("IsTransformFrozen Actor on Import", ref freezeOnLoad);
+            ImGui.Checkbox("Freeze Actor on Import", ref freezeOnLoad);
 
             using(ImRaii.Disabled(true))
                 ImGui.Checkbox("Smart Import", ref smartDefaults); // Smart Import will automatically select import options based on the pose file being imported.

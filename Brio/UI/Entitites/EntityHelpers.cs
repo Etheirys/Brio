@@ -26,9 +26,12 @@ public static class EntityHelpers
                     WidgetHelpers.DrawQuickIcons(capabilities);
                 }
 
-                using(ImRaii.PushId($"bodies_{entity.Id}"))
+                if(entity.IsWidgetBodyHidden is false)
                 {
-                    WidgetHelpers.DrawBodies(capabilities);
+                    using(ImRaii.PushId($"bodies_{entity.Id}"))
+                    {
+                        WidgetHelpers.DrawBodies(capabilities);
+                    }
                 }
             }
         }

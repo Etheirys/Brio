@@ -95,7 +95,7 @@ public class LightWindow : Window, IDisposable
         //
         // Hedder
 
-        if(ImBrio.FontIconButton("lifetimewidget_spawnnew", FontAwesomeIcon.Plus, "Reload New Light"))
+        if(ImBrio.FontIconButton("lifetimewidget_spawnnew", FontAwesomeIcon.Plus, "Spawn New Light"))
         {
             ImGui.OpenPopup("DrawLightSpawnMenuPopup");
         }

@@ -1,6 +1,6 @@
 ﻿using Brio.Capabilities.World;
-using Brio.Core;
 using Brio.Game.World;
+using Brio.Game.World.Interop;
 using Brio.Input;
 using Brio.UI.Controls.Core;
 using Brio.UI.Controls.Stateless;

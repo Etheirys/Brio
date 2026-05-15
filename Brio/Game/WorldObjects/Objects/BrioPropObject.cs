@@ -63,7 +63,7 @@ public unsafe class BrioPropObject : WorldObjectBase
     {
         if(!IsValid) return;
 
-        Brio.Log.Warning($"Reloading Prop Object {FriendlyName} (Address: {Address:X})");
+        Brio.Log.Verbose($"Reloading Prop Object {FriendlyName} (Address: {Address:X})");
 
         IsDirty = false;
 
