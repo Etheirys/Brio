@@ -2,6 +2,7 @@
 using Brio.Resources;
 using Brio.UI.Controls.Stateless;
 using Dalamud.Bindings.ImGui;
+using Lumina.Excel.Sheets;
 using OneOf.Types;
 using System.Numerics;
 
@@ -18,7 +19,7 @@ public class FacewearSelector(string id) : Selector<FacewearUnion>(id)
 
     protected override void PopulateList()
     {
-        foreach(var glasses in GameDataProvider.Instance.Glasses)
+        foreach(var glasses in GameDataProvider.Instance.GetExcelSheet<Glasses>())
             AddItem(glasses);
 
         AddItem(new None());

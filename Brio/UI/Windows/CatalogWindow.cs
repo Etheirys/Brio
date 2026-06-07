@@ -12,6 +12,7 @@ using Dalamud.Interface.Utility;
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Interface.Windowing;
 using Dalamud.Plugin.Services;
+using Lumina.Excel.Sheets;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -542,7 +543,7 @@ public class CatalogWindow : Window, IDisposable
             }
             ImGui.SameLine();
 
-            string place = GameDataProvider.Instance.TerritoryType.TryGetValue((uint)values[i], out var tt)
+            string place = GameDataProvider.Instance.GetExcelSheet<TerritoryType>().TryGetRow((uint)values[i], out var tt)
                 ? tt.PlaceName.ValueNullable?.Name.ExtractText() ?? string.Empty
                 : string.Empty;
 

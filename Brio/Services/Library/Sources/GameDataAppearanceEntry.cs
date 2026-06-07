@@ -91,7 +91,7 @@ public class GameDataAppearanceEntry : ItemEntryBase
         return match;
     }
 
-    protected override string GetpublicId() => _id;
+    protected override string GetPublicId() => _id;
 
     public override bool InvokeDefaultAction(object? args)
     {

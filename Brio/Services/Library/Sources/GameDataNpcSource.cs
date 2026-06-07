@@ -15,36 +15,38 @@ public class GameDataNpcSource : GameDataAppearanceSourceBase
 
     public override void Scan()
     {
-        foreach(var npc in Lumina.BNpcBases)
+        foreach(var row in Lumina.FilteredBNpcBases)
         {
-            string rowName = $"B:{npc.RowId:D7}";
-            string? displayName = Lumina.GetBNpcName(npc.RowId);
-            var entry = new GameDataAppearanceEntry(this, EntityManager, npc.RowId, displayName, 0, npc, $"B{npc.RowId}");
-            entry.SourceInfo = $"BNpc {npc.RowId}";
+            var hasName = Lumina.TryGetBNpcNameByBase(row.RowId, out var name);
+            var entry = new GameDataAppearanceEntry(this, EntityManager, row.RowId, name, 0, row, $"B{row.RowId}");
+
             entry.Tags.Add("NPC");
 
-            if(!string.IsNullOrEmpty(displayName) && displayName != rowName && displayName != $"BNpc {npc.RowId}")
+            if(hasName)
                 entry.Tags.Add("Named");
+
+            entry.SourceInfo = $"BNpc {row.RowId}";
 
             Add(entry);
         }
 
-        foreach(var npc in Lumina.ENpcBases)
+        foreach(var row in Lumina.FilteredENpcBases)
         {
-            string rowName = $"E:{npc.RowId:D7}";
-            var displayName = Lumina.GetENpcName(npc.RowId);
-            var entry = new GameDataAppearanceEntry(this, EntityManager, npc.RowId, displayName ?? rowName, 0, npc, $"E{npc.RowId}");
-            entry.SourceInfo = $"ENpc {npc.RowId}";
+            var hasName = Lumina.TryGetENpcName(row.RowId, out var name);
+            var entry = new GameDataAppearanceEntry(this, EntityManager, row.RowId, name, 0, row, $"E{row.RowId}");
+
             entry.Tags.Add("NPC");
 
-            if(!string.IsNullOrEmpty(displayName) && displayName != rowName && displayName != $"ENpc {npc.RowId}")
+            if(hasName)
                 entry.Tags.Add("Named");
+
+            entry.SourceInfo = $"ENpc {row.RowId}";
 
             Add(entry);
         }
     }
 
-    protected override string GetpublicId()
+    protected override string GetPublicId()
     {
         return "NPCs";
     }

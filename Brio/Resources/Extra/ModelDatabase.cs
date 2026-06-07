@@ -18,7 +18,7 @@ public class ModelDatabase
         _modelsList = [];
 
         // From Game
-        foreach(var item in gameDataProvider.Items)
+        foreach(var item in gameDataProvider.GetExcelSheet<Item>())
         {
             var slots = item.EquipSlotCategory.ValueNullable?.GetEquipSlots() ?? ActorEquipSlot.None;
             if(slots != ActorEquipSlot.None)

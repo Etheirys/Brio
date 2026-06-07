@@ -18,7 +18,7 @@ public class LibraryRoot : GroupEntryBase
         base.DrawInfo(window);
     }
 
-    protected override string GetpublicId()
+    protected override string GetPublicId()
     {
         return "Root";
     }

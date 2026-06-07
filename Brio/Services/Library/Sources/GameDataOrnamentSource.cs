@@ -15,23 +15,23 @@ public class GameDataOrnamentSource : GameDataAppearanceSourceBase
 
     public override void Scan()
     {
-        foreach(var ornament in Lumina.Ornaments)
+        foreach(var ornament in Lumina.FilteredOrnaments)
         {
-            string rowName = $"Ornament {ornament.RowId}";
-            var name = GameDataProvider.Instance.GetOrnamentName(ornament.RowId);
-            var entry = new GameDataAppearanceEntry(this, EntityManager, ornament.RowId, name, ornament.Icon, ornament, $"{ornament.RowId}");
+            var hasName = GameDataProvider.Instance.TryGetOrnamentName(ornament.RowId, out var name);
+            var entry = new GameDataAppearanceEntry(this, EntityManager, ornament.RowId, name, ornament.Icon, ornament, ornament.RowId.ToString());
+
             entry.Tags.Add("Ornament").WithAlias("Fashion Accessory");
 
-            if(name != rowName)
+            if(hasName)
                 entry.Tags.Add("Named");
 
-            entry.SourceInfo = rowName;
+            entry.SourceInfo = $"Ornament {ornament.RowId}";
+
             Add(entry);
         }
     }
 
-
-    protected override string GetpublicId()
+    protected override string GetPublicId()
     {
         return "Ornaments";
     }
