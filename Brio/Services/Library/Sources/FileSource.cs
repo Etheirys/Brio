@@ -390,6 +390,10 @@ public class FileEntry : ItemEntryBase
         EditDetails((ref file) => {
             if(tag != file.Author && !tag.IsWhiteSpace())
             {
+                 if (file.Tags == null)
+                {
+                file.Tags = new TagCollection();
+                }
                 file.Tags?.Add(tag); 
                 this.Tags.Add(tag);
             }
