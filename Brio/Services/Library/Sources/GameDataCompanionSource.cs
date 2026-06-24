@@ -15,11 +15,16 @@ public class GameDataCompanionSource : GameDataAppearanceSourceBase
 
     public override void Scan()
     {
-        foreach(var (_, companion) in Lumina.Companions)
+        foreach(var companion in Lumina.Companions)
         {
             string rowName = $"Companion {companion.RowId}";
-            var entry = new GameDataAppearanceEntry(this, EntityManager, companion.RowId, companion.Singular.ToString() ?? rowName, companion.Icon, companion, $"{companion.RowId}");
+            var name = Lumina.GetCompanionName(companion.RowId);
+            var entry = new GameDataAppearanceEntry(this, EntityManager, companion.RowId, name, companion.Icon, companion, $"{companion.RowId}");
             entry.Tags.Add("Companion").WithAlias("Minion");
+
+            if(name != rowName)
+                entry.Tags.Add("Named");
+
             entry.SourceInfo = rowName;
             Add(entry);
         }

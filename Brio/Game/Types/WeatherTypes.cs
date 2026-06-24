@@ -11,7 +11,7 @@ public partial class WeatherUnion : OneOfBase<Weather, None>
 {
     public static implicit operator WeatherUnion(WeatherId weatherId)
     {
-        if(weatherId.Id != 0 && GameDataProvider.Instance.Weathers.TryGetValue(weatherId.Id, out Weather weather))
+        if(weatherId.Id != 0 && GameDataProvider.Instance.Weathers.TryGetRow(weatherId.Id, out Weather weather))
             return weather;
 
         return new None();

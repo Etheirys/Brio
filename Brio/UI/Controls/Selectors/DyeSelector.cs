@@ -18,7 +18,7 @@ public class DyeSelector(string id) : Selector<DyeUnion>(id)
 
     protected override void PopulateList()
     {
-        foreach(var stain in GameDataProvider.Instance.Stains.Values)
+        foreach(var stain in GameDataProvider.Instance.Stains)
             AddItem(stain);
 
         AddItem(new None());
