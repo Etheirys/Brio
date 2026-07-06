@@ -116,8 +116,16 @@ public static class CameraEditor
                 DrawCameraActorSelect(capability);
 
                 //
-
-                ImBrio.SeparatorText("Properties");
+             
+                using(ImRaii.Disabled(camera.Position == camera.SpawnPosition))
+                    if(ImBrio.SeparatorTextButton("Properties", FontAwesomeIcon.Undo, "Reset to Default"))
+                    {
+                        camera.FoV = 0f;
+                        camera.PivotRotation = 0;
+                        camera.FreeCamValues.MovementSpeed = capability._configurationService.Configuration.Interface.DefaultFreeCameraMovementSpeed;
+                        camera.FreeCamValues.MouseSensitivity = capability._configurationService.Configuration.Interface.DefaultFreeCameraMouseSensitivity;
+                        capability.Snapshot();
+                    }
 
                 //
 
@@ -298,7 +306,14 @@ public static class CameraEditor
 
                     //
 
-                    ImBrio.SeparatorText("Properties");
+                    using(ImRaii.Disabled(camera.Position == camera.SpawnPosition))
+                        if(ImBrio.SeparatorTextButton("Properties", FontAwesomeIcon.Undo, "Reset to Default"))
+                        {
+                            camera.Zoom = 2.5f;
+                            camera.FoV = 0f;
+                            camera.PivotRotation = 0;
+                            capability.Snapshot();
+                        }
 
                     //
 
@@ -402,7 +417,6 @@ public static class CameraEditor
                     if(ImGui.Checkbox("Disable Collision", ref disable))
                     {
                         camera.DisableCollision = disable;
-                        capability.Snapshot();
                     }
 
                     ImGui.SameLine();
@@ -411,7 +425,6 @@ public static class CameraEditor
                     if(ImGui.Checkbox("Delimit Camera", ref delimit))
                     {
                         camera.DelimitCamera = delimit;
-                        capability.Snapshot();
                     }
                 }
             }
