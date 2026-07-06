@@ -62,6 +62,7 @@ public class PosingConfiguration
     public bool FreezeActorOnPoseImport { get; set; } = false;
    
     public bool FreeCameraHasMovementEnabledByDefault { get; set; } = true;
+    public bool IsAdvancedGizmoEnabled { get; set; } = true;
 
     public bool UseOverlayOffset { get; set; } = true;
     public Dictionary<string, Vector3> BoneOverlayOffsets { get; set; } = [];

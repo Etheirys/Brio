@@ -541,6 +541,13 @@ public class SettingsWindow : Window
             }
 
             ImBrio.SeparatorText("Gizmo");
+        
+            bool enableAdvanedGizmo = _configurationService.Configuration.Posing.IsAdvancedGizmoEnabled;
+            if(ImGui.Checkbox("Enable Advanced Gizmo by Default", ref enableAdvanedGizmo))
+            {
+                _configurationService.Configuration.Posing.IsAdvancedGizmoEnabled = enableAdvanedGizmo;
+                _configurationService.ApplyChange();
+            }
 
             bool allowGizmoAxisFlip = _configurationService.Configuration.Posing.AllowGizmoAxisFlip;
             if(ImGui.Checkbox("Allow Gizmo Axis Flip", ref allowGizmoAxisFlip))

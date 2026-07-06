@@ -29,7 +29,7 @@ public class WorldObjectTransformCapability : WorldObjectCapability, ITransforma
 
     public bool HasOverride
     {
-        get => false;
+        get => TransformOverride;
     }
 
     private Transform _originalTransform;
@@ -96,6 +96,17 @@ public class WorldObjectTransformCapability : WorldObjectCapability, ITransforma
 
     public void Undo() => Entity.EntityManager.UndoSelected();
     public void Redo() => Entity.EntityManager.RedoSelected();
+
+    public void Reset(bool generateSnapshot = true, bool clearHistStack = true)
+    {
+        SetTransform(OriginalTransform);
+
+        if(clearHistStack)
+            _historyService.ClearRedo(Entity.Id);
+
+        if(generateSnapshot)
+            Snapshot();
+    }
 
     public unsafe void SetTransform(Transform state)
     {
