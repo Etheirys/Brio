@@ -6,6 +6,7 @@ using Brio.Entities.Core;
 using Brio.Game.GPose;
 using Brio.Game.Input;
 using Brio.Input;
+using Brio.Services.Models;
 using Swan;
 using System;
 using System.Collections.Generic;
@@ -41,16 +42,17 @@ public class VirtualCameraManager : IDisposable
         _moveSpeed = configurationService.Configuration.Interface.DefaultFreeCameraMovementSpeed;
     }
 
-    // This implementation is a bit odd for me, it's not how I thought .IsLocked should be used, but maybe it works well
-    // I also don't know if I want it per-camera or just a global lock for all cameras,
-    // but this works for now and we can change it later when I rework the camera system
     public bool CamerasLocked
     {
         get
         {
-            //if(_entityManager.TryGetEntity("cameras", out var camContainer))
-            //    return camContainer.IsLocked;
-            return false;
+            if(CurrentCamera?.CameraID == 0)
+                return GetDefaultCamera()?.IsLocked ?? false;
+
+            if(_createdCameras is null || _createdCameras.Count == 0 || CurrentCamera is null)
+                return false;
+
+            return _createdCameras[CurrentCamera.CameraID].IsLocked;
         }
     }
 
@@ -130,6 +132,21 @@ public class VirtualCameraManager : IDisposable
 
         _nextCameraId = cameraId;
         return (true, cameraId);
+    }
+
+    public void LoadCameraFromDTO(CameraDTO dto, CameraEntity entity)
+    {
+        if(dto.Camera is null)
+            return;
+
+        bool wasActive = CurrentCamera == entity.VirtualCamera;
+        if(wasActive)
+            CurrentCamera?.DeactivateCamera();
+
+        entity.SetVirtualCamera(dto.Camera);
+
+        if(wasActive)
+            SelectCamera(entity.VirtualCamera);
     }
 
     public (bool, int) CloneCamera(int cameraID)
@@ -442,17 +459,12 @@ public class VirtualCameraManager : IDisposable
         }
         else
         {
-            //// Ensure camera locking resets to unlocked when entering GPose
-            //if(_entityManager.TryGetEntity("cameras", out var camContainer))
-            //{
-            //    camContainer.IsLocked = false;
-            //}
-
             var defaultCam = _entityManager.GetEntity<CameraEntity>(new CameraId(0));
             if(defaultCam is not null)
             {
                 defaultCam.VirtualCamera.SaveCameraState();
                 SelectCamera(defaultCam.VirtualCamera);
+                defaultCam.IsLocked = false;
             }
         }
     }

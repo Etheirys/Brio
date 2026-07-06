@@ -1,4 +1,6 @@
 ﻿using Brio.Capabilities.Camera;
+using Brio.Capabilities.Core;
+using Brio.Capabilities.Timeline;
 using Brio.Config;
 using Brio.Core;
 using Brio.Entities.Core;
@@ -65,6 +67,8 @@ public class CameraEntity(IServiceProvider provider, int cameraID, CameraType ca
 
     public CameraType CameraType { get; private set; } = cameraType;
 
+    public bool IsDefaultCamera => CameraID == 0;
+
     public int SetVirtualCamera(VirtualCamera virtualCamera)
     {
         virtualCamera.SetCameraID(CameraID);
@@ -76,6 +80,7 @@ public class CameraEntity(IServiceProvider provider, int cameraID, CameraType ca
     {
         AddCapability(ActivatorUtilities.CreateInstance<CameraLifetimeCapability>(_serviceProvider, this));
         AddCapability(ActivatorUtilities.CreateInstance<BrioCameraCapability>(_serviceProvider, this));
+        AddCapability(CameraTimelineCapability.CreateIfEligible(_serviceProvider, this));
     }
 
     public override void OnSelected()
@@ -88,7 +93,7 @@ public class CameraEntity(IServiceProvider provider, int cameraID, CameraType ca
     {
         var ce = GetCapability<CameraLifetimeCapability>();
         if(!ce.CanDestroy) return;
-        RenameActorModal.Open(ce.Entity);
+        ModalManager.Instance.OpenRenameModal(ce.Entity);
     }
 
     public override void DrawContextButton()
@@ -100,7 +105,7 @@ public class CameraEntity(IServiceProvider provider, int cameraID, CameraType ca
 
             if(VirtualCamera.IsFreeCamera)
             {
-                string toolTip1 = $"Toggle as Camera Movement";
+                string toolTip1 = "Toggle as Camera Movement";
                 using(ImRaii.PushColor(ImGuiCol.Button, 0))
                 {
                     if(ImBrio.ToggelFontIconButtonRight($"###{Id}_camera_movement", FontAwesomeIcon.Walking, 3f, VirtualCamera.FreeCamValues.IsMovementEnabled, tooltip: toolTip1))
@@ -112,10 +117,10 @@ public class CameraEntity(IServiceProvider provider, int cameraID, CameraType ca
 
             ImGui.SameLine();
          
-            string toolTip2 = $"Toggle Lock Camera";
+            var lockIcon = IsLocked ? FontAwesomeIcon.Lock : FontAwesomeIcon.Unlock;
             using(ImRaii.PushColor(ImGuiCol.Button, 0))
             {
-                if(ImBrio.ToggelFontIconButtonRight($"###{Id}_camera_Lock", FontAwesomeIcon.Lock, 2f, IsLocked, tooltip: toolTip2))
+                if(ImBrio.ToggelFontIconButtonRight($"###{Id}_camera_Lock", lockIcon, 2f, IsLocked, tooltip: IsLocked ? "Locked" : "Unlocked"))
                 {
                     IsLocked = !IsLocked;
                 }
@@ -123,8 +128,7 @@ public class CameraEntity(IServiceProvider provider, int cameraID, CameraType ca
           
             ImGui.SameLine();
 
-            string toolTip = $"Set as Active Camera";
-
+            string toolTip = "Set as Active Camera";
             using(ImRaii.PushColor(ImGuiCol.Text, ThemeManager.CurrentTheme.Accent.AccentColor, VirtualCamera.IsActiveCamera))
             {
                 if(ImBrio.FontIconButtonRight($"###{Id}_camera_contextButton", FontAwesomeIcon.LocationCrosshairs, 1f, toolTip, bordered: false))

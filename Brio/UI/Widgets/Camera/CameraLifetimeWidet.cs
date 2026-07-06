@@ -1,13 +1,11 @@
 ﻿using Brio.Capabilities.Camera;
-using Brio.Game.Actor;
-using Brio.Game.World;
 using Brio.UI.Controls;
-using Brio.UI.Controls.Editors;
 using Brio.UI.Controls.Stateless;
 using Brio.UI.Widgets.Core;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface;
 using Dalamud.Interface.Utility.Raii;
+using System.Numerics;
 
 namespace Brio.UI.Widgets.Camera;
 
@@ -21,13 +19,6 @@ public class CameraLifetimeWidget(CameraLifetimeCapability capability) : Widget<
     {
         using(ImRaii.Disabled(Capability.IsAllowed == false))
         {
-            if(ImBrio.FontIconButton("CameraLifetime_spawnnew", FontAwesomeIcon.Plus, "Spawn New"))
-            {
-                SpawnMenu.OpenUnifiedSpawnMenu();
-            }
-
-            ImGui.SameLine();
-
             if(ImBrio.FontIconButton("CameraLifetime_clone", FontAwesomeIcon.Clone, "Clone Camera"))
             {
                 Capability.VirtualCameraManager.CloneCamera(Capability.CameraEntity.CameraID);
@@ -35,28 +26,36 @@ public class CameraLifetimeWidget(CameraLifetimeCapability capability) : Widget<
 
             ImGui.SameLine();
 
+            if(ImBrio.FontIconButton("CameraLifetime_target", FontAwesomeIcon.LocationCrosshairs, "Set as Active Camera"))
+            {
+                Capability.VirtualCameraManager.SelectCamera(Capability.VirtualCamera);
+            }
+
+            ImBrio.VerticalSeparator(24, 1);
+
             using(ImRaii.Disabled(Capability.CameraEntity.CameraID == 0))
             {
-                if(ImBrio.FontIconButton("CameraLifetime_destroy", FontAwesomeIcon.Trash, "Destroy Camera", Capability.CanDestroy))
+                if(ImBrio.HoldButton("CameraLifetime_destroy", "", FontAwesomeIcon.Trash, 1f, centerTest: true, tooltip: "[HOLD TO DESTROY]", onlyIcon: true))
                 {
                     Capability.VirtualCameraManager.DestroyCamera(Capability.CameraEntity.CameraID);
                 }
 
-                ImGui.SameLine();
+                ImBrio.VerticalSeparator(24, 1);
 
                 if(ImBrio.FontIconButton("CameraLifetime_rename", FontAwesomeIcon.Signature, "Rename"))
                 {
-                    RenameActorModal.Open(Capability.Entity);
+                    ModalManager.Instance.OpenRenameModal(Capability.Entity);
                 }
             }
 
             ImGui.SameLine();
 
-            if(ImBrio.FontIconButton("CameraLifetime_target", FontAwesomeIcon.Bullseye, "Target Camera"))
+            var isLocked = Capability.Entity.IsLocked;
+            var lockIcon = isLocked ? FontAwesomeIcon.Lock : FontAwesomeIcon.Unlock;
+            if(ImBrio.ToggelFontIconButton("CameraLifetime_lock", lockIcon, new Vector2(25, 0), isLocked, tooltip: isLocked ? "Locked" : "Unlocked"))
             {
-                Capability.VirtualCameraManager.SelectCamera(Capability.VirtualCamera);
+                Capability.Entity.IsLocked = !Capability.Entity.IsLocked;
             }
-
         }
     }
 
@@ -92,7 +91,7 @@ public class CameraLifetimeWidget(CameraLifetimeCapability capability) : Widget<
             {
                 ImGui.CloseCurrentPopup();
 
-                RenameActorModal.Open(Capability.Entity);
+                ModalManager.Instance.OpenRenameModal(Capability.Entity);
             }
         }
     }
