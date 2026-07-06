@@ -41,11 +41,6 @@ public class ActionTimelineWindow : Window, IDisposable
 
     public override bool DrawConditions()
     {
-        if(_entityManager.SelectedEntity is ActorEntity actor && actor.IsProp == true)
-        {
-            return false;
-        }
-
         if(!_entityManager.SelectedHasCapability<ActionTimelineCapability>())
         {
             return false;
