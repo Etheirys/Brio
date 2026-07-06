@@ -17,7 +17,7 @@ using System.Numerics;
 
 namespace Brio.UI.Entitites;
 
-public class EntityHierarchyView(EntityManager entityManager, GPoseService gPoseService, HistoryService groupedUndoService)
+public class EntityHierarchyView(EntityManager entityManager, GPoseService gPoseService)
 {
     private const float OffsetWidth = 18f;
     private static float ButtonWidth => ImGui.GetWindowContentRegionMax().X;
@@ -96,7 +96,7 @@ public class EntityHierarchyView(EntityManager entityManager, GPoseService gPose
 
         var entityAllowsMultiSelect = entity.Flags.HasFlag(EntityFlags.AllowMultiSelect);
 
-        if(entityManager.SelectedEntitys.Contains(entity.Id) && entityAllowsMultiSelect)
+        if(entityManager.SelectedEntities.Contains(entity.Id) && entityAllowsMultiSelect)
             isMutiSelected = true;
 
         if(entity.Flags.HasFlag(EntityFlags.DisableDraw))
@@ -130,13 +130,12 @@ public class EntityHierarchyView(EntityManager entityManager, GPoseService gPose
 
                     if(!currentSupportsMultiSelect && currentSelected != null)
                     {
-                        groupedUndoService.Clear();
                         if(diableSelection is false)
                             Select(entity);
                     }
                     else if(diableSelection is false)
                     {
-                        if(entityManager.SelectedEntitys.Contains(entity.Id))
+                        if(entityManager.SelectedEntities.Contains(entity.Id))
                             entityManager.RemoveSelectedEntity(entity.Id);
                         else
                             entityManager.AddSelectedEntity(entity.Id);
@@ -144,8 +143,6 @@ public class EntityHierarchyView(EntityManager entityManager, GPoseService gPose
                 }
                 else
                 {
-                    groupedUndoService.Clear();
-
                     Select(entity);
                 }
             }
@@ -268,25 +265,28 @@ public class EntityHierarchyView(EntityManager entityManager, GPoseService gPose
             ImGui.OpenPopup($"context_popup{entity.Id}");
         }
 
-        if(ImGui.BeginDragDropTarget())
+        if(entity is FolderEntity folderEntity && folderEntity.IsEditable)
         {
-            unsafe
+            if(ImGui.BeginDragDropTarget())
             {
-                var released = ImGui.IsMouseReleased(ImGuiMouseButton.Left);
-                var payload = ImGui.AcceptDragDropPayload("BRIO_ENTITY");
-
-                if(payload.IsNull == false && _draggedEntityId.HasValue && released &&
-                    entityManager.TryGetEntity(_draggedEntityId.Value, out var draggedEntity))
+                unsafe
                 {
-                    Brio.Log.Verbose($"Moving entity {draggedEntity.FriendlyName} into folder {entity.FriendlyName}");
+                    var released = ImGui.IsMouseReleased(ImGuiMouseButton.Left);
+                    var payload = ImGui.AcceptDragDropPayload("BRIO_ENTITY");
 
-                    entityManager.MoveEntity(draggedEntity, entity);
-                    _collapsedFolders.Remove(entity.Id); // Auto-expand on drop
+                    if(payload.IsNull == false && _draggedEntityId.HasValue && released &&
+                        entityManager.TryGetEntity(_draggedEntityId.Value, out var draggedEntity))
+                    {
+                        Brio.Log.Verbose($"Moving entity {draggedEntity.FriendlyName} into folder {entity.FriendlyName}");
 
-                    _draggedEntityId = null;
+                        entityManager.MoveEntity(draggedEntity, entity);
+                        _collapsedFolders.Remove(entity.Id); // Auto-expand on drop
+
+                        _draggedEntityId = null;
+                    }
                 }
+                ImGui.EndDragDropTarget();
             }
-            ImGui.EndDragDropTarget();
         }
 
         ImGui.SetCursorPos(startPos);
@@ -324,7 +324,6 @@ public class EntityHierarchyView(EntityManager entityManager, GPoseService gPose
             }
 
             DrawChildren(entity, selectedEntityId, lastOffset, hasChildren, drawChildren);
-
         }
     }
 
@@ -332,7 +331,7 @@ public class EntityHierarchyView(EntityManager entityManager, GPoseService gPose
     {
         if(entity.Flags.HasFlag(EntityFlags.DisableChildren) == false && hasChildren && drawChildren)
         {
-            foreach(var child in entity.Children)
+            foreach(var child in entity.Children.ToList())
             {
                 DrawEntity(child, selectedEntityId, lastOffset == 0 ? 8 : lastOffset);
             }

@@ -1,6 +1,7 @@
 ﻿using Brio.Capabilities.Core;
 using Brio.Game.Actor;
 using Dalamud.Interface;
+using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
@@ -10,16 +11,19 @@ namespace Brio.Entities.Core;
 
 public abstract class Entity : IDisposable
 {
+
     protected List<Entity> _children = [];
     protected IServiceProvider _serviceProvider;
     private readonly Dictionary<Type, Capability> _capabilities = [];
+
+    public EntityManager EntityManager { get { field ??= _serviceProvider.GetRequiredService<EntityManager>(); return field; } } // I love .net10
 
     public EntityId Id { get; private set; }
     public Entity? Parent { get; protected set; }
     public SpawnFlags SpawnFlag { get; protected set; }
 
-    public IReadOnlyCollection<Entity> Children => _children.AsReadOnly();
-    public IReadOnlyList<Capability> Capabilities => _capabilities.Values.ToList().AsReadOnly();
+    public IReadOnlyCollection<Entity> Children => _children;
+    public IEnumerable<Capability> Capabilities => _capabilities.Values;
 
     string name = "";
     public virtual string FriendlyName
@@ -53,9 +57,9 @@ public abstract class Entity : IDisposable
     public virtual bool IsLoading { get; set; } = false;
     public virtual bool IsLocked { get; set; } = false;
     public virtual bool IsOverlayVisible { get; set; } = false;
-    
-    public virtual bool IsSynced => false;
-    public virtual bool IsLoadedFromProject => false;
+
+    public virtual bool IsSynced { get; set; } = false;
+    public virtual bool IsLoadedFromProject { get; set; } = false;
     public virtual bool IsWidgetBodyHidden { get; set; } = false;
 
     public Entity(EntityId id, IServiceProvider serviceProvider, IEnumerable<Entity>? children = null)

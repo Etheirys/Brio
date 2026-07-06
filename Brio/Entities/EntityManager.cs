@@ -7,6 +7,8 @@ using Brio.Entities.Camera;
 using Brio.Entities.Core;
 using Brio.Entities.Debug;
 using Brio.Entities.World;
+using Brio.Services;
+using Brio.Services.MediatorMessages;
 using Dalamud.Game.ClientState.Objects.Types;
 using Microsoft.Extensions.DependencyInjection;
 using System;
@@ -16,9 +18,9 @@ using System.Linq;
 
 namespace Brio.Entities;
 
-public partial class EntityManager(IServiceProvider serviceProvider, ConfigurationService configurationService) : IDisposable
+public partial class EntityManager : MediatorSubscriberBase
 {
-    private readonly IServiceProvider _serviceProvider = serviceProvider;
+    private readonly IServiceProvider _serviceProvider;
 
     public Entity? RootEntity => _worldEntity;
     private WorldEntity? _worldEntity;
@@ -29,8 +31,10 @@ public partial class EntityManager(IServiceProvider serviceProvider, Configurati
     public EntityManagerContainer EntityManagerContainer => _entityContainerEntity!;
     private EntityManagerContainer? _entityContainerEntity;
 
-    public IReadOnlyList<EntityId> SelectedEntitys => _selectedEntities.AsReadOnly();
+    public IReadOnlyList<EntityId> SelectedEntities => _selectedEntities.AsReadOnly();
     private readonly List<EntityId> _selectedEntities = [];
+
+    public int SelectedEntitiesCount => _selectedEntities.Count;
 
     public EntityId? SelectedEntityById => _selectedEntities.Count > 0 ? _selectedEntities[0] : (EntityId?)null;
     public Entity? SelectedEntity
@@ -53,7 +57,39 @@ public partial class EntityManager(IServiceProvider serviceProvider, Configurati
     private readonly HashSet<TransformableEntity> _transformableEntities = [];
     private readonly Dictionary<EntityId, Entity> _entityMap = [];
 
-    private readonly ConfigurationService _configurationService = configurationService;
+    private readonly ConfigurationService _configurationService;
+    private readonly HistoryService _historyService;
+
+    public EntityManager(IServiceProvider serviceProvider, Mediator mediator, ConfigurationService configurationService, HistoryService historyService) : base(mediator)
+    {
+        _serviceProvider = serviceProvider;
+        _configurationService = configurationService;
+        _historyService = historyService;
+
+        mediator.Subscribe<GposeStateChangedMessage>(this, OnGPoseChanged);
+    }
+
+    private void OnGPoseChanged(GposeStateChangedMessage message)
+    {
+        try
+        {
+            // remove folders on Gpose close. 
+            if(message.NewState == false)
+            {
+                var folders = _entityMap.Values.Where(e => e is FolderEntity).ToArray();
+                for(int i = 0; i < folders.Length; i++)
+                {
+                    var entity = folders[i];
+                    DetachEntity(entity, false);
+                    entity.Dispose();
+                }
+            }
+        }
+        catch(Exception ex)
+        {
+            Brio.Log.Warning(ex, "OnGPoseChanged");
+        }
+    }
 
     public void SetupDefaultEntities()
     {
@@ -115,7 +151,10 @@ public partial class EntityManager(IServiceProvider serviceProvider, Configurati
         entity.OnDetached();
 
         if(entity is TransformableEntity transformableEntity)
+        {
             _transformableEntities.Remove(transformableEntity);
+            _historyService.Forget(entity.Id);
+        }
 
         _entityMap.Remove(entity.Id);
         entity.Parent?.RemoveChild(entity);
@@ -244,25 +283,21 @@ public partial class EntityManager(IServiceProvider serviceProvider, Configurati
         _selectedEntities.Clear();
     }
 
+    public void DestroyAllFolders()
+    {
+        var folders = _entityMap.Values.Where(e => e is FolderEntity).ToArray();
+        for(int i = 0; i < folders.Length; i++)
+        {
+            var entity = folders[i];
+            Brio.Log.Debug($"Removing folder entity {entity.FriendlyName} ({entity.Id})");
+            DetachEntity(entity, false);
+            entity.Dispose();
+        }
+    }
+
     public bool SelectedHasCapability<T>(bool considerChildren = false, bool considerParents = true) where T : Capability
     {
         return TryGetCapabilitiesFromSelectedEntities<T>(out _, considerChildren, considerParents);
-    }
-
-    public List<(EntityId id, PosingCapability capability, Transform transform)> GetAllSelectedActors()
-    {
-        var result = new List<(EntityId, PosingCapability, Transform)>();
-        foreach(var id in _selectedEntities)
-        {
-            if(!TryGetEntity(id, out var entity))
-                continue;
-
-            if(entity.TryGetCapability<PosingCapability>(out var posingCap, false, true))
-            {
-                result.Add((posingCap.Actor, posingCap, posingCap.ModelPosing.Transform));
-            }
-        }
-        return result;
     }
 
     public List<(EntityId id, ITransformable target, Transform snapshot)> GetAllSelectedTransformables()
@@ -277,6 +312,23 @@ public partial class EntityManager(IServiceProvider serviceProvider, Configurati
                 result.Add((id, transformable, transformable.Transform));
         }
         return result;
+    }
+
+    public bool CanUndoSelected => GetAllSelectedTransformables().Any(x => _historyService.CanUndo(x.id));
+    public bool CanRedoSelected => GetAllSelectedTransformables().Any(x => _historyService.CanRedo(x.id));
+
+    public void UndoSelected()
+    {
+        foreach(var (id, _, _) in GetAllSelectedTransformables())
+            if(_historyService.CanUndo(id))
+                _historyService.Undo(id);
+    }
+
+    public void RedoSelected()
+    {
+        foreach(var (id, _, _) in GetAllSelectedTransformables())
+            if(_historyService.CanRedo(id))
+                _historyService.Redo(id);
     }
 
     public IEnumerable<TransformableEntity> TryGetAllTransformableActors()
@@ -294,8 +346,29 @@ public partial class EntityManager(IServiceProvider serviceProvider, Configurati
         {
             if(entity is ActorEntity actor)
             {
-                if(actor.IsProp == false)
-                    yield return actor;
+                yield return actor;
+            }
+        }
+    }
+
+    public IEnumerable<LightEntity> TryGetAllLights()
+    {
+        foreach(var entity in _entityMap.Values)
+        {
+            if(entity is LightEntity light)
+            {
+                yield return light;
+            }
+        }
+    }
+
+    public IEnumerable<CameraEntity> TryGetAllCameras()
+    {
+        foreach(var entity in _entityMap.Values)
+        {
+            if(entity is CameraEntity camera)
+            {
+                yield return camera;
             }
         }
     }
@@ -380,8 +453,10 @@ public partial class EntityManager(IServiceProvider serviceProvider, Configurati
         }
     }
 
-    public void Dispose()
+    public override void Dispose()
     {
+        base.Dispose();
+
         foreach(var entity in _entityMap.Values)
             entity.Dispose();
     }

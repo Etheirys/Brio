@@ -1,5 +1,6 @@
 ﻿using Brio.Capabilities.Actor;
 using Brio.Capabilities.Camera;
+using Brio.Capabilities.Core;
 using Brio.Capabilities.World;
 using Brio.Entities.Actor;
 using Brio.Entities.Camera;
@@ -20,7 +21,6 @@ using System.Linq;
 
 namespace Brio.Entities;
 
-// "cameras" "actorContainer" "environment"
 public class EntityManagerContainer(IServiceProvider provider) : Entity("worldObjectsContainer", provider)
 {
     private readonly GameInputService _gameInputService = provider.GetRequiredService<GameInputService>();
@@ -59,6 +59,7 @@ public class EntityManagerContainer(IServiceProvider provider) : Entity("worldOb
         AddCapability(ActivatorUtilities.CreateInstance<ActorContainerCapability>(_serviceProvider, this));
         AddCapability(ActivatorUtilities.CreateInstance<LightContainerCapability>(_serviceProvider, this));
         AddCapability(ActivatorUtilities.CreateInstance<CameraContainerCapability>(_serviceProvider, this));
+        AddCapability(ActivatorUtilities.CreateInstance<EntitManagerCapability>(_serviceProvider, this));
     }
 
     public override void OnSelected()
