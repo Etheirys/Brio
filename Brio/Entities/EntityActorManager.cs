@@ -3,11 +3,13 @@ using Brio.Entities.Core;
 using Brio.Game.Actor;
 using Brio.Game.Actor.Extensions;
 using Brio.Game.Core;
+using Brio.Game.GPose;
 using Dalamud.Game.ClientState.Objects.Enums;
 using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Plugin.Services;
 using Microsoft.Extensions.DependencyInjection;
 using System;
+
 using NativeCharacter = FFXIVClientStructs.FFXIV.Client.Game.Character.Character;
 
 namespace Brio.Entities;
@@ -19,12 +21,13 @@ public unsafe class EntityActorManager : IDisposable
     private readonly ObjectMonitorService _monitorService;
     private readonly IObjectTable _objects;
     private readonly IFramework _framework;
-
     private readonly ActorSpawnService _actorSpawnService;
+    private readonly GPoseService _gPoseService;
 
-    public EntityActorManager(EntityManager entityManager, ActorSpawnService actorSpawnService, IServiceProvider serviceProvider, ObjectMonitorService monitorService, IObjectTable objects, IFramework framework)
+    public EntityActorManager(EntityManager entityManager, GPoseService gPoseService, ActorSpawnService actorSpawnService, IServiceProvider serviceProvider, ObjectMonitorService monitorService, IObjectTable objects, IFramework framework)
     {
         _entityManager = entityManager;
+        _gPoseService = gPoseService;
         _serviceProvider = serviceProvider;
         _monitorService = monitorService;
         _objects = objects;
@@ -61,6 +64,9 @@ public unsafe class EntityActorManager : IDisposable
 
             // TODO: We should allow manipulation of overworld actors too
             if(!go.IsGPose())
+                return;
+
+            if(go.ObjectIndex is 200 or 0)
                 return;
 
             entity = ActivatorUtilities.CreateInstance<ActorEntity>(_serviceProvider, go);
