@@ -5,10 +5,12 @@ using Brio.Entities;
 using Brio.Entities.Actor;
 using Brio.Entities.Core;
 using Brio.Entities.World;
+using Brio.Entities.WorldObjects;
 using Brio.Game.Camera;
 using Brio.Game.GPose;
 using Brio.Game.Posing;
 using Brio.Game.World;
+using Brio.Game.World.Interop;
 using Brio.Input;
 using Brio.Services;
 using Brio.Services.MediatorMessages;
@@ -36,22 +38,20 @@ public unsafe class PosingOverlayWindow : MediatorWindow
     private readonly ConfigurationService _configurationService;
     private readonly PosingService _posingService;
     private readonly GPoseService _gPoseService;
-    private readonly HistoryService _groupedUndoService;
     private readonly LightingService _lightingService;
     private readonly IGameGui _gameGui;
 
     private readonly PosingTransformEditor _posingTransformEditor = new();
 
     private readonly List<OverlayItem> _selectingFrom = [with(256)];
-    private readonly List<OverlayItem> _clickables = [with(256)];
+    private List<OverlayItem> _clickables = [with(256)];
 
     private readonly List<int> _clickedIndices = [with(10)];
     private readonly List<int> _hoveredIndices = [with(10)];
 
     private Transform? _trackingTransform;
-    private List<(EntityId id, PosingCapability capability, Transform transform)>? _groupedPendingSnapshot = null;
 
-    public PosingOverlayWindow(EntityManager entityManager, IGameGui gameGui, Mediator mediator, CameraService cameraService, LightingService lightingService, HistoryService groupedUndoService, ConfigurationService configService, PosingService posingService, GPoseService gPoseService)
+    public PosingOverlayWindow(EntityManager entityManager, IGameGui gameGui, Mediator mediator, CameraService cameraService, LightingService lightingService, ConfigurationService configService, PosingService posingService, GPoseService gPoseService)
         : base(mediator, "##brio_posing_overlay_window", ImGuiWindowFlags.AlwaysAutoResize, true)
     {
         Namespace = "brio_posing_overlay_namespace";
@@ -63,7 +63,6 @@ public unsafe class PosingOverlayWindow : MediatorWindow
         _configurationService = configService;
         _posingService = posingService;
         _gPoseService = gPoseService;
-        _groupedUndoService = groupedUndoService;
         _lightingService = lightingService;
         _gameGui = gameGui;
 
@@ -97,21 +96,30 @@ public unsafe class PosingOverlayWindow : MediatorWindow
     public override void Draw()
     {
         var overlayConfig = _configurationService.Configuration.Posing;
-        var uiState = new OverlayUIState(overlayConfig, _trackingTransform.HasValue);
+        var uiState = new OverlayUIState(overlayConfig, _trackingTransform.HasValue, _entityManager.SelectedEntitiesCount > 1);
 
         _clickables.Clear();
 
-        GetAllOverlayItems(overlayConfig, _clickables);
-        HandleInput(uiState, overlayConfig, _clickables);
+        GetAllOverlayItems(overlayConfig);
+        HandleInput(uiState, overlayConfig);
         DrawPopup();
-        DrawSkeletonDotsAndLines(uiState, overlayConfig, _clickables);
-        DrawGizmo(uiState);
+        DrawSkeletonDotsAndLines(uiState, overlayConfig);
+
+        var actorEntity = _entityManager.SelectedEntity is ActorEntity actor ? actor : null;
+        DrawGizmo(uiState, actorEntity);
+
+        var lightEntity = _entityManager.SelectedEntity is LightEntity light ? light : null;
+        if(lightEntity != null && lightEntity.GameLight.IsAdvancedGismoVisible)
+            DrawLightOverlays(lightEntity);
+
+        if(_entityManager.SelectedEntity is not ITransformable)
+            _lastSelected = null;
     }
 
     // Overlay items
     //
 
-    private void GetAllOverlayItems(PosingConfiguration config, List<OverlayItem> clickables)
+    private void GetAllOverlayItems(PosingConfiguration config)
     {
         var camera = _cameraService.GetCurrentCamera();
         if(camera == null)
@@ -131,8 +139,14 @@ public unsafe class PosingOverlayWindow : MediatorWindow
                 DisplayName = transformableEntity.FriendlyName,
                 ScreenPosition = viewportPos + screen,
                 Size = config.BoneCircleSize,
-                CurrentlySelected = _entityManager.SelectedEntitys.Contains(transformableEntity.Id),
-                NormalColor = config.ModelTransformCircleStandOutColor,
+                CurrentlySelected = _entityManager.SelectedEntities.Contains(transformableEntity.Id),
+                NormalColor = transformableEntity switch
+                {
+                    ActorEntity => config.ModelTransformCircleStandOutColor,
+                    LightEntity => config.LightCircleNormalColor,
+                    WorldObjectEntity => config.WorldObjectOverlayColor,
+                    _ => config.ModelTransformCircleStandOutColor
+                },
                 HoveredColor = config.BoneCircleHoveredColor,
                 SelectedColor = config.BoneCircleSelectedColor,
                 Entity = transformableEntity,
@@ -141,7 +155,7 @@ public unsafe class PosingOverlayWindow : MediatorWindow
 
             if(transformableEntity is ActorEntity actorEntity)
             {
-                if((actorEntity.IsOverlayVisible || _entityManager.SelectedEntitys.Contains(actorEntity.Id)) && actorEntity.TryGetCapability<PosingCapability>(out var posing))
+                if((actorEntity.IsOverlayVisible || _entityManager.SelectedEntities.Contains(actorEntity.Id)) && actorEntity.TryGetCapability<PosingCapability>(out var posing))
                 {
                     BonePoseInfoId? selectedBoneId = null;
                     if(posing.Selected.Value is BonePoseInfoId boneId)
@@ -178,13 +192,13 @@ public unsafe class PosingOverlayWindow : MediatorWindow
                             bool isSelected = selectedBoneId != null && selectedBoneId.Value.Equals(bonePoseId);
                             bool isMultiSel = posing.IsBoneSelected(bonePoseId);
 
-                            if(!_posingService.OverlayFilter.IsBoneValid(bone, poseSlot) && !isSelected && !isMultiSel)
+                            if(!actorEntity.OverlayFilter.IsBoneValid(bone, poseSlot) && !isSelected && !isMultiSel)
                                 continue;
 
                             uint? overrideLineColor = null;
                             if(config.UsePerCategoryLineColors)
                             {
-                                var categoryId = _posingService.OverlayFilter.GetFilterCategoryId(bone, poseSlot);
+                                var categoryId = actorEntity.OverlayFilter.GetFilterCategoryId(bone, poseSlot);
                                 if(config.BoneCategoryLineColors.TryGetValue(categoryId, out var catColor))
                                     overrideLineColor = catColor;
                             }
@@ -192,9 +206,9 @@ public unsafe class PosingOverlayWindow : MediatorWindow
                             if(!camera->WorldToScreen(boneWorldPosition, out var boneScreen))
                                 continue;
 
-                            int addedIdx = clickables.Count;
+                            int addedIdx = _clickables.Count;
 
-                            clickables.Add(new OverlayItem
+                            _clickables.Add(new OverlayItem
                             {
                                 Kind = OverlayItem.OverlayItemKind.Bone,
                                 DisplayName = bone.FriendlyName,
@@ -209,19 +223,19 @@ public unsafe class PosingOverlayWindow : MediatorWindow
                                 SelectedColor = config.BoneCircleSelectedColor,
                                 OnClick = (oi, isMulti) =>
                                 {
-                                    Brio.Log.Fatal($"Clicked bone overlay item: {oi.DisplayName}, multi: {isMulti}");
-
                                     if(!isMulti)
                                         ClearAllPosingSelections(oi.Entity);
 
                                     _entityManager.SetSelectedEntity(oi.Entity?.Id);
 
                                     posing.SetBoneSelection((BonePoseInfoId)oi.BoneOrModelItem!.Value, isMulti);
+
+                                    _lastSelected = oi;
                                 }
                             });
 
                             if(bone.Parent == null) continue;
-                            if(!_posingService.OverlayFilter.IsBoneValid(bone.Parent, poseSlot)) continue;
+                            if(!actorEntity.OverlayFilter.IsBoneValid(bone.Parent, poseSlot)) continue;
 
                             var parentWorldPos = Vector3.Transform(bone.Parent.LastTransform.Position, modelMatrix);
 
@@ -232,7 +246,7 @@ public unsafe class PosingOverlayWindow : MediatorWindow
                                     Vector3.Transform(parentLocalOffset, bone.Parent.LastTransform.Rotation), modelMatrix);
 
                             if(camera->WorldToScreen(parentWorldPos, out var parentScreen))
-                                CollectionsMarshal.AsSpan(clickables)[addedIdx].ParentScreenPosition = viewportPos + parentScreen;
+                                CollectionsMarshal.AsSpan(_clickables)[addedIdx].ParentScreenPosition = viewportPos + parentScreen;
                         }
                     }
                 }
@@ -247,7 +261,7 @@ public unsafe class PosingOverlayWindow : MediatorWindow
                 {
                     if(isMulti)
                     {
-                        if(_entityManager.SelectedEntitys.Contains(oi.Entity.Id))
+                        if(_entityManager.SelectedEntities.Contains(oi.Entity.Id))
                             _entityManager.RemoveSelectedEntity(oi.Entity.Id);
                         else
                             _entityManager.AddSelectedEntity(oi.Entity.Id);
@@ -263,15 +277,19 @@ public unsafe class PosingOverlayWindow : MediatorWindow
 
                         _entityManager.SetSelectedEntity(oi.Entity.Id);
                     }
+
+                    _lastSelected = oi;
                 }
             };
 
-            clickables.Add(overlayItem);
+            _clickables.Add(overlayItem);
         }
 
         void ClearAllPosingSelections(Entity? exclusion = null)
         {
-            foreach(var entityId in _entityManager.SelectedEntitys)
+            _lastSelected = null;
+
+            foreach(var entityId in _entityManager.SelectedEntities)
             {
                 if(exclusion is not null && entityId == exclusion.Id)
                     continue;
@@ -287,7 +305,7 @@ public unsafe class PosingOverlayWindow : MediatorWindow
         }
     }
 
-    private void HandleInput(OverlayUIState uiState, PosingConfiguration config, List<OverlayItem> clickables)
+    private void HandleInput(OverlayUIState uiState, PosingConfiguration config)
     {
         if(!uiState.SkeletonInputEnabled)
             return;
@@ -296,11 +314,15 @@ public unsafe class PosingOverlayWindow : MediatorWindow
         _hoveredIndices.Clear();
 
         bool isMultiSelectModifier = ImGui.GetIO().KeyShift;
-        var span = CollectionsMarshal.AsSpan(clickables);
+        var span = CollectionsMarshal.AsSpan(_clickables);
 
         for(int i = 0; i < span.Length; i++)
         {
             ref var clickable = ref span[i];
+
+            if(clickable.Kind == OverlayItem.OverlayItemKind.Bone && uiState.MultiEntitySelected)
+                continue;
+
             var start = clickable.ScreenPosition - new Vector2(clickable.Size);
             var end = clickable.ScreenPosition + new Vector2(clickable.Size);
 
@@ -372,6 +394,11 @@ public unsafe class PosingOverlayWindow : MediatorWindow
                 first.OnClick?.Invoke(first, isMultiSelectModifier);
             }
         }
+
+        if(_entityManager.SelectedEntitiesCount == 0)
+        {
+            _lastSelected = null;
+        }
     }
 
     private void DrawPopup()
@@ -422,7 +449,7 @@ public unsafe class PosingOverlayWindow : MediatorWindow
         }
     }
 
-    private void DrawSkeletonDotsAndLines(OverlayUIState uiState, PosingConfiguration config, List<OverlayItem> clickables)
+    private void DrawSkeletonDotsAndLines(OverlayUIState uiState, PosingConfiguration config)
     {
         bool drawLines = uiState.DrawSkeletonLines;
         bool drawDots = uiState.DrawSkeletonDots;
@@ -436,7 +463,7 @@ public unsafe class PosingOverlayWindow : MediatorWindow
         bool lineToCircle = config.SkeletonLineToCircle;
         float lineThickness = config.SkeletonLineThickness;
 
-        var span = CollectionsMarshal.AsSpan(clickables);
+        var span = CollectionsMarshal.AsSpan(_clickables);
 
         for(int i = 0; i < span.Length; i++)
         {
@@ -447,14 +474,16 @@ public unsafe class PosingOverlayWindow : MediatorWindow
                 bool filled = clickable.CurrentlySelected || clickable.CurrentlyHovered;
 
                 if(filled)
-                    drawList.AddCircleFilled(clickable.ScreenPosition, clickable.Size + 3, config.ModelTransformCircleStandOutColor);
+                    drawList.AddCircleFilled(clickable.ScreenPosition, clickable.Size + 3, clickable.NormalColor);
                 else
-                    drawList.AddCircle(clickable.ScreenPosition, clickable.Size, config.ModelTransformCircleStandOutColor, 10, 3);
+                    drawList.AddCircle(clickable.ScreenPosition, clickable.Size, clickable.NormalColor, 10, 3);
 
                 continue;
             }
 
-            var lineColor = linesEnabled
+            bool boneDisabled = !dotsEnabled || uiState.MultiEntitySelected;
+
+            var lineColor = linesEnabled && !uiState.MultiEntitySelected
               ? (clickable.OverrideLineColor ?? config.SkeletonLineActiveColor)
               : config.SkeletonLineInactiveColor;
 
@@ -482,7 +511,7 @@ public unsafe class PosingOverlayWindow : MediatorWindow
                 continue;
 
             uint color;
-            if(!dotsEnabled)
+            if(boneDisabled)
                 color = config.BoneCircleInactiveColor;
             else if(clickable.CurrentlySelected)
                 color = config.BoneCircleSelectedColor;
@@ -507,7 +536,8 @@ public unsafe class PosingOverlayWindow : MediatorWindow
     // Gizmo 
     //
 
-    private void DrawGizmo(OverlayUIState uiState)
+    OverlayItem? _lastSelected = null;
+    private void DrawGizmo(OverlayUIState uiState, ActorEntity? actorEntity)
     {
         if(!uiState.DrawGizmo)
             return;
@@ -516,21 +546,14 @@ public unsafe class PosingOverlayWindow : MediatorWindow
         if(camera == null)
             return;
 
-        OverlayItem? primaryItem = null;
-        foreach(var item in _clickables)
-        {
-            if(item.CurrentlySelected)
-            {
-                primaryItem = item;
-                break;
-            }
-        }
+        ReconcileSelectedGizmoItem();
 
-        if(primaryItem == null)
+        if(_lastSelected == null)
             return;
 
+
         PosingCapability? posing = null;
-        if(primaryItem.Kind is OverlayItem.OverlayItemKind.Bone
+        if(_lastSelected.Kind is OverlayItem.OverlayItemKind.Bone
                             or OverlayItem.OverlayItemKind.ModelTransform)
         {
             if(!_entityManager.TryGetCapabilityFromSelectedEntity<PosingCapability>(out posing))
@@ -539,7 +562,7 @@ public unsafe class PosingOverlayWindow : MediatorWindow
 
         var allTransformables = _entityManager.GetAllSelectedTransformables();
         bool isMultiEntity = allTransformables.Count > 1;
-       
+
         Vector3 centroid = isMultiEntity
             ? TransformHelper.GetCentroidForGivenTransforms(allTransformables.Select(x => x.target.Transform))
             : Vector3.Zero;
@@ -553,16 +576,16 @@ public unsafe class PosingOverlayWindow : MediatorWindow
 
         Game.Posing.Skeletons.Bone? selectedBone = null;
 
-        bool shouldDraw = primaryItem.Kind switch
+        bool shouldDraw = _lastSelected.Kind switch
         {
-            OverlayItem.OverlayItemKind.Bone when posing != null
-                => BuildBoneGizmo(posing, primaryItem, isMultiEntity, ref worldViewMatrix, ref currentTransform, ref modelMatrix, out selectedBone),
+            OverlayItem.OverlayItemKind.Bone when posing != null && actorEntity != null
+                => BuildBoneGizmo(actorEntity, posing, _lastSelected, isMultiEntity, ref worldViewMatrix, ref currentTransform, ref modelMatrix, out selectedBone),
 
             OverlayItem.OverlayItemKind.Actor
             or OverlayItem.OverlayItemKind.Light
             or OverlayItem.OverlayItemKind.ModelTransform
             or OverlayItem.OverlayItemKind.Transformable
-                => BuildEntityGizmo(primaryItem, isMultiEntity, centroid, ref currentTransform),
+                => BuildEntityGizmo(_lastSelected, isMultiEntity, centroid, ref currentTransform),
 
             _ => false
         };
@@ -598,9 +621,6 @@ public unsafe class PosingOverlayWindow : MediatorWindow
                 ? centroid
                 : primaryTransform.Position;
 
-        //if(camera->WorldToScreen(gizmoWorldCenter, out var gizmoCenterScreen))
-            //DrawGizmoImage(ImGui.GetMainViewport().Pos + gizmoCenterScreen);
-
         ImGuizmo.BeginFrame();
         var io = ImGui.GetIO();
         ImGuizmo.SetRect(0, 0, io.DisplaySize.X, io.DisplaySize.Y);
@@ -623,12 +643,6 @@ public unsafe class PosingOverlayWindow : MediatorWindow
 
         if(_trackingTransform.HasValue && (!ImGuizmo.IsUsing() || !ImGui.IsMouseDown(ImGuiMouseButton.Left)))
         {
-            if(_groupedPendingSnapshot?.Count > 0)
-            {
-                _groupedUndoService.Snapshot(_groupedPendingSnapshot);
-                _groupedPendingSnapshot = null;
-            }
-
             TransformHelper.SnapshotAll(_entityManager.GetAllSelectedTransformables().Select(x => x.target));
             _trackingTransform = null;
         }
@@ -640,11 +654,8 @@ public unsafe class PosingOverlayWindow : MediatorWindow
 
         var delta = newTransform.Value.CalculateDiff(originalTransform);
 
-        if(isMultiEntity && primaryItem.Kind is not OverlayItem.OverlayItemKind.Bone)
+        if(isMultiEntity && _lastSelected.Kind is not OverlayItem.OverlayItemKind.Bone)
         {
-            if(_groupedPendingSnapshot == null && ImGuizmo.IsUsing())
-                _groupedPendingSnapshot = _entityManager.GetAllSelectedActors();
-
             TransformHelper.ApplyDeltaToMultiple(allTransformables, delta, centroid, true);
 
             if(delta.Position != Vector3.Zero || delta.Rotation != Quaternion.Identity)
@@ -652,7 +663,7 @@ public unsafe class PosingOverlayWindow : MediatorWindow
                 centroid = TransformHelper.GetCentroidForGivenTransforms(allTransformables.Select(x => x.target.Transform));
             }
         }
-        else if(primaryItem.Kind == OverlayItem.OverlayItemKind.Bone && posing != null)
+        else if(_lastSelected.Kind == OverlayItem.OverlayItemKind.Bone && posing != null)
         {
             if(posing.IsMultiSelecting)
             {
@@ -666,27 +677,24 @@ public unsafe class PosingOverlayWindow : MediatorWindow
                     }
                 }
             }
-            else if(primaryItem.BoneOrModelItem?.Value is BonePoseInfoId bonePoseId)
+            else if(_lastSelected.BoneOrModelItem?.Value is BonePoseInfoId bonePoseId)
             {
                 posing.SkeletonPosing.GetBonePose(bonePoseId).Apply(newTransform.Value, originalTransform);
             }
         }
         else
         {
-            if(_groupedPendingSnapshot == null && ImGuizmo.IsUsing())
-                _groupedPendingSnapshot = _entityManager.GetAllSelectedActors();
-
             foreach(var (_, target, _) in _entityManager.GetAllSelectedTransformables())
                 TransformHelper.ApplyDelta(target, delta);
         }
 
         bool TryGetNewTransform(ref Matrix4x4 matrix)
         {
-            bool canEdit = primaryItem.Kind is OverlayItem.OverlayItemKind.Bone
+            bool canEdit = _lastSelected.Kind is OverlayItem.OverlayItemKind.Bone
                 ? posing != null && !posing.ModelPosing.IsTransformFrozen && !(selectedBone != null && selectedBone.Freeze)
                 : isMultiEntity
                     ? allTransformables.Any(x => !x.target.IsTransformFrozen)
-                    : primaryItem.Transformable is { IsTransformFrozen: false };
+                    : _lastSelected.Transformable is { IsTransformFrozen: false };
 
             if(!canEdit)
                 return false;
@@ -702,7 +710,73 @@ public unsafe class PosingOverlayWindow : MediatorWindow
         }
     }
 
-    private bool BuildBoneGizmo(PosingCapability posing, OverlayItem item, bool isMultiEntity, ref Matrix4x4 worldViewMatrix, ref Transform currentTransform, ref Matrix4x4 modelMatrix, out Game.Posing.Skeletons.Bone? selectedBone)
+    private void ReconcileSelectedGizmoItem()
+    {
+        var entity = _entityManager.SelectedEntity;
+        if(entity is null)
+            return;
+
+        if(entity is ActorEntity actor && actor.TryGetCapability<PosingCapability>(out var posing))
+        {
+            switch(posing.Selected.Value)
+            {
+                case BonePoseInfoId boneId:
+                    if(_lastSelected == null || _lastSelected.Kind != OverlayItem.OverlayItemKind.Bone || _lastSelected.Entity?.Id != actor.Id || _lastSelected.BoneOrModelItem?.Value is not BonePoseInfoId lastBoneId || !lastBoneId.Equals(boneId))
+                    {
+                        _lastSelected = new OverlayItem
+                        {
+                            Kind = OverlayItem.OverlayItemKind.Bone,
+                            DisplayName = actor.FriendlyName,
+                            BoneOrModelItem = posing.Selected,
+                            Entity = actor,
+                            Transformable = actor,
+                        };
+                    }
+                    break;
+
+                case ModelTransformSelection:
+                    if(_lastSelected == null || _lastSelected.Kind != OverlayItem.OverlayItemKind.ModelTransform || _lastSelected.Entity?.Id != actor.Id)
+                    {
+                        _lastSelected = new OverlayItem
+                        {
+                            Kind = OverlayItem.OverlayItemKind.ModelTransform,
+                            DisplayName = actor.FriendlyName,
+                            Entity = actor,
+                            Transformable = actor,
+                        };
+                    }
+                    break;
+
+                default:
+                    if(_lastSelected == null || _lastSelected.Entity?.Id != actor.Id || _lastSelected.Kind == OverlayItem.OverlayItemKind.Bone)
+                    {
+                        _lastSelected = new OverlayItem
+                        {
+                            Kind = OverlayItem.OverlayItemKind.Transformable,
+                            DisplayName = actor.FriendlyName,
+                            Entity = actor,
+                            Transformable = actor,
+                        };
+                    }
+                    break;
+            }
+
+            return;
+        }
+
+        if(entity is ITransformable transformable && (_lastSelected == null || _lastSelected.Entity?.Id != entity.Id))
+        {
+            _lastSelected = new OverlayItem
+            {
+                Kind = OverlayItem.OverlayItemKind.Transformable,
+                DisplayName = entity.FriendlyName,
+                Entity = entity,
+                Transformable = transformable,
+            };
+        }
+    }
+
+    private bool BuildBoneGizmo(ActorEntity actorEntity, PosingCapability posing, OverlayItem item, bool isMultiEntity, ref Matrix4x4 worldViewMatrix, ref Transform currentTransform, ref Matrix4x4 modelMatrix, out Game.Posing.Skeletons.Bone? selectedBone)
     {
         selectedBone = null;
 
@@ -713,7 +787,7 @@ public unsafe class PosingOverlayWindow : MediatorWindow
         if(bone is null)
             return false;
 
-        if(!_posingService.OverlayFilter.IsBoneValid(bone, boneSelect.Slot) && !_posingService.GizmoStaysWhenAllBonesAreDisabled)
+        if(!actorEntity.OverlayFilter.IsBoneValid(bone, boneSelect.Slot) && !_posingService.GizmoStaysWhenAllBonesAreDisabled)
             return false;
 
         var charaBase = bone.Skeleton.CharacterBase;
@@ -761,7 +835,6 @@ public unsafe class PosingOverlayWindow : MediatorWindow
         {
             IsOpen = false;
             _trackingTransform = null;
-            _groupedPendingSnapshot = null;
         }
     }
 
@@ -772,11 +845,188 @@ public unsafe class PosingOverlayWindow : MediatorWindow
         GC.SuppressFinalize(this);
     }
 
+    //
+    // Very kindly inspired and borrowed from Stagehand by universalconquistador (https://github.com/universalconquistador/Stagehand) 
+
+    private const float HitTestRadius = 0.25f;
+
+    private void DrawLightOverlays(LightEntity light)
+    {
+        var drawList = ImGui.GetWindowDrawList();
+
+        var gameLight = light.GameLight;
+        if(gameLight is null || !gameLight.IsValid)
+            return;
+
+        var renderLight = gameLight.GameLight->RenderLight;
+        if(renderLight == null)
+            return;
+
+        bool isSelected = _entityManager.SelectedEntities.Contains(light.Id);
+        float thickness = isSelected ? 2.0f : 1.0f;
+
+        var lightColor = renderLight->Color;
+        var color = new Vector4(lightColor.X, lightColor.Y, lightColor.Z, isSelected ? 1.0f : 0.6f);
+
+        var position = (Vector3)gameLight.Position;
+        var transform = Matrix4x4.CreateFromQuaternion((Quaternion)gameLight.Rotation) *
+                        Matrix4x4.CreateTranslation(position);
+
+        Vector3 localX = Vector3.TransformNormal(Vector3.UnitX, transform);
+        Vector3 localY = Vector3.TransformNormal(Vector3.UnitY, transform);
+        Vector3 localZ = Vector3.TransformNormal(Vector3.UnitZ, transform);
+
+        float range = renderLight->Range;
+        float spotAngle = renderLight->SpotLightAngleDegrees;
+        float falloffAngle = renderLight->AngularFalloffDegrees;
+        var flatSkew = renderLight->FlatLightSkewAngleDegrees;
+
+        switch(renderLight->EmissionType)
+        {
+            case LightType.WorldLight:
+                {
+                    var localHalfX = localX * HitTestRadius;
+                    var localHalfY = localY * HitTestRadius;
+                    var localHalfZ = localZ * HitTestRadius;
+
+                    Span<Vector3> points =
+                    [
+                        new(0.3f, 0.5f, 0.0f),
+                        new(0.6f, -0.2f, 0.0f),
+                        new(-0.4f, 0.1f, 0.0f),
+                    ];
+
+                    for(int i = 0; i < points.Length; i++)
+                    {
+                        var point = points[i];
+                        DrawLine(drawList,
+                            position + point.X * localHalfX + point.Y * localHalfY - localHalfZ, 
+                            position + point.X * localHalfX + point.Y * localHalfY + localHalfZ,
+                            thickness, color);
+                    }
+                    break;
+                }
+            case LightType.PointLight:
+                {
+                    float radius = HitTestRadius * 0.55f;
+                    DrawCircle(drawList, position, localX, localY, radius, thickness, color);
+                    DrawCircle(drawList, position, localY, localZ, radius, thickness, color);
+                    DrawCircle(drawList, position, localZ, localX, radius, thickness, color);
+
+                    if(isSelected)
+                    {
+                        DrawCircle(drawList, position, localX, localY, range, 2.0f, color);
+                        DrawCircle(drawList, position, localY, localZ, range, 2.0f, color);
+                        DrawCircle(drawList, position, localZ, localX, range, 2.0f, color);
+                    }
+                    break;
+                }
+            case LightType.SpotLight:
+                {
+                    if(isSelected)
+                    {
+                        DrawCone(drawList, transform, 0.5f * float.DegreesToRadians(spotAngle), range, 2.0f, color);
+                        DrawCone(drawList, transform, 0.5f * float.DegreesToRadians(spotAngle + falloffAngle),
+                                 range, 1.0f, color with { W = color.W * 0.4f });
+                    }
+                    else
+                    {
+                        DrawCone(drawList, transform, 0.5f * float.DegreesToRadians(spotAngle),
+                                 HitTestRadius * 0.85f, 1.0f, color);
+                    }
+                    break;
+                }
+            case LightType.FlatLight:
+                {
+                    var localHalfX = localX * 0.5f;
+                    var localHalfY = localY * 0.5f;
+
+                    DrawQuad(drawList, position, localHalfX, localHalfY, thickness, color);
+                    DrawLine(drawList, position, position + Vector3.Normalize(localZ) * HitTestRadius, thickness, color);
+
+                    if(isSelected)
+                    {
+                        var skewVector = Vector3.Normalize(localX) * range * MathF.Tan(float.DegreesToRadians(flatSkew.Y)) -
+                                         Vector3.Normalize(localY) * range * MathF.Tan(float.DegreesToRadians(flatSkew.X));
+                        Vector3 farSide = position + localZ * range + skewVector;
+
+                        DrawQuad(drawList, farSide, localHalfX, localHalfY, 2.0f, color);
+
+                        DrawLine(drawList, position + localHalfX + localHalfY, farSide + localHalfX + localHalfY, 2.0f, color);
+                        DrawLine(drawList, position + localHalfX - localHalfY, farSide + localHalfX - localHalfY, 2.0f, color);
+                        DrawLine(drawList, position - localHalfX - localHalfY, farSide - localHalfX - localHalfY, 2.0f, color);
+                        DrawLine(drawList, position - localHalfX + localHalfY, farSide - localHalfX + localHalfY, 2.0f, color);
+                    }
+                    break;
+                }
+        }
+    }
+
+    private void DrawQuad(ImDrawListPtr drawList, Vector3 center, Vector3 localHalfX, Vector3 localHalfY, float thickness, Vector4 color)
+    {
+        DrawLine(drawList, center + localHalfX + localHalfY, center + localHalfX - localHalfY, thickness, color);
+        DrawLine(drawList, center + localHalfX - localHalfY, center - localHalfX - localHalfY, thickness, color);
+        DrawLine(drawList, center - localHalfX - localHalfY, center - localHalfX + localHalfY, thickness, color);
+        DrawLine(drawList, center - localHalfX + localHalfY, center + localHalfX + localHalfY, thickness, color);
+    }
+    private void DrawCircle(ImDrawListPtr drawList, Vector3 centerPoint, Vector3 axisOne, Vector3 axisTwo, float radius, float thickness, Vector4 color)
+    {
+        const int segmentCount = 64;
+        for(int i = 0; i <= segmentCount; i++)
+        {
+            float angleRads = (float)i / segmentCount * MathF.Tau;
+            var point = centerPoint + (MathF.Cos(angleRads) * axisOne + MathF.Sin(angleRads) * axisTwo) * radius;
+            if(_gameGui.WorldToScreen(point, out var screenPos, out _))
+                drawList.PathLineTo(screenPos);
+        }
+        drawList.PathStroke(ImGui.GetColorU32(color), thickness);
+        drawList.PathClear();
+    }
+    private void DrawLine(ImDrawListPtr drawList, Vector3 startPoint, Vector3 endPoint, float thickness, Vector4 color)
+    {
+        if(_gameGui.WorldToScreen(startPoint, out var startScreenPos, out _) &&
+           _gameGui.WorldToScreen(endPoint, out var endScreenPos, out _))
+            drawList.AddLine(startScreenPos, endScreenPos, ImGui.GetColorU32(color), thickness);
+    }
+    private void DrawCone(ImDrawListPtr drawList, Matrix4x4 transform, float angleRadians, float height, float thickness, Vector4 color)
+    {
+        const int slices = 4;
+        const int spokes = 4;
+        Vector3 localX = transform.X.AsVector3();
+        Vector3 localY = transform.Y.AsVector3();
+        var localOrigin = transform.Translation;
+        var localHeightDirection = transform.Z.AsVector3() * height;
+        float tanAngle = MathF.Tan(angleRadians);
+
+        static float SliceRatio(int slice, int count) => MathF.Pow(200.0f, (float)(slice + 1) / count - 1.0f);
+
+        for(int slice = 0; slice < slices; slice++)
+        {
+            float ratio = SliceRatio(slice, slices);
+            DrawCircle(drawList, localOrigin + localHeightDirection * ratio, localX, localY, height * ratio * tanAngle, thickness, color);
+        }
+
+        for(int spoke = 0; spoke < spokes; spoke++)
+        {
+            float angleRads = (float)spoke / spokes * MathF.Tau;
+            Vector3 lastEnd = localOrigin;
+            for(int slice = 0; slice < slices; slice++)
+            {
+                float ratio = SliceRatio(slice, slices);
+                var sliceCenter = localOrigin + localHeightDirection * ratio;
+                var endPoint = sliceCenter + (MathF.Cos(angleRads) * localX + MathF.Sin(angleRads) * localY) * height * ratio * tanAngle;
+                DrawLine(drawList, lastEnd, endPoint, thickness, color);
+                lastEnd = endPoint;
+            }
+        }
+    }
+  
     // UI State
     //
 
-    private class OverlayUIState(PosingConfiguration configuration, bool isTrackingGizmo = false)
+    private class OverlayUIState(PosingConfiguration configuration, bool isTrackingGizmo = false, bool multiEntitySelected = false)
     {
+        public bool MultiEntitySelected = multiEntitySelected;
         public bool PopupOpen = ImGui.IsPopupOpen(BoneSelectPopupName);
         public bool UsingGizmo = ImGuizmo.IsUsing() && isTrackingGizmo;
         public bool HoveringGizmo = ImGuizmo.IsOver();
@@ -833,28 +1083,4 @@ public unsafe class PosingOverlayWindow : MediatorWindow
         public Entity? Entity;
         public Action<OverlayItem, bool>? OnClick;
     }
-
-    // Gizmo Image
-    //
-
-    //public IDalamudTextureWrap? GizmoImage { get; set; }
-    //public float GizmoImageSize { get; set; } = 130f;
-
-    //private void DrawGizmoImage(Vector2 screenCenter)
-    //{
-    //    return;
-
-    //    if(GizmoImage == null || GizmoImage.Handle == 0)
-    //        return;
-
-    //    var half = new Vector2(GizmoImageSize * ImGuiHelpers.GlobalScale * 0.5f);
-    //    ImGui.GetForegroundDrawList().AddImageRounded(
-    //        GizmoImage.Handle,
-    //        screenCenter - half,
-    //        screenCenter + half,
-    //        Vector2.Zero,
-    //        Vector2.One,
-    //        ImGui.GetColorU32(new Vector4(1f, 1f, 1f, 1f)),
-    //        half.X);
-    //}
 }
