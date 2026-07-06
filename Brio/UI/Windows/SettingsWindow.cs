@@ -1,10 +1,12 @@
 using Brio.Config;
+using Brio.Game.Posing;
 using Brio.Input;
 using Brio.IPC;
 using Brio.Resources;
 using Brio.UI.Controls.Core;
 using Brio.UI.Controls.Editors;
 using Brio.UI.Controls.Stateless;
+using Brio.UI.Theming;
 using Brio.Web;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface;
@@ -13,9 +15,13 @@ using Dalamud.Interface.Utility.Raii;
 using Dalamud.Interface.Windowing;
 using Newtonsoft.Json;
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Numerics;
 using System.Text;
+
+using static Brio.Game.Posing.BoneCategories;
 
 namespace Brio.UI.Windows;
 
@@ -26,13 +32,15 @@ public class SettingsWindow : Window
     private readonly GlamourerService _glamourerService;
     private readonly WebService _webService;
     private readonly CustomizePlusService _customizePlusService;
+    private readonly PosingService _posingService;
 
     public SettingsWindow(
         ConfigurationService configurationService,
         PenumbraService penumbraService,
         GlamourerService glamourerService,
         WebService webService,
-        CustomizePlusService customizePlusService) : base($"{Brio.Name} SETTINGS###brio_settings_window", ImGuiWindowFlags.NoResize)
+        CustomizePlusService customizePlusService,
+        PosingService posingService) : base($"{Brio.Name} SETTINGS###brio_settings_window", ImGuiWindowFlags.NoResize)
     {
         Namespace = "brio_settings_namespace";
 
@@ -41,6 +49,9 @@ public class SettingsWindow : Window
         _glamourerService = glamourerService;
         _webService = webService;
         _customizePlusService = customizePlusService;
+        _posingService = posingService;
+
+        this.AllowBackgroundBlur = false;
 
         Size = new Vector2(500, 550);
     }
@@ -77,6 +88,8 @@ public class SettingsWindow : Window
     int selected;
     public override void Draw()
     {
+        ImBrio.BlurWindow();
+
         using(ImRaii.PushId("brio_settings"))
         {
             if(_isModal)
@@ -90,7 +103,7 @@ public class SettingsWindow : Window
             }
             else
             {
-                ImBrio.ButtonSelectorStrip("settings_filters_selector", new Vector2(ImBrio.GetRemainingWidth(), ImBrio.GetLineHeight()), ref selected, ["General", "IPC", "Posing", "Library", "Auto-Save", "Input", "Advanced"]);
+                ImBrio.ButtonSelectorStrip("settings_filters_selector", new Vector2(ImBrio.GetRemainingWidth(), ImBrio.GetLineHeight()), ref selected, ["General", "Posing", "Library", "Auto-Save", "Input", "Advanced"]);
 
                 using(var child = ImRaii.Child("###settingsPane"))
                 {
@@ -102,21 +115,18 @@ public class SettingsWindow : Window
                                 DrawGeneralTab();
                                 break;
                             case 1:
-                                DrawIPCTab();
-                                break;
-                            case 2:
                                 DrawPosingTab();
                                 break;
-                            case 3:
+                            case 2:
                                 DrawLibraryTab();
                                 break;
-                            case 4:
+                            case 3:
                                 DrawSceneTab();
                                 break;
-                            case 5:
+                            case 4:
                                 DrawKeysTab();
                                 break;
-                            case 6:
+                            case 5:
                                 DrawAdvancedTab();
                                 break;
                         }
@@ -128,6 +138,17 @@ public class SettingsWindow : Window
 
     private void DrawGeneralTab()
     {
+        ImBrio.SeparatorText("Options");
+
+        DrawGeneralSettings();
+
+        ImBrio.SeparatorText("IPC");
+
+        DrawBrioIPC();
+        DrawThirdPartyIPC();
+
+        ImBrio.SeparatorText("Other");
+
         if(ImGui.CollapsingHeader("Library", ImGuiTreeNodeFlags.DefaultOpen))
         {
             bool useLibraryWhenImporting = _configurationService.Configuration.UseLibraryWhenImporting;
@@ -158,12 +179,7 @@ public class SettingsWindow : Window
             }
         }
 
-        if(ImGui.CollapsingHeader("Display", ImGuiTreeNodeFlags.DefaultOpen))
-        {
-            DrawDisplaySettings();
-        }
-
-        if(ImGui.CollapsingHeader("Transform Slider Speed", ImGuiTreeNodeFlags.DefaultOpen))
+        if(ImGui.CollapsingHeader("Transform Slider Speed"))
         {
             DrawOffsetSection();
         }
@@ -214,7 +230,7 @@ public class SettingsWindow : Window
         }
     }
 
-    private void DrawDisplaySettings()
+    private void DrawGeneralSettings()
     {
         bool censorActorNames = _configurationService.Configuration.Interface.CensorActorNames;
         if(ImGui.Checkbox("Censor Actor Names Across Brio", ref censorActorNames))
@@ -230,35 +246,55 @@ public class SettingsWindow : Window
             _configurationService.ApplyChange();
         }
 
-        bool enableBrioColor = _configurationService.Configuration.Appearance.EnableBrioColor;
-        if(ImGui.Checkbox("Enable Brio Color", ref enableBrioColor))
+        ImBrio.SeparatorText("Brio's Theme");
+
+        var currentThemeName = _configurationService.Configuration.Appearance.Theme;
+        const string themeLabel = "Theme";
+        ImGui.SetNextItemWidth(-ImGui.CalcTextSize(themeLabel).X - 15);
+        using(var combo = ImRaii.Combo(themeLabel, currentThemeName))
         {
-            _configurationService.Configuration.Appearance.EnableBrioColor = enableBrioColor;
+            if(combo.Success)
+            {
+                foreach(var theme in ThemeManager.Themes)
+                {
+                    if(ImGui.Selectable(theme.Name, theme.Name == currentThemeName))
+                    {
+                        _configurationService.Configuration.Appearance.Theme = theme.Name;
+                        ThemeManager.CurrentTheme = theme;
+                        _configurationService.ApplyChange();
+                    }
+                }
+            }
+        }
+
+        //float windowBgOpacity = _configurationService.Configuration.Appearance.WindowOpacity;
+        //const string opacityLabel = "Window Opacity";
+        //ImGui.SetNextItemWidth(-ImGui.CalcTextSize(opacityLabel).X - 15);
+        //if(ImGui.SliderFloat(opacityLabel, ref windowBgOpacity, 0.0f, 1.0f))
+        //{
+        //    _configurationService.Configuration.Appearance.WindowOpacity = windowBgOpacity;
+        //    _configurationService.ApplyChange();
+        //}
+
+        bool blur = _configurationService.Configuration.Appearance.EnableBlur;
+        if(ImGui.Checkbox("Enable Background Blur", ref blur))
+        {
+            _configurationService.Configuration.Appearance.EnableBlur = blur;
             _configurationService.ApplyChange();
         }
 
-        bool enableBrioScale = _configurationService.Configuration.Appearance.EnableBrioScale;
-        if(ImGui.Checkbox("Enable Brio Scale", ref enableBrioScale))
-        {
-            _configurationService.Configuration.Appearance.EnableBrioScale = enableBrioScale;
-            _configurationService.ApplyChange();
-        }
     }
 
     private void DrawSceneTab()
     {
-        DrawImportScene();
-    }
+        ImBrio.SeparatorText("Options");
 
-    private void DrawIPCTab()
-    {
-        DrawBrioIPC();
-        DrawThirdPartyIPC();
+        DrawAutoSaveSettings();
     }
 
     private void DrawThirdPartyIPC()
     {
-        if(ImGui.CollapsingHeader("Third-Party", ImGuiTreeNodeFlags.DefaultOpen))
+        if(ImGui.CollapsingHeader("Third-Party IPC"))
         {
             var penumbraStatus = _penumbraService.CheckStatus();
             var penumbraUnavailable = penumbraStatus is IPCStatus.None or IPCStatus.NotInstalled or IPCStatus.VersionMismatch or IPCStatus.Error;
@@ -327,47 +363,50 @@ public class SettingsWindow : Window
         }
     }
 
-    private void DrawImportScene()
+    private void DrawAutoSaveSettings()
     {
-        if(ImGui.CollapsingHeader("General", ImGuiTreeNodeFlags.DefaultOpen))
+        var enabled = _configurationService.Configuration.AutoSave.AutoSaveSystemEnabled;
+        if(ImGui.Checkbox("Auto-Save Enabled", ref enabled))
         {
-            var enabled = _configurationService.Configuration.AutoSave.AutoSaveSystemEnabled;
-            if(ImGui.Checkbox("Auto-Save Enabled", ref enabled))
+            _configurationService.Configuration.AutoSave.AutoSaveSystemEnabled = enabled;
+            _configurationService.ApplyChange();
+        }
+
+        using(ImRaii.Disabled(!enabled))
+        {
+            var individual = _configurationService.Configuration.AutoSave.AutoSaveIndividualPoses;
+            if(ImGui.Checkbox("Save Individual Poses", ref individual))
             {
-                _configurationService.Configuration.AutoSave.AutoSaveSystemEnabled = enabled;
+                _configurationService.Configuration.AutoSave.AutoSaveIndividualPoses = individual;
                 _configurationService.ApplyChange();
             }
 
-            using(ImRaii.Disabled(!enabled))
+            var autoGPoseClear = _configurationService.Configuration.AutoSave.CleanAutoSaveOnLeavingGpose;
+            if(ImGui.Checkbox("Clean AutoSaves When Leaving GPose", ref autoGPoseClear))
             {
+                _configurationService.Configuration.AutoSave.CleanAutoSaveOnLeavingGpose = autoGPoseClear;
+                _configurationService.ApplyChange();
+            }
 
-                var individual = _configurationService.Configuration.AutoSave.AutoSaveIndividualPoses;
-                if(ImGui.Checkbox("Save Individual Poses", ref individual))
-                {
-                    _configurationService.Configuration.AutoSave.AutoSaveIndividualPoses = individual;
-                    _configurationService.ApplyChange();
-                }
+            var saveInterval = _configurationService.Configuration.AutoSave.AutoSaveInterval;
+            if(ImGui.SliderInt("Auto-Save Interval", ref saveInterval, 15, 500, "%d seconds"))
+            {
+                _configurationService.Configuration.AutoSave.AutoSaveInterval = saveInterval;
+                _configurationService.ApplyChange();
+            }
 
-                var saveInterval = _configurationService.Configuration.AutoSave.AutoSaveInterval;
-                if(ImGui.SliderInt("Auto-Save Interval", ref saveInterval, 15, 500, "%d seconds"))
-                {
-                    _configurationService.Configuration.AutoSave.AutoSaveInterval = saveInterval;
-                    _configurationService.ApplyChange();
-                }
-
-                var maxSaves = _configurationService.Configuration.AutoSave.MaxAutoSaves;
-                if(ImGui.SliderInt("Max Auto-Saves", ref maxSaves, 3, 80))
-                {
-                    _configurationService.Configuration.AutoSave.MaxAutoSaves = maxSaves;
-                    _configurationService.ApplyChange();
-                }
+            var maxSaves = _configurationService.Configuration.AutoSave.MaxAutoSaves;
+            if(ImGui.SliderInt("Max Auto-Saves", ref maxSaves, 3, 80))
+            {
+                _configurationService.Configuration.AutoSave.MaxAutoSaves = maxSaves;
+                _configurationService.ApplyChange();
             }
         }
     }
 
     private void DrawBrioIPC()
     {
-        if(ImGui.CollapsingHeader("Brio", ImGuiTreeNodeFlags.DefaultOpen))
+        if(ImGui.CollapsingHeader("Brio API & IPC"))
         {
             bool enableBrioIpc = _configurationService.Configuration.IPC.EnableBrioIPC;
             if(ImGui.Checkbox("Enable Brio IPC", ref enableBrioIpc))
@@ -392,6 +431,20 @@ public class SettingsWindow : Window
     {
         if(ImGui.CollapsingHeader("Appearance", ImGuiTreeNodeFlags.DefaultOpen))
         {
+            bool enableBrioColor = _configurationService.Configuration.Appearance.EnableBrioColor;
+            if(ImGui.Checkbox("Enable Brio Color", ref enableBrioColor))
+            {
+                _configurationService.Configuration.Appearance.EnableBrioColor = enableBrioColor;
+                _configurationService.ApplyChange();
+            }
+
+            bool enableBrioScale = _configurationService.Configuration.Appearance.EnableBrioScale;
+            if(ImGui.Checkbox("Enable Brio Scale", ref enableBrioScale))
+            {
+                _configurationService.Configuration.Appearance.EnableBrioScale = enableBrioScale;
+                _configurationService.ApplyChange();
+            }
+
             var allowNPCHackBehavior = _configurationService.Configuration.Appearance.ApplyNPCHack;
             const string label = "Allow NPC Appearance on Players";
             ImGui.SetNextItemWidth(-ImGui.CalcTextSize(label).X - 15);
@@ -421,6 +474,8 @@ public class SettingsWindow : Window
 
     private void DrawPosingTab()
     {
+        ImBrio.SeparatorText("Options");
+
         DrawPosingGeneralSection();
         DrawGPoseSection();
         DrawOverlaySection();
@@ -452,9 +507,23 @@ public class SettingsWindow : Window
             }
 
             bool autoSelectModelTransform = _configurationService.Configuration.Posing.AutoSelectTransformOnEntitySelect;
-            if(ImGui.Checkbox("Select Model Transform Bone/Origin on Entity Select", ref autoSelectModelTransform))
+            if(ImGui.Checkbox("Select Model Transform on Entity Select", ref autoSelectModelTransform))
             {
                 _configurationService.Configuration.Posing.AutoSelectTransformOnEntitySelect = autoSelectModelTransform;
+                _configurationService.ApplyChange();
+            }
+
+            bool autoSelectLight = _configurationService.Configuration.Posing.AutoSelectLightWhenClickingOnALight;
+            if(ImGui.Checkbox("Select Light in Light Window when Clicking a Light Entity", ref autoSelectLight))
+            {
+                _configurationService.Configuration.Posing.AutoSelectLightWhenClickingOnALight = autoSelectLight;
+                _configurationService.ApplyChange();
+            }
+
+            bool ifLightWindowOpenDontUseSceneManager = _configurationService.Configuration.Posing.IfLightWindowisOpenDontUseSceneManager;
+            if(ImGui.Checkbox("If Light Window is Open, Don't Show Light Widget in the Scene Manager", ref ifLightWindowOpenDontUseSceneManager))
+            {
+                _configurationService.Configuration.Posing.IfLightWindowisOpenDontUseSceneManager = ifLightWindowOpenDontUseSceneManager;
                 _configurationService.ApplyChange();
             }
         }
@@ -471,25 +540,7 @@ public class SettingsWindow : Window
                 _configurationService.ApplyChange();
             }
 
-            bool standout = _configurationService.Configuration.Posing.ModelTransformStandout;
-            if(ImGui.Checkbox("Make the [Model Transform] Bone Standout", ref standout))
-            {
-                _configurationService.Configuration.Posing.ModelTransformStandout = standout;
-                _configurationService.ApplyChange();
-            }
-
-            if(standout == false)
-                ImGui.BeginDisabled();
-
-            Vector4 modelTransformCircleStandOut = ImGui.ColorConvertU32ToFloat4(_configurationService.Configuration.Posing.ModelTransformCircleStandOutColor);
-            if(ImGui.ColorEdit4("[Model Transform] Bone Standout Color", ref modelTransformCircleStandOut, ImGuiColorEditFlags.NoInputs))
-            {
-                _configurationService.Configuration.Posing.ModelTransformCircleStandOutColor = ImGui.ColorConvertFloat4ToU32(modelTransformCircleStandOut);
-                _configurationService.ApplyChange();
-            }
-
-            if(standout == false)
-                ImGui.EndDisabled();
+            ImBrio.SeparatorText("Gizmo");
 
             bool allowGizmoAxisFlip = _configurationService.Configuration.Posing.AllowGizmoAxisFlip;
             if(ImGui.Checkbox("Allow Gizmo Axis Flip", ref allowGizmoAxisFlip))
@@ -512,6 +563,8 @@ public class SettingsWindow : Window
                 _configurationService.ApplyChange();
             }
 
+            ImBrio.SeparatorText("Skeleton");
+
             bool showSkeletonLines = _configurationService.Configuration.Posing.ShowSkeletonLines;
             if(ImGui.Checkbox("Show Skeleton Lines", ref showSkeletonLines))
             {
@@ -519,25 +572,28 @@ public class SettingsWindow : Window
                 _configurationService.ApplyChange();
             }
 
-            bool skeletonLineToCircle = _configurationService.Configuration.Posing.SkeletonLineToCircle;
-            if(ImGui.Checkbox("Draw skeleton line to edge of bone circle", ref skeletonLineToCircle))
+            using(ImRaii.Disabled(!showSkeletonLines))
             {
-                _configurationService.Configuration.Posing.SkeletonLineToCircle = skeletonLineToCircle;
-                _configurationService.ApplyChange();
-            }
+                bool skeletonLineToCircle = _configurationService.Configuration.Posing.SkeletonLineToCircle;
+                if(ImGui.Checkbox("Draw skeleton line to edge of bone circle", ref skeletonLineToCircle))
+                {
+                    _configurationService.Configuration.Posing.SkeletonLineToCircle = skeletonLineToCircle;
+                    _configurationService.ApplyChange();
+                }
 
-            bool hideSkeletonWhenGizmoActive = _configurationService.Configuration.Posing.HideSkeletonWhenGizmoActive;
-            if(ImGui.Checkbox("Hide Skeleton when Gizmo Active", ref hideSkeletonWhenGizmoActive))
-            {
-                _configurationService.Configuration.Posing.HideSkeletonWhenGizmoActive = hideSkeletonWhenGizmoActive;
-                _configurationService.ApplyChange();
-            }
+                bool hideSkeletonWhenGizmoActive = _configurationService.Configuration.Posing.HideSkeletonWhenGizmoActive;
+                if(ImGui.Checkbox("Hide Skeleton when Gizmo Active", ref hideSkeletonWhenGizmoActive))
+                {
+                    _configurationService.Configuration.Posing.HideSkeletonWhenGizmoActive = hideSkeletonWhenGizmoActive;
+                    _configurationService.ApplyChange();
+                }
 
-            float lineThickness = _configurationService.Configuration.Posing.SkeletonLineThickness;
-            if(ImGui.DragFloat("Line Thickness", ref lineThickness, 0.01f, 0.01f, 20f))
-            {
-                _configurationService.Configuration.Posing.SkeletonLineThickness = lineThickness;
-                _configurationService.ApplyChange();
+                float lineThickness = _configurationService.Configuration.Posing.SkeletonLineThickness;
+                if(ImGui.DragFloat("Line Thickness", ref lineThickness, 0.01f, 0.01f, 20f))
+                {
+                    _configurationService.Configuration.Posing.SkeletonLineThickness = lineThickness;
+                    _configurationService.ApplyChange();
+                }
             }
 
             float circleSize = _configurationService.Configuration.Posing.BoneCircleSize;
@@ -547,88 +603,320 @@ public class SettingsWindow : Window
                 _configurationService.ApplyChange();
             }
 
-            ImGui.Separator();
-            ImGui.Text("Overlay Colors"u8);
+            ImBrio.SeparatorText("Overlay Colors");
 
-            Vector4 lightCircleNormalColor = ImGui.ColorConvertU32ToFloat4(_configurationService.Configuration.Posing.LightCircleNormalColor);
-            if(ImGui.ColorEdit4("Light Normal Color", ref lightCircleNormalColor, ImGuiColorEditFlags.NoInputs))
+            ImGui.TextDisabled("Bone Circles");
+
+            using(ImRaii.PushIndent())
             {
-                _configurationService.Configuration.Posing.LightCircleNormalColor = ImGui.ColorConvertFloat4ToU32(lightCircleNormalColor);
-                _configurationService.ApplyChange();
+                Vector4 boneCircleNormalColor = ImGui.ColorConvertU32ToFloat4(_configurationService.Configuration.Posing.BoneCircleNormalColor);
+                if(ImGui.ColorEdit4("Normal##bone", ref boneCircleNormalColor, ImGuiColorEditFlags.NoInputs))
+                {
+                    _configurationService.Configuration.Posing.BoneCircleNormalColor = ImGui.ColorConvertFloat4ToU32(boneCircleNormalColor);
+                    _configurationService.ApplyChange();
+                }
 
-                Brio.Log.Error($"{ImGui.ColorConvertFloat4ToU32(lightCircleNormalColor)}");
+                Vector4 boneCircleInactiveColor = ImGui.ColorConvertU32ToFloat4(_configurationService.Configuration.Posing.BoneCircleInactiveColor);
+                if(ImGui.ColorEdit4("Inactive##bone", ref boneCircleInactiveColor, ImGuiColorEditFlags.NoInputs))
+                {
+                    _configurationService.Configuration.Posing.BoneCircleInactiveColor = ImGui.ColorConvertFloat4ToU32(boneCircleInactiveColor);
+                    _configurationService.ApplyChange();
+                }
+
+                Vector4 boneCircleHoveredColor = ImGui.ColorConvertU32ToFloat4(_configurationService.Configuration.Posing.BoneCircleHoveredColor);
+                if(ImGui.ColorEdit4("Hovered##bone", ref boneCircleHoveredColor, ImGuiColorEditFlags.NoInputs))
+                {
+                    _configurationService.Configuration.Posing.BoneCircleHoveredColor = ImGui.ColorConvertFloat4ToU32(boneCircleHoveredColor);
+                    _configurationService.ApplyChange();
+                }
+
+                Vector4 boneCircleSelectedColor = ImGui.ColorConvertU32ToFloat4(_configurationService.Configuration.Posing.BoneCircleSelectedColor);
+                if(ImGui.ColorEdit4("Selected##bone", ref boneCircleSelectedColor, ImGuiColorEditFlags.NoInputs))
+                {
+                    _configurationService.Configuration.Posing.BoneCircleSelectedColor = ImGui.ColorConvertFloat4ToU32(boneCircleSelectedColor);
+                    _configurationService.ApplyChange();
+                }
             }
 
-            Vector4 lightCircleHoveredColor = ImGui.ColorConvertU32ToFloat4(_configurationService.Configuration.Posing.LightCircleHoveredColor);
-            if(ImGui.ColorEdit4("Light Hovered Color", ref lightCircleHoveredColor, ImGuiColorEditFlags.NoInputs))
+            ImGui.Spacing();
+            ImGui.TextDisabled("Entity Colors");
+
+            bool standout = _configurationService.Configuration.Posing.ModelTransformStandout;
+            if(ImGui.Checkbox("Make the entity selections standout", ref standout))
             {
-                _configurationService.Configuration.Posing.LightCircleHoveredColor = ImGui.ColorConvertFloat4ToU32(lightCircleHoveredColor);
+                _configurationService.Configuration.Posing.ModelTransformStandout = standout;
+                _configurationService.ApplyChange();
+            }
+            using(ImRaii.Disabled(!standout))
+            using(ImRaii.PushIndent())
+            {
+                Vector4 modelTransformCircleStandOut = ImGui.ColorConvertU32ToFloat4(_configurationService.Configuration.Posing.ModelTransformCircleStandOutColor);
+                if(ImGui.ColorEdit4("Actor Standout Color##model_transform", ref modelTransformCircleStandOut, ImGuiColorEditFlags.NoInputs))
+                {
+                    _configurationService.Configuration.Posing.ModelTransformCircleStandOutColor = ImGui.ColorConvertFloat4ToU32(modelTransformCircleStandOut);
+                    _configurationService.ApplyChange();
+                }
+
+                Vector4 lightCircleNormalColor = ImGui.ColorConvertU32ToFloat4(_configurationService.Configuration.Posing.LightCircleNormalColor);
+                if(ImGui.ColorEdit4("Light Standout Color##light", ref lightCircleNormalColor, ImGuiColorEditFlags.NoInputs))
+                {
+                    _configurationService.Configuration.Posing.LightCircleNormalColor = ImGui.ColorConvertFloat4ToU32(lightCircleNormalColor);
+                    _configurationService.ApplyChange();
+                }
+
+                Vector4 worldObjectTypeOverlayColor = ImGui.ColorConvertU32ToFloat4(_configurationService.Configuration.Posing.WorldObjectOverlayColor);
+                if(ImGui.ColorEdit4("World Object Standout Color##entitytype", ref worldObjectTypeOverlayColor, ImGuiColorEditFlags.NoInputs))
+                {
+                    _configurationService.Configuration.Posing.WorldObjectOverlayColor = ImGui.ColorConvertFloat4ToU32(worldObjectTypeOverlayColor);
+                    _configurationService.ApplyChange();
+                }
+            }
+
+            ImGui.Spacing();
+            ImGui.TextDisabled("Skeleton Lines");
+
+            using(ImRaii.PushIndent())
+            {
+                Vector4 skeletonLineActive = ImGui.ColorConvertU32ToFloat4(_configurationService.Configuration.Posing.SkeletonLineActiveColor);
+                if(ImGui.ColorEdit4("Active##line", ref skeletonLineActive, ImGuiColorEditFlags.NoInputs))
+                {
+                    _configurationService.Configuration.Posing.SkeletonLineActiveColor = ImGui.ColorConvertFloat4ToU32(skeletonLineActive);
+                    _configurationService.ApplyChange();
+                }
+
+                Vector4 skeletonLineInactive = ImGui.ColorConvertU32ToFloat4(_configurationService.Configuration.Posing.SkeletonLineInactiveColor);
+                if(ImGui.ColorEdit4("Inactive##line", ref skeletonLineInactive, ImGuiColorEditFlags.NoInputs))
+                {
+                    _configurationService.Configuration.Posing.SkeletonLineInactiveColor = ImGui.ColorConvertFloat4ToU32(skeletonLineInactive);
+                    _configurationService.ApplyChange();
+                }
+            }
+
+            ImGui.Spacing();
+            ImGui.TextDisabled("Custom Bone Colors");
+
+            bool usePerCategoryLineColors = _configurationService.Configuration.Posing.UsePerCategoryLineColors;
+            if(ImGui.Checkbox("Color Bone's by Category", ref usePerCategoryLineColors))
+            {
+                _configurationService.Configuration.Posing.UsePerCategoryLineColors = usePerCategoryLineColors;
                 _configurationService.ApplyChange();
             }
 
-            Vector4 lightCircleSelectedColor = ImGui.ColorConvertU32ToFloat4(_configurationService.Configuration.Posing.LightCircleSelectedColor);
-            if(ImGui.ColorEdit4("Light Selected Color", ref lightCircleSelectedColor, ImGuiColorEditFlags.NoInputs))
+            if(usePerCategoryLineColors)
             {
-                _configurationService.Configuration.Posing.LightCircleSelectedColor = ImGui.ColorConvertFloat4ToU32(lightCircleSelectedColor);
-                _configurationService.ApplyChange();
+                using(ImRaii.PushIndent())
+                {
+                    var categoryColors = _configurationService.Configuration.Posing.BoneCategoryLineColors;
+                    foreach(var category in _posingService.BoneCategories.Categories)
+                    {
+                        if(category.Type != BoneCategoryTypes.Filter)
+                            continue;
+
+                        if(!categoryColors.TryGetValue(category.Id, out var existingColor))
+                            existingColor = _configurationService.Configuration.Posing.SkeletonLineActiveColor;
+
+                        Vector4 catColor = ImGui.ColorConvertU32ToFloat4(existingColor);
+                        if(ImGui.ColorEdit4($"{category.Name}##cat_{category.Id}", ref catColor, ImGuiColorEditFlags.NoInputs))
+                        {
+                            categoryColors[category.Id] = ImGui.ColorConvertFloat4ToU32(catColor);
+                            _configurationService.ApplyChange();
+                        }
+                    }
+                }
             }
 
-            Vector4 boneCircleNormalColor = ImGui.ColorConvertU32ToFloat4(_configurationService.Configuration.Posing.BoneCircleNormalColor);
-            if(ImGui.ColorEdit4("Bone Circle Normal Color", ref boneCircleNormalColor, ImGuiColorEditFlags.NoInputs))
-            {
-                _configurationService.Configuration.Posing.BoneCircleNormalColor = ImGui.ColorConvertFloat4ToU32(boneCircleNormalColor);
-                _configurationService.ApplyChange();
-            }
-
-            Vector4 boneCircleInactiveColor = ImGui.ColorConvertU32ToFloat4(_configurationService.Configuration.Posing.BoneCircleInactiveColor);
-            if(ImGui.ColorEdit4("Bone Circle Inactive Color", ref boneCircleInactiveColor, ImGuiColorEditFlags.NoInputs))
-            {
-                _configurationService.Configuration.Posing.BoneCircleInactiveColor = ImGui.ColorConvertFloat4ToU32(boneCircleInactiveColor);
-                _configurationService.ApplyChange();
-            }
-
-            Vector4 boneCircleHoveredColor = ImGui.ColorConvertU32ToFloat4(_configurationService.Configuration.Posing.BoneCircleHoveredColor);
-            if(ImGui.ColorEdit4("Bone Circle Hovered Color", ref boneCircleHoveredColor, ImGuiColorEditFlags.NoInputs))
-            {
-                _configurationService.Configuration.Posing.BoneCircleHoveredColor = ImGui.ColorConvertFloat4ToU32(boneCircleHoveredColor);
-                _configurationService.ApplyChange();
-            }
-
-            Vector4 boneCircleSelectedColor = ImGui.ColorConvertU32ToFloat4(_configurationService.Configuration.Posing.BoneCircleSelectedColor);
-            if(ImGui.ColorEdit4("Bone Circle Selected Color", ref boneCircleSelectedColor, ImGuiColorEditFlags.NoInputs))
-            {
-                _configurationService.Configuration.Posing.BoneCircleSelectedColor = ImGui.ColorConvertFloat4ToU32(boneCircleSelectedColor);
-                _configurationService.ApplyChange();
-            }
-
-            Vector4 skeletonLineActive = ImGui.ColorConvertU32ToFloat4(_configurationService.Configuration.Posing.SkeletonLineActiveColor);
-            if(ImGui.ColorEdit4("Skeleton Active Color", ref skeletonLineActive, ImGuiColorEditFlags.NoInputs))
-            {
-                _configurationService.Configuration.Posing.SkeletonLineActiveColor = ImGui.ColorConvertFloat4ToU32(skeletonLineActive);
-                _configurationService.ApplyChange();
-            }
-
-            Vector4 skeletonLineInactive = ImGui.ColorConvertU32ToFloat4(_configurationService.Configuration.Posing.SkeletonLineInactiveColor);
-            if(ImGui.ColorEdit4("Skeleton Inactive Color", ref skeletonLineInactive, ImGuiColorEditFlags.NoInputs))
-            {
-                _configurationService.Configuration.Posing.SkeletonLineInactiveColor = ImGui.ColorConvertFloat4ToU32(skeletonLineInactive);
-                _configurationService.ApplyChange();
-            }
-
-            ImGui.Separator();
+            ImBrio.SeparatorText("Dot Offsets");
+            DrawBoneOverlayOffsets();
         }
     }
 
-    private void DrawPosingGeneralSection()
+    // Bone Overlay Offsets
+
+    private string _newBoneOffsetName = string.Empty;
+    private string _boneOffsetSearch = string.Empty;
+
+    private void DrawBoneOverlayOffsets()
     {
-        if(ImGui.CollapsingHeader("General", ImGuiTreeNodeFlags.DefaultOpen))
+        bool useOverlayOffset = _configurationService.Configuration.Posing.UseOverlayOffset;
+        if(ImGui.Checkbox("Enable Overlay Offsets", ref useOverlayOffset))
         {
-            var undoStackSize = _configurationService.Configuration.Posing.UndoStackSize;
-            if(ImGui.DragInt("Undo History", ref undoStackSize, 1, 0, 100))
+            _configurationService.Configuration.Posing.UseOverlayOffset = useOverlayOffset;
+            _configurationService.ApplyChange();
+        }
+
+        ImGui.TextDisabled("Offsets the bone's dots in the overlay");
+
+        ImBrio.VerticalPadding(5);
+
+        using(ImRaii.Disabled(!useOverlayOffset))
+        {
+            var boneOffsets = _configurationService.Configuration.Posing.BoneOverlayOffsets;
+
+            DrawOffsetTable(boneOffsets);
+
+            ImGui.Spacing();
+         
+            DrawOffsetAddRow(boneOffsets);
+        }
+
+        ImBrio.VerticalPadding(10);
+    }
+
+    private void DrawOffsetTable(IDictionary<string, Vector3> boneOffsets)
+    {
+        if(boneOffsets.Count == 0)
+        {
+            ImGui.TextDisabled("No offsets. Add one below.");
+            return;
+        }
+
+        var flags = ImGuiTableFlags.RowBg | ImGuiTableFlags.BordersInnerH | ImGuiTableFlags.SizingFixedFit;
+        using var table = ImRaii.Table("##dotoffsets", 3, flags);
+        if(!table.Success)
+            return;
+
+        ImGui.TableSetupColumn("###bone", ImGuiTableColumnFlags.WidthFixed, 150 * ImGuiHelpers.GlobalScale);
+        ImGui.TableSetupColumn("###offset", ImGuiTableColumnFlags.WidthStretch);
+        ImGui.TableSetupColumn("###button", ImGuiTableColumnFlags.WidthFixed, 28 * ImGuiHelpers.GlobalScale);
+
+        string? toRemove = null;
+        foreach(var bone in boneOffsets)
+        {
+            using var id = ImRaii.PushId(bone.Key);
+
+            ImGui.TableNextRow();
+
+            ImGui.TableNextColumn();
+            ImGui.AlignTextToFramePadding();
+            bool known = IsKnownBone(bone.Key);
+            var friendlyName = Localize.Get($"bones.{bone.Key}", bone.Key);
+            if(known)
             {
-                _configurationService.Configuration.Posing.UndoStackSize = undoStackSize;
+                ImGui.Text(friendlyName);
+            }
+            else
+            {
+                ImGui.TextDisabled(friendlyName);
+                if(ImGui.IsItemHovered())
+                    ImGui.SetTooltip("Custom bone (not in catalog)");
+            }
+
+            ImGui.TableNextColumn();
+            ImGui.SetNextItemWidth(-1);
+            var offset = bone.Value;
+            if(ImGui.DragFloat3("##offset", ref offset, 0.0001f, -10f, 10f, "%.4f"))
+            {
+                boneOffsets[bone.Key] = offset;
                 _configurationService.ApplyChange();
             }
+
+            ImGui.TableNextColumn();
+            if(ImBrio.FontIconButton("###delButton", FontAwesomeIcon.Trash, $"Remove offset for '{bone.Key}'"))
+                toRemove = bone.Key;
+        }
+
+        if(toRemove is not null)
+        {
+            boneOffsets.Remove(toRemove);
+            _configurationService.ApplyChange();
+        }
+    }
+    private void DrawOffsetAddRow(IDictionary<string, Vector3> boneOffsets)
+    {
+        ImGui.SetNextItemWidth(150 * ImGuiHelpers.GlobalScale);
+        DrawBonePickerCombo(boneOffsets);
+
+        ImGui.SameLine();
+        ImGui.SetNextItemWidth(150 * ImGuiHelpers.GlobalScale);
+        ImGui.InputTextWithHint("###new_dotoffset", "or type a bone name", ref _newBoneOffsetName, 128);
+
+        ImGui.SameLine();
+        var canAdd = !string.IsNullOrWhiteSpace(_newBoneOffsetName) && !boneOffsets.ContainsKey(_newBoneOffsetName.Trim());
+        if(ImBrio.FontIconButton("###add_dotoffset", FontAwesomeIcon.Plus, "Add bone dot offset", canAdd))
+        {
+            boneOffsets[_newBoneOffsetName.Trim()] = Vector3.Zero;
+            _configurationService.ApplyChange();
+            _newBoneOffsetName = string.Empty;
+            _boneOffsetSearch = string.Empty;
+        }
+    }
+    private void DrawBonePickerCombo(IDictionary<string, Vector3> boneOffsets)
+    {
+        var preview = string.IsNullOrEmpty(_newBoneOffsetName) ? "Pick a bone" : _newBoneOffsetName;
+        using var combo = ImRaii.Combo("##bonepicker", preview, ImGuiComboFlags.HeightLargest);
+        if(!combo.Success)
+            return;
+
+        ImGui.SetNextItemWidth(-1);
+        ImGui.InputTextWithHint("###bonesearch", "Search", ref _boneOffsetSearch, 64);
+   
+        ImGui.Separator();
+
+        var allCategories = _posingService.BoneCategories.Categories;
+        string? lastCategory = null;
+        foreach(var category in allCategories)
+        {
+            if(category.Type != BoneCategoryTypes.Filter)
+                continue;
+
+            var matches = category.Bones.Where(b =>
+                _boneOffsetSearch.Length == 0 ||
+                b.Contains(_boneOffsetSearch, StringComparison.OrdinalIgnoreCase) ||
+                Localize.Get($"bones.{b}", b).Contains(_boneOffsetSearch, StringComparison.OrdinalIgnoreCase));
+
+            bool headerDrawn = false;
+            foreach(var b in matches)
+            {
+                if(!headerDrawn)
+                {
+                    var parentCategory = allCategories.FirstOrDefault(c =>
+                        c.Type == BoneCategoryTypes.Category && c.Bones.Contains(category.Id));
+
+                    if(parentCategory != null && parentCategory.Name != lastCategory)
+                    {
+                        ImBrio.SeparatorText(parentCategory.Name);
+                        lastCategory = parentCategory.Name;
+                    }
+                    ImGui.TextDisabled($"  {category.Name}");
+                    headerDrawn = true;
+                }
+
+                using(ImRaii.PushIndent())
+                {
+                    bool used = boneOffsets.ContainsKey(b);
+                    var friendlyName = Localize.Get($"bones.{b}", b);
+                    using(ImRaii.Disabled(used))
+                    {
+                        if(ImGui.Selectable($"{friendlyName}{(used ? "  (added)" : "")}"))
+                            _newBoneOffsetName = b;
+                    }
+                }
+            }
+        }
+    }
+ 
+    private bool IsKnownBone(string bone)
+    {
+        foreach(var category in _posingService.BoneCategories.Categories)
+        {
+            if(category.Type != BoneCategoryTypes.Filter)
+                continue;
+
+            foreach(var prefix in category.Bones)
+                if(bone.StartsWith(prefix))
+                    return true;
+        }
+        return false;
+    }
+
+    //
+    private void DrawPosingGeneralSection()
+    {
+        var undoStackSize = _configurationService.Configuration.Posing.UndoStackSize;
+        if(ImGui.DragInt("Undo History", ref undoStackSize, 1, 0, 100))
+        {
+            _configurationService.Configuration.Posing.UndoStackSize = undoStackSize;
+            _configurationService.ApplyChange();
         }
     }
 
@@ -674,6 +962,8 @@ public class SettingsWindow : Window
     bool resetSettings = false;
     private void DrawAdvancedTab()
     {
+        ImBrio.SeparatorText("Support");
+
         if(ImGui.Button("Copy Support Info to Clipboard"))
         {
             ImGui.SetClipboardText(Brio.GetDebugInfo());
@@ -689,15 +979,15 @@ public class SettingsWindow : Window
             var logPath = Path.Join(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
                 "XIVLauncher", "dalamud.log");
 
-            using(var fs = new FileStream(logPath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
-            using(var sr = new StreamReader(fs, Encoding.UTF8))
-            {
-                var log = sr.ReadToEnd();
-                ImGui.SetClipboardText(log);
-            }
+            using var fs = new FileStream(logPath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+            using var sr = new StreamReader(fs, Encoding.UTF8);
+            var log = sr.ReadToEnd();
+            ImGui.SetClipboardText(log);
         }
 
-        if(ImGui.CollapsingHeader("Scene Manager", ImGuiTreeNodeFlags.DefaultOpen))
+        ImBrio.SeparatorText("Advanced");
+
+        if(ImGui.CollapsingHeader("Scene Manager"))
         {
             DrawOpenBrioSetting();
             DrawHideSettings();
@@ -707,7 +997,7 @@ public class SettingsWindow : Window
 
         DrawEnvironmentSection();
 
-        if(ImGui.CollapsingHeader("Brio", ImGuiTreeNodeFlags.DefaultOpen))
+        if(ImGui.CollapsingHeader("Settings", ImGuiTreeNodeFlags.DefaultOpen))
         {
             ImGui.Checkbox("Enable [ Reset Settings to Default ] Button", ref resetSettings);
 
@@ -724,7 +1014,7 @@ public class SettingsWindow : Window
 
     private void DrawEnvironmentSection()
     {
-        if(ImGui.CollapsingHeader("Environment", ImGuiTreeNodeFlags.DefaultOpen))
+        if(ImGui.CollapsingHeader("Environment"))
         {
             var resetTimeOnGPoseExit = _configurationService.Configuration.Environment.ResetTimeOnGPoseExit;
             if(ImGui.Checkbox("Reset Time on GPose Exit", ref resetTimeOnGPoseExit))
@@ -768,6 +1058,8 @@ public class SettingsWindow : Window
 
     private void DrawKeysTab()
     {
+        ImBrio.SeparatorText("Options");
+
         bool enableKeybinds = _configurationService.Configuration.InputManager.Enable;
         if(ImGui.Checkbox("Enable keyboard shortcuts", ref enableKeybinds))
         {
@@ -796,21 +1088,9 @@ public class SettingsWindow : Window
             _configurationService.ApplyChange();
         }
 
-        bool flipKeybindsPastNinety = _configurationService.Configuration.InputManager.FlipKeyBindsPastNinety;
-        if(ImGui.Checkbox("Flip Free Camera Keybinds Past -90/90 Degrees", ref flipKeybindsPastNinety))
-        {
-            _configurationService.Configuration.InputManager.FlipKeyBindsPastNinety = flipKeybindsPastNinety;
-            _configurationService.ApplyChange();
-        }
+        ImBrio.SeparatorText("Key Bindings");
 
-        bool disableScrollOnInputs = _configurationService.Configuration.InputManager.DisableScrollWheelOnInputs;
-        if(ImGui.Checkbox("Disable scroll wheel for input boxes and gizmos", ref disableScrollOnInputs))
-        {
-            _configurationService.Configuration.InputManager.DisableScrollWheelOnInputs = disableScrollOnInputs;
-            _configurationService.ApplyChange();
-        }
-
-        if(ImGui.CollapsingHeader("Free Camera", ImGuiTreeNodeFlags.DefaultOpen))
+        if(ImGui.CollapsingHeader("Free Camera"))
         {
             DrawKeyBind(InputAction.FreeCamera_Forward);
             DrawKeyBind(InputAction.FreeCamera_Backward);
@@ -826,7 +1106,7 @@ public class SettingsWindow : Window
 
         using(ImRaii.Disabled(!enableKeybinds))
         {
-            if(ImGui.CollapsingHeader("Interface", ImGuiTreeNodeFlags.DefaultOpen))
+            if(ImGui.CollapsingHeader("Interface"))
             {
                 DrawKeyBind(InputAction.Interface_ToggleBrioWindow);
                 DrawKeyBind(InputAction.Posing_Undo);
@@ -841,7 +1121,7 @@ public class SettingsWindow : Window
                 DrawKeyBind(InputAction.Interface_StopAllActorsAnimations);
             }
 
-            if(ImGui.CollapsingHeader("Posing", ImGuiTreeNodeFlags.DefaultOpen))
+            if(ImGui.CollapsingHeader("Posing"))
             {
                 DrawKeyBind(InputAction.Posing_ToggleOverlay);
                 DrawKeyBind(InputAction.Posing_HideOverlay);
@@ -854,6 +1134,25 @@ public class SettingsWindow : Window
                 DrawKeyBind(InputAction.Posing_Scale);
                 DrawKeyBind(InputAction.Posing_Universal);
                 DrawKeyBind(InputAction.Posing_ToggleWorld);
+            }
+        }
+
+        ImBrio.SeparatorText("Advanced");
+
+        if(ImGui.CollapsingHeader("Advanced"))
+        {
+            bool flipKeybindsPastNinety = _configurationService.Configuration.InputManager.FlipKeyBindsPastNinety;
+            if(ImGui.Checkbox("Flip Free Camera Keybinds Past -90/90 Degrees", ref flipKeybindsPastNinety))
+            {
+                _configurationService.Configuration.InputManager.FlipKeyBindsPastNinety = flipKeybindsPastNinety;
+                _configurationService.ApplyChange();
+            }
+
+            bool disableScrollOnInputs = _configurationService.Configuration.InputManager.DisableScrollWheelOnInputs;
+            if(ImGui.Checkbox("Disable scroll wheel for input boxes and gizmos", ref disableScrollOnInputs))
+            {
+                _configurationService.Configuration.InputManager.DisableScrollWheelOnInputs = disableScrollOnInputs;
+                _configurationService.ApplyChange();
             }
         }
     }
