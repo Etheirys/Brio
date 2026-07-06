@@ -1,4 +1,5 @@
 AsgardXIV
+Haselnussbomber
 Ashadow700
 ashna_ff14
 Bronya-Rand
@@ -12,4 +13,6 @@ MKhayle
 WorstAquaPlayer
 snaeling
 sparqle
+SolarisFFXIV
+BlueSkia
 Yuki-Codes
