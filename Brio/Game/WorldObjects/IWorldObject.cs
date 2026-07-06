@@ -1,5 +1,6 @@
 using Brio.Core;
 using System;
+using System.IO;
 
 namespace Brio.Game.WorldObjects;
 
@@ -7,11 +8,13 @@ public interface IWorldObject : ITransformable, IDisposable
 {
     WorldObjectType ObjectType { get; }
     string FriendlyName { get; }
+    string FriendlyPath { get; }
 
     nint Address { get; }
     bool IsValid { get; }
     bool IsVisible { get; set; }
     bool IsDirty { get; set; }
+    bool IsEphemeral { get; set; }
 
     int EntityIndex { get; }
     int Index { get; }
@@ -20,22 +23,26 @@ public interface IWorldObject : ITransformable, IDisposable
 
     void SetIndex(int index);
     void SetEntityIndex(int index);
+    void SetName(string name);
+    void Recreate(string path);
 }
 
-public abstract class WorldObjectBase : IWorldObject
+public abstract class WorldObject : IWorldObject
 {
     private int _index;
     private int _entityIndex;
     private Transform _currentTransform;
 
     public abstract WorldObjectType ObjectType { get; }
-    public abstract string FriendlyName { get; }  
+    public virtual string FriendlyName { get; protected set; } = string.Empty;
+    public virtual string FriendlyPath { get { if(string.IsNullOrEmpty(field)) return field = System.IO.Path.GetFileNameWithoutExtension(Path); else return field; } }
     public abstract nint Address { get; }
  
     public virtual bool IsValid => Address != nint.Zero;
 
     public virtual bool IsVisible { get; set; }
     public virtual bool IsDirty { get; set; }
+    public virtual bool IsEphemeral { get; set; }
 
     public virtual int Index => _index;
     public virtual int EntityIndex => _entityIndex;
@@ -51,6 +58,9 @@ public abstract class WorldObjectBase : IWorldObject
 
     public abstract void Dispose();
     public abstract void Destroy();
+    public virtual void Recreate(string path) { }
+
+    public virtual void SetName(string name) => FriendlyName = name;
 
     public abstract Transform GetTransform();
     public abstract void SetTransform(Transform transform);

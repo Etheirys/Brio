@@ -14,6 +14,7 @@ public interface ITransformable
     public Transform OriginalTransform { get; set; }
 
     public void Snapshot();
+    public void SetTransform(Transform state);
 }
 
 public abstract class TransformableEntity(EntityId entityId, IServiceProvider provider) : Entity(entityId, provider), ITransformable
@@ -38,6 +39,7 @@ public abstract class TransformableEntity(EntityId entityId, IServiceProvider pr
     }
 
     public abstract void Snapshot();
+    public virtual void SetTransform(Transform state) { Transformable?.SetTransform(state); }
 
     public void AddTransformable<T>() where T : Capability, ITransformable
     {
