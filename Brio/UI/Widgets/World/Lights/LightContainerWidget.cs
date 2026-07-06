@@ -3,6 +3,7 @@ using Brio.Game.World.Interop;
 using Brio.UI.Widgets.Core;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface.Utility.Raii;
+using System.Linq;
 
 namespace Brio.UI.Widgets.World.Lights;
 
@@ -10,18 +11,41 @@ public class LightContainerWidget(LightContainerCapability capability) : Widget<
 {
     public override string HeaderName => "Lights";
 
-    public override WidgetFlags Flags => WidgetFlags.DrawQuickIcons | WidgetFlags.DrawPopup;
-
-
-    public override void DrawQuickIcons()
-    {
-
-    }
+    public override WidgetFlags Flags => WidgetFlags.DrawPopup;
 
     public override void DrawPopup()
     {
         using(ImRaii.Disabled(Capability.IsAllowed == false))
         {
+            if(ImGui.BeginMenu("Add from World...###containerwidgetpopup_add"))
+            {
+                if(ImGui.BeginMenu("World Light...###containerwidgetpopup_addWorldLight"))
+                {
+                    var worldLights = Capability.GetWorldLights().OrderBy(x => x.distance).ToList();
+                    if(worldLights.Count == 0)
+                    {
+                        ImGui.TextDisabled("No world lights found");
+                    }
+                    else
+                    {
+                        if(ImGui.MenuItem($"Add All ({worldLights.Count})###containerwidgetpopup_addAllWorldLights"))
+                        {
+                            Capability.AddAllWorldLights();
+                        }
+                        ImGui.Separator();
+                        foreach(var (light, distance) in worldLights)
+                        {
+                            if(ImGui.MenuItem($"Light: {distance:F1}y##worldlight_{light}"))
+                            {
+                                Capability.AddWorldLight(light);
+                            }
+                        }
+                    }
+                    ImGui.EndMenu();
+                }
+                ImGui.EndMenu();
+            }
+
             if(ImGui.MenuItem("Open Light Window###containerwidgetpopup_openWindow"))
             {
                 Capability.OpenLightWindow();
@@ -52,7 +76,7 @@ public class LightContainerWidget(LightContainerCapability capability) : Widget<
                 {
                     if(ImGui.MenuItem("Confirm Destruction##containerwidgetpopup_destroyallLights"))
                     {
-                        Capability.LightingService.DestroyAllLights();
+                        Capability.LightingService.DestroyAll();
                     }
                     ImGui.EndMenu();
                 }

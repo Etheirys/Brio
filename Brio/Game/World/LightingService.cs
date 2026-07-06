@@ -17,11 +17,11 @@ using Brio.Game.World.Interop;
 using Brio.Game.World.Lights;
 using Brio.Services;
 using Brio.Services.MediatorMessages;
+using Brio.Services.Models;
 using Dalamud.Hooking;
 using Dalamud.Plugin.Services;
 using FFXIVClientStructs.FFXIV.Client.Game.Event;
 using InteropGenerator.Runtime;
-using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -53,6 +53,9 @@ public unsafe class LightingService : MediatorSubscriberBase
 
     //
 
+    private readonly Dictionary<IGameLight, LightDTO> _handledLightStates = [];
+
+    private readonly ComponentSet<IGameLight> _handledLights = [];
     private readonly ComponentSet<IGameLight> _spawnedLights = [];
     private readonly ComponentSet<LightEntity> _lightEntities = [];
 
@@ -62,6 +65,9 @@ public unsafe class LightingService : MediatorSubscriberBase
     public List<LightEntity> SpawnedLightEntities => [.. _lightEntities];
 
     public LightEntity? SelectedLightEntity = null;
+
+    private readonly HashSet<nint> _worldGameLights = [];
+    public IReadOnlyCollection<nint> WorldLights => _worldGameLights;
 
     public LightingService(IServiceProvider serviceProvider, EntityManager entityManager, GPoseService gPoseService, VirtualCameraManager virtualCameraManager, IFramework framework, ISigScanner sigScanner, IGameInteropProvider hooks, Mediator mediator) : base(mediator)
     {
@@ -89,10 +95,11 @@ public unsafe class LightingService : MediatorSubscriberBase
     public char ToggleGPoseLight(BrioEventGPoseController* ptr, uint index)
         => _toggleGPoseLight(ptr, index);
 
-    public BrioLight* LightCtor(BrioLight* light)
+    private BrioLight* LightCtor(BrioLight* light)
     {
-        Brio.Log.Debug($"Light Created at address: {(nint)light}");
         var value = _lightCtorHook.Original(light);
+
+        _worldGameLights.Add((nint)light);
 
         if(Destructor == null)
         {
@@ -115,14 +122,15 @@ public unsafe class LightingService : MediatorSubscriberBase
                 var gposeLight = gposeController->GetLight(i);
                 if(gposeLight != null && (nint)gposeLight == (nint)light)
                 {
-                    Light blight = new(gposeLight, gposeLight->Transform.Position,
-                        gposeLight->Transform.Rotation, gposeLight->Transform.Scale)
+                    Light blight = new(gposeLight, gposeLight->Transform.Position, gposeLight->Transform.Rotation, gposeLight->Transform.Scale)
                     {
                         IsGPoseLight = true,
                         GposeLightIndex = i
                     };
+
                     blight.SetIndex(_spawnedLights.Add(blight));
-                    SpawnGPoseLight(blight);
+                    CreateEntity(blight);
+
                     break;
                 }
             }
@@ -131,32 +139,56 @@ public unsafe class LightingService : MediatorSubscriberBase
         return value;
     }
 
-    public void LightDtor(BrioLight* light, bool free)
+    private void LightDtor(BrioLight* light, bool free)
     {
-        Brio.Log.Debug($"Light Destroyed at address: {(nint)light}");
+        _worldGameLights.Remove((nint)light);
+        RemoveWroldLight(light);
 
-        if(_gPoseService.IsGPosing is false)
+        if(_gPoseService.IsGPosing)
         {
-            _lightDtorHook.Original(light, free);
+            var lightToRemove = _spawnedLights.AsEnumerable()
+                .FirstOrDefault(x => x.IsGPoseLight && x.Address == (nint)light);
 
-            return;
+            if(lightToRemove is not null)
+                RemoveGposeLight(lightToRemove);
         }
-
-        var lightToRemove = _spawnedLights.AsEnumerable()
-            .FirstOrDefault(x => x.IsGPoseLight && (nint)x.Address == (nint)light);
-
-        if(lightToRemove is not null)
-            RemoveGposeLight(lightToRemove);
 
         _lightDtorHook.Original(light, free);
     }
 
-    public void SpawnGPoseLight(Light light)
+    public Entity? AddWorldLight(BrioLight* light)
     {
-        LightEntity camEnt = ActivatorUtilities.CreateInstance<LightEntity>(_serviceProvider, light);
+        if(_worldGameLights.Contains((nint)light))
+        {
+            var blight = new Light(light, light->Transform.Position, light->Transform.Rotation, light->Transform.Scale, true);
+            blight.SetIndex(_handledLights.Add(blight));
 
-        CreateEntity(light);
+            _handledLightStates.Add(blight, SaveLightDTO(blight, Vector3.Zero)!);
+
+            return CreateEntity(blight);
+        }
+
+        return null;
     }
+
+    public void RemoveWroldLight(BrioLight* light)
+    {
+        var hlight = _handledLights.FirstOrDefault(x => x.Address == ((nint)light));
+        if(hlight is not null)
+        {
+            RemoveLightFromEntityManager(hlight);
+            _handledLights.Remove(hlight.Index);
+
+            if(_handledLightStates.TryGetValue(hlight, out LightDTO? ogstate))
+            {
+                if(hlight.IsValid)
+                    LoadLightFromDTO(ogstate, light);
+                _handledLightStates.Remove(hlight);
+            }
+        }
+    }
+
+    //
 
     public void SpawnLight(LightType lightType)
     {
@@ -179,16 +211,21 @@ public unsafe class LightingService : MediatorSubscriberBase
         });
     }
 
-    public Entity CreateEntity(Light light)
+    private Entity CreateEntity(Light light)
     {
         var entity = _entityManager.CreateEntityOnEntityContainer<LightEntity>(light);
         light.SetEntityIndex(_lightEntities.Add(entity));
         return entity;
     }
 
-    public BrioLight* SpawnGameLight(LightType lightType)
+    private BrioLight* SpawnGameLight(LightType lightType)
     {
         BrioLight* light = _createGameLight(lightType, null, null);
+
+        if(_worldGameLights.Contains((nint)light))
+        {
+            _worldGameLights.Remove((nint)light);
+        }
 
         if(_virtualCameraManager.CurrentCamera is not null)
         {
@@ -218,7 +255,13 @@ public unsafe class LightingService : MediatorSubscriberBase
             light->RenderLight->SpotLightAngleDegrees = 45.0f;
             light->RenderLight->AngularFalloffDegrees = 0.5f;
 
-            light->RenderLight->Range = 35;
+            if(lightType is LightType.SpotLight)
+                light->RenderLight->Range = 15;
+            if(lightType is LightType.FlatLight)
+                light->RenderLight->Range = 10;
+            if(lightType is LightType.PointLight)
+                light->RenderLight->Range = 8;
+
             light->RenderLight->FlatLightSkewAngleDegrees = Vector2.Zero;
 
             light->RenderLight->CharacterShadowRange = 110f;
@@ -275,96 +318,127 @@ public unsafe class LightingService : MediatorSubscriberBase
 
     //
 
-    public LightData? SaveLight(IGameLight light)
+    public void LoadLightFromDTO(LightDTO dto, LightEntity entity)
     {
-        try
-        {
-            if(light == null || !light.IsValid)
-            {
-                Brio.Log.Warning("Cannot save an invalid or null light.");
-                return null;
-            }
-
-            return new LightData
-            {
-                AbsolutePosition = light.Position,
-                Rotation = light.Rotation,
-                Color = light.GameLight->RenderLight->Color,
-                Intensity = light.GameLight->RenderLight->Intensity,
-                Range = light.GameLight->RenderLight->Range,
-                Falloff = light.GameLight->RenderLight->FalloffFactor,
-                LightAngle = light.GameLight->RenderLight->SpotLightAngleDegrees,
-                FalloffAngle = light.GameLight->RenderLight->AngularFalloffDegrees,
-                CharacterShadowRange = light.GameLight->RenderLight->CharacterShadowRange,
-                ShadowPlaneNear = light.GameLight->RenderLight->ShadowPlaneNear,
-                ShadowPlaneFar = light.GameLight->RenderLight->ShadowPlaneFar,
-                LightType = light.GameLight->RenderLight->EmissionType
-            };
-        }
-        catch(Exception ex)
-        {
-            Brio.Log.Error("Failed to save light.", ex);
-        }
-
-        return null;
+        if(entity.GameLight.IsValid)
+            LoadLightFromDTO(dto, entity.GameLight.GameLight);
     }
 
-    public void LoadLight(LightData lightData, IGameLight igameLight, Vector3? centralPosition = null)
+    public void LoadLightFromDTO(LightDTO dto, BrioLight* gameLight, Vector3? anchor = null)
     {
-        try
+        _framework.RunOnFrameworkThread(() =>
         {
-            // var lightData = JsonSerializer.Deserialize<LightData>(json);
+            gameLight->Transform.Position = anchor.HasValue ? anchor.Value + dto.RelativePosition : dto.Transform.Position;
+            gameLight->Transform.Rotation = dto.Transform.Rotation;
+            gameLight->Transform.Scale = dto.Transform.Scale;
 
-            if(lightData is null)
+            if(gameLight->RenderLight != null)
             {
-                Brio.Log.Warning("No light data to load.");
-                return;
+                gameLight->RenderLight->EmissionType = dto.LightType;
+                gameLight->RenderLight->Color = dto.Color;
+                gameLight->RenderLight->Intensity = dto.Intensity;
+                gameLight->RenderLight->Range = dto.Range;
+                gameLight->RenderLight->FalloffFactor = dto.Falloff;
+                gameLight->RenderLight->SpotLightAngleDegrees = dto.LightAngle;
+                gameLight->RenderLight->AngularFalloffDegrees = dto.FalloffAngle;
+                gameLight->RenderLight->CharacterShadowRange = dto.CharacterShadowRange;
+                gameLight->RenderLight->ShadowPlaneNear = dto.ShadowPlaneNear;
+                gameLight->RenderLight->ShadowPlaneFar = dto.ShadowPlaneFar;
             }
 
-            _framework.RunOnFrameworkThread(() =>
-            {
-                BrioLight* gameLight = igameLight.GameLight;
+            gameLight->Update();
+            gameLight->UpdateTransforms(false);
+        });
+    }
 
-                if(gameLight is null)
-                    gameLight = SpawnGameLight(lightData.LightType);
+    public LightDTO? SaveLightDTO(IGameLight light, Vector3 anchor)
+    {
+        if(light == null || !light.IsValid || light.GameLight->RenderLight == null)
+            return null;
 
-                // Adjust position relative to the central position if provided
-                gameLight->Transform.Position = centralPosition.HasValue
-                    ? centralPosition.Value + (Vector3)lightData.RelativePosition
-                    : lightData.AbsolutePosition;
+        var gameLight = light.GameLight;
+        var renderLight = gameLight->RenderLight;
 
-                gameLight->Transform.Rotation = lightData.Rotation;
-
-                if(gameLight->RenderLight != null)
-                {
-                    gameLight->RenderLight->Color = lightData.Color;
-                    gameLight->RenderLight->Intensity = lightData.Intensity;
-                    gameLight->RenderLight->Range = lightData.Range;
-                    gameLight->RenderLight->FalloffFactor = lightData.Falloff;
-                    gameLight->RenderLight->SpotLightAngleDegrees = lightData.LightAngle;
-                    gameLight->RenderLight->AngularFalloffDegrees = lightData.FalloffAngle;
-                    gameLight->RenderLight->CharacterShadowRange = lightData.CharacterShadowRange;
-                    gameLight->RenderLight->ShadowPlaneNear = lightData.ShadowPlaneNear;
-                    gameLight->RenderLight->ShadowPlaneFar = lightData.ShadowPlaneFar;
-                }
-
-                gameLight->Update();
-
-                var light = new Light(gameLight, gameLight->Transform.Position, gameLight->Transform.Rotation, gameLight->Transform.Scale);
-                light.SetIndex(_spawnedLights.Add(light));
-
-                CreateEntity(light);
-            });
-
-            Brio.Log.Info($"Light loaded from {igameLight.Index}");
-        }
-        catch(Exception ex)
+        return new LightDTO
         {
-            Brio.Log.Error("Failed to load light.", ex);
-        }
+            Transform = new Transform
+            {
+                Position = gameLight->Transform.Position,
+                Rotation = gameLight->Transform.Rotation,
+                Scale = gameLight->Transform.Scale
+            },
+
+            RelativePosition = ((Vector3)gameLight->Transform.Position) - anchor,
+
+            LightType = renderLight->EmissionType,
+            Color = renderLight->Color,
+            Intensity = renderLight->Intensity,
+            Range = renderLight->Range,
+            Falloff = renderLight->FalloffFactor,
+            LightAngle = renderLight->SpotLightAngleDegrees,
+            FalloffAngle = renderLight->AngularFalloffDegrees,
+            CharacterShadowRange = renderLight->CharacterShadowRange,
+            ShadowPlaneNear = renderLight->ShadowPlaneNear,
+            ShadowPlaneFar = renderLight->ShadowPlaneFar,
+            IsGPoseLight = light.IsGPoseLight,
+            GposeLightIndex = light.GposeLightIndex
+        };
+    }
+
+    public void SpawnFromDTO(LightDTO dto, Vector3? anchor = null, FolderEntity? folder = null)
+    {
+        _framework.RunOnFrameworkThread(() =>
+       {
+           var gameLight = SpawnGameLight(dto.LightType);
+
+           gameLight->Transform.Position = anchor.HasValue ? anchor.Value + dto.RelativePosition : dto.Transform.Position;
+           gameLight->Transform.Rotation = dto.Transform.Rotation;
+           gameLight->Transform.Scale = dto.Transform.Scale;
+
+           Light light = new(gameLight, gameLight->Transform.Position, gameLight->Transform.Rotation, gameLight->Transform.Scale);
+           light.SetIndex(_spawnedLights.Add(light));
+
+           if(gameLight->RenderLight != null)
+           {
+               gameLight->RenderLight->EmissionType = dto.LightType;
+               gameLight->RenderLight->Color = dto.Color;
+               gameLight->RenderLight->Intensity = dto.Intensity;
+               gameLight->RenderLight->Range = dto.Range;
+               gameLight->RenderLight->FalloffFactor = dto.Falloff;
+               gameLight->RenderLight->SpotLightAngleDegrees = dto.LightAngle;
+               gameLight->RenderLight->AngularFalloffDegrees = dto.FalloffAngle;
+               gameLight->RenderLight->CharacterShadowRange = dto.CharacterShadowRange;
+               gameLight->RenderLight->ShadowPlaneNear = dto.ShadowPlaneNear;
+               gameLight->RenderLight->ShadowPlaneFar = dto.ShadowPlaneFar;
+           }
+
+           gameLight->Update();
+           gameLight->UpdateTransforms(false);
+
+           var entity = CreateEntity(light);
+
+           if(!string.IsNullOrEmpty(dto.FriendlyName) && entity is LightEntity lightEntity)
+               lightEntity.RawName = dto.FriendlyName;
+
+           if(folder is not null)
+               _entityManager.MoveEntity(entity, folder);
+       });
     }
 
     //
+
+    public void RemoveLightFromEntityManager(IGameLight light)
+    {
+        _framework.RunOnTick(() =>
+        {
+            var camEnt = _lightEntities.Components[light.EntityIndex];
+            if(camEnt is not null)
+            {
+                _entityManager.DetachEntity(camEnt, true);
+                _lightEntities.Remove(light.EntityIndex);
+            }
+        }, delayTicks: 5);
+    }
 
     public void RemoveGposeLight(IGameLight light)
     {
@@ -390,6 +464,12 @@ public unsafe class LightingService : MediatorSubscriberBase
 
         _framework.RunOnFrameworkThread(() =>
         {
+            if(light.IsWorldLight)
+            {
+                RemoveWroldLight(light.GameLight);
+                return;
+            }
+
             if(light.IsGPoseLight && CurrentGPoseState != null)
             {
                 ToggleGPoseLight(CurrentGPoseState, light.GposeLightIndex);
@@ -406,7 +486,7 @@ public unsafe class LightingService : MediatorSubscriberBase
         });
     }
 
-    public void DestroyAllLights()
+    public void DestroyAll()
     {
         if(_framework.IsFrameworkUnloading)
             return;
@@ -416,6 +496,11 @@ public unsafe class LightingService : MediatorSubscriberBase
             foreach(var lights in _spawnedLights)
             {
                 Destroy(lights);
+            }
+
+            foreach(var light in _handledLights)
+            {
+                RemoveWroldLight(light.GameLight);
             }
 
             _spawnedLights.Clear();
@@ -441,7 +526,7 @@ public unsafe class LightingService : MediatorSubscriberBase
     {
         if(newState is false)
         {
-            DestroyAllLights();
+            DestroyAll();
         }
     }
 
@@ -452,7 +537,7 @@ public unsafe class LightingService : MediatorSubscriberBase
         _lightCtorHook?.Dispose();
         _lightDtorHook?.Dispose();
 
-        DestroyAllLights();
+        DestroyAll();
 
         GC.SuppressFinalize(this);
     }

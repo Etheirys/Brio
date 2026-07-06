@@ -2,9 +2,9 @@
 using Brio.Core;
 using Brio.Entities.Core;
 using Brio.Game.Input;
+using Brio.Services;
 using Brio.UI.Widgets.World.Lights;
 using Brio.UI.Windows.Specialized;
-using System.Collections.Generic;
 using System.Numerics;
 
 using StructsQuaternion = FFXIVClientStructs.FFXIV.Common.Math.Quaternion;
@@ -13,7 +13,7 @@ using StructsVector3 = FFXIVClientStructs.FFXIV.Common.Math.Vector3;
 
 namespace Brio.Capabilities.World;
 
-public class LightTransformCapability : LightCapability, ITransformable
+public class LightTransformCapability : LightCapability, ITransformable, IHistoryCompatible
 {
     public bool OverlayOpen
     {
@@ -30,32 +30,35 @@ public class LightTransformCapability : LightCapability, ITransformable
         get => GameLight.IsGismoVisible;
         set => GameLight.IsGismoVisible = value;
     }
+    public bool IsAdvancedGismoVisible
+    {
+        get => GameLight.IsAdvancedGismoVisible;
+        set => GameLight.IsAdvancedGismoVisible = value;
+    }
 
     public bool HasOverride
     {
         get => rotation != Vector3.Zero || position != Vector3.Zero;
     }
 
-    public bool CanUndo => _undoStack.Count is not 0 and not 1;
-    public bool CanRedo => _redoStack.Count > 0;
+    public bool CanUndo 
+        => Entity.EntityManager.CanUndoSelected;
+    public bool CanRedo 
+        => Entity.EntityManager.CanRedoSelected;
 
-
-    private Stack<LightStack> _undoStack = [];
-    private Stack<LightStack> _redoStack = [];
-
-    private readonly PosingTransformWindow _overlayTransformWindow;
     private readonly PosingOverlayWindow _overlayWindow;
     private readonly GameInputService _gameInputService;
     private readonly ConfigurationService _configurationService;
+    private readonly HistoryService _historyService;
     private readonly LightWindow _lightWindow;
 
     public bool ShouldHideBodyInHierarchy =>
         _lightWindow.IsOpen && _configurationService.Configuration.Posing.IfLightWindowisOpenDontUseSceneManager;
 
-    public bool TransformWindowOpen
+    public bool LightWindowOpen
     {
-        get => _overlayTransformWindow.IsOpen;
-        set => _overlayTransformWindow.IsOpen = value;
+        get => _lightWindow.IsOpen;
+        set => _lightWindow.IsOpen = value;
     }
 
     public bool IsTransformDraggingActive = false;
@@ -80,7 +83,7 @@ public class LightTransformCapability : LightCapability, ITransformable
                 Scale = value.Scale
             };
 
-            ApplyTransform(value);
+            SetTransform(value);
 
             field = value;
         }
@@ -107,15 +110,15 @@ public class LightTransformCapability : LightCapability, ITransformable
     public LightTransformCapability(Entity parent,
         GameInputService gameInputService,
         ConfigurationService configurationService,
-        PosingTransformWindow overlayTransformWindow,
+        HistoryService historyService,
         PosingOverlayWindow window,
         LightWindow lightWindow)
         : base(parent)
     {
         _overlayWindow = window;
         _gameInputService = gameInputService;
-        _overlayTransformWindow = overlayTransformWindow;
         _configurationService = configurationService;
+        _historyService = historyService;
         _lightWindow = lightWindow;
 
         Transform = new Transform
@@ -141,25 +144,11 @@ public class LightTransformCapability : LightCapability, ITransformable
         IsGismoVisible = false;
     }
 
-    public void Redo()
-    {
-        if(_redoStack.TryPop(out var redoStack))
-        {
-            _undoStack.Push(redoStack);
-            ApplyState(redoStack);
-        }
-    }
+    public void Redo() 
+        => Entity.EntityManager.RedoSelected();
 
-    public void Undo()
-    {
-        if(_undoStack.TryPop(out var undoStack))
-            _redoStack.Push(undoStack);
-
-        if(_undoStack.TryPeek(out var applicable))
-        {
-            ApplyState(applicable);
-        }
-    }
+    public void Undo() 
+        => Entity.EntityManager.UndoSelected();
 
     public unsafe void Reset(bool generateSnapshot = true, bool clearHistStack = true)
     {
@@ -179,58 +168,49 @@ public class LightTransformCapability : LightCapability, ITransformable
         scale = Vector3.Zero;
 
         if(clearHistStack)
-            _redoStack.Clear();
+            _historyService.ClearRedo(Entity.Id);
 
         if(generateSnapshot)
             Snapshot();
     }
 
+    public object CaptureInitialState() 
+        => new LightStack(GameLight.SpawnPosition, GameLight.SpawnRotation, GameLight.SpawnScale);
+
     public void Snapshot()
     {
-        var undoStackSize = _configurationService.Configuration.Posing.UndoStackSize;
-        if(undoStackSize <= 0)
-        {
-            _undoStack.Clear();
-            _redoStack.Clear();
-            return;
-        }
-
-        _redoStack.Clear();
-
-        if(_undoStack.Count == 0)
-            _undoStack.Push(new LightStack(GameLight.SpawnPosition, GameLight.SpawnRotation, GameLight.SpawnScale));
-
-        _undoStack.Push(new LightStack(StructsTransform.Position, StructsTransform.Rotation, StructsTransform.Scale));
-        _undoStack = _undoStack.Trim(undoStackSize + 1);
+        _historyService.Snapshot(Entity.Id, this, new LightStack(StructsTransform.Position, StructsTransform.Rotation, StructsTransform.Scale));
     }
 
-    private unsafe void ApplyState(LightStack state)
+    public unsafe void ApplyState(object state)
     {
-        rotation = state.Rotation.EulerAngles;
-        position = state.Position;
-        scale = state.Scale;
+        var lightStack = (LightStack)state;
 
-        Light.GameLight.GameLight->Transform.Position = StructsTransform.Position = state.Position;
-        Light.GameLight.GameLight->Transform.Rotation = StructsTransform.Rotation = state.Rotation;
-        Light.GameLight.GameLight->Transform.Scale = StructsTransform.Scale = state.Scale;
+        rotation = lightStack.Rotation.EulerAngles;
+        position = lightStack.Position;
+        scale = lightStack.Scale;
+
+        Light.GameLight.GameLight->Transform.Position = StructsTransform.Position = lightStack.Position;
+        Light.GameLight.GameLight->Transform.Rotation = StructsTransform.Rotation = lightStack.Rotation;
+        Light.GameLight.GameLight->Transform.Scale = StructsTransform.Scale = lightStack.Scale;
 
         Transform = new Transform()
         {
-            Position = Light.GameLight.SpawnPosition,
-            Rotation = Light.GameLight.SpawnRotation,
-            Scale = Light.GameLight.SpawnScale
+            Position = lightStack.Position,
+            Rotation = lightStack.Rotation,
+            Scale = lightStack.Scale
         };
     }
 
-    private unsafe void ApplyTransform(Transform state)
+    public unsafe void SetTransform(Transform transform)
     {
-        rotation = state.Rotation.ToEuler();
-        position = state.Position;
-        scale = state.Scale;
+        rotation = transform.Rotation.ToEuler();
+        position = transform.Position;
+        scale = transform.Scale;
 
-        Light.GameLight.GameLight->Transform.Position = StructsTransform.Position = state.Position;
-        Light.GameLight.GameLight->Transform.Rotation = StructsTransform.Rotation = state.Rotation;
-        Light.GameLight.GameLight->Transform.Scale = StructsTransform.Scale = state.Scale;
+        Light.GameLight.GameLight->Transform.Position = StructsTransform.Position = transform.Position;
+        Light.GameLight.GameLight->Transform.Rotation = StructsTransform.Rotation = transform.Rotation;
+        Light.GameLight.GameLight->Transform.Scale = StructsTransform.Scale = transform.Scale;
     }
 }
 public record struct LightStack(StructsVector3 Position, StructsQuaternion Rotation, StructsVector3 Scale);

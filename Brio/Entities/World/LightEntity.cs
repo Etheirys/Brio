@@ -1,9 +1,11 @@
-﻿using Brio.Capabilities.World;
+﻿using Brio.Capabilities.Timeline;
+using Brio.Capabilities.World;
 using Brio.Config;
 using Brio.Core;
 using Brio.Entities.Core;
 using Brio.Game.World.Lights;
 using Brio.UI;
+using Brio.UI.Controls;
 using Brio.UI.Controls.Stateless;
 using Brio.UI.Theming;
 using Dalamud.Bindings.ImGui;
@@ -63,9 +65,24 @@ public class LightEntity(IGameLight gameLight, IServiceProvider provider) : Tran
         }
     }
 
+    public override void OnDoubleClick()
+    {
+        ModalManager.Instance.OpenRenameModal(this);
+    }
+
     public unsafe override void SetVisibility(bool visible)
     {
         if(!GameLight.IsValid) return;
+
+        if(GameLight.IsWorldLight)
+        {
+            if(visible)
+                GameLight.GameLight->RenderLight->Intensity = 0f;
+            else
+                GameLight.GameLight->RenderLight->Intensity = 1f;
+
+            return;
+        }
 
         GameLight.SetVisibility(visible);
     }
@@ -82,5 +99,7 @@ public class LightEntity(IGameLight gameLight, IServiceProvider provider) : Tran
         AddCapability(ActivatorUtilities.CreateInstance<LightRenderingCapability>(_serviceProvider, this));
 
         AddCapability(ActivatorUtilities.CreateInstance<LightDebugCapability>(_serviceProvider, this));
+
+        AddCapability(LightTimelineCapability.CreateIfEligible(_serviceProvider, this));
     }
 }

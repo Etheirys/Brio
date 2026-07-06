@@ -37,9 +37,4 @@ public class LightRenderingCapability : LightCapability
 
         Widget = new LightRenderingWidget(this);
     }
-
-    public void Reset(bool generateSnapshot = true, bool reset = true, bool clearHistStack = true)
-    {
-
-    }
 }

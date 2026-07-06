@@ -95,17 +95,18 @@ public class LightWindow : Window, IDisposable
         //
         // Hedder
 
-        if(ImBrio.FontIconButton("lifetimewidget_spawnnew", FontAwesomeIcon.Plus, "Spawn New Light"))
+        if(ImBrio.FontIconButton("lifetimewidget_spawnnew", FontAwesomeIcon.Plus, "Spawn New..."))
         {
-            ImGui.OpenPopup("DrawLightSpawnMenuPopup");
+            SpawnMenu.OpenUnifiedSpawnMenu();
         }
 
-        ImGui.SameLine();
+        ImBrio.VerticalSeparator(25);
 
         LightLifetimeCapability? light = null;
         if(!_lightingService.SelectedLightEntity?.TryGetCapability<LightLifetimeCapability>(out light) ?? false)
             WindowName = $"{Brio.Name} - LIGHT###brio_light_window";
         else
+      
             WindowName = $"{Brio.Name} - LIGHT - {light?.Entity.FriendlyName}###brio_light_window";
 
         using(ImRaii.Disabled(_lightingService!.SelectedLightEntity is null))
@@ -114,23 +115,28 @@ public class LightWindow : Window, IDisposable
             {
                 light!.Clone();
             }
-
+           
             ImGui.SameLine();
+
+            if(ImBrio.FontIconButton("lifetimewidget_move", FontAwesomeIcon.ArrowUp, "Move to Camera"))
+            {
+                light!.MoveToCamera();
+            }
+
+            ImBrio.VerticalSeparator(25);
 
             if(ImBrio.FontIconButton("lifetimewidget_destroy", FontAwesomeIcon.Trash, "Destroy Light", light?.CanDestroy ?? false))
             {
                 light!.Destroy();
             }
 
-            ImGui.SameLine();
+            ImBrio.VerticalSeparator(25);
 
             if(ImBrio.FontIconButton("lifetimewidget_rename", FontAwesomeIcon.Signature, "Rename Light"))
             {
-                RenameActorModal.Open(light!.Entity);
+                ModalManager.Instance.OpenRenameModal(light!.Entity);
             }
         }
-
-        LightEditor.DrawSpawnMenu(_lightingService);
 
         if(_lightingService.SelectedLightEntity is null || _lightingService.SelectedLightEntity.GameLight.IsValid == false)
         {
@@ -166,11 +172,6 @@ public class LightWindow : Window, IDisposable
         if(ImGui.CollapsingHeader("Advanced Shadows Settings"u8, ImGuiTreeNodeFlags.None))
         {
             LightEditor.DrawAdvancedShadows(lightRender);
-        }
-
-        if(ImGui.CollapsingHeader("Advanced Settings"u8, ImGuiTreeNodeFlags.None))
-        {
-            LightEditor.DrawAdvancedSettings(lightRender);
         }
     }
 

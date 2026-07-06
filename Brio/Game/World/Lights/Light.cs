@@ -4,26 +4,6 @@ using System;
 
 namespace Brio.Game.World.Lights;
 
-public class LightData
-{
-    public Vector3 AbsolutePosition { get; set; }
-    public Vector3 RelativePosition { get; set; }
-
-    public Quaternion Rotation { get; set; }
-
-    public LightType LightType { get; set; }
-
-    public Vector3 Color { get; set; }
-    public float Intensity { get; set; }
-    public float Range { get; set; }
-    public float Falloff { get; set; }
-    public float LightAngle { get; set; }
-    public float FalloffAngle { get; set; }
-    public float CharacterShadowRange { get; set; }
-    public float ShadowPlaneNear { get; set; }
-    public float ShadowPlaneFar { get; set; }
-}
-
 public unsafe class Light : IGameLight, IDisposable
 {
     private BrioLight* _gameLight;
@@ -44,19 +24,22 @@ public unsafe class Light : IGameLight, IDisposable
     public Quaternion SpawnRotation { get; set; }
     public Vector3 SpawnScale { get; set; }
 
-    public bool IsGismoVisible { get; set; } = false;
+    public bool IsGismoVisible { get; set; } = true;
+    public bool IsAdvancedGismoVisible { get; set; } = false;
     public bool NeedsUpdate { get; set; }
+    public bool IsWorldLight { get; init; }
 
     public bool IsGPoseLight { get; set; }
     public uint GposeLightIndex { get; set; }
 
-    public Light(BrioLight* gameLight, Vector3 position, Quaternion rotation, Vector3 scale)
+    public Light(BrioLight* gameLight, Vector3 position, Quaternion rotation, Vector3 scale, bool isWorldLight = false)
     {
         _gameLight = gameLight;
 
         SpawnPosition = position;
         SpawnRotation = rotation;
         SpawnScale = scale;
+        IsWorldLight = isWorldLight;
     }
 
     public void SetIndex(int index)
@@ -69,9 +52,28 @@ public unsafe class Light : IGameLight, IDisposable
         _entityIndex = entityIndex;
     }
 
+    public void CopyFrom(BrioLight data)
+    {
+        if(IsValid)
+        {
+            GameLight->Transform.Position = data.Transform.Position;
+            GameLight->Transform.Rotation = data.Transform.Rotation;
+
+            GameLight->RenderLight->Color = data.RenderLight->Color;
+            GameLight->RenderLight->Intensity = data.RenderLight->Intensity;
+            GameLight->RenderLight->Range = data.RenderLight->Range;
+            GameLight->RenderLight->FalloffFactor = data.RenderLight->FalloffFactor;
+            GameLight->RenderLight->SpotLightAngleDegrees = data.RenderLight->SpotLightAngleDegrees;
+            GameLight->RenderLight->AngularFalloffDegrees = data.RenderLight->AngularFalloffDegrees;
+            GameLight->RenderLight->CharacterShadowRange = data.RenderLight->CharacterShadowRange;
+            GameLight->RenderLight->ShadowPlaneNear = data.RenderLight->ShadowPlaneNear;
+            GameLight->RenderLight->ShadowPlaneFar = data.RenderLight->ShadowPlaneFar;
+        }
+    }
+
     public void Destroy()
     {
-        if(IsValid && IsGPoseLight is false)
+        if(IsValid && !IsGPoseLight && !IsWorldLight)
         {
             GameLight->Destroy();
             _gameLight = null;
@@ -113,12 +115,28 @@ public unsafe interface IGameLight
     public Quaternion Rotation { get; }
 
     public bool IsGismoVisible { get; set; }
+    public bool IsAdvancedGismoVisible { get; set; }
+    public bool IsWorldLight { get; }
     public bool IsGPoseLight { get; set; }
-
     public uint GposeLightIndex { get; set; }
 
     public void Destroy();
     public void Update();
-    public void ToggleLight() => GameLight->VisibilityFlags = (byte)(GameLight->VisibilityFlags == 0 ? 79 : 0);
+    public void CopyFrom(BrioLight data);
+    public void ToggleLight()
+    {
+        if(IsWorldLight)
+        {
+            if(GameLight->RenderLight->Intensity > 0f)
+                GameLight->RenderLight->Intensity = 0f;
+            else
+                GameLight->RenderLight->Intensity = 1f;
+
+            return;
+        }
+
+        GameLight->VisibilityFlags = (byte)(GameLight->VisibilityFlags == 0 ? 79 : 0);
+    }
+
     public void SetVisibility(bool visible) => GameLight->VisibilityFlags = (byte)(visible ? 79 : 0);
 }

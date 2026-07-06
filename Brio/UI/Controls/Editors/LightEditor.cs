@@ -1,12 +1,10 @@
 ﻿using Brio.Capabilities.World;
-using Brio.Game.World;
 using Brio.Game.World.Interop;
 using Brio.Input;
-using Brio.UI.Controls.Core;
+using Brio.Services;
 using Brio.UI.Controls.Stateless;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface;
-using Dalamud.Interface.Utility;
 using Dalamud.Interface.Utility.Raii;
 using System;
 using System.Numerics;
@@ -15,35 +13,29 @@ namespace Brio.UI.Controls.Editors;
 
 public class LightEditor
 {
-    public unsafe static void DrawSpawnMenu(LightingService lightingService)
-    {
-        using var popup = ImRaii.Popup("DrawLightSpawnMenuPopup");
-        if(popup.Success)
-        {
-            using(ImRaii.PushColor(ImGuiCol.Button, UIConstants.Transparent))
-            {
-                if(ImGui.Button("Spawn Spot Light"u8, new(125 * ImGuiHelpers.GlobalScale, 0)))
-                {
-                    lightingService.SpawnLight(LightType.SpotLight);
-                }
-
-                if(ImGui.Button("Spawn Point Light"u8, new(125 * ImGuiHelpers.GlobalScale, 0)))
-                {
-                    lightingService.SpawnLight(LightType.PointLight);
-                }
-
-                if(ImGui.Button("Spawn Flat Light"u8, new(125 * ImGuiHelpers.GlobalScale, 0)))
-                {
-                    lightingService.SpawnLight(LightType.FlatLight);
-                }
-            }
-        }
-    }
-
     public static unsafe void DrawAdvancedShadows(LightRenderingCapability Capability)
     {
         var light = Capability.GameLight.GameLight != null ? Capability.GameLight.GameLight->RenderLight : null;
         if(light == null) return;
+
+        // Falloff Mode
+        ImGui.Text("Light Falloff Mode:"u8);
+        ImBrio.CenterNextElementWithPadding(15);
+        if(ImGui.BeginCombo("###falloffMode"u8, $"{light->FalloffType.ToString()}"))
+        {
+            foreach(var value in Enum.GetValues<FalloffType>())
+            {
+                if(ImGui.Selectable(value.ToString(), light->FalloffType == value))
+                {
+                    light->FalloffType = value;
+                }
+            }
+            ImGui.EndCombo();
+        }
+        ImBrio.AttachToolTip("Light Falloff Mode");
+
+        // Shadows
+        //
 
         ImGui.Text("Character Shadow Range:"u8);
         ImBrio.CenterNextElementWithPadding(15);
@@ -66,31 +58,6 @@ public class LightEditor
         ImBrio.VerticalPadding(5);
         ImGui.Text("Falloff Mode / Power & Light Range"u8);
 
-        // Falloff Mode
-        ImBrio.CenterNextElementWithPadding(15);
-        if(ImGui.BeginCombo("###falloffMode"u8, $"{light->FalloffType.ToString()}"))
-        {
-            foreach(var value in Enum.GetValues<FalloffType>())
-            {
-                if(ImGui.Selectable(value.ToString(), light->FalloffType == value))
-                {
-                    light->FalloffType = value;
-                }
-            }
-            ImGui.EndCombo();
-        }
-        ImBrio.AttachToolTip("Light Falloff Factor Type");
-
-        // Falloff Power
-        ImBrio.CenterNextElementWithPadding(15);
-        ImGui.DragFloat("###falloffPower"u8, ref light->FalloffFactor, 0.01f, 0.0f, 1000.0f);
-        ImBrio.AttachToolTip("Light Falloff Factor Power");
-
-        // Range
-        ImBrio.CenterNextElementWithPadding(15);
-        if(ImGui.DragFloat("###lightRange"u8, ref light->Range, 0.1f, 0, 900))
-            Capability.GameLight.NeedsUpdate = true;
-        ImBrio.AttachToolTip("Light Range");
 
         ImBrio.VerticalPadding(5);
     }
@@ -101,25 +68,19 @@ public class LightEditor
         //
         // Hedder Buttons
 
-        if(ImBrio.ToggelFontIconButton("togglelight", FontAwesomeIcon.Lightbulb, Vector2.Zero, Capability.GameLight.IsVisible, hoverText: Capability.GameLight.IsVisible ? "Turn Light Off" : "Turn Light On"))
-        {
-            Capability.GameLight.ToggleLight();
-        }
 
-        ImGui.SameLine();
+        //ImGui.SameLine();
 
-        if(ImBrio.FontIconButtonRight("reset", FontAwesomeIcon.Undo, 1, "Reset Light Properties", Capability.HasOverride))
-        {
-            Capability.Reset();
-        }
+        //if(ImBrio.FontIconButtonRight("reset", FontAwesomeIcon.Undo, 1, "Reset Light Properties", Capability.HasOverride))
+        //{
+        //    Capability.Reset();
+        //}
 
         //
         // Body 
 
         var light = Capability.GameLight.GameLight != null ? Capability.GameLight.GameLight->RenderLight : null;
         if(light == null) return;
-
-        ImBrio.SeparatorText("Light Properties");
 
         if(Capability.SelectedLightType == -1)
         {
@@ -172,12 +133,18 @@ public class LightEditor
                 break;
 
             case LightType.FlatLight:
-                using(ImRaii.ItemWidth((ImGui.CalcItemWidth() / 2) - ImGui.GetStyle().ItemInnerSpacing.X))
+                float spacing = ImGui.GetStyle().ItemInnerSpacing.X;
+                float padding = 10f;
+                float full = ImGui.GetContentRegionAvail().X - ImGui.GetStyle().WindowPadding.X - padding;
+                float half = (full - spacing) / 2;
+
+                ImBrio.CenterNextElementWithPadding(15);
+                using(ImRaii.ItemWidth(half))
                 {
                     ImGui.SliderAngle("###lightAngle_x"u8, ref light->FlatLightSkewAngleDegrees.X, -90, 90);
                     ImBrio.AttachToolTip("Flat Light X");
 
-                    ImGui.SameLine();
+                    ImGui.SameLine(0, spacing);
 
                     ImGui.SliderAngle("###lightAngle_y"u8, ref light->FlatLightSkewAngleDegrees.Y, -90, 90);
                     ImBrio.AttachToolTip("Flat Light Y");
@@ -188,6 +155,17 @@ public class LightEditor
                 ImBrio.AttachToolTip("Flat Light Falloff");
                 break;
         }
+
+        // Falloff Power
+        ImBrio.CenterNextElementWithPadding(15);
+        ImGui.DragFloat("###falloffPower"u8, ref light->FalloffFactor, 0.01f, 0.0f, 1000.0f);
+        ImBrio.AttachToolTip("Light Falloff Factor Power");
+
+        // Range
+        ImBrio.CenterNextElementWithPadding(15);
+        if(ImGui.DragFloat("###lightRange"u8, ref light->Range, 0.1f, 0, 900))
+            Capability.GameLight.NeedsUpdate = true;
+        ImBrio.AttachToolTip("Light Range");
 
         //
 
@@ -249,25 +227,41 @@ public class LightEditor
             Capability.OverlayOpen = !overlayOpen;
         }
 
-        ImGui.SameLine();
+        ImBrio.VerticalSeparator(24);
 
-        if(ImBrio.ToggelFontIconButton($"###togglegizmo_{Capability.Entity.Id}", FontAwesomeIcon.Crosshairs, Vector2.Zero, Capability.IsGismoVisible, hoverText: Capability.IsGismoVisible ? "Diable, Force Gizmo Viable" : "Force Gizmo Viable"))
+        if(ImBrio.ToggelFontIconButton($"save_{Capability.Entity.Id}", FontAwesomeIcon.BookBookmark, new Vector2(25, 0), false, tooltip: "Light Presets"))
         {
-            Capability.IsGismoVisible = !Capability.IsGismoVisible;
+            ImGui.OpenPopup($"DrawPresetPopup");
         }
 
-        ImGui.SameLine();
+        FileUIHelpers.DrawPresetPopup(PresetType.Light, Capability.Entity);
 
-        if(ImBrio.FontIconButton($"undo_{Capability.Entity.Id}", FontAwesomeIcon.Backward, "Undo", Capability.CanUndo) || (InputManagerService.ActionKeysPressedLastFrame(InputAction.Posing_Undo) && Capability.CanUndo))
+        ImBrio.VerticalSeparator(24);
+
+        if(ImBrio.FontIconButton($"undo_{Capability.Entity.Id}", FontAwesomeIcon.Reply, "Undo", Capability.CanUndo) || (InputManagerService.ActionKeysPressedLastFrame(InputAction.Posing_Undo) && Capability.CanUndo))
         {
             Capability.Undo();
         }
 
         ImGui.SameLine();
 
-        if(ImBrio.FontIconButton($"redo_{Capability.Entity.Id}", FontAwesomeIcon.Forward, "Redo", Capability.CanRedo) || (InputManagerService.ActionKeysPressedLastFrame(InputAction.Posing_Redo) && Capability.CanRedo))
+        if(ImBrio.FontIconButton($"redo_{Capability.Entity.Id}", FontAwesomeIcon.Share, "Redo", Capability.CanRedo) || (InputManagerService.ActionKeysPressedLastFrame(InputAction.Posing_Redo) && Capability.CanRedo))
         {
             Capability.Redo();
+        }
+
+        ImBrio.VerticalSeparator(24);
+
+        if(ImBrio.ToggelFontIconButton($"###togglegizmo_{Capability.Entity.Id}", FontAwesomeIcon.CompressArrowsAlt, Vector2.Zero, Capability.IsAdvancedGismoVisible, tooltip: Capability.IsAdvancedGismoVisible ? "Disable Advanced Gizmo" : "Enable Advanced Gizmo"))
+        {
+            Capability.IsAdvancedGismoVisible = !Capability.IsAdvancedGismoVisible;
+        }
+
+        ImGui.SameLine();
+
+        if(ImBrio.ToggelFontIconButton("togglelight", FontAwesomeIcon.Lightbulb, Vector2.Zero, Capability.GameLight.IsVisible, tooltip: Capability.GameLight.IsVisible ? "Turn Light Off" : "Turn Light On"))
+        {
+            Capability.GameLight.ToggleLight();
         }
 
         ImGui.SameLine();

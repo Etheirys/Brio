@@ -1,9 +1,5 @@
 ﻿using Brio.Capabilities.World;
-using Brio.Game.Actor;
-using Brio.Game.Camera;
-using Brio.Game.World;
 using Brio.UI.Controls;
-using Brio.UI.Controls.Editors;
 using Brio.UI.Controls.Stateless;
 using Brio.UI.Widgets.Core;
 using Dalamud.Bindings.ImGui;
@@ -18,20 +14,6 @@ public class LightLifetimeWidget(LightLifetimeCapability lightLifetimeCapability
 
     public override void DrawQuickIcons()
     {
-        if(ImBrio.FontIconButton("lifetimewidget_spawnnew", FontAwesomeIcon.Plus, "Spawn New"))
-        {
-            SpawnMenu.OpenUnifiedSpawnMenu();
-        }
-
-        ImGui.SameLine();
-
-        if(ImBrio.FontIconButton("lifetimewidget_move_to_camera", FontAwesomeIcon.Thumbtack, "Move to Camera"))
-        {
-            Capability.MoveToCamera();
-        }
-
-        ImGui.SameLine();
-
         if(ImBrio.FontIconButton("lifetimewidget_clone", FontAwesomeIcon.Clone, "Clone Light", Capability.CanClone))
         {
             Capability.Clone();
@@ -39,23 +21,23 @@ public class LightLifetimeWidget(LightLifetimeCapability lightLifetimeCapability
 
         ImGui.SameLine();
 
-        if(ImBrio.FontIconButton("lifetimewidget_destroy", FontAwesomeIcon.Trash, "Destroy Light", Capability.CanDestroy))
+        if(ImBrio.FontIconButton("lifetimewidget_move_to_camera", FontAwesomeIcon.CaretSquareDown, "Move to Camera"))
+        {
+            Capability.MoveToCamera();
+        }
+
+        ImBrio.VerticalSeparator(24, 1);
+
+        if(ImBrio.HoldButton("lifetimewidget_destroy", "", FontAwesomeIcon.Trash, 1f, new(40, 0), centerTest: true, tooltip: "[HOLD TO DESTROY]", onlyIcon: true))
         {
             Capability.Destroy();
         }
 
-        ImGui.SameLine();
+        ImBrio.VerticalSeparator(24, 1);
 
         if(ImBrio.FontIconButton("lifetimewidget_rename", FontAwesomeIcon.Signature, "Rename Light"))
         {
-            RenameActorModal.Open(Capability.Entity);
-        }
-
-        ImGui.SameLine();
-
-        if(ImBrio.FontIconButtonRight($"lifetimewidget_openAdvaned", FontAwesomeIcon.SquareArrowUpRight, 1, Capability.IsLightWindowOpen ? "Close Light Window" : "Open Light Window"))
-        {
-            Capability.ToggleLightWindow();
+            ModalManager.Instance.OpenRenameModal(Capability.Entity);
         }
     }
 
@@ -86,7 +68,7 @@ public class LightLifetimeWidget(LightLifetimeCapability lightLifetimeCapability
         {
             ImGui.CloseCurrentPopup();
 
-            RenameActorModal.Open(Capability.Entity);
+            ModalManager.Instance.OpenRenameModal(Capability.Entity);
         }
 
         if(ImGui.MenuItem("Open Light Window###actorlifetime_lightwindow"))
