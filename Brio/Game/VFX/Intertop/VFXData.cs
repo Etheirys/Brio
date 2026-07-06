@@ -16,18 +16,21 @@ public unsafe struct VfxResourceInstance
     [FieldOffset(0x00)] public VfxResourceInstanceVtable* Vtable;
 
     [FieldOffset(0x08)] public VfxResourceObject* VfxResourceHandle;
-    [FieldOffset(0x10)] public VfxResourceInstanceListenerVtable* OwnerListener;              // this points to the VfxData's "VfxResourceInstanceListener" ListenerVtable
+    [FieldOffset(0x10)] public VfxResourceInstanceListenerVtable* OwnerListener;              // this points to the VfxData's "VfxResourceInstanceListener" ListenerVtable (?)
     [FieldOffset(0x18)] public VfxData* Owner;
 
-    [FieldOffset(0x70)] public int Cue;
-    [FieldOffset(0x74)] public int ElapsedFrames;
- 
-    [FieldOffset(0x90)] public Vector3 Scale; // Relly unsure about these two
+    [FieldOffset(0x60)] public ulong JobHandle;
+
+    [FieldOffset(0x70)] public float Speed;
+
+    [FieldOffset(0x90)] public Vector3 Intensity;  // ahhh this is why, it's really Intensity :)
     [FieldOffset(0xA0)] public Vector4 Color;
 
-    [FieldOffset(0xB4)] public byte PlayMode;
-    [FieldOffset(0xB5)] public byte SpeedFlag;
-    [FieldOffset(0xC4)] public byte ActiveFlag;
+    [FieldOffset(0xB4)] public uint PlayMode;
+    [FieldOffset(0xC4)] public uint ActiveFlag;    // 0 PendingStop(something like about to be killed), 1 IsReady, 2 loaded, 7 character attached 
+
+    public readonly bool IsPendingStop => (ActiveFlag & 1) != 0;
+    public readonly bool IsActive => (ActiveFlag & 1) != 0 || JobHandle != 0;
 }
 
 
@@ -73,7 +76,9 @@ public unsafe struct VfxData
 
     [FieldOffset(0x10)] public fixed byte BuilderData[0x1A0];
 
-    [FieldOffset(0xE0)] public int AttachFlags;                                              // bone attach, masked with 0xFF1FFFFF before packing
+    [FieldOffset(0x70)] public fixed ulong TimelineSlots[14];
+
+    [FieldOffset(0xE0)] public int AttachFlags; // Something something bones
 
     [FieldOffset(0x1B0)] public VfxResourceInstanceListenerVtable* ListenerVtable;           // VfxResourceInstance->OwnerListener points here
 
@@ -81,9 +86,7 @@ public unsafe struct VfxData
 
     //[FieldOffset(0x1C0)] public VfxObject* VfxObject;
 
-    [FieldOffset(0x1C8)] public byte Unk2;
+    [FieldOffset(0x1C8)] public byte Unk2; // I think this is a ptr
 
     [FieldOffset(0x1CC)] public int Flags;
-
-    [FieldOffset(0x1D0)] public byte StateFlags;
 }
