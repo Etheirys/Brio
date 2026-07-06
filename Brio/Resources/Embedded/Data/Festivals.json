@@ -20,6 +20,76 @@
     "Unsafe": false
   },
   {
+    "Id": 17,
+    "Name": "Sanctum of the Twelve (Carpet)",
+    "Unsafe": false,
+    "Phases": [
+      {
+        "ID": 1,
+        "Name": "White"
+      },
+      {
+        "ID": 2,
+        "Name": "Pink"
+      },
+      {
+        "ID": 3,
+        "Name": "Orange"
+      },
+      {
+        "ID": 4,
+        "Name": "Blue"
+      },
+      {
+        "ID": 5,
+        "Name": "Red"
+      }
+    ]
+  },
+  {
+    "Id": 18,
+    "Name": "Sanctum of the Twelve (Flowers)",
+    "Unsafe": false,
+    "Phases": [
+      {
+        "ID": 1,
+        "Name": "White (Standard)"
+      },
+      {
+        "ID": 2,
+        "Name": "White (Gold)"
+      },
+      {
+        "ID": 3,
+        "Name": "Pink (Gold)"
+      },
+      {
+        "ID": 4,
+        "Name": "Orange (Gold)"
+      },
+      {
+        "ID": 5,
+        "Name": "White (Platinum)"
+      },
+      {
+        "ID": 6,
+        "Name": "Pink (Platinum)"
+      },
+      {
+        "ID": 7,
+        "Name": "Orange (Platinum)"
+      },
+      {
+        "ID": 8,
+        "Name": "Blue (Platinum)"
+      },
+      {
+        "ID": 9,
+        "Name": "Red (Platinum)"
+      }
+    ]
+  },
+  {
     "Id": 26,
     "Name": "New Year Machinations (Music) (2015)",
     "Unsafe": false
@@ -136,7 +206,7 @@
   },
   {
     "Id": 64,
-    "Name": "Valentione''s Day (2018)",
+    "Name": "Valentione's Day (2018)",
     "Unsafe": false
   },
   {
@@ -168,6 +238,52 @@
     "Id": 73,
     "Name": "Fifth Anniversary Content (2018)",
     "Unsafe": false
+  },
+  {
+    "Id": 74,
+    "Name": "Sanctum of the Twelve (Lighting)",
+    "Unsafe": false,
+    "Phases": [
+      {
+        "ID": 1,
+        "Name": "Natural"
+      },
+      {
+        "ID": 2,
+        "Name": "Romantic"
+      }
+    ]
+  },
+  {
+    "Id": 75,
+    "Name": "Sanctum of the Twelve (Drapes)",
+    "Unsafe": false,
+    "Phases": [
+      {
+        "ID": 1,
+        "Name": "None"
+      },
+      {
+        "ID": 2,
+        "Name": "White"
+      },
+      {
+        "ID": 3,
+        "Name": "Pink"
+      },
+      {
+        "ID": 4,
+        "Name": "Orange"
+      },
+      {
+        "ID": 5,
+        "Name": "Blue"
+      },
+      {
+        "ID": 6,
+        "Name": "Red"
+      }
+    ]
   },
   {
     "Id": 76,
@@ -240,6 +356,11 @@
     "Unsafe": false
   },
   {
+    "Id": 93,
+    "Name": "Ishgard Restoration",
+    "Unsafe": false
+  },
+  {
     "Id": 95,
     "Name": "Starlight Celebration (2019)",
     "Unsafe": false
@@ -267,7 +388,100 @@
   {
     "Id": 100,
     "Name": "Valentione's Day (2020)",
-    "Unsafe": false
+    "Unsafe": false,
+    "Phases": [
+      {
+        "ID": 0,
+        "Name": "None"
+      },
+      {
+        "ID": 1,
+        "Name": "Default"
+      },
+      {
+        "ID": 2,
+        "Name": "Red"
+      },
+      {
+        "ID": 3,
+        "Name": "Big Red"
+      },
+      {
+        "ID": 4,
+        "Name": "Yellow"
+      },
+      {
+        "ID": 5,
+        "Name": "Blue"
+      }
+    ]
+  },
+  {
+    "Id": 101,
+    "Name": "Ocean Fishing",
+    "Unsafe": false,
+    "Phases": [
+      {
+        "ID": 1,
+        "Name": "None"
+      },
+      {
+        "ID": 1,
+        "Name": ""
+      },
+      {
+        "ID": 2,
+        "Name": ""
+      },
+      {
+        "ID": 3,
+        "Name": ""
+      },
+      {
+        "ID": 4,
+        "Name": ""
+      },
+      {
+        "ID": 5,
+        "Name": ""
+      },
+      {
+        "ID": 6,
+        "Name": ""
+      },
+      {
+        "ID": 7,
+        "Name": ""
+      },
+      {
+        "ID": 8,
+        "Name": ""
+      },
+      {
+        "ID": 9,
+        "Name": ""
+      },
+      {
+        "ID": 10,
+        "Name": ""
+      },
+      {
+        "ID": 11,
+        "Name": ""
+      },
+      {
+        "ID": 12,
+        "Name": ""
+      },
+      {
+        "ID": 13,
+        "Name": ""
+      },
+      {
+        "ID": 14,
+        "Name": ""
+      }
+    ]
   },
   {
     "Id": 103,
@@ -331,7 +545,7 @@
   },
   {
     "Id": 115,
-    "Name": "Hatching Tide (2021)",
+    "Name": "Make It Rain (2021)",
     "Unsafe": false
   },
   {
@@ -347,6 +561,11 @@
   {
     "Id": 118,
     "Name": "All Saints' Wake (2021)",
+    "Unsafe": false
+  },
+  {
+    "Id": 120,
+    "Name": "Special Event Flag",
     "Unsafe": false
   },
   {
@@ -443,7 +662,7 @@
   },
   {
     "Id": 131,
-    "Name": "China New Year (2023)",
+    "Name": "Korea New Year (2023)",
     "Unsafe": true
   },
   {
@@ -454,6 +673,11 @@
   {
     "Id": 133,
     "Name": "Starlight Celebration (2022)",
+    "Unsafe": false
+  },
+  {
+    "Id": 134,
+    "Name": "Heavensturn (2023)",
     "Unsafe": false
   },
   {
@@ -473,7 +697,7 @@
   },
   {
     "Id": 138,
-    "Name": "Little Ladies Day (2023)",
+    "Name": "Little Ladies' Day (2023)",
     "Unsafe": false
   },
   {
@@ -564,6 +788,11 @@
     "Unsafe": false
   },
   {
+    "Id": 149,
+    "Name": "Heavensturn (2024)",
+    "Unsafe": false
+  },
+  {
     "Id": 150,
     "Name": "Moonfire Faire (2024)",
     "Unsafe": false,
@@ -632,7 +861,7 @@
   },
   {
     "Id": 155,
-    "Name": "Little Ladies Day (2025)",
+    "Name": "Little Ladies' Day (2025)",
     "Unsafe": false
   },
   {
@@ -729,7 +958,7 @@
   },
   {
     "Id": 169,
-    "Name": "Little Ladies Day (2026)",
+    "Name": "Little Ladies' Day (2026)",
     "Unsafe": false
   },
   {
@@ -793,5 +1022,40 @@
     "Id": 175,
     "Name": "The Rising (2026)",
     "Unsafe": false
+  },
+  {
+    "Id": 176,
+    "Name": "All Saint's Wake (2026)",
+    "Unsafe": false
+  },
+  {
+    "Id": 257,
+    "Name": "Unknown (Something Gold Saucer ???)",
+    "Unsafe": true
+  },
+  {
+    "Id": 258,
+    "Name": "Starlight Celebration (2026)",
+    "Unsafe": true
+  },
+  {
+    "Id": 259,
+    "Name": "Heavensturn (2027)",
+    "Unsafe": true
+  },
+  {
+    "Id": 260,
+    "Name": "Valentione's Day (2027)",
+    "Unsafe": true
+  },
+  {
+    "Id": 261,
+    "Name": "Unknown",
+    "Unsafe": true
+  },
+  {
+    "Id": 262,
+    "Name": "Little Ladies' Day ??? (2027)",
+    "Unsafe": true
   }
 ]
