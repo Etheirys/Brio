@@ -128,7 +128,7 @@ public class CatalogWindow : Window, IDisposable
         List<string> items = ["Furniture", "World Objects", "VFX", "Spawn by Path"];
         if(ConfigurationService.Instance.IsDebug)
             items.Add("Metadata");
-      
+
         if(ImBrio.ButtonSelectorStrip("emote_category_filter", Vector2.Zero, ref categorySelection, [.. items]))
         {
 
@@ -1138,4 +1138,9 @@ public class CatalogWindow : Window, IDisposable
     {
         _gPoseService.OnGPoseStateChange -= OnGPoseStateChange;
     }
+}
+
+public enum CatalogDisplayMode
+{
+    Compact, Grid
 }
