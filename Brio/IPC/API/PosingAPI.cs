@@ -40,7 +40,7 @@ public unsafe class PosingAPI(GPoseService gPoseService, EntityManager entityMan
         {
             if(entity.TryGetCapability<PosingCapability>(out var posingCapability))
             {
-                var pose = posingCapability.ExportPose();
+                var pose = posingCapability.ExportPoseAsFileData();
 
                 return JsonSerializer.Serialize(pose);
             }

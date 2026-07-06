@@ -112,7 +112,7 @@ public static class PosingEditorCommon
         {
             ImGui.SameLine();
 
-            if(ImBrio.ToggelFontIconButton("keep_gizmo", FontAwesomeIcon.LocationCrosshairs, new(0), posingService.GizmoStaysWhenAllBonesAreDisabled, hoverText: "Keep gizmo active even when all items in the filter are disabled"))
+            if(ImBrio.ToggelFontIconButton("keep_gizmo", FontAwesomeIcon.LocationCrosshairs, new(0), posingService.GizmoStaysWhenAllBonesAreDisabled, tooltip: "Keep gizmo active even when all items in the filter are disabled"))
             {
                 posingService.GizmoStaysWhenAllBonesAreDisabled = !posingService.GizmoStaysWhenAllBonesAreDisabled;
             }
@@ -247,24 +247,13 @@ public static class PosingEditorCommon
             }
         }
 
-        if(ImGui.IsItemHovered())
-        {
-            if(posing?.Selected.Value is BonePoseInfoId poseInfo)
-            {
-                switch(posing.SkeletonPosing.GetBonePose(poseInfo).MirrorMode)
-                {
-                    case PoseMirrorMode.None:
-                        ImGui.SetTooltip("Link: None");
-                        break;
-                    case PoseMirrorMode.Copy:
-                        ImGui.SetTooltip("Link: Copy");
-                        break;
-                    case PoseMirrorMode.Mirror:
-                        ImGui.SetTooltip("Link: Mirror");
-                        break;
-                }
-            }
-        }
+        string tooltip = posing?.Selected.Match(
+            boneSelect => $"Mirror Mode: {posing.SkeletonPosing.GetBonePose(boneSelect).MirrorMode}",
+            _ => "Mirror Mode: None",
+            _ => "Mirror Mode: None"
+        ) ?? "Mirror Mode";
+
+        ImBrio.AttachToolTip(tooltip);
     }
 
     public static void DrawIKSelect(PosingCapability posing, Vector2 buttonSize)

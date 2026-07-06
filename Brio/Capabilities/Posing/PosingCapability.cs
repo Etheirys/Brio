@@ -252,11 +252,11 @@ public class PosingCapability : ActorCharacterCapability
             _framework.RunOnTick(() => Snapshot(reset, reconcile, asExpression: asExpression), delayTicks: 4);
     }
 
-    public PoseFile ExportPose()
+    public PoseFile ExportPoseAsFileData()
     {
         return GeneratePoseFile();
     }
-    public void ExportSavePose(string path)
+    public void SavePoseToPath(string path, PoseMetaData? poseMetaData = null)
     {
         var poseFile = ExportPose();
         ResourceProvider.Instance.SaveFileDocument(path, poseFile);
