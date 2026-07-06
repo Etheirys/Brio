@@ -17,15 +17,20 @@ public class ActorContainerCapability : Capability
     private readonly ActorSpawnService _actorSpawnService;
     private readonly TargetService _targetService;
     private readonly GPoseService _gPoseService;
+    private readonly ObjectMonitorService _objectMonitorService;
 
     public bool CanControlCharacters => _gPoseService.IsGPosing;
 
-    public ActorContainerCapability(Entity parent, EntityManager entityManager, ActorSpawnService actorSpawnService, TargetService targetService, GPoseService gPoseService) : base(parent)
+    public ObjectMonitorService ObjectMonitorService => _objectMonitorService;
+
+    public ActorContainerCapability(Entity parent, ObjectMonitorService objectMonitorService, EntityManager entityManager, ActorSpawnService actorSpawnService, TargetService targetService, GPoseService gPoseService) : base(parent)
     {
+        _objectMonitorService = objectMonitorService;
         _entityManager = entityManager;
         _actorSpawnService = actorSpawnService;
         _targetService = targetService;
         _gPoseService = gPoseService;
+
         Widget = new ActorContainerWidget(this);
     }
 
@@ -53,32 +58,6 @@ public class ActorContainerCapability : Capability
         throw new Exception("Failed to create character");
     }
 
-    public (EntityId, ICharacter) CreateProp(bool selectInHierarchy)
-    {
-        if(_actorSpawnService.SpawnNewProp(out ICharacter? character))
-        {
-            EntityId characterId = new EntityId(character!);
-            if(selectInHierarchy)
-            {
-                _entityManager.SetSelectedEntity(character!);
-            }
-            return (characterId, character!);
-        }
-
-        throw new Exception("Failed to create prop");
-    }
-
-    public void SpawnNewProp(bool selectInHierarchy)
-    {
-        if(_actorSpawnService.SpawnNewProp(out ICharacter? character))
-        {
-            if(selectInHierarchy)
-            {
-                _entityManager.SetSelectedEntity(character!);
-            }
-        }
-    }
-
     public void DestroyCharacter(ActorEntity entity)
     {
         _actorSpawnService.DestroyObject(entity.GameObject);
@@ -96,6 +75,14 @@ public class ActorContainerCapability : Capability
                 }
             }
         }
+    }
+
+    public void AddFromWorld(IGameObject? actor)
+    {
+        if(actor is null)
+            return;
+
+        _actorSpawnService.AddFromWorld(actor);
     }
 
     public void DestroyAll()

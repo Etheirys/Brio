@@ -1,20 +1,17 @@
-﻿using Brio.Capabilities.Actor;
-using Brio.Capabilities.Posing;
-using Brio.Core;
-using Brio.Entities;
-using Brio.Files;
-using Brio.Game.Actor.Appearance;
+﻿using Brio.Entities;
+using Brio.Entities.Actor;
+using Brio.Entities.Core;
 using Brio.Game.Actor.Extensions;
 using Brio.Game.Core;
 using Brio.Game.GPose;
 using Brio.Game.Posing;
 using Brio.Game.Types;
 using Brio.IPC;
-using Brio.Resources;
 using Brio.Services;
 using Brio.Services.MediatorMessages;
 using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Plugin.Services;
+using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
@@ -32,6 +29,7 @@ public class ActorSpawnService : MediatorSubscriberBase
     private readonly IObjectTable _objectTable;
     private readonly IClientState _clientState;
     private readonly IFramework _framework;
+    private readonly IServiceProvider _serviceProvider;
     private readonly GPoseService _gPoseService;
     private readonly ActorRedrawService _actorRedrawService;
     private readonly GlamourerService _glamourerService;
@@ -47,12 +45,13 @@ public class ActorSpawnService : MediatorSubscriberBase
 
     public unsafe ActorSpawnService(Mediator mediator, ObjectMonitorService monitorService, CustomizePlusService customizePlusService, ActorLookAtService actorLookAtService, CharacterHandlerService characterHandlerService,
         ActorAppearanceService actorAppearanceService, PosingService posingService, GlamourerService glamourerService,
-        EntityManager entityManager, IObjectTable objectTable, IClientState clientState, IFramework framework,
+        EntityManager entityManager, IObjectTable objectTable, IClientState clientState, IServiceProvider serviceProvider, IFramework framework,
         GPoseService gPoseService, ActorRedrawService actorRedrawService, TargetService targetService) : base(mediator)
     {
         _monitorService = monitorService;
         _objectTable = objectTable;
         _clientState = clientState;
+        _serviceProvider = serviceProvider;
         _framework = framework;
         _gPoseService = gPoseService;
         _actorRedrawService = actorRedrawService;
@@ -69,6 +68,25 @@ public class ActorSpawnService : MediatorSubscriberBase
         _monitorService.CharacterDestroyed += OnCharacterDestroyed;
         _gPoseService.OnGPoseStateChange += OnGPoseStateChanged;
         _clientState.TerritoryChanged += OnTerritoryChanged;
+    }
+
+    public unsafe void AddFromWorld(IGameObject go)
+    {
+        if(go.Native()->IsCharacter())
+        {
+            if(_entityManager.TryGetEntity(new EntityId(go), out var entity))
+            {
+
+            }
+            else
+            {
+                entity = ActivatorUtilities.CreateInstance<ActorEntity>(_serviceProvider, go);
+                entity.SetSpawnFlags(SpawnFlags.WorldActor);
+                _entityManager.AttachEntity(entity, _entityManager.EntityManagerContainer, true);
+
+                _gPoseService.AddCharacterToGPose((ICharacter)go);
+            }
+        }
     }
 
     public bool CreateCharacter([MaybeNullWhen(false)] out ICharacter outCharacter, SpawnFlags flags = SpawnFlags.Default, bool disableSpawnCompanion = false)
@@ -150,48 +168,6 @@ public class ActorSpawnService : MediatorSubscriberBase
             return true;
         }
 
-        return false;
-    }
-
-    public unsafe bool SpawnNewProp(out ICharacter? gamechara)
-    {
-        if(CreateCharacter(out ICharacter? chara, SpawnFlags.IsProp | SpawnFlags.CopyPosition, true))
-        {
-            _framework.RunUntilSatisfied(
-            () => chara.Native()->IsReadyToDraw(),
-            (__) =>
-            {
-                var entity = _entityManager.GetEntity(chara.Native());
-                if(entity is not null)
-                {
-                    entity.GetCapability<ActionTimelineCapability>().SetOverallSpeedOverride(0);
-                  
-                    _framework.RunOnTick(() =>
-                    {
-                        var acf = JsonSerializer.Deserialize<AnamnesisCharaFile>(ResourceProvider.Instance.GetRawResourceString("Data.BrioPropChar.chara"));
-                        entity.GetCapability<ActorAppearanceCapability>().SetAppearanceAsTask(acf, AppearanceImportOptions.Default);
-                       
-                        _framework.RunOnTick(() =>
-                        {
-                            entity.GetCapability<PosingCapability>().LoadResourcesPose("Data.BrioPropPose.pose");
-
-                            _framework.RunOnTick(() =>
-                            {
-                                entity.GetCapability<ActorAppearanceCapability>().AttachWeapon();
-                            }, delayTicks: 10);
-                        }, delayTicks: 10);
-                    }, delayTicks: 10);
-                }
-            },
-                100,
-                dontStartFor: 2
-            );
-
-            gamechara = chara;
-            return true;
-        }
-
-        gamechara = null;
         return false;
     }
 
@@ -377,7 +353,17 @@ public class ActorSpawnService : MediatorSubscriberBase
     private void OnGPoseStateChanged(bool newState)
     {
         if(newState == false)
+        {
             DestroyAllCreated(newState);
+
+            foreach(var entity in _entityManager.TransformableEntities)
+            {
+                if(entity is ActorEntity actorEntity && actorEntity.SpawnFlag.HasFlag(SpawnFlags.WorldActor))
+                {
+                    _entityManager.DetachEntity(actorEntity, true);
+                }
+            }
+        }
     }
 
     private unsafe void OnCharacterDestroyed(NativeCharacter* chara)
@@ -415,12 +401,9 @@ public enum SpawnFlags
     None = 0,
     ReserveCompanionSlot = 1 << 1,
     CopyPosition = 1 << 2,
-    IsProp = 1 << 4,
-    IsEffect = 1 << 8,
+    WorldActor = 1 << 4,
     SetDefaultAppearance = 1 << 16,
 
     WithCompanionSlot = ReserveCompanionSlot | CopyPosition,
-    Prop = IsProp | SetDefaultAppearance | CopyPosition,
-    Effect = IsEffect | SetDefaultAppearance | CopyPosition,
     Default = CopyPosition,
 }

@@ -16,6 +16,8 @@ public class ActorDebugWidget(ActorDebugCapability capability) : Widget<ActorDeb
 
     // TODO: Store this properly in a list or whatever so it can be cleaned up
     private unsafe static VfxData* _spawnedGoopInstance;
+   
+    string path = "vfx/common/eff/c0101_stlp_mim_gre_c0r1.avfx";
 
     public unsafe override void DrawBody()
     {
@@ -110,10 +112,12 @@ public class ActorDebugWidget(ActorDebugCapability capability) : Widget<ActorDeb
             {
                 if(vfxTab.Success)
                 {
-                    if(ImGui.Button("Create Goop"))
+
+                    ImGui.InputText("Path", ref path);
+                    if(ImGui.Button("Create Actor VFX"))
                     {
                         // TODO: Store this properly in a list or whatever so it can be cleaned up
-                        _spawnedGoopInstance = Capability.VFXService.CreateActorVFX("vfx/common/eff/c0101_stlp_mim_gre_c0r1.avfx", Capability.GameObject);
+                        _spawnedGoopInstance = Capability.VFXService.CreateActorVFX(path, Capability.GameObject);
 
                     }
 
@@ -124,7 +128,7 @@ public class ActorDebugWidget(ActorDebugCapability capability) : Widget<ActorDeb
                         DynamisService.Instance.DrawPointer((nint)_spawnedGoopInstance);
                     }
 
-                    if(ImGui.Button("Destroy Goop"))
+                    if(ImGui.Button("Destroy Actor VFX"))
                     {
                         Capability.VFXService.DestroyVFX(_spawnedGoopInstance);
                         _spawnedGoopInstance = null;

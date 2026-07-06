@@ -83,18 +83,6 @@ public class ActorLifetimeCapability : ActorCapability
         }
     }
 
-    public void SpawnNewProp(bool selectInHierarchy)
-    {
-        if(_actorSpawnService.SpawnNewProp(out ICharacter? character))
-        {
-            if(selectInHierarchy)
-            {
-                _entityManager.SetSelectedEntity(character!);
-            }
-        }
-    }
-
-
     public void Clone(bool selectInHierarchy)
     {
         if(!CanClone)
@@ -115,6 +103,12 @@ public class ActorLifetimeCapability : ActorCapability
 
     public void Destroy()
     {
+        if(Entity.SpawnFlag.HasFlag(SpawnFlags.WorldActor))
+        {
+            _entityManager.DetachEntity(Actor, true);
+            return;
+        }
+
         if(!CanDestroy)
             return;
 

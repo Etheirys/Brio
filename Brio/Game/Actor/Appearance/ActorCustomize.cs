@@ -5,7 +5,7 @@ namespace Brio.Game.Actor.Appearance;
 [StructLayout(LayoutKind.Explicit, Size = Count)]
 public struct ActorCustomize
 {
-    public const int Count = 0x1A;
+    public const int Count = 26; // 0x1A
 
     [FieldOffset(0x00)] public unsafe fixed byte Data[Count];
     [FieldOffset(0x00)] public Races Race;

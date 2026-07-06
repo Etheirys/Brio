@@ -1,8 +1,8 @@
 ﻿using Brio.Capabilities.Actor;
-using Brio.Entities.Actor;
 using Brio.UI.Widgets.Core;
 using Dalamud.Bindings.ImGui;
-using Dalamud.Interface.Utility.Raii;
+using System.Linq;
+using System.Numerics;
 
 namespace Brio.UI.Widgets.Actor;
 
@@ -19,14 +19,6 @@ public class ActorContainerWidget(ActorContainerCapability capability) : Widget<
                 flags |= WidgetFlags.DrawPopup | WidgetFlags.CanHide;
 
             return flags;
-        }
-    }
-
-    public override void DrawQuickIcons()
-    {
-        using(ImRaii.Disabled(!Capability.CanControlCharacters))
-        {
-
         }
     }
 
@@ -68,6 +60,36 @@ public class ActorContainerWidget(ActorContainerCapability capability) : Widget<
             ImGui.EndMenu();
         }
 
+        if(ImGui.BeginMenu("Add from World...###containerwidgetpopup_add"))
+        {
+            if(ImGui.BeginMenu("Actor...###containerwidgetpopup_addActor"))
+            {
+                var playerPosition = Capability.ObjectMonitorService.ObjectTable.LocalPlayer?.Position ?? Vector3.Zero; // I hate this
+                var overworldActors = Capability.ObjectMonitorService.GetOverworldActors().OrderBy(actor => Vector3.DistanceSquared(playerPosition, actor.Position));
+
+                if(!overworldActors.Any())
+                {
+                    ImGui.TextDisabled("No world actors found");
+                }
+
+                foreach(var actor in overworldActors)
+                {
+                    if(actor == null || !actor.IsValid())
+                        return;
+
+                    var distanceText = $" [{Vector3.Distance(playerPosition, actor.Position):0.0}]";
+
+                    if(ImGui.MenuItem(string.IsNullOrWhiteSpace(actor?.Name.ToString()) ? $"Unknown {distanceText}##actor_containerwidgetpopup_{actor!.GameObjectId}" : $"{actor.Name} {distanceText}##actor_containerwidgetpopup_{actor.GameObjectId}"))
+                    {
+                        Capability.AddFromWorld(actor);
+                        ImGui.CloseCurrentPopup();
+                    }
+                }
+                ImGui.EndMenu();
+            }
+            ImGui.EndMenu();
+        }
+
         if(ImGui.BeginMenu("Destroy All...###containerwidgetpopup_destroy"))
         {
             if(ImGui.BeginMenu("Actors###containerwidgetpopup_destroyActors"))
@@ -80,5 +102,7 @@ public class ActorContainerWidget(ActorContainerCapability capability) : Widget<
             }
             ImGui.EndMenu();
         }
+
+        ImGui.Separator();
     }
 }

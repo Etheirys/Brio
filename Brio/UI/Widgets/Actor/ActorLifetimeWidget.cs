@@ -16,13 +16,6 @@ public class ActorLifetimeWidget(ActorLifetimeCapability capability) : Widget<Ac
 
     public override void DrawQuickIcons()
     {
-        if(ImBrio.FontIconButton("lifetimewidget_spawnnew", FontAwesomeIcon.Plus, "Spawn New"))
-        {
-            SpawnMenu.OpenUnifiedSpawnMenu();
-        }
-
-        ImGui.SameLine();
-
         if(ImBrio.FontIconButton("lifetimewidget_clone", FontAwesomeIcon.Clone, "Clone", Capability.CanClone))
         {
             Capability.Clone(false);
@@ -35,18 +28,18 @@ public class ActorLifetimeWidget(ActorLifetimeCapability capability) : Widget<Ac
             Capability.Target();
         }
 
-        ImGui.SameLine();
+        ImBrio.VerticalSeparator(24, 1);
 
-        if(ImBrio.FontIconButton("lifetimewidget_destroy", FontAwesomeIcon.Trash, "Destroy", Capability.CanDestroy))
+        if(ImBrio.HoldButton("lifetimewidget_destroy", "", FontAwesomeIcon.Trash, 1f, new(40, 0), centerTest: true, tooltip: "[HOLD TO DESTROY]", onlyIcon: true))
         {
             Capability.Destroy();
         }
 
-        ImGui.SameLine();
+        ImBrio.VerticalSeparator(24, 1);
 
         if(ImBrio.FontIconButton("lifetimewidget_rename", FontAwesomeIcon.Signature, "Rename"))
         {
-            RenameActorModal.Open(Capability.Actor);
+            ModalManager.Instance.OpenRenameModal(Capability.Actor);
         }
     }
 
@@ -77,7 +70,7 @@ public class ActorLifetimeWidget(ActorLifetimeCapability capability) : Widget<Ac
         {
             ImGui.CloseCurrentPopup();
 
-            RenameActorModal.Open(Capability.Actor);
+            ModalManager.Instance.OpenRenameModal(Capability.Actor);
         }
 
         if(ImGui.MenuItem("Target###actorlifetime_target"))

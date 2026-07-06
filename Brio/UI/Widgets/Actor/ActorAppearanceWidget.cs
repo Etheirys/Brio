@@ -13,7 +13,7 @@ namespace Brio.UI.Widgets.Actor;
 
 public class ActorAppearanceWidget(ActorAppearanceCapability capability) : Widget<ActorAppearanceCapability>(capability)
 {
-    public override string HeaderName => Capability.Actor.IsProp ? "Change Prop" : "Appearance";
+    public override string HeaderName => "Appearance";
 
     public override WidgetFlags Flags => WidgetFlags.DefaultOpen | WidgetFlags.DrawBody | WidgetFlags.DrawQuickIcons | WidgetFlags.DrawPopup | WidgetFlags.HasAdvanced;
 
@@ -25,10 +25,13 @@ public class ActorAppearanceWidget(ActorAppearanceCapability capability) : Widge
 
         if(size != 0)
         {
-            using var child = ImRaii.Child($"###appearance_child", new Vector2(0, size), true, ImGuiWindowFlags.NoScrollbar);
-            if(child.Success)
+            using(ImRaii.PushStyle(ImGuiStyleVar.ChildRounding, 8f))
+            using(var child = ImRaii.Child($"###appearance_child", new Vector2(-1, size), true, ImGuiWindowFlags.NoScrollbar))
             {
-                drawBody();
+                if(child.Success)
+                {
+                    drawBody();
+                }
             }
         }
         else
@@ -52,7 +55,7 @@ public class ActorAppearanceWidget(ActorAppearanceCapability capability) : Widge
             ImGui.OpenPopup("widget_npc_selector");
         }
 
-        ImGui.SameLine();
+        ImBrio.VerticalSeparator(24, 1);
 
         if(ImBrio.FontIconButton("import_charafile", FontAwesomeIcon.FileDownload, "Import Character"))
             FileUIHelpers.ShowImportCharacterModal(Capability, AppearanceImportOptions.All);
@@ -62,7 +65,7 @@ public class ActorAppearanceWidget(ActorAppearanceCapability capability) : Widge
         if(ImBrio.FontIconButton("export_charafile", FontAwesomeIcon.Save, "Save Character File"))
             FileUIHelpers.ShowExportCharacterModal(Capability);
 
-        ImGui.SameLine();
+        ImBrio.VerticalSeparator(24, 1);
 
         using(ImRaii.Disabled(Capability.CanMCDF is false))
         {
@@ -85,11 +88,12 @@ public class ActorAppearanceWidget(ActorAppearanceCapability capability) : Widge
                 {
                     FileUIHelpers.ShowExportMCDFModal(Capability);
                 }
-                ImGui.SameLine();
             }
             if(Capability.HasMCDF)
                 ImBrio.AttachToolTip("Can not save a MCDF of a Actor that has a MCDF loaded. Reset this Actor to save a MCDF.");
         }
+
+        ImBrio.VerticalSeparator(24, 1);
 
         if(ImBrio.FontIconButton("advanced_appearance", FontAwesomeIcon.UserEdit, "Advanced"))
             ToggleAdvancedWindow();
