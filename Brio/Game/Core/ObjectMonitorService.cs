@@ -1,9 +1,16 @@
-﻿using Brio.Game.Actor.Interop;
+﻿using Brio.Game.Actor.Extensions;
+using Brio.Game.Actor.Interop;
+using Dalamud.Game.ClientState.Objects.Enums;
+using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Hooking;
 using Dalamud.Plugin.Services;
+using FFXIVClientStructs.FFXIV.Client.Game.Character;
 using FFXIVClientStructs.FFXIV.Client.Graphics.Scene;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.InteropServices;
+
 using NativeCharacter = FFXIVClientStructs.FFXIV.Client.Game.Character.Character;
 
 namespace Brio.Game.Core;
@@ -71,6 +78,21 @@ public unsafe class ObjectMonitorService : IDisposable
         var result = _characterBaseUpdateMaterialsHook.Original(charaBase);
         CharacterBaseMaterialsUpdated?.Invoke(charaBase);
         return result;
+    }
+
+    public IEnumerable<IGameObject> GetOverworldActors()
+    {
+        var actors = _objectTable.CharacterManagerObjects.Where(gameObject => gameObject is { ObjectKind: ObjectKind.BattleNpc or ObjectKind.EventNpc })
+            .Concat(_objectTable.StandObjects.Where(gameObject => gameObject is { ObjectKind: ObjectKind.BattleNpc or ObjectKind.EventNpc }))
+            .Where(actor =>
+            {
+                unsafe
+                {
+                    return actor.IsValid() && actor.Native()->RenderFlags == 0x00;
+                }
+            });
+
+        return actors;
     }
 
     private nint CharacterBaseCleanupDetour(BrioCharacterBase* charaBase)
