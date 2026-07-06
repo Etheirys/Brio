@@ -208,6 +208,7 @@ public class Brio(IDalamudPluginInterface pluginInterface) : IAsyncDalamudPlugin
         serviceCollection.AddSingleton<WorldObjectService>();
         serviceCollection.AddSingleton<ReferenceImageService>();
         serviceCollection.AddSingleton<PathMetadataService>();
+        serviceCollection.AddSingleton<QuickAccessService>();
 
         // API & Web
         serviceCollection.AddSingleton<BrioAPIService>();
@@ -299,7 +300,7 @@ public class Brio(IDalamudPluginInterface pluginInterface) : IAsyncDalamudPlugin
         serviceCollection.AddSingleton<AutoSaveWindow>();
         serviceCollection.AddSingleton<MCDFWindow>();
         serviceCollection.AddSingleton<PosingGraphicalWindow>();
-        serviceCollection.AddSingleton<FurnitureCatalogWindow>();
+        serviceCollection.AddSingleton<CatalogWindow>();
         serviceCollection.AddSingleton<LightWindow>();
         serviceCollection.AddSingleton<EntitySectionWindow>();
 
