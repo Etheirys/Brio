@@ -38,7 +38,7 @@ public class LibraryWindow : Window, IDisposable
     private const float PathBarButtonWidth = 25;
     private const float FooterScaleSliderWidth = 100;
     private const int MinEntrySize = 80;
-    private const int MaxEntrySize = 250;
+    private const int MaxEntrySize = 450;
 
     private readonly SettingsWindow _settingsWindow;
 
@@ -1056,7 +1056,7 @@ public class LibraryWindow : Window, IDisposable
 
     private void DrawFooter()
     {
-        if(ImBrio.Button("Add new source", FontAwesomeIcon.None, new Vector2(100, 0)))
+        if(ImBrio.Button("Add new source", FontAwesomeIcon.Plus, new Vector2(0, 0), centerTest: true))
         {
             if(_isModal)
             {
