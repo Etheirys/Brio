@@ -10,9 +10,11 @@ using Brio.Services;
 using Brio.Services.MediatorMessages;
 using Brio.Services.Models;
 using Dalamud.Plugin.Services;
+using FFXIVClientStructs.FFXIV.Client.Game.Character;
 using FFXIVClientStructs.FFXIV.Client.Graphics.Scene;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
@@ -218,6 +220,10 @@ public unsafe class WorldObjectService : MediatorSubscriberBase
                 {
                     var worldObj = SpawnStaticVfxInternal(dto.Path);
                     worldObj?.SetTransform(transform);
+
+                    if(dto.Color.HasValue)
+                        worldObj?.VFX->Color = dto.Color.Value;
+
                     MoveToFolder(worldObj, folder);
                 });
                 break;
@@ -226,6 +232,20 @@ public unsafe class WorldObjectService : MediatorSubscriberBase
                 {
                     var worldObj = SpawnFurnitureInternal(dto.Path);
                     worldObj?.SetTransform(transform);
+
+                    Brio.Log.Warning($"Furniture spawn: {dto.Path}, Color: {dto.Color} - Stain ID: {dto.StainID}");
+
+                    _framework.RunUntilSatisfied(
+                        () => worldObj?.VsualStateDirty is false,
+                        (_) => {
+                            if(dto.Color.HasValue)
+                                worldObj?.SetCustomColor(dto.Color.Value);
+                           else if(dto.StainID != 0)
+                                worldObj?.SetStain((byte)dto.StainID);
+                        },
+                        1000,
+                        dontStartFor: 1);
+          
                     MoveToFolder(worldObj, folder);
                 });
                 break;
@@ -277,6 +297,20 @@ public unsafe class WorldObjectService : MediatorSubscriberBase
                 {
                     var worldObj = SpawnFurnitureInternal(obj.Path);
                     worldObj?.SetTransform(currentTransform);
+
+                    if(obj is FurnitureObject furniture)
+                    {
+                        _framework.RunUntilSatisfied(
+                            () => worldObj?.VsualStateDirty is false,
+                            (_) => {
+                                if(furniture.IsCustomColor)
+                                    worldObj?.SetCustomColor(furniture.CustomColor);
+                                else if(furniture.StainID != 0)
+                                    worldObj?.SetStain((byte)furniture.StainID);
+                            },
+                            1000,
+                            dontStartFor: 1);
+                    }
                 });
                 break;
             case WorldObjectType.Prop:

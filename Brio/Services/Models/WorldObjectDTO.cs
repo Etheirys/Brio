@@ -13,7 +13,7 @@ namespace Brio.Services.Models;
 [MessagePackObject(keyAsPropertyName: true)]
 public class WorldObjectDTO
 {
-    public static WorldObjectDTO ToDTO(WorldObjectEntity entity, Vector3 anchor)
+    public unsafe static WorldObjectDTO ToDTO(WorldObjectEntity entity, Vector3 anchor)
     {
         var gameObject = entity.GameBgObject;
 
@@ -29,6 +29,19 @@ public class WorldObjectDTO
         if(gameObject is BrioPropObject prop)
             dto.PropModel = PropModelDTO.ToDTO(prop.WeaponInfo);
 
+        if(gameObject is StaticVfxObject vfx)
+        {
+            dto.Color = vfx.VFX->Color;
+        }
+
+        if(gameObject is FurnitureObject fur)
+        {
+            Brio.Log.Warning($"FurnitureObject {fur.FriendlyName} has StainID {fur.StainID} and IsCustomColor {fur.IsCustomColor}");
+            if(fur.IsCustomColor)
+                dto.Color = fur.CustomColor;
+            dto.StainID = fur.StainID;
+        }
+
         return dto;
     }
 
@@ -42,6 +55,9 @@ public class WorldObjectDTO
     public Vector3 RelativePosition { get; set; }
 
     public string? ParentFolderId { get; set; }
+
+    public uint StainID { get; set; }
+    public Vector4? Color { get; set; }
 }
 
 [Serializable]
