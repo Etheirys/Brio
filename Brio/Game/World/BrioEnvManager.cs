@@ -15,6 +15,8 @@ public struct BrioEnvManager
     [FieldOffset(0x000)] public EnvManager Manager;
     [FieldOffset(0x058)] public EnvState EnvState;
 
+    [FieldOffset(0x448)] public EnvState GPoseBrightness;
+
     public unsafe static BrioEnvManager* Instance() => (BrioEnvManager*)EnvManager.Instance();
 }
 

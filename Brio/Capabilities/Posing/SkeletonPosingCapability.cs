@@ -61,13 +61,13 @@ public class SkeletonPosingCapability : ActorCharacterCapability
         _transitiveActions.ForEach(a => a(bone, poseInfo));
     }
 
-    public void ImportSkeletonPose(PoseFile poseFile, PoseImporterOptions options, bool expressionPhase = false)
+    public void ImportSkeletonPose(PoseData poseFile, PoseImporterOptions options, bool expressionPhase = false)
     {
         var importer = new PoseImporter(poseFile, options, expressionPhase);
         RegisterTransitiveAction(importer.ApplyBone);
     }
 
-    public void ExportSkeletonPose(PoseFile poseFile)
+    public void ExportSkeletonPose(PoseData poseFile)
     {
         var skeleton = CharacterSkeleton;
         if(skeleton != null)

@@ -168,13 +168,6 @@ public class FileEntry : ItemEntryBase
     private string? _description;
     private string? _author;
     private string? _version;
-    private string _editDescription = String.Empty;
-    private string _editAuthor = String.Empty;
-    private string _editVersion = String.Empty;
-    private string _editTags = String.Empty;
-    private string? _editBase64Image;
-    private IDalamudTextureWrap? _editPreviewImage;
-    private int? _editPreviewImageFileSize;
 
     public FileEntry(FileSource source, string path, FileTypeInfoBase fileInfo) : base(source)
     {
@@ -220,7 +213,7 @@ public class FileEntry : ItemEntryBase
     public override IDalamudTextureWrap? Icon => GetIcon();
     public override IDalamudTextureWrap? PreviewImage => GetPreviewImage();
     public override Type LoadsType => _fileInfo.Type;
-    public override bool EditAble => true;
+    public override bool EditAble => _fileInfo?.IsFileType<JsonDocumentBase>() == true;
     public FileTypeInfoBase FileTypeInfo => _fileInfo;
 
     public override bool IsVisible
@@ -292,29 +285,10 @@ public class FileEntry : ItemEntryBase
         return null;
     }
 
-    public void LoadNewPreviewImage(string filePath)
-    {
-        try
-        {
-            var (imgBase64, img) = ResourceProvider.Instance.GetNewPreviewImage(filePath);
-            _editBase64Image = imgBase64;
-            if(_editPreviewImage != _previewImage)
-                _editPreviewImage?.Dispose();
-            _editPreviewImage = img;
-            _editPreviewImageFileSize = _editBase64Image != null ? System.Text.Encoding.UTF8.GetByteCount(_editBase64Image) : null;
-        }
-        catch(Exception ex)
-        {
-            Brio.Log.Error(ex, "Failed to load new preview image.");
-        }
-    }
-
     public override void Dispose()
     {
         base.Dispose();
         _previewImage?.Dispose();
-        if(_editPreviewImage != _previewImage)
-            _editPreviewImage?.Dispose();
     }
 
     protected override string GetpublicId()
@@ -333,6 +307,54 @@ public class FileEntry : ItemEntryBase
     public override bool InvokeDefaultAction(object? args)
     {
         return FileTypeInfo?.InvokeDefaultAction(this, args) ?? false;
+    }
+
+    public override void OpenEditDetails()
+    {
+        ModalManager.Instance.OpenEditMetadataModal(this);
+    }
+
+    public (string? Base64Image, IDalamudTextureWrap? Image) LoadPreviewForEdit()
+    {
+        string? base64Image = GetBase64ImageData();
+        if(base64Image == null)
+            return (null, null);
+
+        try
+        {
+            byte[] imgData = Convert.FromBase64String(base64Image);
+            return (base64Image, UIManager.Instance.LoadImage(imgData));
+        }
+        catch(Exception)
+        {
+            return (null, null);
+        }
+    }
+
+    public void SaveMetadata(string? author, string? version, string? description, string tags, string? base64Image)
+    {
+        Tags?.Clear();
+        Tags?.AddRange(tags.Split(',').Select(tag => tag.Trim()).Where(x => x != _author).Where(x => !x.IsWhiteSpace()));
+        TagCollection autoTags = new();
+        _author = author.NullIfEmpty();
+        _version = version.NullIfEmpty();
+        _description = description.NullIfEmpty();
+
+        EditDetails((ref file) => {
+            file.Author = _author;
+            file.Version = _version;
+            file.Description = _description;
+            file.Base64Image = base64Image;
+
+            if(Tags != null)
+                file.Tags = Tags;
+            file.GetAutoTags(ref autoTags);
+        });
+
+        Tags?.AddRange(autoTags);
+
+        _previewImage?.Dispose();
+        _previewImage = null;
     }
 
     public override void DrawActions(bool isModal)
@@ -401,164 +423,5 @@ public class FileEntry : ItemEntryBase
                 this.Tags.Remove(tag);
             }
         });
-    }
-
-    public override void EditDetailsPopup(bool openPopup)
-    {
-        if(openPopup)
-        {
-            _editAuthor = _author ?? "";
-            _editVersion = _version ?? "";
-            _editDescription = _description ?? "";
-            _editTags = Tags != null ? string.Join(", ", Tags.Where(x => x.Name != _author).Select(x => x.Name)) : "";
-            if(_editPreviewImage != _previewImage)
-                _editPreviewImage?.Dispose();
-            _editPreviewImage = GetPreviewImage();
-            _editBase64Image = GetBase64ImageData();
-            _editPreviewImageFileSize = _editBase64Image != null ? System.Text.Encoding.UTF8.GetByteCount(_editBase64Image) : null;
-
-            ImGui.OpenPopup($"Details - {Name}##edit_details_modal");
-        }
-
-        var center = ImGui.GetIO().DisplaySize / 2;
-        ImGui.SetNextWindowPos(center, ImGuiCond.Always, new Vector2(0.5f, 0.5f));
-
-        ImGui.SetNextWindowSize(new Vector2(450, 650));
-        using var popup = ImRaii.PopupModal($"Details - {Name}##edit_details_modal", ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoMove);
-        if(!popup.Success)
-            return;
-
-        ImBrio.SeparatorText("Metadata");
-
-        float labelColumnWidth = ImGui.CalcTextSize("Description:").X + ImGui.GetStyle().ItemSpacing.X;
-
-        if(ImGui.BeginTable("##details_fields", 2, ImGuiTableFlags.None))
-        {
-            ImGui.TableSetupColumn("##label", ImGuiTableColumnFlags.WidthFixed, labelColumnWidth);
-            ImGui.TableSetupColumn("##input", ImGuiTableColumnFlags.WidthStretch);
-
-            ImGui.TableNextRow();
-            ImGui.TableNextColumn();
-            ImGui.AlignTextToFramePadding();
-            ImGui.Text("Author:");
-            ImGui.TableNextColumn();
-            ImGui.SetNextItemWidth(-1);
-            ImGui.InputText("##author", ref _editAuthor);
-
-            ImGui.TableNextRow();
-            ImGui.TableNextColumn();
-            ImGui.AlignTextToFramePadding();
-            ImGui.Text("Version:");
-            ImGui.TableNextColumn();
-            ImGui.SetNextItemWidth(-1);
-            ImGui.InputText("##version", ref _editVersion);
-
-            ImGui.TableNextRow();
-            ImGui.TableNextColumn();
-            ImGui.AlignTextToFramePadding();
-            ImGui.Text("Tags:");
-            ImGui.TableNextColumn();
-            ImGui.SetNextItemWidth(-1);
-            ImGui.InputText("##tags", ref _editTags);
-            ImBrio.AttachToolTip("Comma-separated list of tags");
-
-            ImGui.TableNextRow();
-            ImGui.TableNextColumn();
-            ImGui.AlignTextToFramePadding();
-            ImGui.Text("Description:");
-            ImGui.TableNextColumn();
-            ImGui.SetNextItemWidth(-1);
-            ImGui.InputTextMultiline("##description", ref _editDescription, 1024, new Vector2(-1, 5 * ImGui.GetTextLineHeight()));
-
-            ImGui.EndTable();
-        }
-
-        ImBrio.SeparatorText("Preview Image");
-
-        if(ImGui.Button(_editPreviewImage == null ? "Add##change_preview_image" : "Replace##change_preview_image"))
-            FileUIHelpers.ShowImportPreviewImageModal(this);
-
-        if(_editPreviewImage != null)
-        {
-            ImGui.SameLine();
-            if(ImGui.Button("Remove##remove_preview_image"))
-            {
-                if(_editPreviewImage != _previewImage)
-                    _editPreviewImage?.Dispose();
-                _editPreviewImage = null;
-                _editBase64Image = null;
-                _editPreviewImageFileSize = null;
-            }
-        }
-
-        if(_editPreviewImage != null && _editPreviewImageFileSize != null)
-        {
-            ImGui.SameLine();
-            ImBrio.HorizontalPadding(10);
-            ImGui.Text($"{_editPreviewImage.Width} x {_editPreviewImage.Height} px");
-            ImGui.SameLine();
-            ImBrio.HorizontalPadding(10);
-
-            long fileSize = _editPreviewImageFileSize.Value;
-            string sizeLabel = fileSize >= (1 << 20)
-                ? $"{fileSize / (float)(1 << 20):f2} MB"
-                : $"{fileSize >> 10} KB";
-            ImGui.Text(sizeLabel);
-
-            float width = _editPreviewImage.Width;
-            float height = _editPreviewImage.Height;
-            float aspectRatio = width / height;
-            float scaledHeight = Math.Min(500 / aspectRatio, 500);
-            ImBrio.ImageFit(_editPreviewImage, new Vector2(500, scaledHeight));
-        }
-
-        ImBrio.VerticalPadding(ImGui.GetTextLineHeight() / 2);
-
-        float buttonWidth = ImGui.CalcTextSize("Save").X + ImGui.CalcTextSize("Cancel").X
-            + ImGui.GetStyle().FramePadding.X * 4f + ImGui.GetStyle().ItemSpacing.X;
-        ImBrio.RightAlign(buttonWidth);
-
-        if(ImGui.Button("Save##edit_details_save"))
-        {
-            Tags?.Clear();
-            Tags?.AddRange(_editTags.Split(',').Select(tag => tag.Trim()).Where(x => x != _author).Where(x => !x.IsWhiteSpace()));
-            TagCollection autoTags = new();
-            _author = _editAuthor.NullIfEmpty();
-            _version = _editVersion.NullIfEmpty();
-            _description = _editDescription.NullIfEmpty();
-
-            EditDetails((ref file) => {
-                file.Author = _author;
-                file.Version = _version;
-                file.Description = _description;
-                file.Base64Image = _editBase64Image;
-
-                if(Tags != null)
-                    file.Tags = Tags;
-                file.GetAutoTags(ref autoTags);
-            });
-
-            Tags?.AddRange(autoTags);
-
-            if(_editPreviewImage != _previewImage)
-            {
-                _previewImage?.Dispose();
-                _previewImage = _editPreviewImage;
-            }
-            _editPreviewImage = null;
-
-            ImGui.CloseCurrentPopup();
-        }
-
-        ImGui.SameLine();
-
-        if(ImGui.Button("Cancel##edit_details_cancel"))
-        {
-            if(_editPreviewImage != _previewImage)
-                _editPreviewImage?.Dispose();
-            _editPreviewImage = null;
-
-            ImGui.CloseCurrentPopup();
-        }
     }
 }

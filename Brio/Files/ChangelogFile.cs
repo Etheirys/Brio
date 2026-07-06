@@ -1,7 +1,7 @@
 ﻿#nullable disable
 
 using System.Collections.Generic;
-using YamlDotNet.Serialization;
+using System.Text.Json.Serialization;
 
 namespace Brio.Files;
 
@@ -10,7 +10,7 @@ public class ChangelogFile
     public string Tagline { get; set; }
     public string Subline { get; set; }
 
-    [YamlMember(Alias = "changelog")]
+    [JsonPropertyName("changelog")]
     public List<ChangelogEntry> Changelog { get; set; }
 }
 
@@ -22,7 +22,8 @@ public class ChangelogEntry
     public bool? IsCurrent { get; set; }
     public string Message { get; set; }
 
-    [YamlMember(DefaultValuesHandling = DefaultValuesHandling.Preserve)]
+    [JsonInclude]
+    [JsonPropertyName("versions")]
     public List<VersionEntry> Versions { get; set; }
 }
 

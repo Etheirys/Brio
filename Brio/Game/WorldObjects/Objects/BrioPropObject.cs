@@ -1,4 +1,7 @@
 using Brio.Core;
+using Brio.Game.Actor.Appearance;
+using Brio.Resources;
+using FFXIVClientStructs.FFXIV.Client.Game.Character;
 using FFXIVClientStructs.FFXIV.Client.Graphics.Scene;
 using System;
 
@@ -8,7 +11,7 @@ using CSWorld = FFXIVClientStructs.FFXIV.Client.Graphics.Scene.World;
 
 namespace Brio.Game.WorldObjects.Objects;
 
-public unsafe class BrioPropObject : WorldObjectBase
+public unsafe class BrioPropObject : WorldObject
 {
     private CSWeapon* Weapon;
     public WeaponCreateInfo WeaponInfo { get; set { field = value; IsDirty = true; } }
@@ -24,7 +27,26 @@ public unsafe class BrioPropObject : WorldObjectBase
     //
 
     public override WorldObjectType ObjectType => WorldObjectType.Prop;
-    public override string FriendlyName => "Weapon/Prop";
+    public override string FriendlyName { get; protected set; } = "Weapon | Prop";
+
+    public override string FriendlyPath
+    {
+        get
+        {
+            if(string.IsNullOrEmpty(field))
+            {
+                var equip = new WeaponModelId { Id = ModelSetId, Type = SecondaryId, Variant =  Variant, Stain0 = PrimaryDye, Stain1 = SecondaryDye };
+
+                var info = GameDataProvider.Instance.ModelDatabase.GetModelById(equip, ActorEquipSlot.Prop)?.Name ?? string.Empty;
+                if(!string.IsNullOrEmpty(info))
+                    FriendlyName = info;
+                return field = System.IO.Path.GetFileNameWithoutExtension(Path);
+            }
+            else
+                return field;
+        }
+    }
+
     public override nint Address => (nint)Weapon;
 
     public override bool IsVisible

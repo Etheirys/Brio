@@ -15,7 +15,7 @@ public class FolderWidget(FolderCapability capability) : Widget<FolderCapability
         if(ImGui.MenuItem($"Rename {Capability.FolderEntity.FriendlyName}###folder_rename"))
         {
             ImGui.CloseCurrentPopup();
-            RenameActorModal.Open(Capability.FolderEntity);
+            ModalManager.Instance.OpenRenameModal(Capability.FolderEntity);
         }
 
         string visLabel = Capability.FolderEntity.AreChildrenHidden

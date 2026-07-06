@@ -1,4 +1,5 @@
 using Brio.Core;
+using Brio.Resources;
 using FFXIVClientStructs.FFXIV.Client.Graphics.Scene;
 using System;
 
@@ -7,12 +8,28 @@ using BrioBgObjectEx = Brio.Game.WorldObjects.Interop.BgObjectEx;
 namespace Brio.Game.WorldObjects.Objects;
 
 // this name makes me giggle
-public unsafe class BGOObject : WorldObjectBase
+public unsafe class BGOObject : WorldObject
 {
     public BrioBgObjectEx* BgObject;
 
     public override WorldObjectType ObjectType => WorldObjectType.BgObject;
-    public override string FriendlyName => "World Object";
+    public override string FriendlyName { get; protected set; } = "World Object";
+    public override string FriendlyPath
+    {
+        get
+        {
+            if(string.IsNullOrEmpty(field))
+            {
+                var info = GameDataProvider.Instance.PathDatabase.GetPathDataByPath(Path);
+                if(info != null)
+                    FriendlyName = info.Name;
+                return field = System.IO.Path.GetFileNameWithoutExtension(Path);
+            }
+            else
+                return field;
+        }
+    }
+
     public override nint Address => (nint)BgObject;
 
     public override bool IsVisible

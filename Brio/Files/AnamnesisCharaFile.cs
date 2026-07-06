@@ -22,7 +22,6 @@ public class AnamnesisCharaFileInfo(EntityManager entityManager, ConfigurationSe
 
     protected override void Apply(AnamnesisCharaFile file, ActorEntity actor, bool asExpression = false)
     {
-        Brio.Log.Debug($"Name: {Name} | File: {file}");
         if(actor.TryGetCapability<ActorAppearanceCapability>(out ActorAppearanceCapability? capability) && capability != null)
         {
             _ = capability.SetAppearance(file, AppearanceImportOptions.All);

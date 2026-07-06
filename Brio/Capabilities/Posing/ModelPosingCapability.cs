@@ -77,7 +77,7 @@ public class ModelPosingCapability : ActorCharacterCapability, ITransformable
         ResetTransform();
     }
 
-    public void ImportModelPose(PoseFile poseFile, PoseImporterOptions options, bool isLoadingAsScene, bool applyModelTransform)
+    public void ImportModelPose(PoseData poseFile, PoseImporterOptions options, bool isLoadingAsScene, bool applyModelTransform)
     {
         if(applyModelTransform)
         {
@@ -112,7 +112,7 @@ public class ModelPosingCapability : ActorCharacterCapability, ITransformable
         }
     }
 
-    public void ExportModelPose(PoseFile poseFile)
+    public void ExportModelPose(PoseData poseFile)
     {
         if(_originalTransform.HasValue)
         {
@@ -128,4 +128,8 @@ public class ModelPosingCapability : ActorCharacterCapability, ITransformable
     }
 
     public void Snapshot() { }
+    public void SetTransform(Transform transform)
+    {
+        Transform = transform;
+    }
 }
