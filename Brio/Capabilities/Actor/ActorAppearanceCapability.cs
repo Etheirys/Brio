@@ -20,6 +20,7 @@ using FFXIVClientStructs.FFXIV.Client.Game.Character;
 using System;
 using System.Text;
 using System.Threading.Tasks;
+using Glamourer.Api.Enums;
 
 namespace Brio.Capabilities.Actor;
 
@@ -47,7 +48,7 @@ public class ActorAppearanceCapability : ActorCharacterCapability
     public bool IsDesignOverridden;
     public bool IsProfileOverridden;
 
-    public string CurrentDesign { get; set; } = "None";
+    public (string? data, Guid? id) CurrentDesign { get; set; } = ("None", null);
     public GlamourerService GlamourerService => _glamourerService;
 
 
@@ -57,6 +58,7 @@ public class ActorAppearanceCapability : ActorCharacterCapability
 
 
     private ActorAppearance? _originalAppearance = null;
+    private bool _suppressGlamourerRefresh;
     public bool IsAppearanceOverridden => _originalAppearance.HasValue || HasMCDF || IsDesignOverridden || IsProfileOverridden | IsCollectionOverridden;
 
     public bool HasPenumbraIntegration => _penumbraService.IsAvailable;
@@ -73,7 +75,7 @@ public class ActorAppearanceCapability : ActorCharacterCapability
 
     public bool CanTint => _actorAppearanceService.CanTint;
 
-    public bool HasMCDF;
+    public bool HasMCDF { get; set; }
     public bool CanMCDF => _mCDFService.IsIPCAvailable;
     public bool IsSelf => _targetService.IsSelf(GameObject);
 
@@ -100,9 +102,57 @@ public class ActorAppearanceCapability : ActorCharacterCapability
 
         _gposeService.OnGPoseStateChange += OnGPoseStateChanged;
         _penumbraService.OnPenumbraRedraw += OnPenumbraRedraw;
+        _glamourerService.OnGlamourerStateFinalized += OnGlamourerStateFinalized;
 
         SetSelectedProfile();
     }
+
+    //
+
+    public (bool Has, Guid Id) HasDesignOverride()
+    {
+        if(IsDesignOverridden && SelectedDesign.id.HasValue)
+        {
+            return (true, SelectedDesign.id.Value);
+        }
+     
+        return (false, Guid.Empty);
+    }
+    public string GetCurrentDesign()
+    {
+        return _glamourerService.GetState(Character);
+    }
+
+    public (bool Has, Guid Id) HasProfileOverride()
+    {
+        if(IsProfileOverridden && CurrentProfile.id.HasValue)
+        {
+            return (true, CurrentProfile.id.Value);
+        }
+
+        var data = _customizePlusService.GetActiveProfile(Character);
+        if(data.Item2 is not null)
+        {
+            Brio.Log.Warning($"Active profile found for {GameObject.ObjectIndex}: {data.Item2.Value}");
+            return (true, data.Item2.Value);
+        }
+
+        return (false, Guid.Empty);
+    }
+
+    public (bool Has, Guid Id) HasClollectionOverride()
+    {
+        var collection = _penumbraService.GetCollectionGuidForObject(Character);
+        if(collection is not null)
+        {
+            Brio.Log.Warning($"Active collection found for {GameObject.ObjectIndex}: {collection}");
+            return (true, collection.Value);
+        }
+        
+        return (false, Guid.Empty);
+    }
+
+    //
 
     public async Task<BrioApiResult> LoadMCDF(string path)
     {
@@ -177,9 +227,6 @@ public class ActorAppearanceCapability : ActorCharacterCapability
             _oldCollection = old.ToString();
 
         _ = _actorAppearanceService.Redraw(Character, HasMCDF);
-
-        if(Actor.IsProp)
-            await Redraw();
     }
     public async void ResetCollection()
     {
@@ -188,15 +235,13 @@ public class ActorAppearanceCapability : ActorCharacterCapability
             _penumbraService.SetCollectionForObject(Character, Guid.Parse(_oldCollection!));
             _oldCollection = null;
             _ = _actorAppearanceService.Redraw(Character, HasMCDF);
-
-            if(Actor.IsProp)
-                await Redraw();
         }
     }
 
     public void SetDesign(Guid design)
     {
         IsDesignOverridden = true;
+        CurrentDesign = (null, design);
         _ = _glamourerService.ApplyDesign(design, Character);
     }
     public void ResetDesign(bool checkResetLock = true)
@@ -277,12 +322,12 @@ public class ActorAppearanceCapability : ActorCharacterCapability
     public async void SetAppearanceAsTask(ActorAppearance appearance, AppearanceImportOptions options)
         => await SetAppearance(appearance, options);
 
-    public async Task SetAppearance(ActorAppearance appearance, AppearanceImportOptions options)
+    public async Task SetAppearance(ActorAppearance appearance, AppearanceImportOptions options, bool forceRedaw = false)
     {
         Brio.Log.Debug($"Setting appearance for gameobject {GameObject.ObjectIndex}...");
 
         _originalAppearance ??= _actorAppearanceService.GetActorAppearance(Character);
-        _ = await _actorAppearanceService.SetCharacterAppearance(Character, appearance, options);
+        _ = await _actorAppearanceService.SetCharacterAppearance(Character, appearance, options, forceRedaw);
 
         if(options.HasFlag(AppearanceImportOptions.Shaders))
         {
@@ -292,12 +337,6 @@ public class ActorAppearanceCapability : ActorCharacterCapability
         {
             _modelShaderOverride.Reset();
         }
-
-        if(Entity is ActorEntity actor && actor.IsProp is true)
-            await _framework.RunOnTick(() =>
-            {
-                AttachWeapon();
-            }, delayTicks: 5);
 
         Brio.Log.Debug($"Appearance set for gameobject {GameObject.ObjectIndex}.");
     }
@@ -332,8 +371,21 @@ public class ActorAppearanceCapability : ActorCharacterCapability
 
     public Task MakeHuman() => SetAppearance(new ActorAppearanceUnion(SpecialAppearances.DefaultHumanEventNpc), AppearanceImportOptions.All);
 
+    public PoseMetaData GetPoseMetaData()
+    {
+        var appearance = _actorAppearanceService.GetActorAppearance(Character);
+        return new PoseMetaData
+        (
+            appearance.ModelCharaId,
+            DataPathResolver.ToDataPath(appearance.Customize.Tribe, appearance.Customize.Gender, false).ToString(),
+            appearance.Customize.FaceType
+        );
+    }
+
     public Task RemoveAllEquipment()
     {
+        //
+
         var appearance = _actorAppearanceService.GetActorAppearance(Character);
         appearance.Equipment = new ActorEquipment();
         appearance.Weapons.MainHand = SpecialAppearances.EmperorsMainHand;
@@ -406,9 +458,6 @@ public class ActorAppearanceCapability : ActorCharacterCapability
 
         ApplyShaderOverride();
 
-        if(Actor.IsProp)
-            AttachWeapon();
-
         return;
     }
 
@@ -475,6 +524,18 @@ public class ActorAppearanceCapability : ActorCharacterCapability
         _ = ResetAppearance();
     }
 
+    private void OnGlamourerStateFinalized(nint actorAddress, StateFinalizationType type)
+    {
+        if(actorAddress != Character.Address)
+            return;
+
+        if(_suppressGlamourerRefresh)
+            return;
+
+        _originalAppearance = _actorAppearanceService.GetActorAppearance(Character);
+
+        CurrentDesign = (_glamourerService.GetState(Character), Guid.Empty);
+    }
     private void OnPenumbraRedraw(int gameObjectId)
     {
         if(Character.ObjectIndex == gameObjectId && IsAppearanceOverridden)
@@ -485,6 +546,7 @@ public class ActorAppearanceCapability : ActorCharacterCapability
     {
         _gposeService.OnGPoseStateChange -= OnGPoseStateChanged;
         _penumbraService.OnPenumbraRedraw -= OnPenumbraRedraw;
+        _glamourerService.OnGlamourerStateFinalized -= OnGlamourerStateFinalized;
 
         ResetCollection();
         ResetProfile();
