@@ -1,6 +1,6 @@
-﻿using Brio.Files;
-using Brio.Game.GPose;
+﻿using Brio.Game.GPose;
 using Brio.Services;
+using Brio.Services.Models;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
 using MessagePack;
@@ -12,9 +12,15 @@ using System.Linq;
 namespace Brio.Game.Core;
 
 [MessagePackObject]
+public class BrioProjects
+{
+    [Key(0)] public List<Project> Projects { get; set; } = [];
+}
+
+[MessagePackObject]
 public record class Project
 {
-    [Key(0)] public int Version { get; set; } = 1;
+    [Key(0)] public int Version { get; set; } = 2;
 
     [Key(1)] public required string Name { get; set; }
     [Key(2)] public string? Description { get; set; }
@@ -23,12 +29,7 @@ public record class Project
     [Key(4)] public string? ImagePath { get; set; }
 
     [Key(5)] public DateTime? Created { get; set; }
-}
-
-[MessagePackObject]
-public class BrioProjects
-{
-    [Key(0)] public List<Project> Projects { get; set; } = [];
+    [Key(6)] public DateTime? LastModified { get; set; }
 }
 
 public class ProjectSystem : IDisposable
@@ -47,6 +48,8 @@ public class ProjectSystem : IDisposable
 
     public BrioProjects BrioProjects { get; set; } = new BrioProjects();
 
+    public Project? CurrentProject { get; private set; }
+
     public ProjectSystem(IDalamudPluginInterface pluginInterface, IFramework framework, SceneService sceneService, GPoseService gPoseService)
     {
         _pluginInterface = pluginInterface;
@@ -58,26 +61,29 @@ public class ProjectSystem : IDisposable
 
         LoadProjectData();
 
-        gPoseService.OnGPoseStateChange += GPoseService_OnGPoseStateChange;
+        gPoseService.OnGPoseStateChange += OnGPoseStateChange;
     }
 
 
     public void NewProject(string projectName, string? Description)
     {
-        var path = Path.Combine(ProjectSaveFolder, $"{DateTime.Now:yyyy-MM-dd-hh-mm-ss}.brioproj");
+        var path = Path.Combine(ProjectSaveFolder, $"{projectName}-{DateTime.Now:yyyy-MM-dd-hh-mm-ss}.brioproj");
 
         try
         {
-            var scene = _sceneService.GenerateSceneFile();
+            var scene = _sceneService.CaptureScene();
 
             Brio.Log.Verbose($"saving new project: {path}");
 
-            byte[] bytes = MessagePackSerializer.Serialize(scene);
+            byte[] bytes = _sceneService.Serialize(scene);
             File.WriteAllBytes(path, bytes);
 
-            BrioProjects.Projects.Add(new Project { Name = projectName, Path = path, Description = Description, Created = DateTime.UtcNow });
+            var project = new Project { Name = projectName, Path = path, Description = Description, Created = DateTime.UtcNow };
+            BrioProjects.Projects.Add(project);
 
             SaveProjectData();
+
+            CurrentProject = project;
         }
         catch(Exception ex)
         {
@@ -85,10 +91,31 @@ public class ProjectSystem : IDisposable
         }
     }
 
-    public void LoadProject(Project project, bool destroyAll)
+    public void SaveProject(Project project)
     {
-        var result = MessagePackSerializer.Deserialize<SceneFile>(File.ReadAllBytes(project.Path));
-        _sceneService.LoadScene(result, destroyAll);
+        try
+        {
+            var scene = _sceneService.CaptureScene();
+
+            byte[] bytes = _sceneService.Serialize(scene);
+            File.WriteAllBytes(project.Path, bytes);
+
+            project.LastModified = DateTime.UtcNow;
+
+            SaveProjectData();
+        }
+        catch(Exception ex)
+        {
+            Brio.Log.Error(ex, $"Exception while saving project: {project.Name}");
+        }
+    }
+
+    public void LoadProject(Project project, bool destroyAll, bool useRelativeLightPositions = true, bool useRelativeWorldObjectPositions = true, SceneImportOptions importOptions = SceneImportOptions.Default)
+    {
+        var result = _sceneService.Deserialize(File.ReadAllBytes(project.Path));
+        _sceneService.ImportScene(result, destroyAll, useRelativeLightPositions, useRelativeWorldObjectPositions, importOptions);
+
+        CurrentProject = project;
     }
 
     public void DeleteProject(Project project)
@@ -98,6 +125,9 @@ public class ProjectSystem : IDisposable
             File.Delete(project.Path);
 
             BrioProjects.Projects.Remove(project);
+
+            if(CurrentProject is not null && CurrentProject.Equals(project))
+                CurrentProject = null;
 
             SaveProjectData();
         }
@@ -139,13 +169,13 @@ public class ProjectSystem : IDisposable
         }
     }
 
-    private void GPoseService_OnGPoseStateChange(bool newState)
+    private void OnGPoseStateChange(bool newState)
     {
-
+        // Why is this here? To open the thing on GPose starts ?? TODO(ken)
     }
 
     public void Dispose()
     {
-        _gPoseService.OnGPoseStateChange -= GPoseService_OnGPoseStateChange;
+        _gPoseService.OnGPoseStateChange -= OnGPoseStateChange;
     }
 }
