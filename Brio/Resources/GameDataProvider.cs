@@ -41,6 +41,8 @@ public class GameDataProvider
     public readonly IReadOnlyDictionary<uint, TerritoryType> TerritoryType;
 
     public readonly ModelDatabase ModelDatabase;
+    public readonly FurnitureDatabase FurnitureDatabase;
+    public readonly PathDatabase PathDatabase;
 
     public readonly HumanData HumanData;
 
@@ -99,6 +101,11 @@ public class GameDataProvider
         HumanData = new HumanData(dataManager.GetFile("chara/xls/charamake/human.cmp")!.Data);
 
         ModelDatabase = new(_resourceProvider);
+
+        FurnitureDatabase = new(dataManager);
+
+        using var pathStream = _resourceProvider.GetRawResourceStream("Data.WorldObjectPaths.json.gz");
+        PathDatabase = PathDatabase.LoadFromGz(pathStream, new(), new());
 
         DataManager = dataManager;
     }
