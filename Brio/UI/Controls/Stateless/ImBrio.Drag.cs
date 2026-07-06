@@ -14,17 +14,19 @@ namespace Brio.UI.Controls.Stateless;
 
 public static partial class ImBrio
 {
+    private const float BarWidth = 3f;
+
     private static readonly HashSet<string> expanded = [];
 
     [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-    public static (bool anyActive, bool didChange) DragFloat3(string label, ref Vector3 vectorValue, float step = 1.0f,
-        FontAwesomeIcon icon = FontAwesomeIcon.None, string tooltip = "", bool enableExpanded = false)
+    public static (bool anyActive, bool didChange) DragFloat3(string label, ref Vector3 value, float step = 1.0f, FontAwesomeIcon icon = FontAwesomeIcon.None, string tooltip = "", bool enableExpanded = false)
     {
         bool isExpanded = expanded.Contains(label);
 
         if(icon == FontAwesomeIcon.None)
         {
             ImGui.Text(label);
+
             if(string.IsNullOrEmpty(tooltip) is false)
                 AttachToolTip(tooltip);
         }
@@ -33,19 +35,13 @@ public static partial class ImBrio
             if(enableExpanded)
             {
                 using(ImRaii.PushColor(ImGuiCol.Button, UIConstants.Transparent))
-                {
                     if(Button($"{label}##Button", icon, new Vector2(25 * ImGuiHelpers.GlobalScale), tooltip: tooltip))
                     {
                         if(isExpanded)
-                        {
                             expanded.Remove(label);
-                        }
                         else
-                        {
                             expanded.Add(label);
-                        }
                     }
-                }
             }
             else
             {
@@ -62,29 +58,29 @@ public static partial class ImBrio
             X = GetRemainingWidth() + ImGui.GetStyle().ItemSpacing.X
         };
 
-        (bool changed, bool active) = DragFloat3Horizontal($"###{label}_drag3", ref vectorValue, step, size, toolTip: tooltip);
+        (bool changed, bool active) = DragFloat3Implementation($"###{label}_drag3", ref value, step, size, toolTip: tooltip);
 
         if(isExpanded && enableExpanded)
         {
             ImGui.PushStyleColor(ImGuiCol.Border, UIConstants.GizmoRed);
 
-            float x = vectorValue.X;
-            (var pdidChange, var panyActive) = DragFloat($"###{label}_x", ref x, step, $"{tooltip} X");
-            vectorValue.X = x;
+            float x = value.X;
+            (var pdidChange, var panyActive) = DragFloat($"###{label}_x", ref x, step, $"{tooltip} X", UIConstants.GizmoRed);
+            value.X = x;
 
             ImGui.PopStyleColor();
             ImGui.PushStyleColor(ImGuiCol.Border, UIConstants.GizmoGreen);
 
-            float y = vectorValue.Y;
-            (var rdidChange, var ranyActive) = DragFloat($"###{label}_y", ref y, step, $"{tooltip} Y");
-            vectorValue.Y = y;
+            float y = value.Y;
+            (var rdidChange, var ranyActive) = DragFloat($"###{label}_y", ref y, step, $"{tooltip} Y", UIConstants.GizmoGreen);
+            value.Y = y;
 
             ImGui.PopStyleColor();
             ImGui.PushStyleColor(ImGuiCol.Border, UIConstants.GizmoBlue);
 
-            float z = vectorValue.Z;
-            (var sdidChange, var sanyActive) = DragFloat($"###{label}_z", ref z, step, $"{tooltip} Z");
-            vectorValue.Z = z;
+            float z = value.Z;
+            (var sdidChange, var sanyActive) = DragFloat($"###{label}_z", ref z, step, $"{tooltip} Z", UIConstants.GizmoBlue);
+            value.Z = z;
 
             changed |= pdidChange |= rdidChange |= sdidChange;
             active |= panyActive |= ranyActive |= sanyActive;
@@ -95,21 +91,14 @@ public static partial class ImBrio
         return (active, changed);
     }
 
-
     [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-    public static (bool anyActive, bool didChange) DragFloat3Simple(string label, ref Vector3 value, float step)
+    public static (bool anyActive, bool didChange) DragFloat3Implementation(string label, ref Vector3 value, float step, Vector2 size = default, string? toolTip = null)
     {
-        Vector2 d3size = new(0, 0)
+        if(size == Vector2.Zero)
         {
-            X = GetRemainingWidth() + ImGui.GetStyle().ItemSpacing.X
-        };
+            size = new Vector2(GetRemainingWidth() + ImGui.GetStyle().ItemSpacing.X, 0);
+        }
 
-        return DragFloat3Horizontal($"###{label}", ref value, step, d3size);
-    }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-    public static (bool anyActive, bool didChange) DragFloat3Horizontal(string label, ref Vector3 value, float step, Vector2 size, string? toolTip = null)
-    {
         bool changed = false;
         bool active = false;
 
@@ -122,20 +111,13 @@ public static partial class ImBrio
         if(size.X <= 0)
             size.X = GetRemainingWidth();
 
-        float pillWidth = 3;
-        float pillHeight = 24;
-
-        float entryWidth = ((size.X - (ImGui.GetStyle().ItemSpacing.X * 2)) / 3) - ((pillWidth * ImGuiHelpers.GlobalScale) * 3);
-
-        ImDrawListPtr dl = ImGui.GetWindowDrawList();
-
-        PillDummyBox(ref dl, pillWidth, pillHeight, UIConstants.GizmoRed);
+        float entryWidth = ((size.X - (ImGui.GetStyle().ItemSpacing.X * 2)) / 3);
 
         ImGui.SameLine();
         ImGui.SetNextItemWidth(entryWidth);
 
         using(ImRaii.PushStyle(ImGuiStyleVar.FrameBorderSize, 1f))
-            changed |= ImGui.DragFloat($"##{label}_X", ref value.X, step / 10);
+            changed |= Scrub($"##{label}_X", ref value.X, UIConstants.GizmoRed, entryWidth, step / 10);
 
         if(ImGui.IsItemHovered())
         {
@@ -153,14 +135,10 @@ public static partial class ImBrio
         active |= ImGui.IsItemActive();
 
         ImGui.SameLine();
-
-        PillDummyBox(ref dl, pillWidth, pillHeight, UIConstants.GizmoGreen);
-
-        ImGui.SameLine();
         ImGui.SetNextItemWidth(entryWidth);
 
         using(ImRaii.PushStyle(ImGuiStyleVar.FrameBorderSize, 1f))
-            changed |= ImGui.DragFloat($"##{label}_Y", ref value.Y, step / 10);
+            changed |= Scrub($"##{label}_Y", ref value.Y, UIConstants.GizmoGreen, entryWidth, step / 10, "0.00");
 
         if(ImGui.IsItemHovered())
         {
@@ -178,14 +156,10 @@ public static partial class ImBrio
         active |= ImGui.IsItemActive();
 
         ImGui.SameLine();
-
-        PillDummyBox(ref dl, pillWidth, pillHeight, UIConstants.GizmoBlue);
-
-        ImGui.SameLine();
         ImGui.SetNextItemWidth(entryWidth);
 
         using(ImRaii.PushStyle(ImGuiStyleVar.FrameBorderSize, 1f))
-            changed |= ImGui.DragFloat($"##{label}_Z", ref value.Z, step / 10);
+            changed |= Scrub($"##{label}_Z", ref value.Z, UIConstants.GizmoBlue, entryWidth, step / 10, "0.00");
 
         if(ImGui.IsItemHovered())
         {
@@ -206,7 +180,7 @@ public static partial class ImBrio
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-    public static (bool anyActive, bool didChange) DragFloat(string label, ref float value, float step = 0.1f, string tooltip = "")
+    public static (bool anyActive, bool didChange) DragFloat(string label, ref float value, float step = 0.1f, string tooltip = "", uint color = UIConstants.SlightGrey)
     {
         bool changed = false;
         bool active = false;
@@ -222,7 +196,7 @@ public static partial class ImBrio
         if(FontIconButton(FontAwesomeIcon.ChevronLeft, new Vector2(25 * ImGuiHelpers.GlobalScale)))
         {
             value -= step;
-            changed = true;
+            changed |= true;
         }
 
         AttachToolTip($"Decrease {tooltip}");
@@ -231,14 +205,15 @@ public static partial class ImBrio
 
         bool hasLabel = !label.StartsWith("##");
 
+        float width;
         if(hasLabel)
-            ImGui.SetNextItemWidth((ImGui.GetWindowWidth() * 0.65f) - (buttonWidth * 2) - ImGui.GetStyle().CellPadding.X);
+            width = (ImGui.GetWindowWidth() * 0.65f) - (buttonWidth * 2) - ImGui.GetStyle().CellPadding.X;
         else
-            ImGui.SetNextItemWidth(GetRemainingWidth() - buttonWidth + ImGui.GetStyle().ItemSpacing.X);
+            width = GetRemainingWidth() - buttonWidth + ImGui.GetStyle().ItemSpacing.X;
 
         using(ImRaii.PushStyle(ImGuiStyleVar.FrameBorderSize, 1f))
         {
-            changed |= ImGui.DragFloat($"##{label}_drag", ref value, step / 10.0f);
+            changed |= Scrub($"##{label}_drag", ref value, color, width, step / 10.0f);
             active |= ImGui.IsItemActive();
         }
 
@@ -276,10 +251,19 @@ public static partial class ImBrio
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-    public static (bool anyActive, bool didChange) DragFloat(string label, ref float value, float min, float max, float step = 0.1f, string tooltip = "", int width = 0)
+    public static (bool anyActive, bool didChange) DragFloat2V3(string label, ref Vector3 value, float min, float max, bool degrees = false, float step = 1.0f, Vector2 size = default, string tooltip = "")
     {
+        if(size == Vector2.Zero)
+        {
+            size = new Vector2(GetRemainingWidth() + ImGui.GetStyle().ItemSpacing.X, 0);
+        }
+
         bool changed = false;
         bool active = false;
+
+        Vector2 vectorBuffer = degrees
+            ? new Vector2(BrioUtilities.RadiansToDegrees(-value.X), BrioUtilities.RadiansToDegrees(-value.Y))
+            : new Vector2(value.X, value.Y);
 
         if(InputManagerService.ActionKeysPressed(InputAction.Interface_IncrementSmallModifier))
             step /= 10;
@@ -287,133 +271,83 @@ public static partial class ImBrio
         if(InputManagerService.ActionKeysPressed(InputAction.Interface_IncrementLargeModifier))
             step *= 10;
 
-        float buttonWidth = 32 * ImGuiHelpers.GlobalScale;
-        ImGui.SetNextItemWidth(buttonWidth);
-        if(FontIconButton(FontAwesomeIcon.ChevronLeft, new Vector2(25 * ImGuiHelpers.GlobalScale)))
-        {
-            if(value - step <= min)
-            {
-                value = min;
-            }
-            else
-            {
-                value -= step;
-            }
-            changed = true;
-        }
+        if(size.X <= 0)
+            size.X = GetRemainingWidth();
 
-        AttachToolTip($"Decrease {tooltip}");
+        float entryWidth = (size.X - (ImGui.GetStyle().ItemSpacing.X * 2)) / 2;
 
         ImGui.SameLine();
+        ImGui.SetNextItemWidth(entryWidth);
 
-        bool hasLabel = !label.StartsWith("##");
-
-        if(hasLabel)
-        {
-            ImGui.SetNextItemWidth((ImGui.GetWindowWidth() * 0.65f) - (buttonWidth * 2) - ImGui.GetStyle().CellPadding.X);
-        }
-        else
-        {
-            ImGui.SetNextItemWidth(GetRemainingWidth() - buttonWidth + ImGui.GetStyle().ItemSpacing.X);
-        }
-
-        if(width > 0)
-        {
-            ImGui.SetNextItemWidth(width);
-        }
-
-        if(ImGui.DragFloat($"###{label}_drag", ref value, step / 10.0f, min, max))
-        {
-            if(value < min)
-            {
-                value = min;
-            }
-            else if(value > max)
-            {
-                value = max;
-            }
-            changed |= true;
-        }
-        active |= ImGui.IsItemActive();
+        using(ImRaii.PushStyle(ImGuiStyleVar.FrameBorderSize, 1f))
+            changed |= Scrub($"##{label}_X", ref vectorBuffer.X, UIConstants.GizmoRed, entryWidth, step / 10);
 
         if(ImGui.IsItemHovered())
         {
-            ImGui.SetTooltip($"{tooltip}");
+            AttachToolTip($" X {tooltip}");
             if(!ConfigurationService.Instance.Configuration.InputManager.DisableScrollWheelOnInputs)
             {
                 float mouseWheel = ImGui.GetIO().MouseWheel / 10;
                 if(mouseWheel != 0)
                 {
-                    if(value + (mouseWheel * step) <= min)
-                    {
-                        value = min;
-                    }
-                    else if(value + (mouseWheel * step) >= max)
-                    {
-                        value = max;
-                    }
-                    else
-                    {
-                        value += mouseWheel * step;
-                    }
+                    vectorBuffer.X += mouseWheel * step;
                     changed = true;
                 }
             }
         }
+        active |= ImGui.IsItemActive();
 
         ImGui.SameLine();
-        ImGui.SetNextItemWidth(buttonWidth);
-        if(FontIconButton(FontAwesomeIcon.ChevronRight, new Vector2(25 * ImGuiHelpers.GlobalScale)))
+        ImGui.SetNextItemWidth(entryWidth);
+
+        using(ImRaii.PushStyle(ImGuiStyleVar.FrameBorderSize, 1f))
+            changed |= Scrub($"##{label}_Y", ref vectorBuffer.Y, UIConstants.GizmoGreen, entryWidth, step / 10, "0.00");
+
+        if(ImGui.IsItemHovered())
         {
-            if(value + step >= max)
+            AttachToolTip($" Y {tooltip}");
+            if(!ConfigurationService.Instance.Configuration.InputManager.DisableScrollWheelOnInputs)
             {
-                value = max;
+                float mouseWheel = ImGui.GetIO().MouseWheel / 10;
+                if(mouseWheel != 0)
+                {
+                    vectorBuffer.Y += mouseWheel * step;
+                    changed = true;
+                }
+            }
+        }
+        active |= ImGui.IsItemActive();
+
+        if(changed)
+        {
+            if(degrees)
+            {
+                value.X = BrioUtilities.DegreesToRadians(-vectorBuffer.X);
+                value.Y = BrioUtilities.DegreesToRadians(-vectorBuffer.Y);
             }
             else
             {
-                value += step;
+                value.X = vectorBuffer.X;
+                value.Y = vectorBuffer.Y;
             }
-            changed = true;
-        }
-
-        AttachToolTip($"Increase {tooltip}");
-
-        if(hasLabel)
-        {
-            ImGui.SameLine();
-            ImGui.Text(label);
         }
 
         return (active, changed);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-    public static bool DragFloat2V3(string label, ref Vector3 value, float min, float max, string format, bool degrees = false, ImGuiSliderFlags flags = ImGuiSliderFlags.None, float step = 1.0f)
+    private static bool Scrub(string id, ref float value, uint color, float width, float speed, string format = "0.00", float min = 0f, float max = 0f)
     {
-        Vector2 vector2;
-        bool changed = false;
+        Vector2 startPOS = ImGui.GetCursorScreenPos();
+        float height = ImGui.GetFrameHeight();
+        float rounding = ImGui.GetStyle().FrameRounding;
 
-        if(degrees)
-        {
-            // Convert to degrees
-            vector2 = new Vector2(BrioUtilities.RadiansToDegrees(-value.X), BrioUtilities.RadiansToDegrees(-value.Y));
-            changed = ImGui.DragFloat2(label, ref vector2, step, min, max, format, flags);
-            if(changed)
-            {
-                value.X = BrioUtilities.DegreesToRadians(-vector2.X);
-                value.Y = BrioUtilities.DegreesToRadians(-vector2.Y);
-            }
-        }
-        else
-        {
-            vector2 = new Vector2(value.X, value.Y);
-            changed = ImGui.DragFloat2(label, ref vector2, step, min, max, format, flags);
-            if(changed)
-            {
-                value.X = vector2.X;
-                value.Y = vector2.Y;
-            }
-        }
+        ImGui.GetWindowDrawList().AddRectFilled(startPOS, startPOS + new Vector2(BarWidth + rounding, height), color, rounding, ImDrawFlags.RoundCornersLeft);
+        ImGui.SetCursorScreenPos(startPOS + new Vector2(BarWidth, 0));
+        ImGui.SetNextItemWidth(width - BarWidth);
+
+        bool changed = ImGui.DragFloat(id, ref value, speed, min, max);
+
         return changed;
     }
 }

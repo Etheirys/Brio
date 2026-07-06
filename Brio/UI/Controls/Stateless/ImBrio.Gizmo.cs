@@ -6,6 +6,7 @@ using FFXIVClientStructs.FFXIV.Client.Game.Control;
 using System;
 using System.Numerics;
 using Brio.Config;
+using Brio.UI.Controls.Core;
 
 namespace Brio.UI.Controls.Stateless;
 
@@ -90,6 +91,7 @@ public static partial class ImBrioGizmo
         var transformMatrix = Matrix4x4.CreateFromQuaternion(rotation);
         transformMatrix.Translation = new Vector3(0, -5, 0);
 
+        using(ImRaii.PushColor(ImGuiCol.ChildBg, UIConstants.Transparent))
         using(var child = ImRaii.Child("##imbriozmo", size))
         {
             if(child.Success)

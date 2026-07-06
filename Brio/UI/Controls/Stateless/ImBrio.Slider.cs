@@ -56,10 +56,12 @@ public static partial class ImBrio
             step *= 10;
 
 
+        ImGui.PushID(label);
+
         if(FontIconButton(FontAwesomeIcon.ChevronLeft, new Vector2(25 * ImGuiHelpers.GlobalScale)))
         {
             value -= isAngle ? step * MathHelpers.DegreesToRadians : step;
-            changed = true;
+            changed |= true;
         }
         ImGui.SameLine();
 
@@ -92,7 +94,7 @@ public static partial class ImBrio
                 if(mouseWheel != 0)
                 {
                     value += isAngle ? mouseWheel * step * MathHelpers.DegreesToRadians : mouseWheel * step;
-                    changed = true;
+                    changed |= true;
                 }
             }
         }
@@ -101,7 +103,7 @@ public static partial class ImBrio
         if(FontIconButton(FontAwesomeIcon.ChevronRight, new Vector2(25 * ImGuiHelpers.GlobalScale)))
         {
             value += isAngle ? step * MathHelpers.DegreesToRadians : step;
-            changed = true;
+            changed |= true;
         }
 
         if(hasLabel)
@@ -109,6 +111,8 @@ public static partial class ImBrio
             ImGui.SameLine();
             ImGui.Text(label);
         }
+
+        ImGui.PopID();
 
         return changed;
     }
