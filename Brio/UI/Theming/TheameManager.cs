@@ -225,10 +225,10 @@ public static class ThemeManager
         Name = "Archon Blue",
         Accent = new ThemeAccent
         {
-            AccentColor = SetColor(new Vector4(255, 255, 255, 255)),
-            AccentColorLight = SetColor(new Vector4(255, 255, 255, 255)),
-            AccentColorStrong = SetColor(new Vector4(255, 255, 255, 255)),
-            AccentColorDim = SetColor(new Vector4(255, 255, 255, 255)),
+            AccentColor = SetColor(new Vector4(29, 76, 230, 201)),
+            AccentColorLight = SetColor(new Vector4(29, 76, 230, 201)),
+            AccentColorStrong = SetColor(new Vector4(29, 76, 230, 201)),
+            AccentColorDim = SetColor(new Vector4(29, 76, 230, 201)),
             AccentCheckMark = SetColor(new Vector4(219, 219, 219, 255)),
             AccentButtonHovered = SetColor(new Vector4(29, 76, 230, 201)),
             AccentTabActive = SetColor(new Vector4(20, 20, 58, 224)),
