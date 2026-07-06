@@ -151,7 +151,7 @@ public static class AppearanceEditorCommon
                         bool isSelected = collection.Value.Equals(currentDesign);
                         if(ImGui.Selectable(collection.Value, isSelected))
                         {
-                            capability.CurrentDesign = collection.Value;
+                            capability.CurrentDesign = (collection.Value, collection.Key);
                             capability.SetDesign(collection.Key);
                         }
                     }
@@ -286,7 +286,7 @@ public static class AppearanceEditorCommon
 
         if(_globalNpcSelector.SelectionChanged && _globalNpcSelector.Selected != null)
         {
-            _ = capability.SetAppearance(_globalNpcSelector.Selected.Appearance, options);
+            _ = capability.SetAppearance(_globalNpcSelector.Selected.Appearance, options, true);
             return true;
         }
 
