@@ -164,6 +164,15 @@ public class PenumbraService : BrioIPC
         return collection.Name;
     }
 
+    public Guid? GetCollectionGuidForObject(IGameObject gameObject)
+    {
+        if(IsAvailable == false || gameObject is null)
+            return null;
+
+        var (_, _, collection) = _penumbraGetCollectionForObject.Invoke(gameObject.ObjectIndex);
+        return collection.Id;
+    }
+
     public Guid? SetCollectionForObject(IGameObject gameObject, Guid collectionName)
     {
         if(IsAvailable == false || gameObject is null)
