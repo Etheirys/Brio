@@ -32,6 +32,9 @@ public class Configuration : IPluginConfiguration
     // Library
     public LibraryConfiguration Library { get; set; } = new LibraryConfiguration();
 
+    // Quick Access (Favorites + Recents)
+    public QuickAccessConfiguration QuickAccess { get; set; } = new QuickAccessConfiguration();
+
     // MCDF Data
     public MCDFConfiguration MCDF { get; set; } = new MCDFConfiguration();
 
@@ -45,6 +48,8 @@ public class Configuration : IPluginConfiguration
     public bool UseLibraryWhenImporting { get; set; } = true;
 
     public bool SceneDestoryActorsBeforeImport { get; set; } = false;
+
+    public bool EnableEvents { get; set; } = true;
 
     // Input
     public InputManagerConfiguration InputManager { get; set; } = new InputManagerConfiguration();

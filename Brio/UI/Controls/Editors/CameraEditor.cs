@@ -69,7 +69,6 @@ public static class CameraEditor
                     "Disable Free-Cam Movement" : "Enable Free-Cam Movement"))
                 {
                     camera.FreeCamValues.IsMovementEnabled = !camera.FreeCamValues.IsMovementEnabled;
-                    capability.Snapshot();
                 }
 
                 ImGui.SameLine();
@@ -128,9 +127,10 @@ public static class CameraEditor
 
                 float fov = camera.FoV;
                 ImBrio.CenterNextElementWithPadding(5);
-                if(ImBrio.SliderAngle("###fov", ref fov, -44, 120, "%.2f", ImGuiSliderFlags.AlwaysClamp, toolTip: "FOV"))
+                (var fovDidChange, var fovAnyActive) = ImBrio.SliderAngle("###fov", ref fov, -44, 120, "%.2f", ImGuiSliderFlags.AlwaysClamp, toolTip: "FOV");
+                if(fovDidChange)
                     camera.FoV = fov;
-                anyActiveThisFrame |= ImGui.IsItemActive();
+                anyActiveThisFrame |= fovAnyActive;
 
                 ImGui.SameLine();
 
@@ -149,9 +149,10 @@ public static class CameraEditor
                 ImBrio.CenterNextElementWithPadding(5);
 
                 float pivoRotation = camera.PivotRotation;
-                if(ImBrio.SliderAngle("###rotation", ref pivoRotation, -180, 180, "%.2f", ImGuiSliderFlags.AlwaysClamp, toolTip: "Pivot"))
+                (var pivotDidChange, var pivotAnyActive) = ImBrio.SliderAngle("###rotation", ref pivoRotation, -180, 180, "%.2f", ImGuiSliderFlags.AlwaysClamp, toolTip: "Pivot");
+                if(pivotDidChange)
                     camera.PivotRotation = pivoRotation;
-                anyActiveThisFrame |= ImGui.IsItemActive();
+                anyActiveThisFrame |= pivotAnyActive;
 
                 ImGui.SameLine();
 
@@ -170,9 +171,10 @@ public static class CameraEditor
                 ImBrio.CenterNextElementWithPadding(5);
 
                 float moveSpeed = camera.FreeCamValues.MovementSpeed;
-                if(ImBrio.SliderFloat("##MovementSpeed", ref moveSpeed, 0.005f, 0.3f, "%.4f", ImGuiSliderFlags.AlwaysClamp, step: 0.001f, toolTip: "Movement Speed"))
+                (var moveSpeedDidChange, var moveSpeedAnyActive) = ImBrio.SliderFloat("##MovementSpeed", ref moveSpeed, 0.005f, 0.3f, "%.4f", ImGuiSliderFlags.AlwaysClamp, step: 0.001f, toolTip: "Movement Speed");
+                if(moveSpeedDidChange)
                     camera.FreeCamValues.MovementSpeed = moveSpeed;
-                anyActiveThisFrame |= ImGui.IsItemActive();
+                anyActiveThisFrame |= moveSpeedAnyActive;
 
                 ImGui.SameLine();
 
@@ -191,9 +193,10 @@ public static class CameraEditor
                 ImBrio.CenterNextElementWithPadding(5);
 
                 float mouseSpeed = camera.FreeCamValues.MouseSensitivity;
-                if(ImBrio.SliderFloat("##MouseSensitivity", ref mouseSpeed, 0.001f, 0.2f, "%.4f", ImGuiSliderFlags.AlwaysClamp, step: 0.001f, toolTip: "Mouse Sensitivity"))
+                (var mouseSpeedDidChange, var mouseSpeedAnyActive) = ImBrio.SliderFloat("##MouseSensitivity", ref mouseSpeed, 0.001f, 0.2f, "%.4f", ImGuiSliderFlags.AlwaysClamp, step: 0.001f, toolTip: "Mouse Sensitivity");
+                if(mouseSpeedDidChange)
                     camera.FreeCamValues.MouseSensitivity = mouseSpeed;
-                anyActiveThisFrame |= ImGui.IsItemActive();
+                anyActiveThisFrame |= mouseSpeedAnyActive;
 
                 ImGui.SameLine();
 
@@ -305,9 +308,10 @@ public static class CameraEditor
 
                     float zoom = camera.Zoom;
                     ImBrio.CenterNextElementWithPadding(5);
-                    if(ImBrio.SliderFloat("###zoom", ref zoom, camera.BrioCamera->Camera.MaxDistance, camera.BrioCamera->Camera.MinDistance, "%.2f", ImGuiSliderFlags.AlwaysClamp, toolTip: "Zoom"))
+                    (var zoomDidChange, var zoomAnyActive) = ImBrio.SliderFloat("###zoom", ref zoom, camera.BrioCamera->Camera.MaxDistance, camera.BrioCamera->Camera.MinDistance, "%.2f", ImGuiSliderFlags.AlwaysClamp, toolTip: "Zoom");
+                    if(zoomDidChange)
                         camera.Zoom = zoom;
-                    anyActiveThisFrame |= ImGui.IsItemActive();
+                    anyActiveThisFrame |= zoomAnyActive;
 
                     ImGui.SameLine();
 
@@ -325,9 +329,10 @@ public static class CameraEditor
 
                     float fov = camera.FoV;
                     ImBrio.CenterNextElementWithPadding(5);
-                    if(ImBrio.SliderAngle("###fov", ref fov, -44, 120, "%.2f", ImGuiSliderFlags.AlwaysClamp, toolTip: "FOV"))
+                    (var fovDidChange, var fovAnyActive) = ImBrio.SliderAngle("###fov", ref fov, -44, 120, "%.2f", ImGuiSliderFlags.AlwaysClamp, toolTip: "FOV");
+                    if(fovDidChange)
                         camera.FoV = fov;
-                    anyActiveThisFrame |= ImGui.IsItemActive();
+                    anyActiveThisFrame |= fovAnyActive;
 
                     ImGui.SameLine();
 
@@ -346,9 +351,10 @@ public static class CameraEditor
                     ImBrio.CenterNextElementWithPadding(5);
 
                     float pivotRotation = camera.PivotRotation;
-                    if(ImBrio.SliderAngle("###rotation", ref pivotRotation, -180, 180, "%.2f", toolTip: "Pivot"))
+                    (var pivotDidChange, var pivotAnyActive) = ImBrio.SliderAngle("###rotation", ref pivotRotation, -180, 180, "%.2f", toolTip: "Pivot");
+                    if(pivotDidChange)
                         camera.PivotRotation = pivotRotation;
-                    anyActiveThisFrame |= ImGui.IsItemActive();
+                    anyActiveThisFrame |= pivotAnyActive;
 
                     ImGui.SameLine();
 

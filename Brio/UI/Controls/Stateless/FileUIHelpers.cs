@@ -569,56 +569,56 @@ public class FileUIHelpers
                 {
                     ShowImportPoseModal(capability, transformComponents: transformComponents, applyModelTransformOverride: doTransform);
                 }
-            }
 
-            using(ImRaii.Disabled(false))
-                if(ImBrio.Button("From Clipboard", FontAwesomeIcon.Paste, new(width, height), centerTest: true, tooltip: "Import Pose from Clipboard"))
-                {
-                    var data = ImGui.GetClipboardText();
-                    Clipboard.FromCompressedBase64<PoseFile>(data, out var pose);
-
-                    if(pose is null)
+                using(ImRaii.Disabled(false))
+                    if(ImBrio.Button("From Clipboard", FontAwesomeIcon.Paste, new(width, height), centerTest: true, tooltip: "Import Pose from Clipboard"))
                     {
-                        Brio.NotifyError("Failed to import pose from clipboard! Data on clipboard is not a valid pose.");
-                        Brio.Log.Error("Failed to import pose from clipboard. Data on clipboard is not a valid pose.");
-                        return;
+                        var data = ImGui.GetClipboardText();
+                        Clipboard.FromCompressedBase64<PoseFile>(data, out var pose);
+
+                        if(pose is null)
+                        {
+                            Brio.NotifyError("Failed to import pose from clipboard! Data on clipboard is not a valid pose.");
+                            Brio.Log.Error("Failed to import pose from clipboard. Data on clipboard is not a valid pose.");
+                            return;
+                        }
+
+                        try
+                        {
+                            _ = ImportPose(capability, pose, transformComponents: transformComponents, applyModelTransformOverride: doTransform);
+                        }
+                        catch(Exception ex)
+                        {
+                            Brio.NotifyError("Failed to import pose from clipboard!");
+                            Brio.Log.Error("Failed to import pose from clipboard", ex);
+                        }
                     }
 
-                    try
+                using(ImRaii.Disabled(_lastused is null))
+                    if(ImBrio.Button("Reapply Last Pose", FontAwesomeIcon.PersonWalkingArrowLoopLeft, new(width, height), centerTest: true, tooltip: "Reapply Last Imported Pose"))
                     {
-                        _ = ImportPose(capability, pose, transformComponents: transformComponents, applyModelTransformOverride: doTransform);
+                        _ = ImportPose(capability, _lastused!.Value, transformComponents: transformComponents, applyModelTransformOverride: doTransform);
                     }
-                    catch(Exception ex)
+
+                using(ImRaii.Disabled(_stash is null))
+                    if(ImBrio.Button("Load From Stash", FontAwesomeIcon.Archive, new(width, height), centerTest: true, tooltip: "Load from the Pose Stash"))
                     {
-                        Brio.NotifyError("Failed to import pose from clipboard!");
-                        Brio.Log.Error("Failed to import pose from clipboard", ex);
+                        _ = ImportPose(capability, _stash!.Value, transformComponents: transformComponents, applyModelTransformOverride: doTransform);
                     }
-                }
 
-            using(ImRaii.Disabled(_lastused is null))
-                if(ImBrio.Button("Reapply Last Pose", FontAwesomeIcon.PersonWalkingArrowLoopLeft, new(width, height), centerTest: true, tooltip: "Reapply Last Imported Pose"))
+                ImBrio.SeparatorText("Presets");
+
+                if(ImGui.Button("Import A-Pose", new(width, height)))
                 {
-                    _ = ImportPose(capability, _lastused!.Value, transformComponents: transformComponents, applyModelTransformOverride: doTransform);
+                    capability.LoadResourcesPose("Data.BrioAPose.pose", freezeOnLoad: freezeOnLoad, asBody: true);
+                    ImGui.CloseCurrentPopup();
                 }
 
-            using(ImRaii.Disabled(_stash is null))
-                if(ImBrio.Button("Load From Stash", FontAwesomeIcon.Archive, new(width, height), centerTest: true, tooltip: "Load from the Pose Stash"))
+                if(ImGui.Button("Import T-Pose", new(width, height)))
                 {
-                    _ = ImportPose(capability, _stash!.Value, transformComponents: transformComponents, applyModelTransformOverride: doTransform);
+                    capability.LoadResourcesPose("Data.BrioTPose.pose", freezeOnLoad: freezeOnLoad, asBody: true);
+                    ImGui.CloseCurrentPopup();
                 }
-
-            ImBrio.SeparatorText("Presets");
-
-            if(ImGui.Button("Import A-Pose", new(width, height)))
-            {
-                capability.LoadResourcesPose("Data.BrioAPose.pose", freezeOnLoad: freezeOnLoad, asBody: true);
-                ImGui.CloseCurrentPopup();
-            }
-
-            if(ImGui.Button("Import T-Pose", new(width, height)))
-            {
-                capability.LoadResourcesPose("Data.BrioTPose.pose", freezeOnLoad: freezeOnLoad, asBody: true);
-                ImGui.CloseCurrentPopup();
             }
 
             using(var popup2 = ImRaii.Popup($"import_{tag}_optionsImportPoseMenuPopup"))

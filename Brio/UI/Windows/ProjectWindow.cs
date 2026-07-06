@@ -66,7 +66,7 @@ public class ProjectWindow : Window, IDisposable
     bool destroyAll = false;
     bool useRelativeLightPositions = true;
     bool useRelativeWorldObjectPositions = true;
-    SceneImportOptions importOptions = SceneImportOptions.All;
+    SceneImportOptions importOptions = SceneImportOptions.Default;
     public void DrawLoad()
     {
         var windowSize = ImGui.GetWindowSize();

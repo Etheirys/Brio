@@ -56,7 +56,7 @@ public static partial class ImBrio
                         clicked = entry;
 
                     if(ImGui.IsItemHovered())
-                        AttachToolTip($"{entry.DisplayName}{TooltipSeparator}{entry.Payload}");
+                        AttachToolTip($"{entry.DisplayName}{TooltipSeparator}{entry.Data}");
                 }
             }
         }

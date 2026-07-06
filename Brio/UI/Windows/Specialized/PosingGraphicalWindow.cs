@@ -280,7 +280,7 @@ public class PosingGraphicalWindow : Window, IDisposable
 
         ImBrio.VerticalSeparator(24);
 
-        using(ImRaii.PushColor(ImGuiCol.Text, posing.TransformWindowOpen ? UIConstants.ToggleButtonActive : ThemeManager.CurrentTheme.Text.Text))
+        using(ImRaii.PushColor(ImGuiCol.Text, _hideControlPane ? UIConstants.ToggleButtonActive : ThemeManager.CurrentTheme.Text.Text))
         {
             if(ImBrio.FontIconButton(FontAwesomeIcon.SlidersH, new(buttonWidth, 0)))
                 _hideControlPane = !_hideControlPane;
@@ -351,7 +351,6 @@ public class PosingGraphicalWindow : Window, IDisposable
     private void DrawTransformHeader(PosingCapability posing)
     {
         float width = ((ImGui.GetContentRegionAvail().X - (ImGui.GetStyle().ItemSpacing.X * 3f)) / 4f);
-
         ImBrio.RightAlign((width * 4) + (ImGui.GetStyle().ItemSpacing.X * 3));
      
         PosingEditorCommon.DrawIKSelect(posing, new Vector2(width, 0));
@@ -362,9 +361,7 @@ public class PosingGraphicalWindow : Window, IDisposable
             if(ImBrio.FontIconButton(FontAwesomeIcon.MinusSquare, new Vector2(width, 0)))
                 posing.ClearSelection();
         }
-
-        if(ImGui.IsItemHovered())
-            ImGui.SetTooltip("Clear Selection");
+        ImBrio.AttachToolTip("Clear Selection");
 
 
         ImGui.SameLine();
@@ -379,9 +376,7 @@ public class PosingGraphicalWindow : Window, IDisposable
             if(ImBrio.FontIconButton(FontAwesomeIcon.LevelUpAlt, new Vector2(width, 0)))
                 posing.Selected = new BonePoseInfoId(parentBone!.Name, parentBone!.PartialId, PoseInfoSlot.Character);
         }
-
-        if(ImGui.IsItemHovered())
-            ImGui.SetTooltip("Select Parent");
+        ImBrio.AttachToolTip("Select Parent");
 
         ImGui.SameLine();
 
