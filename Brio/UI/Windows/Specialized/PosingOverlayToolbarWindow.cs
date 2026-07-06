@@ -1,10 +1,14 @@
 ﻿using Brio.Capabilities.Actor;
 using Brio.Capabilities.Posing;
+using Brio.Capabilities.World;
+using Brio.Capabilities.WorldObjects;
 using Brio.Config;
 using Brio.Entities;
 using Brio.Entities.Actor;
+using Brio.Entities.Core;
 using Brio.Game.Input;
 using Brio.Game.Posing;
+using Brio.Game.WorldObjects.Objects;
 using Brio.Input;
 using Brio.Services;
 using Brio.UI.Controls.Core;
@@ -18,6 +22,7 @@ using Dalamud.Interface.Utility.Raii;
 using Dalamud.Interface.Windowing;
 using Dalamud.Plugin.Services;
 using OneOf.Types;
+using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
 
 namespace Brio.UI.Windows.Specialized;
@@ -115,7 +120,8 @@ public class PosingOverlayToolbarWindow : Window
         }
 
         _entityManager.TryGetCapabilityFromSelectedEntity<PosingCapability>(out var posing);
-        _entityManager.TryGetCapabilityFromSelectedEntity<ActionTimelineCapability>(out var timelineCapability);
+        _entityManager.TryGetCapabilityFromSelectedEntity<LightTransformCapability>(out var lightTransform);
+        _entityManager.TryGetCapabilityFromSelectedEntity<WorldObjectTransformCapability>(out var worldTransform);
 
         bool hasMultipleActorsSelected = _entityManager.SelectedEntities.Count > 1;
 
@@ -146,7 +152,7 @@ public class PosingOverlayToolbarWindow : Window
             _gameInputService.AllowEscape = true;
         }
 
-        DrawButtons(posing, timelineCapability, hasMultipleActorsSelected);
+        DrawButtons(posing, lightTransform, worldTransform, hasMultipleActorsSelected);
         DrawBoneFilterPopup();
     }
 
@@ -159,7 +165,7 @@ public class PosingOverlayToolbarWindow : Window
     public Vector2 button3XSizeVector2 => new(button3XSize, button3XSize / 1.2f);
     public Vector2 button4XSizeVector2 => new(button4XSize, button3XSize);
 
-    private void DrawButtons(PosingCapability? posing, ActionTimelineCapability? timelineCapability, bool hasMultipleActorsSelected)
+    private void DrawButtons(PosingCapability? posing, LightTransformCapability? lightTransform, WorldObjectTransformCapability? worldTransform, bool hasMultipleActorsSelected)
     {
         ImGui.PushStyleColor(ImGuiCol.Button, UIConstants.Transparent);
 
@@ -402,13 +408,18 @@ public class PosingOverlayToolbarWindow : Window
         // ------------- State
         //
 
-        using(ImRaii.Disabled(hasMultipleActorsSelected || (!posing?.CanResetBone(bone) ?? false)))
-            if(ImBrio.SeparatorTextButton("State", FontAwesomeIcon.Retweet, "Reset Bone"))
+        var selectedVfx = worldTransform?.GameBgObject as StaticVfxObject;
+
+        using(ImRaii.Disabled(hasMultipleActorsSelected || !((posing?.CanResetBone(bone) ?? false) || selectedVfx is not null)))
+            if(ImBrio.SeparatorTextButton("State", FontAwesomeIcon.Retweet, selectedVfx is not null ? "Restart VFX" : "Reset Bone"))
             {
-                posing?.ResetSelectedBone();
+                if(posing is not null)
+                    posing.ResetSelectedBone();
+                else
+                    selectedVfx?.Resume();
             }
 
-        DrawFrezeButton(timelineCapability, hasMultipleActorsSelected);
+        DrawFrezeButton(hasMultipleActorsSelected);
 
         ImGui.SameLine();
 
@@ -448,13 +459,13 @@ public class PosingOverlayToolbarWindow : Window
 
         using(ImRaii.PushFont(UiBuilder.IconFont))
         {
-            using(ImRaii.Disabled(hasMultipleActorsSelected || (!posing?.HasOverride() ?? false)))
+            using(ImRaii.Disabled(hasMultipleActorsSelected || !CanResetSelectedTransform(posing, lightTransform, worldTransform)))
             {
                 if(ImGui.Button($"{FontAwesomeIcon.Undo.ToIconString()}###reset_pose", new Vector2(button4XSize)))
-                    posing?.Reset(false, false);
+                    ResetSelectedTransform(posing, lightTransform, worldTransform);
             }
         }
-        ImBrio.AttachToolTip($"Reset Transform {posing?.Entity.FriendlyName}");
+        ImBrio.AttachToolTip($"Reset Transform {_entityManager.SelectedEntity?.FriendlyName}");
 
         //using(ImRaii.PushFont(UiBuilder.IconFont))
         //{
@@ -499,7 +510,7 @@ public class PosingOverlayToolbarWindow : Window
 
         // Load Pose Button
 
-        using(ImRaii.Disabled(hasMultipleActorsSelected))
+        using(ImRaii.Disabled(hasMultipleActorsSelected || posing is null))
         using(ImRaii.PushFont(UiBuilder.IconFont))
         {
             if(ImGui.Button($"{FontAwesomeIcon.FileDownload.ToIconString()}###import_pose", button2XSizeVector2))
@@ -511,7 +522,7 @@ public class PosingOverlayToolbarWindow : Window
 
         // Save Pose Button
 
-        using(ImRaii.Disabled(hasMultipleActorsSelected))
+        using(ImRaii.Disabled(hasMultipleActorsSelected || posing is null))
         using(ImRaii.PushFont(UiBuilder.IconFont))
         {
             if(ImGui.Button($"{FontAwesomeIcon.Save.ToIconString()}###export_pose", button2XSizeVector2))
@@ -548,66 +559,102 @@ public class PosingOverlayToolbarWindow : Window
         }
     }
 
-    private void DrawFrezeButton(ActionTimelineCapability? timelineCapability, bool hasMultipleActorsSelected)
+    private static bool CanResetSelectedTransform(PosingCapability? posing, LightTransformCapability? lightTransform, WorldObjectTransformCapability? worldTransform)
+    {
+        if(posing is not null)
+            return posing.HasOverride();
+
+        if(lightTransform is not null)
+            return lightTransform.HasOverride;
+
+        if(worldTransform is not null)
+            return worldTransform.TransformOverride;
+
+        return false;
+    }
+
+    private static void ResetSelectedTransform(PosingCapability? posing, LightTransformCapability? lightTransform, WorldObjectTransformCapability? worldTransform)
+    {
+        if(posing is not null)
+        {
+            posing.Reset(false, false);
+            return;
+        }
+
+        if(lightTransform is not null)
+        {
+            lightTransform.Reset();
+            return;
+        }
+
+        worldTransform?.Reset();
+    }
+
+    private void DrawFrezeButton(bool hasMultipleActorsSelected)
     {
         // Freeze Button
 
+        bool anyFreezable = false;
         bool allFrozen = true;
-        if(hasMultipleActorsSelected)
+        foreach(var entityId in _entityManager.SelectedEntities)
         {
-            foreach(var entityId in _entityManager.SelectedEntities)
+            if(!_entityManager.TryGetEntity(entityId, out var entity))
+                continue;
+
+            if(entity.TryGetCapability<ActionTimelineCapability>(out var cap))
             {
-                if(_entityManager.TryGetEntity(entityId, out var entity))
-                {
-                    if(entity.TryGetCapability<ActionTimelineCapability>(out var cap))
-                    {
-                        if(cap.SpeedMultiplierOverride != 0)
-                        {
-                            allFrozen = false;
-                            break;
-                        }
-                    }
-                }
+                anyFreezable = true;
+                if(cap.SpeedMultiplierOverride != 0)
+                    allFrozen = false;
+            }
+            else if(TryGetSelectedVfx(entity, out var vfx))
+            {
+                anyFreezable = true;
+                if(vfx.Speed != 0)
+                    allFrozen = false;
             }
         }
-        else
-        {
-            allFrozen = timelineCapability?.SpeedMultiplierOverride == 0;
-        }
 
-        using(ImRaii.PushColor(ImGuiCol.Text, allFrozen ? UIConstants.ToggleButtonActive : ThemeManager.CurrentTheme.Text.Text))
+        using(ImRaii.Disabled(!anyFreezable))
+        using(ImRaii.PushColor(ImGuiCol.Text, anyFreezable && allFrozen ? UIConstants.ToggleButtonActive : ThemeManager.CurrentTheme.Text.Text))
         using(ImRaii.PushFont(UiBuilder.IconFont))
         {
-            if(ImGui.Button($"{FontAwesomeIcon.Snowflake.ToIconString()}###freeze_toggle", new Vector2(button4XSize)) || InputManagerService.ActionKeysPressedLastFrame(InputAction.Posing_Freeze))
+            if(ImGui.Button($"{FontAwesomeIcon.Snowflake.ToIconString()}###freeze_toggle", new Vector2(button4XSize)) || (InputManagerService.ActionKeysPressedLastFrame(InputAction.Posing_Freeze) && anyFreezable))
             {
-                if(hasMultipleActorsSelected)
+                bool shouldFreeze = !allFrozen;
+                foreach(var entityId in _entityManager.SelectedEntities)
                 {
-                    bool shouldFreeze = !allFrozen;
-                    foreach(var entityId in _entityManager.SelectedEntities)
+                    if(!_entityManager.TryGetEntity(entityId, out var entity))
+                        continue;
+
+                    if(entity.TryGetCapability<ActionTimelineCapability>(out var cap))
                     {
-                        if(_entityManager.TryGetEntity(entityId, out var entity))
-                        {
-                            if(entity.TryGetCapability<ActionTimelineCapability>(out var cap))
-                            {
-                                if(shouldFreeze)
-                                    cap.SetOverallSpeedOverride(0f);
-                                else
-                                    cap.ResetOverallSpeedOverride();
-                            }
-                        }
+                        if(shouldFreeze)
+                            cap.SetOverallSpeedOverride(0f);
+                        else
+                            cap.ResetOverallSpeedOverride();
                     }
-                }
-                else
-                {
-                    if(timelineCapability?.SpeedMultiplierOverride == 0)
-                        timelineCapability?.ResetOverallSpeedOverride();
-                    else
-                        timelineCapability?.SetOverallSpeedOverride(0f);
+                    else if(TryGetSelectedVfx(entity, out var vfx))
+                    {
+                        vfx.SetSpeed(shouldFreeze ? 0f : 1f);
+                    }
                 }
             }
         }
 
-        ImBrio.AttachToolTip($"{(allFrozen ? "Un-" : "")}Freeze Character{(hasMultipleActorsSelected ? "s" : "")}");
+        ImBrio.AttachToolTip($"{(allFrozen ? "Un-" : "")}Freeze Selected");
+    }
+
+    private static bool TryGetSelectedVfx(Entity entity, [MaybeNullWhen(false)] out StaticVfxObject vfx)
+    {
+        if(entity.TryGetCapability<WorldObjectTransformCapability>(out var worldTransform) && worldTransform.GameBgObject is StaticVfxObject staticVfx)
+        {
+            vfx = staticVfx;
+            return true;
+        }
+
+        vfx = null;
+        return false;
     }
 
     private void DrawBoneFilterPopup()
