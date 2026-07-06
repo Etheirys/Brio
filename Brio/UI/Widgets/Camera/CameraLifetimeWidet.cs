@@ -64,9 +64,14 @@ public class CameraLifetimeWidget(CameraLifetimeCapability capability) : Widget<
         if(Capability.IsAllowed == false)
             return;
 
-        if(ImGui.MenuItem("Target###CameraLifetime_target"))
+        using(ImRaii.Disabled(Capability.CameraEntity.IsDefaultCamera))
         {
-            Capability.VirtualCameraManager.SelectCamera(Capability.VirtualCamera);
+            if(ImGui.MenuItem($"Rename {Capability.CameraEntity.FriendlyName}###CameraLifetime_rename"))
+            {
+                ImGui.CloseCurrentPopup();
+
+                ModalManager.Instance.OpenRenameModal(Capability.Entity);
+            }
         }
 
         if(ImGui.MenuItem("Clone###CameraLifetime_clone"))
@@ -74,9 +79,22 @@ public class CameraLifetimeWidget(CameraLifetimeCapability capability) : Widget<
             Capability.VirtualCameraManager.CloneCamera(Capability.CameraEntity.CameraID);
         }
 
+        if(ImGui.MenuItem("Target###CameraLifetime_target"))
+        {
+            Capability.VirtualCameraManager.SelectCamera(Capability.VirtualCamera);
+        }
+
+        var lockLabel = Capability.Entity.IsLocked ? "Unlock" : "Lock";
+        if(ImGui.MenuItem($"{lockLabel}###CameraLifetime_lock"))
+        {
+            Capability.Entity.IsLocked = !Capability.Entity.IsLocked;
+        }
+
         if(Capability.CanDestroy)
         {
-            if(ImGui.BeginMenu("Destroy###actorlifetime_destroy"))
+            ImGui.Separator();
+
+            if(ImGui.BeginMenu("Destroy###CameraLifetime_destroy"))
             {
                 if(ImGui.MenuItem("Confirm Destruction###CameraLifetime_destroy_confirm"))
                 {
@@ -84,14 +102,6 @@ public class CameraLifetimeWidget(CameraLifetimeCapability capability) : Widget<
                 }
 
                 ImGui.EndMenu();
-            }
-
-
-            if(ImGui.MenuItem($"Rename {Capability.CameraEntity.FriendlyName}###CameraLifetime_rename"))
-            {
-                ImGui.CloseCurrentPopup();
-
-                ModalManager.Instance.OpenRenameModal(Capability.Entity);
             }
         }
     }

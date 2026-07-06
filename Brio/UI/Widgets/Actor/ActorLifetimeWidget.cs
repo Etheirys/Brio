@@ -45,6 +45,13 @@ public class ActorLifetimeWidget(ActorLifetimeCapability capability) : Widget<Ac
 
     public override void DrawPopup()
     {
+        if(ImGui.MenuItem($"Rename {Capability.Actor.FriendlyName}###actorlifetime_rename"))
+        {
+            ImGui.CloseCurrentPopup();
+
+            ModalManager.Instance.OpenRenameModal(Capability.Actor);
+        }
+
         if(Capability.CanClone)
         {
             if(ImGui.MenuItem("Clone###actorlifetime_clone"))
@@ -53,8 +60,27 @@ public class ActorLifetimeWidget(ActorLifetimeCapability capability) : Widget<Ac
             }
         }
 
+        if(ImGui.MenuItem("Move to Camera###actorlifetime_move_to_camera"))
+        {
+            Capability.MoveToCamera();
+        }
+
+        if(ImGui.MenuItem("Target###actorlifetime_target"))
+        {
+            Capability.Target();
+        }
+
+        if(Capability.Entity.TryGetCapability<ActorAppearanceCapability>(out var appearance))
+        {
+            var toggele = appearance.IsHidden ? "Show" : "Hide";
+            if(ImGui.MenuItem($"{toggele} {Capability.Actor.FriendlyName}###Appearance_popup_toggle"))
+                appearance.ToggleHide();
+        }
+
         if(Capability.CanDestroy)
         {
+            ImGui.Separator();
+
             if(ImGui.BeginMenu("Destroy###actorlifetime_destroy"))
             {
                 if(ImGui.MenuItem("Confirm Destruction###actorlifetime_destroy_confirm"))
@@ -64,23 +90,6 @@ public class ActorLifetimeWidget(ActorLifetimeCapability capability) : Widget<Ac
 
                 ImGui.EndMenu();
             }
-        }
-
-        if(ImGui.MenuItem($"Rename {Capability.Actor.FriendlyName}###actorlifetime_rename"))
-        {
-            ImGui.CloseCurrentPopup();
-
-            ModalManager.Instance.OpenRenameModal(Capability.Actor);
-        }
-
-        if(ImGui.MenuItem("Target###actorlifetime_target"))
-        {
-            Capability.Target();
-        }
-
-        if(ImGui.MenuItem("Move to Camera###actorlifetime_move_to_camera"))
-        {
-            Capability.MoveToCamera();
         }
     }
 }

@@ -128,6 +128,8 @@ public class LightTransformCapability : LightCapability, ITransformable, IHistor
             Scale = GameLight.SpawnScale
         };
 
+        IsAdvancedGismoVisible = _configurationService.Configuration.Posing.IsAdvancedGizmoEnabled;
+
         Widget = new LightTransformWidget(this);
     }
 

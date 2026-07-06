@@ -1,6 +1,7 @@
 using Brio.Capabilities.Core;
 using Brio.Entities;
 using Brio.Services;
+using Brio.UI.Widgets.ReferenceImage;
 using Dalamud.Interface.Textures.TextureWraps;
 using Dalamud.Plugin.Services;
 using System;
@@ -22,6 +23,8 @@ public class ReferenceImageCapability : Capability
         _service = service;
 
         ReferenceImageEntity = parent;
+
+        Widget = new ReferenceImageWidget(this);
 
         Task.Run(() => LoadImage(textureProvider));
     }

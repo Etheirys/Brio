@@ -15,7 +15,7 @@ public class ActorAppearanceWidget(ActorAppearanceCapability capability) : Widge
 {
     public override string HeaderName => "Appearance";
 
-    public override WidgetFlags Flags => WidgetFlags.DefaultOpen | WidgetFlags.DrawBody | WidgetFlags.DrawQuickIcons | WidgetFlags.DrawPopup | WidgetFlags.HasAdvanced;
+    public override WidgetFlags Flags => WidgetFlags.DefaultOpen | WidgetFlags.DrawBody | WidgetFlags.DrawQuickIcons | WidgetFlags.HasAdvanced;
 
     public override void DrawBody()
     {
@@ -111,13 +111,6 @@ public class ActorAppearanceWidget(ActorAppearanceCapability capability) : Widge
                     ImGui.CloseCurrentPopup();
             }
         }
-    }
-
-    public override void DrawPopup()
-    {
-        var toggele = Capability.IsHidden ? "Show" : "Hide";
-        if(ImGui.MenuItem($"{toggele} {Capability.Actor.FriendlyName}###Appearance_popup_toggle"))
-            Capability.ToggleHide();
     }
 
     public override void DrawQuickIcons()

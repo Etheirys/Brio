@@ -10,7 +10,50 @@ public class EntityManagerWidget(EntitManagerCapability capability) : Widget<Ent
 {
     public override string HeaderName => "Entity Manager";
 
-    public override WidgetFlags Flags => WidgetFlags.DrawQuickIcons;
+    public override WidgetFlags Flags => WidgetFlags.DrawQuickIcons | WidgetFlags.DrawPopup;
+
+    public override void DrawPopup()
+    {
+        if(ImGui.BeginMenu("Destroy All...###containerwidgetpopup_destroy"))
+        {
+            using(ImRaii.Disabled(Capability.HasFolders == false))
+            {
+                if(ImGui.BeginMenu("Folders###entitymanager_destroyall_folders"))
+                {
+                    if(ImGui.BeginMenu("Return Children to Root###entitymanager_destroyall_folders_return"))
+                    {
+                        if(ImGui.MenuItem("Confirm###entitymanager_destroyall_folders_return_confirm"))
+                            Capability.ReturnAllFolderChildren();
+
+                        ImGui.EndMenu();
+                    }
+
+                    if(ImGui.BeginMenu("Destroy All Children###entitymanager_destroyall_folders_destroy"))
+                    {
+                        if(ImGui.MenuItem("Confirm###entitymanager_destroyall_folders_destroy_confirm"))
+                            Capability.DestroyAllFolderChildren();
+
+                        ImGui.EndMenu();
+                    }
+
+                    ImGui.EndMenu();
+                }
+            }
+
+            using(ImRaii.Disabled(Capability.HasWorldObjects == false))
+            {
+                if(ImGui.BeginMenu("World Objects###entitymanager_destroyall_worldobjects"))
+                {
+                    if(ImGui.MenuItem("Confirm Destruction###entitymanager_destroyall_worldobjects_confirm"))
+                        Capability.DestroyAllWorldObjects();
+
+                    ImGui.EndMenu();
+                }
+            }
+
+            ImGui.EndMenu();
+        }
+    }
 
     public override void DrawQuickIcons()
     {
@@ -51,15 +94,6 @@ public class EntityManagerWidget(EntitManagerCapability capability) : Widget<Ent
             {
 
             }
-
-            //using(ImRaii.Disabled(hasMultiSelect))
-            //{
-            //}
-
-            //using(ImRaii.Disabled(hasMultiSelect == false))
-            //{
-            //}
-
         }
     }
 }

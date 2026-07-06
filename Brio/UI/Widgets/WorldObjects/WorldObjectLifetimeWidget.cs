@@ -43,13 +43,30 @@ public class WorldObjectLifetimeWidget(WorldObjectLifetimeCapability capability)
 
     public override void DrawPopup()
     {
-        if(ImGui.MenuItem("Move to Camera###bglifetime_popup_move"))
-            Capability.MoveToCamera();
+        if(ImGui.MenuItem($"Rename {Capability.Entity.FriendlyName}###bglifetime_popup_rename"))
+        {
+            ImGui.CloseCurrentPopup();
+
+            ModalManager.Instance.OpenRenameModal(Capability.Entity);
+        }
 
         if(Capability.CanClone && ImGui.MenuItem("Clone###bglifetime_popup_clone"))
             Capability.Clone();
 
-        if(Capability.CanDestroy && ImGui.MenuItem("Destroy###bglifetime_popup_destroy"))
-            Capability.Destroy();
+        if(ImGui.MenuItem("Move to Camera###bglifetime_popup_move"))
+            Capability.MoveToCamera();
+
+        if(Capability.CanDestroy)
+        {
+            ImGui.Separator();
+
+            if(ImGui.BeginMenu("Destroy###bglifetime_popup_destroy"))
+            {
+                if(ImGui.MenuItem("Confirm Destruction###bglifetime_popup_destroy_confirm"))
+                    Capability.Destroy();
+
+                ImGui.EndMenu();
+            }
+        }
     }
 }

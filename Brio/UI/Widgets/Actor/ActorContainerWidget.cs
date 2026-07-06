@@ -39,22 +39,33 @@ public class ActorContainerWidget(ActorContainerCapability capability) : Widget<
 
             if(ImGui.MenuItem("Prop###containerwidgetpopup_spawnprop"))
             {
-
+                Capability.WorldObjectService.SpawnProp(new FFXIVClientStructs.FFXIV.Client.Graphics.Scene.WeaponCreateInfo
+                {
+                    WeaponModelId =
+                    {
+                        Id = 9001,
+                        Type = 249,
+                        Variant = 1,
+                        Stain0 = 1,
+                        Stain1 = 1,
+                    },
+                    AnimationVariant = 0,
+                });
             }
 
             if(ImGui.MenuItem("Furniture Item###containerwidgetpopup_spawnfur"))
             {
-
+                Capability.WorldObjectService.SpawnFurniture("bgcommon/hou/outdoor/general/0332/asset/gar_b0_m0332.sgb");
             }
 
             if(ImGui.MenuItem("World Object###containerwidgetpopup_spawnworld"))
             {
-
+                Capability.WorldObjectService.SpawnBgObject("bg/ffxiv/fst_f1/twn/common/bgparts/f1t0_a0_taru1.mdl");
             }
 
             if(ImGui.MenuItem("VFX###containerwidgetpopup_spawnVFX"))
             {
-
+                Capability.WorldObjectService.SpawnStaticVfx("bgcommon/world/common/vfx_for_bg/eff/val_obj001_o.avfx");
             }
 
             ImGui.EndMenu();

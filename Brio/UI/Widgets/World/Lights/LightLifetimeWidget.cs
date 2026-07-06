@@ -43,37 +43,50 @@ public class LightLifetimeWidget(LightLifetimeCapability lightLifetimeCapability
 
     public override void DrawPopup()
     {
-        if(ImGui.MenuItem("Move to Camera###actorlifetime_move_to_camera"))
-        {
-            Capability.MoveToCamera();
-        }
-
-        if(Capability.CanClone)
-        {
-            if(ImGui.MenuItem("Clone###actorlifetime_clone"))
-            {
-                Capability.Clone();
-            }
-        }
-
-        if(Capability.CanDestroy)
-        {
-            if(ImGui.MenuItem("Destroy###actorlifetime_destroy"))
-            {
-                Capability.Destroy();
-            }
-        }
-
-        if(ImGui.MenuItem($"Rename {Capability.Entity.FriendlyName}###actorlifetime_rename"))
+        if(ImGui.MenuItem($"Rename {Capability.Entity.FriendlyName}###lightlifetime_rename"))
         {
             ImGui.CloseCurrentPopup();
 
             ModalManager.Instance.OpenRenameModal(Capability.Entity);
         }
 
-        if(ImGui.MenuItem("Open Light Window###actorlifetime_lightwindow"))
+        if(Capability.CanClone)
+        {
+            if(ImGui.MenuItem("Clone###lightlifetime_clone"))
+            {
+                Capability.Clone();
+            }
+        }
+
+        if(ImGui.MenuItem("Move to Camera###lightlifetime_move_to_camera"))
+        {
+            Capability.MoveToCamera();
+        }
+
+        var togglenText = Capability.GameLight.IsVisible ? $"Turn OFF {Capability.Entity.FriendlyName}" : $"Turn ON {Capability.Entity.FriendlyName}";
+        if(ImGui.MenuItem($"{togglenText}###lightlifetime_toggle"))
+        {
+            Capability.GameLight.ToggleLight();
+        }
+
+        if(ImGui.MenuItem("Open Light Window###lightlifetime_lightwindow"))
         {
             Capability.OpenLightWindow();
+        }
+
+        if(Capability.CanDestroy)
+        {
+            ImGui.Separator();
+
+            if(ImGui.BeginMenu("Destroy###lightlifetime_destroy"))
+            {
+                if(ImGui.MenuItem("Confirm Destruction###lightlifetime_destroy_confirm"))
+                {
+                    Capability.Destroy();
+                }
+
+                ImGui.EndMenu();
+            }
         }
     }
 }
