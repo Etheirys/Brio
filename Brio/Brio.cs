@@ -21,6 +21,7 @@ using Brio.MCDF.Game.FileCache;
 using Brio.MCDF.Game.Services;
 using Brio.Resources;
 using Brio.Services;
+using Brio.Services.Models;
 using Brio.UI;
 using Brio.UI.Controls.Editors;
 using Brio.UI.Modals;
@@ -33,6 +34,7 @@ using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -180,6 +182,7 @@ public class Brio(IDalamudPluginInterface pluginInterface) : IAsyncDalamudPlugin
         serviceCollection.AddSingleton(dalamudServices.Conditions);
         serviceCollection.AddSingleton(dalamudServices.GameGui);
         serviceCollection.AddSingleton(dalamudServices.GameConfig);
+        serviceCollection.AddSingleton(dalamudServices.NotificationManager);
 
         // Core / Misc
         serviceCollection.AddSingleton<SpawnMenu>();
@@ -203,6 +206,7 @@ public class Brio(IDalamudPluginInterface pluginInterface) : IAsyncDalamudPlugin
         serviceCollection.AddSingleton<TimelineIdentification>();
         serviceCollection.AddSingleton<WorldObjectService>();
         serviceCollection.AddSingleton<ReferenceImageService>();
+        serviceCollection.AddSingleton<PathMetadataService>();
 
         // API & Web
         serviceCollection.AddSingleton<BrioAPIService>();
@@ -322,6 +326,32 @@ public class Brio(IDalamudPluginInterface pluginInterface) : IAsyncDalamudPlugin
     {
         UIManager.Instance.NotifyError(message);
     }
+
+    public static void NotifyInfo(string message)
+    {
+        NotificationManager.AddNotification(new Dalamud.Interface.ImGuiNotification.Notification
+        {
+            Title = "Brio Info",
+            Content = message,
+            Type = Dalamud.Interface.ImGuiNotification.NotificationType.Info,
+            RespectUiHidden = false
+        });
+        UIManager.Instance.NotifyInfo(message);
+    }
+
+    public static void PopToast(string message, string title = "Brio Message", Dalamud.Interface.ImGuiNotification.NotificationType type = Dalamud.Interface.ImGuiNotification.NotificationType.Info)
+    {
+        NotificationManager.AddNotification(new Dalamud.Interface.ImGuiNotification.Notification
+        {
+            Title = title,
+            Content = message,
+            Type = type,
+            RespectUiHidden = false
+        });
+    }
+
+    public static bool GameFileExists(string filePath) 
+        => DataManager.FileExists(filePath);
 
     //
     // The following methods are inspired by similar methods in Penumbra for gathering debug info.
