@@ -48,6 +48,8 @@ public class ActorAppearanceWindow : Window, IDisposable
             MaximumSize = new Vector2(1200, 1100)
         };
 
+        this.AllowBackgroundBlur = false;
+
         _gPoseService.OnGPoseStateChange += OnGPoseStateChanged;
     }
 
@@ -65,6 +67,8 @@ public class ActorAppearanceWindow : Window, IDisposable
     bool isAdvancedMenuOpen = true;
     public unsafe override void Draw()
     {
+        ImBrio.BlurWindow();
+
         if(!_entityManager.TryGetCapabilityFromSelectedEntity<ActorAppearanceCapability>(out ActorAppearanceCapability? capability, considerParents: true))
             return;
 

@@ -5,6 +5,7 @@ using System.Runtime.CompilerServices;
 
 namespace Brio.UI.Controls.Stateless;
 
+// This is mostly from Dalamud's code. somewhere in the window stuffs
 public static partial class ImBrio
 {
     private static readonly Vector4 BlurTintMultiplier = new(158 / 255f, 158 / 255f, 158 / 255f, 25 / 255f);
@@ -15,6 +16,9 @@ public static partial class ImBrio
     [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
     public static void BlurWindow(ImGuiWindowFlags flags = ImGuiWindowFlags.None, float blurFactor = 0.10f)
     {
+        if(Config.ConfigurationService.Instance.Configuration.Appearance.EnableBlur is false)
+            return;
+
         var drawList = ImGui.GetWindowDrawList();
 
         var shouldBlur = blurFactor != 0f &&
@@ -41,6 +45,9 @@ public static partial class ImBrio
     [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
     public static void BlurPopup(float blurFactor = 0.10f)
     {
+        if(Config.ConfigurationService.Instance.Configuration.Appearance.EnableBlur is false)
+            return;
+
         var drawList = ImGui.GetWindowDrawList();
 
         var shouldBlur = blurFactor != 0f && ImGui.GetWindowViewport().ID == ImGui.GetMainViewport().ID;

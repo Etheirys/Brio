@@ -29,8 +29,12 @@ public static class BrioStyle
 
             ImGui.PushStyleColor(ImGuiCol.Text, theme.Text.Text);
             ImGui.PushStyleColor(ImGuiCol.TextDisabled, theme.Text.TextDisabled);
+      
+            var opacity = Config.ConfigurationService.Instance.Configuration.Appearance.WindowOpacity;
+            if(Config.ConfigurationService.Instance.Configuration.Appearance.EnableBlur is false)
+                opacity += 0.140f;
 
-            ImGui.PushStyleColor(ImGuiCol.WindowBg, ApplyOpacity(theme.Window.WindowBg, Config.ConfigurationService.Instance.Configuration.Appearance.WindowOpacity));          
+            ImGui.PushStyleColor(ImGuiCol.WindowBg, ApplyOpacity(theme.Window.WindowBg, opacity));          
             ImGui.PushStyleColor(ImGuiCol.ChildBg, theme.Window.ChildBg);
             ImGui.PushStyleColor(ImGuiCol.PopupBg, theme.Window.PopupBg);
 

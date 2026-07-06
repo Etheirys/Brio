@@ -42,6 +42,8 @@ public class PosingTransformWindow : Window
             MaximumSize = new Vector2(350, 850),
             MinimumSize = new Vector2(200, 150)
         };
+
+        this.AllowBackgroundBlur = false;
     }
 
     public override bool DrawConditions()
@@ -54,6 +56,8 @@ public class PosingTransformWindow : Window
 
     public unsafe override void Draw()
     {
+        ImBrio.BlurWindow();
+
         if(!(_entityManager.SelectedEntity is TransformableEntity transformableEntity))
             return;
 

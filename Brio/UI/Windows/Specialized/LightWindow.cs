@@ -40,6 +40,8 @@ public class LightWindow : Window, IDisposable
         };
         this.SizeConstraints = constraints;
 
+        this.AllowBackgroundBlur = false;
+
         _gPoseService.OnGPoseStateChange += OnGPoseStateChange;
     }
 
@@ -52,6 +54,8 @@ public class LightWindow : Window, IDisposable
 
     public override void Draw()
     {
+        ImBrio.BlurWindow();
+
         ImBrio.VerticalPadding(2);
 
         if(_configService.Configuration.Posing.AutoSelectLightWhenClickingOnALight && _entityManager.SelectedEntity is LightEntity lightEntity)

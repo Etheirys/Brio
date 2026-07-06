@@ -6,6 +6,7 @@ using Brio.Game.Cutscene;
 using Brio.Game.GPose;
 using Brio.Game.Posing;
 using Brio.UI.Controls.Editors;
+using Brio.UI.Controls.Stateless;
 using Dalamud.Interface.Windowing;
 using System;
 using System.Numerics;
@@ -36,6 +37,8 @@ public class ActionTimelineWindow : Window, IDisposable
             MinimumSize = new Vector2(430, 350)
         };
 
+        this.AllowBackgroundBlur = false;
+
         _gPoseService.OnGPoseStateChange += OnGPoseStateChange;
     }
 
@@ -51,6 +54,8 @@ public class ActionTimelineWindow : Window, IDisposable
 
     public override void Draw()
     {
+        ImBrio.BlurWindow();
+
         if(!_entityManager.TryGetCapabilityFromSelectedEntity<ActionTimelineCapability>(out var capability, considerParents: true))
         {
             return;

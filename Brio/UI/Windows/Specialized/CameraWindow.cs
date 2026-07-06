@@ -40,11 +40,15 @@ public class CameraWindow : Window, IDisposable
         };
         this.SizeConstraints = constraints;
 
+        this.AllowBackgroundBlur = false;
+
         _gPoseService.OnGPoseStateChange += OnGPoseStateChange;
     }
 
     public override void Draw()
     {
+        ImBrio.BlurWindow();
+
         ImBrio.VerticalPadding(2);
 
         ImGui.Text("Select Camera to Edit:");

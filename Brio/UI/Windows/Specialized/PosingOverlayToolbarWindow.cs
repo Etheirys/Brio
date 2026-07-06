@@ -52,6 +52,7 @@ public class PosingOverlayToolbarWindow : Window
         _framework = framework;
 
         ShowCloseButton = false;
+        this.AllowBackgroundBlur = false;
 
         SizeConstraints = new WindowSizeConstraints
         {
@@ -105,6 +106,8 @@ public class PosingOverlayToolbarWindow : Window
 
     public override void Draw()
     {
+        ImBrio.BlurWindow();
+
         if(_pushedStyle)
         {
             _pushedStyle = false;

@@ -55,6 +55,7 @@ public class AutoSaveWindow : Window, IDisposable
         };
         this.SizeConstraints = constraints;
 
+        this.AllowBackgroundBlur = false;
         _gPoseService.OnGPoseStateChange += GPoseService_OnGPoseStateChange;
     }
 
@@ -90,6 +91,8 @@ public class AutoSaveWindow : Window, IDisposable
     private SceneImportOptions _importOptions = SceneImportOptions.All;
     public override void Draw()
     {
+        ImBrio.BlurWindow();
+
         using(ImRaii.PushColor(ImGuiCol.Text, UIConstants.GizmoMagenta))
         {
             ImGui.Text("ATTENTION: Brio will **NOT** make AutoSaves with this window open!");

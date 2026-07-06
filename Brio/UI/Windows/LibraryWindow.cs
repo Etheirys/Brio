@@ -112,6 +112,8 @@ public class LibraryWindow : Window, IDisposable
         };
         this.SizeConstraints = constraints;
 
+        this.AllowBackgroundBlur = false;
+
         _configurationService = configurationService;
         _libraryManager = libraryManager;
         _gPoseService = gPoseService;
@@ -296,6 +298,8 @@ public class LibraryWindow : Window, IDisposable
 
     public override void Draw()
     {
+        ImBrio.BlurWindow();
+
         DrawLibrary();
     }
 

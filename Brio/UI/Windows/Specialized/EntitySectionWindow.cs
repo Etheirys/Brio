@@ -1,5 +1,6 @@
 using Brio.Entities;
 using Brio.Game.GPose;
+using Brio.UI.Controls.Stateless;
 using Brio.UI.Entitites;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface.Utility.Raii;
@@ -27,11 +28,14 @@ public class EntitySectionWindow : Window, IDisposable
             MaximumSize = new Vector2(400, 1050)
         };
 
+        this.AllowBackgroundBlur = false;
         _gPoseService.OnGPoseStateChange += OnGPoseStateChange;
     }
 
     public override void Draw()
     {
+        ImBrio.BlurWindow();
+
         var selected = _entityManager.SelectedEntity;
 
         WindowName = selected is not null
