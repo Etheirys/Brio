@@ -1,4 +1,5 @@
 ﻿using Brio.Game.GPose;
+using Brio.MCDF.API.Data;
 using Brio.Services;
 using Brio.Services.MediatorMessages;
 using Dalamud.Game.ClientState.Conditions;
@@ -15,7 +16,11 @@ namespace Brio.Game.Core;
 
 public class DalamudService : MediatorSubscriberBase
 {
+    public static DalamudService? Instance;
+
     public bool IsWine { get; init; }
+
+    public uint CurrentTerritory { get { if(field is 0) return _clientState.TerritoryType; return field; } set; } = 0;
 
     private readonly ICondition _condition;
     private readonly IFramework _framework;
@@ -43,6 +48,7 @@ public class DalamudService : MediatorSubscriberBase
         _framework.Update += FrameworkUpdate;
         _clientState.TerritoryChanged += TerritoryChanged;
 
+        Instance = this;
     }
 
     public bool IsInCutscene { get; private set; } = false;
@@ -88,6 +94,8 @@ public class DalamudService : MediatorSubscriberBase
     private void TerritoryChanged(uint obj)
     {
         Mediator.Publish(new TerritoryChangedMessage(obj));
+
+        CurrentTerritory = obj;
     }
 
     public async Task<uint> GetHomeWorldIdAsync()
