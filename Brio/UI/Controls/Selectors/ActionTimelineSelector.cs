@@ -38,12 +38,24 @@ public class ActionTimelineSelector(string id) : Selector<ActionTimelineSelector
 
     public bool IsPinned => _isPinned;
 
+    //TODO(KEN) at some point make all of them use `field`
+
     public bool AllowBlending
     {
         get => _showBlendable;
         set
         {
             _showBlendable = value;
+            UpdateList();
+        }
+    }
+
+    public bool ExpressionsOnly
+    {
+        get => field;
+        set
+        {
+            field = value;
             UpdateList();
         }
     }
@@ -72,6 +84,8 @@ public class ActionTimelineSelector(string id) : Selector<ActionTimelineSelector
                 ImGui.End();
                 return;
             }
+
+            ImBrio.BlurWindow(ImGuiWindowFlags.None);
 
             DrawPinButton();
 
@@ -247,6 +261,9 @@ public class ActionTimelineSelector(string id) : Selector<ActionTimelineSelector
 
     protected override void DrawOptions()
     {
+        if(ExpressionsOnly)
+            return;
+
         bool[] items = [_showEmotes, _showActions, _showRaw];
 
         var changed = ImBrio.ToggleSelecterStrip("actiontimeline_filters_selector", Vector2.Zero, ref items, ["Emotes", "Actions", "Timelines"]);
@@ -306,7 +323,7 @@ public class ActionTimelineSelector(string id) : Selector<ActionTimelineSelector
 
         int emoteCategorySelection = _emoteCategoryValue;
 
-        if(ImBrio.ButtonSelectorStrip("emote_category_filter", Vector2.Zero, ref emoteCategorySelection, ["All", "General", "Special", "Expressions"]))
+        if(ImBrio.ButtonSelectorStrip("emote_category_filter", Vector2.Zero, ref emoteCategorySelection, ["All", "General", "Special", "Expression"]))
         {
             _emoteCategoryValue = emoteCategorySelection;
             _filterByEmoteCategory = _emoteCategoryValue != 0;
@@ -356,6 +373,14 @@ public class ActionTimelineSelector(string id) : Selector<ActionTimelineSelector
 
     protected override bool Filter(ActionTimelineSelectorEntry item, string search)
     {
+        var searchText = $"{item.Name} {item.TimelineId} {item.TimelineType} {item.Slot} {item.Purpose} {item.Key} {item.SecondaryId}";
+
+        if(!searchText.Contains(search, StringComparison.InvariantCultureIgnoreCase))
+            return false;
+
+        if(ExpressionsOnly)
+            return item.TimelineType == ActionTimelineSelectorEntry.OriginalType.Emote && item.EmoteCategory == 3 && item.Purpose == ActionTimelineSelectorEntry.AnimationPurpose.Blend;
+
         if(item.TimelineType == ActionTimelineSelectorEntry.OriginalType.Emote && !_showEmotes)
             return false;
 
@@ -396,12 +421,7 @@ public class ActionTimelineSelector(string id) : Selector<ActionTimelineSelector
             }
         }
 
-        var searchText = $"{item.Name} {item.TimelineId} {item.TimelineType} {item.Slot} {item.Purpose} {item.Key} {item.SecondaryId}";
-
-        if(searchText.Contains(search, StringComparison.InvariantCultureIgnoreCase))
-            return true;
-
-        return false;
+        return true;
     }
 }
 
