@@ -1,4 +1,5 @@
-﻿using FFXIVClientStructs.FFXIV.Client.Game.Control;
+﻿using Brio.Config;
+using FFXIVClientStructs.FFXIV.Client.Game.Control;
 using MessagePack;
 using System;
 using System.Numerics;
@@ -220,7 +221,7 @@ public unsafe partial class VirtualCamera
 [MessagePackObject(keyAsPropertyName: true)]
 public class FreeCamValues
 {
-    public bool IsMovementEnabled = false;
+    public bool IsMovementEnabled = ConfigurationService.Instance.Configuration.Posing.FreeCameraHasMovementEnabledByDefault;
     public bool Move2D = false;
 
     public float MouseSensitivity { get; set; } = 0f;

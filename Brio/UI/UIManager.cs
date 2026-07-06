@@ -40,9 +40,13 @@ public class UIManager : IDisposable
     private readonly PosingGraphicalWindow _graphicalWindow;
     private readonly CameraWindow _cameraWindow;
     private readonly LightWindow _lightWindow;
+    private readonly EntitySectionWindow _entitySectionWindow;
+    private readonly TimelineWindow _timelineWindow;
 
-    private readonly FurnitureCatalogWindow _furnitureCatalogWindow;
+    private readonly CatalogWindow _furnitureCatalogWindow;
     private readonly ReferenceImageService _referenceImageService;
+
+    private readonly ModalManager _modalManager;
 
     private readonly ITextureProvider _textureProvider;
     private readonly IToastGui _toastGui;
@@ -99,8 +103,12 @@ public class UIManager : IDisposable
             AutoSaveWindow autoSaveWindow,
             MCDFWindow mCDFWindow,
             LightWindow lightWindow,
-            FurnitureCatalogWindow furnitureCatalogWindow,
+            EntitySectionWindow entitySectionWindow,
+            TimelineWindow timelineWindow,
+            CatalogWindow furnitureCatalogWindow,
             ReferenceImageService referenceImageService,
+
+            ModalManager modalManager,
 
             PenumbraService penumbraService,
             GlamourerService glamourerService
@@ -130,8 +138,12 @@ public class UIManager : IDisposable
         _autoSaveWindow = autoSaveWindow;
         _mCDFWindow = mCDFWindow;
         _lightWindow = lightWindow;
+        _entitySectionWindow = entitySectionWindow;
+        _timelineWindow = timelineWindow;
         _furnitureCatalogWindow = furnitureCatalogWindow;
         _referenceImageService = referenceImageService;
+
+        _modalManager = modalManager;
 
         _framework = framework;
 
@@ -156,6 +168,8 @@ public class UIManager : IDisposable
         _windowSystem.AddWindow(_autoSaveWindow);
         _windowSystem.AddWindow(_mCDFWindow);
         _windowSystem.AddWindow(_lightWindow);
+        _windowSystem.AddWindow(_entitySectionWindow);
+        _windowSystem.AddWindow(_timelineWindow);
         _windowSystem.AddWindow(_furnitureCatalogWindow);
 
         _gPoseService.OnGPoseStateChange += OnGPoseStateChange;
@@ -181,6 +195,16 @@ public class UIManager : IDisposable
     public void ToggleGraphicalPosingWindow()
     {
         _graphicalWindow.IsOpen = !_graphicalWindow.IsOpen;
+    }
+
+    public void ToggleEntitySectionWindow()
+    {
+        _entitySectionWindow.IsOpen = !_entitySectionWindow.IsOpen;
+    }
+
+    public void ToggleTimelineWindow()
+    {
+        _timelineWindow.IsOpen = !_timelineWindow.IsOpen;
     }
 
     public void ToggleFurnitureCatalogWindow()
@@ -218,6 +242,11 @@ public class UIManager : IDisposable
         _toastGui.ShowError(message);
     }
 
+    public void NotifyInfo(string message)
+    {
+        _toastGui.ShowNormal(message);
+    }
+
     public void ToggleMainWindow() => _mainWindow.IsOpen = !_mainWindow.IsOpen;
     public void ToggleSettingsWindow() => _settingsWindow.IsOpen = !_settingsWindow.IsOpen;
     public void ToggleWelcomeWindow() => _updateWindow.IsOpen = !_updateWindow.IsOpen;
@@ -247,8 +276,7 @@ public class UIManager : IDisposable
             _windowSystem.Draw();
             _referenceImageService.DrawWindows();
             FileDialogManager.Draw();
-            _libraryWindow.DrawModal();
-            RenameActorModal.DrawModal();
+            _modalManager.Draw();
             UpdateKeyBinds();
 
             if(SpawnMenu.NeedsActivation)

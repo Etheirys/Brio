@@ -1,5 +1,6 @@
 using Brio.Core;
 using Brio.Entities;
+using Brio.Entities.Core;
 using Brio.Entities.WorldObjects;
 using Brio.Game.Camera;
 using Brio.Game.Core;
@@ -7,12 +8,14 @@ using Brio.Game.GPose;
 using Brio.Game.WorldObjects.Objects;
 using Brio.Services;
 using Brio.Services.MediatorMessages;
+using Brio.Services.Models;
 using Dalamud.Plugin.Services;
 using FFXIVClientStructs.FFXIV.Client.Graphics.Scene;
 using System;
 using System.Collections.Generic;
 using System.Numerics;
 using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
 
 namespace Brio.Game.WorldObjects;
 
@@ -45,6 +48,15 @@ public unsafe class WorldObjectService : MediatorSubscriberBase
         _sglService = sGLService;
 
         mediator.Subscribe<FrameworkUpdateMessage>(this, (_) => OnFrameworkUpdate());
+        mediator.Subscribe<GposeStateChangedMessage>(this, (state) => OnGPoseStateChanged(state.NewState));
+    }
+
+    private void OnGPoseStateChanged(bool state)
+    {
+        if(state == false)
+        {
+            DestroyAll();
+        }
     }
 
     private void OnFrameworkUpdate()
@@ -67,17 +79,12 @@ public unsafe class WorldObjectService : MediatorSubscriberBase
                     if(vfx.IsDirty)
                     {
                         vfx.IsDirty = false;
-                        vfx.IsVisible = false;
 
-                        _framework.RunOnTick(() =>
-                        {
-                            vfx.IsVisible = true;
-                        }, delayTicks: 2);
-
-                        vfx.VFX->Update(0f);
+                        vfx.VFX->SomeFlags = 0xF7;
+                        vfx.VFX->Update(0.0f);
                     }
 
-                    vfx.CheckRefresh();
+                    //vfx.CheckRefresh();
 
                     break;
 
@@ -99,6 +106,8 @@ public unsafe class WorldObjectService : MediatorSubscriberBase
                     if(furniture.IsValid && furniture.IsDirty)
                     {
                         furniture.SGL->Instances.SetCollidersActive(false);
+                        if(furniture.VsualStateDirty)
+                            furniture.ClearColor();
                     }
                     break;
             }
@@ -115,6 +124,11 @@ public unsafe class WorldObjectService : MediatorSubscriberBase
         _framework.RunOnFrameworkThread(() => SpawnStaticVfxInternal(path));
     public void SpawnFurniture(string path) =>
         _framework.RunOnFrameworkThread(() => SpawnFurnitureInternal(path));
+
+    public Task<BGOObject?> SpawnBgObjectAsync(string path) =>
+        _framework.RunOnFrameworkThread(() => SpawnBgObjectInternal(path));
+    public Task<StaticVfxObject?> SpawnStaticVfxAsync(string path) =>
+        _framework.RunOnFrameworkThread(() => SpawnStaticVfxInternal(path));
 
     private BGOObject? SpawnBgObjectInternal(string path)
     {
@@ -184,6 +198,61 @@ public unsafe class WorldObjectService : MediatorSubscriberBase
 
     //
 
+    public void SpawnFromDTO(WorldObjectDTO dto, Vector3? anchor = null, FolderEntity? folder = null)
+    {
+        var transform = dto.Transform;
+        transform.Position = anchor.HasValue ? anchor.Value + dto.RelativePosition : dto.Transform.Position;
+
+        switch(dto.ObjectType)
+        {
+            case WorldObjectType.BgObject:
+                _framework.RunOnFrameworkThread(() =>
+                {
+                    var worldObj = SpawnBgObjectInternal(dto.Path);
+                    worldObj?.SetTransform(transform);
+                    MoveToFolder(worldObj, folder);
+                });
+                break;
+            case WorldObjectType.StaticVfx:
+                _framework.RunOnFrameworkThread(() =>
+                {
+                    var worldObj = SpawnStaticVfxInternal(dto.Path);
+                    worldObj?.SetTransform(transform);
+                    MoveToFolder(worldObj, folder);
+                });
+                break;
+            case WorldObjectType.Furniture:
+                _framework.RunOnFrameworkThread(() =>
+                {
+                    var worldObj = SpawnFurnitureInternal(dto.Path);
+                    worldObj?.SetTransform(transform);
+                    MoveToFolder(worldObj, folder);
+                });
+                break;
+            case WorldObjectType.Prop:
+                if(dto.PropModel is null)
+                    break;
+                _framework.RunOnFrameworkThread(() =>
+                {
+                    var worldObj = SpawnPropInternal(dto.PropModel.ToWeaponCreateInfo());
+                    worldObj?.SetTransform(transform);
+                    MoveToFolder(worldObj, folder);
+                });
+                break;
+        }
+    }
+
+    private void MoveToFolder(IWorldObject? obj, FolderEntity? folder)
+    {
+        if(obj is null || folder is null)
+            return;
+
+        var entity = _worldObjectEntities.Components[obj.EntityIndex];
+
+        if(entity is not null)
+            _entityManager.MoveEntity(entity, folder);
+    }
+
     public void Clone(IWorldObject obj)
     {
         var currentTransform = obj.Transform;
@@ -239,7 +308,7 @@ public unsafe class WorldObjectService : MediatorSubscriberBase
 
         var current = obj.Transform;
         current.Position = position;
-        obj.Transform = current;
+        obj.SetTransform(current);
     }
 
     public void DestroyAll()

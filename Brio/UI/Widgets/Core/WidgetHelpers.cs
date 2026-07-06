@@ -85,8 +85,8 @@ public class WidgetHelpers
 
             uint btnBg = (buttonHovered, buttonHovered && ImGui.IsMouseDown(ImGuiMouseButton.Left)) switch
             {
-                (true, true) => ImGui.GetColorU32(ImGuiCol.HeaderActive),
-                (true, false) => ImGui.GetColorU32(ImGuiCol.HeaderHovered),
+                (true, true) => ImGui.GetColorU32(ImGuiCol.ButtonActive),
+                (true, false) => ImGui.GetColorU32(ImGuiCol.ButtonHovered),
                 (false, _) => ImGui.GetColorU32(ImGuiCol.Header),
             };
 
@@ -141,7 +141,8 @@ public class WidgetHelpers
             ImGui.NewLine();
     }
 
-    public static void DrawQuickIconSection(Capability capability) => DrawQuickIconSection(capability.Widget);
+    public static void DrawQuickIconSection(Capability capability) 
+        => DrawQuickIconSection(capability.Widget);
 
     public static void DrawQuickIconSection(IWidget? widget)
     {

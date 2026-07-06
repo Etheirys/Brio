@@ -1,7 +1,9 @@
+using Brio.Capabilities.Timeline;
 using Brio.Capabilities.WorldObjects;
 using Brio.Core;
 using Brio.Entities.Core;
 using Brio.Game.WorldObjects;
+using Brio.UI;
 using Brio.UI.Controls;
 using Brio.UI.Controls.Stateless;
 using Brio.UI.Theming;
@@ -10,25 +12,24 @@ using Dalamud.Interface;
 using Dalamud.Interface.Utility.Raii;
 using Microsoft.Extensions.DependencyInjection;
 using System;
-using System.IO;
 
 namespace Brio.Entities.WorldObjects;
 
-public class WorldObjectEntity(IWorldObject gameObject, IServiceProvider provider) : TransformableEntity(new EntityId(gameObject), provider), ITransformable
+public class WorldObjectEntity(IWorldObject worldObject, IServiceProvider provider) : TransformableEntity(new EntityId(worldObject), provider), ITransformable
 {
-    public IWorldObject GameBgObject => gameObject;
+    public IWorldObject GameBgObject => worldObject;
 
     public string RawName = "";
 
     public override string FriendlyName
     {
         get => string.IsNullOrEmpty(RawName)
-            ? $"{gameObject.FriendlyName}: {Path.GetFileNameWithoutExtension(gameObject.Path)}"
+            ? (!string.IsNullOrEmpty(worldObject.FriendlyPath) ? $"{worldObject.FriendlyName} [{worldObject.FriendlyPath}]" : worldObject.FriendlyName)
             : RawName;
         set => RawName = value;
     }
 
-    public override FontAwesomeIcon Icon => gameObject.ObjectType switch
+    public override FontAwesomeIcon Icon => worldObject.ObjectType switch
     {
         WorldObjectType.BgObject => FontAwesomeIcon.Box,
         WorldObjectType.StaticVfx => FontAwesomeIcon.Burst,
@@ -42,18 +43,18 @@ public class WorldObjectEntity(IWorldObject gameObject, IServiceProvider provide
     public override int ContextButtonCount => 1;
 
     public override void OnDoubleClick() 
-        => RenameActorModal.Open(this);
+        => ModalManager.Instance.OpenRenameModal(this);
 
     public override void Snapshot()
     => Transformable?.Snapshot();
 
     public override void DrawContextButton()
     {
-        using(ImRaii.PushColor(ImGuiCol.Button, ThemeManager.CurrentTheme.Accent.AccentColor, !gameObject.IsVisible))
+        using(ImRaii.PushColor(ImGuiCol.Button, ThemeManager.CurrentTheme.Accent.AccentColor, !worldObject.IsVisible))
         {
-            string toolTip = gameObject.IsVisible ? $"Hide {FriendlyName}" : $"Show {FriendlyName}";
-            if(ImBrio.FontIconButtonRight($"###{Id}_hideObj", gameObject.IsVisible ? FontAwesomeIcon.Eye : FontAwesomeIcon.EyeSlash, 1f, toolTip, bordered: false))
-                gameObject.IsVisible = !gameObject.IsVisible;
+            string toolTip = worldObject.IsVisible ? $"Hide {FriendlyName}" : $"Show {FriendlyName}";
+            if(ImBrio.FontIconButtonRight($"###{Id}_hideObj", worldObject.IsVisible ? FontAwesomeIcon.Eye : FontAwesomeIcon.EyeSlash, 1f, toolTip, bordered: false))
+                worldObject.IsVisible = !worldObject.IsVisible;
         }
     }
 
@@ -69,5 +70,7 @@ public class WorldObjectEntity(IWorldObject gameObject, IServiceProvider provide
         AddTransformable<WorldObjectTransformCapability>();
 
         AddCapability(ActivatorUtilities.CreateInstance<DebugWorldObjectCapability>(_serviceProvider, this));
+
+        AddCapability(ActivatorUtilities.CreateInstance<WorldObjectTimelineCapability>(_serviceProvider, this));
     }
 }

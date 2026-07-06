@@ -1,6 +1,5 @@
 using Brio.Capabilities.WorldObjects;
 using Brio.UI.Controls;
-using Brio.UI.Controls.Editors;
 using Brio.UI.Controls.Stateless;
 using Brio.UI.Widgets.Core;
 using Dalamud.Bindings.ImGui;
@@ -15,28 +14,31 @@ public class WorldObjectLifetimeWidget(WorldObjectLifetimeCapability capability)
 
     public override void DrawQuickIcons()
     {
-        if(ImBrio.FontIconButton("bglifetime_spawnnew", FontAwesomeIcon.Plus, "New..."))
-            SpawnMenu.OpenUnifiedSpawnMenu();
-
-        ImGui.SameLine();
-
-        if(ImBrio.FontIconButton("bglifetime_movetocamera", FontAwesomeIcon.CameraRotate, "Move to Camera"))
-            Capability.MoveToCamera();
-
-        ImGui.SameLine();
-
         if(ImBrio.FontIconButton("bglifetime_clone", FontAwesomeIcon.Clone, "Clone", Capability.CanClone))
+        {
             Capability.Clone();
+        }
 
         ImGui.SameLine();
 
-        if(ImBrio.FontIconButton("bglifetime_destroy", FontAwesomeIcon.Trash, "Destroy", Capability.CanDestroy))
+        if(ImBrio.FontIconButton("bglifetime_movetocamera", FontAwesomeIcon.CaretSquareDown, "Move to Camera"))
+        {
+            Capability.MoveToCamera();
+        }
+
+        ImBrio.VerticalSeparator(24, 1);
+
+        if(ImBrio.HoldButton("bglifetime_destroy", "", FontAwesomeIcon.Trash, 1f, new(40, 0), centerTest: true, tooltip: "[HOLD TO DESTROY]", onlyIcon: true))
+        {
             Capability.Destroy();
+        }
 
-        ImGui.SameLine();
+        ImBrio.VerticalSeparator(24, 1);
 
         if(ImBrio.FontIconButton("bglifetime_rename", FontAwesomeIcon.Signature, "Rename"))
-            RenameActorModal.Open(Capability.Entity);
+        {
+            ModalManager.Instance.OpenRenameModal(Capability.Entity);
+        }
     }
 
     public override void DrawPopup()

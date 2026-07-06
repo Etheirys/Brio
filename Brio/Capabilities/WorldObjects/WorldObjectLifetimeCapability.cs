@@ -9,7 +9,7 @@ public class WorldObjectLifetimeCapability : WorldObjectCapability
     private readonly WorldObjectService _bgObjectService;
 
     public bool CanDestroy => true;
-    public bool CanClone => GameBgObject.ObjectType is WorldObjectType.BgObject or WorldObjectType.StaticVfx or WorldObjectType.Prop;
+    public bool CanClone => GameBgObject.ObjectType is WorldObjectType.BgObject or WorldObjectType.Furniture or WorldObjectType.StaticVfx or WorldObjectType.Prop;
 
     public WorldObjectLifetimeCapability(Entity parent, WorldObjectService bgObjectService) : base(parent)
     {
