@@ -14,6 +14,7 @@ using Brio.UI.Windows.Specialized;
 using Dalamud.Plugin.Services;
 using OneOf;
 using OneOf.Types;
+using Swan;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,7 +22,7 @@ using System.Numerics;
 
 namespace Brio.Capabilities.Posing;
 
-public class PosingCapability : ActorCharacterCapability
+public class PosingCapability : ActorCharacterCapability, IHistoryCompatible
 {
     public PosingSelectionType Selected { get; set; } = new None();
     public PosingSelectionType Hover { get; set; } = new None();
@@ -51,12 +52,9 @@ public class PosingCapability : ActorCharacterCapability
 
     public bool CanResetBone(Bone? bone) => ModelPosing.HasOverride == false || !(bone is not null && !SkeletonPosing.PoseInfo.GetPoseInfo(bone).HasStacks);
 
-    public bool CanUndo => _undoStack.Count is not 0 and not 1 || _groupedUndoService.CanUndo;
-    public bool CanRedo => _redoStack.Count > 0 || _groupedUndoService.CanRedo;
+    public bool CanUndo => _entityManager.CanUndoSelected;
+    public bool CanRedo => _entityManager.CanRedoSelected;
     public bool HasIKApplied => SkeletonPosing.PoseInfo.HasIKStacks;
-
-    private Stack<PoseStack> _undoStack = [];
-    private Stack<PoseStack> _redoStack = [];
 
     public bool OverlayOpen
     {
@@ -81,13 +79,13 @@ public class PosingCapability : ActorCharacterCapability
     private readonly PosingTransformWindow _overlayTransformWindow;
     private readonly IFramework _framework;
     private readonly GameInputService _gameInputService;
-    private readonly HistoryService _groupedUndoService;
+    private readonly HistoryService _historyService;
     private readonly EntityManager _entityManager;
 
     public PosingCapability(
         ActorEntity parent,
         PosingOverlayWindow window,
-        HistoryService groupedUndoService,
+        HistoryService historyService,
         PosingService posingService,
         EntityManager entityManager,
         ConfigurationService configurationService,
@@ -104,7 +102,7 @@ public class PosingCapability : ActorCharacterCapability
         _overlayTransformWindow = overlayTransformWindow;
         _entityManager = entityManager;
         _framework = framework;
-        _groupedUndoService = groupedUndoService;
+        _historyService = historyService;
         _gameInputService = gameInputService;
     }
 
@@ -147,8 +145,8 @@ public class PosingCapability : ActorCharacterCapability
         }
     }
 
-    public void ImportPose(OneOf<PoseFile, CMToolPoseFile> rawPoseFile, PoseImporterOptions? options = null, bool asExpression = false, bool asScene = false, bool asIPCpose = false, bool asBody = false,
-        bool freezeOnLoad = false, bool asProp = false, TransformComponents? transformComponents = null, bool? applyModelTransformOverride = null)
+    public void ImportPose(OneOf<PoseFile, CMToolPoseFile, PoseData> rawPoseFile, PoseImporterOptions? options = null, bool asExpression = false, bool asScene = false, bool asIPCpose = false, bool asBody = false,
+        bool freezeOnLoad = false, TransformComponents? transformComponents = null, bool? applyModelTransformOverride = null)
     {
         if(Actor.TryGetCapability<ActionTimelineCapability>(out var actionTimeline))
         {
@@ -157,7 +155,7 @@ public class PosingCapability : ActorCharacterCapability
             actionTimeline.StopSpeedAndResetTimeline(() =>
             {
                 ImportPose_Internal(rawPoseFile, options, reset: false, reconcile: false, asExpression: asExpression, asScene: asScene,
-                    asIPCpose: asIPCpose, asBody: asBody, asProp: asProp, transformComponents: transformComponents, applyModelTransformOverride: applyModelTransformOverride);
+                    asIPCpose: asIPCpose, asBody: asBody, asProp: false, transformComponents: transformComponents, applyModelTransformOverride: applyModelTransformOverride);
 
             }, !(ConfigurationService.Instance.Configuration.Posing.FreezeActorOnPoseImport || freezeOnLoad));
         }
@@ -168,14 +166,15 @@ public class PosingCapability : ActorCharacterCapability
     }
 
     // TODO change this boolean hell into flags after Scenes are added
-    PoseFile? tempPose;
-    internal void ImportPose_Internal(OneOf<PoseFile, CMToolPoseFile> rawPoseFile, PoseImporterOptions? options = null, bool generateSnapshot = true, bool reset = true, bool reconcile = true,
+    PoseData? tempPose;
+    internal void ImportPose_Internal(OneOf<PoseFile, CMToolPoseFile, PoseData> rawPoseFile, PoseImporterOptions? options = null, bool generateSnapshot = true, bool reset = true, bool reconcile = true,
         bool asExpression = false, bool expressionPhase2 = false, bool asScene = false, bool asIPCpose = false, bool asBody = false, bool asProp = false,
         TransformComponents? transformComponents = null, bool? applyModelTransformOverride = null)
     {
         var poseFile = rawPoseFile.Match(
                 poseFile => poseFile,
-                cmToolPoseFile => cmToolPoseFile.Upgrade()
+                cmToolPoseFile => cmToolPoseFile.Upgrade(),
+                poseData => poseData
             );
 
         if(poseFile.Bones.Count == 0 && poseFile.MainHand.Count == 0 && poseFile.OffHand.Count == 0)
@@ -193,7 +192,7 @@ public class PosingCapability : ActorCharacterCapability
             Brio.Log.Debug("Loading as Expression");
 
             options = _posingService.ExpressionOptions;
-            tempPose = GeneratePoseFile();
+            tempPose = GeneratePoseData();
         }
         else if(asBody)
         {
@@ -254,25 +253,56 @@ public class PosingCapability : ActorCharacterCapability
 
     public PoseFile ExportPoseAsFileData()
     {
-        return GeneratePoseFile();
+        var poseData = GeneratePoseData();
+
+        var poseFile = new PoseFile
+        {
+            Bones = poseData.Bones,
+            MainHand = poseData.MainHand,
+            OffHand = poseData.OffHand,
+            Prop = poseData.Prop,
+            Ornament = poseData.Ornament,
+            ModelDifference = poseData.ModelDifference,
+            ModelAbsoluteValues = poseData.ModelAbsoluteValues,
+            Rotation = poseData.Rotation,
+            Scale = poseData.Scale,
+            Position = poseData.Position
+        };
+
+        return poseFile;
     }
     public void SavePoseToPath(string path, PoseMetaData? poseMetaData = null)
     {
-        var poseFile = ExportPose();
+        var poseFile = ExportPoseAsFileData();
+
+        if(poseMetaData != null)
+        {
+            poseFile.ModelId = poseMetaData.ModelId;
+            poseFile.RaceSexId = poseMetaData.RaceSexId;
+            poseFile.FaceID = poseMetaData.FaceID;
+        }
+
         ResourceProvider.Instance.SaveFileDocument(path, poseFile);
     }
 
+    public object CaptureInitialState() => new PoseStack(new PoseInfo(), ModelPosing.OriginalTransform);
+
+    public void ApplyState(object state)
+    {
+        var poseStack = (PoseStack)state;
+        SkeletonPosing.PoseInfo = poseStack.Info.Clone();
+        ModelPosing.Transform = poseStack.ModelTransform;
+    }
+
+    void IHistoryCompatible.Snapshot() => Snapshot();
+
     public void Snapshot(bool reset = true, bool reconcile = true, bool asExpression = false)
     {
-        var undoStackSize = _configurationService.Configuration.Posing.UndoStackSize;
-        if(undoStackSize <= 0)
+        if(_configurationService.Configuration.Posing.UndoStackSize <= 0)
         {
-            _undoStack.Clear();
-            _redoStack.Clear();
+            _historyService.Snapshot(Entity.Id, this, new PoseStack(SkeletonPosing.PoseInfo.Clone(), ModelPosing.Transform));
             return;
         }
-
-        _redoStack.Clear();
 
         if(asExpression == true)
         {
@@ -282,11 +312,7 @@ public class PosingCapability : ActorCharacterCapability
             return;
         }
 
-        if(_undoStack.Count == 0)
-            _undoStack.Push(new PoseStack(new PoseInfo(), ModelPosing.OriginalTransform));
-
-        _undoStack.Push(new PoseStack(SkeletonPosing.PoseInfo.Clone(), ModelPosing.Transform));
-        _undoStack = _undoStack.Trim(undoStackSize + 1);
+        _historyService.Snapshot(Entity.Id, this, new PoseStack(SkeletonPosing.PoseInfo.Clone(), ModelPosing.Transform));
 
         if(SkeletonPosing.PoseInfo.HasIKStacks is false)
             ReconcileHead();
@@ -326,48 +352,17 @@ public class PosingCapability : ActorCharacterCapability
         }
     }
 
-    public void Redo()
-    {
-        if(_entityManager.SelectedEntitys.Count > 1)
-        {
-            _groupedUndoService.Redo();
-            return;
-        }
+    public void Redo() => _entityManager.RedoSelected();
 
-        if(_redoStack.TryPop(out var redoStack))
-        {
-            _undoStack.Push(redoStack);
-            SkeletonPosing.PoseInfo = redoStack.Info.Clone();
-            ModelPosing.Transform = redoStack.ModelTransform;
-        }
-    }
-
-    public void Undo()
-    {
-        if(_entityManager.SelectedEntitys.Count > 1)
-        {
-            _groupedUndoService.Undo();
-            return;
-        }
-
-        if(_undoStack.TryPop(out var undoStack))
-            _redoStack.Push(undoStack);
-
-        if(_undoStack.TryPeek(out var applicable))
-        {
-            SkeletonPosing.PoseInfo = applicable.Info.Clone();
-            ModelPosing.Transform = applicable.ModelTransform;
-        }
-    }
+    public void Undo() => _entityManager.UndoSelected();
 
     public void Reset(bool generateSnapshot = true, bool reset = true, bool clearHistStack = true)
     {
-        if(Actor.IsProp == false)
-            SkeletonPosing.ResetPose();
+        SkeletonPosing.ResetPose();
         ModelPosing.ResetTransform();
 
         if(clearHistStack)
-            _redoStack.Clear();
+            _historyService.ClearRedo(Entity.Id);
 
         if(generateSnapshot)
             Snapshot(reset);
@@ -425,7 +420,7 @@ public class PosingCapability : ActorCharacterCapability
         _framework.RunOnTick(() =>
         {
             var all = new PoseImporterOptions(new BoneFilter(_posingService), TransformComponents.All, true);
-            var poseFile = GeneratePoseFile();
+            var poseFile = GeneratePoseData();
             if(reset)
             {
                 Reset(generateSnapshot, false);
@@ -434,9 +429,9 @@ public class PosingCapability : ActorCharacterCapability
         }, delayTicks: 2);
     }
 
-    public PoseFile GeneratePoseFile()
+    public PoseData GeneratePoseData()
     {
-        var poseFile = new PoseFile();
+        var poseFile = new PoseData();
         SkeletonPosing.ExportSkeletonPose(poseFile);
         ModelPosing.ExportModelPose(poseFile);
         return poseFile;
@@ -485,7 +480,7 @@ public class PosingCapability : ActorCharacterCapability
         if(skeleton == null || skeleton.Bones.Count == 0)
             return;
 
-        var currentPose = GeneratePoseFile();
+        var currentPose = GeneratePoseData();
         var mirroredPose = new PoseFile();
 
         var processedBones = new HashSet<string>(); // We need to track processed bones to avoid double-processing left/right pairs in some instances 
@@ -576,8 +571,8 @@ public class PosingCapability : ActorCharacterCapability
     {
         // This creates generation loss over multiple uses, as floating point precision errors accumulate.
         var euler = transform.Rotation.ToEuler();
-        euler.X = 180 - euler.X;
-        euler.Y = -euler.Y;
+        euler.Y = 180 - euler.Y;
+        euler.X = -euler.X;
         var mirroredRotation = euler.ToQuaternion();
 
         var mirroredPosition = new Vector3(-transform.Position.X, transform.Position.Y, transform.Position.Z);
@@ -598,7 +593,7 @@ public class PosingCapability : ActorCharacterCapability
         var mirroredPosition = new Vector3(-transform.Position.X, transform.Position.Y, transform.Position.Z);
 
         var euler = transform.Rotation.ToEuler();
-        euler.Y = -euler.Y;
+        euler.X = -euler.X;
         var mirroredRotation = euler.ToQuaternion();
 
         return new Transform

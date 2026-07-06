@@ -20,12 +20,9 @@ public static class PosingEditorCommon
     {
         ImGui.Text(posing.Selected.DisplayName);
 
-        if(posing.Actor.IsProp == false)
-        {
-            ImGui.SetWindowFontScale(0.75f);
-            ImGui.TextDisabled(posing.Selected.Subtitle);
-            ImGui.SetWindowFontScale(1.0f);
-        }
+        ImGui.SetWindowFontScale(0.75f);
+        ImGui.TextDisabled(posing.Selected.Subtitle);
+        ImGui.SetWindowFontScale(1.0f);
 
         BonePoseInfoId? selectedIsBone = posing.IsSelectedBone();
         using(ImRaii.PushColor(ImGuiCol.Text, UIConstants.GizmoRed))
