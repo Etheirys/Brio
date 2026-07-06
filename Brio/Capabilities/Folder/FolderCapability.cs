@@ -2,7 +2,7 @@ using Brio.Capabilities.Actor;
 using Brio.Capabilities.Core;
 using Brio.Capabilities.World;
 using Brio.Capabilities.WorldObjects;
-using Brio.Entities;
+using Brio.Entities.Camera;
 using Brio.Entities.Core;
 using Brio.UI.Widgets.Folder;
 using System.Collections.Generic;
@@ -11,13 +11,10 @@ namespace Brio.Capabilities.Folder;
 
 public class FolderCapability : Capability
 {
-    private readonly EntityManager _entityManager;
-
     public FolderEntity FolderEntity { get; }
 
-    public FolderCapability(FolderEntity parent, EntityManager entityManager) : base(parent)
+    public FolderCapability(FolderEntity parent) : base(parent)
     {
-        _entityManager = entityManager;
         FolderEntity = parent;
 
         Widget = new FolderWidget(this);
@@ -54,9 +51,9 @@ public class FolderCapability : Capability
         }
 
         foreach(var child in childCopy)
-            _entityManager.MoveEntity(child, parent);
+            FolderEntity.EntityManager.MoveEntity(child, parent);
 
-        _entityManager.DetachEntity(FolderEntity, false);
+        parent.EntityManager.DetachEntity(FolderEntity, false);
     }
 
     public void DeleteFolderDestroyChildren()
@@ -64,7 +61,7 @@ public class FolderCapability : Capability
         var childCopy = new List<Entity>(FolderEntity.Children);
         DestroyChildren(childCopy);
 
-        _entityManager.DetachEntity(FolderEntity, true);
+        FolderEntity.EntityManager.DetachEntity(FolderEntity, true);
     }
 
     private void DestroyChildren(IEnumerable<Entity> children)
@@ -74,14 +71,17 @@ public class FolderCapability : Capability
             // this is hacky
             try
             {
-                if(child.TryGetCapability<ActorLifetimeCapability>(out var actorLt))
-                    actorLt.Destroy();
-                else if(child.TryGetCapability<LightLifetimeCapability>(out var lightLt))
-                    lightLt.Destroy();
-                else if(child.TryGetCapability<WorldObjectLifetimeCapability>(out var worldObjLt))
-                    worldObjLt.Destroy();
+                if(child.TryGetCapability<ActorLifetimeCapability>(out var actor))
+                    actor.Destroy();
+                else if(child.TryGetCapability<LightLifetimeCapability>(out var light))
+                    light.Destroy();
+                else if(child.TryGetCapability<WorldObjectLifetimeCapability>(out var worldObj))
+                    worldObj.Destroy();
 
-                _entityManager.DetachEntity(child, true);
+                if(child is CameraEntity cameraEntity && cameraEntity.IsDefaultCamera)
+                    continue;
+
+                FolderEntity.EntityManager.DetachEntity(child, true);
             }
             catch(System.Exception)
             {

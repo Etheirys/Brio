@@ -1,4 +1,5 @@
 ﻿using Brio.Capabilities.Folder;
+using Brio.UI;
 using Brio.UI.Controls;
 using Brio.UI.Controls.Stateless;
 using Brio.UI.Theming;
@@ -19,6 +20,7 @@ public class FolderEntity : Entity
     public override int ContextButtonCount => 1;
 
     public bool AreChildrenHidden { get; set; }
+    public bool IsEditable { get; set; } = true;
 
     public FolderEntity(string name, IServiceProvider serviceProvider) : base($"folder_{Guid.NewGuid():N}", serviceProvider)
     {
@@ -32,7 +34,7 @@ public class FolderEntity : Entity
 
     public override void OnDoubleClick()
     {
-        RenameActorModal.Open(this);
+        ModalManager.Instance.OpenRenameModal(this);
     }
 
     public override void DrawContextButton()
