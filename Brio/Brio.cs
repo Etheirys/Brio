@@ -23,6 +23,7 @@ using Brio.Resources;
 using Brio.Services;
 using Brio.UI;
 using Brio.UI.Controls.Editors;
+using Brio.UI.Modals;
 using Brio.UI.Windows;
 using Brio.UI.Windows.Specialized;
 using Brio.Web;
@@ -53,6 +54,8 @@ public class Brio(IDalamudPluginInterface pluginInterface) : IAsyncDalamudPlugin
 
     public static IPluginLog Log { get; private set; } = null!;
     public static IFramework Framework { get; private set; } = null!;
+    public static IDataManager DataManager { get; private set; } = null!;
+    public static INotificationManager NotificationManager { get; private set; } = null!;
 
     private DiagnosticTracker _perfTracker = new("ServiceStartup", logInterval: 1, slowFrameThresholdMs: 1, slowFrameCooldownFrames: 1, []);
 
@@ -67,6 +70,8 @@ public class Brio(IDalamudPluginInterface pluginInterface) : IAsyncDalamudPlugin
             var dalamudServices = new DalamudPluginService(_pluginInterface);
             Log = dalamudServices.Log;
             Framework = dalamudServices.Framework;
+            DataManager = dalamudServices.DataManager;
+            NotificationManager = dalamudServices.NotificationManager;
 
             try
             {
@@ -265,6 +270,15 @@ public class Brio(IDalamudPluginInterface pluginInterface) : IAsyncDalamudPlugin
         // UI
         serviceCollection.AddSingleton<UIManager>();
 
+        // Modals
+        serviceCollection.AddSingleton<ModalManager>();
+        serviceCollection.AddSingleton<RenameActorModal>();
+        serviceCollection.AddSingleton<ExportSceneModal>();
+        serviceCollection.AddSingleton<ImportSceneModal>();
+        serviceCollection.AddSingleton<SaveProjectModal>();
+        serviceCollection.AddSingleton<MetadataModal>();
+
+        // Windows
         serviceCollection.AddSingleton<MainWindow>();
         serviceCollection.AddSingleton<SettingsWindow>();
         serviceCollection.AddSingleton<ProjectWindow>();
