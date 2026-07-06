@@ -36,7 +36,7 @@ public static class BrioStyle
 
             ImGui.PushStyleColor(ImGuiCol.WindowBg, ApplyOpacity(theme.Window.WindowBg, opacity));          
             ImGui.PushStyleColor(ImGuiCol.ChildBg, theme.Window.ChildBg);
-            ImGui.PushStyleColor(ImGuiCol.PopupBg, theme.Window.PopupBg);
+            ImGui.PushStyleColor(ImGuiCol.PopupBg, ApplyOpacity(theme.Window.PopupBg, opacity));
 
             ImGui.PushStyleColor(ImGuiCol.Border, theme.Window.Border);
             ImGui.PushStyleColor(ImGuiCol.BorderShadow, theme.Window.BorderShadow);
