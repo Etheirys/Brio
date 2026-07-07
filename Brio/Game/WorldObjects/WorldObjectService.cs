@@ -86,7 +86,11 @@ public unsafe class WorldObjectService : MediatorSubscriberBase
                         vfx.VFX->Update(0.0f);
                     }
 
-                    //vfx.CheckRefresh();
+                    if((vfx.Moved && vfx.ShouldStartWithoutSpeed) || (vfx.IsDirty && vfx.ShouldStartWithoutSpeed))
+                    {
+                        vfx.Moved = false;
+                        vfx.SetSpeed(0f);
+                    }
 
                     break;
 

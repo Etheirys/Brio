@@ -1,4 +1,6 @@
 using Brio.Core;
+using Brio.Resources;
+using Brio.Resources.Extra;
 using System;
 using System.IO;
 
@@ -8,13 +10,15 @@ public interface IWorldObject : ITransformable, IDisposable
 {
     WorldObjectType ObjectType { get; }
     string FriendlyName { get; }
-    string FriendlyPath { get; }
+    string FriendlyPath { get; set; }
 
     nint Address { get; }
     bool IsValid { get; }
     bool IsVisible { get; set; }
     bool IsDirty { get; set; }
     bool IsEphemeral { get; set; }
+
+    PathData? PathMeta { get; set; }
 
     int EntityIndex { get; }
     int Index { get; }
@@ -35,9 +39,10 @@ public abstract class WorldObject : IWorldObject
 
     public abstract WorldObjectType ObjectType { get; }
     public virtual string FriendlyName { get; protected set; } = string.Empty;
-    public virtual string FriendlyPath { get { if(string.IsNullOrEmpty(field)) return field = System.IO.Path.GetFileNameWithoutExtension(Path); else return field; } }
+    public virtual string FriendlyPath { get { if(string.IsNullOrEmpty(field)) return field = System.IO.Path.GetFileNameWithoutExtension(Path); else return field; } set; }
     public abstract nint Address { get; }
- 
+    public virtual PathData? PathMeta { get => field ??= GameDataProvider.Instance.PathDatabase.GetPathDataByPath(Path); set; }
+
     public virtual bool IsValid => Address != nint.Zero;
 
     public virtual bool IsVisible { get; set; }

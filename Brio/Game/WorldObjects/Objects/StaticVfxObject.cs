@@ -17,6 +17,10 @@ public unsafe class StaticVfxObject : WorldObject
 
     public bool IsLooping = false;
     public bool WantsReload = false;
+    public bool ShouldResume = true;
+    public bool ShouldStartWithoutSpeed = false;
+
+    public bool Moved = false;
 
     public bool NeedsRefresh => IsValid && DateTime.UtcNow >= Expires;
     public int VfxRefreshIntervalSeconds { get; set; } = 100;
@@ -38,6 +42,7 @@ public unsafe class StaticVfxObject : WorldObject
             else
                 return field;
         }
+        set;
     }
 
     public override nint Address => (nint)VFX;
@@ -47,7 +52,7 @@ public unsafe class StaticVfxObject : WorldObject
     public Vector3 Intensity => IsValid ? VfxResource->Intensity : Vector3.Zero;
     public float Speed => IsValid ? VfxResource->Speed : 0f;
 
-    public override bool IsVisible 
+    public override bool IsVisible
     {
         get => IsValid && ((VFXObject*)VFX)->Alpha > 0f;
         set
@@ -82,9 +87,19 @@ public unsafe class StaticVfxObject : WorldObject
         {
             _vFXService.PlayStaticVFX(VFX);
             Expires = DateTime.UtcNow + TimeSpan.FromSeconds(VfxRefreshIntervalSeconds);
-        
+
             IsVisible = true;
         }
+    }
+
+    public override void Recreate(string path)
+    {
+        Destroy();
+        Path = path;
+        PathMeta = null;
+        FriendlyPath = string.Empty;
+        VFX = null;
+        Create();
     }
 
     public void Reload()
@@ -102,7 +117,7 @@ public unsafe class StaticVfxObject : WorldObject
         {
             _vFXService.PlayStaticVFX(VFX);
             Expires = DateTime.UtcNow + TimeSpan.FromSeconds(VfxRefreshIntervalSeconds);
-        
+
             IsVisible = true;
         }
     }
@@ -136,7 +151,7 @@ public unsafe class StaticVfxObject : WorldObject
     public bool IsActive()
     {
         if(!IsValid) return false;
-       
+
         return _vFXService.IsActiveStatic(VFX);
     }
 
@@ -170,9 +185,14 @@ public unsafe class StaticVfxObject : WorldObject
         VFX->Position = transform.Position;
         VFX->Rotation = transform.Rotation;
         VFX->Scale = transform.Scale;
-       
+
         VFX->NotifyTransformChanged();
         VFX->UpdateCulling();
+
+        if(ShouldResume)
+            Resume();
+
+        Moved = true;
     }
 
     public override void Destroy()

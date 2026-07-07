@@ -45,6 +45,7 @@ public unsafe class BrioPropObject : WorldObject
             else
                 return field;
         }
+        set;
     }
 
     public override nint Address => (nint)Weapon;

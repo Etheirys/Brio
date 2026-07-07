@@ -1,5 +1,6 @@
 using Brio.Core;
 using Brio.Resources;
+using Brio.Resources.Extra;
 using FFXIVClientStructs.FFXIV.Client.Graphics.Scene;
 using System;
 
@@ -28,6 +29,7 @@ public unsafe class BGOObject : WorldObject
             else
                 return field;
         }
+        set;
     }
 
     public override nint Address => (nint)BgObject;
@@ -60,6 +62,16 @@ public unsafe class BGOObject : WorldObject
         SetTransform(Transform);
 
         BgObject->UpdateCulling();
+    }
+
+    public override void Recreate(string path)
+    {
+        Destroy();
+        Path = path;
+        PathMeta = null;
+        FriendlyPath = string.Empty;
+        BgObject = null;
+        Create(path);
     }
 
     public override Transform GetTransform()
