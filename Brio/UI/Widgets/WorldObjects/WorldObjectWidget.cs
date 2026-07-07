@@ -540,6 +540,8 @@ public class WorldObjectWidget(WorldObjectTransformCapability worldcap) : Widget
 
         using(var group = ImRaii.Group())
         {
+            ImBrio.VerticalPadding(2);
+
             var color = (Vector4)staticVfx.VFX->Color;
             if(ImBrio.SeparatorTextButton(name, FontAwesomeIcon.Undo, enabled: color != Vector4.One, tooltip: "Reset Color"))
                 staticVfx.VFX->Color = Vector4.One;
