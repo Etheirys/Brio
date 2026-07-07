@@ -60,7 +60,7 @@ public class PosingConfiguration
     public int UndoStackSize { get; set; } = 50;
 
     public bool FreezeActorOnPoseImport { get; set; } = false;
-   
+
     public bool FreeCameraHasMovementEnabledByDefault { get; set; } = true;
     public bool IsAdvancedGizmoEnabled { get; set; } = true;
 

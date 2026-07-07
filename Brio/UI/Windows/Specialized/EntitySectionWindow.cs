@@ -2,8 +2,6 @@ using Brio.Entities;
 using Brio.Game.GPose;
 using Brio.UI.Controls.Stateless;
 using Brio.UI.Entitites;
-using Dalamud.Bindings.ImGui;
-using Dalamud.Interface.Utility.Raii;
 using Dalamud.Interface.Windowing;
 using System;
 using System.Numerics;
@@ -46,7 +44,7 @@ public class EntitySectionWindow : Window, IDisposable
                 ? $"{Brio.Name} - [{selected.FriendlyName}]###brio_entity_section_window"
                 : $"{Brio.Name} - ENTITY###brio_entity_section_window";
 
-        EntityHelpers.DrawEntitySection(sectionEntity, drawChild:true);
+        EntityHelpers.DrawEntitySection(sectionEntity, drawChild: true);
     }
 
     private void OnGPoseStateChange(bool newState)

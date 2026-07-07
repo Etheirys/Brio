@@ -3,14 +3,12 @@ using Brio.Capabilities.Posing;
 using Brio.Config;
 using Brio.Core;
 using Brio.Entities;
-using Brio.Entities.Core;
 using Brio.Game.Actor.Appearance;
 using Brio.Game.Camera;
 using Brio.Game.GPose;
 using Brio.Game.Posing;
 using Brio.Input;
 using Brio.Resources;
-using Brio.Services;
 using Brio.UI.Controls.Core;
 using Brio.UI.Controls.Editors;
 using Brio.UI.Controls.Stateless;
@@ -352,7 +350,7 @@ public class PosingGraphicalWindow : Window, IDisposable
     {
         float width = ((ImGui.GetContentRegionAvail().X - (ImGui.GetStyle().ItemSpacing.X * 3f)) / 4f);
         ImBrio.RightAlign((width * 4) + (ImGui.GetStyle().ItemSpacing.X * 3));
-     
+
         PosingEditorCommon.DrawIKSelect(posing, new Vector2(width, 0));
 
         ImGui.SameLine();

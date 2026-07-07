@@ -8,7 +8,7 @@ public class QuickAccessService(ConfigurationService configurationService)  // T
 {
     private readonly ConfigurationService _configurationService = configurationService;
 
-    private QuickAccessConfiguration Config 
+    private QuickAccessConfiguration Config
         => _configurationService.Configuration.QuickAccess;
 
     public bool IsFavorite(string surface, string id)

@@ -900,7 +900,7 @@ public unsafe class PosingOverlayWindow : MediatorWindow
                     {
                         var point = points[i];
                         DrawLine(drawList,
-                            position + point.X * localHalfX + point.Y * localHalfY - localHalfZ, 
+                            position + point.X * localHalfX + point.Y * localHalfY - localHalfZ,
                             position + point.X * localHalfX + point.Y * localHalfY + localHalfZ,
                             thickness, color);
                     }
@@ -1020,7 +1020,7 @@ public unsafe class PosingOverlayWindow : MediatorWindow
             }
         }
     }
-  
+
     // UI State
     //
 

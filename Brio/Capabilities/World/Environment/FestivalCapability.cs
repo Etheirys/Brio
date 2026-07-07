@@ -4,7 +4,6 @@ using Brio.Game.World;
 using Brio.UI.Widgets.World;
 using FFXIVClientStructs.FFXIV.Client.Game;
 using System.Collections.Generic;
-using System.Linq;
 using static Brio.Game.World.FestivalService;
 
 namespace Brio.Capabilities.World;

@@ -25,7 +25,7 @@ public class UpdateWindow : Window
     // Some code found here is inspired by CharacterSelect+
 
     private static float CloseButtonWidth => 310f * ImGuiHelpers.GlobalScale;
-   
+
     private bool _scrollToTop = false;
 
     private ChangelogFile? _changelogFile;

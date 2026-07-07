@@ -5,7 +5,6 @@ using Brio.Core;
 using Brio.Entities.Core;
 using Brio.Game.World.Lights;
 using Brio.UI;
-using Brio.UI.Controls;
 using Brio.UI.Controls.Stateless;
 using Brio.UI.Theming;
 using Dalamud.Bindings.ImGui;

@@ -116,7 +116,7 @@ public static class CameraEditor
                 DrawCameraActorSelect(capability);
 
                 //
-             
+
                 using(ImRaii.Disabled(camera.IsOverridden))
                     if(ImBrio.SeparatorTextButton("Properties", FontAwesomeIcon.Undo, "Reset to Default"))
                     {

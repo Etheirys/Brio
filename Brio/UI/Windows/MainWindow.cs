@@ -9,7 +9,6 @@ using Brio.UI.Controls.Core;
 using Brio.UI.Controls.Editors;
 using Brio.UI.Controls.Stateless;
 using Brio.UI.Entitites;
-using Brio.UI.Theming;
 using Brio.UI.Windows.Specialized;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface;
@@ -54,7 +53,7 @@ public class MainWindow : Window, IDisposable
         ProjectSystem projectSystem
         )
         : base($" {Brio.Name} [{configService.Version}]###brio_main_window", ImGuiWindowFlags.AlwaysAutoResize)
-        //: base($" {Brio.Name} [0.8.0.0]###brio_main_window", ImGuiWindowFlags.AlwaysAutoResize)
+    //: base($" {Brio.Name} [0.8.0.0]###brio_main_window", ImGuiWindowFlags.AlwaysAutoResize)
     {
         Namespace = "brio_main_namespace";
 
@@ -128,11 +127,11 @@ public class MainWindow : Window, IDisposable
             var isUndocked = _entitySectionWindow.IsOpen;
 
             var pos = ImGui.GetCursorPos();
-          
+
             if(ImBrio.FontIconButtonRight("undock_entity_section", isUndocked ? FontAwesomeIcon.Compress : FontAwesomeIcon.WindowRestore, 1,
                 tooltip: isUndocked ? "Redock Entity Widgets" : "Undock Entity Widgets into it's own Window"))
                 _entitySectionWindow.IsOpen = !_entitySectionWindow.IsOpen;
-       
+
             ImGui.SetCursorPos(pos);
 
             using(ImRaii.Disabled(_gPoseService.IsGPosing == false || selected?.IsLoading == true))
@@ -209,7 +208,7 @@ public class MainWindow : Window, IDisposable
 
     private void DrawHeaderButtons()
     {
-        float buttonWidths = 25 ;
+        float buttonWidths = 25;
         float line1FinalWidth = ImBrio.GetRemainingWidth() - (((buttonWidths * 2) * ImGuiHelpers.GlobalScale) + (ImGui.GetStyle().ItemSpacing.X * 2) + ImGui.GetStyle().WindowBorderSize);
 
         float line1Width = (line1FinalWidth / 2) - 3;
@@ -250,12 +249,12 @@ public class MainWindow : Window, IDisposable
 
         //if(ImBrio.Button("Open Vivacity Timeline BETA", FontAwesomeIcon.Timeline, new Vector2(-1, 0), centerTest: true))
         //{
-                
+
         //}
-    
+
         //
 
-            using(ImRaii.Disabled(_mCDFService.IsApplyingMCDF))
+        using(ImRaii.Disabled(_mCDFService.IsApplyingMCDF))
             FileUIHelpers.DrawProjectPopup(_sceneService, _entityManager, _projectWindow, _autoSaveService, _projectSystem);
     }
 

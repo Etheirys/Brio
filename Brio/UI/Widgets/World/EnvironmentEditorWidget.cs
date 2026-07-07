@@ -31,7 +31,7 @@ public class EnvironmentEditorWidget(EnvironmentEditorCapability capability) : W
             case 0:
                 ImBrio.VerticalPadding(3);
 
-                if(ImBrio.SeparatorTextButton("Particles", FontAwesomeIcon.Redo, "Reset All Particle Properties", 
+                if(ImBrio.SeparatorTextButton("Particles", FontAwesomeIcon.Redo, "Reset All Particle Properties",
                      Capability.Environment.EnvironmentOverrideState.HasFlag(EnvironmentOverrideState.Particles)))
                 {
                     Capability.Environment.EnvironmentOverrideState &= ~EnvironmentOverrideState.Particles;
@@ -145,7 +145,7 @@ public class EnvironmentEditorWidget(EnvironmentEditorCapability capability) : W
 
                 ImBrio.VerticalPadding(5);
                 ImBrio.SeparatorText("Advanced");
-         
+
                 ImBrio.CenterNextElementWithPadding(15);
                 didRainChange |= ImGui.SliderFloat("###rainScattering"u8, ref env->EnvState.Rain.Scatter, 0.0f, 10.0f);
                 ImBrio.AttachToolTip("Rain Scattering");
@@ -162,7 +162,7 @@ public class EnvironmentEditorWidget(EnvironmentEditorCapability capability) : W
                 break;
             case 2:
                 ImBrio.VerticalPadding(3);
-               
+
                 if(ImBrio.SeparatorTextButton("Wind", FontAwesomeIcon.Redo, "Reset All Rain Properties",
                     Capability.Environment.EnvironmentOverrideState.HasFlag(EnvironmentOverrideState.Wind)))
                 {
@@ -189,7 +189,7 @@ public class EnvironmentEditorWidget(EnvironmentEditorCapability capability) : W
                 break;
             case 3:
                 ImBrio.VerticalPadding(3);
-            
+
                 if(ImBrio.SeparatorTextButton("Fog", FontAwesomeIcon.Redo, "Reset All Fog Properties",
                      Capability.Environment.EnvironmentOverrideState.HasFlag(EnvironmentOverrideState.Fog)))
                 {

@@ -35,7 +35,7 @@ public unsafe class BrioPropObject : WorldObject
         {
             if(string.IsNullOrEmpty(field))
             {
-                var equip = new WeaponModelId { Id = ModelSetId, Type = SecondaryId, Variant =  Variant, Stain0 = PrimaryDye, Stain1 = SecondaryDye };
+                var equip = new WeaponModelId { Id = ModelSetId, Type = SecondaryId, Variant = Variant, Stain0 = PrimaryDye, Stain1 = SecondaryDye };
 
                 var info = GameDataProvider.Instance.ModelDatabase.GetModelById(equip, ActorEquipSlot.Prop)?.Name ?? string.Empty;
                 if(!string.IsNullOrEmpty(info))

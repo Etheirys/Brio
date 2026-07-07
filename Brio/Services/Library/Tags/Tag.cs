@@ -12,12 +12,12 @@ public class Tag : IEquatable<Tag?>
         _name = name;
         IsToolGenerated = isToolGenerated;
     }
-   
+
     // TODO: a lookup in resources for tag name (I don't know what this means - ken)
     private readonly string _name;
     public string DisplayName => _name;
     public string Name => _name;
-   
+
     private readonly HashSet<string> _aliases = [];
     public IReadOnlyCollection<string> Aliases => _aliases;
 

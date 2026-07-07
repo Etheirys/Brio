@@ -62,7 +62,7 @@ public class ConfigurationService : IDisposable
         try
         {
             var path = pluginInterface.ConfigDirectory.FullName;
-        
+
             if(!System.IO.Directory.Exists(path))
                 System.IO.Directory.CreateDirectory(path);
 

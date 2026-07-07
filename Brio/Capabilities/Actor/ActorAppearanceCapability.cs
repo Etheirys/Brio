@@ -17,10 +17,10 @@ using Brio.Resources;
 using Brio.UI.Widgets.Actor;
 using Dalamud.Plugin.Services;
 using FFXIVClientStructs.FFXIV.Client.Game.Character;
+using Glamourer.Api.Enums;
 using System;
 using System.Text;
 using System.Threading.Tasks;
-using Glamourer.Api.Enums;
 
 namespace Brio.Capabilities.Actor;
 
@@ -114,7 +114,7 @@ public class ActorAppearanceCapability : ActorCharacterCapability
         {
             return (true, SelectedDesign.id.Value);
         }
-     
+
         return (false, Guid.Empty);
     }
     public string GetCurrentDesign()
@@ -145,7 +145,7 @@ public class ActorAppearanceCapability : ActorCharacterCapability
         {
             return (true, collection.Value);
         }
-        
+
         return (false, Guid.Empty);
     }
 

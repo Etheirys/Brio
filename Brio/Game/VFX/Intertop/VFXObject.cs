@@ -26,7 +26,7 @@ public unsafe struct VFXObject
 
     [FieldOffset(0x24C)] public byte LoopMode;
     [FieldOffset(0x24D)] public byte LoopModeB;
-    
+
     [FieldOffset(0x250)] public uint TriggerParam;
     [FieldOffset(0x254)] public uint Unk1;
     [FieldOffset(0x25C)] public uint CurrentTrigger;

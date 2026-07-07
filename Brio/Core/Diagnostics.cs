@@ -27,7 +27,7 @@ public static class Diagnostics
     /// </summary>
     public static DiagnosticScope MeasureTime(ref DiagnosticTrace trace, bool logOnDispose, string logLabel)
         => new(ref trace, 0, logOnDispose, logLabel);
-  
+
     public static bool TickSlowFrame(double ms, double thresholdMs, ref int cooldown, int cooldownFrames)
     {
         if(ms > thresholdMs && cooldown <= 0)
@@ -198,7 +198,7 @@ public struct DiagnosticTracker(string tag, int logInterval, double slowFrameThr
         if(_dynamicTraces == null)
             return;
 
-        double totalAverage = 0; 
+        double totalAverage = 0;
         foreach(var tracesKVP in _dynamicTraces)
         {
             var trace = tracesKVP.Value;

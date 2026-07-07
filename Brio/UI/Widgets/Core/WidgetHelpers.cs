@@ -105,7 +105,7 @@ public class WidgetHelpers
 
         var upperLeft = ImGui.GetCursorScreenPos();
         var lowerRight = upperLeft + new Vector2(headerWidth, ImGui.GetFrameHeight());
-        
+
         uint headerBg = (ImGui.IsMouseHoveringRect(upperLeft, lowerRight - new Vector2(0.001f, 0f)), ImGui.IsMouseDown(ImGuiMouseButton.Left)) switch
         {
             (true, true) => ImGui.GetColorU32(ImGuiCol.HeaderActive),
@@ -141,7 +141,7 @@ public class WidgetHelpers
             ImGui.NewLine();
     }
 
-    public static void DrawQuickIconSection(Capability capability) 
+    public static void DrawQuickIconSection(Capability capability)
         => DrawQuickIconSection(capability.Widget);
 
     public static void DrawQuickIconSection(IWidget? widget)

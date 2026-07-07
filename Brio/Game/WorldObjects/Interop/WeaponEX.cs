@@ -1,8 +1,5 @@
 ﻿using FFXIVClientStructs.FFXIV.Client.Graphics.Scene;
-using System;
-using System.Collections.Generic;
 using System.Runtime.InteropServices;
-using System.Text;
 
 namespace Brio.Game.WorldObjects.Interop;
 

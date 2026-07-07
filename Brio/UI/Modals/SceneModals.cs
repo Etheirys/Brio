@@ -34,7 +34,7 @@ public class ExportSceneModal : Modal
         ImBrio.SeparatorText($" Author ");
         ImGui.SetNextItemWidth(-float.Epsilon);
         ImGui.InputText("###export_author", ref _author, 100);
-      
+
         ImBrio.SeparatorText($" Description ");
         ImGui.SetNextItemWidth(-float.Epsilon);
         ImGui.InputText("###export_description", ref _description, 250);

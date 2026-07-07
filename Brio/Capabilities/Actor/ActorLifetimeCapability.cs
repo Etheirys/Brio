@@ -1,15 +1,14 @@
-﻿using Brio.Entities;
+﻿using Brio.Capabilities.Posing;
+using Brio.Entities;
 using Brio.Entities.Actor;
+using Brio.Entities.Core;
 using Brio.Game.Actor;
 using Brio.Game.Actor.Extensions;
 using Brio.Game.Camera;
-using Brio.Capabilities.Posing;
 using Brio.Game.Core;
 using Brio.Game.World;
 using Brio.UI.Widgets.Actor;
 using Dalamud.Game.ClientState.Objects.Types;
-using Brio.UI.Entitites;
-using Brio.Entities.Core;
 
 namespace Brio.Capabilities.Actor;
 

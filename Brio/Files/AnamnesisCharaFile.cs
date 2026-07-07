@@ -169,7 +169,7 @@ public class AnamnesisCharaFile : JsonDocumentBase
     }
 
     public static implicit operator BrioHuman.ShaderParams(AnamnesisCharaFile chara)
-    {       
+    {
         // More Extended Appearance (Shaders)
         var shaders = new BrioHuman.ShaderParams
         {

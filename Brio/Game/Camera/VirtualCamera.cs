@@ -26,7 +26,8 @@ public unsafe partial class VirtualCamera
 
     [IgnoreMember] public BrioCamera* BrioCamera => (BrioCamera*)CameraManager.Instance()->GetActiveCamera();
 
-    [IgnoreMember] public unsafe bool IsOverridden => DisableCollision || DelimitCamera || PositionOffset != Vector3.Zero
+    [IgnoreMember]
+    public unsafe bool IsOverridden => DisableCollision || DelimitCamera || PositionOffset != Vector3.Zero
             | PivotRotation != 0 | FoV != 0 | Pan != Vector2.Zero | BrioCamera->Camera.Distance != 2.5f;
 
     public bool HasDelimitOverride => delimitCameraHasOverride;

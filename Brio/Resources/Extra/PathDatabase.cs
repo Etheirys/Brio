@@ -350,7 +350,7 @@ public sealed partial class PathIndex
             return true;
         }
         path = string.Empty;
-     
+
         return false;
     }
 
@@ -362,7 +362,7 @@ public sealed partial class PathIndex
             return true;
         }
         paths = [];
-     
+
         return false;
     }
 
@@ -372,10 +372,10 @@ public sealed partial class PathIndex
     public IEnumerable<string> WithPrefix(string prefix, int limit = 100)
     {
         var prefixNormalized = PathData.Normalize(prefix);
-     
+
         var lo = LowerBound(prefixNormalized);
         var count = 0;
-    
+
         for(var i = lo; i < _paths.Length && count < limit; i++)
         {
             if(!_paths[i].Path.StartsWith(prefixNormalized, StringComparison.Ordinal))

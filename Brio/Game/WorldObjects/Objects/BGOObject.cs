@@ -1,6 +1,5 @@
 using Brio.Core;
 using Brio.Resources;
-using Brio.Resources.Extra;
 using FFXIVClientStructs.FFXIV.Client.Graphics.Scene;
 using System;
 
@@ -81,7 +80,7 @@ public unsafe class BGOObject : WorldObject
         return new Transform { Position = bg->Position, Rotation = bg->Rotation, Scale = bg->Scale };
     }
     public override void SetTransform(Transform transform)
-    {       
+    {
         Transform = transform;
 
         if(!IsValid) return;

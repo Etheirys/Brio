@@ -4,7 +4,6 @@ using Brio.Entities;
 using Brio.Entities.World;
 using Brio.Game.GPose;
 using Brio.Game.World;
-using Brio.UI.Controls;
 using Brio.UI.Controls.Editors;
 using Brio.UI.Controls.Stateless;
 using Dalamud.Bindings.ImGui;
@@ -110,7 +109,7 @@ public class LightWindow : Window, IDisposable
         if(!_lightingService.SelectedLightEntity?.TryGetCapability<LightLifetimeCapability>(out light) ?? false)
             WindowName = $"{Brio.Name} - LIGHT###brio_light_window";
         else
-      
+
             WindowName = $"{Brio.Name} - LIGHT - {light?.Entity.FriendlyName}###brio_light_window";
 
         using(ImRaii.Disabled(_lightingService!.SelectedLightEntity is null))
@@ -119,7 +118,7 @@ public class LightWindow : Window, IDisposable
             {
                 light!.Clone();
             }
-           
+
             ImGui.SameLine();
 
             if(ImBrio.FontIconButton("lifetimewidget_move", FontAwesomeIcon.ArrowUp, "Move to Camera"))

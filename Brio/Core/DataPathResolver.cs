@@ -61,9 +61,9 @@ public static class DataPathResolver
 
         return (tribe, feminine ? Genders.Feminine : Genders.Masculine, isNpc);
     }
-    
+
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static bool IsViera(short id) 
+    private static bool IsViera(short id)
         => id is 1701 or 1704 or 1801 or 1804;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -77,7 +77,7 @@ public static class DataPathResolver
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static string ResolveTailEarsPath(short raceSexId, ushort tailEarsId)
     {
-        (string dir, string pre, string suf) = IsViera(raceSexId)                             
+        (string dir, string pre, string suf) = IsViera(raceSexId)
             ? ("zear", "z", "zer")
             : ("tail", "t", "til");
 

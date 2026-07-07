@@ -16,7 +16,7 @@ public class ActorDebugWidget(ActorDebugCapability capability) : Widget<ActorDeb
 
     // TODO: Store this properly in a list or whatever so it can be cleaned up
     private unsafe static VfxData* _spawnedGoopInstance;
-   
+
     string path = "vfx/common/eff/c0101_stlp_mim_gre_c0r1.avfx";
 
     public unsafe override void DrawBody()

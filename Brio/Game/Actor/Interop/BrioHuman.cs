@@ -37,7 +37,7 @@ public struct BrioHuman
 
         [FieldOffset(0x30)]
         public Vector3 HairHighlight;
-      
+
         [FieldOffset(0x40)]
         public Vector3 RightEyeColor;
 

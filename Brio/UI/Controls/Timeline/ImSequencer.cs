@@ -8,7 +8,7 @@
 //
 // Original ImSequencer code licensed under the MIT License.
 
-using Brio.Game.Timeline;
+using Brio.Services.Timeline;
 using Dalamud.Bindings.ImGui;
 using System;
 using System.Collections.Generic;
@@ -46,7 +46,6 @@ public class ImSequencerState
     public int SelectedEntry = -1;
 
     public bool IsDraggingSplitter;
-    public bool InspectorCollapsed;
 
     public bool MovingCurrentFrame;
     public int MovingPos = -1;
@@ -419,9 +418,9 @@ public class ImSequencer
                 var hoveredMute = muteRect.Contains(ctx.IO.MousePos);
 
                 if(hoveredMute && ImGui.IsMouseClicked(0))
-                    track.Muted = !track.Muted;
+                    track.IsMuted = !track.IsMuted;
 
-                var muteColor = ImGui.GetColorU32(track.Muted || hoveredMute ? ImGuiCol.Text : ImGuiCol.TextDisabled);
+                var muteColor = ImGui.GetColorU32(track.IsMuted || hoveredMute ? ImGuiCol.Text : ImGuiCol.TextDisabled);
                 var muteLabel = "M";
                 var muteTextSize = ImGui.CalcTextSize(muteLabel);
                 ctx.DrawList.AddText(muteCenter - (muteTextSize * 0.5f), muteColor, muteLabel);
@@ -429,7 +428,7 @@ public class ImSequencer
                 if(!hoveredArrow && !hoveredMute && rowRect.Contains(ctx.IO.MousePos) && ImGui.IsMouseClicked(0))
                     selectedEntry = absoluteIndex;
 
-                var nameColor = ImGui.GetColorU32(track.Muted ? ImGuiCol.TextDisabled : ColorLegendText);
+                var nameColor = ImGui.GetColorU32(track.IsMuted ? ImGuiCol.TextDisabled : ColorLegendText);
                 ctx.DrawList.AddText(new Vector2(tPos.X + textIndent, tPos.Y), nameColor, track.DisplayName ?? track.Name ?? $"#{i + 1}");
             }
         }
@@ -515,7 +514,8 @@ public class ImSequencer
 
                     if(x >= ctx.ContentMin.X + ctx.LeftOffset && x <= ctx.ContentMax.X)
                     {
-                        switch(kf.Shape)
+                        var shape = kf.InterpolationMode == InterpolationMode.Step ? KeyframeShape.Square : kf.Shape;
+                        switch(shape)
                         {
                             case KeyframeShape.Circle:
                                 ctx.DrawList.AddCircleFilled(new Vector2(x, y), size, drawColor);

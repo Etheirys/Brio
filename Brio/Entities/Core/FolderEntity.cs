@@ -1,6 +1,5 @@
 ﻿using Brio.Capabilities.Folder;
 using Brio.UI;
-using Brio.UI.Controls;
 using Brio.UI.Controls.Stateless;
 using Brio.UI.Theming;
 using Dalamud.Bindings.ImGui;

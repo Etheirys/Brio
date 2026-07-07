@@ -102,7 +102,7 @@ public unsafe class TargetService : MediatorSubscriberBase
     public override void Dispose()
     {
         base.Dispose();
-        
+
         GC.SuppressFinalize(this);
     }
 }

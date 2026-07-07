@@ -41,9 +41,9 @@ public class LightTransformCapability : LightCapability, ITransformable, IHistor
         get => rotation != Vector3.Zero || position != Vector3.Zero;
     }
 
-    public bool CanUndo 
+    public bool CanUndo
         => Entity.EntityManager.CanUndoSelected;
-    public bool CanRedo 
+    public bool CanRedo
         => Entity.EntityManager.CanRedoSelected;
 
     private readonly PosingOverlayWindow _overlayWindow;
@@ -73,8 +73,8 @@ public class LightTransformCapability : LightCapability, ITransformable, IHistor
             _originalTransform ??= field;
             return field;
         }
-        set 
-        { 
+        set
+        {
             _originalTransform ??= field;
             StructsTransform = new StructsTransforms()
             {
@@ -146,10 +146,10 @@ public class LightTransformCapability : LightCapability, ITransformable, IHistor
         IsGismoVisible = false;
     }
 
-    public void Redo() 
+    public void Redo()
         => Entity.EntityManager.RedoSelected();
 
-    public void Undo() 
+    public void Undo()
         => Entity.EntityManager.UndoSelected();
 
     public unsafe void Reset(bool generateSnapshot = true, bool clearHistStack = true)
@@ -176,7 +176,7 @@ public class LightTransformCapability : LightCapability, ITransformable, IHistor
             Snapshot();
     }
 
-    public object CaptureInitialState() 
+    public object CaptureInitialState()
         => new LightStack(GameLight.SpawnPosition, GameLight.SpawnRotation, GameLight.SpawnScale);
 
     public void Snapshot()

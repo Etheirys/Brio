@@ -14,7 +14,6 @@ using Brio.UI.Windows.Specialized;
 using Dalamud.Plugin.Services;
 using OneOf;
 using OneOf.Types;
-using Swan;
 using System;
 using System.Collections.Generic;
 using System.Linq;

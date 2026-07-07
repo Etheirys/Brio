@@ -2,7 +2,6 @@ using Brio.Core;
 using Brio.Resources;
 using Brio.Resources.Extra;
 using System;
-using System.IO;
 
 namespace Brio.Game.WorldObjects;
 

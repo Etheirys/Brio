@@ -2,7 +2,6 @@
 using Brio.Game.GPose;
 using Brio.MCDF.Game.Services;
 using Brio.Services.Models;
-using Brio.UI.Controls.Core;
 using Brio.UI.Controls.Stateless;
 using Brio.UI.Entitites;
 using Dalamud.Bindings.ImGui;

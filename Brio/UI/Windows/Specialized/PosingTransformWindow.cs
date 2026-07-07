@@ -1,11 +1,8 @@
 ﻿using Brio.Capabilities.Posing;
 using Brio.Core;
 using Brio.Entities;
-using Brio.Entities.Actor;
-using Brio.Entities.Core;
 using Brio.Game.Camera;
 using Brio.Game.Posing;
-using Brio.Services;
 using Brio.UI.Controls.Editors;
 using Brio.UI.Controls.Stateless;
 using Dalamud.Bindings.ImGui;
@@ -13,7 +10,6 @@ using Dalamud.Interface;
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Interface.Windowing;
 using OneOf.Types;
-using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 

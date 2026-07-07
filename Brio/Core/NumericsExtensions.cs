@@ -110,7 +110,7 @@ public static class NumericsExtensions
         A = byte.MaxValue,
     };
 
-    public static byte ToRoundedByteComponent(this float value) 
+    public static byte ToRoundedByteComponent(this float value)
         => (byte)Math.Clamp((int)MathF.Round(Math.Clamp(value, 0f, 1f) * 255f), 0, 255);
 
 

@@ -1,9 +1,7 @@
-﻿using Brio.Game.WorldObjects;
-using Brio.Game.World;
-using Dalamud.Game.ClientState.Objects.Types;
+﻿using Brio.Game.World.Interop;
 using Brio.Game.World.Lights;
-using Brio.Game.World.Interop;
-
+using Brio.Game.WorldObjects;
+using Dalamud.Game.ClientState.Objects.Types;
 using NativeCharacter = FFXIVClientStructs.FFXIV.Client.Game.Character.Character;
 using NativeGameObject = FFXIVClientStructs.FFXIV.Client.Game.Object.GameObject;
 

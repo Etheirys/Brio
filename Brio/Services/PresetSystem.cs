@@ -57,17 +57,17 @@ public class PresetSystem
         foreach(PresetType type in Enum.GetValues<PresetType>())
         {
             Directory.CreateDirectory(PresetSaveFolder(type));
-         
+
             LoadPresetData(type);
         }
     }
 
-    private string PresetSaveFolder(PresetType type) 
+    private string PresetSaveFolder(PresetType type)
         => Path.Combine(_pluginInterface.GetPluginConfigDirectory(), "Data", "Presets", type.ToString());
-    private string BrioDataPath(PresetType type) 
+    private string BrioDataPath(PresetType type)
         => Path.Combine(PresetSaveFolder(type), "brio.data");
 
-    public IReadOnlyList<Preset> GetPresets(PresetType type) 
+    public IReadOnlyList<Preset> GetPresets(PresetType type)
         => _presets[type].Presets;
 
     //
@@ -91,9 +91,9 @@ public class PresetSystem
         SavePreset(PresetType.Camera, name, description, dtos);
     }
 
-    public List<LightDTO> LoadLightPreset(Preset preset) 
+    public List<LightDTO> LoadLightPreset(Preset preset)
         => LoadPreset<LightDTO>(preset);
-    public List<CameraDTO> LoadCameraPreset(Preset preset) 
+    public List<CameraDTO> LoadCameraPreset(Preset preset)
         => LoadPreset<CameraDTO>(preset);
 
     //
@@ -126,7 +126,7 @@ public class PresetSystem
             Brio.Log.Error(ex, $"Exception while saving new preset: {name}");
         }
     }
-    private List<T> LoadPreset<T>(Preset preset) 
+    private List<T> LoadPreset<T>(Preset preset)
         => Deserialize<T>(File.ReadAllBytes(preset.Path));
     public void DeletePreset(Preset preset)
     {

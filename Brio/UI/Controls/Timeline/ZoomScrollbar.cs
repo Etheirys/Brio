@@ -158,50 +158,50 @@ public sealed class ZoomScrollbar
             switch(s.ActiveId)
             {
                 case HandleLeft:
-                {
-                    var newMin = newContentPos;
-                    newMin = Math.Min(newMin, s.ViewMax - s.MinViewSpan);
-                    newMin = Math.Max(newMin, s.ContentMin);
+                    {
+                        var newMin = newContentPos;
+                        newMin = Math.Min(newMin, s.ViewMax - s.MinViewSpan);
+                        newMin = Math.Max(newMin, s.ContentMin);
 
-                    s.ViewMin = newMin;
-                    changed = true;
-                    break;
-                }
+                        s.ViewMin = newMin;
+                        changed = true;
+                        break;
+                    }
                 case HandleRight:
-                {
-                    var newMax = newContentPos;
-                    newMax = Math.Max(newMax, s.ViewMin + s.MinViewSpan);
-                    newMax = Math.Min(newMax, s.ContentMax);
+                    {
+                        var newMax = newContentPos;
+                        newMax = Math.Max(newMax, s.ViewMin + s.MinViewSpan);
+                        newMax = Math.Min(newMax, s.ContentMax);
 
-                    s.ViewMax = newMax;
-                    changed = true;
-                    break;
-                }
+                        s.ViewMax = newMax;
+                        changed = true;
+                        break;
+                    }
                 case HandleCenter:
-                {
-                    var span = s.ViewMax - s.ViewMin;
-
-                    var grabOffsetContent = s.GrabOffset / pxPerUnit;
-                    var newMin = newContentPos - grabOffsetContent;
-                    var newMax = newMin + span;
-
-                    if(newMin < s.ContentMin)
                     {
-                        newMin = s.ContentMin;
-                        newMax = newMin + span;
-                    }
+                        var span = s.ViewMax - s.ViewMin;
 
-                    if(newMax > s.ContentMax)
-                    {
-                        newMax = s.ContentMax;
-                        newMin = newMax - span;
-                    }
+                        var grabOffsetContent = s.GrabOffset / pxPerUnit;
+                        var newMin = newContentPos - grabOffsetContent;
+                        var newMax = newMin + span;
 
-                    s.ViewMin = newMin;
-                    s.ViewMax = newMax;
-                    changed = true;
-                    break;
-                }
+                        if(newMin < s.ContentMin)
+                        {
+                            newMin = s.ContentMin;
+                            newMax = newMin + span;
+                        }
+
+                        if(newMax > s.ContentMax)
+                        {
+                            newMax = s.ContentMax;
+                            newMin = newMax - span;
+                        }
+
+                        s.ViewMin = newMin;
+                        s.ViewMax = newMax;
+                        changed = true;
+                        break;
+                    }
             }
         }
 

@@ -1,8 +1,8 @@
-﻿using Brio.Input;
+﻿using Brio.Config;
+using Brio.Input;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Bindings.ImGuizmo;
 using System.Numerics;
-using Brio.Config;
 
 namespace Brio.Core;
 

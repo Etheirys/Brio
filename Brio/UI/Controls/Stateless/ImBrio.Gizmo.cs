@@ -1,12 +1,12 @@
-﻿using Brio.Game.Camera;
+﻿using Brio.Config;
+using Brio.Game.Camera;
 using Brio.Input;
+using Brio.UI.Controls.Core;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface.Utility.Raii;
 using FFXIVClientStructs.FFXIV.Client.Game.Control;
 using System;
 using System.Numerics;
-using Brio.Config;
-using Brio.UI.Controls.Core;
 
 namespace Brio.UI.Controls.Stateless;
 

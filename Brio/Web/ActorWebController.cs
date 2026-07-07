@@ -1,7 +1,6 @@
 ﻿using Brio.Game.Actor;
 using Brio.Game.Actor.Extensions;
 using Brio.Game.Core;
-using Brio.Game.Posing;
 using Brio.IPC.API;
 using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Plugin.Services;

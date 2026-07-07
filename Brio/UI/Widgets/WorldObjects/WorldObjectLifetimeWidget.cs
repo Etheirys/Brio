@@ -1,5 +1,4 @@
 using Brio.Capabilities.WorldObjects;
-using Brio.UI.Controls;
 using Brio.UI.Controls.Stateless;
 using Brio.UI.Widgets.Core;
 using Dalamud.Bindings.ImGui;

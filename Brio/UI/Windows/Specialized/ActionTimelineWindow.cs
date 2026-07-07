@@ -1,7 +1,6 @@
 ﻿using Brio.Capabilities.Actor;
 using Brio.Config;
 using Brio.Entities;
-using Brio.Entities.Actor;
 using Brio.Game.Cutscene;
 using Brio.Game.GPose;
 using Brio.Game.Posing;

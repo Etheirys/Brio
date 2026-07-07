@@ -1,7 +1,6 @@
 using Brio.Core;
 using Brio.Game.Core;
 using Brio.Resources;
-using Brio.Resources.Extra;
 using FFXIVClientStructs.FFXIV.Client.Graphics;
 using FFXIVClientStructs.FFXIV.Client.Graphics.Scene;
 using FFXIVClientStructs.FFXIV.Client.LayoutEngine;

@@ -33,7 +33,7 @@ public class SkyEditorWidget(SkyEditorCapability skyEditorCapability) : Widget<S
         {
             case 1:
                 ImBrio.VerticalPadding(3);
-               
+
                 if(ImBrio.SeparatorTextButton("Stars", FontAwesomeIcon.Redo, "Reset All Stars Properties",
                     Capability.Environment.EnvironmentOverrideState.HasFlag(EnvironmentOverrideState.Stars)))
                 {
@@ -175,7 +175,7 @@ public class SkyEditorWidget(SkyEditorCapability skyEditorCapability) : Widget<S
             case 2:
 
                 ImBrio.VerticalPadding(3);
-           
+
                 if(ImBrio.SeparatorTextButton("Cloud", FontAwesomeIcon.Redo, "Reset All Cloud Properties",
                     Capability.Environment.EnvironmentOverrideState.HasFlag(EnvironmentOverrideState.Clouds)))
                 {

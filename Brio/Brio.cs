@@ -34,7 +34,6 @@ using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -153,7 +152,7 @@ public class Brio(IDalamudPluginInterface pluginInterface) : IAsyncDalamudPlugin
                 }
             }
             _services?.Dispose();
-           
+
             Log.Info($"Disposed {Name}!");
         });
 
@@ -354,7 +353,7 @@ public class Brio(IDalamudPluginInterface pluginInterface) : IAsyncDalamudPlugin
         });
     }
 
-    public static bool GameFileExists(string filePath) 
+    public static bool GameFileExists(string filePath)
         => DataManager.FileExists(filePath);
 
     //

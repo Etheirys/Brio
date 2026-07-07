@@ -5,7 +5,6 @@ using Brio.UI.Widgets.Core;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface;
 using Dalamud.Interface.Utility.Raii;
-using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 
@@ -51,7 +50,7 @@ public class FestivalWidget : Widget<FestivalCapability>
 
                         Capability.AllFestivals.TryGetValue(festival.Id, out var festivalEntry);
 
-                        string name = $"{festivalEntry?.ToString() ?? "Unknown"} ({festival.Id} - {festival.Phase})" ;
+                        string name = $"{festivalEntry?.ToString() ?? "Unknown"} ({festival.Id} - {festival.Phase})";
 
                         if(ImGui.Selectable(name, isSelected))
                         {

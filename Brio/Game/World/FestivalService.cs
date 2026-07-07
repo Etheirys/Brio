@@ -14,7 +14,6 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Numerics;
-using System.Text;
 
 namespace Brio.Game.World;
 
@@ -356,7 +355,7 @@ public unsafe class FestivalService : MediatorSubscriberBase
                     var lgb = _dataManager.GetFile<LgbFile>($"bg/{dir}/{name}.lgb");
 
                     if(lgb == null) continue;
-                   foreach(var layer in lgb.Layers)
+                    foreach(var layer in lgb.Layers)
                     {
                         if(layer.FestivalID == 0) continue;
 

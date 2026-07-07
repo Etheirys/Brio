@@ -7,13 +7,11 @@ using Brio.UI.Controls.Stateless;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface;
 using Dalamud.Interface.Textures.TextureWraps;
-using Dalamud.Interface.Utility.Raii;
 using EmbedIO.Utilities;
 using System;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Numerics;
 using System.Runtime.InteropServices;
 
 namespace Brio.Library.Sources;
@@ -340,7 +338,8 @@ public class FileEntry : ItemEntryBase
         _version = version?.NullIfEmpty();
         _description = description?.NullIfEmpty();
 
-        EditDetails((ref file) => {
+        EditDetails((ref file) =>
+        {
             file.Author = _author;
             file.Version = _version;
             file.Description = _description;
@@ -405,10 +404,11 @@ public class FileEntry : ItemEntryBase
 
     public override void AddTag(string tag)
     {
-        EditDetails((ref file) => {
+        EditDetails((ref file) =>
+        {
             if(tag != file.Author && !tag.IsWhiteSpace())
             {
-                file.Tags?.Add(tag); 
+                file.Tags?.Add(tag);
                 this.Tags.Add(tag);
             }
         });
@@ -416,7 +416,8 @@ public class FileEntry : ItemEntryBase
 
     public override void RemoveTag(string tag)
     {
-        EditDetails((ref file) => {
+        EditDetails((ref file) =>
+        {
             if(tag != file.Author)
             {
                 file.Tags?.Remove(tag);

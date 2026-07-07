@@ -1,5 +1,4 @@
-﻿using Brio.Capabilities.Core;
-using Brio.Config;
+﻿using Brio.Config;
 using Brio.Entities.Core;
 using Brio.Game.GPose;
 using Brio.Game.WorldObjects;

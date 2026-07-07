@@ -541,7 +541,7 @@ public class SettingsWindow : Window
             }
 
             ImBrio.SeparatorText("Gizmo");
-        
+
             bool enableAdvanedGizmo = _configurationService.Configuration.Posing.IsAdvancedGizmoEnabled;
             if(ImGui.Checkbox("Enable Advanced Gizmo by Default", ref enableAdvanedGizmo))
             {
@@ -762,7 +762,7 @@ public class SettingsWindow : Window
             DrawOffsetTable(boneOffsets);
 
             ImGui.Spacing();
-         
+
             DrawOffsetAddRow(boneOffsets);
         }
 
@@ -856,7 +856,7 @@ public class SettingsWindow : Window
 
         ImGui.SetNextItemWidth(-1);
         ImGui.InputTextWithHint("###bonesearch", "Search", ref _boneOffsetSearch, 64);
-   
+
         ImGui.Separator();
 
         var allCategories = _posingService.BoneCategories.Categories;
@@ -901,7 +901,7 @@ public class SettingsWindow : Window
             }
         }
     }
- 
+
     private bool IsKnownBone(string bone)
     {
         foreach(var category in _posingService.BoneCategories.Categories)

@@ -10,7 +10,6 @@ using Brio.Game.Input;
 using Brio.Game.Posing;
 using Brio.Game.WorldObjects.Objects;
 using Brio.Input;
-using Brio.Services;
 using Brio.UI.Controls.Core;
 using Brio.UI.Controls.Editors;
 using Brio.UI.Controls.Stateless;
@@ -94,7 +93,7 @@ public class PosingOverlayToolbarWindow : Window
         ImGui.PushStyleVar(ImGuiStyleVar.WindowTitleAlign, new Vector2(0.5f, 0.5f));
         ImGui.PushStyleColor(ImGuiCol.NavWindowingHighlight, UIConstants.Transparent);
 
-       _pushedStyle = true;
+        _pushedStyle = true;
     }
     public override void PostDraw()
     {

@@ -1,5 +1,4 @@
 ﻿using Brio.Game.GPose;
-using Brio.MCDF.API.Data;
 using Brio.Services;
 using Brio.Services.MediatorMessages;
 using Dalamud.Game.ClientState.Conditions;

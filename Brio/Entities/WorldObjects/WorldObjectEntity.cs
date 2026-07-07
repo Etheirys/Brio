@@ -4,7 +4,6 @@ using Brio.Core;
 using Brio.Entities.Core;
 using Brio.Game.WorldObjects;
 using Brio.UI;
-using Brio.UI.Controls;
 using Brio.UI.Controls.Stateless;
 using Brio.UI.Theming;
 using Dalamud.Bindings.ImGui;
@@ -42,7 +41,7 @@ public class WorldObjectEntity(IWorldObject worldObject, IServiceProvider provid
     public override EntityFlags Flags => EntityFlags.AllowDoubleClick | EntityFlags.HasContextButton | EntityFlags.DefaultOpen | EntityFlags.AllowMultiSelect;
     public override int ContextButtonCount => 1;
 
-    public override void OnDoubleClick() 
+    public override void OnDoubleClick()
         => ModalManager.Instance.OpenRenameModal(this);
 
     public override void Snapshot()

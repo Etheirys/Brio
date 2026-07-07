@@ -18,9 +18,9 @@ public class BrioCameraCapability : CameraCapability
     public readonly ConfigurationService _configurationService;
     public readonly EntityManager _entityManager;
 
-    public bool CanUndo 
+    public bool CanUndo
         => _undoStack.Count is not 0 and not 1;
-    public bool CanRedo 
+    public bool CanRedo
         => _redoStack.Count > 0;
 
     private Stack<CameraSnapshot> _undoStack = [];
@@ -137,6 +137,6 @@ public class BrioCameraCapability : CameraCapability
     }
 }
 
-public record struct CameraSnapshot( Vector3 Position, Vector3 Rotation, Vector3 PositionOffset, Vector3 TargetOffset, string SelectedActorName,
+public record struct CameraSnapshot(Vector3 Position, Vector3 Rotation, Vector3 PositionOffset, Vector3 TargetOffset, string SelectedActorName,
     float PivotRotation, float Zoom, float FoV, Vector2 Pan, Vector2 Angle,
     bool DisableCollision, bool DelimitCamera, bool IsPortraitMode, float MovementSpeed, float MouseSensitivity, bool DelimitAngle, bool IsMovementEnabled, bool Move2D);

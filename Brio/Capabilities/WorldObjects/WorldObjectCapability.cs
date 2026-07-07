@@ -1,6 +1,6 @@
 using Brio.Capabilities.Core;
-using Brio.Entities.WorldObjects;
 using Brio.Entities.Core;
+using Brio.Entities.WorldObjects;
 using Brio.Game.WorldObjects;
 using System;
 

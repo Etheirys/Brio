@@ -10,11 +10,9 @@ using Brio.Services;
 using Brio.Services.MediatorMessages;
 using Brio.Services.Models;
 using Dalamud.Plugin.Services;
-using FFXIVClientStructs.FFXIV.Client.Game.Character;
 using FFXIVClientStructs.FFXIV.Client.Graphics.Scene;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
@@ -245,15 +243,16 @@ public unsafe class WorldObjectService : MediatorSubscriberBase
 
                     _framework.RunUntilSatisfied(
                         () => worldObj?.VsualStateDirty is false,
-                        (_) => {
+                        (_) =>
+                        {
                             if(dto.Color.HasValue)
                                 worldObj?.SetCustomColor(dto.Color.Value);
-                           else if(dto.StainID != 0)
+                            else if(dto.StainID != 0)
                                 worldObj?.SetStain((byte)dto.StainID);
                         },
                         1000,
                         dontStartFor: 1);
-          
+
                     MoveToFolder(worldObj, folder);
                 });
                 break;
@@ -310,7 +309,8 @@ public unsafe class WorldObjectService : MediatorSubscriberBase
                     {
                         _framework.RunUntilSatisfied(
                             () => worldObj?.VsualStateDirty is false,
-                            (_) => {
+                            (_) =>
+                            {
                                 if(furniture.IsCustomColor)
                                     worldObj?.SetCustomColor(furniture.CustomColor);
                                 else if(furniture.StainID != 0)

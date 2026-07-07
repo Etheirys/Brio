@@ -253,7 +253,7 @@ public class AutoSaveService : MediatorSubscriberBase, IDisposable
 
     public void CleanOldSaves()
     {
-        if(!Directory.Exists(AutoSaveFolder)) 
+        if(!Directory.Exists(AutoSaveFolder))
             return;
 
         try

@@ -32,7 +32,7 @@ public unsafe class SGLService : MediatorSubscriberBase
     public SharedGroupLayoutInstance* CreateSGL(string sgbPath, CSLayoutTransform transform)
     {
         var sgbBytes = System.Text.Encoding.UTF8.GetBytes(sgbPath + "\0");
-        fixed (byte* sgbPathPtr = sgbBytes)
+        fixed(byte* sgbPathPtr = sgbBytes)
         {
             // magic numbers! the parameters are as follows:
 

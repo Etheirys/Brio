@@ -1,5 +1,4 @@
 ﻿using Brio.Capabilities.Camera;
-using Brio.Capabilities.Core;
 using Brio.Capabilities.Timeline;
 using Brio.Config;
 using Brio.Core;
@@ -8,7 +7,6 @@ using Brio.Game.Camera;
 using Brio.Game.GPose;
 using Brio.Game.Input;
 using Brio.UI;
-using Brio.UI.Controls;
 using Brio.UI.Controls.Stateless;
 using Brio.UI.Theming;
 using Dalamud.Bindings.ImGui;
@@ -116,7 +114,7 @@ public class CameraEntity(IServiceProvider provider, int cameraID, CameraType ca
             }
 
             ImGui.SameLine();
-         
+
             var lockIcon = IsLocked ? FontAwesomeIcon.Lock : FontAwesomeIcon.Unlock;
             using(ImRaii.PushColor(ImGuiCol.Button, 0))
             {
@@ -125,7 +123,7 @@ public class CameraEntity(IServiceProvider provider, int cameraID, CameraType ca
                     IsLocked = !IsLocked;
                 }
             }
-          
+
             ImGui.SameLine();
 
             string toolTip = "Set as Active Camera";

@@ -42,10 +42,11 @@ public class Mediator() : IDisposable
 
         if(_pumpTask is not null)
         {
-            try 
-            { 
+            try
+            {
                 await _pumpTask.ConfigureAwait(false);
-            } catch(Exception) { } // just ignore
+            }
+            catch(Exception) { } // just ignore
         }
     }
 
@@ -65,8 +66,8 @@ public class Mediator() : IDisposable
             }
         }
         catch(Exception ex)
-        { 
-            Brio.Log.Fatal("Eror in Mediator Pump: {ex}", ex); 
+        {
+            Brio.Log.Fatal("Eror in Mediator Pump: {ex}", ex);
         }
     }
 
@@ -106,11 +107,11 @@ public class Mediator() : IDisposable
         lock(_addRemoveLock)
         {
             var removed = subContainer.Subscribers.Where(s => s.Subscriber == subscriber);
-            if(!removed.Any()) 
+            if(!removed.Any())
                 return;
 
             subContainer.Subscribers = Resort(subContainer.Subscribers.RemoveAll(s => s.Subscriber == subscriber));
-            foreach(var r in removed) 
+            foreach(var r in removed)
                 _lastErrorTime.TryRemove(r, out _);
         }
     }
@@ -126,7 +127,7 @@ public class Mediator() : IDisposable
                     continue;
 
                 subContainer.Subscribers = Resort(subContainer.Subscribers.RemoveAll(s => s.Subscriber == subscriber));
-                foreach(var r in removed) 
+                foreach(var r in removed)
                     _lastErrorTime.TryRemove(r, out _);
 
                 Brio.Log.Debug("{sub} unsubscribed from {msg}", subscriber.GetType().Name, type.Name);
@@ -197,15 +198,15 @@ public class Mediator() : IDisposable
     private static ImmutableArray<SubscriberAction> Resort(ImmutableArray<SubscriberAction> source)
     {
         var builder = ImmutableArray.CreateBuilder<SubscriberAction>(source.Length);
-       
+
         foreach(var sub in source)
             if(sub.Subscriber is IHighPriorityMediatorSubscriber)
                 builder.Add(sub);
-       
+
         foreach(var sub in source)
-            if(sub.Subscriber is not IHighPriorityMediatorSubscriber) 
+            if(sub.Subscriber is not IHighPriorityMediatorSubscriber)
                 builder.Add(sub);
-     
+
         return builder.MoveToImmutable();
     }
 
@@ -254,7 +255,7 @@ public abstract class MediatorSubscriberBase(Mediator mediator) : IMediatorSubsc
     }
 }
 
-public abstract class MediatorWindow(Mediator mediator, string name, ImGuiWindowFlags flags = ImGuiWindowFlags.None, bool forceMainWindow = false) 
+public abstract class MediatorWindow(Mediator mediator, string name, ImGuiWindowFlags flags = ImGuiWindowFlags.None, bool forceMainWindow = false)
     : Window(name, flags, forceMainWindow), IMediatorSubscriber
 {
     public Mediator Mediator { get; init; } = mediator;

@@ -208,7 +208,7 @@ public static partial class ImBrio
         {
             innerWidth = size.X - (ImGui.GetStyle().FramePadding.X * 2);
         }
-        
+
         float iconR = iconWidth + ImGui.GetStyle().ItemInnerSpacing.X;
         float textOffset = iconR / innerWidth;
         using(ImRaii.PushStyle(ImGuiStyleVar.ButtonTextAlign, new Vector2(textOffset, 0.5f), centerTest == false))
@@ -783,7 +783,7 @@ public static partial class ImBrio
         if(onlyIcon)
         {
             FontIconButton(id, icon, tooltip);
-         
+
             isActive = ImGui.IsItemActive();
             activated = ImGui.IsItemActivated();
             buttonMin = ImGui.GetItemRectMin();
@@ -874,9 +874,9 @@ public static partial class ImBrio
         float y = cursorPos.Y;
 
         ImGui.GetWindowDrawList().AddLine(new Vector2(x, y), new Vector2(x, y + height), col, thick);
-       
+
         ImGui.Dummy(new Vector2((pad * 2) + thick, height));
-    
+
         ImGui.SameLine();
     }
 
