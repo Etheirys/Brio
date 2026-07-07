@@ -424,9 +424,10 @@ public class TimelineSequencerEditor(TimelineService timelineService, Configurat
 
         if(ImGui.IsItemActivated())
         {
-            if(Vector2.Distance(io.MousePos, p1Screen) < 12f)
+            var handleHitRadius = 12f * ImGuiHelpers.GlobalScale;
+            if(Vector2.Distance(io.MousePos, p1Screen) < handleHitRadius)
                 _draggingPoint = 0;
-            else if(Vector2.Distance(io.MousePos, p2Screen) < 12f)
+            else if(Vector2.Distance(io.MousePos, p2Screen) < handleHitRadius)
                 _draggingPoint = 1;
             else
                 _draggingPoint = -1;
@@ -449,11 +450,14 @@ public class TimelineSequencerEditor(TimelineService timelineService, Configurat
             _draggingPoint = -1;
 
         var handleColor = ImGui.GetColorU32(ImGuiCol.Button);
-        drawList.AddLine(p0Screen, p1Screen, handleColor, 2f);
-        drawList.AddLine(p3Screen, p2Screen, handleColor, 2f);
-        drawList.AddBezierCubic(p0Screen, p1Screen, p2Screen, p3Screen, ImGui.GetColorU32(ImGuiCol.PlotLines), 3f, 32);
-        drawList.AddCircleFilled(p1Screen, 6f, ImGui.GetColorU32(ImGuiCol.ButtonHovered));
-        drawList.AddCircleFilled(p2Screen, 6f, ImGui.GetColorU32(ImGuiCol.ButtonHovered));
+        var handleLineThickness = 2f * ImGuiHelpers.GlobalScale;
+        var curveLineThickness = 3f * ImGuiHelpers.GlobalScale;
+        var handleRadius = 6f * ImGuiHelpers.GlobalScale;
+        drawList.AddLine(p0Screen, p1Screen, handleColor, handleLineThickness);
+        drawList.AddLine(p3Screen, p2Screen, handleColor, handleLineThickness);
+        drawList.AddBezierCubic(p0Screen, p1Screen, p2Screen, p3Screen, ImGui.GetColorU32(ImGuiCol.PlotLines), curveLineThickness, 32);
+        drawList.AddCircleFilled(p1Screen, handleRadius, ImGui.GetColorU32(ImGuiCol.ButtonHovered));
+        drawList.AddCircleFilled(p2Screen, handleRadius, ImGui.GetColorU32(ImGuiCol.ButtonHovered));
     }
     private static int MatchPreset(Vector2 p1, Vector2 p2)
     {

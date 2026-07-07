@@ -10,6 +10,7 @@
 
 using Brio.Services.Timeline;
 using Dalamud.Bindings.ImGui;
+using Dalamud.Interface.Utility;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -79,6 +80,8 @@ public class ImSequencer
     public ImGuiCol ColorPlayhead { get; set; } = ImGuiCol.ButtonActive;
     public ImGuiCol ColorPlayheadText { get; set; } = ImGuiCol.Text;
 
+    private const float KeyframeHalfSize = 6f;
+
     private struct RenderContext
     {
         public ImDrawListPtr DrawList;
@@ -90,7 +93,8 @@ public class ImSequencer
         public Vector2 ContentMax;
         public float LegendWidth;
         public float LeftOffset;
-        public int ItemHeight;
+        public float ItemHeight;
+        public float Scale;
     }
 
     private static TimelineTrack? GetTrack(List<TimelineTrack> tracks, int index) => index >= 0 && index < tracks.Count ? tracks[index] : null;
@@ -99,10 +103,11 @@ public class ImSequencer
     {
         var ret = false;
         var io = ImGui.GetIO();
-        var itemHeight = 20;
+        var scale = ImGuiHelpers.GlobalScale;
+        var itemHeight = 20f * scale;
 
-        var splitterGap = 4f;
-        var scrollbarHeight = 14.0f;
+        var splitterGap = 4f * scale;
+        var scrollbarHeight = 14.0f * scale;
         var requestContextMenu = false;
         var isSplitterHoveredOrActive = false;
 
@@ -129,8 +134,9 @@ public class ImSequencer
             var canvasPos = ImGui.GetCursorScreenPos();
             var canvasSize = ImGui.GetContentRegionAvail();
 
-            var maxLegendWidth = Math.Max(50f, canvasSize.X - 50f);
-            state.LegendWidth = Math.Clamp(state.LegendWidth, 50f, maxLegendWidth);
+            var minLegendWidth = 50f * scale;
+            var maxLegendWidth = Math.Max(minLegendWidth, canvasSize.X - minLegendWidth);
+            state.LegendWidth = Math.Clamp(state.LegendWidth, minLegendWidth, maxLegendWidth);
 
             var leftOffset = state.LegendWidth + splitterGap;
             var viewWidthPixels = Math.Max(1f, canvasSize.X - leftOffset - ImGui.GetStyle().ScrollbarSize);
@@ -139,10 +145,10 @@ public class ImSequencer
             CalculateZoomAndSpan(state, frameMin, frameMax, viewWidthPixels);
             var firstFrameUsed = (int)Math.Round(state.ZoomState.ViewMin);
 
-            DrawHeader(canvasPos, canvasSize, itemHeight);
+            DrawHeader(canvasPos, canvasSize, itemHeight, scale);
 
-            ImGui.SetCursorScreenPos(new Vector2(canvasPos.X + state.LegendWidth - 3f, canvasPos.Y));
-            ImGui.InvisibleButton("##headerSplitter", new Vector2(8f, itemHeight));
+            ImGui.SetCursorScreenPos(new Vector2(canvasPos.X + state.LegendWidth - (3f * scale), canvasPos.Y));
+            ImGui.InvisibleButton("##headerSplitter", new Vector2(8f * scale, itemHeight));
             if(ImGui.IsItemActive())
                 state.LegendWidth += io.MouseDelta.X;
             if(ImGui.IsItemHovered() || ImGui.IsItemActive())
@@ -152,7 +158,7 @@ public class ImSequencer
             }
 
             var spacingY = ImGui.GetStyle().ItemSpacing.Y;
-            var childFrameSize = new Vector2(canvasSize.X, Math.Max(10, canvasSize.Y - itemHeight - scrollbarHeight - (spacingY * 2)));
+            var childFrameSize = new Vector2(canvasSize.X, Math.Max(10f * scale, canvasSize.Y - itemHeight - scrollbarHeight - (spacingY * 2)));
             var totalUiHeight = itemHeight + childFrameSize.Y + scrollbarHeight;
 
             ImGui.SetCursorScreenPos(new Vector2(canvasPos.X, canvasPos.Y + itemHeight));
@@ -183,7 +189,8 @@ public class ImSequencer
                     ContentMax = contentMax,
                     LegendWidth = state.LegendWidth,
                     LeftOffset = leftOffset,
-                    ItemHeight = itemHeight
+                    ItemHeight = itemHeight,
+                    Scale = scale
                 };
 
                 var totalPossibleStripes = (int)((ctx.ContentMax.Y - ctx.ContentMin.Y) / ctx.ItemHeight);
@@ -205,8 +212,8 @@ public class ImSequencer
                     ret = ProcessDragging(ctx, state, tracks, frameMin, frameMax);
 
                 var scrollY = ImGui.GetScrollY();
-                ImGui.SetCursorPos(new Vector2(state.LegendWidth - 3f, scrollY));
-                ImGui.InvisibleButton("##timelineSplitter", new Vector2(8f, childFrameSize.Y));
+                ImGui.SetCursorPos(new Vector2(state.LegendWidth - (3f * scale), scrollY));
+                ImGui.InvisibleButton("##timelineSplitter", new Vector2(8f * scale, childFrameSize.Y));
                 if(ImGui.IsItemActive())
                     state.LegendWidth += io.MouseDelta.X;
                 if(ImGui.IsItemHovered() || ImGui.IsItemActive())
@@ -221,10 +228,10 @@ public class ImSequencer
                 ImGui.PopStyleColor();
             }
 
-            DrawScrollbar(state, viewWidthPixels, leftOffset, scrollbarHeight);
+            DrawScrollbar(state, viewWidthPixels, leftOffset, scrollbarHeight, scale);
 
-            ImGui.SetCursorScreenPos(new Vector2(canvasPos.X + state.LegendWidth - 3f, canvasPos.Y + itemHeight + childFrameSize.Y));
-            ImGui.InvisibleButton("##scrollSplitter", new Vector2(8f, scrollbarHeight));
+            ImGui.SetCursorScreenPos(new Vector2(canvasPos.X + state.LegendWidth - (3f * scale), canvasPos.Y + itemHeight + childFrameSize.Y));
+            ImGui.InvisibleButton("##scrollSplitter", new Vector2(8f * scale, scrollbarHeight));
             if(ImGui.IsItemActive())
                 state.LegendWidth += io.MouseDelta.X;
             if(ImGui.IsItemHovered() || ImGui.IsItemActive())
@@ -233,14 +240,14 @@ public class ImSequencer
                 isSplitterHoveredOrActive = true;
             }
 
-            state.LegendWidth = Math.Clamp(state.LegendWidth, 50f, maxLegendWidth);
+            state.LegendWidth = Math.Clamp(state.LegendWidth, minLegendWidth, maxLegendWidth);
 
             var splitLineColor = isSplitterHoveredOrActive ? ImGui.GetColorU32(ImGuiCol.SeparatorHovered) : ImGui.GetColorU32(ColorHeaderLines);
 
             parentDrawList.AddLine(
-                new Vector2(canvasPos.X + state.LegendWidth + 1f, canvasPos.Y),
-                new Vector2(canvasPos.X + state.LegendWidth + 1f, canvasPos.Y + totalUiHeight),
-                splitLineColor, 2.0f);
+                new Vector2(canvasPos.X + state.LegendWidth + scale, canvasPos.Y),
+                new Vector2(canvasPos.X + state.LegendWidth + scale, canvasPos.Y + totalUiHeight),
+                splitLineColor, 2.0f * scale);
         }
         finally
         {
@@ -284,7 +291,7 @@ public class ImSequencer
         state.FramePixelWidth = (float)(viewWidthPixels / viewSpan);
     }
 
-    private void DrawHeader(Vector2 canvasPos, Vector2 canvasSize, int itemHeight)
+    private void DrawHeader(Vector2 canvasPos, Vector2 canvasSize, float itemHeight, float scale)
     {
         var headerWidth = canvasSize.X - ImGui.GetStyle().ScrollbarSize;
         var headerSize = new Vector2(headerWidth, itemHeight);
@@ -295,7 +302,7 @@ public class ImSequencer
         ImGui.GetWindowDrawList().AddLine(
             new Vector2(canvasPos.X, canvasPos.Y + itemHeight),
             new Vector2(canvasPos.X + headerWidth, canvasPos.Y + itemHeight),
-            ImGui.GetColorU32(ColorHeaderLines), 1.5f);
+            ImGui.GetColorU32(ColorHeaderLines), 1.5f * scale);
     }
 
     private void DrawTrackStripes(RenderContext ctx, int visibleTrackCount)
@@ -303,8 +310,8 @@ public class ImSequencer
         for(var i = 0; i < visibleTrackCount; i++)
         {
             var col = (i & 1) != 0 ? ImGui.GetColorU32(ColorStripe1) : ImGui.GetColorU32(ColorStripe2);
-            var pos = new Vector2(ctx.ContentMin.X + ctx.LeftOffset, ctx.ContentMin.Y + ctx.ItemHeight * i + 1);
-            var sz = new Vector2(ctx.ContentMax.X, pos.Y + ctx.ItemHeight - 1);
+            var pos = new Vector2(ctx.ContentMin.X + ctx.LeftOffset, ctx.ContentMin.Y + ctx.ItemHeight * i + ctx.Scale);
+            var sz = new Vector2(ctx.ContentMax.X, pos.Y + ctx.ItemHeight - ctx.Scale);
             ctx.DrawList.AddRectFilled(pos, sz, col);
         }
     }
@@ -313,7 +320,7 @@ public class ImSequencer
     {
         var modFrameCount = 5;
         var frameStep = 1;
-        while(modFrameCount * state.FramePixelWidth < 100)
+        while(modFrameCount * state.FramePixelWidth < 100 * ctx.Scale)
         {
             modFrameCount *= 2;
             frameStep *= 2;
@@ -325,7 +332,7 @@ public class ImSequencer
         {
             var px = (float)(ctx.ContentMin.X + (i - state.ZoomState.ViewMin) * state.FramePixelWidth + ctx.LeftOffset);
             if(px <= ctx.ContentMax.X && px >= ctx.ContentMin.X + ctx.LeftOffset)
-                ctx.DrawList.AddLine(new Vector2(px, ctx.ContentMin.Y), new Vector2(px, ctx.ContentMax.Y), lineColor, 1);
+                ctx.DrawList.AddLine(new Vector2(px, ctx.ContentMin.Y), new Vector2(px, ctx.ContentMax.Y), lineColor, ctx.Scale);
         }
     }
 
@@ -333,7 +340,7 @@ public class ImSequencer
     {
         var modFrameCount = 5;
         var frameStep = 1;
-        while(modFrameCount * state.FramePixelWidth < 100)
+        while(modFrameCount * state.FramePixelWidth < 100 * ctx.Scale)
         {
             modFrameCount *= 2;
             frameStep *= 2;
@@ -344,20 +351,20 @@ public class ImSequencer
         var textColor = ImGui.GetColorU32(ColorHeaderText);
         var lineColor = ImGui.GetColorU32(ColorHeaderLines);
 
-        void DrawLine(int i, int regionHeight)
+        void DrawLine(int i, float regionHeight)
         {
             var baseIndex = i % modFrameCount == 0 || i == frameMax || i == frameMin;
             var halfIndex = i % halfModFrameCount == 0;
             var px = (float)(ctx.ContentMin.X + (i - state.ZoomState.ViewMin) * state.FramePixelWidth + ctx.LeftOffset);
 
-            var tiretStart = baseIndex ? 4 : halfIndex ? 10 : 14;
+            var tiretStart = (baseIndex ? 4f : halfIndex ? 10f : 14f) * ctx.Scale;
             var tiretEnd = baseIndex ? regionHeight : ctx.ItemHeight;
 
             if(px <= ctx.ContentMax.X && px >= ctx.ContentMin.X + ctx.LeftOffset)
-                ctx.ParentDrawList.AddLine(new Vector2(px, ctx.CanvasPos.Y + tiretStart), new Vector2(px, ctx.CanvasPos.Y + tiretEnd - 1), lineColor, 1);
+                ctx.ParentDrawList.AddLine(new Vector2(px, ctx.CanvasPos.Y + tiretStart), new Vector2(px, ctx.CanvasPos.Y + tiretEnd - ctx.Scale), lineColor, ctx.Scale);
 
             if(baseIndex && px >= ctx.ContentMin.X + ctx.LeftOffset && px <= ctx.ContentMax.X)
-                ctx.ParentDrawList.AddText(new Vector2(px + 3f, ctx.CanvasPos.Y), textColor, $"{i}");
+                ctx.ParentDrawList.AddText(new Vector2(px + (3f * ctx.Scale), ctx.CanvasPos.Y), textColor, $"{i}");
         }
 
         for(var i = frameMin; i <= frameMax; i += frameStep)
@@ -374,9 +381,9 @@ public class ImSequencer
             for(var i = 0; i < visibleTracks.Count; i++)
             {
                 var track = visibleTracks[i];
-                var indent = track.Depth * 14f;
-                var tPos = new Vector2(ctx.ContentMin.X + 3 + indent, ctx.ContentMin.Y + i * ctx.ItemHeight + 2);
-                var textIndent = 16f;
+                var indent = track.Depth * 14f * ctx.Scale;
+                var tPos = new Vector2(ctx.ContentMin.X + (3f * ctx.Scale) + indent, ctx.ContentMin.Y + i * ctx.ItemHeight + (2f * ctx.Scale));
+                var textIndent = 16f * ctx.Scale;
 
                 var rowRect = new ImRect(
                     new Vector2(ctx.ContentMin.X, ctx.ContentMin.Y + i * ctx.ItemHeight),
@@ -397,10 +404,12 @@ public class ImSequencer
 
                 if(track.HasChildren)
                 {
-                    var center = new Vector2(tPos.X + 6f, ctx.ContentMin.Y + i * ctx.ItemHeight + (ctx.ItemHeight / 2f));
-                    var s = 4f;
+                    var center = new Vector2(tPos.X + (6f * ctx.Scale), ctx.ContentMin.Y + i * ctx.ItemHeight + (ctx.ItemHeight / 2f));
+                    var s = 4f * ctx.Scale;
+                    var arrowInset = 2f * ctx.Scale;
+                    var hitHalf = new Vector2(8f * ctx.Scale, 8f * ctx.Scale);
 
-                    var arrowRect = new ImRect(center - new Vector2(8, 8), center + new Vector2(8, 8));
+                    var arrowRect = new ImRect(center - hitHalf, center + hitHalf);
                     hoveredArrow = arrowRect.Contains(ctx.IO.MousePos);
                     var color = ImGui.GetColorU32(hoveredArrow ? ImGuiCol.Text : ImGuiCol.TextDisabled);
 
@@ -408,13 +417,13 @@ public class ImSequencer
                         track.IsExpanded = !track.IsExpanded;
 
                     if(track.IsExpanded)
-                        ctx.DrawList.AddTriangleFilled(center + new Vector2(-s, -s + 2), center + new Vector2(s, -s + 2), center + new Vector2(0, s + 2), color);
+                        ctx.DrawList.AddTriangleFilled(center + new Vector2(-s, -s + arrowInset), center + new Vector2(s, -s + arrowInset), center + new Vector2(0, s + arrowInset), color);
                     else
-                        ctx.DrawList.AddTriangleFilled(center + new Vector2(-s + 2, -s), center + new Vector2(-s + 2, s), center + new Vector2(s + 2, 0), color);
+                        ctx.DrawList.AddTriangleFilled(center + new Vector2(-s + arrowInset, -s), center + new Vector2(-s + arrowInset, s), center + new Vector2(s + arrowInset, 0), color);
                 }
 
-                var muteCenter = new Vector2(ctx.ContentMin.X + ctx.LegendWidth - 12f, ctx.ContentMin.Y + i * ctx.ItemHeight + (ctx.ItemHeight / 2f));
-                var muteRect = new ImRect(muteCenter - new Vector2(8, 8), muteCenter + new Vector2(8, 8));
+                var muteCenter = new Vector2(ctx.ContentMin.X + ctx.LegendWidth - (12f * ctx.Scale), ctx.ContentMin.Y + i * ctx.ItemHeight + (ctx.ItemHeight / 2f));
+                var muteRect = new ImRect(muteCenter - new Vector2(8f * ctx.Scale, 8f * ctx.Scale), muteCenter + new Vector2(8f * ctx.Scale, 8f * ctx.Scale));
                 var hoveredMute = muteRect.Contains(ctx.IO.MousePos);
 
                 if(hoveredMute && ImGui.IsMouseClicked(0))
@@ -465,7 +474,7 @@ public class ImSequencer
                 foreach(var kf in track.Keyframes.ToList())
                 {
                     var x = (float)(ctx.ContentMin.X + ctx.LeftOffset + (kf.Frame - state.ZoomState.ViewMin) * state.FramePixelWidth);
-                    var size = 6f;
+                    var size = KeyframeHalfSize * ctx.Scale;
                     var keyframeRect = new ImRect(new Vector2(x - size, y - size), new Vector2(x + size, y + size));
 
                     var isHovered = keyframeRect.Contains(ctx.IO.MousePos);
@@ -605,7 +614,8 @@ public class ImSequencer
             foreach(var kf in track.Keyframes.ToList())
             {
                 var x = (float)(ctx.ContentMin.X + ctx.LeftOffset + (kf.Frame - state.ZoomState.ViewMin) * state.FramePixelWidth);
-                var kfRect = new ImRect(new Vector2(x - 6f, y - 6f), new Vector2(x + 6f, y + 6f));
+                var kfSize = KeyframeHalfSize * ctx.Scale;
+                var kfRect = new ImRect(new Vector2(x - kfSize, y - kfSize), new Vector2(x + kfSize, y + kfSize));
 
                 if(selectionRect.Overlaps(kfRect))
                     state.SelectedKeyframes.Add(new SelectedKeyframe(absoluteIndex, kf.Id));
@@ -642,19 +652,19 @@ public class ImSequencer
         var cursorOffset = (float)(ctx.ContentMin.X + ctx.LeftOffset + (currentFrame - state.ZoomState.ViewMin) * state.FramePixelWidth);
         if(cursorOffset >= ctx.ContentMin.X + ctx.LeftOffset && cursorOffset <= ctx.ContentMax.X)
         {
-            ctx.DrawList.AddLine(new Vector2(cursorOffset, ctx.ContentMin.Y), new Vector2(cursorOffset, ctx.ContentMax.Y), ImGui.GetColorU32(ColorPlayhead), 1f);
+            ctx.DrawList.AddLine(new Vector2(cursorOffset, ctx.ContentMin.Y), new Vector2(cursorOffset, ctx.ContentMax.Y), ImGui.GetColorU32(ColorPlayhead), ctx.Scale);
 
             var playheadColor = ImGui.GetColorU32(ColorPlayhead);
             var textColor = ImGui.GetColorU32(ColorPlayheadText);
             var headerBottom = ctx.CanvasPos.Y + ctx.ItemHeight;
-            var rounding = 3f;
-            var padding = 4f;
+            var rounding = 3f * ctx.Scale;
+            var padding = 4f * ctx.Scale;
             var frameText = $"{currentFrame}";
             var textSize = ImGui.CalcTextSize(frameText);
-            var triHeight = 5f;
+            var triHeight = 5f * ctx.Scale;
             var boxHeight = textSize.Y + (padding / 2);
             var boxWidthHalf = (textSize.X / 2) + padding;
-            var triBaseY = headerBottom - triHeight - 1f;
+            var triBaseY = headerBottom - triHeight - ctx.Scale;
             var boxBottom = triBaseY;
             var boxTop = boxBottom - boxHeight;
 
@@ -665,7 +675,7 @@ public class ImSequencer
 
             var triP1 = new Vector2(cursorOffset - boxWidthHalf, boxBottom);
             var triP2 = new Vector2(cursorOffset + boxWidthHalf, boxBottom);
-            var triP3 = new Vector2(cursorOffset, headerBottom - 1f);
+            var triP3 = new Vector2(cursorOffset, headerBottom - ctx.Scale);
             ctx.ParentDrawList.AddTriangleFilled(triP1, triP2, triP3, playheadColor);
 
             ctx.ParentDrawList.AddText(new Vector2(cursorOffset - (textSize.X / 2), boxTop + (padding / 4)), textColor, frameText);
@@ -737,13 +747,13 @@ public class ImSequencer
         return ret;
     }
 
-    private static void DrawScrollbar(ImSequencerState state, float viewWidthPixels, float leftOffset, float height)
+    private static void DrawScrollbar(ImSequencerState state, float viewWidthPixels, float leftOffset, float height, float scale)
     {
         var scrollbarCursorPos = ImGui.GetCursorPos();
         ImGui.SetCursorPosX(scrollbarCursorPos.X + leftOffset);
         ImGui.SetItemAllowOverlap();
 
-        if(ZoomScrollbar.Draw("sequencer_zoom", ref state.ZoomState, height))
+        if(ZoomScrollbar.Draw("sequencer_zoom", ref state.ZoomState, height, scale))
         {
             var viewSpan = Math.Max(state.ZoomState.ViewMax - state.ZoomState.ViewMin, 1);
             state.FramePixelWidth = (float)(viewWidthPixels / viewSpan);

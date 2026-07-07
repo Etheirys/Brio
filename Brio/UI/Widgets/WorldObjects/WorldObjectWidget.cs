@@ -10,6 +10,7 @@ using Brio.UI.Controls.Stateless;
 using Brio.UI.Widgets.Core;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface;
+using Dalamud.Interface.Utility;
 using Dalamud.Interface.Utility.Raii;
 using FFXIVClientStructs.FFXIV.Client.Game.Character;
 using FFXIVClientStructs.FFXIV.Client.Graphics.Scene;
@@ -182,7 +183,7 @@ public class WorldObjectWidget(WorldObjectTransformCapability worldcap) : Widget
             ImBrio.SeparatorText("VFX Properties");
             ImBrio.VerticalPadding(5);
 
-            if(ImGui.Button($"Update", new Vector2(-1, 24)))
+            if(ImGui.Button($"Update", new Vector2(-1, 24 * ImGuiHelpers.GlobalScale)))
             {
                 staticVfx.Resume();
             }

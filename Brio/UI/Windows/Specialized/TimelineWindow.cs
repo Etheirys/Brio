@@ -88,7 +88,7 @@ public class TimelineWindow : Window, IDisposable
         DrawAddPopup();
 
         ImGui.SameLine();
-        ImGui.SetNextItemWidth(120f);
+        ImGui.SetNextItemWidth(120f * ImGuiHelpers.GlobalScale);
         var max = _timelineService.FrameMax;
         if(ImGui.DragInt("Length", ref max, 1f, _timelineService.FrameMin + 1, 10000))
             _timelineService.FrameMax = Math.Max(_timelineService.FrameMin + 1, max);
@@ -99,8 +99,8 @@ public class TimelineWindow : Window, IDisposable
         var centerWidth = (buttonWidth * 6) + (style.ItemSpacing.X * 5);
 
         var loopWidth = ImGui.GetFrameHeight() + style.ItemInnerSpacing.X + ImGui.CalcTextSize("Loop").X;
-        var resetWidth = 80f * ImGuiHelpers.GlobalScale;
-        var fpsWidth = (90f * ImGuiHelpers.GlobalScale) + style.ItemInnerSpacing.X + ImGui.CalcTextSize("FPS").X;
+        var resetWidth = 25f * ImGuiHelpers.GlobalScale;
+        var fpsWidth = (65f * ImGuiHelpers.GlobalScale) + style.ItemInnerSpacing.X + ImGui.CalcTextSize("FPS").X;
         var rightWidth = loopWidth + style.ItemSpacing.X + resetWidth + style.ItemSpacing.X + fpsWidth;
 
         ImGui.SameLine();
@@ -155,9 +155,9 @@ public class TimelineWindow : Window, IDisposable
         }
 
         ImGui.SameLine();
-        ImGui.SetNextItemWidth(90f);
+        ImGui.SetNextItemWidth(90f * ImGuiHelpers.GlobalScale);
         var fps = (int)_configurationService.Configuration.Timeline.PlaybackFramesPerSecond;
-        using(var combo = ImRaii.Combo("FPS", $"{fps}"))
+        using(var combo = ImRaii.Combo("###fps", $"{fps}"))
         {
             if(combo.Success)
             {

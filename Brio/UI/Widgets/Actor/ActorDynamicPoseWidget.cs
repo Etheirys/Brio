@@ -46,7 +46,7 @@ public class ActorDynamicPoseWidget(ActorDynamicPoseCapability capability) : Wid
             return;
         }
 
-        if(ImBrio.Button("   Set Expression", FontAwesomeIcon.Grin, new Vector2(ImBrio.GetRemainingWidth() - (28 * ImGuiHelpers.GlobalScale), 24), centerTest: true))
+        if(ImBrio.Button("   Set Expression", FontAwesomeIcon.Grin, new Vector2(ImBrio.GetRemainingWidth() - (28 * ImGuiHelpers.GlobalScale), 24 * ImGuiHelpers.GlobalScale), centerTest: true))
         {
             _expressionSelector.Select(null, false);
             ImGui.OpenPopup("dfc_expression_popup");

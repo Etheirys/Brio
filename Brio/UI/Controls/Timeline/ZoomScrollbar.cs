@@ -33,7 +33,7 @@ public sealed class ZoomScrollbar
     private const int HandleRight = 2;
     private const int HandleCenter = 3;
 
-    public static bool Draw(string id, ref State s, float height = 14.0f)
+    public static bool Draw(string id, ref State s, float height = 14.0f, float scale = 1f)
     {
         var io = ImGui.GetIO();
         var style = ImGui.GetStyle();
@@ -91,13 +91,14 @@ public sealed class ZoomScrollbar
         draw.AddRectFilled(new Vector2(cursor.X, laneY0), new Vector2(cursor.X + size.X, laneY1), colBar, style.FrameRounding);
 
         var thumbRounding = style.GrabRounding > 0 ? style.GrabRounding : style.FrameRounding;
-        var thumbMin = new Vector2(x0, cursor.Y + 2);
-        var thumbMax = new Vector2(x1, cursor.Y + size.Y - 2);
+        var thumbInset = 2f * scale;
+        var thumbMin = new Vector2(x0, cursor.Y + thumbInset);
+        var thumbMax = new Vector2(x1, cursor.Y + size.Y - thumbInset);
         draw.AddRectFilled(thumbMin, thumbMax, colFill, thumbRounding);
 
-        var gripW = MathF.Max(4f, MathF.Min(10f, (x1 - x0) * 0.15f));
-        draw.AddRectFilled(new Vector2(x0, cursor.Y + 2), new Vector2(x0 + gripW, cursor.Y + size.Y - 2), colGrip, thumbRounding);
-        draw.AddRectFilled(new Vector2(x1 - gripW, cursor.Y + 2), new Vector2(x1, cursor.Y + size.Y - 2), colGrip, thumbRounding);
+        var gripW = MathF.Max(4f * scale, MathF.Min(10f * scale, (x1 - x0) * 0.15f));
+        draw.AddRectFilled(new Vector2(x0, cursor.Y + thumbInset), new Vector2(x0 + gripW, cursor.Y + size.Y - thumbInset), colGrip, thumbRounding);
+        draw.AddRectFilled(new Vector2(x1 - gripW, cursor.Y + thumbInset), new Vector2(x1, cursor.Y + size.Y - thumbInset), colGrip, thumbRounding);
 
         var mx = io.MousePos.X;
         var my = io.MousePos.Y;

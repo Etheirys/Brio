@@ -21,6 +21,7 @@ public class ReferenceImageEntity : Entity
     public Vector2 PanOffset { get; set; } = Vector2.Zero;
     public float Opacity { get; set; } = 1.0f;
     public float Zoom { get; set; } = 1.0f;
+    public float Rotation { get; set; } = 0.0f;
 
     public override string FriendlyName { get; set; }
     public override FontAwesomeIcon Icon => FontAwesomeIcon.Image;
