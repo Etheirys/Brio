@@ -12,13 +12,13 @@ namespace Brio.UI.Widgets.World;
 
 public class SkyEditorWidget(SkyEditorCapability skyEditorCapability) : Widget<SkyEditorCapability>(skyEditorCapability)
 {
-    public override string HeaderName => "Sky";
+    public override string HeaderName => "Ambient";
     public override WidgetFlags Flags => WidgetFlags.DrawBody;
 
     int selected = 0;
-    private readonly TextureSelector _skyTextureSelector = new("sky_texture_selector", TextureType.Sky);
-    private readonly TextureSelector _cloudTextureSelector = new("cloud_texture_selector", TextureType.Cloud);
-    private readonly TextureSelector _cloudSideTextureSelector = new("cloud_side_texture_selector", TextureType.CloudSide);
+    private readonly TextureSelector _skyTextureSelector = new("sky_texture_selector", TextureType.Sky, 450);
+    private readonly TextureSelector _cloudTextureSelector = new("cloud_texture_selector", TextureType.Cloud, 75);
+    private readonly TextureSelector _cloudSideTextureSelector = new("cloud_side_texture_selector", TextureType.CloudSide, 75);
 
     public unsafe override void DrawBody()
     {
@@ -27,7 +27,7 @@ public class SkyEditorWidget(SkyEditorCapability skyEditorCapability) : Widget<S
 
         ImBrio.VerticalPadding(3);
 
-        ImBrio.ButtonSelectorStrip("stars_filters_selector", new Vector2(ImBrio.GetRemainingWidth(), ImBrio.GetLineHeight()), ref selected, ["Sky", "Stars", "Clouds"]);
+        ImBrio.ButtonSelectorStrip("stars_filters_selector", new Vector2(ImBrio.GetRemainingWidth(), ImBrio.GetLineHeight()), ref selected, ["Sky", "Stars", "Clouds", "Indoors"]);
 
         switch(selected)
         {
@@ -271,6 +271,31 @@ public class SkyEditorWidget(SkyEditorCapability skyEditorCapability) : Widget<S
 
                 if(didSkyChange4)
                     Capability.Environment.EnvironmentOverrideState |= EnvironmentOverrideState.Clouds;
+
+                break;
+            case 3:
+
+                ImBrio.VerticalPadding(3);
+
+                if(ImBrio.SeparatorTextButton("Interior Brightness", FontAwesomeIcon.Redo, "Reset All Sky Properties", Capability.IsInside))
+                {
+                    Capability.ResetIndoorLighting();
+                }
+
+                ImBrio.CenterNextElementWithPadding(10);
+
+                float currentLight = Capability.IndoorLight;
+                using(ImRaii.Disabled(Capability.IsInside == false))
+                    if(ImGui.SliderFloat("###brightness", ref currentLight, 0.0f, 1.0f))
+                    {
+                        Capability.IndoorLight = currentLight;
+                    }
+                if(Capability.IsInside == false)
+                    ImBrio.AttachToolTip("You must be inside housing to adjust interior brightness.");
+                else
+                    ImBrio.AttachToolTip("Adjust the brightness of the interior lighting.");
+
+                ImBrio.VerticalPadding(3);
 
                 break;
         }

@@ -17,7 +17,7 @@ public class EnvironmentEditorWidget(EnvironmentEditorCapability capability) : W
     public override WidgetFlags Flags => WidgetFlags.DrawBody;
 
     int selected = 0;
-    private readonly TextureSelector _textureSelector = new("particle_texture_selector", TextureType.Particle);
+    private readonly TextureSelector _textureSelector = new("particle_texture_selector", TextureType.Particle, 20);
 
     public unsafe override void DrawBody()
     {
