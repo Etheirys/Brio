@@ -93,7 +93,7 @@ public class ReferenceImageService(EntityManager entityManager)
         var contentStart = ImGui.GetCursorPos();
 
         if(hasImage)
-            DrawZoomedImage(cap!.Texture!, entity.Zoom, entity.Opacity, entity.PanOffset);
+            DrawZoomedImage(cap!.Texture!, entity.Zoom, entity.Opacity, entity.PanOffset, entity.Rotation);
         else
             ImGui.Dummy(ImGui.GetContentRegionAvail());
 
@@ -137,7 +137,9 @@ public class ReferenceImageService(EntityManager entityManager)
 
         ImGui.SameLine();
 
-        float reservedWidth = ((90f * ImGuiHelpers.GlobalScale) + ImGui.GetStyle().ItemSpacing.X) * 2;
+        float reservedWidth = ((90f * ImGuiHelpers.GlobalScale) + ImGui.GetStyle().ItemSpacing.X) * 3
+            + (25f * ImGuiHelpers.GlobalScale) + ImGui.GetStyle().ItemSpacing.X;
+
         string displayName = TruncateToWidth(entity.FriendlyName, Math.Max(ImGui.GetContentRegionAvail().X - reservedWidth, 0));
         ImGui.Text(displayName);
         if(displayName != entity.FriendlyName && ImGui.IsItemHovered())
@@ -158,9 +160,22 @@ public class ReferenceImageService(EntityManager entityManager)
         if(ImGui.SliderFloat($"###zoom_{entity.Id}", ref zoom, 0.1f, 3.0f, "%.1fx"))
             entity.Zoom = zoom;
         ImBrio.AttachToolTip("Zoom (Scroll Wheel)");
+
+        ImGui.SameLine();
+
+        ImGui.SetNextItemWidth(90 * ImGuiHelpers.GlobalScale);
+        float rotationDegrees = entity.Rotation * (180f / MathF.PI);
+        if(ImGui.SliderFloat($"###rotation_{entity.Id}", ref rotationDegrees, 0f, 360f, "%.0f°"))
+            entity.Rotation = rotationDegrees * (MathF.PI / 180f);
+        ImBrio.AttachToolTip("Rotation");
+
+        ImGui.SameLine();
+
+        if(ImBrio.FontIconButton($"###{entity.Id}_rotation_reset", FontAwesomeIcon.Undo, "Reset Rotation", bordered: false))
+            entity.Rotation = 0f;
     }
 
-    private static void DrawZoomedImage(IDalamudTextureWrap texture, float zoom, float opacity, Vector2 panOffset)
+    private static void DrawZoomedImage(IDalamudTextureWrap texture, float zoom, float opacity, Vector2 panOffset, float rotation)
     {
         var available = ImGui.GetContentRegionAvail();
 
@@ -180,11 +195,22 @@ public class ReferenceImageService(EntityManager entityManager)
         var baseScreenPos = ImGui.GetCursorScreenPos();
         var imageMin = baseScreenPos + new Vector2(offsetX, offsetY);
         var imageMax = imageMin + new Vector2(width, height);
+        var imageCenter = (imageMin + imageMax) * 0.5f;
 
         uint alpha = (uint)(Math.Clamp(opacity, 0f, 1f) * 255) & 0xFF;
         uint tintColor = (alpha << 24) | (255u << 16) | (255u << 8) | 255u;
 
-        ImGui.GetWindowDrawList().AddImage(texture.Handle, imageMin, imageMax, Vector2.Zero, Vector2.One, tintColor);
+        float cosA = MathF.Cos(rotation);
+        float sinA = MathF.Sin(rotation);
+
+        Vector2 Rotate(Vector2 v) => new((v.X * cosA) - (v.Y * sinA), (v.X * sinA) + (v.Y * cosA));
+
+        var pos1 = imageCenter + Rotate(new Vector2(-width * 0.5f, -height * 0.5f));
+        var pos2 = imageCenter + Rotate(new Vector2(+width * 0.5f, -height * 0.5f));
+        var pos3 = imageCenter + Rotate(new Vector2(+width * 0.5f, +height * 0.5f));
+        var pos4 = imageCenter + Rotate(new Vector2(-width * 0.5f, +height * 0.5f));
+
+        ImGui.GetWindowDrawList().AddImageQuad(texture.Handle, pos1, pos2, pos3, pos4, new Vector2(0.0f, 0.0f), new Vector2(1.0f, 0.0f), new Vector2(1.0f, 1.0f), new Vector2(0.0f, 1.0f), tintColor);
 
         ImGui.Dummy(available);
     }
