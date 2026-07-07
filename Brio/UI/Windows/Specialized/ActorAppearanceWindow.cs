@@ -1,6 +1,5 @@
 ﻿using Brio.Capabilities.Actor;
 using Brio.Entities;
-using Brio.Entities.Actor;
 using Brio.Game.Actor.Appearance;
 using Brio.Game.Actor.Extensions;
 using Brio.Game.GPose;
@@ -48,16 +47,13 @@ public class ActorAppearanceWindow : Window, IDisposable
             MaximumSize = new Vector2(1200, 1100)
         };
 
+        this.AllowBackgroundBlur = false;
+
         _gPoseService.OnGPoseStateChange += OnGPoseStateChanged;
     }
 
     public override bool DrawConditions()
     {
-        if(_entityManager.SelectedEntity is ActorEntity actor && actor.IsProp == true)
-        {
-            return false;
-        }
-
         if(!_entityManager.SelectedHasCapability<ActorAppearanceCapability>())
         {
             return false;
@@ -70,6 +66,8 @@ public class ActorAppearanceWindow : Window, IDisposable
     bool isAdvancedMenuOpen = true;
     public unsafe override void Draw()
     {
+        ImBrio.BlurWindow();
+
         if(!_entityManager.TryGetCapabilityFromSelectedEntity<ActorAppearanceCapability>(out ActorAppearanceCapability? capability, considerParents: true))
             return;
 

@@ -1,10 +1,11 @@
-﻿using Brio.Entities.Core;
+﻿using Brio.Core;
+using Brio.Entities.Core;
 using Brio.Game.Actor;
 using Brio.Game.Camera;
-using System.Numerics;
 using Brio.Game.World;
 using Brio.UI.Widgets.World.Lights;
 using Brio.UI.Windows.Specialized;
+using System.Numerics;
 
 namespace Brio.Capabilities.World;
 
@@ -20,7 +21,7 @@ public class LightLifetimeCapability : LightCapability
         _lightWindow = lightWindow;
         _cameraManager = cameraManager;
 
-        this.Widget = new LightLifetimeWidget(this, actorSpawnService, cameraManager, lightingService);
+        this.Widget = new LightLifetimeWidget(this);
     }
 
     public bool CanDestroy => true;
@@ -50,36 +51,23 @@ public class LightLifetimeCapability : LightCapability
         _lightingService.Clone(GameLight);
     }
 
-    public void MoveToCamera()
+    public unsafe void MoveToCamera()
     {
         if(_cameraManager.CurrentCamera is null)
             return;
 
-        var cam = _cameraManager.CurrentCamera;
-        System.Numerics.Vector3 camPos;
-        if(cam.IsFreeCamera)
+        if(GameLight != null && GameLight.GameLight != null && Entity is TransformableEntity transformableEntity)
         {
-            camPos = cam.Position;
-        }
-        else
-        {
-            unsafe
-            {
-                camPos = cam.BrioCamera->Position;
-            }
-        }
+            var cam = _cameraManager.CurrentCamera;
 
-        unsafe
-        {
-            if(GameLight != null && GameLight.GameLight != null)
-            {
-                GameLight.GameLight->Transform.Position = camPos;
+            Vector3 camPos = cam.IsFreeCamera ? cam.Position : cam.BrioCamera->Position;
+            Quaternion camRot = cam.IsFreeCamera ? cam.FreeCameraRotationAsQuaternion : cam.BrioCamera->CalculateDirectionAsQuaternion();
 
-                if(cam.IsFreeCamera)
-                    GameLight.GameLight->Transform.Rotation = cam.FreeCameraRotationAsQuaternion;
-                else
-                    GameLight.GameLight->Transform.Rotation = cam.BrioCamera->CalculateDirectionAsQuaternion();
-            }
+            var transform = transformableEntity.Transform;
+            transform.Position = camPos;
+            transform.Rotation = camRot;
+
+            transformableEntity.Transform = transform;
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using FFXIVClientStructs.FFXIV.Client.Graphics;
+using System;
 using System.Numerics;
 namespace Brio.Core;
 
@@ -7,17 +8,17 @@ public static class NumericsExtensions
     public static Quaternion ToQuaternion(this Vector3 euler)
     {
         euler *= MathHelpers.DegreesToRadians;
-        Quaternion quaternion = Quaternion.CreateFromYawPitchRoll(euler.X, euler.Y, euler.Z);
+        Quaternion quaternion = Quaternion.CreateFromYawPitchRoll(euler.Y, euler.X, euler.Z);
         return Quaternion.Normalize(quaternion);
     }
 
     public static Vector3 ToEuler(this Quaternion r)
     {
         float yaw = MathF.Atan2(2.0f * (r.Y * r.W + r.X * r.Z), 1.0f - 2.0f * (r.X * r.X + r.Y * r.Y));
-        float pitch = MathF.Asin(2.0f * (r.X * r.W - r.Y * r.Z));
+        float pitch = MathF.Asin(Math.Clamp(2.0f * (r.X * r.W - r.Y * r.Z), -1.0f, 1.0f));
         float roll = MathF.Atan2(2.0f * (r.X * r.Y + r.Z * r.W), 1.0f - 2.0f * (r.X * r.X + r.Z * r.Z));
 
-        return new Vector3(yaw, pitch, roll) * MathHelpers.RadiansToDegrees;
+        return new Vector3(pitch, yaw, roll) * MathHelpers.RadiansToDegrees;
     }
 
     public static bool IsPointInPolygon(this ref Vector2 point, Vector2[] polygon)
@@ -94,4 +95,23 @@ public static class NumericsExtensions
     {
         return Quaternion.Dot(me, other) >= 1 - tolerance;
     }
+
+    public static Vector4 ToOpaqueNormalizedColor(this Vector4 color) => new(
+        Math.Clamp(color.X, 0f, 1f),
+        Math.Clamp(color.Y, 0f, 1f),
+        Math.Clamp(color.Z, 0f, 1f),
+        1f);
+
+    public static ByteColor ToByteColor(this Vector4 color) => new()
+    {
+        R = color.X.ToRoundedByteComponent(),
+        G = color.Y.ToRoundedByteComponent(),
+        B = color.Z.ToRoundedByteComponent(),
+        A = byte.MaxValue,
+    };
+
+    public static byte ToRoundedByteComponent(this float value)
+        => (byte)Math.Clamp((int)MathF.Round(Math.Clamp(value, 0f, 1f) * 255f), 0, 255);
+
+
 }

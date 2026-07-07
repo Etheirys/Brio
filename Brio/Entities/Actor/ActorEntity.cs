@@ -1,10 +1,14 @@
 ﻿using Brio.Capabilities.Actor;
 using Brio.Capabilities.Posing;
+using Brio.Capabilities.Timeline;
 using Brio.Config;
+using Brio.Core;
 using Brio.Entities.Core;
 using Brio.Game.Actor;
 using Brio.Game.Actor.Extensions;
-using Brio.UI.Controls;
+using Brio.Game.Posing;
+using Brio.IPC;
+using Brio.UI;
 using Brio.UI.Controls.Stateless;
 using Brio.UI.Theming;
 using Dalamud.Bindings.ImGui;
@@ -16,11 +20,17 @@ using System;
 
 namespace Brio.Entities.Actor;
 
-public class ActorEntity(IGameObject gameObject, IServiceProvider provider) : Entity(new EntityId(gameObject), provider)
+public class ActorEntity(IGameObject gameObject, IServiceProvider provider) : TransformableEntity(new EntityId(gameObject), provider)
 {
     public readonly IGameObject GameObject = gameObject;
 
     private readonly ConfigurationService _configService = provider.GetRequiredService<ConfigurationService>();
+    private readonly PosingService _posingService = provider.GetRequiredService<PosingService>();
+    private readonly GlamourerService _glamourerService = provider.GetRequiredService<GlamourerService>();
+
+    private ActorAppearanceCapability _actorAppearanceCapability = null!;
+
+    public BoneFilter OverlayFilter { get; private set; } = null!;
 
     public string RawName = "";
     public override string FriendlyName
@@ -29,7 +39,7 @@ public class ActorEntity(IGameObject gameObject, IServiceProvider provider) : En
         {
             if(string.IsNullOrEmpty(RawName))
             {
-                return _configService.Configuration.Interface.CensorActorNames ? GameObject.GetCensoredName() : GameObject.GetFriendlyName();
+                return GameObject.GetFriendlyName();
             }
 
             return GameObject.GetAsCustomName(RawName);
@@ -39,7 +49,7 @@ public class ActorEntity(IGameObject gameObject, IServiceProvider provider) : En
             RawName = value;
         }
     }
-    public override FontAwesomeIcon Icon => IsProp ? FontAwesomeIcon.Cube : GameObject.GetFriendlyIcon();
+    public override FontAwesomeIcon Icon => GameObject.GetFriendlyIcon();
 
     public override bool IsVisible => true;
 
@@ -47,29 +57,41 @@ public class ActorEntity(IGameObject gameObject, IServiceProvider provider) : En
 
     public override int ContextButtonCount => 1;
 
-    public bool IsProp => ActorType == ActorType.Prop;
-
     public ActorType ActorType => GetActorType();
 
     private ActorType GetActorType()
     {
-        if(SpawnFlag.HasFlag(SpawnFlags.IsEffect))
-            return ActorType.Effect;
-        if(SpawnFlag.HasFlag(SpawnFlags.IsProp))
-            return ActorType.Prop;
+        if(SpawnFlag.HasFlag(SpawnFlags.WorldActor))
+            return ActorType.WorldActor;
 
         return ActorType.BrioActor;
     }
 
+    public override void Snapshot()
+    {
+        if(TryGetCapability<PosingCapability>(out var cap))
+            cap.Snapshot(false, false);
+    }
+
     public override void OnDoubleClick()
     {
-        var aac = GetCapability<ActorAppearanceCapability>();
-        RenameActorModal.Open(aac.Actor);
+        ModalManager.Instance.OpenRenameModal(this);
+    }
+
+    public override void SetVisibility(bool visible)
+    {
+        if(_actorAppearanceCapability is not null)
+        {
+            if(visible)
+                _actorAppearanceCapability.Show();
+            else
+                _actorAppearanceCapability.Hide();
+        }
     }
 
     public override void DrawContextButton()
     {
-        var aac = GetCapability<ActorAppearanceCapability>();
+        var aac = _actorAppearanceCapability;
 
         using(ImRaii.PushColor(ImGuiCol.Button, ThemeManager.CurrentTheme.Accent.AccentColor, aac.IsHidden))
         {
@@ -83,25 +105,38 @@ public class ActorEntity(IGameObject gameObject, IServiceProvider provider) : En
 
     public override void OnAttached()
     {
-        AddCapability(ActivatorUtilities.CreateInstance<ActorLifetimeCapability>(_serviceProvider, this));
-        AddCapability(ActivatorUtilities.CreateInstance<ActorAppearanceCapability>(_serviceProvider, this));
+        OverlayFilter = new BoneFilter(_posingService);
+        OverlayFilter.DisableCategory("ex");
+        OverlayFilter.DisableCategory("weapon");
+        OverlayFilter.DisableCategory("clothing");
+        OverlayFilter.DisableCategory("legacy");
+        OverlayFilter.DisableCategory("other");
 
-        if(ActorType is ActorType.BrioActor)
+        //
+
+        IsSynced = _glamourerService.CheckForLock(this.GameObject);
+
+        //
+
+        AddCapability(ActivatorUtilities.CreateInstance<ActorLifetimeCapability>(_serviceProvider, this));
+        AddCapability(_actorAppearanceCapability = ActivatorUtilities.CreateInstance<ActorAppearanceCapability>(_serviceProvider, this));
+
+        if(ActorType is ActorType.BrioActor && GameObject.ObjectKind == Dalamud.Game.ClientState.Objects.Enums.ObjectKind.Pc)
             AddCapability(ActorDynamicPoseCapability.CreateIfEligible(_serviceProvider, this));
 
         AddCapability(ActivatorUtilities.CreateInstance<SkeletonPosingCapability>(_serviceProvider, this));
-        AddCapability(ActivatorUtilities.CreateInstance<ModelPosingCapability>(_serviceProvider, this));
+
+        AddTransformable<ModelPosingCapability>();
+
         AddCapability(ActivatorUtilities.CreateInstance<PosingCapability>(_serviceProvider, this));
 
         AddCapability(ActionTimelineCapability.CreateIfEligible(_serviceProvider, this));
 
-        if(ActorType is not ActorType.Prop)
-        {
-            if(ActorType is not ActorType.Effect)
-            {
-                AddCapability(CompanionCapability.CreateIfEligible(_serviceProvider, this));
-            }
+        AddCapability(ActorTimelineCapability.CreateIfEligible(_serviceProvider, this));
 
+        if(ActorType is not ActorType.WorldActor)
+        {
+            AddCapability(CompanionCapability.CreateIfEligible(_serviceProvider, this));
             AddCapability(StatusEffectCapability.CreateIfEligible(_serviceProvider, this));
         }
 

@@ -1,5 +1,7 @@
 ﻿using Brio.Config;
 using Brio.Game.GPose;
+using Brio.Services;
+using Brio.Services.MediatorMessages;
 using Dalamud.Game.ClientState.Keys;
 using Dalamud.Plugin.Services;
 using System;
@@ -7,31 +9,28 @@ using System.Collections.Generic;
 
 namespace Brio.Input;
 
-public class InputManagerService : IDisposable
+public class InputManagerService : MediatorSubscriberBase
 {
     private readonly IKeyState _keyState;
     private readonly ConfigurationService _configurationService;
     private readonly GPoseService _gPoseService;
-    private readonly IFramework _framework;
-
     private readonly Dictionary<VirtualKey, bool> _lastFrameKeyStates = [];
     private readonly HashSet<VirtualKey> _keyUpTriggered = [];
 
     public static InputManagerService Instance { get; private set; } = null!;
 
-    public InputManagerService(IKeyState keyState, IFramework framework, ConfigurationService configurationService, GPoseService gPoseService)
+    public InputManagerService(IKeyState keyState, Mediator mediator, ConfigurationService configurationService, GPoseService gPoseService) : base(mediator)
     {
         _keyState = keyState;
         _configurationService = configurationService;
         _gPoseService = gPoseService;
-        _framework = framework;
 
-        _framework.Update += OnFrameworkUpdate;
+        mediator.Subscribe<FrameworkUpdateMessage>(this, (state) => OnFrameworkUpdate());
 
         Instance = this;
     }
 
-    private void OnFrameworkUpdate(IFramework framework)
+    private void OnFrameworkUpdate()
     {
         if(_gPoseService.IsGPosing is false || _configurationService.Configuration.InputManager.Enable is false)
             return;
@@ -148,9 +147,9 @@ public class InputManagerService : IDisposable
         return Instance._keyState.GetValidVirtualKeys();
     }
 
-    public void Dispose()
+    public override void Dispose()
     {
-        _framework.Update -= OnFrameworkUpdate;
+        base.Dispose();
 
         GC.SuppressFinalize(this);
     }

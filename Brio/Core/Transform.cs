@@ -147,6 +147,12 @@ public struct Transform
         return false;
     }
 
+    public Transform Lerp(Transform to, float delta) => new()
+    {
+        Position = Vector3.Lerp(Position, to.Position, delta),
+        Rotation = Quaternion.Slerp(Rotation, to.Rotation, delta),
+        Scale = Vector3.Lerp(Scale, to.Scale, delta)
+    };
 }
 
 [Flags]

@@ -1,13 +1,6 @@
 ﻿using Brio.Capabilities.World;
 using Brio.Entities.Core;
-using Brio.Game.GPose;
-using Brio.Game.World;
-using Brio.UI.Controls.Editors;
-using Brio.UI.Controls.Stateless;
-using Brio.UI.Theming;
-using Dalamud.Bindings.ImGui;
 using Dalamud.Interface;
-using Dalamud.Interface.Utility.Raii;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 
@@ -15,35 +8,15 @@ namespace Brio.Entities.World;
 
 public class EnvironmentContainerEntity(IServiceProvider provider) : Entity("environment", provider)
 {
-    private readonly GPoseService _gPoseService = provider.GetRequiredService<GPoseService>();
-    private readonly LightingService _lightingService = provider.GetRequiredService<LightingService>();
-
     public override string FriendlyName => "Environment";
-    public override FontAwesomeIcon Icon => FontAwesomeIcon.MountainSun;
+    public override FontAwesomeIcon Icon => FontAwesomeIcon.CloudMoon;
 
-    public override int ContextButtonCount => 1;
-    public override EntityFlags Flags => EntityFlags.AllowOutsideGpose | EntityFlags.DefaultOpen | EntityFlags.HasContextButton;
-
-    public override void DrawContextButton()
-    {
-        using(ImRaii.Disabled(_gPoseService.IsGPosing == false))
-        {
-            using(ImRaii.PushColor(ImGuiCol.Button, ThemeManager.CurrentTheme.Accent.AccentColor))
-            {
-                string toolTip = $"New Light";
-                if(ImBrio.FontIconButtonRight($"###{Id}_light_contextButton", FontAwesomeIcon.Plus, 1f, toolTip, bordered: false))
-                {
-                    ImGui.OpenPopup("DrawLightSpawnMenuPopup");
-                }
-                LightEditor.DrawSpawnMenu(_lightingService);
-            }
-        }
-    }
+    public override int ContextButtonCount => 0;
+    public override EntityFlags Flags => EntityFlags.AllowOutsideGpose | EntityFlags.DefaultOpen;
 
     public override void OnAttached()
     {
         AddCapability(ActivatorUtilities.CreateInstance<EnvironmentLifetimeCapability>(_serviceProvider, this));
-        AddCapability(ActivatorUtilities.CreateInstance<LightContainerCapability>(_serviceProvider, this));
         AddCapability(ActivatorUtilities.CreateInstance<TimeWeatherCapability>(_serviceProvider, this));
         AddCapability(ActivatorUtilities.CreateInstance<SkyEditorCapability>(_serviceProvider, this));
         AddCapability(ActivatorUtilities.CreateInstance<EnvironmentEditorCapability>(_serviceProvider, this));

@@ -1,7 +1,7 @@
 ﻿using Brio.Game.Core;
 using Brio.Game.GPose;
 using Brio.MCDF.Game.Services;
-using Brio.UI.Controls.Core;
+using Brio.Services.Models;
 using Brio.UI.Controls.Stateless;
 using Brio.UI.Entitites;
 using Dalamud.Bindings.ImGui;
@@ -19,11 +19,10 @@ public class ProjectWindow : Window, IDisposable
     private readonly GPoseService _gPoseService;
     private readonly MCDFService _mCDFService;
 
-    int selected = 0;
     static Project? selectedItem;
-    private const float InfoPaneWidth = 200;
+    private const float InfoPaneWidth = 175;
 
-    public ProjectWindow(ProjectSystem projectSystem, MCDFService mCDFService, GPoseService gPoseService) : base($"{Brio.Name} PROJECT BETA###brio_project_window", ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse)
+    public ProjectWindow(ProjectSystem projectSystem, MCDFService mCDFService, GPoseService gPoseService) : base($"{Brio.Name} LOAD PROJECT###brio_project_window", ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse)
     {
         Namespace = "brio_project_namespace";
 
@@ -33,60 +32,28 @@ public class ProjectWindow : Window, IDisposable
 
         WindowSizeConstraints constraints = new()
         {
-            MinimumSize = new(600, 400),
-            MaximumSize = new(785, 435)
+            MinimumSize = new(450, 350),
+            MaximumSize = new(805, 500)
         };
         this.SizeConstraints = constraints;
+        this.AllowBackgroundBlur = false;
 
         _gPoseService.OnGPoseStateChange += GPoseService_OnGPoseStateChange;
     }
 
-    string currentActorName = string.Empty;
-    string currentActorDis = string.Empty;
+    public override void PreDraw()
+    {
+        this.Size = new Vector2(380, 500);
+        ImGui.SetNextWindowPos(new Vector2((ImGui.GetIO().DisplaySize.X - Size!.Value.X) / 2, (ImGui.GetIO().DisplaySize.Y - Size!.Value.Y) / 2), ImGuiCond.Appearing);
+    }
+
     public override void Draw()
     {
-        using(ImRaii.PushColor(ImGuiCol.Text, UIConstants.GizmoMagenta))
-            ImGui.Text("Project System is in Beta.");
-
-        using(ImRaii.PushColor(ImGuiCol.Text, UIConstants.GizmoMagenta))
-            ImGui.Text("ATTENTION: Projects made in this version will be incompatible with the next version of Brio!");
+        ImBrio.BlurWindow();
 
         using(ImRaii.Disabled(_mCDFService.IsApplyingMCDF || _mCDFService.IsSavingMCDF))
         {
-            ImBrio.ButtonSelectorStrip("library_filters_selector", new Vector2(ImBrio.GetRemainingWidth(), ImBrio.GetLineHeight()), ref selected, ["Load", "Save"]);
-
-            if(selected == 0 || _projectSystem.IsLoading)
-            {
-                DrawLoad();
-            }
-            else
-            {
-                var windowSize = ImGui.GetWindowSize();
-                var lastPos = ImGui.GetCursorPos();
-
-                using var child = ImRaii.Child("###new_pane", new Vector2(ImBrio.GetRemainingWidth(), ImBrio.GetRemainingHeight()), false);
-
-                if(child.Success)
-                {
-                    ImGui.Text($"Save New Project");
-
-                    ImGui.InputText("Project Name###brio_popup_name", ref currentActorName, 35);
-                    ImGui.InputText("Project Description###brio_popup_dis", ref currentActorDis, 35);
-
-                    using(ImRaii.Disabled(string.IsNullOrEmpty(currentActorName)))
-                    {
-                        if(ImBrio.Button("Save Project", FontAwesomeIcon.Save, new(135, 0), centerTest: true, tooltip: "Save Project"))
-                        {
-                            _projectSystem.NewProject(currentActorName, currentActorDis);
-
-                            selected = 0;
-
-                            currentActorName = string.Empty;
-                            currentActorDis = string.Empty;
-                        }
-                    }
-                }
-            }
+            DrawLoad();
         }
 
         if(_mCDFService.IsApplyingMCDF || _mCDFService.IsSavingMCDF)
@@ -96,7 +63,9 @@ public class ProjectWindow : Window, IDisposable
     }
 
     bool destroyAll = false;
-    bool doDelete = false;
+    bool useRelativeLightPositions = true;
+    bool useRelativeWorldObjectPositions = true;
+    SceneImportOptions importOptions = SceneImportOptions.Default;
     public void DrawLoad()
     {
         var windowSize = ImGui.GetWindowSize();
@@ -105,7 +74,7 @@ public class ProjectWindow : Window, IDisposable
             if(child.Success == false)
                 return;
 
-            float entriesPaneHeight = ImBrio.GetRemainingHeight() - ImBrio.GetLineHeight() - ImGui.GetStyle().ItemSpacing.Y;
+            float entriesPaneHeight = ImBrio.GetRemainingHeight() - (ImBrio.GetLineHeight() * 1) - (ImGui.GetStyle().ItemSpacing.Y * 1);
             float entriesPaneWidth = ImBrio.GetRemainingWidth();
             using(var entriesChild = ImRaii.Child("###entries_pane", new Vector2(entriesPaneWidth, entriesPaneHeight), true))
             {
@@ -134,15 +103,11 @@ public class ProjectWindow : Window, IDisposable
             {
                 if(ImBrio.Button("Load", FontAwesomeIcon.FileImport, new(120, 0), centerTest: true, tooltip: "Load Project"))
                 {
-                    _projectSystem.LoadProject(selectedItem!, destroyAll);
+                    _projectSystem.LoadProject(selectedItem!, destroyAll, useRelativeLightPositions, useRelativeWorldObjectPositions, importOptions);
                 }
 
                 ImGui.SameLine();
-
-                if(ImGui.Checkbox("Override Current Scene", ref destroyAll))
-                {
-
-                }
+                FileUIHelpers.DrawImportSettingsPopup(ref importOptions, ref destroyAll, ref useRelativeLightPositions, ref useRelativeWorldObjectPositions);
             }
         }
 
@@ -171,14 +136,11 @@ public class ProjectWindow : Window, IDisposable
             }
             using(ImRaii.Disabled(selectedItem is null))
             {
-                ImGui.Checkbox("###doDelete", ref doDelete);
-                ImGui.SameLine();
-                using(ImRaii.Disabled(doDelete == false))
-                    if(ImBrio.Button("Delete", FontAwesomeIcon.Trash, new(120, 0), centerTest: true, tooltip: "Delete Project"))
-                    {
-                        _projectSystem.DeleteProject(selectedItem!);
-                        selectedItem = null;
-                    }
+                if(ImBrio.HoldButton("proj_delete", "Delete", FontAwesomeIcon.Trash, 1.1f, new(120, 0), centerTest: true, tooltip: "[HOLD]\nDelete Project"))
+                {
+                    _projectSystem.DeleteProject(selectedItem!);
+                    selectedItem = null;
+                }
             }
         }
 

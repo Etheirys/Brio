@@ -1,9 +1,8 @@
-﻿using Brio.Core;
+﻿using Brio.Config;
+using Brio.Core;
 using Dalamud.Game.ClientState.Objects.Enums;
 using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Interface;
-
-using NativeCharacter = FFXIVClientStructs.FFXIV.Client.Game.Character.Character;
 using StructsObject = FFXIVClientStructs.FFXIV.Client.Game.Object.GameObject;
 
 namespace Brio.Game.Actor.Extensions;
@@ -27,7 +26,7 @@ public static class GameObjectExtensions
 
     public static string GetAsCustomName(this IGameObject go, string name)
     {
-        return $"{name} ({go.ObjectIndex})";
+        return $"{name}";
     }
 
     public static string GetFriendlyName(this IGameObject go)
@@ -35,20 +34,22 @@ public static class GameObjectExtensions
         switch(go.ObjectKind)
         {
             case ObjectKind.Ornament:
-                return $"Ornament ({go.ObjectIndex})";
+                return $"Ornament {go.Name}";
             case ObjectKind.Mount:
-                return $"Mount ({go.ObjectIndex})";
+                return $"Mount {go.Name}";
+            case ObjectKind.Pc:
+                return ConfigurationService.Instance.Configuration.Interface.CensorActorNames ? go.GetCensoredName() : $"{go.Name}";
             default:
-                return $"{go.Name} ({go.ObjectIndex})";
+                return $"{go.Name}";
         }
     }
 
     public static string GetCensoredName(this IGameObject go)
     {
         if(go.ObjectIndex >= ActorTableHelpers.GPoseStart)
-            return $"{(go.ObjectIndex - ActorTableHelpers.GPoseStart + 1).ToBrioName()} ({go.ObjectIndex})";
+            return $"{(go.ObjectIndex - ActorTableHelpers.GPoseStart + 1).ToBrioName()}";
 
-        return $"{((int)go.ObjectIndex).ToBrioName()} ({go.ObjectIndex})";
+        return $"{((int)go.ObjectIndex).ToBrioName()}";
     }
 
     public static bool IsGPose(this IGameObject go)

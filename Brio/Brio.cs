@@ -11,6 +11,7 @@ using Brio.Game.GPose;
 using Brio.Game.Input;
 using Brio.Game.Posing;
 using Brio.Game.World;
+using Brio.Game.WorldObjects;
 using Brio.Input;
 using Brio.IPC;
 using Brio.IPC.API;
@@ -20,7 +21,11 @@ using Brio.MCDF.Game.FileCache;
 using Brio.MCDF.Game.Services;
 using Brio.Resources;
 using Brio.Services;
+using Brio.Services.Models;
+using Brio.Services.Timeline;
 using Brio.UI;
+using Brio.UI.Controls.Editors;
+using Brio.UI.Modals;
 using Brio.UI.Windows;
 using Brio.UI.Windows.Specialized;
 using Brio.Web;
@@ -33,77 +38,126 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 
 using static Brio.Core.Win32;
 
 namespace Brio;
 
-public class Brio : IDalamudPlugin
+public class Brio(IDalamudPluginInterface pluginInterface) : IAsyncDalamudPlugin
 {
     public const int MajorAPIVersion = 3;
     public const int MinorAPIVersion = 0;
 
     public const string Name = "BRIO";
 
+    private readonly IDalamudPluginInterface _pluginInterface = pluginInterface;
     private static ServiceProvider? _services = null;
 
     public static IPluginLog Log { get; private set; } = null!;
     public static IFramework Framework { get; private set; } = null!;
+    public static IDataManager DataManager { get; private set; } = null!;
+    public static INotificationManager NotificationManager { get; private set; } = null!;
 
-    public Brio(IDalamudPluginInterface pluginInterface)
+    private DiagnosticTracker _perfTracker = new("ServiceStartup", logInterval: 1, slowFrameThresholdMs: 1, slowFrameCooldownFrames: 1, []);
+
+    public Task LoadAsync(CancellationToken cancellationToken)
     {
-        // Setup dalamud services
-        var dalamudServices = new DalamudPluginService(pluginInterface);
-        Log = dalamudServices.Log;
-        Framework = dalamudServices.Framework;
-
-        dalamudServices.Framework.RunOnTick(() =>
+        return Task.Run(() =>
         {
-            var trace = new DiagnosticTrace();
-            using(Diagnostics.MeasureTime(ref trace, logOnDispose: true, logLabel: "StartUp"))
+            var stopwatch = new Stopwatch();
+            stopwatch.Start();
+
+            // Setup dalamud services
+            var dalamudServices = new DalamudPluginService(_pluginInterface);
+            Log = dalamudServices.Log;
+            Framework = dalamudServices.Framework;
+            DataManager = dalamudServices.DataManager;
+            NotificationManager = dalamudServices.NotificationManager;
+
+            try
             {
-                var stopwatch = new Stopwatch();
-                stopwatch.Start();
                 Log.Info($"Starting {Name}...");
 
-                try
+                using(Diagnostics.MeasureTime(ref _perfTracker.Trace, logOnDispose: true, logLabel: "StartUp"))
                 {
                     // Setup plugin services
                     var serviceCollection = SetupServices(dalamudServices);
 
                     _services = serviceCollection.BuildServiceProvider(new ServiceProviderOptions { ValidateOnBuild = true });
 
-                    // Initialize the singletons
-                    foreach(var service in serviceCollection)
+                    Framework.RunOnTick(() =>
                     {
-                        if(service.Lifetime == ServiceLifetime.Singleton)
+                        // Initialize the singletons
+                        foreach(var service in serviceCollection)
                         {
-                            Log.Debug($"Initializing {service.ServiceType}...");
-                            _services.GetRequiredService(service.ServiceType);
+                            var trace = new DiagnosticTrace();
+
+                            var tick = Diagnostics.MeasureTime(ref trace, logOnDispose: false, logLabel: service.ServiceType.Name);
+                            if(service.Lifetime == ServiceLifetime.Singleton)
+                            {
+                                Log.Debug($"Initializing {service.ServiceType}...");
+                                _services.GetRequiredService(service.ServiceType);
+                            }
+                            tick.Record();
+
+                            try
+                            {
+                                _perfTracker.AddTrace($"{service.ServiceType}", ref trace);
+                            }
+                            catch(Exception) { }
                         }
-                    }
 
-                    // Setup default entities
-                    Log.Debug($"Setting up default entitites...");
-                    _services.GetRequiredService<EntityManager>().SetupDefaultEntities();
-                    _services.GetRequiredService<EntityActorManager>().AttachContainer();
-                    _services.GetRequiredService<Mediator>().StartAsync(CancellationToken.None);
+                        // Setup default entities
+                        Log.Debug($"Setting up default entitites...");
+                        _services.GetRequiredService<EntityManager>().SetupDefaultEntities();
+                        _services.GetRequiredService<EntityActorManager>().Initialize();
 
-                    // Trigger GPose events to ensure the plugin is in the correct state
-                    Log.Debug($"Triggering initial GPose state...");
-                    _services.GetRequiredService<GPoseService>().TriggerGPoseChange();
+                        _services.GetRequiredService<Mediator>().StartAsync(CancellationToken.None);
+                        _services.GetRequiredService<SpawnMenu>().Initialize(_services);
 
-                    Log.Info($"Started {Name} in {stopwatch.ElapsedMilliseconds}ms");
+                        // Trigger GPose events to ensure the plugin is in the correct state
+                        Log.Debug($"Triggering initial GPose state...");
+                        _services.GetRequiredService<GPoseService>().TriggerGPoseChange();
+
+                        _perfTracker.Log();
+
+                    }, delayTicks: 2); // TODO: Why do we need to wait several frames for some users?
                 }
-                catch(Exception e)
+
+                Log.Info($"Started {Name} in {stopwatch.ElapsedMilliseconds}ms");
+            }
+            catch(Exception e)
+            {
+                Log.Fatal(e, $"Failed to start {Name} in {stopwatch.ElapsedMilliseconds}ms", e);
+                throw;
+            }
+        }, cancellationToken);
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        await Framework.RunOnFrameworkThread(() =>
+        {
+            foreach(var service in _services?.GetServices<IDisposable>() ?? [])
+            {
+                try
                 {
-                    Log.Error(e, $"Failed to start {Name} in {stopwatch.ElapsedMilliseconds}ms");
-                    _services?.Dispose();
-                    throw;
+                    service.Dispose();
+
+                    Log.Debug($"Disposed service {service.GetType().FullName}");
+                }
+                catch(Exception ex)
+                {
+                    Log.Error(ex, $"Error disposing service {service.GetType().FullName}");
                 }
             }
+            _services?.Dispose();
 
-        }, delayTicks: 2); // TODO: Why do we need to wait several frames for some users?
+            Log.Info($"Disposed {Name}!");
+        });
+
+        GC.SuppressFinalize(this);
     }
 
     private static ServiceCollection SetupServices(DalamudPluginService dalamudServices)
@@ -129,10 +183,11 @@ public class Brio : IDalamudPlugin
         serviceCollection.AddSingleton(dalamudServices.Conditions);
         serviceCollection.AddSingleton(dalamudServices.GameGui);
         serviceCollection.AddSingleton(dalamudServices.GameConfig);
+        serviceCollection.AddSingleton(dalamudServices.NotificationManager);
 
         // Core / Misc
+        serviceCollection.AddSingleton<SpawnMenu>();
         serviceCollection.AddSingleton<Mediator>();
-        serviceCollection.AddSingleton<EventBus>();
         serviceCollection.AddSingleton<DalamudService>();
         serviceCollection.AddSingleton<ConfigurationService>();
         serviceCollection.AddSingleton<ResourceProvider>();
@@ -141,6 +196,7 @@ public class Brio : IDalamudPlugin
         serviceCollection.AddSingleton<InputManagerService>();
         serviceCollection.AddSingleton<SceneService>();
         serviceCollection.AddSingleton<ProjectSystem>();
+        serviceCollection.AddSingleton<PresetSystem>();
         serviceCollection.AddSingleton<AutoSaveService>();
         serviceCollection.AddSingleton<HistoryService>();
         serviceCollection.AddSingleton<FileCacheService>();
@@ -150,6 +206,10 @@ public class Brio : IDalamudPlugin
         serviceCollection.AddSingleton<CharacterHandlerService>();
         serviceCollection.AddSingleton<LightingService>();
         serviceCollection.AddSingleton<TimelineIdentification>();
+        serviceCollection.AddSingleton<WorldObjectService>();
+        serviceCollection.AddSingleton<ReferenceImageService>();
+        serviceCollection.AddSingleton<PathMetadataService>();
+        serviceCollection.AddSingleton<QuickAccessService>();
 
         // API & Web
         serviceCollection.AddSingleton<BrioAPIService>();
@@ -179,7 +239,8 @@ public class Brio : IDalamudPlugin
         serviceCollection.AddSingleton<ActorSpawnService>();
         serviceCollection.AddSingleton<ActorRedrawService>();
         serviceCollection.AddSingleton<ActorAppearanceService>();
-        serviceCollection.AddSingleton<ActorVFXService>();
+        serviceCollection.AddSingleton<VFXService>();
+        serviceCollection.AddSingleton<SGLService>();
         serviceCollection.AddSingleton<ActionTimelineService>();
         serviceCollection.AddSingleton<GPoseService>();
         serviceCollection.AddSingleton<CommandHandlerService>();
@@ -197,6 +258,7 @@ public class Brio : IDalamudPlugin
         serviceCollection.AddSingleton<GameInputService>();
         serviceCollection.AddSingleton<VirtualCameraManager>();
         serviceCollection.AddSingleton<CutsceneManager>();
+        serviceCollection.AddSingleton<TimelineService>();
 
         // Library
         serviceCollection.AddSingleton<FileTypeInfoBase, AnamnesisCharaFileInfo>();
@@ -216,6 +278,15 @@ public class Brio : IDalamudPlugin
         // UI
         serviceCollection.AddSingleton<UIManager>();
 
+        // Modals
+        serviceCollection.AddSingleton<ModalManager>();
+        serviceCollection.AddSingleton<RenameActorModal>();
+        serviceCollection.AddSingleton<ExportSceneModal>();
+        serviceCollection.AddSingleton<ImportSceneModal>();
+        serviceCollection.AddSingleton<SaveProjectModal>();
+        serviceCollection.AddSingleton<MetadataModal>();
+
+        // Windows
         serviceCollection.AddSingleton<MainWindow>();
         serviceCollection.AddSingleton<SettingsWindow>();
         serviceCollection.AddSingleton<ProjectWindow>();
@@ -231,7 +302,11 @@ public class Brio : IDalamudPlugin
         serviceCollection.AddSingleton<AutoSaveWindow>();
         serviceCollection.AddSingleton<MCDFWindow>();
         serviceCollection.AddSingleton<PosingGraphicalWindow>();
+        serviceCollection.AddSingleton<CatalogWindow>();
         serviceCollection.AddSingleton<LightWindow>();
+        serviceCollection.AddSingleton<EntitySectionWindow>();
+        serviceCollection.AddSingleton<TimelineWindow>();
+
 
         return serviceCollection;
     }
@@ -256,8 +331,34 @@ public class Brio : IDalamudPlugin
 
     public static void NotifyError(string message)
     {
-        EventBus.Instance.NotifyError(message);
+        UIManager.Instance.NotifyError(message);
     }
+
+    public static void NotifyInfo(string message)
+    {
+        NotificationManager.AddNotification(new Dalamud.Interface.ImGuiNotification.Notification
+        {
+            Title = "Brio Info",
+            Content = message,
+            Type = Dalamud.Interface.ImGuiNotification.NotificationType.Info,
+            RespectUiHidden = false
+        });
+        UIManager.Instance.NotifyInfo(message);
+    }
+
+    public static void PopToast(string message, string title = "Brio Message", Dalamud.Interface.ImGuiNotification.NotificationType type = Dalamud.Interface.ImGuiNotification.NotificationType.Info)
+    {
+        NotificationManager.AddNotification(new Dalamud.Interface.ImGuiNotification.Notification
+        {
+            Title = title,
+            Content = message,
+            Type = type,
+            RespectUiHidden = false
+        });
+    }
+
+    public static bool GameFileExists(string filePath)
+        => DataManager.FileExists(filePath);
 
     //
     // The following methods are inspired by similar methods in Penumbra for gathering debug info.
@@ -361,9 +462,9 @@ public class Brio : IDalamudPlugin
     {
         ReadOnlySpan<string> relevantPlugins =
         [
-            "Glamourer", "Penumbra", "CustomizePlus", "VfxEditor", "Ktisis",
+            "Glamourer", "Penumbra", "CustomizePlus", "VfxEditor", "Ktisis", "PovPlus",
             "IllusioVitae", "Aetherment", "GagSpeak", "ProjectGagSpeak", "RoleplayingVoiceDalamud", "AQuestReborn",
-            "LoporritSync", "HonseFarm.Client", "LightlessSync", "Snowcloak", "MareSempiterne"
+            "LoporritSync", "HonseFarm.Client", "LightlessSync", "Snowcloak", "MareSempiterne", "Sundouleia", "Loci"
         ];
 
         var plugins = _services?.GetService<IDalamudPluginInterface>()?.InstalledPlugins
@@ -383,13 +484,6 @@ public class Brio : IDalamudPlugin
             }
         }
     }
-
-    public void Dispose()
-    {
-        _services?.Dispose();
-
-        GC.SuppressFinalize(this);
-    }
 }
 
 
@@ -400,6 +494,7 @@ public class Brio : IDalamudPlugin
 //  Happy Third Anniversary Brio!
 //
 // -------------------------------------------------------------
+
 
 /*                                                                                                                                                
                                                                                                                                                  
@@ -481,4 +576,14 @@ public class Brio : IDalamudPlugin
                                           ++###################################++++++++++++++++++++++++++++++##########+                         
                                           ++###################################++++++++++++++++++++++++++++++##########+                         
                                                                                                                                                                                                                                                                                                   
+
+ 
 */
+
+// -------------------------------------------------------------
+
+//
+// Brio is Licensed under the AGPL-3.0 License (https://www.gnu.org/licenses/agpl-3.0)
+//
+
+// -------------------------------------------------------------

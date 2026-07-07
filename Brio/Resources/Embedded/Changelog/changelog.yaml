@@ -1,12 +1,38 @@
 
-tagline: "Brio 0.7.2 - 7.5 Support"
-subline: "P.S. I'm sick, someone send me Nyquil"
+tagline: "Brio 0.8.0 - Furniture, World Object, VFX, Spawing, + More!!!"
+subline: "[PH] Lorem ipsum dolor sit amet"
 changelog:
+
+  - name: v0.8.0
+    tagline: Furniture, World Objects, VFX, oh my!
+    date: "July ?? 2026"
+    isCurrent: true
+    versions:
+      - number: "ATTENTION! Known crash! When standing in Water and you try to make a Brio actor a ENPC you can crash!!!"
+        icon: ""
+        items:
+          - "As a reminder! If you experience any issues please report them on Discord or on GitHub"
+
+      - number: "[PH]  consectetur "
+        icon: ""
+        items:
+          - "[PH] Vivamus feugiat erat eu quam cursus, sed ornare dolor aliquet."
+          - "[PH] Vestibulum accumsan dignissim lacinia. Etiam cursus, mauris non sollicitudin iaculis"
+          - "[PH] est lectus porttitor neque, vel tincidunt felis dui ac libero. Mauris"
+          - "[PH] Mauris luctus accumsan nisi, ac faucibus purus auctor quis "
+     
+      - number: "[PH] adipiscing elit"
+        icon: ""
+        items:
+          - "[PH] ellentesque ut ligula laoreet, dictum nibh vel, dignissim mi. Pellentesque habitant morbi tristique"
+          - "[PH] senectus et netus et malesuada fames ac turpis egestas."
+          - "[PH] Nunc facilisis ipsum quis orci aliquam, quis auctor massa varius. Phasellus rutrum dolor aliquet massa suscipit luctus."
+          - "[PH] In ornare condimentum leo, ut viverra orci egestas sed. Ut posuere condimentum felis non tristique."
 
   - name: v0.7.2
     tagline: 7.5 Support!
     date: "April 29th 2026"
-    isCurrent: true
+    isCurrent: false
     versions:
       - number: "ATTENTION! SE removed `SkinGloss` and `HairGloss` from the game; so they are no longer available!"
         icon: ""

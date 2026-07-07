@@ -1,5 +1,7 @@
-﻿using Dalamud.Bindings.ImGui;
+﻿using Brio.UI.Theming;
+using Dalamud.Bindings.ImGui;
 using Dalamud.Interface.Utility;
+using System;
 using System.Numerics;
 
 namespace Brio.UI;
@@ -23,75 +25,80 @@ public static class BrioStyle
         if(EnableColor)
         {
             _hasPushedColor = true;
+            var theme = ThemeManager.CurrentTheme;
 
-            PushStyleColor(ImGuiCol.Text, new Vector4(255, 255, 255, 255));
-            PushStyleColor(ImGuiCol.TextDisabled, new Vector4(128, 128, 128, 255));
+            ImGui.PushStyleColor(ImGuiCol.Text, theme.Text.Text);
+            ImGui.PushStyleColor(ImGuiCol.TextDisabled, theme.Text.TextDisabled);
 
-            PushStyleColor(ImGuiCol.WindowBg, new Vector4(25, 25, 25, 248));
-            PushStyleColor(ImGuiCol.ChildBg, new Vector4(25, 25, 25, 66));
-            PushStyleColor(ImGuiCol.PopupBg, new Vector4(25, 25, 25, 248));
+            var opacity = Config.ConfigurationService.Instance.Configuration.Appearance.WindowOpacity;
+            if(Config.ConfigurationService.Instance.Configuration.Appearance.EnableBlur is false)
+                opacity += 0.140f;
 
-            PushStyleColor(ImGuiCol.Border, new Vector4(44, 44, 44, 255));
-            PushStyleColor(ImGuiCol.BorderShadow, new Vector4(0, 0, 0, 128));
+            ImGui.PushStyleColor(ImGuiCol.WindowBg, ApplyOpacity(theme.Window.WindowBg, opacity));
+            ImGui.PushStyleColor(ImGuiCol.ChildBg, theme.Window.ChildBg);
+            ImGui.PushStyleColor(ImGuiCol.PopupBg, ApplyOpacity(theme.Window.PopupBg, opacity));
 
-            PushStyleColor(ImGuiCol.FrameBg, new Vector4(36, 36, 36, 255));
-            PushStyleColor(ImGuiCol.FrameBgHovered, new Vector4(57, 57, 57, 255));
-            PushStyleColor(ImGuiCol.FrameBgActive, new Vector4(33, 33, 3, 255));
+            ImGui.PushStyleColor(ImGuiCol.Border, theme.Window.Border);
+            ImGui.PushStyleColor(ImGuiCol.BorderShadow, theme.Window.BorderShadow);
 
-            PushStyleColor(ImGuiCol.TitleBg, new Vector4(27, 27, 27, 232));
-            PushStyleColor(ImGuiCol.TitleBgActive, new Vector4(33, 33, 33, 255));
-            PushStyleColor(ImGuiCol.TitleBgCollapsed, new Vector4(30, 30, 30, 255));
+            ImGui.PushStyleColor(ImGuiCol.FrameBg, theme.Frame.FrameBg);
+            ImGui.PushStyleColor(ImGuiCol.FrameBgHovered, theme.Frame.FrameBgHovered);
+            ImGui.PushStyleColor(ImGuiCol.FrameBgActive, theme.Frame.FrameBgActive);
 
-            PushStyleColor(ImGuiCol.MenuBarBg, new Vector4(36, 36, 36, 255));
-            PushStyleColor(ImGuiCol.ScrollbarBg, new Vector4(0, 0, 0, 0));
-            PushStyleColor(ImGuiCol.ScrollbarGrab, new Vector4(62, 62, 62, 255));
-            PushStyleColor(ImGuiCol.ScrollbarGrabHovered, new Vector4(70, 70, 70, 255));
-            PushStyleColor(ImGuiCol.ScrollbarGrabActive, new Vector4(70, 70, 70, 255));
+            ImGui.PushStyleColor(ImGuiCol.TitleBg, theme.Window.TitleBg);
+            ImGui.PushStyleColor(ImGuiCol.TitleBgActive, theme.Window.TitleBgActive);
+            ImGui.PushStyleColor(ImGuiCol.TitleBgCollapsed, theme.Window.TitleBgCollapsed);
 
-            PushStyleColor(ImGuiCol.CheckMark, new Vector4(98, 75, 224, 255));
+            ImGui.PushStyleColor(ImGuiCol.MenuBarBg, theme.Window.MenuBarBg);
+            ImGui.PushStyleColor(ImGuiCol.ScrollbarBg, theme.Scrollbar.ScrollbarBg);
+            ImGui.PushStyleColor(ImGuiCol.ScrollbarGrab, theme.Scrollbar.ScrollbarGrab);
+            ImGui.PushStyleColor(ImGuiCol.ScrollbarGrabHovered, theme.Scrollbar.ScrollbarGrabHovered);
+            ImGui.PushStyleColor(ImGuiCol.ScrollbarGrabActive, theme.Scrollbar.ScrollbarGrabActive);
 
-            PushStyleColor(ImGuiCol.SliderGrab, new Vector4(101, 101, 101, 255));
-            PushStyleColor(ImGuiCol.SliderGrabActive, new Vector4(123, 123, 123, 255));
+            ImGui.PushStyleColor(ImGuiCol.CheckMark, theme.Accent.AccentCheckMark);
 
-            PushStyleColor(ImGuiCol.Button, new Vector4(255, 255, 255, 31));
-            PushStyleColor(ImGuiCol.ButtonHovered, new Vector4(74, 56, 170, 255));
-            PushStyleColor(ImGuiCol.ButtonActive, new Vector4(54, 42, 122, 255));
+            ImGui.PushStyleColor(ImGuiCol.SliderGrab, theme.Slider.SliderGrab);
+            ImGui.PushStyleColor(ImGuiCol.SliderGrabActive, theme.Slider.SliderGrabActive);
 
-            PushStyleColor(ImGuiCol.Header, new Vector4(0, 0, 0, 60));
-            PushStyleColor(ImGuiCol.HeaderHovered, new Vector4(0, 0, 0, 90));
-            PushStyleColor(ImGuiCol.HeaderActive, new Vector4(0, 0, 0, 120));
+            ImGui.PushStyleColor(ImGuiCol.Button, theme.Button.Button);
+            ImGui.PushStyleColor(ImGuiCol.ButtonHovered, theme.Button.ButtonHovered);
+            ImGui.PushStyleColor(ImGuiCol.ButtonActive, theme.Button.ButtonActive);
 
-            PushStyleColor(ImGuiCol.Separator, new Vector4(75, 75, 75, 121));
-            PushStyleColor(ImGuiCol.SeparatorHovered, new Vector4(37, 25, 98, 255));
-            PushStyleColor(ImGuiCol.SeparatorActive, new Vector4(98, 75, 224, 255));
+            ImGui.PushStyleColor(ImGuiCol.Header, theme.Header.Header);
+            ImGui.PushStyleColor(ImGuiCol.HeaderHovered, theme.Header.HeaderHovered);
+            ImGui.PushStyleColor(ImGuiCol.HeaderActive, theme.Header.HeaderActive);
 
-            PushStyleColor(ImGuiCol.ResizeGrip, new Vector4(0, 0, 0, 0));
-            PushStyleColor(ImGuiCol.ResizeGripHovered, new Vector4(0, 0, 0, 0));
-            PushStyleColor(ImGuiCol.ResizeGripActive, new Vector4(98, 75, 224, 255));
+            ImGui.PushStyleColor(ImGuiCol.Separator, theme.Separator.Separator);
+            ImGui.PushStyleColor(ImGuiCol.SeparatorHovered, theme.Separator.SeparatorHovered);
+            ImGui.PushStyleColor(ImGuiCol.SeparatorActive, theme.Separator.SeparatorActive);
 
-            PushStyleColor(ImGuiCol.Tab, new Vector4(41, 41, 41, 255));
-            PushStyleColor(ImGuiCol.TabHovered, new Vector4(42, 29, 113, 255));
-            PushStyleColor(ImGuiCol.TabActive, new Vector4(98, 75, 224, 255));
-            PushStyleColor(ImGuiCol.TabUnfocused, new Vector4(41, 39, 41, 255));
-            PushStyleColor(ImGuiCol.TabUnfocusedActive, new Vector4(73, 48, 205, 255));
+            ImGui.PushStyleColor(ImGuiCol.ResizeGrip, theme.Misc.ResizeGrip);
+            ImGui.PushStyleColor(ImGuiCol.ResizeGripHovered, theme.Misc.ResizeGripHovered);
+            ImGui.PushStyleColor(ImGuiCol.ResizeGripActive, theme.Misc.ResizeGripActive);
 
-            PushStyleColor(ImGuiCol.DockingPreview, new Vector4(91, 70, 208, 105));
-            PushStyleColor(ImGuiCol.DockingEmptyBg, new Vector4(51, 51, 51, 255));
+            ImGui.PushStyleColor(ImGuiCol.Tab, theme.Tab.Tab);
+            ImGui.PushStyleColor(ImGuiCol.TabHovered, theme.Tab.TabHovered);
+            ImGui.PushStyleColor(ImGuiCol.TabActive, theme.Tab.TabActive);
+            ImGui.PushStyleColor(ImGuiCol.TabUnfocused, theme.Tab.TabUnfocused);
+            ImGui.PushStyleColor(ImGuiCol.TabUnfocusedActive, theme.Tab.TabUnfocusedActive);
 
-            PushStyleColor(ImGuiCol.PlotLines, new Vector4(156, 156, 156, 255));
+            ImGui.PushStyleColor(ImGuiCol.DockingPreview, theme.Docking.DockingPreview);
+            ImGui.PushStyleColor(ImGuiCol.DockingEmptyBg, theme.Docking.DockingEmptyBg);
 
-            PushStyleColor(ImGuiCol.TableHeaderBg, new Vector4(48, 48, 48, 255));
-            PushStyleColor(ImGuiCol.TableBorderStrong, new Vector4(79, 79, 89, 255));
-            PushStyleColor(ImGuiCol.TableBorderLight, new Vector4(59, 59, 64, 255));
-            PushStyleColor(ImGuiCol.TableRowBg, new Vector4(0, 0, 0, 0));
-            PushStyleColor(ImGuiCol.TableRowBgAlt, new Vector4(255, 255, 255, 15));
+            ImGui.PushStyleColor(ImGuiCol.PlotLines, theme.Misc.PlotLines);
 
-            PushStyleColor(ImGuiCol.TextSelectedBg, new Vector4(98, 75, 224, 255));
-            PushStyleColor(ImGuiCol.DragDropTarget, new Vector4(98, 75, 224, 255));
+            ImGui.PushStyleColor(ImGuiCol.TableHeaderBg, theme.Table.TableHeaderBg);
+            ImGui.PushStyleColor(ImGuiCol.TableBorderStrong, theme.Table.TableBorderStrong);
+            ImGui.PushStyleColor(ImGuiCol.TableBorderLight, theme.Table.TableBorderLight);
+            ImGui.PushStyleColor(ImGuiCol.TableRowBg, theme.Table.TableRowBg);
+            ImGui.PushStyleColor(ImGuiCol.TableRowBgAlt, theme.Table.TableRowBgAlt);
 
-            PushStyleColor(ImGuiCol.NavHighlight, new Vector4(98, 75, 224, 179));
-            PushStyleColor(ImGuiCol.NavWindowingDimBg, new Vector4(204, 204, 204, 51));
-            PushStyleColor(ImGuiCol.NavWindowingHighlight, new Vector4(204, 204, 204, 89));
+            ImGui.PushStyleColor(ImGuiCol.TextSelectedBg, theme.Text.TextSelectedBg);
+            ImGui.PushStyleColor(ImGuiCol.DragDropTarget, theme.Misc.DragDropTarget);
+
+            ImGui.PushStyleColor(ImGuiCol.NavHighlight, theme.Misc.NavHighlight);
+            ImGui.PushStyleColor(ImGuiCol.NavWindowingDimBg, theme.Misc.NavWindowingDimBg);
+            ImGui.PushStyleColor(ImGuiCol.NavWindowingHighlight, theme.Misc.NavWindowingHighlight);
         }
 
         ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Vector2(6, 6));
@@ -118,14 +125,10 @@ public static class BrioStyle
         ImGui.PushStyleVar(ImGuiStyleVar.TabRounding, 4f);
     }
 
-    static void PushStyleColor(ImGuiCol imGuiCol, Vector4 colorVector)
+    private static uint ApplyOpacity(uint color, float opacity)
     {
-        uint r = (uint)(colorVector.X) & 0xFF;
-        uint g = (uint)(colorVector.Y) & 0xFF;
-        uint b = (uint)(colorVector.Z) & 0xFF;
-        uint a = (uint)(colorVector.W) & 0xFF;
-
-        ImGui.PushStyleColor(imGuiCol, (a << 24) | (b << 16) | (g << 8) | r);
+        var alpha = (uint)Math.Clamp(opacity * 255f, 0f, 255f);
+        return (color & 0x00FFFFFF) | (alpha << 24);
     }
 
     public static void PopStyle()

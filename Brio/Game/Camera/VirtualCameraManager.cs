@@ -6,7 +6,7 @@ using Brio.Entities.Core;
 using Brio.Game.GPose;
 using Brio.Game.Input;
 using Brio.Input;
-using Microsoft.Extensions.DependencyInjection;
+using Brio.Services.Models;
 using Swan;
 using System;
 using System.Collections.Generic;
@@ -42,16 +42,17 @@ public class VirtualCameraManager : IDisposable
         _moveSpeed = configurationService.Configuration.Interface.DefaultFreeCameraMovementSpeed;
     }
 
-    // This implementation is a bit odd for me, it's not how I thought .IsLocked should be used, but maybe it works well
-    // I also don't know if I want it per-camera or just a global lock for all cameras,
-    // but this works for now and we can change it later when I rework the camera system
     public bool CamerasLocked
     {
         get
         {
-            if(_entityManager.TryGetEntity("cameras", out var camContainer))
-                return camContainer.IsLocked;
-            return false;
+            if(CurrentCamera?.CameraID == 0)
+                return GetDefaultCamera()?.IsLocked ?? false;
+
+            if(_createdCameras is null || _createdCameras.Count == 0 || CurrentCamera is null)
+                return false;
+
+            return _createdCameras[CurrentCamera.CameraID].IsLocked;
         }
     }
 
@@ -66,159 +67,162 @@ public class VirtualCameraManager : IDisposable
 
     public (bool, int) CreateCamera(CameraType cameraType, bool selectCamera = true, bool targetNewInHierarch = true, VirtualCamera? virtualCamera = null)
     {
-        if(_entityManager.TryGetEntity("cameras", out var ent))
+        var oldCam = CurrentCamera;
+        CurrentCamera?.DeactivateCamera();
+
+        int cameraId = _nextCameraId + 1;
+
+        var camEnt = _entityManager.CreateEntityOnEntityContainer<CameraEntity>(cameraId, cameraType);
+        bool lastCameraIsFreeCam = oldCam?.IsFreeCamera ?? false;
+
+        if(virtualCamera is null)
         {
-            var oldCam = CurrentCamera;
+            switch(cameraType)
+            {
+                case CameraType.Free:
+                    camEnt.VirtualCamera.FreeCamValues.MovementSpeed = DefaultMovementSpeed;
+                    camEnt.VirtualCamera.FreeCamValues.MouseSensitivity = DefaultMouseSensitivity;
+                    camEnt.VirtualCamera.IsFreeCamera = true;
+                    camEnt.VirtualCamera.ToFreeCam();
+
+                    // preserve the rotation from a BrioCamera if switching to a free cam
+                    if(!lastCameraIsFreeCam && oldCam is not null)
+                    {
+                        camEnt.VirtualCamera.Rotation = oldCam.RotationAsVector3;
+                    }
+
+                    camEnt.VirtualCamera.ActivateCamera();
+                    camEnt.VirtualCamera.DeactivateCamera();
+                    _createdCameras.Add(cameraId, camEnt);
+                    break;
+                case CameraType.Game:
+                    camEnt.VirtualCamera.IsFreeCamera = false;
+                    camEnt.VirtualCamera.ActivateCamera();
+                    camEnt.VirtualCamera.DeactivateCamera();
+                    _createdCameras.Add(cameraId, camEnt);
+                    break;
+                case CameraType.Cutscene:
+                    camEnt.VirtualCamera.IsCutsceneCamera = true;
+                    camEnt.VirtualCamera.ActivateCamera();
+                    camEnt.VirtualCamera.DeactivateCamera();
+                    _createdCameras.Add(cameraId, camEnt);
+                    break;
+                default:
+                    Brio.Log.Error($"Unknown camera type: {cameraType}");
+                    break;
+            }
+        }
+        else
+        {
+            var id = camEnt.SetVirtualCamera(virtualCamera);
+
+            if(_createdCameras.TryAdd(id, camEnt) == false)
+            {
+                _createdCameras[id] = camEnt;
+            }
+        }
+
+        CurrentCamera?.ActivateCamera();
+
+
+        if(targetNewInHierarch)
+            _entityManager.SetSelectedEntity(camEnt);
+        else if(selectCamera)
+            SelectCamera(camEnt.VirtualCamera);
+
+        _nextCameraId = cameraId;
+        return (true, cameraId);
+    }
+
+    public void LoadCameraFromDTO(CameraDTO dto, CameraEntity entity)
+    {
+        if(dto.Camera is null)
+            return;
+
+        bool wasActive = CurrentCamera == entity.VirtualCamera;
+        if(wasActive)
             CurrentCamera?.DeactivateCamera();
 
-            int cameraId = _nextCameraId + 1;
+        entity.SetVirtualCamera(dto.Camera);
 
-            var camEnt = ActivatorUtilities.CreateInstance<CameraEntity>(_serviceProvider, cameraId, cameraType);
-            bool lastCameraIsFreeCam = oldCam?.IsFreeCamera ?? false;
-
-            _entityManager.AttachEntity(camEnt, ent);
-
-            if(virtualCamera is null)
-            {
-                switch(cameraType)
-                {
-                    case CameraType.Free:
-                        camEnt.VirtualCamera.FreeCamValues.MovementSpeed = DefaultMovementSpeed;
-                        camEnt.VirtualCamera.FreeCamValues.MouseSensitivity = DefaultMouseSensitivity;
-                        camEnt.VirtualCamera.IsFreeCamera = true;
-                        camEnt.VirtualCamera.ToFreeCam();
-
-                        // preserve the rotation from a BrioCamera if switching to a free cam
-                        if(!lastCameraIsFreeCam && oldCam is not null)
-                        {
-                            camEnt.VirtualCamera.Rotation = oldCam.RotationAsVector3;
-                        }
-
-                        camEnt.VirtualCamera.ActivateCamera();
-                        camEnt.VirtualCamera.DeactivateCamera();
-                        _createdCameras.Add(cameraId, camEnt);
-                        break;
-                    case CameraType.Game:
-                        camEnt.VirtualCamera.IsFreeCamera = false;
-                        camEnt.VirtualCamera.ActivateCamera();
-                        camEnt.VirtualCamera.DeactivateCamera();
-                        _createdCameras.Add(cameraId, camEnt);
-                        break;
-                    case CameraType.Cutscene:
-                        camEnt.VirtualCamera.IsCutsceneCamera = true;
-                        camEnt.VirtualCamera.ActivateCamera();
-                        camEnt.VirtualCamera.DeactivateCamera();
-                        _createdCameras.Add(cameraId, camEnt);
-                        break;
-                    default:
-                        Brio.Log.Error($"Unknown camera type: {cameraType}");
-                        break;
-                }
-            }
-            else
-            {
-                var id = camEnt.SetVirtualCamera(virtualCamera);
-
-                if(_createdCameras.TryAdd(id, camEnt) == false)
-                {
-                    _createdCameras[id] = camEnt;
-                }
-            }
-
-            CurrentCamera?.ActivateCamera();
-
-
-            if(targetNewInHierarch)
-                _entityManager.SetSelectedEntity(camEnt);
-            else if(selectCamera)
-                SelectCamera(camEnt.VirtualCamera);
-
-            _nextCameraId = cameraId;
-            return (true, cameraId);
-        }
-        return (false, -1);
+        if(wasActive)
+            SelectCamera(entity.VirtualCamera);
     }
 
     public (bool, int) CloneCamera(int cameraID)
     {
         CameraEntity? oldCameraEntity;
 
-        if(_entityManager.TryGetEntity("cameras", out var ent))
+        if(cameraID == 0)
         {
-            if(cameraID == 0)
+            Brio.Log.Verbose("Cloning default camera.");
+
+            var defaultCam = GetDefaultCamera();
+            if(defaultCam == null)
             {
-                Brio.Log.Verbose("Cloning default camera.");
-
-                var defaultCam = GetDefaultCamera();
-                if(defaultCam == null)
-                {
-                    Brio.Log.Error("Default camera not found.");
-                    return (false, -1);
-                }
-
-                oldCameraEntity = defaultCam;
-            }
-            else
-            {
-                Brio.Log.Verbose($"Cloning camera {cameraID}");
-
-                if(!_createdCameras.TryGetValue(cameraID, out CameraEntity? oldCamEnt))
-                {
-                    Brio.Log.Error($"Camera with ID {cameraID} not found");
-                    return (false, -1);
-                }
-                oldCameraEntity = oldCamEnt;
-            }
-
-            if(oldCameraEntity == null)
-            {
-                Brio.Log.Error("No camera found to clone");
+                Brio.Log.Error("Default camera not found.");
                 return (false, -1);
             }
 
-            CurrentCamera?.DeactivateCamera();
-            int newCameraId = _nextCameraId + 1;
-
-            var oldCamera = oldCameraEntity.VirtualCamera;
-            var newCamera = ActivatorUtilities.CreateInstance<CameraEntity>(_serviceProvider, newCameraId, oldCameraEntity.CameraType);
-            _entityManager.AttachEntity(newCamera, ent);
-
-            oldCamera.CopyPropertiesTo(newCamera.VirtualCamera);
-            newCamera.VirtualCamera.Rotation = oldCamera.Rotation;
-
-            if(oldCameraEntity.CameraType == CameraType.Free)
-            {
-                newCamera.VirtualCamera.Position = oldCamera.Position;
-                newCamera.VirtualCamera.ToFreeCam();
-            }
-            else
-            {
-                newCamera.VirtualCamera.PositionOffset = oldCamera.PositionOffset;
-                newCamera.VirtualCamera.Angle = oldCamera.Angle;
-                newCamera.VirtualCamera.Pan = oldCamera.Pan;
-            }
-
-            _createdCameras.Add(newCameraId, newCamera);
-            CurrentCamera?.ActivateCamera();
-            _entityManager.SetSelectedEntity(newCamera);
-
-            if(oldCameraEntity.CameraType == CameraType.Free)
-            {
-                newCamera.VirtualCamera.FreeCamValues.DelimitAngle = oldCamera.FreeCamValues.DelimitAngle;
-                newCamera.VirtualCamera.FreeCamValues.MovementSpeed = oldCamera.FreeCamValues.MovementSpeed;
-                newCamera.VirtualCamera.FreeCamValues.MouseSensitivity = oldCamera.FreeCamValues.MouseSensitivity;
-            }
-            else
-            {
-                newCamera.VirtualCamera.DisableCollision = oldCamera.DisableCollision;
-                newCamera.VirtualCamera.DelimitCamera = oldCamera.DelimitCamera;
-            }
-
-            _nextCameraId = newCameraId;
-            return (true, newCameraId);
+            oldCameraEntity = defaultCam;
         }
-        Brio.Log.Error("No camera container found");
-        return (false, -1);
+        else
+        {
+            Brio.Log.Verbose($"Cloning camera {cameraID}");
+
+            if(!_createdCameras.TryGetValue(cameraID, out CameraEntity? oldCamEnt))
+            {
+                Brio.Log.Error($"Camera with ID {cameraID} not found");
+                return (false, -1);
+            }
+            oldCameraEntity = oldCamEnt;
+        }
+
+        if(oldCameraEntity == null)
+        {
+            Brio.Log.Error("No camera found to clone");
+            return (false, -1);
+        }
+
+        CurrentCamera?.DeactivateCamera();
+        int newCameraId = _nextCameraId + 1;
+
+        var oldCamera = oldCameraEntity.VirtualCamera;
+        var newCamera = _entityManager.CreateEntityOnEntityContainer<CameraEntity>(newCameraId, oldCameraEntity.CameraType);
+
+        oldCamera.CopyPropertiesTo(newCamera.VirtualCamera);
+        newCamera.VirtualCamera.Rotation = oldCamera.Rotation;
+
+        if(oldCameraEntity.CameraType == CameraType.Free)
+        {
+            newCamera.VirtualCamera.Position = oldCamera.Position;
+            newCamera.VirtualCamera.ToFreeCam();
+        }
+        else
+        {
+            newCamera.VirtualCamera.PositionOffset = oldCamera.PositionOffset;
+            newCamera.VirtualCamera.Angle = oldCamera.Angle;
+            newCamera.VirtualCamera.Pan = oldCamera.Pan;
+        }
+
+        _createdCameras.Add(newCameraId, newCamera);
+        CurrentCamera?.ActivateCamera();
+        _entityManager.SetSelectedEntity(newCamera);
+
+        if(oldCameraEntity.CameraType == CameraType.Free)
+        {
+            newCamera.VirtualCamera.FreeCamValues.DelimitAngle = oldCamera.FreeCamValues.DelimitAngle;
+            newCamera.VirtualCamera.FreeCamValues.MovementSpeed = oldCamera.FreeCamValues.MovementSpeed;
+            newCamera.VirtualCamera.FreeCamValues.MouseSensitivity = oldCamera.FreeCamValues.MouseSensitivity;
+        }
+        else
+        {
+            newCamera.VirtualCamera.DisableCollision = oldCamera.DisableCollision;
+            newCamera.VirtualCamera.DelimitCamera = oldCamera.DelimitCamera;
+        }
+
+        _nextCameraId = newCameraId;
+        return (true, newCameraId);
     }
 
     public bool DestroyCamera(int cameraID)
@@ -228,24 +232,21 @@ public class VirtualCameraManager : IDisposable
 
         Brio.Log.Verbose("Destroying Brio camera " + cameraID);
 
-        if(_entityManager.TryGetEntity("cameras", out var ent))
+        if(_createdCameras.TryGetValue(cameraID, out CameraEntity? camEnt))
         {
-            if(_createdCameras.TryGetValue(cameraID, out CameraEntity? camEnt))
+            if(_entityManager.TryGetEntity(new CameraId(0), out var defaultCamEnt) && defaultCamEnt is CameraEntity cameraEnt)
             {
-                if(_entityManager.TryGetEntity(new Entities.Core.CameraId(0), out var defaultCamEnt) && defaultCamEnt is CameraEntity cameraEnt)
-                {
-                    SelectCamera(cameraEnt.VirtualCamera);
-                    _entityManager.SetSelectedEntity(defaultCamEnt);
-                }
-
-                ent.RemoveChild(camEnt);
-
-                // destroy the camera from the dictionary
-                // prevents cameras using old camera positions/rotations
-                _createdCameras.Remove(cameraID);
-
-                return true;
+                SelectCamera(cameraEnt.VirtualCamera);
+                _entityManager.SetSelectedEntity(defaultCamEnt);
             }
+
+            _entityManager.RemoveEntityFromEntityContainer(camEnt);
+
+            // destroy the camera from the dictionary
+            // prevents cameras using old camera positions/rotations
+            _createdCameras.Remove(cameraID);
+
+            return true;
         }
         return false;
     }
@@ -325,9 +326,11 @@ public class VirtualCameraManager : IDisposable
         //
         // Handle keyboard input
         //
+        if(CurrentCamera.IsPortraitMode)
+        {
 
-        // This removes the purgatory function and prevent camera crazing out when typing with the camera enabled
-        if(FreeCamValues.IsMovementEnabled == false)
+        }
+        else if(FreeCamValues.IsMovementEnabled == false)
         {
             return;
         }
@@ -389,7 +392,14 @@ public class VirtualCameraManager : IDisposable
         else if(InputManagerService.ActionKeysPressed(InputAction.FreeCamera_DecreaseCamMovement))
             _moveSpeed = CurrentCamera.FreeCamValues.MovementSpeed * 0.3f;
 
-        _forward = Vector3.Transform(new Vector3(leftRight, upDown, forwardBackward),
+        if(CurrentCamera.IsPortraitMode)
+            leftRight = -leftRight;
+
+        var inputVector = new Vector3(leftRight, upDown, forwardBackward);
+        if(CurrentCamera.IsPortraitMode)
+            inputVector = Vector3.Transform(inputVector, Quaternion.CreateFromAxisAngle(Vector3.UnitZ, MathF.PI / 2f));
+
+        _forward = Vector3.Transform(inputVector,
             Quaternion.CreateFromYawPitchRoll(CurrentCamera!.Rotation.X, FreeCamValues.Move2D ? 0 : -CurrentCamera.Rotation.Y, CurrentCamera.Rotation.Z));
     }
     public Matrix4x4 UpdateMatrix()
@@ -400,6 +410,10 @@ public class VirtualCameraManager : IDisposable
         }
 
         _lastMousePosition *= CurrentCamera.FreeCamValues.MouseSensitivity * MathHelpers.DegreesToRadians;
+
+        if(CurrentCamera.IsPortraitMode)
+            _lastMousePosition = new Vector2(-_lastMousePosition.Y, _lastMousePosition.X);
+
         CurrentCamera.Position += _forward * _moveSpeed;
 
         CurrentCamera.Rotation.X -= _lastMousePosition.X;
@@ -445,17 +459,12 @@ public class VirtualCameraManager : IDisposable
         }
         else
         {
-            // Ensure camera locking resets to unlocked when entering GPose
-            if(_entityManager.TryGetEntity("cameras", out var camContainer))
-            {
-                camContainer.IsLocked = false;
-            }
-
-            var defaultCam = _entityManager.GetEntity<CameraEntity>(new Entities.Core.CameraId(0));
+            var defaultCam = _entityManager.GetEntity<CameraEntity>(new CameraId(0));
             if(defaultCam is not null)
             {
                 defaultCam.VirtualCamera.SaveCameraState();
                 SelectCamera(defaultCam.VirtualCamera);
+                defaultCam.IsLocked = false;
             }
         }
     }

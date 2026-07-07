@@ -14,6 +14,7 @@ using FFXIVClientStructs.FFXIV.Client.Graphics.Scene;
 using System;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
+
 using static Brio.Game.Actor.ActorRedrawService;
 using static FFXIVClientStructs.FFXIV.Client.Graphics.Scene.Human;
 using DrawDataContainer = FFXIVClientStructs.FFXIV.Client.Game.Character.DrawDataContainer;
@@ -34,6 +35,7 @@ public class ActorAppearanceService : IDisposable
     private readonly ActorRedrawService _actorRedrawService;
     private readonly CharacterHandlerService _characterHandlerService;
     private readonly DalamudService _dalamudService;
+    private readonly IFramework _framwork;
 
     private delegate byte EnforceKindRestrictionsDelegate(nint a1, nint a2);
     private readonly Hook<EnforceKindRestrictionsDelegate> _enforceKindRestrictionsHook = null!;
@@ -48,7 +50,7 @@ public class ActorAppearanceService : IDisposable
 
     public bool CanTint => _configurationService.Configuration.Appearance.EnableTinting;
 
-    public unsafe ActorAppearanceService(GPoseService gPoseService, VirtualCameraManager virtualCameraManager, CharacterHandlerService characterHandlerService,
+    public unsafe ActorAppearanceService(GPoseService gPoseService, VirtualCameraManager virtualCameraManager, CharacterHandlerService characterHandlerService, IFramework framework,
         IObjectTable objectTable, CustomizePlusService customizePlusService, PenumbraService penumbraService, ActorRedrawService actorRedrawService, DalamudService dalamudService,
         ConfigurationService configurationService, ActorRedrawService redrawService, GlamourerService glamourerService, EntityManager entityManager,
         ISigScanner sigScanner, IGameInteropProvider hooks)
@@ -65,6 +67,7 @@ public class ActorAppearanceService : IDisposable
         _actorRedrawService = actorRedrawService;
         _dalamudService = dalamudService;
         _characterHandlerService = characterHandlerService;
+        _framwork = framework;
 
         var enforceKindRestrictionsAddress = sigScanner.ScanText("E8 ?? ?? ?? ?? 41 B0 ?? 48 8B D6 48 8B");
         _enforceKindRestrictionsHook = hooks.HookFromAddress<EnforceKindRestrictionsDelegate>(enforceKindRestrictionsAddress, EnforceKindRestrictionsDetour);
@@ -103,6 +106,7 @@ public class ActorAppearanceService : IDisposable
         bool forceHeadToggles = false;
         bool glamourerReset = false;
         bool glamourerUnlocked = false;
+        bool didchange = false;
 
         unsafe
         {
@@ -114,7 +118,21 @@ public class ActorAppearanceService : IDisposable
                 native->ModelContainer.ModelCharaId = appearance.ModelCharaId;
                 needsRedraw |= true;
                 glamourerReset |= true;
+                didchange |= true;
             }
+        }
+
+        if(didchange)
+        {
+            if(needsRedraw)
+                _ = await _redrawService.Redraw(character);
+
+            return RedrawResult.NoChange;
+        }
+
+        unsafe
+        {
+            var native = character.Native();
 
             if(options.HasFlag(AppearanceImportOptions.Equipment) || options.HasFlag(AppearanceImportOptions.Customize))
             {
@@ -160,11 +178,11 @@ public class ActorAppearanceService : IDisposable
                             {
                                 if(options.HasFlag(AppearanceImportOptions.Customize))
                                 {
-                                    Buffer.MemoryCopy(appearance.Customize.Data, ptr, 32, 32);
+                                    Buffer.MemoryCopy(appearance.Customize.Data, ptr, 26, 26);
                                 }
                                 else
                                 {
-                                    Buffer.MemoryCopy(existingAppearance.Customize.Data, ptr, 28, 28);
+                                    Buffer.MemoryCopy(existingAppearance.Customize.Data, ptr, 26, 26);
                                 }
 
                                 if(options.HasFlag(AppearanceImportOptions.Equipment))
@@ -175,7 +193,7 @@ public class ActorAppearanceService : IDisposable
                                 {
                                     Buffer.MemoryCopy(existingAppearance.Equipment.Data, ptr + 32, 80, 80);
                                 }
-                               
+
                                 var didUpdate = human->Human.UpdateDrawData((DrawData*)ptr, false);
                                 needsRedraw |= !didUpdate;
                             }
@@ -186,7 +204,7 @@ public class ActorAppearanceService : IDisposable
                         }
                     }
 
-                    if(options.HasFlag(AppearanceImportOptions.Customize))
+                    if(options.HasFlag(AppearanceImportOptions.Customize) && native->ModelContainer.ModelCharaId == 0)
                     {
                         // We can just set the data again incase we didn't earlier
                         *(ActorCustomize*)&native->DrawData.CustomizeData = appearance.Customize;
@@ -200,7 +218,7 @@ public class ActorAppearanceService : IDisposable
                         }
                     }
                 }
-              
+
                 // Facewear
                 _setFacewear(&native->DrawData, 0, 0);
                 _setFacewear(&native->DrawData, 0, appearance.Facewear);

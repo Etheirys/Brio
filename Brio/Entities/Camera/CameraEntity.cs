@@ -1,10 +1,12 @@
 ﻿using Brio.Capabilities.Camera;
+using Brio.Capabilities.Timeline;
+using Brio.Config;
 using Brio.Core;
 using Brio.Entities.Core;
 using Brio.Game.Camera;
 using Brio.Game.GPose;
 using Brio.Game.Input;
-using Brio.UI.Controls;
+using Brio.UI;
 using Brio.UI.Controls.Stateless;
 using Brio.UI.Theming;
 using Dalamud.Bindings.ImGui;
@@ -51,15 +53,19 @@ public class CameraEntity(IServiceProvider provider, int cameraID, CameraType ca
 
     public VirtualCameraManager VirtualCameraManager => _virtualCameraManager;
 
-    public CameraContainerEntity? CameraContainer => Parent as CameraContainerEntity;
+    public EntityManagerContainer? CameraContainer => Parent as EntityManagerContainer;
 
     public override EntityFlags Flags => EntityFlags.AllowDoubleClick | EntityFlags.HasContextButton | EntityFlags.DefaultOpen;
 
-    public override int ContextButtonCount => VirtualCamera.IsFreeCamera ? 2 : 1;
+    public override int ContextButtonCount => VirtualCamera.IsFreeCamera ? 3 : 2;
 
     public override FontAwesomeIcon Icon => GetIcon();
 
+    public override bool IsWidgetBodyHidden => (ConfigurationService.Instance.Configuration.Posing.IfCameraWindowisOpenDontUseSceneManager && UIManager.IsCameraWindowOpen);
+
     public CameraType CameraType { get; private set; } = cameraType;
+
+    public bool IsDefaultCamera => CameraID == 0;
 
     public int SetVirtualCamera(VirtualCamera virtualCamera)
     {
@@ -72,6 +78,7 @@ public class CameraEntity(IServiceProvider provider, int cameraID, CameraType ca
     {
         AddCapability(ActivatorUtilities.CreateInstance<CameraLifetimeCapability>(_serviceProvider, this));
         AddCapability(ActivatorUtilities.CreateInstance<BrioCameraCapability>(_serviceProvider, this));
+        AddCapability(CameraTimelineCapability.CreateIfEligible(_serviceProvider, this));
     }
 
     public override void OnSelected()
@@ -84,7 +91,7 @@ public class CameraEntity(IServiceProvider provider, int cameraID, CameraType ca
     {
         var ce = GetCapability<CameraLifetimeCapability>();
         if(!ce.CanDestroy) return;
-        RenameActorModal.Open(ce.Entity);
+        ModalManager.Instance.OpenRenameModal(ce.Entity);
     }
 
     public override void DrawContextButton()
@@ -96,22 +103,30 @@ public class CameraEntity(IServiceProvider provider, int cameraID, CameraType ca
 
             if(VirtualCamera.IsFreeCamera)
             {
-                var pixelPos = ImGui.GetWindowSize().X - ((ImGui.CalcTextSize("XXX").X + (ImGui.GetStyle().FramePadding.X * 2)) * 2);
-
-                ImGui.SetCursorPosX(pixelPos);
-
-                string toolTip1 = $"Toggle as Camera Movement";
+                string toolTip1 = "Toggle as Camera Movement";
                 using(ImRaii.PushColor(ImGuiCol.Button, 0))
-                    if(ImBrio.ToggelFontIconButton($"###{Id}_camera_movement", FontAwesomeIcon.Walking, new System.Numerics.Vector2(0), VirtualCamera.FreeCamValues.IsMovementEnabled, hoverText: toolTip1))
+                {
+                    if(ImBrio.ToggelFontIconButtonRight($"###{Id}_camera_movement", FontAwesomeIcon.Walking, 3f, VirtualCamera.FreeCamValues.IsMovementEnabled, tooltip: toolTip1))
                     {
                         VirtualCamera.FreeCamValues.IsMovementEnabled = !VirtualCamera.FreeCamValues.IsMovementEnabled;
                     }
+                }
             }
 
             ImGui.SameLine();
 
-            string toolTip = $"Set as Active Camera";
+            var lockIcon = IsLocked ? FontAwesomeIcon.Lock : FontAwesomeIcon.Unlock;
+            using(ImRaii.PushColor(ImGuiCol.Button, 0))
+            {
+                if(ImBrio.ToggelFontIconButtonRight($"###{Id}_camera_Lock", lockIcon, 2f, IsLocked, tooltip: IsLocked ? "Locked" : "Unlocked"))
+                {
+                    IsLocked = !IsLocked;
+                }
+            }
 
+            ImGui.SameLine();
+
+            string toolTip = "Set as Active Camera";
             using(ImRaii.PushColor(ImGuiCol.Text, ThemeManager.CurrentTheme.Accent.AccentColor, VirtualCamera.IsActiveCamera))
             {
                 if(ImBrio.FontIconButtonRight($"###{Id}_camera_contextButton", FontAwesomeIcon.LocationCrosshairs, 1f, toolTip, bordered: false))

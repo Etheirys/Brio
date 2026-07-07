@@ -1,9 +1,10 @@
-﻿using Brio.Entities;
+﻿using Brio.Capabilities.Posing;
+using Brio.Entities;
 using Brio.Entities.Actor;
+using Brio.Entities.Core;
 using Brio.Game.Actor;
 using Brio.Game.Actor.Extensions;
 using Brio.Game.Camera;
-using Brio.Capabilities.Posing;
 using Brio.Game.Core;
 using Brio.Game.World;
 using Brio.UI.Widgets.Actor;
@@ -27,7 +28,7 @@ public class ActorLifetimeCapability : ActorCapability
         _actorAppearanceService = actorAppearanceService;
         _cameraManager = cameraManager;
 
-        Widget = new ActorLifetimeWidget(this, actorSpawnService, cameraManager, lightingService);
+        Widget = new ActorLifetimeWidget(this);
     }
 
     public void MoveToCamera()
@@ -62,7 +63,7 @@ public class ActorLifetimeCapability : ActorCapability
         _targetService.GPoseTarget = GameObject;
     }
 
-    public bool CanClone => Actor.Parent is ActorContainerEntity && GameObject is ICharacter;
+    public bool CanClone => Actor.Parent is EntityManagerContainer or FolderEntity && GameObject is ICharacter;
 
     public void SpawnNewActor(bool selectInHierarchy, bool spawnCompanion, bool disableSpawnCompanion)
     {
@@ -81,18 +82,6 @@ public class ActorLifetimeCapability : ActorCapability
         }
     }
 
-    public void SpawnNewProp(bool selectInHierarchy)
-    {
-        if(_actorSpawnService.SpawnNewProp(out ICharacter? character))
-        {
-            if(selectInHierarchy)
-            {
-                _entityManager.SetSelectedEntity(character!);
-            }
-        }
-    }
-
-
     public void Clone(bool selectInHierarchy)
     {
         if(!CanClone)
@@ -108,15 +97,21 @@ public class ActorLifetimeCapability : ActorCapability
     }
 
     public bool CanDestroy =>
-        Actor.Parent is ActorContainerEntity ||
+        Actor.Parent is EntityManagerContainer or FolderEntity ||
         (Actor.Parent is ActorEntity parentEntity && parentEntity.GameObject is ICharacter character && character.HasSpawnedCompanion());
 
     public void Destroy()
     {
+        if(Entity.SpawnFlag.HasFlag(SpawnFlags.WorldActor))
+        {
+            _entityManager.DetachEntity(Actor, true);
+            return;
+        }
+
         if(!CanDestroy)
             return;
 
-        if(Actor.Parent is ActorContainerEntity)
+        if(Actor.Parent is EntityManagerContainer or FolderEntity)
             _actorSpawnService.DestroyObject(GameObject);
         else if(Actor.Parent is ActorEntity actorEntity)
             _actorSpawnService.DestroyCompanion((ICharacter)((ActorEntity)Actor.Parent).GameObject);

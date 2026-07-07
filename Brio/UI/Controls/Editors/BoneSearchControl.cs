@@ -132,7 +132,8 @@ public class BoneSearchControl
                 {
                     if(ImGui.IsItemClicked())
                     {
-                        posing.Selected = bonePoseInfoId;
+                        bool isMulti = ImGui.GetIO().KeyCtrl || ImGui.GetIO().KeyShift;
+                        posing.SetBoneSelection(bonePoseInfoId, isMulti);
                     }
 
                     foreach(var child in bone.Children)

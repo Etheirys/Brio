@@ -603,7 +603,7 @@ public class GearEditor()
 
         using(ImRaii.PushId("facewear"))
         {
-            ImGui.Text($"Facewear: {facewearName}");
+            ImGui.Text($"Glasses: {facewearName}");
 
             if(ImBrio.BorderedGameIcon("##icon", facewearIcon, "Images.Facewear.png", size: faceIconSize))
             {

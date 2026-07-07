@@ -47,4 +47,14 @@ public static partial class ImBrio
         ImGui.SetCursorPosX(ImGui.GetCursorPosX() + offset);
         ImGui.SetNextItemWidth(elementWidth);
     }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+    public static void CenterNextElementBetweenTwoElements(float leftButtonWidth, float rightButtonWidth)
+    {
+        var spacing = ImGui.GetStyle().ItemSpacing.X;
+        var totalWidth = ImGui.GetContentRegionAvail().X + leftButtonWidth + spacing;
+        var comboWidth = totalWidth - leftButtonWidth - rightButtonWidth - (spacing * 2);
+
+        ImGui.SetNextItemWidth(comboWidth);
+    }
 }

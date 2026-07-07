@@ -1,4 +1,5 @@
-﻿using FFXIVClientStructs.FFXIV.Client.Game.Control;
+﻿using Brio.Config;
+using FFXIVClientStructs.FFXIV.Client.Game.Control;
 using MessagePack;
 using System;
 using System.Numerics;
@@ -15,6 +16,8 @@ public unsafe partial class VirtualCamera
     {
         CameraID = cameraID;
 
+        SpawnPosition = BrioCamera->GetPosition();
+
         ResetCamera();
     }
 
@@ -23,18 +26,20 @@ public unsafe partial class VirtualCamera
 
     [IgnoreMember] public BrioCamera* BrioCamera => (BrioCamera*)CameraManager.Instance()->GetActiveCamera();
 
+    [IgnoreMember]
     public unsafe bool IsOverridden => DisableCollision || DelimitCamera || PositionOffset != Vector3.Zero
-    | PivotRotation != 0 | FoV != 0 | Pan != Vector2.Zero | BrioCamera->Camera.Distance != 2.5f;
+            | PivotRotation != 0 | FoV != 0 | Pan != Vector2.Zero | BrioCamera->Camera.Distance != 2.5f;
 
     public bool HasDelimitOverride => delimitCameraHasOverride;
 
     [IgnoreMember] public bool IsActiveCamera { get; set; } = false;
     public bool IsFreeCamera { get; set; } = false;
     public bool IsCutsceneCamera { get; set; } = false;
+    public bool IsPortraitMode { get; private set; } = false;
 
     [IgnoreMember] public int CameraID { get; private set; } = -1;
 
-    public Vector3 SpawnPosition = Vector3.Zero; // TODO (KEN) Implement spawn position logic
+    public Vector3 SpawnPosition = Vector3.Zero;
 
     public Vector3 RealPosition => BrioCamera->GetPosition();
 
@@ -163,6 +168,7 @@ public unsafe partial class VirtualCamera
         DisableCollision = false;
         DelimitCamera = false;
 
+        IsPortraitMode = false;
         PivotRotation = 0;
         Zoom = 2.5f;
         FoV = 0f;
@@ -199,6 +205,12 @@ public unsafe partial class VirtualCamera
         CameraID = id;
     }
 
+    public void TogglePortraitMode()
+    {
+        IsPortraitMode = !IsPortraitMode;
+        PivotRotation += IsPortraitMode ? MathF.PI / 2f : -MathF.PI / 2f;
+    }
+
     public void ToFreeCam()
     {
         if(Position == Vector3.Zero)
@@ -210,7 +222,7 @@ public unsafe partial class VirtualCamera
 [MessagePackObject(keyAsPropertyName: true)]
 public class FreeCamValues
 {
-    public bool IsMovementEnabled = false;
+    public bool IsMovementEnabled = ConfigurationService.Instance.Configuration.Posing.FreeCameraHasMovementEnabledByDefault;
     public bool Move2D = false;
 
     public float MouseSensitivity { get; set; } = 0f;

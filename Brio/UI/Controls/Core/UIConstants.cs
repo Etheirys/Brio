@@ -3,7 +3,6 @@ namespace Brio.UI.Controls.Core;
 
 public static class UIConstants
 {
-    public const uint ToggleButtonInactive = 0xFFFFFFFF;
     public const uint ToggleButtonActive = 0xFF0050FF;
     public const uint Transparent = 0x00000000;
 

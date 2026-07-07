@@ -5,7 +5,7 @@ using Brio.UI.Widgets.Core;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface;
 using Dalamud.Interface.Utility.Raii;
-using System.Collections.Generic;
+using System.Linq;
 using System.Numerics;
 
 namespace Brio.UI.Widgets.World;
@@ -16,6 +16,7 @@ public class FestivalWidget : Widget<FestivalCapability>
     public override WidgetFlags Flags => WidgetFlags.DrawBody;
 
     private int _selectedFestival;
+    private int _selectedPhase;
 
     private static FestivalSelector _globalFestivalSelector = null!;
 
@@ -33,8 +34,6 @@ public class FestivalWidget : Widget<FestivalCapability>
 
     private void DrawControls()
     {
-        List<uint> festivals = [.. Capability.ActiveFestivals];
-
         using(ImRaii.Disabled(!Capability.CanModify))
         {
             ImGui.SetNextItemWidth(-1);
@@ -42,20 +41,20 @@ public class FestivalWidget : Widget<FestivalCapability>
             {
                 if(listbox.Success)
                 {
-                    foreach(var festivalId in festivals)
+                    foreach(var festival in Capability.ActiveFestivals)
                     {
-                        if(festivalId == 0)
+                        if(festival.Id == 0)
                             continue;
 
-                        var isSelected = festivalId == _selectedFestival;
+                        var isSelected = festival.Id == _selectedFestival;
 
-                        Capability.AllFestivals.TryGetValue(festivalId, out var festival);
+                        Capability.AllFestivals.TryGetValue(festival.Id, out var festivalEntry);
 
-                        string name = festival?.ToString() ?? $"Unknown ({festivalId})";
+                        string name = $"{festivalEntry?.ToString() ?? "Unknown"} ({festival.Id} - {festival.Phase})";
 
                         if(ImGui.Selectable(name, isSelected))
                         {
-                            _selectedFestival = (int)festivalId;
+                            _selectedFestival = (int)festival.Id;
                         }
                     }
                 }
@@ -70,14 +69,26 @@ public class FestivalWidget : Widget<FestivalCapability>
 
             ImGui.SameLine();
 
-            if(ImBrio.FontIconButton("festival_add_button", FontAwesomeIcon.Plus, "Add Festival", Capability.CanAdd && _selectedFestival != 0))
+            ImGui.SetNextItemWidth(ImGui.CalcTextSize("XXXXXXX").X);
+            ImGui.InputInt("###festival_phase_input", ref _selectedPhase, 0, 0);
+            if(ImBrio.IsItemConfirmed())
             {
-                AddFestival();
+                Capability.ChangePhase((uint)_selectedFestival, (ushort)_selectedPhase);
             }
 
             ImGui.SameLine();
 
-            if(ImBrio.FontIconButton("festival_remove_button", FontAwesomeIcon.Minus, "Remove Festival", _selectedFestival != 0 && festivals.Contains((uint)_selectedFestival)))
+            if(ImBrio.FontIconButton("festival_add_button", FontAwesomeIcon.Plus, "Add Festival", Capability.CanAdd && _selectedFestival != 0))
+            {
+                if(_selectedPhase != 0)
+                    Capability.ChangePhase((uint)_selectedFestival, (ushort)_selectedPhase);
+                else
+                    AddFestival();
+            }
+
+            ImGui.SameLine();
+
+            if(ImBrio.FontIconButton("festival_remove_button", FontAwesomeIcon.Minus, "Remove Festival", _selectedFestival != 0 && Capability.ActiveFestivals.Any(f => f.Id == (uint)_selectedFestival)))
             {
                 Capability.Remove((uint)_selectedFestival);
             }

@@ -16,9 +16,10 @@ namespace Brio.UI.Controls.Editors;
 
 public class CustomizeEditor()
 {
-    private float MaxItemWidth => ImGui.GetContentRegionAvail().X - ImGui.CalcTextSize("XXXXXXXXXX").X;
+    private float MaxItemWidth => ImGui.GetContentRegionAvail().X - 10;
     private float LabelStart => MaxItemWidth + ImGui.GetCursorPosX() + ImGui.GetStyle().FramePadding.X * 2f;
     private Vector2 IconSize => new(ImGui.GetTextLineHeight() * 3.2f);
+
 
     private ActorAppearanceCapability _capability = null!;
 
@@ -33,21 +34,20 @@ public class CustomizeEditor()
         {
             if(customizeGroup.Success)
             {
+                ImBrio.SeparatorText("Model");
+
+                ImBrio.VerticalPadding(5);
 
                 didChange |= DrawReset(ref currentAppearance, originalAppearance);
                 didChange |= DrawModelIdSelector(ref currentAppearance.ModelCharaId);
 
+                ImBrio.VerticalPadding(10);
+
                 if(_capability.IsHuman)
                 {
-                    ImBrio.VerticalPadding(2);
-                    ImGui.Separator();
-                    ImBrio.VerticalPadding(2);
+                    ImBrio.SeparatorText("Race");
 
                     didChange |= DrawRaceSelector(ref currentAppearance.Customize);
-
-                    ImBrio.VerticalPadding(2);
-                    ImGui.Separator();
-                    ImBrio.VerticalPadding(2);
 
                     var menus = BrioCharaMakeType.BuildMenus(currentAppearance);
                     didChange |= DrawMenus(ref currentAppearance, menus);
@@ -57,6 +57,8 @@ public class CustomizeEditor()
                     if(ImGui.Button("Make Human"))
                         _ = _capability.MakeHuman();
                 }
+
+                ImBrio.VerticalPadding(10);
             }
         }
 
@@ -101,10 +103,8 @@ public class CustomizeEditor()
                     break;
 
                 case CustomizeIndex.EyeShape:
-                    ImBrio.VerticalPadding(4);
+                    ImBrio.SeparatorText("Eyes");
                     didChange |= DrawEyeSelector(ref appearance.Customize);
-                    ImGui.Separator();
-                    ImBrio.VerticalPadding(4);
                     break;
 
                 case CustomizeIndex.EyeColor:
@@ -113,10 +113,8 @@ public class CustomizeEditor()
                     break;
 
                 case CustomizeIndex.HairStyle:
-                    ImBrio.VerticalPadding(4);
+                    ImBrio.SeparatorText("Hair Style");
                     didChange |= DrawHairSelect(ref appearance.Customize, menu, menu.Title);
-                    ImGui.Separator();
-                    ImBrio.VerticalPadding(4);
                     break;
 
                 case CustomizeIndex.HairColor:
@@ -125,27 +123,20 @@ public class CustomizeEditor()
                     break;
 
                 case CustomizeIndex.LipStyle:
-                    ImBrio.VerticalPadding(4);
+                    ImBrio.SeparatorText("Mouth");
                     didChange |= DrawMouth(ref appearance.Customize, menu.Title, hasLipColor);
-                    ImGui.Separator();
-                    ImBrio.VerticalPadding(4);
                     break;
 
                 case CustomizeIndex.LipColor:
                     if(!hasLipColor)
                     {
-                        ImBrio.VerticalPadding(4);
                         didChange |= DrawListSelector(ref appearance.Customize, CustomizeIndex.LipColor, menu.Title);
-                        ImGui.Separator();
-                        ImBrio.VerticalPadding(4);
                     }
                     break;
 
                 case CustomizeIndex.Facepaint:
-                    ImBrio.VerticalPadding(4);
+                    ImBrio.SeparatorText("Face Paint");
                     didChange |= DrawFacePaintSelect(ref appearance.Customize, menu, menu.Title);
-                    ImGui.Separator();
-                    ImBrio.VerticalPadding(4);
                     break;
 
                 case CustomizeIndex.FacepaintColor:
@@ -158,11 +149,9 @@ public class CustomizeEditor()
                     {
                         if(colorMenu != null)
                         {
-                            ImBrio.VerticalPadding(4);
+                            ImBrio.SeparatorText("Features");
                             didChange |= DrawFeatureSelect(ref appearance.Customize, menu, colorMenu);
                             featuresDone = true;
-                            ImGui.Separator();
-                            ImBrio.VerticalPadding(4);
                         }
                     }
                     break;
@@ -172,10 +161,7 @@ public class CustomizeEditor()
                     break;
 
                 default:
-                    ImBrio.VerticalPadding(4);
                     didChange |= DrawGenericMenu(ref appearance.Customize, menu);
-                    ImGui.Separator();
-                    ImBrio.VerticalPadding(4);
                     break;
             }
         }
@@ -187,12 +173,9 @@ public class CustomizeEditor()
     {
         bool madeChange = false;
 
-        const string modelIdLabel = "Model";
-        ImGui.SetNextItemWidth(MaxItemWidth);
+        ImGui.SetNextItemWidth(MaxItemWidth - 25);
         if(ImGui.InputInt("###model_id", ref modelId, 1, 1, default, ImGuiInputTextFlags.EnterReturnsTrue))
             madeChange |= true;
-        ImGui.SameLine();
-        ImGui.Text(modelIdLabel);
 
         return madeChange;
     }
@@ -201,8 +184,7 @@ public class CustomizeEditor()
     {
         bool madeChange = false;
 
-        const string raceLabel = "Race";
-        float width = MaxItemWidth / 2f - ImGui.GetStyle().FramePadding.X;
+        float width = MaxItemWidth / 2f;
 
         var racePreview = Enum.GetName(customize.Race) ?? "Unknown";
         ImGui.SetNextItemWidth(width);
@@ -284,10 +266,6 @@ public class CustomizeEditor()
             }
         }
 
-        ImGui.SameLine();
-        ImGui.SetCursorPosY(ImGui.GetCursorPosY() - (ImGui.GetTextLineHeight() / 2) - ImGui.GetStyle().ItemSpacing.Y);
-        ImGui.Text(raceLabel);
-
         return madeChange;
     }
 
@@ -361,12 +339,6 @@ public class CustomizeEditor()
             }
         }
 
-        ImGui.SameLine();
-
-        ImGui.SetCursorPos(new Vector2(LabelStart, ImGui.GetCursorPosY() + ImGui.GetTextLineHeight()));
-        ImGui.Text(title);
-        ImGui.SetCursorPos(whenDone);
-
         if(ImBrio.DrawIconSelectorPopup("hair_style_popup", hairStyles.Where(x => x.FeatureID > 0).Select(x => new ImBrio.IconSelectorEntry(x.FeatureID, x.Icon)).ToArray(), ref currentHairIdx, columns: 6, iconSize: IconSize))
         {
             customize.HairStyle = (byte)currentHairIdx;
@@ -408,10 +380,6 @@ public class CustomizeEditor()
         }
         if(ImGui.IsItemHovered())
             ImGui.SetTooltip("Small Iris");
-
-        ImGui.SameLine();
-        ImGui.SetCursorPosX(LabelStart);
-        ImGui.Text("Eyes");
 
         return madeChange;
     }
@@ -458,11 +426,6 @@ public class CustomizeEditor()
                 madeChange |= DrawColorSelector(ref customize, CustomizeIndex.LipColor, "Lip Color");
             }
         }
-
-        ImGui.SameLine();
-
-        ImGui.SetCursorPosX(LabelStart);
-        ImGui.Text(title);
 
         return madeChange;
     }
@@ -524,12 +487,6 @@ public class CustomizeEditor()
             }
         }
 
-        ImGui.SameLine();
-
-        ImGui.SetCursorPos(new Vector2(LabelStart, ImGui.GetCursorPosY() + ImGui.GetTextLineHeight()));
-        ImGui.Text(title);
-        ImGui.SetCursorPos(whenDone);
-
         if(ImBrio.DrawIconSelectorPopup("face_paint_popup", facePaints.Where(x => x.FeatureID > 0).Select(x => new ImBrio.IconSelectorEntry(x.FeatureID, x.Icon)).ToArray(), ref currentFacepaintIdx, columns: 6, iconSize: IconSize, fallbackImage: "Images.Head.png"))
         {
             customize.RealFacepaint = (byte)currentFacepaintIdx;
@@ -580,17 +537,11 @@ public class CustomizeEditor()
                 }
             }
 
-            ImGui.SameLine();
-            ImGui.SetCursorPos(new Vector2(LabelStart, ImGui.GetCursorPosY() + ImGui.GetTextLineHeight()));
-            ImGui.Text("Features");
-            ImGui.SetCursorPos(whenDone);
-
             if(ImBrio.DrawIconSelectorPopup("face_feature_popup", [.. entries], ref currentFeatures, columns: 4, iconSize: IconSize, fallbackImage: "Images.Head.png", bitField: true))
             {
                 customize.FaceFeatures = (FacialFeature)currentFeatures;
                 madeChange |= true;
             }
-
         }
 
         return madeChange;
@@ -608,10 +559,6 @@ public class CustomizeEditor()
             didChange |= true;
         }
 
-        ImGui.SameLine();
-
-        ImGui.Text(title);
-
         return didChange;
     }
 
@@ -627,8 +574,6 @@ public class CustomizeEditor()
         if(ImBrio.BorderedGameIcon($"{customizeIndex}_icon", graphic, "Images.UnknownIcon.png", size: IconSize))
             ImGui.OpenPopup($"{customizeIndex}_popup");
 
-        Vector2 whenDone = ImGui.GetCursorPos();
-
         ImGui.SameLine();
 
         using(var group = ImRaii.Group())
@@ -640,12 +585,6 @@ public class CustomizeEditor()
                     customize.Data[(int)customizeIndex] = (byte)value;
                     didChange |= true;
                 }
-
-                ImGui.SameLine();
-
-                ImGui.SetCursorPos(new Vector2(LabelStart, ImGui.GetCursorPosY() + ImGui.GetTextLineHeight()));
-                ImGui.Text(menu.Title);
-                ImGui.SetCursorPos(whenDone);
             }
         }
 
@@ -670,18 +609,17 @@ public class CustomizeEditor()
             didChange |= true;
         }
 
-        ImGui.SameLine();
-
-        ImGui.Text(title);
-
         return didChange;
     }
 
     private bool DrawGenericMenu(ref ActorCustomize customize, BrioCharaMakeType.Menu menu)
     {
+
         var menuType = menu.Type;
         var customizeIndex = menu.CustomizeIndex;
         var title = menu.Title;
+
+        ImBrio.SeparatorText(title);
 
         return menuType switch
         {
@@ -709,15 +647,9 @@ public class CustomizeEditor()
         };
         int valueIdx = customize.Data[(int)customizeIndex];
         uint value = colors.Length > valueIdx ? colors[valueIdx] : 0;
-        if(ImBrio.DrawLabeledColor($"{customizeIndex}_color", value, valueIdx.ToString(), title))
-            ImGui.OpenPopup($"{customizeIndex}_popup");
 
-        if(ownOption)
-        {
-            ImGui.SameLine();
-            ImGui.SetCursorPosX(LabelStart);
-            ImGui.Text(title);
-        }
+        if(ImBrio.DrawLabeledColor($"{customizeIndex}_color", value, valueIdx.ToString(), "###dummy"))
+            ImGui.OpenPopup($"{customizeIndex}_popup");
 
         if(ImBrio.DrawPopupColorSelector($"{customizeIndex}_popup", colors, ref valueIdx))
         {

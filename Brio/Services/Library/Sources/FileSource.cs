@@ -12,7 +12,6 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Numerics;
 using System.Runtime.InteropServices;
 
 namespace Brio.Library.Sources;
@@ -113,9 +112,9 @@ public interface IFileMetadata
 
 public class DirectoryEntry : GroupEntryBase
 {
-    private string _name;
-    private IDalamudTextureWrap _icon;
-    private string _path;
+    private readonly IDalamudTextureWrap _icon;
+    private readonly string _name;
+    private readonly string _path;
 
     public DirectoryEntry(FileSource source, string path)
         : base(source)
@@ -124,7 +123,7 @@ public class DirectoryEntry : GroupEntryBase
         _name = Path.GetFileNameWithoutExtension(path);
         if(_name.Length >= 60)
         {
-            _name = Name.Substring(0, 55) + "...";
+            _name = string.Concat(_name.AsSpan(0, 55), "...");
         }
 
         _icon = ResourceProvider.Instance.GetResourceImage("Images.FileIcon_Directory.png");
@@ -167,35 +166,25 @@ public class FileEntry : ItemEntryBase
     private string? _description;
     private string? _author;
     private string? _version;
-    private string _editDescription = String.Empty;
-    private string _editAuthor = String.Empty;
-    private string _editVersion = String.Empty;
-    private string _editTags = String.Empty;
-    private string? _editBase64Image;
-    private IDalamudTextureWrap? _editPreviewImage;
-    private bool _isEditWindowOpen = false;
-    private int? _editPreviewImageFileSize;
 
-    public FileEntry(FileSource source, string path, FileTypeInfoBase fileInfo)
-        : base(source)
+    public FileEntry(FileSource source, string path, FileTypeInfoBase fileInfo) : base(source)
     {
         _fileInfo = fileInfo;
 
-        this.FilePath = path;
-        this.SourceInfo = Path.GetRelativePath(source.DirectoryPath, path);
+        FilePath = path;
+        SourceInfo = Path.GetRelativePath(source.DirectoryPath, path);
 
         _name = Path.GetFileNameWithoutExtension(path);
         if(_name.Length >= 60)
         {
-            _name = _name.Substring(0, 55) + "...";
+            _name = string.Concat(_name.AsSpan(0, 55), "...");
         }
 
         try
         {
             if(_fileInfo.IsFileType<IFileMetadata>() == true)
             {
-                IFileMetadata? file = _fileInfo.Load(path) as IFileMetadata;
-                if(file != null)
+                if(_fileInfo.Load(path) is IFileMetadata file)
                 {
                     if(file.Tags != null)
                         Tags.AddRange(file.Tags);
@@ -222,7 +211,7 @@ public class FileEntry : ItemEntryBase
     public override IDalamudTextureWrap? Icon => GetIcon();
     public override IDalamudTextureWrap? PreviewImage => GetPreviewImage();
     public override Type LoadsType => _fileInfo.Type;
-    public override bool EditAble => true;
+    public override bool EditAble => _fileInfo?.IsFileType<JsonDocumentBase>() == true;
     public FileTypeInfoBase FileTypeInfo => _fileInfo;
 
     public override bool IsVisible
@@ -281,8 +270,7 @@ public class FileEntry : ItemEntryBase
         {
             if(_fileInfo?.IsFileType<JsonDocumentBase>() == true)
             {
-                JsonDocumentBase? file = _fileInfo.Load(FilePath) as JsonDocumentBase;
-                if(file != null && file.Base64Image != null)
+                if(_fileInfo.Load(FilePath) is JsonDocumentBase file && file.Base64Image != null)
                 {
                     return file.Base64Image;
                 }
@@ -295,29 +283,10 @@ public class FileEntry : ItemEntryBase
         return null;
     }
 
-    public void LoadNewPreviewImage(string filePath)
-    {
-        try
-        {
-            var (imgBase64, img) = ResourceProvider.Instance.GetNewPreviewImage(filePath);
-            _editBase64Image = imgBase64;
-            if(_editPreviewImage != _previewImage)
-                _editPreviewImage?.Dispose();
-            _editPreviewImage = img;
-            _editPreviewImageFileSize = _editBase64Image != null ? System.Text.Encoding.UTF8.GetByteCount(_editBase64Image) : null;
-        }
-        catch(Exception ex)
-        {
-            Brio.Log.Error(ex, "Failed to load new preview image.");
-        }
-    }
-
     public override void Dispose()
     {
         base.Dispose();
         _previewImage?.Dispose();
-        if(_editPreviewImage != _previewImage)
-            _editPreviewImage?.Dispose();
     }
 
     protected override string GetpublicId()
@@ -336,6 +305,55 @@ public class FileEntry : ItemEntryBase
     public override bool InvokeDefaultAction(object? args)
     {
         return FileTypeInfo?.InvokeDefaultAction(this, args) ?? false;
+    }
+
+    public override void OpenEditDetails()
+    {
+        ModalManager.Instance.OpenEditMetadataModal(this);
+    }
+
+    public (string? Base64Image, IDalamudTextureWrap? Image) LoadPreviewForEdit()
+    {
+        string? base64Image = GetBase64ImageData();
+        if(base64Image == null)
+            return (null, null);
+
+        try
+        {
+            byte[] imgData = Convert.FromBase64String(base64Image);
+            return (base64Image, UIManager.Instance.LoadImage(imgData));
+        }
+        catch(Exception)
+        {
+            return (null, null);
+        }
+    }
+
+    public void SaveMetadata(string? author, string? version, string? description, string tags, string? base64Image)
+    {
+        Tags?.Clear();
+        Tags?.AddRange(tags.Split(',').Select(tag => tag.Trim()).Where(x => x != _author).Where(x => !x.IsWhiteSpace()));
+        TagCollection autoTags = new();
+        _author = author?.NullIfEmpty();
+        _version = version?.NullIfEmpty();
+        _description = description?.NullIfEmpty();
+
+        EditDetails((ref file) =>
+        {
+            file.Author = _author;
+            file.Version = _version;
+            file.Description = _description;
+            file.Base64Image = base64Image;
+
+            if(Tags != null)
+                file.Tags = Tags;
+            file.GetAutoTags(ref autoTags);
+        });
+
+        Tags?.AddRange(autoTags);
+
+        _previewImage?.Dispose();
+        _previewImage = null;
     }
 
     public override void DrawActions(bool isModal)
@@ -371,8 +389,7 @@ public class FileEntry : ItemEntryBase
         {
             if(_fileInfo?.IsFileType<JsonDocumentBase>() == true)
             {
-                JsonDocumentBase? file = _fileInfo.Load(FilePath) as JsonDocumentBase;
-                if(file != null)
+                if(_fileInfo.Load(FilePath) is JsonDocumentBase file)
                 {
                     handler(ref file);
                     ResourceProvider.Instance.SaveFileDocument(this.FilePath, file);
@@ -387,10 +404,11 @@ public class FileEntry : ItemEntryBase
 
     public override void AddTag(string tag)
     {
-        EditDetails((ref file) => {
+        EditDetails((ref file) =>
+        {
             if(tag != file.Author && !tag.IsWhiteSpace())
             {
-                file.Tags?.Add(tag); 
+                file.Tags?.Add(tag);
                 this.Tags.Add(tag);
             }
         });
@@ -398,139 +416,13 @@ public class FileEntry : ItemEntryBase
 
     public override void RemoveTag(string tag)
     {
-        EditDetails((ref file) => {
+        EditDetails((ref file) =>
+        {
             if(tag != file.Author)
             {
                 file.Tags?.Remove(tag);
                 this.Tags.Remove(tag);
             }
         });
-    }
-
-    public override void EditDetailsPopup(bool openPopup)
-    {
-        if(openPopup)
-        {
-            _isEditWindowOpen = true;
-            _editAuthor = _author ?? "";
-            _editVersion = _version ?? "";
-            _editDescription = _description ?? "";
-            _editTags = Tags != null ? string.Join(", ", Tags.Where(x => x.Name != _author).Select(x => x.Name)) : "";
-            if(_editPreviewImage != _previewImage)
-                _editPreviewImage?.Dispose();
-            _editPreviewImage = GetPreviewImage();
-            _editBase64Image = GetBase64ImageData();
-            _editPreviewImageFileSize = _editBase64Image != null ? System.Text.Encoding.UTF8.GetByteCount(_editBase64Image) : null;
-            // Without this the auto resize will show the old window size for 1 frame if the previous window was bigger then the current
-            ImGui.SetNextWindowSize(new Vector2(0, 1)); 
-        }
-
-        if(_isEditWindowOpen is false)
-            return;
-
-        ImGui.Begin("Details", ImGuiWindowFlags.AlwaysAutoResize);
-
-        ImGui.Text("Author:");
-        ImGui.SameLine();
-        ImGui.SetCursorPosX(ImGui.GetCursorPosX() + ImGui.CalcTextSize("Version:").X - ImGui.CalcTextSize("Author:").X);
-        ImGui.InputText("##author", ref _editAuthor);
-
-        ImGui.Text("Version:");
-        ImGui.SameLine();
-        ImGui.InputText("##version", ref _editVersion);
-
-        ImGui.Text("Tags:");
-        ImGui.SameLine();
-        ImGui.SetCursorPosX(ImGui.GetCursorPosX() + ImGui.CalcTextSize("Version:").X - ImGui.CalcTextSize("Tags:").X);
-        ImGui.InputText("##tags", ref _editTags);
-
-        ImGui.Text("Description:");
-        ImGui.InputTextMultiline("##description", ref _editDescription, 1024, new Vector2(-1, 5 * ImGui.GetTextLineHeight()));
-
-        ImGui.Text("Image:");
-        ImGui.SameLine();
-        if(ImGui.Button(_editPreviewImage == null ? "Add##change_preview_image" : "Replace##change_preview_image"))
-            FileUIHelpers.ShowImportPreviewImageModal(this);
-
-        if(_editPreviewImage != null)
-        {
-            ImGui.SameLine();
-            if(ImGui.Button("Remove##remove_preview_image"))
-            {
-                if(_editPreviewImage != _previewImage)
-                    _editPreviewImage?.Dispose();
-                _editPreviewImage = null;
-                _editBase64Image = null;
-                _editPreviewImageFileSize = null;
-            }
-        }
-
-        if(_editPreviewImage != null && _editPreviewImageFileSize != null)
-        {
-            ImGui.SameLine();
-            ImBrio.HorizontalPadding(10);
-            ImGui.Text($"{_editPreviewImage.Width} x {_editPreviewImage.Height} px");
-            ImGui.SameLine();
-            ImBrio.HorizontalPadding(10);
-            if(_editPreviewImageFileSize > (1 << 20))
-                ImGui.Text($"{_editPreviewImageFileSize >> 20:f2} MB");
-            else
-                ImGui.Text($"{_editPreviewImageFileSize >> 10} KB");
-
-            // Dont't want to center the image vertically so we need to calc new height in advance
-            float width = _editPreviewImage.Width;
-            float height = _editPreviewImage.Height;
-            float aspectRatio = width / height;
-            float scaledHeight = Math.Min(500 / aspectRatio, 500);
-            ImBrio.ImageFit(_editPreviewImage, new Vector2(500, scaledHeight));
-        }
-
-        ImBrio.VerticalPadding(ImGui.GetTextLineHeight() / 2);
-        float buttonsWidth = ImGui.CalcTextSize("Save").X + ImGui.CalcTextSize("Cancel").X + ImGui.GetStyle().FramePadding.X * 4f
-            + ImGui.GetStyle().ItemSpacing.X;
-        ImBrio.RightAlign(buttonsWidth);
-        
-        if(ImGui.Button("Save##edit_details_save"))
-        {
-            Tags?.Clear();
-            Tags?.AddRange(_editTags.Split(',').Select(tag => tag.Trim()).Where(x => x != _author).Where(x => !x.IsWhiteSpace()));
-            TagCollection autoTags = new();
-            _author = _editAuthor.NullIfEmpty();
-            _version = _editVersion.NullIfEmpty();
-            _description = _editDescription.NullIfEmpty();
-
-            EditDetails((ref file) => {
-                file.Author = _author;
-                file.Version = _version;
-                file.Description = _description;
-                file.Base64Image = _editBase64Image;
-
-                if(Tags != null)
-                    file.Tags = Tags;
-                file.GetAutoTags(ref autoTags);
-            });
-
-            Tags?.AddRange(autoTags);
-
-            if(_editPreviewImage != _previewImage)
-            {
-                _previewImage?.Dispose();
-                _previewImage = _editPreviewImage;
-            }
-            _editPreviewImage = null;
-
-            _isEditWindowOpen = false;
-        }
-        ImGui.SameLine();
-        if(ImGui.Button("Cancel##edit_details_cancel"))
-        {
-            if(_editPreviewImage != _previewImage)
-                _editPreviewImage?.Dispose();
-            _editPreviewImage= null;
-
-            _isEditWindowOpen = false;
-        }
-
-        ImGui.End();
     }
 }

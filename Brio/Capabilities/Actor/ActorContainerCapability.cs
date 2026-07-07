@@ -5,6 +5,7 @@ using Brio.Entities.Core;
 using Brio.Game.Actor;
 using Brio.Game.Core;
 using Brio.Game.GPose;
+using Brio.Game.WorldObjects;
 using Brio.UI.Widgets.Actor;
 using Dalamud.Game.ClientState.Objects.Types;
 using System;
@@ -17,15 +18,23 @@ public class ActorContainerCapability : Capability
     private readonly ActorSpawnService _actorSpawnService;
     private readonly TargetService _targetService;
     private readonly GPoseService _gPoseService;
+    private readonly ObjectMonitorService _objectMonitorService;
+    private readonly WorldObjectService _worldObjectService;
 
     public bool CanControlCharacters => _gPoseService.IsGPosing;
 
-    public ActorContainerCapability(ActorContainerEntity parent, EntityManager entityManager, ActorSpawnService actorSpawnService, TargetService targetService, GPoseService gPoseService) : base(parent)
+    public ObjectMonitorService ObjectMonitorService => _objectMonitorService;
+    public WorldObjectService WorldObjectService => _worldObjectService;
+
+    public ActorContainerCapability(Entity parent, ObjectMonitorService objectMonitorService, EntityManager entityManager, ActorSpawnService actorSpawnService, TargetService targetService, GPoseService gPoseService, WorldObjectService worldObjectService) : base(parent)
     {
+        _objectMonitorService = objectMonitorService;
         _entityManager = entityManager;
         _actorSpawnService = actorSpawnService;
         _targetService = targetService;
         _gPoseService = gPoseService;
+        _worldObjectService = worldObjectService;
+
         Widget = new ActorContainerWidget(this);
     }
 
@@ -53,32 +62,6 @@ public class ActorContainerCapability : Capability
         throw new Exception("Failed to create character");
     }
 
-    public (EntityId, ICharacter) CreateProp(bool selectInHierarchy)
-    {
-        if(_actorSpawnService.SpawnNewProp(out ICharacter? character))
-        {
-            EntityId characterId = new EntityId(character!);
-            if(selectInHierarchy)
-            {
-                _entityManager.SetSelectedEntity(character!);
-            }
-            return (characterId, character!);
-        }
-
-        throw new Exception("Failed to create prop");
-    }
-
-    public void SpawnNewProp(bool selectInHierarchy)
-    {
-        if(_actorSpawnService.SpawnNewProp(out ICharacter? character))
-        {
-            if(selectInHierarchy)
-            {
-                _entityManager.SetSelectedEntity(character!);
-            }
-        }
-    }
-
     public void DestroyCharacter(ActorEntity entity)
     {
         _actorSpawnService.DestroyObject(entity.GameObject);
@@ -96,6 +79,14 @@ public class ActorContainerCapability : Capability
                 }
             }
         }
+    }
+
+    public void AddFromWorld(IGameObject? actor)
+    {
+        if(actor is null)
+            return;
+
+        _actorSpawnService.AddFromWorld(actor);
     }
 
     public void DestroyAll()

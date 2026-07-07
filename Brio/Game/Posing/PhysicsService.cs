@@ -10,13 +10,15 @@
 //
 
 using Brio.Game.GPose;
+using Brio.Services;
+using Brio.Services.MediatorMessages;
 using Dalamud.Memory;
 using Dalamud.Plugin.Services;
 using System;
 
 namespace Brio.Game.Posing;
 
-public partial class PhysicsService : IDisposable
+public partial class PhysicsService : MediatorSubscriberBase
 {
     private readonly GPoseService _gPoseService;
     private readonly IFramework _framework;
@@ -27,12 +29,12 @@ public partial class PhysicsService : IDisposable
     private byte[] _originalPhysicsBytes1 = [];
     private byte[] _originalPhysicsBytes2 = [];
 
-    public PhysicsService(ISigScanner scanner, IFramework framework, GPoseService gPoseService, IGameInteropProvider hooking)
+    public PhysicsService(ISigScanner scanner, IFramework framework, Mediator mediator, GPoseService gPoseService, IGameInteropProvider hooking) : base(mediator)
     {
         _gPoseService = gPoseService;
         _framework = framework;
 
-        _framework.Update += OnFrameworkUpdate;
+        mediator.Subscribe<PriorityFrameworkUpdateMessage>(this, msg => OnFrameworkUpdate(msg.Framework));
 
         // This signature is from Anamnesis (https://github.com/imchillin/Anamnesis)
         // Found in AddressService.cs on line 159 - SkeletonFreezePhysics (1/2/3)
@@ -80,15 +82,15 @@ public partial class PhysicsService : IDisposable
         return originalBytes;
     }
 
-    public void Dispose()
+    public override void Dispose()
     {
-        GC.SuppressFinalize(this);
+        base.Dispose();
 
         if(IsFreezeEnabled)
         {
             FreezeRevert();
         }
 
-        _framework.Update -= OnFrameworkUpdate;
+        GC.SuppressFinalize(this);
     }
 }

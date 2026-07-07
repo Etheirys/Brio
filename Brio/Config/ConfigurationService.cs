@@ -1,4 +1,5 @@
-﻿using Dalamud.Plugin;
+﻿using Brio.UI.Theming;
+using Dalamud.Plugin;
 using System;
 using System.Reflection;
 
@@ -27,6 +28,8 @@ public class ConfigurationService : IDisposable
         Instance = this;
         _pluginInterface = pluginInterface;
         Configuration = _pluginInterface.GetPluginConfig() as Configuration ?? new Configuration();
+
+        ThemeManager.SetThemeByName(Configuration.Appearance.Theme);
     }
 
     public void Save()
@@ -52,6 +55,28 @@ public class ConfigurationService : IDisposable
     public void Dispose()
     {
         Save();
+    }
+
+    public static void OpenConfigFolder(IDalamudPluginInterface pluginInterface)
+    {
+        try
+        {
+            var path = pluginInterface.ConfigDirectory.FullName;
+
+            if(!System.IO.Directory.Exists(path))
+                System.IO.Directory.CreateDirectory(path);
+
+            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo()
+            {
+                FileName = path,
+                UseShellExecute = true,
+                Verb = "open"
+            });
+        }
+        catch(Exception ex)
+        {
+            Brio.Log.Error($"Failed to open config folder: {ex}");
+        }
     }
 
 #if DEBUG

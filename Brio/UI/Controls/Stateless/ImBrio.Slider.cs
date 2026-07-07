@@ -1,7 +1,8 @@
-﻿using Brio.Core;
+﻿using Brio.Config;
+using Brio.Core;
 using Brio.Input;
-using Brio.Config;
 using Dalamud.Bindings.ImGui;
+using Dalamud.Interface;
 using Dalamud.Interface.Utility;
 using System.Numerics;
 
@@ -14,33 +15,37 @@ public static partial class ImBrio
         bool changed = false;
 
         float x = value.X;
-        changed |= SliderFloat($"###{label}_x", ref x, min, max, format, flags, step);
+        (var xChanged, _) = SliderFloat($"###{label}_x", ref x, min, max, format, flags, step);
+        changed |= xChanged;
         value.X = x;
 
         float y = value.Y;
-        changed |= SliderFloat($"###{label}_y", ref y, min, max, format, flags, step);
+        (var yChanged, _) = SliderFloat($"###{label}_y", ref y, min, max, format, flags, step);
+        changed |= yChanged;
         value.Y = y;
 
         float z = value.Z;
-        changed |= SliderFloat($"###{label}_z", ref z, min, max, format, flags, step);
+        (var zChanged, _) = SliderFloat($"###{label}_z", ref z, min, max, format, flags, step);
+        changed |= zChanged;
         value.Z = z;
 
         return changed;
     }
 
-    public static bool SliderFloat(string label, ref float value, float min, float max, string format = "%.2f", ImGuiSliderFlags flags = ImGuiSliderFlags.None, float step = 1.0f, string toolTip = "")
+    public static (bool changed, bool active) SliderFloat(string label, ref float value, float min, float max, string format = "%.2f", ImGuiSliderFlags flags = ImGuiSliderFlags.None, float step = 1.0f, string toolTip = "")
     {
         return SliderBase(label, ref value, min, max, format, flags, step, false, toolTip);
     }
 
-    public static bool SliderAngle(string label, ref float value, float min, float max, string format = "%.2f", ImGuiSliderFlags flags = ImGuiSliderFlags.None, float step = 1.0f, string toolTip = "")
+    public static (bool changed, bool active) SliderAngle(string label, ref float value, float min, float max, string format = "%.2f", ImGuiSliderFlags flags = ImGuiSliderFlags.None, float step = 1.0f, string toolTip = "")
     {
         return SliderBase(label, ref value, min, max, format, flags, step, true, toolTip);
     }
 
-    private static bool SliderBase(string label, ref float value, float min, float max, string format, ImGuiSliderFlags flags, float step, bool isAngle = false, string toolTip = "")
+    private static (bool changed, bool active) SliderBase(string label, ref float value, float min, float max, string format, ImGuiSliderFlags flags, float step, bool isAngle = false, string toolTip = "")
     {
         bool changed = false;
+        bool active = false;
         float buttonWidth = ImGui.GetCursorPosX();
 
         if(max < min)
@@ -55,10 +60,13 @@ public static partial class ImBrio
             step *= 10;
 
 
-        if(ImGui.Button($"◀##{label}_decrease", new Vector2(25 * ImGuiHelpers.GlobalScale)))
+        ImGui.PushID(label);
+
+        if(FontIconButton(FontAwesomeIcon.ChevronLeft, new Vector2(25 * ImGuiHelpers.GlobalScale)))
         {
             value -= isAngle ? step * MathHelpers.DegreesToRadians : step;
-            changed = true;
+            changed |= true;
+            active = true;
         }
         ImGui.SameLine();
 
@@ -80,6 +88,8 @@ public static partial class ImBrio
         else
             changed |= ImGui.SliderFloat($"##{label}_slider", ref value, min, max, format, flags);
 
+        active |= ImGui.IsItemActive();
+
         if(ImGui.IsItemHovered())
         {
             if(string.IsNullOrEmpty(toolTip) == false)
@@ -91,16 +101,18 @@ public static partial class ImBrio
                 if(mouseWheel != 0)
                 {
                     value += isAngle ? mouseWheel * step * MathHelpers.DegreesToRadians : mouseWheel * step;
-                    changed = true;
+                    changed |= true;
+                    active = true;
                 }
             }
         }
 
         ImGui.SameLine();
-        if(ImGui.Button($"▶##{label}_increase", new Vector2(25 * ImGuiHelpers.GlobalScale)))
+        if(FontIconButton(FontAwesomeIcon.ChevronRight, new Vector2(25 * ImGuiHelpers.GlobalScale)))
         {
             value += isAngle ? step * MathHelpers.DegreesToRadians : step;
-            changed = true;
+            changed |= true;
+            active = true;
         }
 
         if(hasLabel)
@@ -109,6 +121,8 @@ public static partial class ImBrio
             ImGui.Text(label);
         }
 
-        return changed;
+        ImGui.PopID();
+
+        return (changed, active);
     }
 }

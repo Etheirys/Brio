@@ -1,9 +1,4 @@
 ﻿using Brio.Capabilities.World;
-using Brio.Game.Actor;
-using Brio.Game.Camera;
-using Brio.Game.World;
-using Brio.UI.Controls;
-using Brio.UI.Controls.Editors;
 using Brio.UI.Controls.Stateless;
 using Brio.UI.Widgets.Core;
 using Dalamud.Bindings.ImGui;
@@ -11,39 +6,13 @@ using Dalamud.Interface;
 
 namespace Brio.UI.Widgets.World.Lights;
 
-public class LightLifetimeWidget : Widget<LightLifetimeCapability>
+public class LightLifetimeWidget(LightLifetimeCapability lightLifetimeCapability) : Widget<LightLifetimeCapability>(lightLifetimeCapability)
 {
-    private readonly ActorSpawnService _actorSpawnService;
-    private readonly VirtualCameraManager _cameraManager;
-    private readonly LightingService _lightingService;
-
-    public LightLifetimeWidget(LightLifetimeCapability lightLifetimeCapability, ActorSpawnService actorSpawnService, VirtualCameraManager cameraManager, LightingService lightingService) : base(lightLifetimeCapability)
-    {
-        _actorSpawnService = actorSpawnService;
-        _cameraManager = cameraManager;
-        _lightingService = lightingService;
-    }
-
     public override string HeaderName => "Lifetime";
     public override WidgetFlags Flags => WidgetFlags.DrawPopup | WidgetFlags.DrawQuickIcons;
 
     public override void DrawQuickIcons()
     {
-        if(ImBrio.FontIconButton("lifetimewidget_spawnnew", FontAwesomeIcon.Plus, "Spawn New"))
-        {
-            ImGui.OpenPopup("UnifiedSpawnMenuPopup");
-        }
-        SpawnMenuEditor.DrawUnifiedSpawnMenu(_actorSpawnService, _cameraManager, _lightingService);
-
-        ImGui.SameLine();
-
-        if(ImBrio.FontIconButton("lifetimewidget_move_to_camera", FontAwesomeIcon.Thumbtack, "Move to Camera"))
-        {
-            Capability.MoveToCamera();
-        }
-
-        ImGui.SameLine();
-
         if(ImBrio.FontIconButton("lifetimewidget_clone", FontAwesomeIcon.Clone, "Clone Light", Capability.CanClone))
         {
             Capability.Clone();
@@ -51,59 +20,72 @@ public class LightLifetimeWidget : Widget<LightLifetimeCapability>
 
         ImGui.SameLine();
 
-        if(ImBrio.FontIconButton("lifetimewidget_destroy", FontAwesomeIcon.Trash, "Destroy Light", Capability.CanDestroy))
+        if(ImBrio.FontIconButton("lifetimewidget_move_to_camera", FontAwesomeIcon.CaretSquareDown, "Move to Camera"))
+        {
+            Capability.MoveToCamera();
+        }
+
+        ImBrio.VerticalSeparator(24, 1);
+
+        if(ImBrio.HoldButton("lifetimewidget_destroy", "", FontAwesomeIcon.Trash, 1f, new(40, 0), centerTest: true, tooltip: "[HOLD TO DESTROY]", onlyIcon: true))
         {
             Capability.Destroy();
         }
 
-        ImGui.SameLine();
+        ImBrio.VerticalSeparator(24, 1);
 
         if(ImBrio.FontIconButton("lifetimewidget_rename", FontAwesomeIcon.Signature, "Rename Light"))
         {
-            RenameActorModal.Open(Capability.Entity);
-        }
-
-        ImGui.SameLine();
-
-        if(ImBrio.FontIconButtonRight($"lifetimewidget_openAdvaned", FontAwesomeIcon.SquareArrowUpRight, 1, Capability.IsLightWindowOpen ? "Close Light Window" : "Open Light Window"))
-        {
-            Capability.ToggleLightWindow();
+            ModalManager.Instance.OpenRenameModal(Capability.Entity);
         }
     }
 
     public override void DrawPopup()
     {
-        if(ImGui.MenuItem("Move to Camera###actorlifetime_move_to_camera"))
+        if(ImGui.MenuItem($"Rename {Capability.Entity.FriendlyName}###lightlifetime_rename"))
         {
-            Capability.MoveToCamera();
+            ImGui.CloseCurrentPopup();
+
+            ModalManager.Instance.OpenRenameModal(Capability.Entity);
         }
 
         if(Capability.CanClone)
         {
-            if(ImGui.MenuItem("Clone###actorlifetime_clone"))
+            if(ImGui.MenuItem("Clone###lightlifetime_clone"))
             {
                 Capability.Clone();
             }
         }
 
-        if(Capability.CanDestroy)
+        if(ImGui.MenuItem("Move to Camera###lightlifetime_move_to_camera"))
         {
-            if(ImGui.MenuItem("Destroy###actorlifetime_destroy"))
-            {
-                Capability.Destroy();
-            }
+            Capability.MoveToCamera();
         }
 
-        if(ImGui.MenuItem($"Rename {Capability.Entity.FriendlyName}###actorlifetime_rename"))
+        var togglenText = Capability.GameLight.IsVisible ? $"Turn OFF {Capability.Entity.FriendlyName}" : $"Turn ON {Capability.Entity.FriendlyName}";
+        if(ImGui.MenuItem($"{togglenText}###lightlifetime_toggle"))
         {
-            ImGui.CloseCurrentPopup();
-
-            RenameActorModal.Open(Capability.Entity);
+            Capability.GameLight.ToggleLight();
         }
 
-        if(ImGui.MenuItem("Open Light Window###actorlifetime_lightwindow"))
+        if(ImGui.MenuItem("Open Light Window###lightlifetime_lightwindow"))
         {
             Capability.OpenLightWindow();
+        }
+
+        if(Capability.CanDestroy)
+        {
+            ImGui.Separator();
+
+            if(ImGui.BeginMenu("Destroy###lightlifetime_destroy"))
+            {
+                if(ImGui.MenuItem("Confirm Destruction###lightlifetime_destroy_confirm"))
+                {
+                    Capability.Destroy();
+                }
+
+                ImGui.EndMenu();
+            }
         }
     }
 }

@@ -52,6 +52,14 @@ public class WelcomeService : IDisposable
             configService.Configuration.Version = Configuration.CurrentVersion;
         }
 
+        if(configService.Configuration.Version <= 4) // Brio 0.8.0
+        {
+            configService.Configuration.AutoSave.AutoSaveInterval = 60;
+            configService.Configuration.AutoSave.MaxAutoSaves = 60;
+
+            configService.Configuration.Version = Configuration.CurrentVersion;
+        }
+
         configService.ApplyChange();
 
         #endregion

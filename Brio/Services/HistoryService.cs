@@ -1,82 +1,76 @@
-using Brio.Capabilities.Posing;
+using Brio.Config;
 using Brio.Core;
-using Brio.Entities;
 using Brio.Entities.Core;
-using Brio.Game.Posing;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Brio.Services;
 
-public class HistoryService(EntityManager entityManager)
+public class HistoryService(ConfigurationService configurationService)
 {
-    private readonly EntityManager _entityManager = entityManager;
+    public bool CanUndo(EntityId id) => GetStacks(id).Undo.Count is not 0 and not 1;
+    public bool CanRedo(EntityId id) => GetStacks(id).Redo.Count > 0;
 
-    private readonly Stack<GroupEntry> _undo = [];
-    private readonly Stack<GroupEntry> _redo = [];
-
-    public void Snapshot(IEnumerable<(EntityId id, PosingCapability capability, Transform transform)> entries)
+    public void Snapshot(EntityId id, IHistoryCompatible owner, object state)
     {
-        var group = new GroupEntry
+        var stacks = GetStacks(id);
+        var undoStackSize = configurationService.Configuration.Posing.UndoStackSize;
+        if(undoStackSize <= 0)
         {
-            Entries = [.. entries.Select(e => new HistoryEntry(e.id, e.capability, e.transform))]
-        };
-
-        _undo.Push(group);
-        _redo.Clear();
-    }
-
-    public bool CanUndo => _undo.Count is not 0 and not 1;
-    public bool CanRedo => _redo.Count > 0;
-
-    public void Undo()
-    {
-        if(!CanUndo)
+            stacks.Undo.Clear();
+            stacks.Redo.Clear();
             return;
-
-        var pop = _undo.Pop();
-        var entries = new GroupEntry();
-
-        foreach(var entry in pop.Entries)
-        {
-            entries.Entries.Add(new HistoryEntry(entry.Id, entry.Capability, entry.ModelTransform));
-
-            entry.Capability.SkeletonPosing.PoseInfo = entry.Capability.SkeletonPosing.PoseInfo.Clone();
-            entry.Capability.ModelPosing.Transform = entry.ModelTransform;
         }
 
-        _redo.Push(entries);
+        stacks.Redo.Clear();
+
+        if(stacks.Undo.Count == 0)
+            stacks.Undo.Push(new Entry(owner, owner.CaptureInitialState()));
+
+        stacks.Undo.Push(new Entry(owner, state));
+        stacks.Undo = stacks.Undo.Trim(undoStackSize + 1);
     }
 
-    public void Redo()
+    public void Undo(EntityId id)
     {
-        if(!CanRedo)
-            return;
+        var stacks = GetStacks(id);
+        if(stacks.Undo.TryPop(out var popped))
+            stacks.Redo.Push(popped);
 
-        var pop = _redo.Pop();
-        var entries = new GroupEntry();
+        if(stacks.Undo.TryPeek(out var applicable))
+            applicable.Owner.ApplyState(applicable.State);
+    }
 
-        foreach(var entry in pop.Entries)
+    public void Redo(EntityId id)
+    {
+        var stacks = GetStacks(id);
+        if(stacks.Redo.TryPop(out var popped))
         {
-            entries.Entries.Add(new HistoryEntry(entry.Id, entry.Capability, entry.ModelTransform));
-
-            entry.Capability.SkeletonPosing.PoseInfo = entry.Capability.SkeletonPosing.PoseInfo.Clone();
-            entry.Capability.ModelPosing.Transform = entry.ModelTransform;
+            stacks.Undo.Push(popped);
+            popped.Owner.ApplyState(popped.State);
         }
-
-        _undo.Push(entries);
     }
 
-    public void Clear()
+    public void Forget(EntityId id) => _stacks.Remove(id);
+
+    public void ClearRedo(EntityId id) => GetStacks(id).Redo.Clear();
+
+    private readonly Dictionary<EntityId, EntityStacks> _stacks = [];
+
+    private EntityStacks GetStacks(EntityId id)
     {
-        _undo.Clear();
-        _redo.Clear();
+        if(!_stacks.TryGetValue(id, out var stacks))
+        {
+            stacks = new EntityStacks();
+            _stacks[id] = stacks;
+        }
+        return stacks;
     }
 
-    private class GroupEntry
+    private class EntityStacks
     {
-        public List<HistoryEntry> Entries = [];
+        public Stack<Entry> Undo = [];
+        public Stack<Entry> Redo = [];
     }
+
+    private record Entry(IHistoryCompatible Owner, object State);
 }
-
-public record class HistoryEntry(EntityId Id, PosingCapability Capability, Transform ModelTransform);

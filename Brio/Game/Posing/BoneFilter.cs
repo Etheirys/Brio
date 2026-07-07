@@ -157,6 +157,25 @@ public class BoneFilter
     public bool IsCategoryEnabled(string id) => _allowedCategories.Contains(id);
     public bool IsCategoryEnabled(BoneCategory category) => _allowedCategories.Contains(category.Id);
 
+    public string GetFilterCategoryId(Bone bone, PoseInfoSlot slot)
+    {
+        if(slot is PoseInfoSlot.MainHand or PoseInfoSlot.OffHand)
+            return "weapon";
+
+        if(slot is PoseInfoSlot.Ornament)
+            return "ornament";
+
+        if(slot is PoseInfoSlot.Prop)
+            return "prop";
+
+        foreach(var (bonePrefix, categoryIds) in _bonePrefixToCategories)
+        {
+            if(bone.Name.StartsWith(bonePrefix) && categoryIds.Count > 0)
+                return categoryIds[0];
+        }
+
+        return "other";
+    }
 
     public void DisableSubCategory(string id)
     {
