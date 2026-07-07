@@ -296,7 +296,7 @@ public unsafe class FestivalService : MediatorSubscriberBase
 
         var knownEntries = _resourceProvider.GetResourceDocument<List<FestivalFileEntry>>("Data.Festivals.json");
 
-        foreach(var (_, row) in gameDataProvider.Festivals)
+        foreach(var row in gameDataProvider.Festivals)
         {
             if(row.RowId == 0)
                 continue;

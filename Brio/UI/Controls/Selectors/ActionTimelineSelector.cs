@@ -127,7 +127,7 @@ public class ActionTimelineSelector(string id) : Selector<ActionTimelineSelector
 
     protected override void PopulateList()
     {
-        foreach(var timeline in GameDataProvider.Instance.ActionTimelines.Values)
+        foreach(var timeline in GameDataProvider.Instance.ActionTimelines)
         {
             if(!string.IsNullOrEmpty(timeline.Key.ToString()))
                 AddItem(new ActionTimelineSelectorEntry(
@@ -143,14 +143,14 @@ public class ActionTimelineSelector(string id) : Selector<ActionTimelineSelector
                     0));
         }
 
-        foreach(var emote in GameDataProvider.Instance.Emotes.Values)
+        foreach(var emote in GameDataProvider.Instance.Emotes)
         {
             BrioActionTimeline timeline;
             bool drawsWeapon = emote.DrawsWeapon;
             byte emoteCategory = (byte)emote.EmoteCategory.RowId;
 
             // Loop
-            if(emote.ActionTimeline[0].RowId != 0 && GameDataProvider.Instance.ActionTimelines.TryGetValue(emote.ActionTimeline[0].RowId, out timeline))
+            if(emote.ActionTimeline[0].RowId != 0 && GameDataProvider.Instance.ActionTimelines.TryGetRow(emote.ActionTimeline[0].RowId, out timeline))
             {
                 AddItem(new ActionTimelineSelectorEntry(
                     emote.Name.ToString(),
@@ -166,7 +166,7 @@ public class ActionTimelineSelector(string id) : Selector<ActionTimelineSelector
             }
 
             // Intro
-            if(emote.ActionTimeline[1].RowId != 0 && GameDataProvider.Instance.ActionTimelines.TryGetValue(emote.ActionTimeline[1].RowId, out timeline))
+            if(emote.ActionTimeline[1].RowId != 0 && GameDataProvider.Instance.ActionTimelines.TryGetRow(emote.ActionTimeline[1].RowId, out timeline))
             {
                 AddItem(new ActionTimelineSelectorEntry(
                     emote.Name.ToString(),
@@ -182,7 +182,7 @@ public class ActionTimelineSelector(string id) : Selector<ActionTimelineSelector
             }
 
             // Ground
-            if(emote.ActionTimeline[2].RowId != 0 && GameDataProvider.Instance.ActionTimelines.TryGetValue(emote.ActionTimeline[2].RowId, out timeline))
+            if(emote.ActionTimeline[2].RowId != 0 && GameDataProvider.Instance.ActionTimelines.TryGetRow(emote.ActionTimeline[2].RowId, out timeline))
             {
                 AddItem(new ActionTimelineSelectorEntry(
                     emote.Name.ToString(),
@@ -198,7 +198,7 @@ public class ActionTimelineSelector(string id) : Selector<ActionTimelineSelector
             }
 
             // Chair
-            if(emote.ActionTimeline[3].RowId != 0 && GameDataProvider.Instance.ActionTimelines.TryGetValue(emote.ActionTimeline[3].RowId, out timeline))
+            if(emote.ActionTimeline[3].RowId != 0 && GameDataProvider.Instance.ActionTimelines.TryGetRow(emote.ActionTimeline[3].RowId, out timeline))
             {
                 AddItem(new ActionTimelineSelectorEntry(
                     emote.Name.ToString(),
@@ -214,7 +214,7 @@ public class ActionTimelineSelector(string id) : Selector<ActionTimelineSelector
             }
 
             // Upper Body
-            if(emote.ActionTimeline[4].RowId != 0 && GameDataProvider.Instance.ActionTimelines.TryGetValue(emote.ActionTimeline[4].RowId, out timeline))
+            if(emote.ActionTimeline[4].RowId != 0 && GameDataProvider.Instance.ActionTimelines.TryGetRow(emote.ActionTimeline[4].RowId, out timeline))
             {
                 AddItem(new ActionTimelineSelectorEntry(
                     emote.Name.ToString(),
@@ -230,9 +230,9 @@ public class ActionTimelineSelector(string id) : Selector<ActionTimelineSelector
             }
         }
 
-        foreach(var action in GameDataProvider.Instance.Actions.Values)
+        foreach(var action in GameDataProvider.Instance.Actions)
         {
-            if(action.AnimationEnd.RowId != 0 && GameDataProvider.Instance.ActionTimelines.TryGetValue(action.AnimationEnd.RowId, out BrioActionTimeline timeline))
+            if(action.AnimationEnd.RowId != 0 && GameDataProvider.Instance.ActionTimelines.TryGetRow(action.AnimationEnd.RowId, out BrioActionTimeline timeline))
                 AddItem(new ActionTimelineSelectorEntry(
                     action.Name.ToString(),
                     (ushort)action.AnimationEnd.RowId,

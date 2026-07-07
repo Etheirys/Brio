@@ -23,7 +23,7 @@ public class WeatherSelector(string id) : Selector<WeatherUnion>(id)
 
     protected override void PopulateList()
     {
-        foreach(var weather in GameDataProvider.Instance.Weathers.Values)
+        foreach(var weather in GameDataProvider.Instance.Weathers)
             AddItem(weather);
     }
 

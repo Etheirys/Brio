@@ -1,9 +1,9 @@
-﻿using Brio.Game.Types;
+﻿using System.Numerics;
+using Brio.Game.Types;
 using Brio.Resources;
 using Brio.UI.Controls.Stateless;
 using Dalamud.Bindings.ImGui;
 using OneOf.Types;
-using System.Numerics;
 
 namespace Brio.UI.Controls.Selectors;
 
@@ -23,13 +23,13 @@ public class CompanionSelector(string id) : Selector<CompanionRowUnion>(id)
 
     protected override void PopulateList()
     {
-        foreach(var companion in GameDataProvider.Instance.Companions.Values)
+        foreach(var companion in GameDataProvider.Instance.Companions)
             AddItem(companion);
 
-        foreach(var mount in GameDataProvider.Instance.Mounts.Values)
+        foreach(var mount in GameDataProvider.Instance.Mounts)
             AddItem(mount);
 
-        foreach(var ornament in GameDataProvider.Instance.Ornaments.Values)
+        foreach(var ornament in GameDataProvider.Instance.Ornaments)
             AddItem(ornament);
 
         AddItem(new None());
@@ -74,9 +74,9 @@ public class CompanionSelector(string id) : Selector<CompanionRowUnion>(id)
             return false;
 
         var searchText = item.Match(
-            companion => $"{companion.Singular} {companion.Plural} {companion.RowId} {companion.Model.RowId}",
-            mount => $"{mount.Singular} {mount.Plural} {mount.RowId} {mount.ModelChara.RowId}",
-            ornament => $"{ornament.Singular} {ornament.Plural} {ornament.RowId} {ornament.Model}",
+            companion => $"{GameDataProvider.Instance.GetCompanionName(companion.RowId)} {companion.Plural} {companion.RowId} {companion.Model.RowId}",
+            mount => $"{GameDataProvider.Instance.GetMountName(mount.RowId)} {mount.Plural} {mount.RowId} {mount.ModelChara.RowId}",
+            ornament => $"{GameDataProvider.Instance.GetOrnamentName(ornament.RowId)} {ornament.Plural} {ornament.RowId} {ornament.Model}",
             none => "none"
         );
 
@@ -98,16 +98,16 @@ public class CompanionSelector(string id) : Selector<CompanionRowUnion>(id)
 
         // Get name
         var textA = itemA.Match(
-            companion => companion.Singular.ToString(),
-            mount => mount.Singular.ToString(),
-            ornament => ornament.Singular.ToString(),
+            companion => GameDataProvider.Instance.GetCompanionName(companion.RowId),
+            mount => GameDataProvider.Instance.GetMountName(mount.RowId),
+            ornament => GameDataProvider.Instance.GetOrnamentName(ornament.RowId),
             none => ""
         );
 
         var textB = itemB.Match(
-            companion => companion.Singular.ToString(),
-            mount => mount.Singular.ToString(),
-            ornament => ornament.Singular.ToString(),
+            companion => GameDataProvider.Instance.GetCompanionName(companion.RowId),
+            mount => GameDataProvider.Instance.GetMountName(mount.RowId),
+            ornament => GameDataProvider.Instance.GetOrnamentName(ornament.RowId),
             none => ""
         );
 

@@ -1,11 +1,11 @@
-﻿using Brio.Game.Types;
+﻿using System;
+using System.Collections.Generic;
+using System.Numerics;
+using Brio.Game.Types;
 using Brio.Resources;
 using Brio.UI.Controls.Stateless;
 using Dalamud.Bindings.ImGui;
 using Lumina.Excel.Sheets;
-using System;
-using System.Collections.Generic;
-using System.Numerics;
 using static Brio.UI.Controls.Selectors.NpcSelector;
 
 namespace Brio.UI.Controls.Selectors;
@@ -27,58 +27,37 @@ public class NpcSelector(string id) : Selector<NpcSelectorEntry>(id)
 
     protected override void PopulateList()
     {
-        foreach(var (_, npc) in GameDataProvider.Instance.BNpcBases)
+        var gameDataProvider = GameDataProvider.Instance;
+
+        foreach(var npc in gameDataProvider.BNpcBases)
         {
-            string name = $"B:{npc.RowId:D7}";
-            name = ResolveName(name);
+            var name = gameDataProvider.GetBNpcName(npc.RowId);
             AddItem(new NpcSelectorEntry(name, 0, npc));
         }
 
-        foreach(var (_, npc) in GameDataProvider.Instance.ENpcBases)
+        foreach(var npc in gameDataProvider.ENpcBases)
         {
-            string name = $"E:{npc.RowId:D7}";
-
-            var resident = GameDataProvider.Instance.ENpcResidents[npc.RowId];
-
-            if(!string.IsNullOrEmpty(resident.Singular.ToString()))
-                name = resident.Singular.ToString();
-
-            name = ResolveName(name);
+            var name = gameDataProvider.GetENpcName(npc.RowId);
             AddItem(new NpcSelectorEntry(name, 0, npc));
         }
 
-        foreach(var (_, mount) in GameDataProvider.Instance.Mounts)
+        foreach(var mount in gameDataProvider.Mounts)
         {
-            AddItem(new NpcSelectorEntry(mount.Singular.ToString() ?? $"Mount {mount.RowId}", mount.Icon, mount));
+            var name = gameDataProvider.GetMountName(mount.RowId);
+            AddItem(new NpcSelectorEntry(name, mount.Icon, mount));
         }
 
-        foreach(var (_, companion) in GameDataProvider.Instance.Companions)
+        foreach(var companion in gameDataProvider.Companions)
         {
-            AddItem(new NpcSelectorEntry(companion.Singular.ToString() ?? $"Companion {companion.RowId}", companion.Icon, companion));
+            var name = gameDataProvider.GetCompanionName(companion.RowId);
+            AddItem(new NpcSelectorEntry(name, companion.Icon, companion));
         }
 
-        foreach(var (_, ornament) in GameDataProvider.Instance.Ornaments)
+        foreach(var ornament in gameDataProvider.Ornaments)
         {
-            AddItem(new NpcSelectorEntry(ornament.Singular.ToString() ?? $"Ornament {ornament.RowId}", ornament.Icon, ornament));
+            var name = GameDataProvider.Instance.GetOrnamentName(ornament.RowId);
+            AddItem(new NpcSelectorEntry(name, ornament.Icon, ornament));
         }
-    }
-
-    private static string ResolveName(string name)
-    {
-        var names = ResourceProvider.Instance.GetResourceDocument<IReadOnlyDictionary<string, string>>("Data.NpcNames.json");
-
-        if(names.TryGetValue(name, out var nameOverride))
-            name = nameOverride;
-
-        if(name.StartsWith("N:"))
-        {
-            var nameId = uint.Parse(name.Substring(2));
-            if(GameDataProvider.Instance.BNpcNames.TryGetValue(nameId, out var nameRef))
-                if(!string.IsNullOrEmpty(nameRef.Singular.ToString()))
-                    name = nameRef.Singular.ToString();
-        }
-
-        return name;
     }
 
     protected override void DrawOptions()

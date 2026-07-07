@@ -15,13 +15,10 @@ public class GameDataMountSource : GameDataAppearanceSourceBase
 
     public override void Scan()
     {
-        foreach(var (_, mount) in Lumina.Mounts)
+        foreach(var mount in Lumina.Mounts)
         {
             string rowName = $"Mount {mount.RowId}";
-
-            string name = mount.Singular.ToString();
-            if(string.IsNullOrEmpty(name))
-                name = rowName;
+            string name = Lumina.GetMountName(mount.RowId);
 
             var entry = new GameDataAppearanceEntry(this, EntityManager, mount.RowId, name, mount.Icon, mount, $"{mount.RowId}");
             entry.Tags.Add("Mount");

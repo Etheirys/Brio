@@ -718,7 +718,7 @@ public class LibraryWindow : Window, IDisposable
             {
                 try
                 {
-                    using(var child = ImRaii.Child("library_search_input", new(searchBarWidth, searchBarHeight), false, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse))
+                    using(var child = ImRaii.Child("library_search_input_child", new(searchBarWidth, searchBarHeight), false, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse))
                     {
 
                         if(child.Success)
@@ -843,7 +843,7 @@ public class LibraryWindow : Window, IDisposable
 
             // clear the search input buffer
             data.BufTextLen = 0;
-            data.BufSize = 0;
+            data.BufSize = 256 + 1;
             data.CursorPos = 0;
             data.SelectionStart = 0;
             data.SelectionEnd = 0;

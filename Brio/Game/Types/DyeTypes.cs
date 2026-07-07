@@ -10,7 +10,7 @@ public partial class DyeUnion : OneOfBase<Stain, None>
 {
     public static implicit operator DyeUnion(DyeId dyeId)
     {
-        if(dyeId.Id != 0 && GameDataProvider.Instance.Stains.TryGetValue(dyeId.Id, out var dye))
+        if(dyeId.Id != 0 && GameDataProvider.Instance.Stains.TryGetRow(dyeId.Id, out var dye))
             return new DyeUnion(dye);
 
         return new None();

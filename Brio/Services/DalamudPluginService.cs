@@ -13,6 +13,7 @@ public class DalamudPluginService
     [PluginService] public ISigScanner SigScanner { get; private set; } = null!;
     [PluginService] public IObjectTable ObjectTable { get; private set; } = null!;
     [PluginService] public IDataManager DataManager { get; private set; } = null!;
+    [PluginService] public ISeStringEvaluator SeStringEvaluator { get; private set; } = null!;
     [PluginService] public ICommandManager CommandManager { get; private set; } = null!;
     [PluginService] public IToastGui ToastGui { get; private set; } = null!;
     [PluginService] public ITargetManager TargetManager { get; private set; } = null!;
