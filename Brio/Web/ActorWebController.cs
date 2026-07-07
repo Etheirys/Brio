@@ -20,7 +20,7 @@ using BrioTransform = Brio.Core.Transform;
 
 namespace Brio.Web;
 
-public class ActorWebController(IFramework framework, PosingAPI posingAPI, SkeletonService skeletonService, ActorSpawnService actorSpawnService, ActorRedrawService redrawService) : WebApiController
+public class ActorWebController(IFramework framework, PosingAPI posingAPI, ActorSpawnService actorSpawnService, ActorRedrawService redrawService) : WebApiController
 {
     private readonly IFramework _framework = framework;
     private readonly ActorSpawnService _actorSpawnService = actorSpawnService;
@@ -143,8 +143,6 @@ public class ActorWebController(IFramework framework, PosingAPI posingAPI, Skele
             Response.StatusCode = 400;
             return;
         }
-
-        bool success = false;
 
         var boneTransforms = new Dictionary<string, BrioTransform>();
 

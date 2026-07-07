@@ -336,9 +336,9 @@ public class FileEntry : ItemEntryBase
         Tags?.Clear();
         Tags?.AddRange(tags.Split(',').Select(tag => tag.Trim()).Where(x => x != _author).Where(x => !x.IsWhiteSpace()));
         TagCollection autoTags = new();
-        _author = author.NullIfEmpty();
-        _version = version.NullIfEmpty();
-        _description = description.NullIfEmpty();
+        _author = author?.NullIfEmpty();
+        _version = version?.NullIfEmpty();
+        _description = description?.NullIfEmpty();
 
         EditDetails((ref file) => {
             file.Author = _author;

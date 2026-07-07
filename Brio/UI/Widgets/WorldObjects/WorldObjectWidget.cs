@@ -26,7 +26,6 @@ public class WorldObjectWidget(WorldObjectTransformCapability worldcap) : Widget
 
     private readonly ITransformableEditor _transformableEditor = new();
 
-    private bool isative = false;
     private int _selector = 0;
     public unsafe override void DrawBody()
     {

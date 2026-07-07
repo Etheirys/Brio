@@ -265,41 +265,35 @@ public unsafe class FestivalService : MediatorSubscriberBase
         //    }
         //}
 
+        //// vfx/common/eff/%s.avfx
+        //sb.AppendLine("Loaded VFX locations:");
+        //foreach(var item in _dataManager.GetExcelSheet<Lumina.Excel.Sheets.VFX>())
+        //{
+        //    //sb.AppendLine($"ID: {item.RowId} Location: {item.Location}");
+        //}
 
-        StringBuilder sb = new StringBuilder();
+        //// vfx/channeling/eff/%s.avfx
+        //// vfx/channeling/eff/chn_y6d3_launch0g2.avfx
+        //sb.AppendLine("Loaded Channeling locations:");
+        //foreach(var item in _dataManager.GetExcelSheet<Channeling>())
+        //{
+        //    //sb.AppendLine($"ID: {item.RowId} File: {item.File} - {item.Unknown0} - {item.Unknown1} - {item.Unknown2} - {item.Unknown_70}");
+        //}
 
+        //sb.AppendLine("Loaded Lockon locations:");
+        //foreach(var item in _dataManager.GetExcelSheet<Lockon>())
+        //{
+        //    //sb.AppendLine($"ID: {item.RowId} IconName: {item.IconName.ToString()} - {item.Unknown1} ");
+        //}
 
-        // vfx/common/eff/%s.avfx
-        sb.AppendLine("Loaded VFX locations:");
-        foreach(var item in _dataManager.GetExcelSheet<Lumina.Excel.Sheets.VFX>())
-        {
-            //sb.AppendLine($"ID: {item.RowId} Location: {item.Location}");
-        }
+        //// 
+        //// vfx/omen/eff/%s.avfx
+        //// vfx/omen/eff/general_trialaser_o0p.avfx
+        //sb.AppendLine("Loaded Lockon Omen:");
+        //foreach(var item in _dataManager.GetExcelSheet<Omen>())
+        //{
 
-        // vfx/channeling/eff/%s.avfx
-        // vfx/channeling/eff/chn_y6d3_launch0g2.avfx
-        sb.AppendLine("Loaded Channeling locations:");
-        foreach(var item in _dataManager.GetExcelSheet<Channeling>())
-        {
-            //sb.AppendLine($"ID: {item.RowId} File: {item.File} - {item.Unknown0} - {item.Unknown1} - {item.Unknown2} - {item.Unknown_70}");
-        }
-
-        sb.AppendLine("Loaded Lockon locations:");
-        foreach(var item in _dataManager.GetExcelSheet<Lockon>())
-        {
-            //sb.AppendLine($"ID: {item.RowId} IconName: {item.IconName.ToString()} - {item.Unknown1} ");
-        }
-
-        // 
-        // vfx/omen/eff/%s.avfx
-        // vfx/omen/eff/general_trialaser_o0p.avfx
-        sb.AppendLine("Loaded Lockon Omen:");
-        foreach(var item in _dataManager.GetExcelSheet<Omen>())
-        {
-            //sb.AppendLine($"ID: {item.RowId} Path: {item.Path} [{item.PathAlly}]- {item.Type} - u0 {item.Unknown0} - ls {item.LargeScale} - rs {item.RestrictYScale} ");
-        }
-
-        //Brio.Log.Warning(sb.ToString());
+        //}
 
         var knownEntries = _resourceProvider.GetResourceDocument<List<FestivalFileEntry>>("Data.Festivals.json");
 
@@ -307,15 +301,6 @@ public unsafe class FestivalService : MediatorSubscriberBase
         {
             if(row.RowId == 0)
                 continue;
-
-            //LgbFile
-            unsafe
-            {
-                //EventFramework.Instance()->GetContentDirector();
-                //ExdModule.Addresses.GetEnabledZoneSharedGroupRequirementIndex
-                //ZoneSharedGroup
-                // ZoneSharedGroupManager
-            }
 
             Brio.Log.Verbose($"Processing festival {row.RowId} {row.Name} {row.Unknown1} {row.Unknown0}");
 
@@ -392,27 +377,10 @@ public unsafe class FestivalService : MediatorSubscriberBase
         return cached;
     }
 
-
     private void OnTerritoryChanged(uint obj)
     {
         _pendingChanges.Clear();
         _originalState = null;
-
-        if(false)
-        {
-            var bg = GetBG(_clientState.TerritoryType);
-            var zoneFests = GetZoneFestivals(bg);
-
-            if(zoneFests.Count == 0)
-            {
-                Brio.Log.Warning($"No festivals found for bg {bg} (TerritoryType {_clientState.TerritoryType})");
-
-            }
-            foreach(var (festivalId, festivalPhases) in zoneFests)
-            {
-                Brio.Log.Information($"Festival {festivalId} with phases {string.Join(", ", festivalPhases)} for bg {bg}");
-            }
-        }
     }
 
     public override void Dispose()

@@ -58,7 +58,6 @@ public class ActorAppearanceCapability : ActorCharacterCapability
 
 
     private ActorAppearance? _originalAppearance = null;
-    private bool _suppressGlamourerRefresh;
     public bool IsAppearanceOverridden => _originalAppearance.HasValue || HasMCDF || IsDesignOverridden || IsProfileOverridden | IsCollectionOverridden;
 
     public bool HasPenumbraIntegration => _penumbraService.IsAvailable;
@@ -525,9 +524,6 @@ public class ActorAppearanceCapability : ActorCharacterCapability
     private void OnGlamourerStateFinalized(nint actorAddress, StateFinalizationType type)
     {
         if(actorAddress != Character.Address)
-            return;
-
-        if(_suppressGlamourerRefresh)
             return;
 
         _originalAppearance = _actorAppearanceService.GetActorAppearance(Character);
