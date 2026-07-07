@@ -87,13 +87,13 @@ public class PosingOverlayToolbarWindow : Window
 
     public override void PreDraw()
     {
-        base.PreDraw();
-
         ImGui.PushStyleVar(ImGuiStyleVar.WindowBorderSize, 0);
         ImGui.PushStyleVar(ImGuiStyleVar.WindowTitleAlign, new Vector2(0.5f, 0.5f));
         ImGui.PushStyleColor(ImGuiCol.NavWindowingHighlight, UIConstants.Transparent);
 
         _pushedStyle = true;
+
+        base.PreDraw();
     }
     public override void PostDraw()
     {
@@ -115,7 +115,8 @@ public class PosingOverlayToolbarWindow : Window
         if(_pushedStyle)
         {
             _pushedStyle = false;
-            ImGui.PopStyleVar(1);
+            ImGui.PopStyleVar(2);
+            ImGui.PopStyleColor(1);
         }
 
         _entityManager.TryGetCapabilityFromSelectedEntity<PosingCapability>(out var posing);
