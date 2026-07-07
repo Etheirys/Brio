@@ -508,7 +508,7 @@ public class SceneService(EntityManager _entityManager, GlamourerService _glamou
         {
             try
             {
-                Brio.Log.Warning("Applying data to actor: " + actorEntity.FriendlyName);
+                Brio.Log.Verbose("Applying data to actor: " + actorEntity.Id);
 
                 var pem = actorFile.HasPenumbra;
                 var wasSync = actorFile.WasMCDF && actorFile.WasOtherPlayer;
@@ -526,20 +526,18 @@ public class SceneService(EntityManager _entityManager, GlamourerService _glamou
 
                     if(applyGlamourer)
                     {
+                        Brio.Log.Verbose("Applying glamourer design for actor: " + actorEntity.FriendlyName);
                         if(actorFile.GlamourerDesignBase64 is not null)
                         {
-                            Brio.Log.Warning($"Applying glamourer design from base64 for actor: {actorEntity.FriendlyName}");
                             _glamourerService.SetState(actorEntity.GameObject, actorFile.GlamourerDesignBase64);
                         }
                         else
                         {
-                            Brio.Log.Warning($"Applying glamourer design from GUID for actor: {actorEntity.FriendlyName} G:{actorFile.GlamourerDesign!.Value}");
                             _glamourerService.ApplyDesign(actorFile.GlamourerDesign!.Value, actorEntity.GameObject);
                         }
                     }
                     else
                     {
-                        Brio.Log.Warning($"Applying appearance for actor: {actorEntity.FriendlyName} - Valid:{actorFile.AnamnesisCharaFile.IsExtendedAppearanceValid}\n{actorFile.AnamnesisCharaFile}");
                         if(actorFile.AnamnesisCharaFile.IsExtendedAppearanceValid)
                         {
                             BrioUtilities.ImportShadersFromFile(ref appearanceCapability._modelShaderOverride, actorFile.AnamnesisCharaFile);
@@ -553,19 +551,19 @@ public class SceneService(EntityManager _entityManager, GlamourerService _glamou
 
                     if(pem && actorFile.PenumbraCollection.HasValue && _penumbraService.IsAvailable)
                     {
-                        Brio.Log.Warning($"Applying penumbra collection for actor: {actorEntity.FriendlyName} - P:{actorFile.PenumbraCollection.Value}");
+                        Brio.Log.Verbose($"Applying penumbra collection for actor: {actorEntity.FriendlyName} - P:{actorFile.PenumbraCollection.Value}");
                         _penumbraService.SetCollectionForObject(actorEntity.GameObject, actorFile.PenumbraCollection.Value);
                     }
 
                     if(actorFile.HasCustomizePlus && _customizePlusService.IsAvailable)
                     {
-                        Brio.Log.Warning($"Applying customize plus profile for actor: {actorEntity.FriendlyName} - C:{actorFile.CustomizePlusProfile}");
+                        Brio.Log.Verbose($"Applying customize plus profile for actor: {actorEntity.FriendlyName} - C:{actorFile.CustomizePlusProfile}");
                     }
 
                     await _redrawService.WaitForDrawing(actorEntity.GameObject);
                 }
 
-                Brio.Log.Warning("Importing pose for actor: " + actorFile.Name);
+                Brio.Log.Verbose("Importing pose for actor: " + actorFile.Name);
 
                 var mountPose = false;
                 if(actorFile.Child is not null && actorFile.Child.Companion.Kind == CompanionKind.Mount)
@@ -584,7 +582,7 @@ public class SceneService(EntityManager _entityManager, GlamourerService _glamou
                         () => companionCapability.GetCompanionAsEntity() is not null,
                         (_) =>
                         {
-                            Brio.Log.Warning("Importing pose for companion: " + actorFile.Child);
+                            Brio.Log.Verbose("Importing pose for companion: " + actorFile.Child);
 
                             if(actorFile.Child.PoseFile is not null)
                             {
@@ -604,7 +602,7 @@ public class SceneService(EntityManager _entityManager, GlamourerService _glamou
                     );
                 }
 
-                Brio.Log.Warning("Finished applying data to actor: " + actorFile.Name);
+                Brio.Log.Debug("Finished applying data to actor: " + actorFile.Name);
             }
             catch(Exception ex)
             {

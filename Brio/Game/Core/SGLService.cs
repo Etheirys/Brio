@@ -47,7 +47,7 @@ public unsafe class SGLService : MediatorSubscriberBase
             // 0 something to do with the parent?
             // 0 this looks like it's for some kind of bone attach? 
 
-            Brio.Log.Warning("Creating SGL with path: " + sgbPath);
+            Brio.Log.Verbose("Creating SGL with path: " + sgbPath);
 
             return _createSGL(-1, 0, &transform, sgbPathPtr, null, 1, 0, 0xC, 0, 0);
         }

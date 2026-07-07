@@ -4,7 +4,6 @@ using Brio.Entities;
 using Brio.Entities.Core;
 using Brio.Game.Posing;
 using Brio.Input;
-using Brio.Services;
 using Brio.UI.Controls.Stateless;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface;
@@ -52,17 +51,6 @@ public class PosingTransformEditor
 
             ImBrio.VerticalPadding(3);
 
-            // TODO add this to settings or something (KEN)
-
-            //if(ImBrio.FontIconButton("transformOffset", FontAwesomeIcon.GaugeSimpleHigh, "Adjust how much each transform value changes per drag step."))
-            //{
-            //    ImGui.OpenPopup("transformOffset");
-            //}
-
-            //DrawTransformOffset(posingCapability);
-
-            //ImBrio.VerticalSeparator(24, 1);
-
             using(ImRaii.Disabled(isBone == false))
             {
                 if(ImBrio.FontIconButton("propagate", FontAwesomeIcon.Compress, "Propagate", realBone?.EligibleForIK == true))
@@ -105,7 +93,7 @@ public class PosingTransformEditor
                 using(ImRaii.Disabled(parentBone is null))
                 {
                     if(ImBrio.FontIconButton(FontAwesomeIcon.LevelUpAlt))
-                        posingCapability.Selected = new BonePoseInfoId(parentBone!.Name, parentBone!.PartialId, PoseInfoSlot.Character);
+                        posingCapability.SetBoneSelection(new BonePoseInfoId(parentBone!.Name, parentBone!.PartialId, PoseInfoSlot.Character), false);
                 }
                 ImBrio.AttachToolTip("Select Parent");
             }
@@ -285,9 +273,6 @@ public class PosingTransformEditor
                 var delta = primaryTransform.CalculateDiff(beforeMods);
 
                 TransformHelper.ApplyDeltaToMultiple(selected, delta, centroid, rdidChange);
-
-                if(pdidChange || rdidChange)
-                    centroid = TransformHelper.GetCentroidForGivenTransforms(selected.Select(t => t.target.Transform));
             }
 
             if(anyActive)
@@ -304,46 +289,6 @@ public class PosingTransformEditor
 
                 _trackingTransform = null;
                 _trackingEuler = null;
-            }
-        }
-    }
-
-    private unsafe static void DrawTransformOffset(PosingCapability posingCapability)
-    {
-        using var popup = ImRaii.Popup("transformOffset");
-        if(popup.Success)
-        {
-            BonePoseInfoId? selectedIsBone = posingCapability.IsSelectedBone();
-
-            if(selectedIsBone.HasValue)
-            {
-                var bone = posingCapability.SkeletonPosing.GetBone(selectedIsBone);
-                if(bone is not null)
-                {
-                    if(!bone.IsBoneAdjustmentSet)
-                    {
-                        bone.BoneAdjustmentOffset = posingCapability.ConfigurationService.Configuration.Interface.DefaultBoneTransformMovementSpeed;
-                        bone.IsBoneAdjustmentSet = true;
-                    }
-
-                    ImBrio.DragFloat($"##transformSpeed_1", ref bone.BoneAdjustmentOffset, 0.001f, "Offset");
-
-                    bool freezeTransforms = bone.Freeze;
-                    if(ImGui.Checkbox("Freeze Transforms", ref freezeTransforms))
-                    {
-                        bone.Freeze = freezeTransforms;
-                    }
-                }
-            }
-            else
-            {
-                ImBrio.DragFloat($"##transformSpeed_1", ref posingCapability.ModelPosing.TransformOffset, 0.001f, "Offset");
-
-                bool freezeTransforms = posingCapability.ModelPosing.IsTransformFrozen;
-                if(ImGui.Checkbox("Freeze Transforms", ref freezeTransforms))
-                {
-                    posingCapability.ModelPosing.IsTransformFrozen = freezeTransforms;
-                }
             }
         }
     }

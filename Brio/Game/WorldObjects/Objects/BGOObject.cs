@@ -81,9 +81,7 @@ public unsafe class BGOObject : WorldObject
         return new Transform { Position = bg->Position, Rotation = bg->Rotation, Scale = bg->Scale };
     }
     public override void SetTransform(Transform transform)
-    {
-        Brio.Log.Warning($"Setting transform for {FriendlyName} at address {Address:X} to Position: {transform.Position}, Rotation: {transform.Rotation}, Scale: {transform.Scale}");
-       
+    {       
         Transform = transform;
 
         if(!IsValid) return;

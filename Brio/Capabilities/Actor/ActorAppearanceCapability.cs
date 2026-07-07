@@ -133,7 +133,6 @@ public class ActorAppearanceCapability : ActorCharacterCapability
         var data = _customizePlusService.GetActiveProfile(Character);
         if(data.Item2 is not null)
         {
-            Brio.Log.Warning($"Active profile found for {GameObject.ObjectIndex}: {data.Item2.Value}");
             return (true, data.Item2.Value);
         }
 
@@ -145,7 +144,6 @@ public class ActorAppearanceCapability : ActorCharacterCapability
         var collection = _penumbraService.GetCollectionGuidForObject(Character);
         if(collection is not null)
         {
-            Brio.Log.Warning($"Active collection found for {GameObject.ObjectIndex}: {collection}");
             return (true, collection.Value);
         }
         
