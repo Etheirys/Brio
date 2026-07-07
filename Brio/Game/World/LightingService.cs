@@ -431,7 +431,7 @@ public unsafe class LightingService : MediatorSubscriberBase
     {
         _framework.RunOnTick(() =>
         {
-            var camEnt = _lightEntities.Components[light.EntityIndex];
+            var camEnt = _lightEntities.Components[light.Index];
             if(camEnt is not null)
             {
                 _entityManager.DetachEntity(camEnt, true);
@@ -451,10 +451,10 @@ public unsafe class LightingService : MediatorSubscriberBase
                 var camEnt = _lightEntities.Components[light.Index];
                 if(camEnt is not null)
                 {
-                    _entityManager.RemoveEntityFromEntityContainer(camEnt);
-                    _lightEntities.Remove(light.Index);
+                    _entityManager.DetachEntity(camEnt, true);
                 }
             }
+            _lightEntities.Remove(light.EntityIndex);
         });
     }
 
@@ -480,7 +480,7 @@ public unsafe class LightingService : MediatorSubscriberBase
             var camEnt = _lightEntities.Components[light.Index];
             if(camEnt is not null)
             {
-                _entityManager.RemoveEntityFromEntityContainer(camEnt);
+                _entityManager.DetachEntity(camEnt, true);
                 _lightEntities.Remove(light.Index);
             }
         });
@@ -502,9 +502,6 @@ public unsafe class LightingService : MediatorSubscriberBase
             {
                 RemoveWroldLight(light.GameLight);
             }
-
-            _spawnedLights.Clear();
-            _lightEntities.Clear();
         });
     }
 
