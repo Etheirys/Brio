@@ -136,17 +136,19 @@ public abstract class Selector<T> where T : class
                     _selectableSize.X = 0;
                     _selectableSize.Y = EntrySize;
 
+                    float rowPitch = EntrySize + ImGui.GetStyle().ItemSpacing.Y;
+
                     if(_scrollToSelected)
                     {
                         int selIndex = items.FindIndex(IsItemSoftSelected);
                         if(selIndex >= 0)
-                            ImGui.SetScrollY(Math.Max(0f, selIndex * EntrySize - (listSize.Y - EntrySize) * 0.5f));
+                            ImGui.SetScrollY(Math.Max(0f, selIndex * rowPitch - (listSize.Y - rowPitch) * 0.5f));
 
                         _scrollToSelected = false;
                     }
 
                     var clipper = new ImGuiListClipperPtr(ImGuiNative.ImGuiListClipper());
-                    clipper.Begin(items.Count, EntrySize);
+                    clipper.Begin(items.Count, rowPitch);
                     while(clipper.Step())
                     {
                         for(int i = clipper.DisplayStart; i < clipper.DisplayEnd; i++)
