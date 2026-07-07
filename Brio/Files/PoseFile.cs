@@ -23,6 +23,7 @@ public class PoseFileInfo : AppliableActorFileInfoBase<PoseFile>
 {
     private PosingCapability? _pendingCapability;
     private OneOf<PoseFile, CMToolPoseFile, PoseData>? _pendingPose;
+    private bool _openPendingPosePopup;
 
     public override string Name => "Pose File";
     public override IDalamudTextureWrap Icon => ResourceProvider.Instance.GetResourceImage("Images.FileIcon_Pose.png");
@@ -35,6 +36,12 @@ public class PoseFileInfo : AppliableActorFileInfoBase<PoseFile>
     public override void DrawActions(FileEntry fileEntry, bool isModal)
     {
         base.DrawActions(fileEntry, isModal);
+
+        if(_openPendingPosePopup)
+        {
+            ImGui.OpenPopup("DrawImportPoseMenuPopup");
+            _openPendingPosePopup = false;
+        }
 
         FileUIHelpers.DrawImportPoseMenuPopup("libraryPose", _pendingCapability, importPose: _pendingPose);
     }
@@ -52,8 +59,7 @@ public class PoseFileInfo : AppliableActorFileInfoBase<PoseFile>
 
                 _pendingCapability = capability;
                 _pendingPose = file;
-
-                ImGui.OpenPopup("DrawImportPoseMenuPopup");
+                _openPendingPosePopup = true;
             }
         }
     }
