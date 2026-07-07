@@ -841,7 +841,7 @@ public class CatalogWindow : Window, IDisposable
         clipper.End();
         clipper.Destroy();
     }
-    private unsafe void DrawFurnitureGrid()
+    private void DrawFurnitureGrid()
     {
         var availH = ImBrio.GetRemainingHeight();
         using var child = ImRaii.Child("###furn_grid", new Vector2(0, availH), true);
@@ -864,29 +864,21 @@ public class CatalogWindow : Window, IDisposable
             _furnitureGridRows = BuildFurnitureGridRows(_filteredFurnishings, numCols);
         }
 
-        var clipper = new ImGuiListClipperPtr(ImGuiNative.ImGuiListClipper());
-        clipper.Begin(_furnitureGridRows.Count);
-        while(clipper.Step())
+        foreach(var gridRow in _furnitureGridRows)
         {
-            for(int r = clipper.DisplayStart; r < clipper.DisplayEnd; r++)
+            if(gridRow.Header is not null)
             {
-                var gridRow = _furnitureGridRows[r];
-                if(gridRow.Header is not null)
-                {
-                    ImBrio.SeparatorText(gridRow.Header);
-                    continue;
-                }
+                ImBrio.SeparatorText(gridRow.Header);
+                continue;
+            }
 
-                for(int c = 0; c < gridRow.Count; c++)
-                {
-                    if(c > 0) ImGui.SameLine();
-                    var item = _filteredFurnishings[gridRow.Start + c];
-                    DrawGameIcon($"furn_{item.ModelKey}_{(item.Indoors ? 1 : 0)}", item.IconId, item.Name, item.GetPath(), ObjectPathKind.SharedGroup, iconSize);
-                }
+            for(int c = 0; c < gridRow.Count; c++)
+            {
+                if(c > 0) ImGui.SameLine();
+                var item = _filteredFurnishings[gridRow.Start + c];
+                DrawGameIcon($"furn_{item.ModelKey}_{(item.Indoors ? 1 : 0)}", item.IconId, item.Name, item.GetPath(), ObjectPathKind.SharedGroup, iconSize);
             }
         }
-        clipper.End();
-        clipper.Destroy();
     }
 
     // UI shit (TODO)
