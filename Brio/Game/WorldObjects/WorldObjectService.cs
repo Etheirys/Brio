@@ -92,6 +92,12 @@ public unsafe class WorldObjectService : MediatorSubscriberBase
                         vfx.SetSpeed(0f);
                     }
 
+                    if(vfx.IsLooping && vfx.Expires < DateTime.Now)
+                    {
+                        vfx.Expires = DateTime.Now.AddSeconds(vfx.VfxRefreshIntervalSeconds);
+                        vfx.Resume();
+                    }
+
                     break;
 
                 case BrioPropObject prop:
@@ -236,8 +242,6 @@ public unsafe class WorldObjectService : MediatorSubscriberBase
                 {
                     var worldObj = SpawnFurnitureInternal(dto.Path);
                     worldObj?.SetTransform(transform);
-
-                    Brio.Log.Warning($"Furniture spawn: {dto.Path}, Color: {dto.Color} - Stain ID: {dto.StainID}");
 
                     _framework.RunUntilSatisfied(
                         () => worldObj?.VsualStateDirty is false,

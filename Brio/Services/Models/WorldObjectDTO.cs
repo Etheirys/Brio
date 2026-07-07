@@ -36,7 +36,6 @@ public class WorldObjectDTO
 
         if(gameObject is FurnitureObject fur)
         {
-            Brio.Log.Warning($"FurnitureObject {fur.FriendlyName} has StainID {fur.StainID} and IsCustomColor {fur.IsCustomColor}");
             if(fur.IsCustomColor)
                 dto.Color = fur.CustomColor;
             dto.StainID = fur.StainID;

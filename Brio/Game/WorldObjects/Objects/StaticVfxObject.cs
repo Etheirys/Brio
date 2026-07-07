@@ -23,7 +23,7 @@ public unsafe class StaticVfxObject : WorldObject
     public bool Moved = false;
 
     public bool NeedsRefresh => IsValid && DateTime.UtcNow >= Expires;
-    public int VfxRefreshIntervalSeconds { get; set; } = 100;
+    public int VfxRefreshIntervalSeconds { get; set; } = 15;
 
     public override WorldObjectType ObjectType => WorldObjectType.StaticVfx;
     public override string FriendlyName { get; protected set; } = "VFX";
