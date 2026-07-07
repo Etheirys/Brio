@@ -1,8 +1,7 @@
-﻿using Brio.Entities;
+using Brio.Entities;
 using Brio.Entities.Core;
 using Brio.Game.GPose;
 using Brio.Input;
-using Brio.Services;
 using Brio.UI.Controls.Stateless;
 using Brio.UI.Theming;
 using Brio.UI.Widgets.Core;
@@ -22,6 +21,7 @@ public class EntityHierarchyView(EntityManager entityManager, GPoseService gPose
     private const float OffsetWidth = 18f;
     private static float ButtonWidth => ImGui.GetWindowContentRegionMax().X;
 
+    private readonly List<(Entity entity, float offset, bool disabled)> _visibleItems = [];
     private readonly HashSet<EntityId> _collapsedFolders = [];
 
     private EntityId? _draggedEntityId;
@@ -54,40 +54,91 @@ public class EntityHierarchyView(EntityManager entityManager, GPoseService gPose
 
         using(ImRaii.PushId($"entity_hierarchy_{root.Id}"))
         {
-            if(debug is not null)
-            {
-                DrawEntity(debug, selectedEntityId);
-            }
+            BuildVisibleEtities(root, debug);
 
-            DrawEntity(root, selectedEntityId, drawChildren: false);
+            var entityHeight = 24 * ImGuiHelpers.GlobalScale;
 
-            foreach(var item in root.Children)
+            unsafe
             {
-                var disable = gPoseService.IsGPosing == false && item.Flags.HasFlag(EntityFlags.AllowOutsideGpose) == false;
-                try
+                var clipper = new ImGuiListClipperPtr(ImGuiNative.ImGuiListClipper());
+                clipper.Begin(_visibleItems.Count, entityHeight);
+                while(clipper.Step())
                 {
-                    using(ImRaii.Disabled(disable))
-                        DrawEntity(item, selectedEntityId);
+                    for(int i = clipper.DisplayStart; i < clipper.DisplayEnd; i++)
+                    {
+                        var (entity, offset, disabled) = _visibleItems[i];
+
+                        try
+                        {
+                            using(ImRaii.Disabled(disabled))
+                            {
+                                if(entity.Flags.HasFlag(EntityFlags.IsFolder))
+                                {
+                                    DrawFolder(entity, selectedEntityId);
+                                    continue;
+                                }
+
+                                DrawEntity(entity, selectedEntityId, offset);
+
+                            }
+                        }
+                        catch(Exception ex)
+                        {
+                            Brio.Log.Error($"Error drawing entity {entity.FriendlyName} ({entity.Id}): {ex}");
+                        }
+                    }
                 }
-                catch(Exception ex)
-                {
-                    Brio.Log.Error($"Error drawing entity {item.FriendlyName} ({item.Id}): {ex}");
-                }
+                clipper.End();
+                clipper.Destroy();
             }
         }
     }
 
-    private void DrawEntity(Entity entity, EntityId? selectedEntityId, float lastOffset = 0, bool drawChildren = true)
+    private void BuildVisibleEtities(Entity root, Entity? debug)
+    {
+        _visibleItems.Clear();
+
+        if(debug is not null)
+            AppendRow(debug, 0, false);
+
+        AppendRow(root, 0, false, recurseChildren: false);
+
+        foreach(var child in root.Children)
+        {
+            var disabled = gPoseService.IsGPosing == false && child.Flags.HasFlag(EntityFlags.AllowOutsideGpose) == false;
+            AppendRow(child, 0, disabled);
+        }
+
+        void AppendRow(Entity entity, float offset, bool disabled, bool recurseChildren = true)
+        {
+            var draw = entity.Flags.HasFlag(EntityFlags.DisableDraw) == false;
+
+            if(draw)
+            {
+                _visibleItems.Add((entity, offset, disabled));
+
+                if(entity.Flags.HasFlag(EntityFlags.IsFolder) && _collapsedFolders.Contains(entity.Id))
+                    return;
+            }
+
+            if(recurseChildren == false || entity.Flags.HasFlag(EntityFlags.DisableChildren))
+                return;
+
+            var childOffset = draw == false ? offset : offset == 0 ? 8 : offset + OffsetWidth;
+
+            foreach(var child in entity.Children.ToList())
+                AppendRow(child, childOffset, disabled);
+        }
+    }
+
+    private void DrawEntity(Entity entity, EntityId? selectedEntityId, float lastOffset)
     {
         bool isSelected = false;
-        bool hasChildren = false;
         bool hasOffset = false;
         bool isMutiSelected = false;
 
         if(lastOffset > 0)
             hasOffset = true;
-        if(entity.Children.Count > 0)
-            hasChildren = true;
         if(selectedEntityId != null && entity.Id.Equals(selectedEntityId))
             isSelected = true;
 
@@ -98,18 +149,6 @@ public class EntityHierarchyView(EntityManager entityManager, GPoseService gPose
 
         if(entityManager.SelectedEntities.Contains(entity.Id) && entityAllowsMultiSelect)
             isMutiSelected = true;
-
-        if(entity.Flags.HasFlag(EntityFlags.DisableDraw))
-        {
-            DrawChildren(entity, selectedEntityId, 3, hasChildren, drawChildren);
-            return;
-        }
-
-        if(entity.Flags.HasFlag(EntityFlags.IsFolder))
-        {
-            DrawFolder(entity, selectedEntityId, lastOffset, hasChildren, drawChildren);
-            return;
-        }
 
         using(ImRaii.PushColor(ImGuiCol.Button, 0))
         using(ImRaii.PushColor(ImGuiCol.ButtonActive, 0))
@@ -175,6 +214,26 @@ public class EntityHierarchyView(EntityManager entityManager, GPoseService gPose
                 ImGui.EndDragDropSource();
             }
 
+            if(entity == entityManager.EntityManagerContainer)
+            {
+                if(ImGui.BeginDragDropTarget())
+                {
+                    unsafe
+                    {
+                        var released = ImGui.IsMouseReleased(ImGuiMouseButton.Left);
+                        var payload = ImGui.AcceptDragDropPayload("BRIO_ENTITY");
+
+                        if(payload.IsNull == false && _draggedEntityId.HasValue && released &&
+                            entityManager.TryGetEntity(_draggedEntityId.Value, out var draggedEntity))
+                        {
+                            MoveDraggedSelectionTo(draggedEntity, entity);
+                            _draggedEntityId = null;
+                        }
+                    }
+                    ImGui.EndDragDropTarget();
+                }
+            }
+
             ImGui.SetCursorPos(invsButtonPos);
         }
 
@@ -183,7 +242,6 @@ public class EntityHierarchyView(EntityManager entityManager, GPoseService gPose
             var curPos = ImGui.GetCursorPos();
 
             ImGui.SetCursorPos(new Vector2(curPos.X + lastOffset, curPos.Y));
-            lastOffset += OffsetWidth;
         }
 
         using(ImRaii.PushColor(ImGuiCol.Button, ThemeManager.CurrentTheme.Accent.AccentColor, isSelected || isMutiSelected))
@@ -216,17 +274,11 @@ public class EntityHierarchyView(EntityManager entityManager, GPoseService gPose
                 }
             }
         }
-
-        DrawChildren(entity, selectedEntityId, lastOffset, hasChildren, drawChildren);
     }
 
-    private void DrawFolder(Entity entity, EntityId? selectedEntityId, float lastOffset, bool hasChildren, bool drawChildren)
+    private void DrawFolder(Entity entity, EntityId? selectedEntityId)
     {
         bool isFolderCollapsed = _collapsedFolders.Contains(entity.Id);
-
-        bool hasOffset = false;
-        if(lastOffset > 0)
-            hasOffset = true;
 
         var arrow = isFolderCollapsed
             ? FontAwesomeIcon.CaretRight.ToIconString()
@@ -277,11 +329,8 @@ public class EntityHierarchyView(EntityManager entityManager, GPoseService gPose
                     if(payload.IsNull == false && _draggedEntityId.HasValue && released &&
                         entityManager.TryGetEntity(_draggedEntityId.Value, out var draggedEntity))
                     {
-                        Brio.Log.Verbose($"Moving entity {draggedEntity.FriendlyName} into folder {entity.FriendlyName}");
-
-                        entityManager.MoveEntity(draggedEntity, entity);
+                        MoveDraggedSelectionTo(draggedEntity, entity);
                         _collapsedFolders.Remove(entity.Id); // Auto-expand on drop
-
                         _draggedEntityId = null;
                     }
                 }
@@ -315,26 +364,24 @@ public class EntityHierarchyView(EntityManager entityManager, GPoseService gPose
                 }
             }
         }
-
-        if(isFolderCollapsed is false)
-        {
-            if(hasOffset)
-            {
-                lastOffset += OffsetWidth;
-            }
-
-            DrawChildren(entity, selectedEntityId, lastOffset, hasChildren, drawChildren);
-        }
     }
 
-    public void DrawChildren(Entity entity, EntityId? selectedEntityId, float lastOffset, bool hasChildren, bool drawChildren)
+    private void MoveDraggedSelectionTo(Entity draggedEntity, Entity newParent)
     {
-        if(entity.Flags.HasFlag(EntityFlags.DisableChildren) == false && hasChildren && drawChildren)
+        var isMultiDrag = entityManager.SelectedEntities.Contains(draggedEntity.Id) && entityManager.SelectedEntities.Count > 1;
+
+        if(isMultiDrag)
         {
-            foreach(var child in entity.Children.ToList())
-            {
-                DrawEntity(child, selectedEntityId, lastOffset == 0 ? 8 : lastOffset);
-            }
+            var selected = new List<Entity>();
+            foreach(var id in entityManager.SelectedEntities)
+                if(entityManager.TryGetEntity(id, out var selectedEntity))
+                    selected.Add(selectedEntity);
+
+            entityManager.MoveEntities(selected, newParent);
+        }
+        else
+        {
+            entityManager.MoveEntity(draggedEntity, newParent);
         }
     }
 

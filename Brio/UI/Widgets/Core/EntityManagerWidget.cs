@@ -139,10 +139,10 @@ public class EntityManagerWidget(EntitManagerCapability capability) : Widget<Ent
             {
                 if(popup.Success)
                 {
-                    if(ImGui.MenuItem("Return All Children to Root###manager_folderoptions_return"))
+                    if(ImGui.MenuItem("Return All Children to Entity Manager###manager_folderoptions_return"))
                         Capability.ReturnAllFolderChildren();
 
-                    if(ImGui.MenuItem("Destroy All Folder Children###manager_folderoptions_destroy"))
+                    if(ImGui.MenuItem("Destroy All Folders + Children###manager_folderoptions_destroy"))
                         Capability.DestroyAllFolderChildren();
                 }
             }
