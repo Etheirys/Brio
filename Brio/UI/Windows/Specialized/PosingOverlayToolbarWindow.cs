@@ -343,7 +343,7 @@ public class PosingOverlayToolbarWindow : Window
                 using(ImRaii.Disabled(parentBone == null))
                 {
                     if(ImGui.Button($"{FontAwesomeIcon.LevelUpAlt.ToIconString()}###select_parent", new Vector2(button4XSize)))
-                        posing?.Selected = new BonePoseInfoId(parentBone!.Name, parentBone!.PartialId, PoseInfoSlot.Character);
+                        posing?.SetBoneSelection(new BonePoseInfoId(parentBone!.Name, parentBone!.PartialId, PoseInfoSlot.Character), false);
                 }
             }
             ImBrio.AttachToolTip("Select Parent");
@@ -462,7 +462,12 @@ public class PosingOverlayToolbarWindow : Window
             using(ImRaii.Disabled(hasMultipleActorsSelected || !CanResetSelectedTransform(posing, lightTransform, worldTransform)))
             {
                 if(ImGui.Button($"{FontAwesomeIcon.Undo.ToIconString()}###reset_pose", new Vector2(button4XSize)))
-                    ResetSelectedTransform(posing, lightTransform, worldTransform);
+                {
+                    if(posing is not null)
+                        ImGui.OpenPopup("overlay_reset_pose_popup");
+                    else
+                        ResetSelectedTransform(posing, lightTransform, worldTransform);
+                }
             }
         }
         ImBrio.AttachToolTip($"Reset Transform {_entityManager.SelectedEntity?.FriendlyName}");
@@ -538,6 +543,14 @@ public class PosingOverlayToolbarWindow : Window
         FileUIHelpers.DrawImportPoseMenuPopup("postingOverlay", posing, true);
         FileUIHelpers.DrawExportPoseMenuPopup(posing);
 
+        using(var popup = ImRaii.Popup("overlay_reset_pose_popup", ImGuiWindowFlags.AlwaysAutoResize))
+        {
+            if(popup.Success && posing is not null)
+            {
+                DrawResetMenu(posing);
+            }
+        }
+
         using(var popup = ImRaii.Popup("overlay_bone_search_popup"))
         {
             if(popup.Success)
@@ -571,6 +584,40 @@ public class PosingOverlayToolbarWindow : Window
             return worldTransform.TransformOverride;
 
         return false;
+    }
+
+    private static void DrawResetMenu(PosingCapability posing)
+    {
+        using(ImRaii.PushStyle(ImGuiStyleVar.ButtonTextAlign, new Vector2(0, 0.5f)))
+        using(ImRaii.PushColor(ImGuiCol.Button, UIConstants.Transparent))
+        {
+            var buttonSize = new Vector2(155 * ImGuiHelpers.GlobalScale, 0);
+
+            if(ImBrio.IconButtonWithText(FontAwesomeIcon.Undo, "Reset Pose", buttonSize))
+            {
+                posing.Reset(false, false);
+                ImGui.CloseCurrentPopup();
+            }
+
+            using(ImRaii.Disabled(!posing.HasOverride(posing.SkeletonPosing.FilterNonFaceBones)))
+            {
+                if(ImBrio.IconButtonWithText(FontAwesomeIcon.ChildReaching, "Reset Body", buttonSize))
+                {
+                    posing.Snapshot(false, reconcile: false);
+                    posing.SkeletonPosing.PoseInfo.Clear(posing.SkeletonPosing.FilterNonFaceBones);
+                    ImGui.CloseCurrentPopup();
+                }
+            }
+
+            using(ImRaii.Disabled(!posing.HasOverride(posing.SkeletonPosing.FilterFaceBones)))
+            {
+                if(ImBrio.IconButtonWithText(FontAwesomeIcon.Smile, "Reset Face", buttonSize))
+                {
+                    posing.SkeletonPosing.PoseInfo.Clear(posing.SkeletonPosing.FilterFaceBones);
+                    ImGui.CloseCurrentPopup();
+                }
+            }
+        }
     }
 
     private static void ResetSelectedTransform(PosingCapability? posing, LightTransformCapability? lightTransform, WorldObjectTransformCapability? worldTransform)

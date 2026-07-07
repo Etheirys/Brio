@@ -113,7 +113,7 @@ public class PosingTransformWindow : Window
         using(ImRaii.Disabled(parentBone == null))
         {
             if(ImBrio.FontIconButton(FontAwesomeIcon.LevelUpAlt, new Vector2(buttonWidth, 0)))
-                posing.Selected = new BonePoseInfoId(parentBone!.Name, parentBone!.PartialId, PoseInfoSlot.Character);
+                posing.SetBoneSelection(new BonePoseInfoId(parentBone!.Name, parentBone!.PartialId, PoseInfoSlot.Character), false);
         }
         ImBrio.AttachToolTip("Select Parent");
 

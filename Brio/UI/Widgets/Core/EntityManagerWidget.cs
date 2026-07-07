@@ -1,16 +1,40 @@
-﻿using Brio.Capabilities.Core;
+using Brio.Capabilities.Core;
+using Brio.Entities.Core;
 using Brio.UI.Controls.Stateless;
+using Brio.UI.Theming;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface;
 using Dalamud.Interface.Utility.Raii;
+using System.Linq;
 
 namespace Brio.UI.Widgets.Core;
 
 public class EntityManagerWidget(EntitManagerCapability capability) : Widget<EntitManagerCapability>(capability)
 {
-    public override string HeaderName => "Entity Manager";
+    public override string HeaderName => "Multi-Selection";
 
-    public override WidgetFlags Flags => WidgetFlags.DrawQuickIcons | WidgetFlags.DrawPopup;
+    public override WidgetFlags Flags => Capability.Entity.EntityManager.SelectedEntities.Count > 1 ?
+        WidgetFlags.DrawQuickIcons | WidgetFlags.DrawPopup | WidgetFlags.DrawBody | WidgetFlags.DefaultOpen :
+        WidgetFlags.DrawQuickIcons | WidgetFlags.DrawPopup;
+
+    public override void DrawBody()
+    {
+        if(Capability.Entity.EntityManager.SelectedEntities.Count > 1)
+        {
+            ImBrio.VerticalPadding(3);
+
+            ImGui.AlignTextToFramePadding();
+            using(ImRaii.PushColor(ImGuiCol.Text, ThemeManager.CurrentTheme.Accent.AccentColor))
+                ImGui.Text($"{Capability.Entity.EntityManager.SelectedEntities.Count} Selected");
+
+            ImBrio.VerticalPadding(7);
+
+            ImBrio.SeparatorText("Transform");
+            Capability.DrawMultiTransform();
+
+            ImBrio.VerticalPadding(10);
+        }
+    }
 
     public override void DrawPopup()
     {
@@ -60,39 +84,67 @@ public class EntityManagerWidget(EntitManagerCapability capability) : Widget<Ent
         using(ImRaii.Disabled(Capability.CanControlCharacters is false))
         {
             bool hasSelection = Capability.Entity.EntityManager.SelectedEntity != null;
-            bool hasMultiSelect = Capability.Entity.EntityManager.SelectedEntities.Count > 1;
 
-            if(ImBrio.FontIconButton("Manager_clone", FontAwesomeIcon.Clone, "Clone Selected"))
+            if(ImBrio.FontIconButton("Manager_clone", FontAwesomeIcon.Clone, "Clone Selected", hasSelection))
             {
-
+                Capability.CloneSelected();
             }
 
             ImGui.SameLine();
 
-            if(ImBrio.FontIconButton("Manager_selectinhierarchy", FontAwesomeIcon.CheckSquare, "Select All", hasSelection))
+            if(ImBrio.FontIconButton("Manager_selectinhierarchy", FontAwesomeIcon.CheckSquare, "Select All"))
             {
-
+                Capability.SelectAllInHierarchy();
             }
 
             ImBrio.VerticalSeparator(24, 1);
 
             if(ImBrio.HoldButton("manager_destroyall", "", FontAwesomeIcon.Bomb, 1f, new(40, 0), centerTest: true, tooltip: "[HOLD TO DESTROY ALL]", onlyIcon: true))
             {
-
+                Capability.DestroyAllSelected();
             }
 
             ImBrio.VerticalSeparator(24, 1);
 
-            if(ImBrio.FontIconButton("Manager_move", FontAwesomeIcon.FolderTree, "Move to Folder..."))
+            if(ImBrio.FontIconButton("Manager_move", FontAwesomeIcon.FolderTree, "Move to Folder...", hasSelection))
             {
+                ImGui.OpenPopup("manager_move_to_folder_popup");
+            }
 
+            using(var popup = ImRaii.Popup("manager_move_to_folder_popup"))
+            {
+                if(popup.Success)
+                {
+                    foreach(var folder in Capability.Entity.Children.OfType<FolderEntity>().Where(f => f.IsEditable))
+                    {
+                        if(ImGui.MenuItem($"{folder.FriendlyName}###manager_move_to_folder_{folder.Id}"))
+                            Capability.MoveSelectedToFolder(folder);
+                    }
+
+                    ImGui.Separator();
+
+                    if(ImGui.MenuItem("New Folder...###manager_move_to_new_folder"))
+                        Capability.MoveSelectedToNewFolder();
+                }
             }
 
             ImGui.SameLine();
 
-            if(ImBrio.FontIconButton("Manager_folderoptions", FontAwesomeIcon.EllipsisV, "Folder Options"))
+            if(ImBrio.FontIconButton("Manager_folderoptions", FontAwesomeIcon.EllipsisV, "Folder Options", Capability.HasFolders))
             {
+                ImGui.OpenPopup("manager_folder_options_popup");
+            }
 
+            using(var popup = ImRaii.Popup("manager_folder_options_popup"))
+            {
+                if(popup.Success)
+                {
+                    if(ImGui.MenuItem("Return All Children to Root###manager_folderoptions_return"))
+                        Capability.ReturnAllFolderChildren();
+
+                    if(ImGui.MenuItem("Destroy All Folder Children###manager_folderoptions_destroy"))
+                        Capability.DestroyAllFolderChildren();
+                }
             }
         }
     }

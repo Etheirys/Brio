@@ -143,7 +143,9 @@ public class MainWindow : Window, IDisposable
 
             ImBrio.VerticalSeparator(24, 1);
 
-            EntityHelpers.DrawEntitySection(selected, isUndocked);
+            var sectionEntity = _entityManager.SelectedEntities.Count > 1 ? _entityManager.EntityManagerContainer : selected;
+
+            EntityHelpers.DrawEntitySection(sectionEntity, isUndocked);
         }
         catch(Exception ex)
         {
@@ -163,12 +165,6 @@ public class MainWindow : Window, IDisposable
             if(container.Success)
             {
                 _entitySelector.Draw(rootEntity, _entityManager.DebugEntity);
-
-                if(_entityManager.SelectedEntities.Count > 1)
-                {
-                    using var color = ImRaii.PushColor(ImGuiCol.Text, ThemeManager.CurrentTheme.Accent.AccentColor);
-                    ImGui.Text($"{_entityManager.SelectedEntities.Count} selected");
-                }
             }
         }
 
@@ -252,8 +248,15 @@ public class MainWindow : Window, IDisposable
 
         //
 
-        using(ImRaii.Disabled(_mCDFService.IsApplyingMCDF))
-            FileUIHelpers.DrawProjectPopup(_sceneService, _entityManager, _projectWindow, _autoSaveService);
+        //if(ImBrio.Button("Open Vivacity Timeline BETA", FontAwesomeIcon.Timeline, new Vector2(-1, 0), centerTest: true))
+        //{
+                
+        //}
+    
+        //
+
+            using(ImRaii.Disabled(_mCDFService.IsApplyingMCDF))
+            FileUIHelpers.DrawProjectPopup(_sceneService, _entityManager, _projectWindow, _autoSaveService, _projectSystem);
     }
 
     public void Dispose()

@@ -37,12 +37,16 @@ public class EntitySectionWindow : Window, IDisposable
         ImBrio.BlurWindow();
 
         var selected = _entityManager.SelectedEntity;
+        var hasMultipleSelected = _entityManager.SelectedEntities.Count > 1;
+        var sectionEntity = hasMultipleSelected ? _entityManager.EntityManagerContainer : selected;
 
-        WindowName = selected is not null
-            ? $"{Brio.Name} - [{selected.FriendlyName}]###brio_entity_section_window"
-            : $"{Brio.Name} - ENTITY###brio_entity_section_window";
+        WindowName = hasMultipleSelected
+            ? $"{Brio.Name} - [Multiple Selected]###brio_entity_section_window"
+            : selected is not null
+                ? $"{Brio.Name} - [{selected.FriendlyName}]###brio_entity_section_window"
+                : $"{Brio.Name} - ENTITY###brio_entity_section_window";
 
-        EntityHelpers.DrawEntitySection(selected, drawChild:true);
+        EntityHelpers.DrawEntitySection(sectionEntity, drawChild:true);
     }
 
     private void OnGPoseStateChange(bool newState)

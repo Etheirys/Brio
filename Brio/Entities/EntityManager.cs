@@ -185,6 +185,12 @@ public partial class EntityManager : MediatorSubscriberBase
         return true;
     }
 
+    public void MoveEntities(IEnumerable<Entity> entities, Entity newParent)
+    {
+        foreach(var entity in entities.ToList())
+            MoveEntity(entity, newParent);
+    }
+
     public bool TryGetEntity(EntityId id, [MaybeNullWhen(false)] out Entity entity)
     {
         return _entityMap.TryGetValue(id, out entity);
@@ -281,6 +287,17 @@ public partial class EntityManager : MediatorSubscriberBase
                 ent.OnDeselected();
         }
         _selectedEntities.Clear();
+    }
+
+    public void SelectAllSelectable()
+    {
+        ClearSelectedEntities();
+
+        foreach(var entity in _entityMap.Values)
+        {
+            if(entity.Flags.HasFlag(EntityFlags.AllowMultiSelect) && entity.Flags.HasFlag(EntityFlags.DisableSelection) == false)
+                AddSelectedEntity(entity.Id);
+        }
     }
 
     public void DestroyAllFolders()
