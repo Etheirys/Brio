@@ -117,7 +117,7 @@ public static class CameraEditor
 
                 //
 
-                using(ImRaii.Disabled(camera.IsOverridden))
+                using(ImRaii.Disabled(!camera.IsOverridden))
                     if(ImBrio.SeparatorTextButton("Properties", FontAwesomeIcon.Undo, "Reset to Default"))
                     {
                         camera.FoV = 0f;
@@ -306,7 +306,7 @@ public static class CameraEditor
 
                     //
 
-                    using(ImRaii.Disabled(camera.IsOverridden))
+                    using(ImRaii.Disabled(!camera.IsOverridden))
                         if(ImBrio.SeparatorTextButton("Properties", FontAwesomeIcon.Undo, "Reset to Default"))
                         {
                             camera.Zoom = 2.5f;
