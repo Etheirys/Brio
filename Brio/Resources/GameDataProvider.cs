@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using Brio.Game.Actor.Appearance;
+﻿using Brio.Game.Actor.Appearance;
 using Brio.Resources.Extra;
 using Brio.Resources.Sheets;
 using Dalamud.Game;
@@ -7,6 +6,8 @@ using Dalamud.Game.ClientState.Objects.Enums;
 using Dalamud.Plugin.Services;
 using Lumina.Excel;
 using Lumina.Excel.Sheets;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Brio.Resources;
 
@@ -51,6 +52,7 @@ public class GameDataProvider
 
     public readonly HumanData HumanData;
 
+    public readonly IReadOnlyDictionary<uint, TerritoryType> TerritoryType;
     public readonly IReadOnlyDictionary<string, string> NpcNames;
 
     public GameDataProvider(IDataManager dataManager, ISeStringEvaluator seStringEvaluator, ResourceProvider resourceProvider)
@@ -112,14 +114,14 @@ public class GameDataProvider
         HumanData = new HumanData(dataManager.GetFile("chara/xls/charamake/human.cmp")!.Data);
 
         NpcNames = ResourceProvider.GetResourceDocument<IReadOnlyDictionary<string, string>>("Data.NpcNames.json");
-       
+
         TerritoryType = dataManager.GetExcelSheet<TerritoryType>()!.ToDictionary(x => x.RowId, x => x).AsReadOnly();
 
         ModelDatabase = new(resourceProvider, this);
-      
+
         FurnitureDatabase = new(dataManager);
 
-        using var pathStream = _resourceProvider.GetRawResourceStream("Data.WorldObjectPaths.json.gz");
+        using var pathStream = ResourceProvider.GetRawResourceStream("Data.WorldObjectPaths.json.gz");
         PathDatabase = PathDatabase.LoadFromGz(pathStream, new(), new());
 
         DataManager = dataManager;
@@ -150,7 +152,7 @@ public class GameDataProvider
                 return bNpcName;
             }
         }
-        
+
         return null;
     }
 }

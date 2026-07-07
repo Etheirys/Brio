@@ -542,7 +542,7 @@ public class CatalogWindow : Window, IDisposable
             }
             ImGui.SameLine();
 
-            string place = GameDataProvider.Instance.TerritoryTypes.TryGetValue((uint)values[i], out var tt)
+            string place = GameDataProvider.Instance.TerritoryType.TryGetValue((uint)values[i], out var tt)
                 ? tt.PlaceName.ValueNullable?.Name.ExtractText() ?? string.Empty
                 : string.Empty;
 
