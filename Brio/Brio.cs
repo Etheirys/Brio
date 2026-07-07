@@ -22,6 +22,7 @@ using Brio.MCDF.Game.Services;
 using Brio.Resources;
 using Brio.Services;
 using Brio.Services.Models;
+using Brio.Services.Timeline;
 using Brio.UI;
 using Brio.UI.Controls.Editors;
 using Brio.UI.Modals;
@@ -256,6 +257,7 @@ public class Brio(IDalamudPluginInterface pluginInterface) : IAsyncDalamudPlugin
         serviceCollection.AddSingleton<GameInputService>();
         serviceCollection.AddSingleton<VirtualCameraManager>();
         serviceCollection.AddSingleton<CutsceneManager>();
+        serviceCollection.AddSingleton<TimelineService>();
 
         // Library
         serviceCollection.AddSingleton<FileTypeInfoBase, AnamnesisCharaFileInfo>();
@@ -302,6 +304,7 @@ public class Brio(IDalamudPluginInterface pluginInterface) : IAsyncDalamudPlugin
         serviceCollection.AddSingleton<CatalogWindow>();
         serviceCollection.AddSingleton<LightWindow>();
         serviceCollection.AddSingleton<EntitySectionWindow>();
+        serviceCollection.AddSingleton<TimelineWindow>();
 
 
         return serviceCollection;

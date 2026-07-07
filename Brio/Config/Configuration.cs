@@ -29,6 +29,9 @@ public class Configuration : IPluginConfiguration
 
     public SceneImportConfiguration Import { get; set; } = new SceneImportConfiguration();
 
+    // Timeline
+    public TimelineConfiguration Timeline { get; set; } = new TimelineConfiguration();
+
     // Library
     public LibraryConfiguration Library { get; set; } = new LibraryConfiguration();
 

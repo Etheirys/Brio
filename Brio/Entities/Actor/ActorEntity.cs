@@ -132,13 +132,7 @@ public class ActorEntity(IGameObject gameObject, IServiceProvider provider) : Tr
 
         AddCapability(ActionTimelineCapability.CreateIfEligible(_serviceProvider, this));
 
-        if(ActorType is not ActorType.Prop)
-        {
-            if(ActorType is not ActorType.Effect)
-            {
-                AddCapability(CompanionCapability.CreateIfEligible(_serviceProvider, this));
-            }
-
+        AddCapability(ActorTimelineCapability.CreateIfEligible(_serviceProvider, this));
 
         if(ActorType is not ActorType.WorldActor)
         {
