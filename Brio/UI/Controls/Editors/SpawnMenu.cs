@@ -132,7 +132,7 @@ public class SpawnMenu
 
                 if(ImBrio.IconButtonWithText(FontAwesomeIcon.Couch, "Open Object Catalog", buttonSize))
                 {
-                    UIManager.Instance.ToggleFurnitureCatalogWindow();
+                    UIManager.Instance.ToggleCatalogWindow();
                     ImGui.CloseCurrentPopup();
                 }
 

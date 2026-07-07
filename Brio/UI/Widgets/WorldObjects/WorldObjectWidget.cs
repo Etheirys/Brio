@@ -22,9 +22,14 @@ namespace Brio.UI.Widgets.WorldObjects;
 public class WorldObjectWidget(WorldObjectTransformCapability worldcap) : Widget<WorldObjectTransformCapability>(worldcap)
 {
     public override string HeaderName => "Object Editor";
-    public override WidgetFlags Flags => WidgetFlags.DrawBody | WidgetFlags.DefaultOpen | WidgetFlags.CanHide;
+    public override WidgetFlags Flags => WidgetFlags.DrawBody | WidgetFlags.DefaultOpen | WidgetFlags.CanHide | WidgetFlags.HasAdvanced;
 
     private readonly ITransformableEditor _transformableEditor = new();
+
+    public override void ToggleAdvancedWindow()
+    {
+        UIManager.Instance.ToggleCatalogWindow();
+    }
 
     private int _selector = 0;
     public unsafe override void DrawBody()

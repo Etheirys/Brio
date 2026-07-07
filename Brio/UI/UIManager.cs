@@ -42,7 +42,7 @@ public class UIManager : IDisposable
     private readonly EntitySectionWindow _entitySectionWindow;
     private readonly TimelineWindow _timelineWindow;
 
-    private readonly CatalogWindow _furnitureCatalogWindow;
+    private readonly CatalogWindow _catalogWindow;
     private readonly ReferenceImageService _referenceImageService;
 
     private readonly ModalManager _modalManager;
@@ -139,7 +139,7 @@ public class UIManager : IDisposable
         _lightWindow = lightWindow;
         _entitySectionWindow = entitySectionWindow;
         _timelineWindow = timelineWindow;
-        _furnitureCatalogWindow = furnitureCatalogWindow;
+        _catalogWindow = furnitureCatalogWindow;
         _referenceImageService = referenceImageService;
 
         _modalManager = modalManager;
@@ -169,7 +169,7 @@ public class UIManager : IDisposable
         _windowSystem.AddWindow(_lightWindow);
         _windowSystem.AddWindow(_entitySectionWindow);
         _windowSystem.AddWindow(_timelineWindow);
-        _windowSystem.AddWindow(_furnitureCatalogWindow);
+        _windowSystem.AddWindow(_catalogWindow);
 
         _gPoseService.OnGPoseStateChange += OnGPoseStateChange;
         _configurationService.OnConfigurationChanged += ApplySettings;
@@ -206,9 +206,9 @@ public class UIManager : IDisposable
         _timelineWindow.IsOpen = !_timelineWindow.IsOpen;
     }
 
-    public void ToggleFurnitureCatalogWindow()
+    public void ToggleCatalogWindow()
     {
-        _furnitureCatalogWindow.IsOpen = !_furnitureCatalogWindow.IsOpen;
+        _catalogWindow.IsOpen = !_catalogWindow.IsOpen;
     }
 
     public void ToggleProjectWindow()
