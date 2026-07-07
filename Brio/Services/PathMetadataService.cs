@@ -1,8 +1,10 @@
 using Brio.Resources;
 using Brio.Resources.Extra;
 using Dalamud.Plugin;
+using Swan;
 using System;
 using System.IO;
+using System.IO.Compression;
 
 namespace Brio.Services;
 
@@ -23,17 +25,36 @@ public class PathMetadataService
 
     public PathDatabase PathDatabase => _db;
 
-    public PathMetadataService(GameDataProvider gameData, IDalamudPluginInterface pluginInterface)
+    public PathMetadataService(GameDataProvider gameData, IDalamudPluginInterface pluginInterface, ResourceProvider resourceProvider)
     {
         _db = gameData.PathDatabase;
 
         var dataDir = Path.Combine(pluginInterface.GetPluginConfigDirectory(), "Data");
+        Directory.CreateDirectory(dataDir);
 
         _userFile = Path.Combine(dataDir, "PathStore.user.bpath");
-        _pluginFile = Path.Combine(dataDir, "PathStore.plugin.bpath");
+        //_pluginFile = Path.Combine(dataDir, "PathStore.plugin.bpath");
 
-        Load(PathTarget.User, _userFile);
-        Load(PathTarget.Plugin, _pluginFile);
+        byte[] userBytes = [];
+        if(File.Exists(_userFile))
+            userBytes = File.ReadAllBytes(_userFile);
+
+        byte[] pluginBytes = [];
+
+        //if(File.Exists(_pluginFile))
+        //    pluginBytes = File.ReadAllBytes(_pluginFile);
+
+        _pluginFile = string.Empty;
+
+        using var pathStream = resourceProvider.GetRawResourceStream("Data.PathStore.bpath");
+        using(var ms = new MemoryStream())
+        {
+            pathStream.CopyTo(ms);
+            pluginBytes = ms.ToArray();
+        }
+
+        Load(PathTarget.User, ref userBytes);
+        Load(PathTarget.Plugin, ref pluginBytes);
     }
 
     //
@@ -69,14 +90,11 @@ public class PathMetadataService
             Brio.Log.Error(ex, "Failed to save path metadata store");
         }
     }
-    private void Load(PathTarget target, string file)
+    private void Load(PathTarget target, ref byte[] data)
     {
         try
         {
-            if(!File.Exists(file))
-                return;
-
-            var loaded = PathDatabase.Deserialize<PathStore>(File.ReadAllBytes(file), PathStore.Magic);
+            var loaded = PathDatabase.Deserialize<PathStore>(data, PathStore.Magic);
             var store = StoreFor(target);
 
             store.KeyVersion = loaded.KeyVersion;
@@ -86,7 +104,7 @@ public class PathMetadataService
         }
         catch(Exception ex)
         {
-            Brio.Log.Error(ex, $"Failed to load path metadata store from {file}");
+            Brio.Log.Error(ex, $"Failed to load data for store {target}");
         }
     }
 

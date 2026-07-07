@@ -157,14 +157,14 @@ public sealed partial class PathIndex
 
     public static readonly Dictionary<string, string> AssetTypeNames = new()
     {
-        { "rck",  "Rock"      }, { "rock", "Rock"      }, { "roc",  "Rock"      },
+        { "rck",  "Rock"      }, { "rock", "Rock"      }, { "roc",  "Rock"          },
         { "wal",  "Wall"      }, { "wall", "Wall"      },
         { "tre",  "Tree"      }, { "tree", "Tree"      },
         { "dor",  "Door"      },
-        { "cel",  "Ceiling "      },
-        { "plr",  "Pillar"    }, { "pil",  "Pillar"    }, { "pill", "Pillar"    },
+        { "cel",  "Ceiling "  },
+        { "plr",  "Pillar"    }, { "pil",  "Pillar"    }, { "pill", "Pillar"        },
         { "flo",  "Floor"     },
-        { "lmp",  "Lamp"      }, { "lamp", "Lamp"      }, { "ligt", "Light"      }, { "lig",  "Light"     },
+        { "lmp",  "Lamp"      }, { "lamp", "Lamp"      }, { "ligt", "Light"         }, { "lig",  "Light"     },
         { "gat",  "Gate"      }, { "gate", "Gate"      },
         { "fen",  "Fence"     },
         { "tow",  "Tower"     },
@@ -178,18 +178,18 @@ public sealed partial class PathIndex
         { "flw",  "Flower"    },
         { "bos",  "Boss"      },
         { "wep",  "Weapon"    },
-        { "fnt",  "Furniture"  },
-        { "rub",  "Rubble"    },
-        { "cin",  "Coins"    },
-        { "lsf",  "Landscape" },
-        { "arf",  "Miscellaneous"  },
-        { "ter",  "Terrain"   }, { "plt",  "Foliage"  }, { "bsh",  "Foliage"  },
+        { "fnt",  "Furniture"       },
+        { "rub",  "Rubble"          },
+        { "cin",  "Coins"           },
+        { "lsf",  "Landscape"       },
+        { "arf",  "Miscellaneous"   },
+        { "ter",  "Terrain"   }, { "plt",  "Foliage"  }, { "bsh",  "Foliage"        },
         { "gren", "Foliage"   },
         { "itm",  "Item"      },
         { "chr",  "Chair"     }, { "chair", "Chair"   },
         { "dsk",  "Desk"      }, { "desk", "Desk"     },
         { "rug",  "Rug"       },
-        { "slf",  "Shelf"     }, { "shelf", "Shelf"   }, { "she",  "Shelf"     },
+        { "slf",  "Shelf"     }, { "shelf", "Shelf"   }, { "she",  "Shelf"          },
         { "win",  "Window"    },
         { "tbl",  "Table"     }, { "table", "Table"   },
         { "bed",  "Bed"       },
@@ -213,7 +213,7 @@ public sealed partial class PathIndex
         { "step", "Steps"     }, { "stp",  "Steps"   },
         { "pip",  "Pipe"      },
         { "pol",  "Pole"      },
-        { "ivy",  "Ivy"       }, { "tuta",  "Ivy"     },
+        { "ivy",  "Ivy"       }, { "tuta",  "Ivy"    },
         { "dec",  "Decoration"},
         { "bui",  "Building"  },
         { "sak",  "Railing"   }, { "saku", "Railing" },
@@ -508,8 +508,7 @@ public sealed class PathDatabase
     {
         if(import.DB.KeyVersion != target.KeyVersion)
             throw new InvalidDataException(
-                $"Key version mismatch: import={import.DB.KeyVersion}, target={target.KeyVersion}. " +
-                "A rehash migration is required before merging.");
+                $"Key version mismatch: import={import.DB.KeyVersion}, target={target.KeyVersion}. ");
 
         var result = new MergeResult();
         foreach(var item in import.DB.Entries)
