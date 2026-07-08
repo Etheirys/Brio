@@ -1,4 +1,5 @@
-﻿using Brio.Capabilities.Posing;
+﻿using Brio.Capabilities.Core;
+using Brio.Capabilities.Posing;
 using Brio.Core;
 using Brio.Entities;
 using Brio.Entities.Core;
@@ -21,6 +22,7 @@ public class PosingTransformEditor
     private Transform? _trackingTransform;
     private Vector3? _trackingEuler;
     private readonly ITransformableEditor _modelTransformEditor = new();
+    private readonly BoneSearchControl _boneSearchEditor = new();
 
     public void Draw(string id, PosingCapability posingCapability, bool compactMode = false)
     {
@@ -113,6 +115,14 @@ public class PosingTransformEditor
                 if(ImBrio.FontIconButtonRight("resetTransform", FontAwesomeIcon.Retweet, 1, tooltip: "Reset Bone"))
                 {
                     posingCapability.ResetSelectedBone();
+                }
+            }
+
+            using(var popup = ImRaii.Popup("widget_bone_search_popup", ImGuiWindowFlags.AlwaysAutoResize))
+            {
+                if(popup.Success)
+                {
+                    _boneSearchEditor.Draw("widget_bone_search", posingCapability);
                 }
             }
 

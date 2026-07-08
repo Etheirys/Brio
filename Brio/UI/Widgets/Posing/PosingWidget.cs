@@ -21,8 +21,6 @@ public class PosingWidget(PosingCapability capability) : Widget<PosingCapability
 
     private readonly PosingTransformEditor _posingTransformEditor = new();
 
-    private readonly BoneSearchControl _boneSearchEditor = new();
-
 
     public override void DrawBody()
     {
@@ -109,14 +107,6 @@ public class PosingWidget(PosingCapability capability) : Widget<PosingCapability
             if(popup.Success)
             {
                 DrawResetMenu();
-            }
-        }
-
-        using(var popup = ImRaii.Popup("widget_bone_search_popup", ImGuiWindowFlags.AlwaysAutoResize))
-        {
-            if(popup.Success)
-            {
-                _boneSearchEditor.Draw("widget_bone_search", Capability);
             }
         }
     }
