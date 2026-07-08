@@ -12,6 +12,21 @@ changelog:
         items:
           - "As a reminder! If you experience any issues please report them on Discord or on GitHub"
 
+      - number: "0.8.3"
+        icon: ""
+        items:
+          - "(0.8.2) Fixed an issue where Brio would incorrectly reset NPC clothing in\ncutscenes when Glamourer was installed"
+          - "Changing to a NPC should now be a bit better now, but there is still more missmatchs!"
+          - "Changing values in Vivacity's inspector now properly changes the keyframe"
+          - "Fixed an issue where sometimes when leaving Gpose your current Glamourer\ndesigns would leave you nude"
+          - "Fixed the bone search Popup from not appearing in the posing widget"
+          - "Fixed an issue where you could not change a Keyframe that was in blend to step"
+          - "Fixed the hold button from not working if you enabled the entity widgets window"
+          - "Fixed an issue where cloning a light would not copy its position"
+          - "Fixed a crash with default GPose lights"
+          - "Fixed an issue where lights would sometimes not be destroyed properly"
+          - "Added Add additional text to the tool tip on the `Refresh Interval` control on a VFX"
+
       - number: "Vivacity, Brio's Animation Timeline"
         icon: ""
         items:
