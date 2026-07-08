@@ -1,4 +1,4 @@
-﻿using Brio.Config;
+using Brio.Config;
 using Brio.Game.Actor;
 using Brio.Game.Core;
 using Dalamud.Game.ClientState.Objects.Types;
@@ -107,6 +107,7 @@ public class GlamourerService : BrioIPC
 
     private void HandleGlamourerStateFinalized(nint actorAddress, StateFinalizationType type)
     {
+        return;
         Brio.Log.Debug($"Glamourer state finalized event received. Type: {type}");
         OnGlamourerStateFinalized?.Invoke(actorAddress, type);
     }
@@ -275,8 +276,9 @@ public class GlamourerService : BrioIPC
 
         try
         {
-            _glamourerUnlockByName.Invoke(name, LockCode);
             _glamourerRevertByName.Invoke(name, LockCode);
+            _glamourerUnlockByName.Invoke(name, LockCode);
+            
         }
         catch(Exception ex)
         {
