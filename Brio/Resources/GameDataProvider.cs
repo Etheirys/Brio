@@ -63,7 +63,7 @@ public class GameDataProvider
 
         bNpcLinks = CsvLoader.LoadResource<BNpcLink>(CsvLoader.BNpcLinkResourceName, false, out _, out _, dataManager.GameData, dataManager.GameData.Options.DefaultExcelLanguage)
             .GroupBy(link => link.BNpcBaseId)
-            .ToFrozenDictionary(group => group.Key, group => group.Select(link => link.BNpcNameId).ToHashSet());
+            .ToFrozenDictionary(group => group.Key, group => group.Reverse().Select(link => link.BNpcNameId).ToHashSet());
 
         ModelDatabase = new(resourceProvider, this);
 
