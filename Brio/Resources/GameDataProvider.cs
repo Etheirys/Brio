@@ -23,7 +23,7 @@ public class GameDataProvider
     private readonly ISeStringEvaluator seStringEvaluator;
 
     private readonly IReadOnlyDictionary<string, string> npcNames;
-    private readonly FrozenDictionary<uint, uint> bNpcLinks;
+    private readonly FrozenDictionary<uint, HashSet<uint>> bNpcLinks;
 
     private readonly Dictionary<uint, string> eNpcNameCache = [];
     private readonly Dictionary<uint, string> bNpcNameCache = [];
@@ -62,8 +62,8 @@ public class GameDataProvider
         npcNames = resourceProvider.GetResourceDocument<IReadOnlyDictionary<string, string>>("Data.NpcNames.json");
 
         bNpcLinks = CsvLoader.LoadResource<BNpcLink>(CsvLoader.BNpcLinkResourceName, false, out _, out _, dataManager.GameData, dataManager.GameData.Options.DefaultExcelLanguage)
-            .DistinctBy(link => link.BNpcBaseId)
-            .ToFrozenDictionary(link => link.BNpcBaseId, link => link.BNpcNameId);
+            .GroupBy(link => link.BNpcBaseId)
+            .ToFrozenDictionary(group => group.Key, group => group.Select(link => link.BNpcNameId).ToHashSet());
 
         ModelDatabase = new(resourceProvider, this);
 
@@ -116,32 +116,34 @@ public class GameDataProvider
 
     public bool TryGetBNpcNameByBase(uint bNpcBaseId, out string name)
     {
-        if(!bNpcLinks.TryGetValue(bNpcBaseId, out var bNpcNameId) || bNpcNameId == 0)
+        if(!bNpcLinks.TryGetValue(bNpcBaseId, out var bNpcNameIds) || bNpcNameIds.Count == 0)
         {
             name = $"BNpc {bNpcBaseId}";
             return false;
         }
 
-        if(bNpcNameCache.TryGetValue(bNpcNameId, out var cachedName))
+        foreach (var bNpcNameId in bNpcNameIds)
         {
-            name = string.IsNullOrEmpty(cachedName) ? $"BNpc {bNpcBaseId}" : cachedName;
-            return true;
-        }
+            if(bNpcNameCache.TryGetValue(bNpcNameId, out var cachedName))
+            {
+                name = string.IsNullOrEmpty(cachedName) ? $"BNpc {bNpcBaseId}" : cachedName;
+                return true;
+            }
 
-        if(seStringEvaluator.EvaluateObjStr(ObjectKind.BattleNpc, bNpcNameId) is { Length: not 0 } evaluatedName)
-        {
-            bNpcNameCache.TryAdd(bNpcNameId, name = evaluatedName);
-            return true;
-        }
+            if(seStringEvaluator.EvaluateObjStr(ObjectKind.BattleNpc, bNpcNameId) is { Length: not 0 } evaluatedName)
+            {
+                bNpcNameCache.TryAdd(bNpcNameId, name = evaluatedName);
+                return true;
+            }
 
-        if (ResolveName($"B:{bNpcBaseId:D7}") is { Length: not 0 } resolvedName)
-        {
-            bNpcNameCache.TryAdd(bNpcNameId, name = resolvedName);
-            return true;
+            if(ResolveName($"B:{bNpcBaseId:D7}") is { Length: not 0 } resolvedName)
+            {
+                bNpcNameCache.TryAdd(bNpcNameId, name = resolvedName);
+                return true;
+            }
         }
 
         name = $"BNpc {bNpcBaseId}";
-        bNpcNameCache.TryAdd(bNpcNameId, string.Empty);
         return false;
     }
 
