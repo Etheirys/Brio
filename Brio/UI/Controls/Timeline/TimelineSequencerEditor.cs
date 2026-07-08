@@ -125,8 +125,8 @@ public class TimelineSequencerEditor(TimelineService timelineService, Configurat
 
             using(var inspector = ImRaii.Child("###sequencerInspector", new Vector2(inspectorWidth, avail.Y), true))
             {
-                if(inspector.Success)
-                    DrawInspector(host, state);
+                if(inspector.Success && DrawInspector(host, state) && !_timelineService.IsPlaying)
+                    _timelineService.ApplyCurrentFrame(true);
             }
         }
     }
@@ -204,72 +204,79 @@ public class TimelineSequencerEditor(TimelineService timelineService, Configurat
         if(!modifier)
             ImBrio.AttachToolTip("Hold Ctrl to delete.");
     }
-    private void DrawInspector(ITimelineHost host, ImSequencerState state)
+    private bool DrawInspector(ITimelineHost host, ImSequencerState state)
     {
         var selected = GetSelectedKeyframes(host, state);
         if(selected.Count == 0)
         {
             ImGui.TextWrapped("Select a Keyframe to edit it.");
-            return;
+            return false;
         }
 
         var keyframe = selected[0];
+        var changed = false;
 
         ImBrio.SeparatorText(selected.Count == 1 ? $"Keyframe at frame {keyframe.Frame}" : $"{selected.Count} Keyframes selected");
         ImBrio.VerticalSeparator(5);
 
         ImBrio.SeparatorText("Components");
-        DrawComponents(host, selected, keyframe);
+        changed |= DrawComponents(host, selected, keyframe);
 
         if(selected.Count == 1)
         {
             ImBrio.SeparatorText("Transform");
-            DrawKeyframeTransform(keyframe);
+            changed |= DrawKeyframeTransform(keyframe);
         }
 
         ImBrio.SeparatorText("Easing");
-        DrawEasingEditor(selected, keyframe);
+        changed |= DrawEasingEditor(selected, keyframe);
+
+        return changed;
     }
 
     //
 
-    private static void DrawComponents(ITimelineHost host, List<TrackKeyframe> selected, TrackKeyframe representative)
+    private static bool DrawComponents(ITimelineHost host, List<TrackKeyframe> selected, TrackKeyframe representative)
     {
+        var changed = false;
+
         if(representative.Camera.HasValue)
         {
-            DrawCameraComponentToggle(selected, representative, "Position", CameraComponents.Position);
+            changed |= DrawCameraComponentToggle(selected, representative, "Position", CameraComponents.Position);
             ImGui.SameLine();
-            DrawCameraComponentToggle(selected, representative, "Rotation", CameraComponents.Rotation);
+            changed |= DrawCameraComponentToggle(selected, representative, "Rotation", CameraComponents.Rotation);
             ImGui.SameLine();
-            DrawCameraComponentToggle(selected, representative, "Lens", CameraComponents.Lens);
+            changed |= DrawCameraComponentToggle(selected, representative, "Lens", CameraComponents.Lens);
         }
         else if(representative.Light.HasValue)
         {
-            DrawLightComponentToggle(selected, representative, "Position", LightComponents.Position);
+            changed |= DrawLightComponentToggle(selected, representative, "Position", LightComponents.Position);
             ImGui.SameLine();
-            DrawLightComponentToggle(selected, representative, "Rendering", LightComponents.Rendering);
+            changed |= DrawLightComponentToggle(selected, representative, "Rendering", LightComponents.Rendering);
         }
         else if(representative.WorldObject.HasValue)
         {
-            DrawWorldObjectComponentToggle(selected, representative, "Transform", WorldObjectComponents.Transform);
+            changed |= DrawWorldObjectComponentToggle(selected, representative, "Transform", WorldObjectComponents.Transform);
 
             if(host.CaptureChannels.Any(c => c.Name == "Color"))
             {
                 ImGui.SameLine();
-                DrawWorldObjectComponentToggle(selected, representative, "Color", WorldObjectComponents.Color);
+                changed |= DrawWorldObjectComponentToggle(selected, representative, "Color", WorldObjectComponents.Color);
             }
         }
         else
         {
-            DrawTransformComponentToggle(selected, representative, "Position", TransformComponents.Position);
+            changed |= DrawTransformComponentToggle(selected, representative, "Position", TransformComponents.Position);
             ImGui.SameLine();
-            DrawTransformComponentToggle(selected, representative, "Rotation", TransformComponents.Rotation);
+            changed |= DrawTransformComponentToggle(selected, representative, "Rotation", TransformComponents.Rotation);
             ImGui.SameLine();
-            DrawTransformComponentToggle(selected, representative, "Scale", TransformComponents.Scale);
+            changed |= DrawTransformComponentToggle(selected, representative, "Scale", TransformComponents.Scale);
         }
+
+        return changed;
     }
 
-    private static void DrawKeyframeTransform(TrackKeyframe keyframe)
+    private static bool DrawKeyframeTransform(TrackKeyframe keyframe)
     {
         if(keyframe.Camera.HasValue)
         {
@@ -284,6 +291,7 @@ public class TimelineSequencerEditor(TimelineService timelineService, Configurat
                 keyframe.Camera = camera;
             }
 
+            return posChanged || rotChanged;
         }
         else if(keyframe.Light.HasValue)
         {
@@ -301,6 +309,8 @@ public class TimelineSequencerEditor(TimelineService timelineService, Configurat
 
             if(posChanged || rotChanged || scaleChanged)
                 keyframe.Light = light;
+
+            return posChanged || rotChanged || scaleChanged;
         }
         else if(keyframe.WorldObject.HasValue)
         {
@@ -318,6 +328,8 @@ public class TimelineSequencerEditor(TimelineService timelineService, Configurat
 
             if(posChanged || rotChanged || scaleChanged)
                 keyframe.WorldObject = worldObject;
+
+            return posChanged || rotChanged || scaleChanged;
         }
         else
         {
@@ -335,52 +347,73 @@ public class TimelineSequencerEditor(TimelineService timelineService, Configurat
 
             if(posChanged || rotChanged || scaleChanged)
                 keyframe.Transform = transform;
+
+            return posChanged || rotChanged || scaleChanged;
         }
     }
 
-    private static void DrawTransformComponentToggle(List<TrackKeyframe> selected, TrackKeyframe representative, string label, TransformComponents flag)
+    private static bool DrawTransformComponentToggle(List<TrackKeyframe> selected, TrackKeyframe representative, string label, TransformComponents flag)
     {
         var enabled = representative.Components.HasFlag(flag);
         if(ImGui.Checkbox($"{label}##tcomp_{label}", ref enabled))
+        {
             foreach(var kf in selected)
                 kf.Components = enabled ? kf.Components | flag : kf.Components & ~flag;
+            return true;
+        }
+        return false;
     }
-    private static void DrawLightComponentToggle(List<TrackKeyframe> selected, TrackKeyframe representative, string label, LightComponents flag)
+    private static bool DrawLightComponentToggle(List<TrackKeyframe> selected, TrackKeyframe representative, string label, LightComponents flag)
     {
         var enabled = representative.LightComponents.HasFlag(flag);
         if(ImGui.Checkbox($"{label}##lcomp_{label}", ref enabled))
+        {
             foreach(var kf in selected)
                 kf.LightComponents = enabled ? kf.LightComponents | flag : kf.LightComponents & ~flag;
+            return true;
+        }
+        return false;
     }
-    private static void DrawWorldObjectComponentToggle(List<TrackKeyframe> selected, TrackKeyframe representative, string label, WorldObjectComponents flag)
+    private static bool DrawWorldObjectComponentToggle(List<TrackKeyframe> selected, TrackKeyframe representative, string label, WorldObjectComponents flag)
     {
         var enabled = representative.WorldObjectComponents.HasFlag(flag);
         if(ImGui.Checkbox($"{label}##wcomp_{label}", ref enabled))
+        {
             foreach(var kf in selected)
                 kf.WorldObjectComponents = enabled ? kf.WorldObjectComponents | flag : kf.WorldObjectComponents & ~flag;
+            return true;
+        }
+        return false;
     }
-    private static void DrawCameraComponentToggle(List<TrackKeyframe> selected, TrackKeyframe representative, string label, CameraComponents flag)
+    private static bool DrawCameraComponentToggle(List<TrackKeyframe> selected, TrackKeyframe representative, string label, CameraComponents flag)
     {
         var enabled = representative.CameraComponents.HasFlag(flag);
         if(ImGui.Checkbox($"{label}##ccomp_{label}", ref enabled))
+        {
             foreach(var kf in selected)
                 kf.CameraComponents = enabled ? kf.CameraComponents | flag : kf.CameraComponents & ~flag;
+            return true;
+        }
+        return false;
     }
 
     //
 
-    private void DrawEasingEditor(List<TrackKeyframe> selected, TrackKeyframe representative)
+    private bool DrawEasingEditor(List<TrackKeyframe> selected, TrackKeyframe representative)
     {
+        var changed = false;
+
         var mode = (int)representative.InterpolationMode;
         if(ImBrio.ButtonSelectorStrip("###interpolation_mode", Vector2.Zero, ref mode, _modeNames))
         {
             var newMode = (InterpolationMode)mode;
             foreach(var kf in selected)
                 kf.InterpolationMode = newMode;
+            changed = true;
         }
 
         if(representative.InterpolationMode == InterpolationMode.Step)
-            return;
+            return changed;
 
         var preset = MatchPreset(representative.P1, representative.P2);
         if(ImGui.Combo("Preset", ref preset, _presetNames, _presetNames.Length) && preset < _presetP1.Length)
@@ -390,6 +423,7 @@ public class TimelineSequencerEditor(TimelineService timelineService, Configurat
                 kf.P1 = _presetP1[preset];
                 kf.P2 = _presetP2[preset];
             }
+            changed = true;
         }
 
         var p1 = representative.P1;
@@ -444,6 +478,7 @@ public class TimelineSequencerEditor(TimelineService timelineService, Configurat
                 else
                     kf.P2 = norm;
             }
+            changed = true;
         }
 
         if(ImGui.IsMouseReleased(ImGuiMouseButton.Left))
@@ -458,6 +493,8 @@ public class TimelineSequencerEditor(TimelineService timelineService, Configurat
         drawList.AddBezierCubic(p0Screen, p1Screen, p2Screen, p3Screen, ImGui.GetColorU32(ImGuiCol.PlotLines), curveLineThickness, 32);
         drawList.AddCircleFilled(p1Screen, handleRadius, ImGui.GetColorU32(ImGuiCol.ButtonHovered));
         drawList.AddCircleFilled(p2Screen, handleRadius, ImGui.GetColorU32(ImGuiCol.ButtonHovered));
+
+        return changed;
     }
     private static int MatchPreset(Vector2 p1, Vector2 p2)
     {
