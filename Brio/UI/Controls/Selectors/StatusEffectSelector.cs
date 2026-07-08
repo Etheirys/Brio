@@ -24,7 +24,7 @@ public class StatusEffectSelector(string id) : Selector<StatusEffectSelectorHold
 
     protected override void PopulateList()
     {
-        foreach(var item in GameDataProvider.Instance.Statuses)
+        foreach(var item in GameDataProvider.Instance.GetExcelSheet<Status>())
         {
             AddItem(new StatusEffectSelectorHolder { Status = item });
         }

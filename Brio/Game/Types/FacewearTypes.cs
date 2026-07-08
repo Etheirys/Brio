@@ -10,7 +10,7 @@ public partial class FacewearUnion : OneOfBase<Glasses, None>
 {
     public static implicit operator FacewearUnion(FacewearId facewearId)
     {
-        if(facewearId.Id != 0 && GameDataProvider.Instance.Glasses.TryGetRow(facewearId.Id, out var glasses))
+        if(facewearId.Id != 0 && GameDataProvider.Instance.GetExcelSheet<Glasses>().TryGetRow(facewearId.Id, out var glasses))
             return new FacewearUnion(glasses);
 
         return new None();

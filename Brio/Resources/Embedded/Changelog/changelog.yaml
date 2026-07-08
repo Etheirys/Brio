@@ -135,7 +135,7 @@ changelog:
           - "Fixed an issue where not all of the Sky textures were available in the list"
           - "Small design and layout improvements and the Advanced Appearance window"
           - "Added a new Interior setting to the Ambient Advanced Environment \n\twidget that lets you change the interior lighting level"
-          - "NPCs, monsters & equipment are now better localized (Thanks Hazel!)"
+          - "NPCs, monsters & equipment are now better localized (Thanks Hasel!)"
           - "Added the ability to edit metadata from the Brio Library"
           - "Increase the maximum icon size for the Brio Library"
           - "Fix an issue where some icons were not displayed properly in the Brio Library"

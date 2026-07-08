@@ -1,13 +1,15 @@
-﻿using Brio.Resources;
+using Brio.Resources;
 using Brio.Resources.Sheets;
 using Brio.UI.Controls.Core;
 using Brio.UI.Controls.Stateless;
 using Brio.UI.Theming;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface;
+using Lumina.Excel.Sheets;
 using System;
 using System.Numerics;
 using static Brio.Game.Actor.ActionTimelineService;
+using ActionSheet = Lumina.Excel.Sheets.Action;
 
 namespace Brio.UI.Controls.Selectors;
 
@@ -143,7 +145,7 @@ public class ActionTimelineSelector(string id) : Selector<ActionTimelineSelector
                     0));
         }
 
-        foreach(var emote in GameDataProvider.Instance.Emotes)
+        foreach(var emote in GameDataProvider.Instance.GetExcelSheet<Emote>())
         {
             BrioActionTimeline timeline;
             bool drawsWeapon = emote.DrawsWeapon;
@@ -230,7 +232,7 @@ public class ActionTimelineSelector(string id) : Selector<ActionTimelineSelector
             }
         }
 
-        foreach(var action in GameDataProvider.Instance.Actions)
+        foreach(var action in GameDataProvider.Instance.GetExcelSheet<ActionSheet>())
         {
             if(action.AnimationEnd.RowId != 0 && GameDataProvider.Instance.ActionTimelines.TryGetRow(action.AnimationEnd.RowId, out BrioActionTimeline timeline))
                 AddItem(new ActionTimelineSelectorEntry(

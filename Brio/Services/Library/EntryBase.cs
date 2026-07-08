@@ -28,7 +28,7 @@ public abstract class EntryBase : ITagged
     public SourceBase? Source => _source;
     public string? SourceInfo { get; set; }
 
-    public string Identifier => $"{this.Source?.GetpublicId()}||{GetpublicId()}";
+    public string Identifier => $"{this.Source?.GetPublicId()}||{GetPublicId()}";
 
     public abstract bool PassesFilters(params FilterBase[] filters);
 
@@ -85,5 +85,5 @@ public abstract class EntryBase : ITagged
         return false;
     }
 
-    protected abstract string GetpublicId();
+    protected abstract string GetPublicId();
 }

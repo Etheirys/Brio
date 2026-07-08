@@ -96,7 +96,7 @@ public unsafe struct BrioCharaMakeType(ExcelPage page, uint offset, uint row) : 
     {
         var menus = new List<Menu>();
 
-        var charaMakeTypes = GameDataProvider.Instance.DataManager.GetExcelSheet<BrioCharaMakeType>(name: "CharaMakeType").
+        var charaMakeTypes = GameDataProvider.Instance.GetExcelSheet<BrioCharaMakeType>(name: "CharaMakeType").
             First(x => x.Gender == (sbyte)appearance.Customize.Gender && x.Race.RowId == (uint)appearance.Customize.Race);
 
         for(uint i = 0; i < charaMakeTypes.CharaMakeStruct.Count; ++i)

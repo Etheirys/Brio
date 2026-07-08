@@ -59,7 +59,7 @@ public class FileSource : SourceBase
     public override IDalamudTextureWrap? Icon => ResourceProvider.Instance.GetResourceImage("Images.ProviderIcon_Directory.png");
     public override string Description => DirectoryPath;
 
-    protected override string GetpublicId()
+    protected override string GetPublicId()
     {
         // All file sources share the same public Id, as the files themselves are unique on the
         // file system.
@@ -132,7 +132,7 @@ public class DirectoryEntry : GroupEntryBase
     public override string Name => _name;
     public override IDalamudTextureWrap? Icon => _icon;
 
-    protected override string GetpublicId()
+    protected override string GetPublicId()
     {
         return _path;
     }
@@ -289,7 +289,7 @@ public class FileEntry : ItemEntryBase
         _previewImage?.Dispose();
     }
 
-    protected override string GetpublicId()
+    protected override string GetPublicId()
     {
         return FilePath;
     }
