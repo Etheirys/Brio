@@ -178,11 +178,11 @@ public class ActorAppearanceService : IDisposable
                             {
                                 if(options.HasFlag(AppearanceImportOptions.Customize))
                                 {
-                                    Buffer.MemoryCopy(appearance.Customize.Data, ptr, 26, 26);
+                                    Buffer.MemoryCopy(appearance.Customize.Data, ptr, 32, 32);
                                 }
                                 else
                                 {
-                                    Buffer.MemoryCopy(existingAppearance.Customize.Data, ptr, 26, 26);
+                                    Buffer.MemoryCopy(existingAppearance.Customize.Data, ptr, 28, 28);
                                 }
 
                                 if(options.HasFlag(AppearanceImportOptions.Equipment))
@@ -204,6 +204,7 @@ public class ActorAppearanceService : IDisposable
                         }
                     }
 
+                    // || appearance.ModelCharaId == 0
                     if(options.HasFlag(AppearanceImportOptions.Customize) && native->ModelContainer.ModelCharaId == 0)
                     {
                         // We can just set the data again incase we didn't earlier
