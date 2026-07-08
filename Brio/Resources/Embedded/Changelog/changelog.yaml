@@ -12,7 +12,7 @@ changelog:
         items:
           - "As a reminder! If you experience any issues please report them on Discord or on GitHub"
 
-      - number: "0.8.3"
+      - number: "0.8.0.3"
         icon: ""
         items:
           - "(0.8.2) Fixed an issue where Brio would incorrectly reset NPC clothing in\ncutscenes when Glamourer was installed"
