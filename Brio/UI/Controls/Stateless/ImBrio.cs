@@ -8,6 +8,7 @@ using Dalamud.Interface.Textures.TextureWraps;
 using Dalamud.Interface.Utility;
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Utility;
+using FFXIVClientStructs.FFXIV.Client.System.String;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -26,7 +27,7 @@ public static partial class ImBrio
 {
     public const string TooltipSeparator = "--SEP--";
 
-    private static readonly Dictionary<string, HoldButtonState> _holdButtonStates = [];
+    private static readonly Dictionary<uint, HoldButtonState> _holdButtonStates = [];
 
 
     [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
@@ -746,7 +747,7 @@ public static partial class ImBrio
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-    public static bool HoldButton(string id, string label, FontAwesomeIcon icon, float holdDuration = 1.0f, Vector2? btnsize = null, string tooltip = "", bool centerTest = false, bool onlyIcon = false)
+    public static bool HoldButton(ImU8String id, string label, FontAwesomeIcon icon, float holdDuration = 1.0f, Vector2? btnsize = null, string tooltip = "", bool centerTest = false, bool onlyIcon = false)
     {
         bool wasTriggered = false;
 
@@ -769,7 +770,8 @@ public static partial class ImBrio
 
         float textOffset = (iconWidth + style.ItemInnerSpacing.X) / innerWidth;
 
-        if(!_holdButtonStates.TryGetValue(id, out var state))
+        var uid = ImGui.GetID(id); // wow. I need to use this in other places 
+        if(!_holdButtonStates.TryGetValue(uid, out var state))
         {
             state = new HoldButtonState();
         }
@@ -782,7 +784,8 @@ public static partial class ImBrio
 
         if(onlyIcon)
         {
-            FontIconButton(id, icon, tooltip);
+            FontIconButton(icon);
+            AttachToolTip(tooltip);
 
             isActive = ImGui.IsItemActive();
             activated = ImGui.IsItemActivated();
@@ -818,7 +821,7 @@ public static partial class ImBrio
 
         if(activated && ImGui.GetIO().KeyCtrl)
         {
-            _holdButtonStates.Remove(id);
+            _holdButtonStates.Remove(uid);
             return true;
         }
 
@@ -843,11 +846,11 @@ public static partial class ImBrio
                 wasTriggered = true;
             }
 
-            _holdButtonStates[id] = state;
+            _holdButtonStates[uid] = state;
         }
         else
         {
-            _holdButtonStates.Remove(id);
+            _holdButtonStates.Remove(uid);
         }
 
         return wasTriggered;

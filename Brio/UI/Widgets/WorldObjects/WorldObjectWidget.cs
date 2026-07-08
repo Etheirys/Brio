@@ -202,6 +202,13 @@ public class WorldObjectWidget(WorldObjectTransformCapability worldcap) : Widget
                     staticVfx.VfxRefreshIntervalSeconds = refreshInterval;
                     staticVfx.Expires = DateTime.Now.AddSeconds(staticVfx.VfxRefreshIntervalSeconds);
                 }
+                if(staticVfx.IsLooping == false)
+                {
+                    ImBrio.AttachToolTip("""
+                        Must have Looping enabled to use!
+
+                        """);
+                }
                 ImBrio.AttachToolTip("The interval in seconds at which the VFX will be refreshed.");
             }
 

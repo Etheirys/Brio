@@ -318,7 +318,7 @@ public class FileUIHelpers
                 }
                 ImGui.SameLine();
 
-                if(ImBrio.HoldButton($"preset_delete", "Delete", FontAwesomeIcon.Trash, 1.1f, size, centerTest: true, tooltip: "[HOLD]\nDelete Preset"))
+                if(ImBrio.HoldButton("preset_delete", "Delete", FontAwesomeIcon.Trash, 1.1f, size, centerTest: true, tooltip: "[HOLD]\nDelete Preset"))
                 {
                     presetSystem.DeletePreset(state.Selected!);
                     state.Selected = null;
