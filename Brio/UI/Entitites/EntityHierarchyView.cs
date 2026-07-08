@@ -415,6 +415,12 @@ public class EntityHierarchyView(EntityManager entityManager, GPoseService gPose
 
     private void Select(Entity entity)
     {
+        if(entity.Flags.HasFlag(EntityFlags.DisableSelection))
+        {
+            entity.OnSelected();
+            return;
+        }
+
         _lastSelectedId = entity.Id;
         entityManager.SetSelectedEntity(entity);
     }
