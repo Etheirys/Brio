@@ -54,7 +54,7 @@ public class GameDataProvider
         ActionTimelines = dataManager.GetExcelSheet<BrioActionTimeline>();
 
         FilteredBNpcBases = [.. dataManager.GetExcelSheet<BNpcBase>().Where(row => row.RowId != 0 && row.ModelChara.RowId != 0)];
-        FilteredENpcBases = [.. dataManager.GetExcelSheet<ENpcBase>().Where(row => row.RowId != 0 && row.ModelChara.RowId != 0)];
+        FilteredENpcBases = [.. dataManager.GetExcelSheet<ENpcBase>().Where(row => row.RowId != 0)];
         FilteredMounts = [.. dataManager.GetExcelSheet<Mount>().Where(row => row.RowId != 0 && row.ModelChara.RowId != 0)];
         FilteredCompanions = [.. dataManager.GetExcelSheet<Companion>().Where(row => row.RowId != 0 && row.Model.RowId != 0)];
         FilteredOrnaments = [.. dataManager.GetExcelSheet<Ornament>().Where(row => row.RowId != 0 && row.Model != 0)];
