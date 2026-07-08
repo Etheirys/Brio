@@ -1,33 +1,202 @@
-
-tagline: "Brio 0.8.0 - Furniture, World Object, VFX, Spawing, + More!!!"
-subline: "[PH] Lorem ipsum dolor sit amet"
+tagline: "Brio 0.8.0 - World Object Spawning, Timeline & More!!!"
+subline: "Go to my blusky to see fun video on it! (minmoose)"
 changelog:
 
   - name: v0.8.0
-    tagline: Furniture, World Objects, VFX, oh my!
-    date: "July ?? 2026"
+    tagline: Folders, World Objects, VFX, Timeline! Oh my!
+    date: "July 7th 2026"
     isCurrent: true
     versions:
-      - number: "ATTENTION! Known crash! When standing in Water and you try to make a Brio actor a ENPC you can crash!!!"
+      - number: "Thank you!"
         icon: ""
         items:
           - "As a reminder! If you experience any issues please report them on Discord or on GitHub"
 
-      - number: "[PH]  consectetur "
+      - number: "Vivacity, Brio's Animation Timeline"
         icon: ""
         items:
-          - "[PH] Vivamus feugiat erat eu quam cursus, sed ornare dolor aliquet."
-          - "[PH] Vestibulum accumsan dignissim lacinia. Etiam cursus, mauris non sollicitudin iaculis"
-          - "[PH] est lectus porttitor neque, vel tincidunt felis dui ac libero. Mauris"
-          - "[PH] Mauris luctus accumsan nisi, ac faucibus purus auctor quis "
-     
-      - number: "[PH] adipiscing elit"
+          - "Animate everything, a complete animation timeline! \n\tFrom lights, actors, bones. and even the new world objects!"
+          - "This is a BETA So many things about it do not function. \n\tLike saving, and there may be parts broken (like VFX)"
+          - "Try it out by clicking on it in the entity hierarchy."
+          - "I am working on significant updates for this, please try it out and let me know what you think!"
+
+      - number: "Object Spawning"
         icon: ""
         items:
-          - "[PH] ellentesque ut ligula laoreet, dictum nibh vel, dignissim mi. Pellentesque habitant morbi tristique"
-          - "[PH] senectus et netus et malesuada fames ac turpis egestas."
-          - "[PH] Nunc facilisis ipsum quis orci aliquam, quis auctor massa varius. Phasellus rutrum dolor aliquet massa suscipit luctus."
-          - "[PH] In ornare condimentum leo, ut viverra orci egestas sed. Ut posuere condimentum felis non tristique."
+          - "Spawn of wide variety of game assets, if you see it in the game, you can likely spawn it!"
+          - "Over 100,000 things to spawn"
+          - "World Objects, VFX, Weapons, Furniture Items, and yes, even the very planet, Etheirys!"
+          - "You can spawn one using the new unified spawn menu or the catalog"
+          - "The catalog window displays many different filters for you to falter the entire game's of game objects \n\tdown how you see fit library"
+          - "Some objects have metadata I have placed on them like names, \n\tan update coming soon you too will be able to update this metadata \n\tand upload it back to the project so everyone can win!"
+
+      - number: "Brio Overlay v2"
+        icon: ""
+        items:
+          - "You can now multi select every entity type in the entity hierarchy"
+          - "You can now make more than one actor show it's bones"
+          - "Enable a bone offset to fix those pesky eyes (I will work on export and import for this soon)"
+          - "Color the bones based off of their category!"
+          - "Added advanced to gizmos to the lights! (you can turn it off with a little button in the light UI) \n\t(Thanks universalconquistador for the implementation)"
+          - "The overlay toolbar has also gotten improvements like, \n\tbetter more descriptive tool tips and user interface, \n\treacts better to currently selected object!"
+          - "And more!"
+
+      - number: "Entity hierarchy"
+        icon: ""
+        items:
+          - "Significantly improved the Entity Hierarchy"
+          - "A new unified spawn menu, to spawn everything Brio and spawn"
+          - "The Quick Actions menu (The buttons right under the hierarchy) \n\tare now all uniformed for every entity"
+          - "More consistent right click menus"
+          - "You can now undock the widgets underneath the hierarchy into its own window"
+          - "Almost every single entity editor has been modified with a new design \n\tTo help streamline and minimize vertical length! \n\tPlease give me your feedback on how you like them"
+
+      - number: "Folders"
+        icon: ""
+        items:
+          - "You can now add folders!"
+          - "You can drag and drop an entity on a folder"
+          - "you can even multi select entities using `Ctrl` and drag and drop them too!"
+          - "Want to move entities out of a folder? you can drag them right back out onto the Entities item"
+          - "They even get saved with the new Projects!"
+
+      - number: "Reference Images"
+        icon: ""
+        items:
+          - "Lock, rotate, zoom and position as many images you see fit to help you pose"
+          - "(does not save with projects)"
+
+      - number: "File Metadata Editing"
+        icon: ""
+        items:
+          - "You can now edit the metadata to poses and character files!"
+          - "Add a preview image set the description the author!"
+          - "Even works in the Brio Library"
+
+      - number: "Presets"
+        icon: ""
+        items:
+          - "You can now save and load presets"
+          - "currently the presets only exist on the camera and lights"
+          - "In the future it will work on Advanced Environment, and World Objects (and maybe more, who knows!)"
+          - "Coming soon is the ability to export these!"
+
+      - number: "Add from World"
+        icon: ""
+        items:
+          - "You can now add the lights from the overworld into brio"
+          - "The same goes with actors in the overworld, currently you can only add other NPC's \n\tand you **cannot*** add other players. \n\tI am still debating on whether or not I wish to let others add others players"
+
+      - number: "Themes"
+        icon: ""
+        items:
+          - "Added many new themes to Brio!"
+          - "From the blue you can find in game, to an orange like the year 2000 I hope there is theme that you love!"
+          - "Brio now has a beautiful blur in the background of every window \n\t(blur was implement in Dalamud's end, so no perf loss!)"
+          - "You can change them in settings!"
+
+      - number: "Projects are now out of BETA"
+        icon: ""
+        items:
+          - "Projects and Auto Saves are now significantly more stable"
+          - "Saves everything in the scene, with the exception to the timeline (coming soon), \n\tthe advanced environment settings \n\t and reference images"
+
+      - number: "Face Control (Renamed from Dynamic Face Control)"
+        icon: ""
+        items:
+          - "There is now a new very large button that lets you, set the actors expression!"
+          - "Made user interface changes to the widget"
+
+      - number: "Pose File Import/Export"
+        icon: ""
+        items:
+          - "Added smart import, the pose importer will automatically react and adjust accordingly \n\tBased off of the data in the pose file"
+          - "The post file format has been enhanced to now include metadata!"
+          - "Things like race, face, and more! several places in the UI already (like smart import) in the future"
+          - "Added the ability to Import/Export a pose from the clipboard"
+          - "Added an ability to reapply the last pose you used"
+          - "Added the ability to stash a pose to use later (only saves per game session)"
+
+      - number: "Advanced Pose Window"
+        icon: ""
+        items:
+          - "Significantly improved the user interface!"
+          - "Even more improvements to the scaling (and more to come over time!)"
+          - "Realigned many of to be more consistent with the rest of Brio's UI, \n\tso some buttons may be in different spots!"
+
+      - number: "Other Miscellaneous improvements"
+        icon: ""
+        items:
+          - "Note: To fix an issue with the transform system,"
+          - "Default values when spawning a light have changed"
+          - "The light editor now includes Falloff & Range in the Light Properties section"
+          - "Delete buttons are now HOLD to action. you Hold down control and click to bypass this."
+          - "Fixed a crash where if you were standing in water and changed into an NPC the game would crash"
+          - "Fixed an issue where not all of the Sky textures were available in the list"
+          - "Small design and layout improvements and the Advanced Appearance window"
+          - "Added a new Interior setting to the Ambient Advanced Environment \n\twidget that lets you change the interior lighting level"
+          - "NPCs, monsters & equipment are now better localized (Thanks Hazel!)"
+          - "Added the ability to edit metadata from the Brio Library"
+          - "Increase the maximum icon size for the Brio Library"
+          - "Fix an issue where some icons were not displayed properly in the Brio Library"
+          - "Fixed an issue where dragging rotation to an exact 90 degree angle would \n\tresult in the transform returning NaN"
+          - "Made multiple performance improvements"
+          - "Added the following new settings:"
+          - "Disable scroll wheel for input boxes and gizmos"
+          - "Select Light and Light window when clicking a light entity"
+          - "If light window is open don't show the light widget in the scene manager"
+          - "Enable advanced gizmo by default"
+          - "Enable Background Blur"
+          - "You could now have over eighty auto-saves"
+          - "A migration will take place that will update you configuration to now ought to save every minute \n\tat a Max of 60. Making for you to have a full hours worth of auto-save"
+          - "Festivals now support phases"
+          - "Added more festival names"
+          - "Improved the camera editor, fixed a few issues and added undo/redo"
+          - "The Camera Window has been improved to look much like the Light Window"
+          - "the light window can now be opened by right clicking a light or with the \n\tToggle Advanced button on any light"
+          - "Cameras can now be locked individually"
+          - "Multiple internal system rewrites, if you experience any issues please be sure to report it!"
+          - "Updated the Contributors and Supporters list. Thank you to everyone who has supported the project so far!"
+          - "Brio has now moved out of ALPHA and is now in BETA"
+    
+      - number: "So much more"
+        icon: ""
+        items:
+        - "There is so much here,\nyou are bound to find things that are not here in this log.\nI hope you have a fun time!\n"
+
+      - number: "Known Issues"
+        icon: ""
+        items:
+          - "If you drag the gizmo outside of the window, you lose control of the game and have to restart.\n\t
+             As a work around, try to move the camera to face where the gizmo should be and it should resolve."
+          - "The input system still has issues when pressing certain keyboard combinations, \n\tespecially when interfacing with the games default camera keybinds
+             \n\tIf you move the default camera into a folder and then delete the folder \n\tand all of the children it will delete the default camera.
+             \n\tIf this happens just restart Brio in the Plugin installer"
+          - "You can only target other actors instead of other entities from the camera targeting system"
+          - "If you have undocked the entity widgets, the delete button does not function.
+             \n\tAs a work around hold `Ctrl` and click it instead"
+
+  - name: Message From the Developer 
+    tagline:
+    date: "July 7th 2026"
+    isCurrent: true
+    message: |
+        So much when into making this for y'all I hope you enjoy it!
+        I am going to rest now, I am very sleepy...
+
+        I didn't get to think you all Properly in the changlog as it's so unwieldy so
+        Thanks for all the help making this update possible,
+        Abyeon, universalconquistador, Ny, Karou, Leyla, BlueSkia
+        Haselnussbomber (Thanks Hasel!), Tex Nevada & SolarisFFXIV.
+
+        One dev in particular I want to single out, Khayle
+        She is behind plugins like Chat Bubbles and XIVCombo, and she needs some financial help
+        So if you could, please, go give her a hand (https://ko-fi.com/khayle)
+
+        Thanks, and happy posing! (And now animating!!)
+
+        As always, I love you all very much, 
+        Minmoose  
 
   - name: v0.7.2
     tagline: 7.5 Support!
@@ -404,7 +573,7 @@ changelog:
       Also There is now a Brio Community discord, come join us! discord.gg/GCb4srgEaH
 
       I love you all very much, Thank you!
-      - Minmoose  
+      Minmoose  
     
   - name: v0.5.3
     tagline: "That damned boat"

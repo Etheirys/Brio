@@ -163,7 +163,7 @@ public class MainWindow : Window, IDisposable
         {
             if(container.Success)
             {
-                _entitySelector.Draw(rootEntity, _entityManager.DebugEntity);
+                _entitySelector.Draw(rootEntity, _entityManager.DebugEntity, _entityManager.TimelineEntity);
             }
         }
 

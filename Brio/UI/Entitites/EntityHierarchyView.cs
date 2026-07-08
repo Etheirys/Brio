@@ -27,7 +27,7 @@ public class EntityHierarchyView(EntityManager entityManager, GPoseService gPose
     private EntityId? _draggedEntityId;
     private EntityId? _lastSelectedId;
 
-    public void Draw(Entity root, Entity? debug)
+    public void Draw(Entity root, Entity? debug, Entity? timeline)
     {
         if(root.IsVisible is false)
             return;
@@ -54,7 +54,7 @@ public class EntityHierarchyView(EntityManager entityManager, GPoseService gPose
 
         using(ImRaii.PushId($"entity_hierarchy_{root.Id}"))
         {
-            BuildVisibleEtities(root, debug);
+            BuildVisibleEtities(root, debug, timeline);
 
             var entityHeight = 24 * ImGuiHelpers.GlobalScale;
 
@@ -94,12 +94,15 @@ public class EntityHierarchyView(EntityManager entityManager, GPoseService gPose
         }
     }
 
-    private void BuildVisibleEtities(Entity root, Entity? debug)
+    private void BuildVisibleEtities(Entity root, Entity? debug, Entity? timeline)
     {
         _visibleItems.Clear();
 
         if(debug is not null)
             AppendRow(debug, 0, false);
+
+        if(timeline is not null)
+            AppendRow(timeline, 0, false);
 
         AppendRow(root, 0, false, recurseChildren: false);
 

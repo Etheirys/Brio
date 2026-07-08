@@ -27,6 +27,10 @@ public partial class EntityManager : MediatorSubscriberBase
     public Entity? DebugEntity => _debugEntity;
     private DebugEntity? _debugEntity;
 
+    public Entity? TimelineEntity => _timelineEntity;
+    private Vivacity.TimelineEntity? _timelineEntity;
+    private bool _showTimelineEntity = true;
+
     public EntityManagerContainer EntityManagerContainer => _entityContainerEntity!;
     private EntityManagerContainer? _entityContainerEntity;
 
@@ -96,6 +100,7 @@ public partial class EntityManager : MediatorSubscriberBase
         _entityMap[_worldEntity.Id] = _worldEntity;
 
         RefreshDebugEntity();
+        RefreshTimelineEntity();
 
         var environmentEntity = ActivatorUtilities.CreateInstance<EnvironmentContainerEntity>(_serviceProvider);
         AttachEntity(environmentEntity, _worldEntity);
@@ -467,6 +472,31 @@ public partial class EntityManager : MediatorSubscriberBase
                 _debugEntity = null;
             }
         }
+    }
+
+    private void RefreshTimelineEntity()
+    {
+        if(_showTimelineEntity)
+        {
+            _timelineEntity = ActivatorUtilities.CreateInstance<Vivacity.TimelineEntity>(_serviceProvider);
+            _timelineEntity.OnAttached();
+
+            _entityMap[Vivacity.TimelineEntity.FixedId] = _timelineEntity;
+        }
+        else
+        {
+            if(TryGetEntity(Vivacity.TimelineEntity.FixedId, out var entity))
+            {
+                _entityMap.Remove(Vivacity.TimelineEntity.FixedId);
+                _timelineEntity = null;
+            }
+        }
+    }
+
+    public void ToggleTimelineEntityVisibility()
+    {
+        _showTimelineEntity = !_showTimelineEntity;
+        RefreshTimelineEntity();
     }
 
     public override void Dispose()
