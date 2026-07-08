@@ -211,7 +211,7 @@ public unsafe class LightingService : MediatorSubscriberBase
         });
     }
 
-    private Entity CreateEntity(Light light)
+    private LightEntity CreateEntity(Light light)
     {
         var entity = _entityManager.CreateEntityOnEntityContainer<LightEntity>(light);
         light.SetEntityIndex(_lightEntities.Add(entity));
@@ -285,12 +285,12 @@ public unsafe class LightingService : MediatorSubscriberBase
             // Spawn a new GameLight
             var clonedGameLight = SpawnGameLight(sourceLight.GameLight->RenderLight->EmissionType);
 
-            Light clonedLight = new(clonedGameLight, clonedGameLight->Transform.Position, clonedGameLight->Transform.Rotation, clonedGameLight->Transform.Scale);
-            clonedLight.SetIndex(_spawnedLights.Add(clonedLight));
-
             // Copy properties from the source light to the cloned light
             clonedGameLight->Transform.Position = sourceLight.GameLight->Transform.Position;
             clonedGameLight->Transform.Rotation = sourceLight.GameLight->Transform.Rotation;
+
+            Light clonedLight = new(clonedGameLight, clonedGameLight->Transform.Position, clonedGameLight->Transform.Rotation, clonedGameLight->Transform.Scale);
+            clonedLight.SetIndex(_spawnedLights.Add(clonedLight));
 
             if(clonedGameLight->RenderLight != null && sourceLight.GameLight->RenderLight != null)
             {
@@ -307,7 +307,13 @@ public unsafe class LightingService : MediatorSubscriberBase
 
             clonedGameLight->Update();
 
-            CreateEntity(clonedLight);
+            var e = CreateEntity(clonedLight);
+            e.Transform = new Transform
+            {
+                Position = clonedGameLight->Transform.Position,
+                Rotation = clonedGameLight->Transform.Rotation,
+                Scale = clonedGameLight->Transform.Scale
+            };
 
             foreach(var gameLight in _spawnedLights.AsEnumerable())
             {
