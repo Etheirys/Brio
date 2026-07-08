@@ -1,4 +1,4 @@
-﻿using Brio.Capabilities.Actor;
+using Brio.Capabilities.Actor;
 using Brio.Capabilities.Posing;
 using Brio.Capabilities.World;
 using Brio.Capabilities.WorldObjects;
@@ -60,8 +60,8 @@ public class PosingOverlayToolbarWindow : Window
 
         SizeConstraints = new WindowSizeConstraints
         {
-            MinimumSize = new Vector2(((button4XSize * 4) + 30) * ImGuiHelpers.GlobalScale, 400),
-            MaximumSize = new Vector2(((button4XSize * 4) + 30) * ImGuiHelpers.GlobalScale, 400)
+            MinimumSize = new Vector2(((button4XSize * 4) + 30) * ImGuiHelpers.GlobalScale, 400 * ImGuiHelpers.GlobalScale),
+            MaximumSize = new Vector2(((button4XSize * 4) + 30) * ImGuiHelpers.GlobalScale, 400 * ImGuiHelpers.GlobalScale)
         };
     }
 
@@ -87,6 +87,12 @@ public class PosingOverlayToolbarWindow : Window
 
     public override void PreDraw()
     {
+        SizeConstraints = new WindowSizeConstraints
+        {
+            MinimumSize = new Vector2(((button4XSize * 4) + 30) * ImGuiHelpers.GlobalScale, 400 * ImGuiHelpers.GlobalScale),
+            MaximumSize = new Vector2(((button4XSize * 4) + 30) * ImGuiHelpers.GlobalScale, 400 * ImGuiHelpers.GlobalScale)
+        }; 
+
         ImGui.PushStyleVar(ImGuiStyleVar.WindowBorderSize, 0);
         ImGui.PushStyleVar(ImGuiStyleVar.WindowTitleAlign, new Vector2(0.5f, 0.5f));
         ImGui.PushStyleColor(ImGuiCol.NavWindowingHighlight, UIConstants.Transparent);
