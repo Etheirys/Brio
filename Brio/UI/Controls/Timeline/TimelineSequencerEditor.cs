@@ -404,7 +404,7 @@ public class TimelineSequencerEditor(TimelineService timelineService, Configurat
         var changed = false;
 
         var mode = (int)representative.InterpolationMode;
-        if(ImBrio.ButtonSelectorStrip("###interpolation_mode", Vector2.Zero, ref mode, _modeNames))
+        if(ImBrio.ButtonSelectorStrip("interpolation_mode", Vector2.Zero, ref mode, _modeNames))
         {
             var newMode = (InterpolationMode)mode;
             foreach(var kf in selected)
@@ -412,8 +412,8 @@ public class TimelineSequencerEditor(TimelineService timelineService, Configurat
             changed = true;
         }
 
-        if(representative.InterpolationMode == InterpolationMode.Step)
-            return changed;
+        if((InterpolationMode)mode == InterpolationMode.Step)
+            changed = true;
 
         var preset = MatchPreset(representative.P1, representative.P2);
         if(ImGui.Combo("Preset", ref preset, _presetNames, _presetNames.Length) && preset < _presetP1.Length)
