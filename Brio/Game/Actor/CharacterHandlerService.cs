@@ -80,8 +80,6 @@ public class CharacterHandlerService : IDisposable
         _glamourerService.UnlockAndRevertCharacterByName(obj.Name.TextValue);
         _glamourerService.UnlockAndRevertCharacter(obj);
 
-        _glamourerService.RevertByName(obj.Name.TextValue);
-
         _customizePlusService.RemoveTemporaryProfile(obj);
 
         if(obj.Address != nint.Zero)
