@@ -60,8 +60,8 @@ public class PosingOverlayToolbarWindow : Window
 
         SizeConstraints = new WindowSizeConstraints
         {
-            MinimumSize = new Vector2(((button4XSize * 4) + 30) * ImGuiHelpers.GlobalScale, 400 * ImGuiHelpers.GlobalScale),
-            MaximumSize = new Vector2(((button4XSize * 4) + 30) * ImGuiHelpers.GlobalScale, 400 * ImGuiHelpers.GlobalScale)
+            MinimumSize = new Vector2(((button4XSize * 4) + 30) , 400),
+            MaximumSize = new Vector2(((button4XSize * 4) + 30) , 400)
         };
     }
 
@@ -87,11 +87,11 @@ public class PosingOverlayToolbarWindow : Window
 
     public override void PreDraw()
     {
-        SizeConstraints = new WindowSizeConstraints
-        {
-            MinimumSize = new Vector2(((button4XSize * 4) + 30) * ImGuiHelpers.GlobalScale, 400 * ImGuiHelpers.GlobalScale),
-            MaximumSize = new Vector2(((button4XSize * 4) + 30) * ImGuiHelpers.GlobalScale, 400 * ImGuiHelpers.GlobalScale)
-        }; 
+        //SizeConstraints = new WindowSizeConstraints
+        //{
+        //    MinimumSize = new Vector2(((button4XSize * 4) + 30) * ImGuiHelpers.GlobalScale, 400 * ImGuiHelpers.GlobalScale),
+        //    MaximumSize = new Vector2(((button4XSize * 4) + 30) * ImGuiHelpers.GlobalScale, 400 * ImGuiHelpers.GlobalScale)
+        //}; 
 
         ImGui.PushStyleVar(ImGuiStyleVar.WindowBorderSize, 0);
         ImGui.PushStyleVar(ImGuiStyleVar.WindowTitleAlign, new Vector2(0.5f, 0.5f));

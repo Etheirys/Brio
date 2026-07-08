@@ -592,7 +592,7 @@ public static partial class ImBrio
     [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
     public static bool BoneOverlayVisibilityButton(string id, bool isVisible, Vector2 size, string? tooltip = null, bool enabled = true)
     {
-        var buttonSize = size * ImGuiHelpers.GlobalScale;
+        var buttonSize = size;
 
         uint baseBoneColor = 0xFFFFBF7A;
         uint hiddenBoneColor = 0xFF444444;
