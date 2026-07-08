@@ -1,6 +1,7 @@
 using Brio.Config;
 using Brio.Game.Actor;
 using Brio.Game.Core;
+using Brio.Game.GPose;
 using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
@@ -42,6 +43,7 @@ public class GlamourerService : BrioIPC
     private readonly ICommandManager _commandManager;
     private readonly IObjectTable _gameObjects;
     private readonly DalamudService _dalamudService;
+    private readonly GPoseService _gPoseService;
 
     //
     //
@@ -68,7 +70,7 @@ public class GlamourerService : BrioIPC
 
     private readonly uint LockCode = 0x6D617265;
 
-    public GlamourerService(IDalamudPluginInterface pluginInterface, IObjectTable gameObjects, ICommandManager commandManager, DalamudService dalamudService, ConfigurationService configurationService, IFramework framework, ActorRedrawService redrawService)
+    public GlamourerService(IDalamudPluginInterface pluginInterface, GPoseService gPoseService, IObjectTable gameObjects, ICommandManager commandManager, DalamudService dalamudService, ConfigurationService configurationService, IFramework framework, ActorRedrawService redrawService)
     {
         _pluginInterface = pluginInterface;
         _configurationService = configurationService;
@@ -77,6 +79,7 @@ public class GlamourerService : BrioIPC
         _commandManager = commandManager;
         _dalamudService = dalamudService;
         _gameObjects = gameObjects;
+        _gPoseService = gPoseService;
 
         _glamourerInitializedSubscriber = Initialized.Subscriber(_pluginInterface, OnConfigurationChanged);
         _glamourerStateFinalizedSubscriber = StateFinalized.Subscriber(_pluginInterface, HandleGlamourerStateFinalized);
@@ -114,7 +117,7 @@ public class GlamourerService : BrioIPC
 
     public bool CheckForLock(IGameObject? character)
     {
-        if(IsAvailable == false || character is null)
+        if(IsAvailable == false || character is null || _gPoseService.IsGPosing == false)
             return false;
 
         var (key, _) = _glamourerGetState.Invoke(character!.ObjectIndex);
