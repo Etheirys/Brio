@@ -70,10 +70,7 @@ public class DalamudService : MediatorSubscriberBase
             IsInCutscene = false;
         }
 
-        if(_gPoseService.IsGPosing)
-        {
-            Mediator.Publish(new FrameworkUpdateMessage(framework));
-        }
+        Mediator.Publish(new FrameworkUpdateMessage(framework));
 
         var localPlayer = _objectTable.LocalPlayer;
         if(localPlayer != null)
