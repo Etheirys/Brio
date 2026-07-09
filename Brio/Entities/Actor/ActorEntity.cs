@@ -114,7 +114,7 @@ public class ActorEntity(IGameObject gameObject, IServiceProvider provider) : Tr
 
         //
 
-        IsSynced = _glamourerService.CheckForLock(this.GameObject);
+        // IsSynced = _glamourerService.CheckForLock(this.GameObject);
 
         //
 
