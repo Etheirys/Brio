@@ -110,14 +110,13 @@ public class GlamourerService : BrioIPC
 
     private void HandleGlamourerStateFinalized(nint actorAddress, StateFinalizationType type)
     {
-        return;
         Brio.Log.Debug($"Glamourer state finalized event received. Type: {type}");
         OnGlamourerStateFinalized?.Invoke(actorAddress, type);
     }
 
     public bool CheckForLock(IGameObject? character)
     {
-        if(IsAvailable == false || character is null || _gPoseService.IsGPosing == false)
+        if(IsAvailable == false || character is null)
             return false;
 
         var (key, _) = _glamourerGetState.Invoke(character!.ObjectIndex);
