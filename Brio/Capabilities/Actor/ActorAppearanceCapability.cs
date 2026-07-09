@@ -526,9 +526,9 @@ public class ActorAppearanceCapability : ActorCharacterCapability
         if(actorAddress != Character.Address)
             return;
 
-        _originalAppearance = _actorAppearanceService.GetActorAppearance(Character);
+        //_originalAppearance = _actorAppearanceService.GetActorAppearance(Character);
 
-        CurrentDesign = (_glamourerService.GetState(Character), Guid.Empty);
+        //CurrentDesign = (_glamourerService.GetState(Character), Guid.Empty);
     }
     private void OnPenumbraRedraw(int gameObjectId)
     {
