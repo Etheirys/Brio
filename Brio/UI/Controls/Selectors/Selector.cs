@@ -260,6 +260,17 @@ public abstract class Selector<T> where T : class
         }, TaskScheduler.Default);
     }
 
+    protected void ReloadList()
+    {
+        _taskQueue = _taskQueue.ContinueWith(_ =>
+        {
+            _items.Clear();
+            PopulateList();
+        }, TaskScheduler.Default);
+
+        UpdateList(shouldClear: true);
+    }
+
     protected virtual bool Filter(T item, string search)
     {
         return true;
