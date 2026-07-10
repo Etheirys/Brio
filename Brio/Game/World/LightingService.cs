@@ -123,6 +123,7 @@ public unsafe class LightingService : MediatorSubscriberBase
                 var gposeLight = gposeController->GetLight(i);
                 if(gposeLight != null && (nint)gposeLight == (nint)light)
                 {
+                    _worldGameLights.Remove((nint)light);
                     Light blight = new(gposeLight, gposeLight->Transform.Position, gposeLight->Transform.Rotation, gposeLight->Transform.Scale)
                     {
                         IsGPoseLight = true,
@@ -150,7 +151,6 @@ public unsafe class LightingService : MediatorSubscriberBase
 
         if(_gPoseService.IsGPosing)
         {
-            var gposeController = (BrioEventGPoseController*)&EventFramework.Instance()->EventSceneModule.EventGPoseController;
             for(uint i = 0; i < 3; i++)
             {
                 var gposeLight = gposeLights[i];
@@ -473,6 +473,7 @@ public unsafe class LightingService : MediatorSubscriberBase
 
     public void Destroy(IGameLight light)
     {
+        Brio.Log.Warning($"Destroying light at index {light.Index} with address {light.Address}.");
         _framework.RunOnFrameworkThread(() =>
         {
             if(light.IsWorldLight)
