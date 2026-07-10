@@ -64,6 +64,10 @@ public class CatalogWindow : Window, IDisposable
     private List<string> _modelSubtypeOptions = [];
     private List<string> _modelAssetOptions = [];
     private CatalogDisplayMode _modelDisplayMode = CatalogDisplayMode.Compact;
+    private bool _modelLivePreviewEnabled;
+    private IWorldObject? _modelLivePreview;
+    private string _modelLivePreviewPath = string.Empty;
+    private int _modelLivePreviewRequest;
 
     private List<GamePathInfo> _allVfx = [];
     private List<GamePathInfo> _filteredVfx = [];
@@ -672,6 +676,22 @@ public class CatalogWindow : Window, IDisposable
         if(DrawSearchAndViewMode(ref _modelSearch, ref _modelDisplayMode, "model_view"))
             ApplyModelFilter();
 
+        ImGui.SameLine();
+        if(ImBrio.ToggelFontIconButton("model_live_preview", FontAwesomeIcon.Eye, new Vector2(24, 5), _modelLivePreviewEnabled,
+            tooltip: "Live Preview (single-click previews, double-click spawns)"))
+        {
+            _modelLivePreviewEnabled = !_modelLivePreviewEnabled;
+            if(!_modelLivePreviewEnabled)
+                ClearModelLivePreview();
+        }
+
+        ImGui.SameLine();
+        using(ImRaii.Disabled(_modelLivePreview is not { IsValid: true }))
+        {
+            if(ImBrio.FontIconButton("model_live_preview_clear", FontAwesomeIcon.Ban, "Clear Live Preview"))
+                ClearModelLivePreview();
+        }
+
         float third = (ImGui.GetContentRegionAvail().X - ImGui.GetStyle().ItemSpacing.X * 2) / 3f;
         if(ImBrio.MultiComboBox("###model_exp", _modelExpansionOptions, ref _selectedModelExpansions, third, "All Expansions"))
             ApplyModelFilter();
@@ -743,7 +763,7 @@ public class CatalogWindow : Window, IDisposable
                 ImGui.SameLine(0, 4 * ImGuiHelpers.GlobalScale);
 
                 if(ImGui.Selectable($"{name}###{key}"))
-                    Spawn(kind, model.Path, name, 0);
+                    HandleCatalogSelection(kind, model.Path, name, 0, ImGui.IsMouseDoubleClicked(ImGuiMouseButton.Left));
 
                 if(ImGui.IsItemHovered())
                     ImBrio.AttachToolTip(metadata is not null ? $"{metadata.Name}{ImBrio.TooltipSeparator}{model.Path}" : $"{model.DisplayName}{ImBrio.TooltipSeparator}{model.Path}");
@@ -888,9 +908,11 @@ public class CatalogWindow : Window, IDisposable
     private void DrawGameIcon(string key, uint iconId, string name, string path, ObjectPathKind kind, float iconSize)
     {
         bool clicked;
+        bool doubleClicked;
         using(ImRaii.Group())
         {
             clicked = ImBrio.BorderedGameIcon(key, iconId, "Images.UnknownIcon.png", size: new Vector2(iconSize));
+            doubleClicked = clicked && ImGui.IsMouseDoubleClicked(ImGuiMouseButton.Left);
 
             float tileW = ImGui.GetItemRectSize().X;
             float starW = ImGui.GetTextLineHeight();
@@ -906,7 +928,7 @@ public class CatalogWindow : Window, IDisposable
             ImBrio.AttachToolTip($"{name}{ImBrio.TooltipSeparator}{path}");
 
         if(clicked)
-            Spawn(kind, path, name, iconId);
+            HandleCatalogSelection(kind, path, name, iconId, doubleClicked);
 
         IconRightClick($"###rightclick_{key}", kind, path, name, iconId);
     }
@@ -933,6 +955,72 @@ public class CatalogWindow : Window, IDisposable
 
     private void ToggleFav(ObjectPathKind kind, string path, string name, uint iconId)
         => _quickAccess.ToggleFavorite(MakeEntry(kind, path, name, iconId));
+
+    //
+
+    private void HandleCatalogSelection(ObjectPathKind kind, string path, string name, uint iconId, bool doubleClicked)
+    {
+        if(_modelLivePreviewEnabled && kind == ObjectPathKind.Model)
+        {
+            if(doubleClicked)
+            {
+                ClearModelLivePreview();
+                Spawn(kind, path, name, iconId);
+            }
+            else
+            {
+                PreviewModel(path);
+            }
+
+            return;
+        }
+
+        Spawn(kind, path, name, iconId);
+    }
+
+    private async void PreviewModel(string path)
+    {
+        if(_modelLivePreviewPath == path && _modelLivePreview is { IsValid: true })
+            return;
+
+        var request = ++_modelLivePreviewRequest;
+        ClearModelLivePreview(invalidatePendingRequest: false);
+
+        try
+        {
+            var preview = await _worldObjectService.SpawnBgObjectAsync(path);
+            if(request != _modelLivePreviewRequest || !_modelLivePreviewEnabled)
+            {
+                if(preview is not null)
+                    _worldObjectService.Destroy(preview);
+                return;
+            }
+
+            _modelLivePreview = preview;
+            _modelLivePreviewPath = preview is null ? string.Empty : path;
+        }
+        catch(Exception ex)
+        {
+            Brio.Log.Error(ex, $"Failed to create a live model preview for {path}");
+            if(request == _modelLivePreviewRequest)
+            {
+                _modelLivePreview = null;
+                _modelLivePreviewPath = string.Empty;
+            }
+        }
+    }
+
+    private void ClearModelLivePreview(bool invalidatePendingRequest = true)
+    {
+        if(invalidatePendingRequest)
+            _modelLivePreviewRequest++;
+
+        if(_modelLivePreview is { IsValid: true })
+            _worldObjectService.Destroy(_modelLivePreview);
+
+        _modelLivePreview = null;
+        _modelLivePreviewPath = string.Empty;
+    }
 
     //
 
@@ -1124,11 +1212,21 @@ public class CatalogWindow : Window, IDisposable
     private void OnGPoseStateChange(bool newState)
     {
         if(!newState)
+        {
+            ClearModelLivePreview();
             IsOpen = false;
+        }
+    }
+
+    public override void OnClose()
+    {
+        ClearModelLivePreview();
+        base.OnClose();
     }
 
     public void Dispose()
     {
+        ClearModelLivePreview();
         _gPoseService.OnGPoseStateChange -= OnGPoseStateChange;
     }
 }
