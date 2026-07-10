@@ -1,9 +1,10 @@
 ﻿using Brio.Capabilities.Posing;
 using Brio.Config;
 using Brio.Entities.Actor;
-using Brio.Game.Actor;
+using Brio.Game.Core;
 using Brio.Game.Posing;
 using Brio.UI.Widgets.Actor;
+using Dalamud.Plugin.Services;
 using System.Collections.Generic;
 
 namespace Brio.Capabilities.Actor;
@@ -14,16 +15,18 @@ public class ActorDebugCapability : ActorCharacterCapability
     public bool IsDebug => _configService.IsDebug;
 
     private readonly ConfigurationService _configService;
-    private readonly ActorVFXService _vfxService;
+    private readonly VFXService _vfxService;
     private readonly SkeletonService _skeletonService;
+    public readonly IObjectTable _gameObjects;
 
     public SkeletonService SkeletonService => _skeletonService;
 
-    public ActorDebugCapability(ActorEntity parent, SkeletonService skeletonService, ConfigurationService configService, ActorVFXService actorVFXService) : base(parent)
+    public ActorDebugCapability(ActorEntity parent, IObjectTable gameObjects, SkeletonService skeletonService, ConfigurationService configService, VFXService actorVFXService) : base(parent)
     {
         _configService = configService;
         _vfxService = actorVFXService;
         _skeletonService = skeletonService;
+        _gameObjects = gameObjects;
 
         Widget = new ActorDebugWidget(this);
     }
@@ -39,5 +42,5 @@ public class ActorDebugCapability : ActorCharacterCapability
         }
     }
 
-    public ActorVFXService VFXService => _vfxService;
+    public VFXService VFXService => _vfxService;
 }

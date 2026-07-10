@@ -60,6 +60,10 @@ public class CommandHandlerService : IDisposable
                 _uiManager.ToggleMainWindow();
                 break;
 
+            case "timeline":
+                _uiManager.ToggleTimelineWindow();
+                break;
+
             case "settings":
                 _uiManager.ToggleSettingsWindow();
                 break;

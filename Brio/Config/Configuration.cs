@@ -4,8 +4,8 @@ namespace Brio.Config;
 
 public class Configuration : IPluginConfiguration
 {
-    public const int CurrentVersion = 4;
-    public const int CurrentPopupKey = 2232;
+    public const int CurrentVersion = 5;
+    public const int CurrentPopupKey = 3001; // why did I set it to this?????? 
 
     public int Version { get; set; } = CurrentVersion;
 
@@ -29,8 +29,14 @@ public class Configuration : IPluginConfiguration
 
     public SceneImportConfiguration Import { get; set; } = new SceneImportConfiguration();
 
+    // Timeline
+    public TimelineConfiguration Timeline { get; set; } = new TimelineConfiguration();
+
     // Library
     public LibraryConfiguration Library { get; set; } = new LibraryConfiguration();
+
+    // Quick Access (Favorites + Recents)
+    public QuickAccessConfiguration QuickAccess { get; set; } = new QuickAccessConfiguration();
 
     // MCDF Data
     public MCDFConfiguration MCDF { get; set; } = new MCDFConfiguration();
@@ -45,6 +51,8 @@ public class Configuration : IPluginConfiguration
     public bool UseLibraryWhenImporting { get; set; } = true;
 
     public bool SceneDestoryActorsBeforeImport { get; set; } = false;
+
+    public bool EnableEvents { get; set; } = true;
 
     // Input
     public InputManagerConfiguration InputManager { get; set; } = new InputManagerConfiguration();

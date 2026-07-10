@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.InteropServices;
 
 namespace Brio.Core;
 
@@ -6,7 +7,7 @@ public static class Win32
 {
     public delegate bool MonitorEnumProc(IntPtr hMonitor, IntPtr hdcMonitor, ref RECT lprcMonitor, IntPtr dwData);
 
-    [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential)]
+    [StructLayout(LayoutKind.Sequential)]
     public struct RECT
     {
         public int left;
@@ -15,7 +16,7 @@ public static class Win32
         public int bottom;
     }
 
-    [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential, CharSet = System.Runtime.InteropServices.CharSet.Auto)]
+    [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Auto)]
     public struct MONITORINFOEX
     {
         public uint cbSize;
@@ -23,14 +24,18 @@ public static class Win32
         public RECT rcWork;
         public uint dwFlags;
 
-        [System.Runtime.InteropServices.MarshalAs(System.Runtime.InteropServices.UnmanagedType.ByValTStr, SizeConst = 32)]
+        [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 32)]
         public string szDevice;
     }
 
-    [System.Runtime.InteropServices.DllImport("user32.dll")]
+    //
+    //
+    //
+
+    [DllImport("user32.dll")]
     public static extern bool EnumDisplayMonitors(IntPtr hdc, IntPtr lprcClip, MonitorEnumProc lpfnEnum, IntPtr dwData);
 
-    [System.Runtime.InteropServices.DllImport("user32.dll", CharSet = System.Runtime.InteropServices.CharSet.Auto)]
+    [DllImport("user32.dll", CharSet = CharSet.Auto)]
     public static extern bool GetMonitorInfo(IntPtr hMonitor, ref MONITORINFOEX lpmi);
 
 }

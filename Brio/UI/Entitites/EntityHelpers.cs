@@ -3,12 +3,13 @@ using Brio.UI.Controls.Stateless;
 using Brio.UI.Widgets.Core;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface.Utility.Raii;
+using System.Numerics;
 
 namespace Brio.UI.Entitites;
 
 public static class EntityHelpers
 {
-    public static void DrawEntitySection(Entity? entity)
+    public static void DrawEntitySection(Entity? entity, bool isUndocked = false, bool drawChild = false)
     {
         if(entity is not null && entity.IsAttached)
         {
@@ -26,9 +27,35 @@ public static class EntityHelpers
                     WidgetHelpers.DrawQuickIcons(capabilities);
                 }
 
-                using(ImRaii.PushId($"bodies_{entity.Id}"))
+                if(entity.IsWidgetBodyHidden is false && isUndocked == false)
                 {
-                    WidgetHelpers.DrawBodies(capabilities);
+                    ImBrio.VerticalPadding(2f);
+
+                    if(drawChild)
+                    {
+                        ImGui.Separator();
+                        ImBrio.VerticalPadding(2f);
+
+                        using(var s = ImRaii.PushStyle(ImGuiStyleVar.ChildBorderSize, 0f))
+                        using(var child = ImRaii.Child("###entitySection", new Vector2(-1, -1), false))
+                        {
+                            if(child.Success)
+                            {
+                                s.Pop();
+
+                                using(ImRaii.PushId($"bodies_{entity.Id}"))
+                                {
+                                    WidgetHelpers.DrawBodies(capabilities);
+                                }
+                            }
+                        }
+                        return;
+                    }
+
+                    using(ImRaii.PushId($"bodies_{entity.Id}"))
+                    {
+                        WidgetHelpers.DrawBodies(capabilities);
+                    }
                 }
             }
         }

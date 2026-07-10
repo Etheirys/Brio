@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Numerics;
 using Brio.Game.Types;
 using Brio.Resources;
@@ -29,34 +28,34 @@ public class NpcSelector(string id) : Selector<NpcSelectorEntry>(id)
     {
         var gameDataProvider = GameDataProvider.Instance;
 
-        foreach(var npc in gameDataProvider.BNpcBases)
+        foreach(var row in gameDataProvider.FilteredBNpcBases)
         {
-            var name = gameDataProvider.GetBNpcName(npc.RowId);
-            AddItem(new NpcSelectorEntry(name, 0, npc));
+            var name = gameDataProvider.GetBNpcNameByBase(row.RowId);
+            AddItem(new NpcSelectorEntry(name, 0, row));
         }
 
-        foreach(var npc in gameDataProvider.ENpcBases)
+        foreach(var row in gameDataProvider.FilteredENpcBases)
         {
-            var name = gameDataProvider.GetENpcName(npc.RowId);
-            AddItem(new NpcSelectorEntry(name, 0, npc));
+            var name = gameDataProvider.GetENpcName(row.RowId);
+            AddItem(new NpcSelectorEntry(name, 0, row));
         }
 
-        foreach(var mount in gameDataProvider.Mounts)
+        foreach(var row in gameDataProvider.FilteredMounts)
         {
-            var name = gameDataProvider.GetMountName(mount.RowId);
-            AddItem(new NpcSelectorEntry(name, mount.Icon, mount));
+            var name = gameDataProvider.GetMountName(row.RowId);
+            AddItem(new NpcSelectorEntry(name, row.Icon, row));
         }
 
-        foreach(var companion in gameDataProvider.Companions)
+        foreach(var row in gameDataProvider.FilteredCompanions)
         {
-            var name = gameDataProvider.GetCompanionName(companion.RowId);
-            AddItem(new NpcSelectorEntry(name, companion.Icon, companion));
+            var name = gameDataProvider.GetCompanionName(row.RowId);
+            AddItem(new NpcSelectorEntry(name, row.Icon, row));
         }
 
-        foreach(var ornament in gameDataProvider.Ornaments)
+        foreach(var row in gameDataProvider.FilteredOrnaments)
         {
-            var name = GameDataProvider.Instance.GetOrnamentName(ornament.RowId);
-            AddItem(new NpcSelectorEntry(name, ornament.Icon, ornament));
+            var name = GameDataProvider.Instance.GetOrnamentName(row.RowId);
+            AddItem(new NpcSelectorEntry(name, row.Icon, row));
         }
     }
 
@@ -103,11 +102,11 @@ public class NpcSelector(string id) : Selector<NpcSelectorEntry>(id)
     protected override bool Filter(NpcSelectorEntry item, string search)
     {
         bool shouldHide = item.Appearance.Match(
-            bnpc => !showBNpcs || bnpc.RowId == 0,
-            enpc => !showENpcs || enpc.RowId == 0,
-            mount => !showMounts || mount.ModelChara.RowId == 0,
-            companion => !showCompanions || companion.Model.RowId == 0,
-            ornament => !showOrnaments || ornament.Model == 0,
+            bnpc => !showBNpcs,
+            enpc => !showENpcs,
+            mount => !showMounts,
+            companion => !showCompanions,
+            ornament => !showOrnaments,
             none => true
         );
 
@@ -123,10 +122,7 @@ public class NpcSelector(string id) : Selector<NpcSelectorEntry>(id)
             none => ""
         );
 
-        if(searchTerm.Contains(search, StringComparison.InvariantCultureIgnoreCase))
-            return true;
-
-        return false;
+        return searchTerm.Contains(search, StringComparison.InvariantCultureIgnoreCase);
     }
 
     protected override int Compare(NpcSelectorEntry itemA, NpcSelectorEntry itemB)

@@ -33,19 +33,14 @@ public static class IntExtensions
         else
         {
             result.Append(ones[number / 100]);
+            result.Append(separator);
+            result.Append("Hundred");
 
             int remainder = number % 100;
-            if(remainder == 0)
+            if(remainder > 0)
             {
                 result.Append(separator);
-                result.Append("Hundred");
-            }
-            else
-            {
-                result.Append(separator);
-                result.Append("Hundred");
-                result.Append(separator);
-                result.Append(ToWords(remainder, ""));
+                result.Append(ToWords(remainder, separator));
             }
         }
 

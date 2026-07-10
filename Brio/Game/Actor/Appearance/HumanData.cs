@@ -34,7 +34,7 @@ public class HumanData
     public uint[] GetHairColors(Tribes tribe, Genders gender)
     {
         var start = GetTribeHairStartIndex(tribe, gender);
-        return [.._rawColors[start..(start + HairLength)].Where(x => x != NeutralHair)];
+        return [.. _rawColors[start..(start + HairLength)].Where(x => x != NeutralHair)];
     }
 
     public uint[] GetHairHighlightColors() => [.. _rawColors[256..(256 + HairLength)].Where(x => x != NeutralHair)];

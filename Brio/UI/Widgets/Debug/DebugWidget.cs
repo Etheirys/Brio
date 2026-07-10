@@ -38,8 +38,27 @@ public class DebugWidget(DebugCapability capability, IClientState _clientState, 
                     if(item.Success)
                         DrawMisc();
                 }
+
+                using(var item = ImRaii.TabItem("Objects"))
+                {
+                    if(item.Success)
+                        DrawObjects();
+                }
+
+                using(var item = ImRaii.TabItem("World"))
+                {
+                    if(item.Success)
+                    {
+
+                    }
+                }
             }
         }
+    }
+
+    private unsafe void DrawObjects()
+    {
+
     }
 
     private void DrawGPose()

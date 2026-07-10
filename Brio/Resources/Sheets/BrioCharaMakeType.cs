@@ -96,12 +96,12 @@ public unsafe struct BrioCharaMakeType(ExcelPage page, uint offset, uint row) : 
     {
         var menus = new List<Menu>();
 
-        var CharaMakeTypes = GameDataProvider.Instance.DataManager.GetExcelSheet<BrioCharaMakeType>(name: "CharaMakeType").
+        var charaMakeTypes = GameDataProvider.Instance.GetExcelSheet<BrioCharaMakeType>(name: "CharaMakeType").
             First(x => x.Gender == (sbyte)appearance.Customize.Gender && x.Race.RowId == (uint)appearance.Customize.Race);
 
-        for(uint i = 0; i < CharaMakeTypes.CharaMakeStruct.Count; ++i)
+        for(uint i = 0; i < charaMakeTypes.CharaMakeStruct.Count; ++i)
         {
-            var firstChar = CharaMakeTypes.CharaMakeStruct[(int)i];
+            var firstChar = charaMakeTypes.CharaMakeStruct[(int)i];
 
             var title = firstChar.Menu.ValueNullable?.Text.ExtractText() ?? "Unknown";
             var menuType = (MenuType)firstChar.SubMenuType;
@@ -117,7 +117,7 @@ public unsafe struct BrioCharaMakeType(ExcelPage page, uint offset, uint row) : 
 
             for(int y = 0; y < FaceCount; ++y)
             {
-                var faceOption = CharaMakeTypes.FacialFeatureOption[y];
+                var faceOption = charaMakeTypes.FacialFeatureOption[y];
                 for(int x = 0; x < faceOption.Options.Length; ++x)
                 {
                     FacialFeatures[y, x] = faceOption.Options[x];
@@ -135,17 +135,32 @@ public unsafe struct BrioCharaMakeType(ExcelPage page, uint offset, uint row) : 
                 subParams[x] = (int)firstChar.SubMenuParam[x];
             }
 
-            menus.Add(new Menu(i, CharaMakeTypes.RowId, title,
-                CharaMakeTypes.Race.IsValid ? (Races)CharaMakeTypes.Race.Value.RowId : 0,
-                CharaMakeTypes.Tribe.IsValid ? (Tribes)CharaMakeTypes.Tribe.Value.RowId : 0,
-                (Genders)CharaMakeTypes.Gender, menuType, subMenuMask, customizeIndex,
-                initialValue, subParams, subGraphics, [.. CharaMakeTypes.VoiceStruct], FacialFeatures));
+            menus.Add(new Menu(i, charaMakeTypes.RowId, title,
+                charaMakeTypes.Race.IsValid ? (Races)charaMakeTypes.Race.Value.RowId : 0,
+                charaMakeTypes.Tribe.IsValid ? (Tribes)charaMakeTypes.Tribe.Value.RowId : 0,
+                (Genders)charaMakeTypes.Gender, menuType, subMenuMask, customizeIndex,
+                initialValue, subParams, subGraphics, [.. charaMakeTypes.VoiceStruct], FacialFeatures));
 
 
         }
 
+        menus.Sort((a, b) => GetMenuSortPriority(a.CustomizeIndex).CompareTo(GetMenuSortPriority(b.CustomizeIndex)));
+
         return new MenuCollection([.. menus]);
     }
+
+    private static int GetMenuSortPriority(CustomizeIndex index) => index switch
+    {
+        CustomizeIndex.Height => 0,
+        CustomizeIndex.HairStyle => 0,
+        CustomizeIndex.FaceType => 1,
+        CustomizeIndex.FaceFeatures => 2,
+        CustomizeIndex.Facepaint => 3,
+        CustomizeIndex.RaceFeatureType => 4,
+        CustomizeIndex.RaceFeatureSize => 5,
+        CustomizeIndex.SkinColor => 6,
+        _ => 7,
+    };
 
     public class MenuCollection(Menu[] menus)
     {
@@ -158,7 +173,7 @@ public unsafe struct BrioCharaMakeType(ExcelPage page, uint offset, uint row) : 
 
         public Menu[] GetMenusForCustomize(CustomizeIndex index)
         {
-            return Menus.Where(x => x.CustomizeIndex == index).ToArray();
+            return [.. Menus.Where(x => x.CustomizeIndex == index)];
         }
 
         public MenuType GetMenuTypeForCustomize(CustomizeIndex index)

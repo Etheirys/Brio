@@ -11,8 +11,7 @@ namespace Brio.Files;
 
 public class MareCharacterDataFileInfo : AppliableActorFileInfoBase<MareCharacterDataFile>
 {
-    public MareCharacterDataFileInfo(EntityManager entityManager, ConfigurationService configurationService)
-    : base(entityManager, configurationService)
+    public MareCharacterDataFileInfo(EntityManager entityManager, ConfigurationService configurationService) : base(entityManager, configurationService)
     {
     }
 
@@ -25,8 +24,7 @@ public class MareCharacterDataFileInfo : AppliableActorFileInfoBase<MareCharacte
 
     protected override void Apply(MareCharacterDataFile file, ActorEntity actor, bool asExpression = false)
     {
-        ActorAppearanceCapability? capability;
-        if(actor.TryGetCapability<ActorAppearanceCapability>(out capability) && capability != null)
+        if(actor.TryGetCapability<ActorAppearanceCapability>(out ActorAppearanceCapability? capability) && capability != null)
         {
             _ = capability.LoadMCDF(file.GetPath());
         }

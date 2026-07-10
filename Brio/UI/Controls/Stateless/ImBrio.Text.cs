@@ -6,14 +6,13 @@ using Dalamud.Interface.Utility.Raii;
 using Dalamud.Plugin;
 using System;
 using System.Numerics;
+using System.Runtime.CompilerServices;
 
 namespace Brio.UI.Controls.Stateless;
 
 public static partial class ImBrio
 {
-
-
-
+    [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
     public static void TextCentered(string text, float width)
     {
         float textWidth = ImGui.CalcTextSize(text).X;
@@ -27,11 +26,54 @@ public static partial class ImBrio
         ImGui.TextWrapped(text);
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
     public static void Text(string text, uint color = 0xFFFFFF)
     {
         ImGui.TextColored(ImGui.ColorConvertU32ToFloat4(color), text);
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+    public static void DrawTruncateTextToWidth(string text, float maxWidth)
+    {
+        const string ellipsis = "...";
+        ReadOnlySpan<char> span = text.AsSpan();
+
+        if(maxWidth <= 0)
+        {
+            ImGui.Text(ellipsis);
+            return;
+        }
+
+        if(ImGui.CalcTextSize(span).X <= maxWidth)
+        {
+            ImGui.Text(span);
+            return;
+        }
+
+        float available = maxWidth - ImGui.CalcTextSize(ellipsis).X;
+
+        int lnth = 0;
+        int lethLong = span.Length - 1;
+        while(lnth < lethLong)
+        {
+            int mid = lnth + (lethLong - lnth + 1) / 2;
+            if(ImGui.CalcTextSize(span[..mid]).X <= available)
+                lnth = mid;
+            else
+
+                lethLong = mid - 1;
+        }
+
+        Span<char> textBuffer = stackalloc char[lnth + 3];
+
+        span[..lnth].CopyTo(textBuffer);
+        ellipsis.AsSpan().CopyTo(textBuffer[lnth..]);
+
+        ImGui.Text(textBuffer);
+    }
+
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
     public static void Icon(FontAwesomeIcon icon)
     {
         if(icon == FontAwesomeIcon.None) return;

@@ -1,78 +1,74 @@
-﻿using System;
+﻿using Brio.Core;
+using Dalamud.Bindings.ImGui;
+using Dalamud.Interface.Windowing;
+using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
-using System.Reflection;
 using System.Text;
 using System.Threading;
+using System.Threading.Channels;
 using System.Threading.Tasks;
 
 namespace Brio.Services;
 
 public class Mediator() : IDisposable
 {
+    private readonly Channel<MessageBase> _queue = Channel.CreateUnbounded<MessageBase>(new UnboundedChannelOptions { SingleReader = true, SingleWriter = false });
+    private readonly CancellationTokenSource _loopCTS = new();
+
     private readonly Lock _addRemoveLock = new();
+    private readonly ConcurrentDictionary<Type, SubscriberContainer> _subscribers = new();
+    private readonly ConcurrentDictionary<SubscriberAction, DateTime> _lastErrorTime = new();
 
-    private readonly CancellationTokenSource _loopCts = new();
-    private readonly ConcurrentDictionary<object, DateTime> _lastErrorTime = [];
+    private Task? _pumpTask;
 
-    private readonly ConcurrentQueue<MessageBase> _messageQueue = new();
-    private readonly ConcurrentDictionary<Type, MethodInfo?> _genericExecuteMethods = new();
-    private readonly ConcurrentDictionary<Type, HashSet<SubscriberAction>> _subscriberDict = [];
-
-    public void PrintSubscriberInfo()
-    {
-        Brio.Log.Info("=== Mediator Subscriber Info ===");
-        foreach(var subscriber in _subscriberDict.SelectMany(c => c.Value.Select(v => v.Subscriber))
-            .DistinctBy(p => p).OrderBy(p => p.GetType().FullName, StringComparer.Ordinal).ToList())
-        {
-            Brio.Log.Info("Subscriber {type}: {sub}", subscriber.GetType().Name, subscriber?.ToString() ?? "Unknown Subscriber");
-
-            StringBuilder sb = new();
-            sb.Append("=> ");
-
-            var list = _subscriberDict.Where(item => item.Value.Any(v => v.Subscriber == subscriber)).ToList();
-            for(int i = 0; i < list.Count; i++)
-                sb.Append(list[i].Key.Name).Append(", ");
-
-            if(!string.Equals(sb.ToString(), "=> ", StringComparison.Ordinal))
-                Brio.Log.Info("{sb}", sb.ToString().TrimEnd(' ', ','));
-
-            Brio.Log.Info("---");
-        }
-    }
+    private DiagnosticTracker _perfTracker = new("Mediator", logInterval: 7000, slowFrameThresholdMs: 5.0, slowFrameCooldownFrames: 7000, []);
 
     public Task StartAsync(CancellationToken cancellationToken)
     {
-        Brio.Log.Info("Starting Mediator");
-
-        _ = Task.Run(async () =>
-        {
-            while(!_loopCts.Token.IsCancellationRequested)
-            {
-                await Task.Delay(100, _loopCts.Token).ConfigureAwait(false);
-
-                HashSet<MessageBase> processedMessages = [];
-                while(_messageQueue.TryDequeue(out var message))
-                {
-                    if(processedMessages.Contains(message)) { continue; }
-                    processedMessages.Add(message);
-
-                    ExecuteMessage(message);
-                }
-            }
-        }, cancellationToken);
-
+        Brio.Log.Debug("Starting Mediator");
+        _pumpTask = Task.Run(PumpAsync, cancellationToken);
         Brio.Log.Info("Started Mediator");
 
         return Task.CompletedTask;
     }
-    public Task StopAsync(CancellationToken cancellationToken)
+
+    public async Task StopAsync(CancellationToken cancellationToken)
     {
-        _messageQueue.Clear();
-        _loopCts.Cancel();
-        _loopCts.Dispose();
-        return Task.CompletedTask;
+        _queue.Writer.TryComplete();
+        if(!_loopCTS.IsCancellationRequested)
+            _loopCTS.Cancel();
+
+        if(_pumpTask is not null)
+        {
+            try
+            {
+                await _pumpTask.ConfigureAwait(false);
+            }
+            catch(Exception) { } // just ignore
+        }
+    }
+
+    private async Task PumpAsync()
+    {
+        try
+        {
+            while(await _queue.Reader.WaitToReadAsync(_loopCTS.Token).ConfigureAwait(false))
+            {
+                while(_queue.Reader.TryRead(out var message))
+                {
+                    using(Diagnostics.MeasureTime(ref _perfTracker.Trace))
+                        ExecuteMessage(message);
+
+                    _perfTracker.Tick();
+                }
+            }
+        }
+        catch(Exception ex)
+        {
+            Brio.Log.Fatal("Eror in Mediator Pump: {ex}", ex);
+        }
     }
 
     public void Publish<T>(T message) where T : MessageBase
@@ -83,110 +79,163 @@ public class Mediator() : IDisposable
         }
         else
         {
-            _messageQueue.Enqueue(message);
+            _queue.Writer.TryWrite(message);
         }
     }
 
     public void Subscribe<T>(IMediatorSubscriber subscriber, Action<T> action) where T : MessageBase
     {
+        var subContainer = _subscribers.GetOrAdd(typeof(T), static _ => new SubscriberContainer());
+
         lock(_addRemoveLock)
         {
-            _subscriberDict.TryAdd(typeof(T), []);
+            var subAction = new SubscriberAction(subscriber, action);
+            if(subContainer.Subscribers.Any(s => s.Subscriber == subscriber))
+                return;
 
-            if(!_subscriberDict[typeof(T)].Add(new(subscriber, action)))
-            {
-                throw new InvalidOperationException("Already subscribed");
-            }
+            subContainer.SubAction ??= BuildAction<T>();
+
+            subContainer.Subscribers = Resort(subContainer.Subscribers.Add(subAction));
         }
     }
+
     public void Unsubscribe<T>(IMediatorSubscriber subscriber) where T : MessageBase
     {
+        if(!_subscribers.TryGetValue(typeof(T), out var subContainer))
+            return;
+
         lock(_addRemoveLock)
         {
-            if(_subscriberDict.ContainsKey(typeof(T)))
-            {
-                _subscriberDict[typeof(T)].RemoveWhere(p => p.Subscriber == subscriber);
-            }
+            var removed = subContainer.Subscribers.Where(s => s.Subscriber == subscriber);
+            if(!removed.Any())
+                return;
+
+            subContainer.Subscribers = Resort(subContainer.Subscribers.RemoveAll(s => s.Subscriber == subscriber));
+            foreach(var r in removed)
+                _lastErrorTime.TryRemove(r, out _);
         }
     }
+
     internal void UnsubscribeAll(IMediatorSubscriber subscriber)
     {
         lock(_addRemoveLock)
         {
-            foreach(Type kvp in _subscriberDict.Select(k => k.Key))
+            foreach(var (type, subContainer) in _subscribers)
             {
-                int unSubbed = _subscriberDict[kvp]?.RemoveWhere(p => p.Subscriber == subscriber) ?? 0;
-                if(unSubbed > 0)
-                {
-                    Brio.Log.Debug("{sub} unsubscribed from {msg}", subscriber.GetType().Name, kvp.Name);
-                }
+                var removed = subContainer.Subscribers.Where(s => s.Subscriber == subscriber);
+                if(!removed.Any())
+                    continue;
+
+                subContainer.Subscribers = Resort(subContainer.Subscribers.RemoveAll(s => s.Subscriber == subscriber));
+                foreach(var r in removed)
+                    _lastErrorTime.TryRemove(r, out _);
+
+                Brio.Log.Debug("{sub} unsubscribed from {msg}", subscriber.GetType().Name, type.Name);
             }
         }
     }
 
     private void ExecuteMessage(MessageBase message)
     {
-        if(!_subscriberDict.TryGetValue(message.GetType(), out HashSet<SubscriberAction>? subscribers) || subscribers == null || !subscribers.Any()) return;
+        if(!_subscribers.TryGetValue(message.GetType(), out var subContainer))
+            return;
 
-        List<SubscriberAction> subscribersCopy = [];
-        lock(_addRemoveLock)
-        {
-            subscribersCopy = subscribers?.Where(s => s.Subscriber != null).OrderBy(k => k.Subscriber is IHighPriorityMediatorSubscriber ? 0 : 1).ToList() ?? [];
-        }
+        var subscribers = subContainer.Subscribers;
+        if(subscribers.IsDefaultOrEmpty)
+            return;
 
-#pragma warning disable S3011 // Reflection should not be used to increase accessibility of classes, methods, or fields
-        var msgType = message.GetType();
-        if(!_genericExecuteMethods.TryGetValue(msgType, out var methodInfo))
-        {
-            _genericExecuteMethods[msgType] = methodInfo = GetType()
-                 .GetMethod(nameof(ExecuteReflected), BindingFlags.NonPublic | BindingFlags.Instance)?
-                 .MakeGenericMethod(msgType);
-        }
-
-        methodInfo!.Invoke(this, [subscribersCopy, message]);
-#pragma warning restore S3011 // Reflection should not be used to increase accessibility of classes, methods, or fields
+        subContainer.SubAction!(subscribers, message, this);
     }
-    private void ExecuteReflected<T>(List<SubscriberAction> subscribers, T message) where T : MessageBase
+
+    public void PrintSubscriberInfo()
     {
-        foreach(SubscriberAction subscriber in subscribers)
+        Brio.Log.Info("=== Mediator Subscriber Info ===");
+
+        var subs = _subscribers
+            .SelectMany(kv => kv.Value.Subscribers.Select(s => s.Subscriber))
+            .Distinct()
+            .OrderBy(p => p.GetType().FullName, StringComparer.Ordinal);
+
+        foreach(var subscriber in subs)
         {
-            try
-            {
-                ((Action<T>)subscriber.Action).Invoke(message);
-            }
-            catch(Exception ex)
-            {
-                if(_lastErrorTime.TryGetValue(subscriber, out var lastErrorTime) && lastErrorTime.Add(TimeSpan.FromSeconds(10)) > DateTime.UtcNow)
-                    continue;
+            Brio.Log.Info("Subscriber {type}: {sub}", subscriber.GetType().Name, subscriber.ToString() ?? "Unknown");
 
-                Brio.Log.Error("Error executing {type} for subscriber {subscriber}: {ex}",
-                    message.GetType().Name, subscriber.Subscriber.GetType().Name, ex.InnerException?.Message ?? ex.Message);
+            var sb = new StringBuilder("=> ");
+            foreach(var kv in _subscribers)
+                if(kv.Value.Subscribers.Any(s => s.Subscriber == subscriber))
+                    sb.Append(kv.Key.Name).Append(", ");
 
-                _lastErrorTime[subscriber] = DateTime.UtcNow;
-            }
+            if(sb.Length > 3)
+                Brio.Log.Info("{sb}", sb.ToString().TrimEnd(' ', ','));
+
+            Brio.Log.Info("---");
         }
+    }
+
+    private static Action<ImmutableArray<SubscriberAction>, MessageBase, Mediator> BuildAction<T>() where T : MessageBase
+    {
+        return static (subscribers, message, self) =>
+        {
+            foreach(var sub in subscribers)
+            {
+                try
+                {
+                    ((Action<T>)sub.Action).Invoke((T)message);
+                }
+                catch(Exception ex)
+                {
+                    if(self._lastErrorTime.TryGetValue(sub, out var last) && last.AddSeconds(10) > DateTime.UtcNow)
+                        continue;
+
+                    Brio.Log.Error("Error executing {type} for subscriber {subscriber}: {ex}", typeof(T).Name, sub.Subscriber.GetType().Name, ex.InnerException?.Message ?? ex.Message);
+
+                    self._lastErrorTime[sub] = DateTime.UtcNow;
+                }
+            }
+        };
+    }
+
+    private static ImmutableArray<SubscriberAction> Resort(ImmutableArray<SubscriberAction> source)
+    {
+        var builder = ImmutableArray.CreateBuilder<SubscriberAction>(source.Length);
+
+        foreach(var sub in source)
+            if(sub.Subscriber is IHighPriorityMediatorSubscriber)
+                builder.Add(sub);
+
+        foreach(var sub in source)
+            if(sub.Subscriber is not IHighPriorityMediatorSubscriber)
+                builder.Add(sub);
+
+        return builder.MoveToImmutable();
+    }
+
+    private class SubscriberContainer
+    {
+        public ImmutableArray<SubscriberAction> Subscribers = [];
+        public Action<ImmutableArray<SubscriberAction>, MessageBase, Mediator>? SubAction;
+    }
+
+    private sealed class SubscriberAction(IMediatorSubscriber subscriber, object action)
+    {
+        public object Action { get; } = action;
+        public IMediatorSubscriber Subscriber { get; } = subscriber;
+
+        public override bool Equals(object? obj)
+            => obj is SubscriberAction o && Subscriber == o.Subscriber && Action == o.Action;
+
+        public override int GetHashCode()
+            => HashCode.Combine(Subscriber, Action);
     }
 
     public void Dispose()
     {
         StopAsync(CancellationToken.None).GetAwaiter().GetResult();
+        _loopCTS.Dispose();
+
         GC.SuppressFinalize(this);
     }
-
-    private sealed class SubscriberAction
-    {
-        public SubscriberAction(IMediatorSubscriber subscriber, object action)
-        {
-            Subscriber = subscriber;
-            Action = action;
-        }
-
-        public object Action { get; }
-        public IMediatorSubscriber Subscriber { get; }
-    }
 }
-
-//
 
 public interface IHighPriorityMediatorSubscriber : IMediatorSubscriber { }
 
@@ -195,14 +244,21 @@ public interface IMediatorSubscriber : IDisposable
     Mediator Mediator { get; }
 }
 
-public abstract class MediatorSubscriberBase : IMediatorSubscriber
+public abstract class MediatorSubscriberBase(Mediator mediator) : IMediatorSubscriber
 {
-    public MediatorSubscriberBase(Mediator mediator)
-    {
-        Mediator = mediator;
-    }
+    public Mediator Mediator { get; } = mediator;
 
-    public Mediator Mediator { get; }
+    public virtual void Dispose()
+    {
+        Mediator.UnsubscribeAll(this);
+        GC.SuppressFinalize(this);
+    }
+}
+
+public abstract class MediatorWindow(Mediator mediator, string name, ImGuiWindowFlags flags = ImGuiWindowFlags.None, bool forceMainWindow = false)
+    : Window(name, flags, forceMainWindow), IMediatorSubscriber
+{
+    public Mediator Mediator { get; init; } = mediator;
 
     public virtual void Dispose()
     {

@@ -35,16 +35,20 @@ public class CameraWindow : Window, IDisposable
 
         WindowSizeConstraints constraints = new()
         {
-            MinimumSize = new(250, 300),
-            MaximumSize = new(355, 400)
+            MinimumSize = new(280, 300),
+            MaximumSize = new(385, 485)
         };
         this.SizeConstraints = constraints;
+
+        this.AllowBackgroundBlur = false;
 
         _gPoseService.OnGPoseStateChange += OnGPoseStateChange;
     }
 
     public override void Draw()
     {
+        ImBrio.BlurWindow();
+
         ImBrio.VerticalPadding(2);
 
         ImGui.Text("Select Camera to Edit:");
@@ -66,7 +70,6 @@ public class CameraWindow : Window, IDisposable
 
         ImBrio.AttachToolTip("Current Camera");
 
-        ImGui.Separator();
 
         if(_virtualCameraService.SelectedCameraEntity is null || _virtualCameraService.SelectedCameraEntity.IsAttached == false)
         {
@@ -75,13 +78,12 @@ public class CameraWindow : Window, IDisposable
                 : null;
         }
 
+        ImBrio.SeparatorText($"Camera - [{_virtualCameraService.SelectedCameraEntity?.FriendlyName}]");
+
         //
         // Hedder
 
-        if(_virtualCameraService.SelectedCameraEntity is null)
-        {
-            _virtualCameraService.SelectedCameraEntity = _virtualCameraService.GetDefaultCamera();
-        }
+        _virtualCameraService.SelectedCameraEntity ??= _virtualCameraService.GetDefaultCamera();
 
         if(!_virtualCameraService!.SelectedCameraEntity!.TryGetCapability<BrioCameraCapability>(out var camBrioCap))
         {
@@ -94,7 +96,7 @@ public class CameraWindow : Window, IDisposable
         switch(camBrioCap.CameraEntity.CameraType)
         {
             case CameraType.Free:
-                WindowName = $"{Brio.Name} - CAMERA (FREE)###brio_camera_window";
+                WindowName = $"{Brio.Name} - CAMERA (FREE CAM)###brio_camera_window";
                 CameraEditor.DrawFreeCam("camera_widget_editor", camBrioCap);
                 break;
             case CameraType.Cutscene:
@@ -103,7 +105,7 @@ public class CameraWindow : Window, IDisposable
                 break;
             case CameraType.Game:
             case CameraType.Default:
-                WindowName = $"{Brio.Name} - CAMERA (GAME)###brio_camera_window";
+                WindowName = $"{Brio.Name} - CAMERA (BRIO CAM)###brio_camera_window";
                 CameraEditor.DrawBrioCam("camera_widget_editor", camBrioCap);
                 break;
         }

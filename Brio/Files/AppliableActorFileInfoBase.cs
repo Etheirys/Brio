@@ -10,7 +10,7 @@ public abstract class AppliableActorFileInfoBase<T> : JsonDocumentBaseFileInfo<T
     where T : class
 {
     private EntityManager _entityManager;
-    private ConfigurationService _configService;
+    protected ConfigurationService _configService;
 
     public AppliableActorFileInfoBase(EntityManager entityManager, ConfigurationService configurationService)
     {
@@ -36,17 +36,19 @@ public abstract class AppliableActorFileInfoBase<T> : JsonDocumentBaseFileInfo<T
     {
         base.DrawActions(fileEntry, isModal);
 
-        ImBrio.DrawApplyToActor(_entityManager, (actor) =>
+        ImBrio.DrawApplyToActor(_entityManager, (actor) => OnApplyToActor(fileEntry, actor));
+    }
+
+    protected virtual void OnApplyToActor(FileEntry fileEntry, ActorEntity actor)
+    {
+        if(Load(fileEntry.FilePath) is T file)
         {
-            if(Load(fileEntry.FilePath) is T file)
+            if(_configService.Configuration.Library.UseFilenameAsActorName)
             {
-                if(_configService.Configuration.Library.UseFilenameAsActorName)
-                {
-                    actor.FriendlyName = fileEntry.Name;
-                }
-                Apply(file, actor, false);
+                actor.FriendlyName = fileEntry.Name;
             }
-        });
+            Apply(file, actor, false);
+        }
     }
 
     protected abstract void Apply(T file, ActorEntity actor, bool asExpression);

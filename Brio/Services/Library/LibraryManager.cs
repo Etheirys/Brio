@@ -3,12 +3,12 @@ using Brio.Files;
 using Brio.Library.Filters;
 using Brio.Library.Sources;
 using Brio.Library.Tags;
+using Brio.Services;
 using Brio.UI;
 using Brio.UI.Controls.Editors;
 using Brio.UI.Windows;
 using Dalamud.Interface;
 using Dalamud.Plugin.Services;
-using MessagePack;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -23,9 +23,11 @@ public class LibraryManager : IDisposable
 
     private readonly FileService _fileService;
     private readonly ConfigurationService _configurationService;
+    private readonly SceneService _sceneService;
     private readonly IFramework _framework;
+
     private readonly LibraryRoot _rootItem;
-    private readonly List<SourceBase> _sources = new();
+    private readonly List<SourceBase> _sources = [];
     private readonly IEnumerable<SourceBase> _publicSources;
 
     private LibraryWindow? _window;
@@ -40,6 +42,7 @@ public class LibraryManager : IDisposable
         FileService fileService,
         ConfigurationService configurationService,
         IFramework framework,
+        SceneService sceneService,
         IEnumerable<SourceBase> publicSources)
     {
         _instance = this;
@@ -48,6 +51,7 @@ public class LibraryManager : IDisposable
         _framework = framework;
         _rootItem = new();
         _publicSources = publicSources;
+        _sceneService = sceneService;
 
         _configurationService.Configuration.Library.ReEstablishDefaultPaths();
         _configurationService.OnConfigurationChanged += OnConfigurationChanged;
@@ -72,7 +76,7 @@ public class LibraryManager : IDisposable
         if(_instance == null || _instance._window == null)
             return;
 
-        _instance._window.OpenModal(filter, callback);
+        ModalManager.Instance.OpenLibraryModal(filter, callback);
     }
 
     public void AddSource(SourceBase source)
@@ -178,7 +182,7 @@ public class LibraryManager : IDisposable
                     string path = paths[0];
                     object? result;
                     if(loadMessagePack)
-                        result = MessagePackSerializer.Deserialize<SceneFile>(File.ReadAllBytes(path));
+                        result = _sceneService.Deserialize(File.ReadAllBytes(path));
                     else
                         result = _fileService.Load(path);
 

@@ -31,7 +31,7 @@ public class StatusEffectCapability : ActorCapability
 
     public unsafe IEnumerable<Status> ActiveStatuses => Character.GetStatusManager()->GetAllStatuses();
 
-    public unsafe void RemoveStatus(Status status) => RemoveStatus((ushort)status.RowId);
+    public void RemoveStatus(Status status) => RemoveStatus((ushort)status.RowId);
 
     public unsafe void RemoveStatus(ushort status)
     {
@@ -46,10 +46,5 @@ public class StatusEffectCapability : ActorCapability
     public unsafe void AddStatus(ushort status)
     {
         Character.GetStatusManager()->AddStatus(status);
-    }
-
-    public Status? GetStatus(uint rowId)
-    {
-        return GameDataProvider.Instance.Statuses.TryGetRow(rowId, out var status) ? status : null;
     }
 }

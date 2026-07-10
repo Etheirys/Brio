@@ -22,7 +22,6 @@ public class AnamnesisCharaFileInfo(EntityManager entityManager, ConfigurationSe
 
     protected override void Apply(AnamnesisCharaFile file, ActorEntity actor, bool asExpression = false)
     {
-        Brio.Log.Debug($"Name: {Name} | File: {file}");
         if(actor.TryGetCapability<ActorAppearanceCapability>(out ActorAppearanceCapability? capability) && capability != null)
         {
             _ = capability.SetAppearance(file, AppearanceImportOptions.All);
@@ -102,9 +101,9 @@ public class AnamnesisCharaFile : JsonDocumentBase
     {
         base.GetAutoTags(ref tags);
 
-        tags.Add(this.Race.ToDisplayName());
-        tags.Add(this.Gender.ToDisplayName());
-        tags.Add(this.Tribe.ToDisplayName());
+        tags.Add(this.Race.ToDisplayName(), true);
+        tags.Add(this.Gender.ToDisplayName(), true);
+        tags.Add(this.Tribe.ToDisplayName(), true);
     }
 
     public static implicit operator ActorAppearance(AnamnesisCharaFile chara)
@@ -170,7 +169,7 @@ public class AnamnesisCharaFile : JsonDocumentBase
     }
 
     public static implicit operator BrioHuman.ShaderParams(AnamnesisCharaFile chara)
-    {       
+    {
         // More Extended Appearance (Shaders)
         var shaders = new BrioHuman.ShaderParams
         {

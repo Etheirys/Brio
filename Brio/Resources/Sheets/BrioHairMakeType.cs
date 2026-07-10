@@ -43,7 +43,7 @@ public struct BrioHairMakeType(ExcelPage page, uint offset, uint row) : IExcelRo
 
     public static IEnumerable<CharaMakeCustomize> GetHairStyles(ActorCustomize customize)
     {
-        var HairMakeType = GameDataProvider.Instance.DataManager.GetExcelSheet<BrioHairMakeType>().Where(x => x.Gender == customize.Gender && x.Race.RowId == (uint)customize.Race && x.Tribe.RowId == (uint)customize.Tribe);
+        var HairMakeType = GameDataProvider.Instance.GetExcelSheet<BrioHairMakeType>().Where(x => x.Gender == customize.Gender && x.Race.RowId == (uint)customize.Race && x.Tribe.RowId == (uint)customize.Tribe);
 
         foreach(var item in HairMakeType)
         {
@@ -57,7 +57,7 @@ public struct BrioHairMakeType(ExcelPage page, uint offset, uint row) : IExcelRo
 
     public static IEnumerable<CharaMakeCustomize> GetFacePaints(ActorCustomize customize)
     {
-        var FacePaints = GameDataProvider.Instance.DataManager.GetExcelSheet<BrioHairMakeType>().Where(x => x.Gender == customize.Gender && x.Race.RowId == (uint)customize.Race && x.Tribe.RowId == (uint)customize.Tribe);
+        var FacePaints = GameDataProvider.Instance.GetExcelSheet<BrioHairMakeType>().Where(x => x.Gender == customize.Gender && x.Race.RowId == (uint)customize.Race && x.Tribe.RowId == (uint)customize.Tribe);
 
         foreach(var item in FacePaints)
         {

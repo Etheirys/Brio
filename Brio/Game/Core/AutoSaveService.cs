@@ -1,40 +1,68 @@
-﻿using Brio.Config;
-using Brio.Files;
+﻿using Brio.Capabilities.Posing;
+using Brio.Config;
 using Brio.Game.GPose;
 using Brio.MCDF.Game.Services;
 using Brio.Resources;
 using Brio.Services;
-using Brio.UI;
+using Brio.Services.MediatorMessages;
+using Brio.Services.Models;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
-using Dalamud.Utility;
-using MessagePack;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Timers;
 
 namespace Brio.Game.Core;
 
-public class AutoSaveService : IDisposable
+public record class AutoSaveEntry
+{
+    public required string FolderPath { get; init; }
+    public required string DisplayName { get; init; }
+
+    public required bool HasPoses { get; init; }
+    public required int PoseCount { get; init; }
+
+    public required string SavedAtDelta { get; init; }
+
+    public string BrioSavePath => Path.Combine(FolderPath, "SceneAutoSave.brioautosave");
+    public bool IsValid => File.Exists(BrioSavePath);
+}
+
+public record class AutoSavePoseEntry
+{
+    public required string ActorName { get; init; }
+    public required string FilePath { get; init; }
+
+    public bool IsCompanion => ActorName.EndsWith("-Companion", StringComparison.OrdinalIgnoreCase);
+}
+
+public class AutoSaveService : MediatorSubscriberBase, IDisposable
 {
     private readonly IDalamudPluginInterface _pluginInterface;
     private readonly IFramework _framework;
-    private readonly GPoseService _gPoseService;
     private readonly SceneService _sceneService;
     private readonly MCDFService _mCDFService;
+    private readonly Mediator _mediator;
+    private readonly GPoseService _gPoseService;
 
-    public bool IsEnabled = true;
+    public bool IsEnabled { get; set; } = true;
 
-    public AutoSaveService(IDalamudPluginInterface pluginInterface, IFramework framework, SceneService sceneService, MCDFService mCDFService, GPoseService gPoseService)
+    public AutoSaveService(IDalamudPluginInterface pluginInterface, IFramework framework, GPoseService gPoseService, Mediator mediator, SceneService sceneService, MCDFService mCDFService) : base(mediator)
     {
         _pluginInterface = pluginInterface;
         _framework = framework;
-        _gPoseService = gPoseService;
         _sceneService = sceneService;
         _mCDFService = mCDFService;
+        _mediator = mediator;
+        _gPoseService = gPoseService;
 
-        gPoseService.OnGPoseStateChange += GPoseService_OnGPoseStateChange;
+        if(_gPoseService.IsGPosing)
+            Start();
+
+        _mediator.Subscribe<GposeEndMessage>(this, _ => OnGPoseStateChange(false));
+        _mediator.Subscribe<GposeStartMessage>(this, _ => OnGPoseStateChange(true));
     }
 
     private Timer? _timer = null;
@@ -42,7 +70,9 @@ public class AutoSaveService : IDisposable
 
     public void Start()
     {
-        if(Directory.Exists(AutoSaveFolder) == false)
+        _timer?.Dispose();
+
+        if(!Directory.Exists(AutoSaveFolder))
         {
             Directory.CreateDirectory(AutoSaveFolder);
         }
@@ -71,8 +101,10 @@ public class AutoSaveService : IDisposable
 
     private void OnElapsed(object? sender, ElapsedEventArgs e)
     {
-        if(IsEnabled)
+        if(IsEnabled && _gPoseService.IsGPosing)
+        {
             _framework.RunOnFrameworkThread(AutoSave);
+        }
     }
 
     private void AutoSave()
@@ -89,11 +121,12 @@ public class AutoSaveService : IDisposable
 
             try
             {
-                var scene = _sceneService.GenerateSceneFile();
+                var scene = _sceneService.CaptureScene();
 
-                byte[] bytes = MessagePackSerializer.Serialize(scene);
+                byte[] bytes = _sceneService.Serialize(scene);
 
-                var path = Path.Combine(AutoSaveFolder, $"autosave-{DateTime.Now:yyyy-MM-dd}-{DateTime.Now:hh-mm-ss}");
+                var now = DateTime.Now;
+                var path = Path.Combine(AutoSaveFolder, $"autosave-{now:yyyy-MM-dd}-{now:HH-mm-ss-ff}");
 
                 Brio.Log.Verbose($"AutoSaving: {path}");
 
@@ -135,41 +168,8 @@ public class AutoSaveService : IDisposable
         }
     }
 
-    public void ShowAutoSaves()
-    {
-        UIManager.Instance.FileDialogManager.CustomSideBarItems.Clear();
-        UIManager.Instance.FileDialogManager.OpenFileDialog(
-            "Load AutoSave",
-            ".brioautosave",
-            (success, paths) =>
-            {
-                if(success && paths.Count == 1)
-                {
-                    string path = paths[0];
-                    if(path.IsNullOrEmpty() == false)
-                    {
-                        try
-                        {
-                            var result = MessagePackSerializer.Deserialize<SceneFile>(File.ReadAllBytes(path));
-                            _sceneService.LoadScene(result, true);
-                        }
-                        catch(Exception ex)
-                        {
-                            Brio.NotifyError("Brio AutoSave save was corrupted!");
-                            Brio.Log.Error(ex, "Exception while loading an AutoSave!");
-                        }
-                    }
-                }
-            },
-            1,
-            AutoSaveFolder,
-            true);
-    }
-
     internal void Update()
     {
-        Brio.Log.Verbose($"AutoSave: Update");
-
         var timeInterval = TimeSpan.FromSeconds(ConfigurationService.Instance.Configuration.AutoSave.AutoSaveInterval).TotalMilliseconds;
         if(_timer is not null && _timer.Interval != timeInterval)
         {
@@ -177,8 +177,85 @@ public class AutoSaveService : IDisposable
         }
     }
 
+    public IReadOnlyList<AutoSaveEntry> GetAutoSaves()
+    {
+        if(Directory.Exists(AutoSaveFolder) == false)
+            return [];
+
+        return [.. Directory.EnumerateDirectories(AutoSaveFolder)
+            .Select(d => new DirectoryInfo(d))
+            .OrderByDescending(d => d.LastWriteTime)
+            .Select(d =>
+            {
+                var posesPath = Path.Combine(d.FullName, "Poses");
+
+                bool hasPoses = Directory.Exists(posesPath);
+                int poseCount = hasPoses
+                    ? Directory.EnumerateFiles(posesPath, "*.pose").Count()
+                    : 0;
+
+
+                var timeDelta = DateTime.Now - d.LastWriteTime;
+                var savedAt = string.Empty;
+                if(timeDelta.TotalSeconds < 60)
+                    savedAt = $"{(int)timeDelta.TotalSeconds}s ago";
+                if(timeDelta.TotalMinutes < 60)
+                    savedAt = $"{(int)timeDelta.TotalMinutes}m {timeDelta.Seconds}s ago";
+                if(timeDelta.TotalHours < 24)
+                    savedAt = $"{(int)timeDelta.TotalHours}h {timeDelta.Minutes}m ago";
+                else
+                    savedAt = $"{(int)timeDelta.TotalDays}d {timeDelta.Hours}h ago";
+
+                return new AutoSaveEntry
+                {
+                    FolderPath = d.FullName,
+                    DisplayName = $"Auto-Save {d.LastWriteTime:g}",
+                    SavedAtDelta = savedAt,
+                    HasPoses = hasPoses,
+                    PoseCount = poseCount
+                };
+            })];
+    }
+
+    public void LoadAutoSave(AutoSaveEntry entry, bool destroyAll = false, bool useRelativeLightPositions = true, bool useRelativeWorldObjectPositions = true, SceneImportOptions importOptions = SceneImportOptions.Default)
+    {
+        try
+        {
+            var result = _sceneService.Deserialize(File.ReadAllBytes(entry.BrioSavePath));
+            _sceneService.ImportScene(result, destroyAll, useRelativeLightPositions, useRelativeWorldObjectPositions, importOptions);
+        }
+        catch(Exception ex)
+        {
+            Brio.NotifyError("Brio AutoSave was corrupted!");
+            Brio.Log.Error(ex, "Exception while loading an AutoSave!");
+        }
+    }
+
+    public void LoadPoseOnActor(AutoSavePoseEntry poseEntry, PosingCapability capability)
+    {
+        capability.ImportPose(poseEntry.FilePath);
+    }
+
+    public IReadOnlyList<AutoSavePoseEntry> GetAllAutoSavePoses(AutoSaveEntry entry)
+    {
+        var posesPath = Path.Combine(entry.FolderPath, "Poses");
+        if(Directory.Exists(posesPath) == false)
+            return [];
+
+        return [.. Directory.EnumerateFiles(posesPath, "*.pose")
+            .OrderBy(f => f)
+            .Select(f => new AutoSavePoseEntry
+            {
+                ActorName = Path.GetFileNameWithoutExtension(f),
+                FilePath = f
+            })];
+    }
+
     public void CleanOldSaves()
     {
+        if(!Directory.Exists(AutoSaveFolder))
+            return;
+
         try
         {
             var saveFolders = Directory.EnumerateDirectories(AutoSaveFolder)
@@ -224,7 +301,7 @@ public class AutoSaveService : IDisposable
         }
     }
 
-    private void GPoseService_OnGPoseStateChange(bool newState)
+    private void OnGPoseStateChange(bool newState)
     {
         if(newState)
         {
@@ -238,9 +315,13 @@ public class AutoSaveService : IDisposable
         }
     }
 
-    public void Dispose()
+    public override void Dispose()
     {
+        base.Dispose();
+
         Stop();
-        _gPoseService.OnGPoseStateChange -= GPoseService_OnGPoseStateChange;
+        _timer?.Dispose();
+
+        GC.SuppressFinalize(this);
     }
 }

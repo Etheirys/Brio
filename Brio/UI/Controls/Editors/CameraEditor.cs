@@ -1,16 +1,18 @@
 ﻿using Brio.Capabilities.Camera;
 using Brio.Config;
+using Brio.Core;
 using Brio.Entities.Actor;
-using Brio.Entities.Camera;
+using Brio.Entities.World;
+using Brio.Entities.WorldObjects;
 using Brio.Files;
 using Brio.Game.Actor.Extensions;
-using Brio.Game.Camera;
 using Brio.Game.Cutscene;
-using Brio.UI.Controls.Core;
+using Brio.Game.WorldObjects;
+using Brio.Input;
+using Brio.Services;
 using Brio.UI.Controls.Stateless;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface;
-using Dalamud.Interface.Utility;
 using Dalamud.Interface.Utility.Raii;
 using FFXIVClientStructs.FFXIV.Client.Game.Object;
 using FFXIVClientStructs.FFXIV.Client.Graphics.Scene;
@@ -21,45 +23,50 @@ namespace Brio.UI.Controls.Editors;
 
 public static class CameraEditor
 {
-    public unsafe static void DrawSpawnMenu(VirtualCameraManager virtualCameraManager)
-    {
-        using var popup = ImRaii.Popup("DrawSpawnMenuPopup");
-        if(popup.Success)
-        {
-            using(ImRaii.PushColor(ImGuiCol.Button, UIConstants.Transparent))
-            {
-                if(ImGui.Button("New Brio Camera"u8, new(155 * ImGuiHelpers.GlobalScale, 0)))
-                {
-                    virtualCameraManager.CreateCamera(CameraType.Game);
-                }
-
-                if(ImGui.Button("New Free-Cam"u8, new(155 * ImGuiHelpers.GlobalScale, 0)))
-                {
-                    virtualCameraManager.CreateCamera(CameraType.Free);
-                }
-
-                //ImGui.Separator();
-
-                //if(ImGui.Button("New Cutscene Camera"))
-                //{
-                //    virtualCameraManager.CreateCamera(CameraType.Cutscene);
-                //}
-            }
-        }
-    }
-
     public unsafe static void DrawFreeCam(string id, BrioCameraCapability capability)
     {
         var camera = capability.VirtualCamera;
+        bool anyActiveThisFrame = false;
 
         using(ImRaii.PushId(id))
         {
             using(ImRaii.Disabled(!capability.IsAllowed))
             {
-                var width = -ImGui.CalcTextSize("XXXXXXXx").X;
+                var width = -ImGui.CalcTextSize("XxxxxX").X;
 
-                if(ImBrio.ToggelButton("Enable Movement", new Vector2(135, 25), camera.FreeCamValues.IsMovementEnabled, hoverText: camera.FreeCamValues.IsMovementEnabled ?
-                    "Disable Free-Cam Movement" : "Enabled Free-Cam Movement"))
+                if(ImBrio.ToggelFontIconButton("portraitMode", FontAwesomeIcon.Mobile, new Vector2(0, 0), camera.IsPortraitMode, tooltip: "Portrait Mode"))
+                {
+                    camera.TogglePortraitMode();
+                    capability.Snapshot();
+                }
+
+                ImBrio.VerticalSeparator(24);
+
+                if(ImBrio.ToggelFontIconButton("save", FontAwesomeIcon.BookBookmark, new Vector2(25, 0), false, tooltip: "Camera Presets"))
+                {
+                    ImGui.OpenPopup($"DrawPresetPopup");
+                }
+
+                FileUIHelpers.DrawPresetPopup(PresetType.Camera, capability.Entity);
+
+                ImBrio.VerticalSeparator(24);
+
+                if(ImBrio.FontIconButton("undo", FontAwesomeIcon.Reply, "Undo", capability.CanUndo) || (InputManagerService.ActionKeysPressedLastFrame(InputAction.Posing_Undo) && capability.CanUndo))
+                {
+                    capability.Undo();
+                }
+
+                ImGui.SameLine();
+
+                if(ImBrio.FontIconButton("redo", FontAwesomeIcon.Share, "Redo", capability.CanRedo) || (InputManagerService.ActionKeysPressedLastFrame(InputAction.Posing_Redo) && capability.CanRedo))
+                {
+                    capability.Redo();
+                }
+
+                ImBrio.VerticalSeparator(24);
+
+                if(ImBrio.ToggelFontIconButton("EnableMovement", FontAwesomeIcon.Walking, new Vector2(25, 0), camera.FreeCamValues.IsMovementEnabled, tooltip: camera.FreeCamValues.IsMovementEnabled ?
+                    "Disable Free-Cam Movement" : "Enable Free-Cam Movement"))
                 {
                     camera.FreeCamValues.IsMovementEnabled = !camera.FreeCamValues.IsMovementEnabled;
                 }
@@ -68,112 +75,163 @@ public static class CameraEditor
 
                 using(ImRaii.Disabled(camera.FreeCamValues.IsMovementEnabled == false))
                 {
-                    if(ImBrio.ToggelFontIconButton("LateralMovement", FontAwesomeIcon.SolarPanel, new Vector2(25, 0), camera.FreeCamValues.Move2D, hoverText: "Lateral Movement"))
+                    if(ImBrio.ToggelFontIconButton("LateralMovement", FontAwesomeIcon.SolarPanel, new Vector2(25, 0), camera.FreeCamValues.Move2D, tooltip: "Lateral Movement"))
                     {
                         camera.FreeCamValues.Move2D = !camera.FreeCamValues.Move2D;
+                        capability.Snapshot();
                     }
                 }
 
+                //
+
+                using(ImRaii.Disabled(camera.Position == camera.SpawnPosition))
+                    if(ImBrio.SeparatorTextButton("Transform", FontAwesomeIcon.Undo, "Reset Transform"))
+                    {
+                        camera.Position = camera.SpawnPosition;
+                        capability.Snapshot();
+                    }
+
+                ImBrio.VerticalPadding(2);
+
+                Vector3 pos = camera.Position;
+                (var panyActive1, var pdidChange1) = ImBrio.DragFloat3($"###_transformPosition_2", ref pos, 0.001f, FontAwesomeIcon.ArrowsUpDownLeftRight, "Position Offset", enableExpanded: false);
+                if(pdidChange1)
+                    camera.Position = pos;
+                anyActiveThisFrame |= panyActive1;
+
+                //
+
+                ImBrio.Icon(FontAwesomeIcon.ArrowsSpin);
+                ImGui.SameLine();
+                ImGui.SetNextItemWidth(width);
+
+                var rotation = camera.Rotation;
+                (var panyActive2, var pdidChange2) = ImBrio.DragFloat2V3("###Pan", ref rotation, -360, 360, false, 0.001f, Vector2.Zero, "Pan");
+                if(pdidChange2)
+                    camera.Rotation = rotation;
+                anyActiveThisFrame |= panyActive2;
+
+                //
+
+                DrawCameraActorSelect(capability);
+
+                //
+
+                using(ImRaii.Disabled(!camera.IsOverridden))
+                    if(ImBrio.SeparatorTextButton("Properties", FontAwesomeIcon.Undo, "Reset to Default"))
+                    {
+                        camera.FoV = 0f;
+                        camera.PivotRotation = 0;
+                        camera.FreeCamValues.MovementSpeed = capability._configurationService.Configuration.Interface.DefaultFreeCameraMovementSpeed;
+                        camera.FreeCamValues.MouseSensitivity = capability._configurationService.Configuration.Interface.DefaultFreeCameraMouseSensitivity;
+                        capability.Snapshot();
+                    }
+
+                //
+
+                ImBrio.Icon(FontAwesomeIcon.Panorama);
+                ImGui.SameLine();
+                ImBrio.AttachToolTip("FOV");
+
+                float fov = camera.FoV;
+                ImBrio.CenterNextElementWithPadding(5);
+                (var fovDidChange, var fovAnyActive) = ImBrio.SliderAngle("###fov", ref fov, -44, 120, "%.2f", ImGuiSliderFlags.AlwaysClamp, toolTip: "FOV");
+                if(fovDidChange)
+                    camera.FoV = fov;
+                anyActiveThisFrame |= fovAnyActive;
+
                 ImGui.SameLine();
 
-                if(ImBrio.FontIconButtonRight("reset", FontAwesomeIcon.Undo, 1f, "Reset Camera", camera.IsOverridden))
-                    camera.ResetCamera();
+                if(ImBrio.FontIconButtonRight("resetFoV", FontAwesomeIcon.Undo, 1f, "Reset", fov != 0))
+                {
+                    camera.FoV = 0f;
+                    capability.Snapshot();
+                }
 
                 //
-                ImGui.Separator();
+
+                ImBrio.Icon(FontAwesomeIcon.CameraRotate);
+                ImGui.SameLine();
+                ImBrio.AttachToolTip("Pivot");
+
+                ImBrio.CenterNextElementWithPadding(5);
+
+                float pivoRotation = camera.PivotRotation;
+                (var pivotDidChange, var pivotAnyActive) = ImBrio.SliderAngle("###rotation", ref pivoRotation, -180, 180, "%.2f", ImGuiSliderFlags.AlwaysClamp, toolTip: "Pivot");
+                if(pivotDidChange)
+                    camera.PivotRotation = pivoRotation;
+                anyActiveThisFrame |= pivotAnyActive;
+
+                ImGui.SameLine();
+
+                if(ImBrio.FontIconButtonRight("resetRotation", FontAwesomeIcon.Undo, 1f, "Reset", pivoRotation != 0))
+                {
+                    camera.PivotRotation = 0;
+                    capability.Snapshot();
+                }
+
                 //
 
+                ImBrio.Icon(FontAwesomeIcon.Walking);
+                ImGui.SameLine();
+                ImBrio.AttachToolTip("Movement Speed");
+
+                ImBrio.CenterNextElementWithPadding(5);
+
+                float moveSpeed = camera.FreeCamValues.MovementSpeed;
+                (var moveSpeedDidChange, var moveSpeedAnyActive) = ImBrio.SliderFloat("##MovementSpeed", ref moveSpeed, 0.005f, 0.3f, "%.4f", ImGuiSliderFlags.AlwaysClamp, step: 0.001f, toolTip: "Movement Speed");
+                if(moveSpeedDidChange)
+                    camera.FreeCamValues.MovementSpeed = moveSpeed;
+                anyActiveThisFrame |= moveSpeedAnyActive;
+
+                ImGui.SameLine();
+
+                if(ImBrio.FontIconButtonRight("resetMovementSpeed", FontAwesomeIcon.Undo, 1f, "Reset Movement Speed", moveSpeed != capability._configurationService.Configuration.Interface.DefaultFreeCameraMovementSpeed))
                 {
-                    ImBrio.Icon(FontAwesomeIcon.ArrowsToCircle);
-
-                    ImGui.SameLine();
-
-                    ImGui.SetNextItemWidth(width);
-                    var position = camera.Position;
-                    if(ImGui.DragFloat3("Position", ref position, 0.001f))
-                        camera.Position = position;
+                    camera.FreeCamValues.MovementSpeed = capability._configurationService.Configuration.Interface.DefaultFreeCameraMovementSpeed;
+                    capability.Snapshot();
                 }
 
+                //
+
+                ImBrio.Icon(FontAwesomeIcon.Mouse);
+                ImGui.SameLine();
+                ImBrio.AttachToolTip("Mouse Sensitivity");
+
+                ImBrio.CenterNextElementWithPadding(5);
+
+                float mouseSpeed = camera.FreeCamValues.MouseSensitivity;
+                (var mouseSpeedDidChange, var mouseSpeedAnyActive) = ImBrio.SliderFloat("##MouseSensitivity", ref mouseSpeed, 0.001f, 0.2f, "%.4f", ImGuiSliderFlags.AlwaysClamp, step: 0.001f, toolTip: "Mouse Sensitivity");
+                if(mouseSpeedDidChange)
+                    camera.FreeCamValues.MouseSensitivity = mouseSpeed;
+                anyActiveThisFrame |= mouseSpeedAnyActive;
+
+                ImGui.SameLine();
+
+                if(ImBrio.FontIconButtonRight("resetMouseSensitivity", FontAwesomeIcon.Undo, 1f, "Reset Mouse Sensitivity", mouseSpeed != capability._configurationService.Configuration.Interface.DefaultFreeCameraMouseSensitivity))
                 {
-                    ImBrio.Icon(FontAwesomeIcon.ArrowsSpin);
-
-                    ImGui.SameLine();
-
-                    ImGui.SetNextItemWidth(width);
-                    var rotation = camera.Rotation;
-                    if(ImBrio.DragFloat2V3("Pan", ref rotation, -360, 360, "%.3f", true, ImGuiSliderFlags.AlwaysClamp))
-                        camera.Rotation = rotation;
+                    camera.FreeCamValues.MouseSensitivity = capability._configurationService.Configuration.Interface.DefaultFreeCameraMouseSensitivity;
+                    capability.Snapshot();
                 }
 
-                {
-                    ImBrio.Icon(FontAwesomeIcon.Panorama);
-
-                    ImGui.SameLine();
-
-                    var fov = camera.FoV;
-                    if(ImBrio.SliderAngle("##FoV", ref fov, -44, 120, "%.2f", ImGuiSliderFlags.AlwaysClamp))
-                        camera.FoV = fov;
-                }
-
-                {
-                    ImBrio.Icon(FontAwesomeIcon.CameraRotate);
-
-                    ImGui.SameLine();
-
-                    float pivot = camera.PivotRotation;
-                    if(ImBrio.SliderAngle("##PivotRotation", ref pivot, -180, 180, "%.2f"))
-                        camera.PivotRotation = pivot;
-
-                    ImGui.SameLine();
-
-                    if(ImBrio.FontIconButtonRight("resetPivotRotation", FontAwesomeIcon.Undo, 1f, "Reset Pivot", camera.PivotRotation != 0))
-                        camera.PivotRotation = 0;
-                }
-
-                ImGui.Separator();
-
-                {
-                    ImBrio.Icon(FontAwesomeIcon.Walking);
-
-                    ImGui.SameLine();
-
-                    float moveSpeed = camera.FreeCamValues.MovementSpeed;
-                    if(ImBrio.SliderFloat("##MovementSpeed", ref moveSpeed, 0.005f, 0.3f, "%.4f", ImGuiSliderFlags.None, step: 0.001f))
-                        camera.FreeCamValues.MovementSpeed = moveSpeed;
-
-                    ImGui.SameLine();
-
-                    if(ImBrio.FontIconButtonRight("resetMovementSpeed", FontAwesomeIcon.Undo, 1f, "Reset Movement Speed", moveSpeed != capability._configurationService.Configuration.Interface.DefaultFreeCameraMovementSpeed))
-                        camera.FreeCamValues.MovementSpeed = capability._configurationService.Configuration.Interface.DefaultFreeCameraMovementSpeed;
-                }
-
-                {
-                    ImBrio.Icon(FontAwesomeIcon.Mouse);
-
-                    ImGui.SameLine();
-
-                    float mouseSpeed = camera.FreeCamValues.MouseSensitivity;
-                    if(ImBrio.SliderFloat("##MouseSensitivity", ref mouseSpeed, 0.001f, 0.2f, "%.4f", ImGuiSliderFlags.None, step: 0.001f))
-                        camera.FreeCamValues.MouseSensitivity = mouseSpeed;
-
-                    ImGui.SameLine();
-
-                    if(ImBrio.FontIconButtonRight("resetMouseSensitivity", FontAwesomeIcon.Undo, 1f, "Reset MouseSensitivity", mouseSpeed != capability._configurationService.Configuration.Interface.DefaultFreeCameraMouseSensitivity))
-                        camera.FreeCamValues.MouseSensitivity = capability._configurationService.Configuration.Interface.DefaultFreeCameraMouseSensitivity;
-                }
-
-                ImGui.Separator();
+                ImBrio.SeparatorText("Advanced");
 
                 var delimit = camera.FreeCamValues.DelimitAngle;
                 if(ImGui.Checkbox("Delimit Camera Angle", ref delimit))
+                {
                     camera.FreeCamValues.DelimitAngle = delimit;
+                    capability.Snapshot();
+                }
             }
         }
+
+        capability.TrackEdit(anyActiveThisFrame);
     }
 
     public unsafe static void DrawBrioCam(string id, BrioCameraCapability capability)
     {
         var camera = capability.VirtualCamera;
+        bool anyActiveThisFrame = false;
 
         using(ImRaii.PushId(id))
         {
@@ -181,153 +239,265 @@ public static class CameraEditor
             {
                 if(camera is not null)
                 {
+                    var width = -ImGui.CalcTextSize("XxxxxX").X;
 
-                    var width = -ImGui.CalcTextSize("XXXXXXXXXx").X;
-
-                    if(ImBrio.FontIconButtonRight("reset", FontAwesomeIcon.Undo, 1f, "Reset", camera.IsOverridden))
-                        camera.ResetCamera();
-
-                    //
-                    ImGui.Separator();
-                    //
-
-                    using(ImRaii.Disabled(capability._entityManager.SelectedEntity is not ActorEntity))
-                        if(ImBrio.FontIconButton("recenter_on_selected", FontAwesomeIcon.Bullseye, "Recenter on Selected Actor"))
-                        {
-                            var entity = capability._entityManager.SelectedEntity;
-                            if(entity is ActorEntity actor)
-                            {
-                                capability.VirtualCamera.SelectedActorName = $"Selected: [ {actor.FriendlyName} ]";
-                                camera.TargetOffset = (actor.GameObject.GetDrawObject<DrawObject>()->Object.Position - ((GameObject*)actor.GameObject.Address)->Position);
-                            }
-                        }
-
-                    ImGui.SameLine();
-
-                    ImBrio.CenterNextElementWithPadding(40);
-
-                    if(ImGui.BeginCombo($"###CameraContainerActorsWidget_{capability.Entity.Id}_list", capability.VirtualCamera.SelectedActorName))
+                    if(ImBrio.ToggelFontIconButton("portraitMode", FontAwesomeIcon.Mobile, new Vector2(0, 0), camera.IsPortraitMode, tooltip: "Portrait Mode"))
                     {
-                        foreach(var value in capability._entityManager.TryGetAllActors())
-                        {
-                            if(ImGui.Selectable($"[ {value.FriendlyName} ]"))
-                            {
-                                capability.VirtualCamera.SelectedActorName = $"Selected: [ {value.FriendlyName} ]";
-                                camera.TargetOffset = (value.GameObject.GetDrawObject<DrawObject>()->Object.Position - ((GameObject*)value.GameObject.Address)->Position);
-                            }
-                        }
-                        ImGui.EndCombo();
+                        camera.TogglePortraitMode();
+                        capability.Snapshot();
+                    }
+
+                    ImBrio.VerticalSeparator(24);
+
+                    if(ImBrio.ToggelFontIconButton("save", FontAwesomeIcon.BookBookmark, new Vector2(25, 0), camera.FreeCamValues.Move2D, tooltip: "Presets"))
+                    {
+                        ImGui.OpenPopup("DrawPresetPopup");
+                    }
+
+                    FileUIHelpers.DrawPresetPopup(PresetType.Camera, capability.Entity);
+
+                    ImBrio.VerticalSeparator(24);
+
+                    if(ImBrio.FontIconButton("undo", FontAwesomeIcon.Reply, "Undo", capability.CanUndo) || (InputManagerService.ActionKeysPressedLastFrame(InputAction.Posing_Undo) && capability.CanUndo))
+                    {
+                        capability.Undo();
                     }
 
                     ImGui.SameLine();
 
-                    if(ImBrio.FontIconButtonRight("reset_selected", FontAwesomeIcon.Undo, 1f, "Reset Selected Actor", camera.IsSelectingActor))
+                    if(ImBrio.FontIconButton("redo", FontAwesomeIcon.Share, "Redo", capability.CanRedo) || (InputManagerService.ActionKeysPressedLastFrame(InputAction.Posing_Redo) && capability.CanRedo))
                     {
-                        camera.TargetOffset = new Vector3(0);
-                        camera.SelectedActorName = "Select an actor to track";
+                        capability.Redo();
                     }
 
-                    {
-                        const string offsetText = "Position";
+                    //
 
-                        ImBrio.Icon(FontAwesomeIcon.ArrowsToCircle);
-
-                        ImGui.SameLine();
-
-                        ImGui.SetNextItemWidth(width);
-                        var position = camera.RealPosition;
-                        using(ImRaii.Disabled(true))
+                    using(ImRaii.Disabled(camera.PositionOffset == Vector3.Zero))
+                        if(ImBrio.SeparatorTextButton("Transform", FontAwesomeIcon.Undo, "Reset Transform"))
                         {
-                            ImGui.DragFloat3(offsetText, ref position, 0.001f);
-                        }
-                    }
-
-                    {
-                        const string offsetText = "Offset";
-
-                        ImBrio.Icon(FontAwesomeIcon.ArrowsUpDownLeftRight);
-
-                        ImGui.SameLine();
-
-                        Vector3 pos = camera.PositionOffset;
-                        ImGui.SetNextItemWidth(width);
-                        if(ImGui.DragFloat3(offsetText, ref pos, 0.001f))
-                            camera.PositionOffset = pos;
-
-                        ImGui.SameLine();
-
-                        if(ImBrio.FontIconButtonRight("resetPosition", FontAwesomeIcon.Undo, 1f, "Reset Position-Offset", camera.PositionOffset != Vector3.Zero))
                             camera.PositionOffset = Vector3.Zero;
+                            capability.Snapshot();
+                        }
+
+                    ImBrio.VerticalPadding(2);
+
+                    using(ImRaii.Disabled(true))
+                    {
+                        var position = camera.RealPosition;
+                        (var panyActive, var pdidChange) = ImBrio.DragFloat3($"###_transformPosition_1", ref position, 0.01f, FontAwesomeIcon.ArrowsToCircle, "Absolute Position", enableExpanded: false);
                     }
 
-                    ImGui.Separator();
+                    ImBrio.VerticalPadding(2);
 
-                    const string rotationText = "Rotation";
-                    float rotation = camera.PivotRotation;
-                    ImGui.SetNextItemWidth(width);
-                    if(ImBrio.SliderAngle(rotationText, ref rotation, -180, 180, "%.2f"))
-                        camera.PivotRotation = rotation;
+                    {
+                        Vector3 pos = camera.PositionOffset;
+                        (var panyActive, var pdidChange) = ImBrio.DragFloat3($"###_transformPosition_2", ref pos, 0.001f, FontAwesomeIcon.ArrowsUpDownLeftRight, "Position Offset", enableExpanded: false);
 
+                        if(pdidChange)
+                        {
+                            camera.PositionOffset = pos;
+                        }
+                        anyActiveThisFrame |= panyActive;
+                    }
+
+                    //
+
+                    DrawCameraActorSelect(capability);
+
+                    //
+
+                    using(ImRaii.Disabled(!camera.IsOverridden))
+                        if(ImBrio.SeparatorTextButton("Properties", FontAwesomeIcon.Undo, "Reset to Default"))
+                        {
+                            camera.Zoom = 2.5f;
+                            camera.FoV = 0f;
+                            camera.PivotRotation = 0;
+                            capability.Snapshot();
+                        }
+
+                    //
+
+                    ImBrio.Icon(FontAwesomeIcon.ArrowsUpDownLeftRight);
                     ImGui.SameLine();
+                    ImBrio.AttachToolTip("Zoom");
 
-                    if(ImBrio.FontIconButtonRight("resetRotation", FontAwesomeIcon.Undo, 1f, "Reset", rotation != 0))
-                        camera.PivotRotation = 0;
-
-                    const string zoomText = "Zoom";
                     float zoom = camera.Zoom;
-                    ImGui.SetNextItemWidth(width);
-                    if(ImBrio.SliderFloat(zoomText, ref zoom, camera.BrioCamera->Camera.MaxDistance, camera.BrioCamera->Camera.MinDistance, "%.2f", ImGuiSliderFlags.AlwaysClamp))
+                    ImBrio.CenterNextElementWithPadding(5);
+                    (var zoomDidChange, var zoomAnyActive) = ImBrio.SliderFloat("###zoom", ref zoom, camera.BrioCamera->Camera.MaxDistance, camera.BrioCamera->Camera.MinDistance, "%.2f", ImGuiSliderFlags.AlwaysClamp, toolTip: "Zoom");
+                    if(zoomDidChange)
                         camera.Zoom = zoom;
+                    anyActiveThisFrame |= zoomAnyActive;
 
                     ImGui.SameLine();
 
                     if(ImBrio.FontIconButtonRight("resetZoom", FontAwesomeIcon.Undo, 1f, "Reset", zoom != 2.5))
+                    {
                         camera.Zoom = 2.5f;
+                        capability.Snapshot();
+                    }
 
-                    const string fovText = "FoV";
+                    //
+
+                    ImBrio.Icon(FontAwesomeIcon.Panorama);
+                    ImGui.SameLine();
+                    ImBrio.AttachToolTip("FOV");
+
                     float fov = camera.FoV;
-                    ImGui.SetNextItemWidth(width);
-                    if(ImBrio.SliderAngle(fovText, ref fov, -44, 120, "%.2f", ImGuiSliderFlags.AlwaysClamp))
+                    ImBrio.CenterNextElementWithPadding(5);
+                    (var fovDidChange, var fovAnyActive) = ImBrio.SliderAngle("###fov", ref fov, -44, 120, "%.2f", ImGuiSliderFlags.AlwaysClamp, toolTip: "FOV");
+                    if(fovDidChange)
                         camera.FoV = fov;
+                    anyActiveThisFrame |= fovAnyActive;
 
                     ImGui.SameLine();
 
                     if(ImBrio.FontIconButtonRight("resetFoV", FontAwesomeIcon.Undo, 1f, "Reset", fov != 0))
+                    {
                         camera.FoV = 0f;
+                        capability.Snapshot();
+                    }
 
-                    ImGui.Separator();
+                    //
 
-                    const string panText = "Pan";
-                    Vector2 pan = camera.Pan;
-                    ImGui.SetNextItemWidth(width);
-                    if(ImGui.DragFloat2(panText, ref pan, 0.001f))
-                        camera.Pan = pan;
+                    ImBrio.Icon(FontAwesomeIcon.CameraRotate);
+                    ImGui.SameLine();
+                    ImBrio.AttachToolTip("Pivot");
+
+                    ImBrio.CenterNextElementWithPadding(5);
+
+                    float pivotRotation = camera.PivotRotation;
+                    (var pivotDidChange, var pivotAnyActive) = ImBrio.SliderAngle("###rotation", ref pivotRotation, -180, 180, "%.2f", toolTip: "Pivot");
+                    if(pivotDidChange)
+                        camera.PivotRotation = pivotRotation;
+                    anyActiveThisFrame |= pivotAnyActive;
 
                     ImGui.SameLine();
 
-                    if(ImBrio.FontIconButtonRight("resetPan", FontAwesomeIcon.Undo, 1f, "Reset", pan != Vector2.Zero))
-                        camera.Pan = Vector2.Zero;
+                    if(ImBrio.FontIconButtonRight("resetRotation", FontAwesomeIcon.Undo, 1f, "Reset", pivotRotation != 0))
+                    {
+                        camera.PivotRotation = 0;
+                        capability.Snapshot();
+                    }
 
-                    const string angleText = "Angle";
-                    Vector2 angle = camera.Angle;
-                    ImGui.SetNextItemWidth(width);
-                    if(ImGui.DragFloat2(angleText, ref angle, 0.001f))
-                        camera.Angle = angle;
+                    ///
 
+                    ImBrio.VerticalPadding(2);
                     ImGui.Separator();
+                    ImBrio.VerticalPadding(2);
+
+                    ImBrio.Icon(FontAwesomeIcon.UsersViewfinder);
+                    ImGui.SameLine();
+                    ImBrio.AttachToolTip("Pan");
+
+                    Vector2 pan = camera.Pan;
+                    ImBrio.CenterNextElementWithPadding(5);
+                    if(ImGui.DragFloat2("###pan", ref pan, 0.001f))
+                        camera.Pan = pan;
+                    anyActiveThisFrame |= ImGui.IsItemActive();
+                    ImBrio.AttachToolTip("Pan");
+
+                    //
+
+                    ImBrio.Icon(FontAwesomeIcon.ArrowsSpin);
+                    ImGui.SameLine();
+                    ImBrio.AttachToolTip("Angle");
+
+                    Vector2 angle = camera.Angle;
+                    ImBrio.CenterNextElementWithPadding(5);
+                    if(ImGui.DragFloat2("###angle", ref angle, 0.001f))
+                        camera.Angle = angle;
+                    anyActiveThisFrame |= ImGui.IsItemActive();
+                    ImBrio.AttachToolTip("Angle");
+
+                    //
+
+                    ImBrio.SeparatorText("Advanced");
 
                     var disable = camera.DisableCollision;
                     if(ImGui.Checkbox("Disable Collision", ref disable))
+                    {
                         camera.DisableCollision = disable;
+                    }
 
                     ImGui.SameLine();
 
                     var delimit = camera.DelimitCamera;
                     if(ImGui.Checkbox("Delimit Camera", ref delimit))
+                    {
                         camera.DelimitCamera = delimit;
+                    }
                 }
             }
         }
+
+        capability.TrackEdit(anyActiveThisFrame);
+    }
+
+
+    public static unsafe void DrawCameraActorSelect(BrioCameraCapability capability)
+    {
+        var camera = capability.VirtualCamera;
+
+        using(ImRaii.Disabled(camera.IsSelectingActor))
+            if(ImBrio.SeparatorTextButton("Target Entity", FontAwesomeIcon.Undo, "Target Entity"))
+            {
+                camera.TargetOffset = new Vector3(0);
+                camera.SelectedActorName = "Select an actor to track";
+                capability.Snapshot();
+            }
+
+        using(ImRaii.Disabled(capability._entityManager.SelectedEntity is not ActorEntity))
+            if(ImBrio.FontIconButton("recenter_on_selected", FontAwesomeIcon.Bullseye, "Recenter on Selected Actor"))
+            {
+                var entity = capability._entityManager.SelectedEntity;
+                if(entity is ActorEntity actor)
+                {
+                    capability.VirtualCamera.SelectedActorName = $"Selected: [ {actor.FriendlyName} ]";
+                    camera.TargetOffset = (actor.GameObject.GetDrawObject<DrawObject>()->Object.Position - ((GameObject*)actor.GameObject.Address)->Position);
+                    capability.Snapshot();
+                }
+            }
+
+        ImGui.SameLine();
+
+        float btnWidth = ImGui.GetFrameHeight();
+
+        ImGui.SetNextItemWidth(-float.Epsilon);
+        if(ImGui.BeginCombo($"###CameraContainerActorsWidget_{capability.Entity.Id}_list", capability.VirtualCamera.SelectedActorName))
+        {
+            foreach(var value in capability._entityManager.TryGetAllTransformableActors())
+            {
+                if(ImGui.Selectable($"[ {value.FriendlyName} ]"))
+                {
+                    camera.TargetOffset = GetEntityDrawOffset(value);
+                    capability.Snapshot();
+                }
+            }
+            ImGui.EndCombo();
+        }
+    }
+
+    // TODO FIX (ken) this does not yet work
+    private static unsafe Vector3 GetEntityDrawOffset(TransformableEntity entity)
+    {
+        if(entity is ActorEntity actorEntity)
+            return actorEntity.GameObject.GetDrawObject<DrawObject>()->Object.Position - ((GameObject*)actorEntity.GameObject.Address)->Position;
+
+        if(entity is WorldObjectEntity worldObjectEntity && worldObjectEntity.GameBgObject.ObjectType == WorldObjectType.BgObject)
+        {
+            var bgo = (BgObject*)worldObjectEntity.GameBgObject.Address;
+
+            if(bgo != null)
+                return bgo->DrawObject.Object.Position - bgo->Position;
+        }
+
+        if(entity is LightEntity lightEntity)
+        {
+            if(lightEntity.GameLight != null)
+                return lightEntity.GameLight.GameLight->DrawObject.Object.Position - lightEntity.GameLight.GameLight->Transform.Position;
+        }
+
+        return entity.Transform.Position;
     }
 
     //

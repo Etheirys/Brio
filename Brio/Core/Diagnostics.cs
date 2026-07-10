@@ -27,7 +27,7 @@ public static class Diagnostics
     /// </summary>
     public static DiagnosticScope MeasureTime(ref DiagnosticTrace trace, bool logOnDispose, string logLabel)
         => new(ref trace, 0, logOnDispose, logLabel);
-  
+
     public static bool TickSlowFrame(double ms, double thresholdMs, ref int cooldown, int cooldownFrames)
     {
         if(ms > thresholdMs && cooldown <= 0)
@@ -79,6 +79,11 @@ public ref struct DiagnosticScope : IDisposable
         {
             _trace.Log(_logLabel);
         }
+    }
+
+    public void Record()
+    {
+        _trace.Record(Stopwatch.GetTimestamp() - _start, _customData);
     }
 }
 
@@ -193,12 +198,18 @@ public struct DiagnosticTracker(string tag, int logInterval, double slowFrameThr
         if(_dynamicTraces == null)
             return;
 
+        double totalAverage = 0;
         foreach(var tracesKVP in _dynamicTraces)
         {
             var trace = tracesKVP.Value;
             Brio.Log.Verbose($"  [Diagnostics]:[{tracesKVP.Key}] avg={trace.AvgMs:F3}ms max={trace.MaxMs:F3}ms");
+            totalAverage += trace.AvgMs;
             trace.Reset();
         }
+        Brio.Log.Verbose($"  -----------------------------------------------------");
+        Brio.Log.Verbose($"  [Diagnostics]:[Total Average] avg={totalAverage:F3}ms");
+        Brio.Log.Verbose($"  -----------------------------------------------------");
+
     }
 }
 

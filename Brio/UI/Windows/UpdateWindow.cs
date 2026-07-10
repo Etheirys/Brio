@@ -8,13 +8,14 @@ using Dalamud.Interface.Utility;
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Interface.Windowing;
 using Dalamud.Utility;
+using SharpYaml;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Numerics;
 using System.Text;
-using YamlDotNet.Serialization;
-using YamlDotNet.Serialization.NamingConventions;
+using System.Text.Json;
+using System.Threading.Tasks;
 
 namespace Brio.UI.Windows;
 
@@ -23,12 +24,13 @@ public class UpdateWindow : Window
     //
     // Some code found here is inspired by CharacterSelect+
 
-    private bool _scrollToTop = false;
-    private float _closeButtonWidth => 310f * ImGuiHelpers.GlobalScale;
+    private static float CloseButtonWidth => 310f * ImGuiHelpers.GlobalScale;
 
+    private bool _scrollToTop = false;
+
+    private ChangelogFile? _changelogFile;
     private readonly List<string> _supporters = [];
     private readonly List<string> _contributors = [];
-    private readonly ChangelogFile _changelogFile;
 
     public UpdateWindow() : base($"   {Brio.Name} CHANGLOG [{ConfigurationService.Instance.Version}]###brio_welcomewindow", ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoDocking | ImGuiWindowFlags.NoTitleBar | ImGuiWindowFlags.NoDecoration)
     {
@@ -39,43 +41,52 @@ public class UpdateWindow : Window
         ShowCloseButton = false;
         AllowClickthrough = false;
         AllowPinning = false;
+        AllowBackgroundBlur = false;
+    }
 
-        //
+    public Task LoadData()
+    {
+        return Task.Run(() =>
+        {
+            string? line;
 
-        string? line;
+            var kofiStream = ResourceProvider.Instance.GetRawResourceStream("Changelog.kofi.txt");
+            var patreonStream = ResourceProvider.Instance.GetRawResourceStream("Changelog.patreon.txt");
+            var contributorsStream = ResourceProvider.Instance.GetRawResourceStream("Changelog.contributors.txt");
 
-        var kofiStream = ResourceProvider.Instance.GetRawResourceStream("Changelog.kofi.txt");
-        var patreonStream = ResourceProvider.Instance.GetRawResourceStream("Changelog.patreon.txt");
-        var contributorsStream = ResourceProvider.Instance.GetRawResourceStream("Changelog.contributors.txt");
+            using var streamReader = new StreamReader(kofiStream, Encoding.UTF8, true, 128);
+            while((line = streamReader.ReadLine()) is not null)
+                _supporters.Add(line);
 
-        using var streamReader = new StreamReader(kofiStream, Encoding.UTF8, true, 128);
-        while((line = streamReader.ReadLine()) is not null)
-            _supporters.Add(line);
+            using var streamReader2 = new StreamReader(patreonStream, Encoding.UTF8, true, 128);
+            while((line = streamReader2.ReadLine()) is not null)
+                _supporters.Add(line);
 
-        using var streamReader2 = new StreamReader(patreonStream, Encoding.UTF8, true, 128);
-        while((line = streamReader2.ReadLine()) is not null)
-            _supporters.Add(line);
+            using var streamReader3 = new StreamReader(contributorsStream, Encoding.UTF8, true, 128);
+            while((line = streamReader3.ReadLine()) is not null)
+                _contributors.Add(line);
 
-        using var streamReader3 = new StreamReader(contributorsStream, Encoding.UTF8, true, 128);
-        while((line = streamReader3.ReadLine()) is not null)
-            _contributors.Add(line);
+            //
 
-        //
+            var changelogStream = ResourceProvider.Instance.GetRawResourceStream("Changelog.changelog.yaml");
+            using var streamReader4 = new StreamReader(changelogStream, Encoding.UTF8, true, 128);
 
-        var changelogStream = ResourceProvider.Instance.GetRawResourceStream("Changelog.changelog.yaml");
-        using var streamReader4 = new StreamReader(changelogStream, Encoding.UTF8, true, 128);
+            var yamlOptions = new YamlSerializerOptions
+            {
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                DefaultIgnoreCondition = YamlIgnoreCondition.WhenReading,
+            };
 
-        var deserializer = new DeserializerBuilder()
-            .WithNamingConvention(CamelCaseNamingConvention.Instance)
-            .IgnoreUnmatchedProperties()
-            .Build();
-
-        var yaml = streamReader4.ReadToEnd();
-        _changelogFile = deserializer.Deserialize<ChangelogFile>(yaml);
+            var yaml = streamReader4.ReadToEnd();
+            _changelogFile = YamlSerializer.Deserialize<ChangelogFile>(yaml, yamlOptions);
+        });
     }
 
     public override void OnOpen()
     {
+        if(_changelogFile is null)
+            LoadData().Wait();
+
         _scrollToTop = true;
     }
     public override void PreDraw()
@@ -90,6 +101,8 @@ public class UpdateWindow : Window
     int selected = 0;
     public override void Draw()
     {
+        ImBrio.BlurWindow();
+
         var windowPos = ImGui.GetWindowPos();
         var windowPadding = ImGui.GetStyle().WindowPadding;
 
@@ -100,7 +113,7 @@ public class UpdateWindow : Window
 
         // Image
 
-        var image = ResourceProvider.Instance.GetResourceImage($"Changelog.Images.brio-artbk-apl-29.png");
+        var image = ResourceProvider.Instance.GetResourceImage($"Changelog.Images.brio-artbk-jun-800.png");
 
         // Calculate scaling to fill width and maintain aspect ratio
         var imageAspect = (float)(image.Width / image.Height);
@@ -121,14 +134,19 @@ public class UpdateWindow : Window
         // Cursor line up
         ImGui.SetCursorScreenPos(headerStart);
 
-        // Keep this for correct cursor line up
-        ImGui.Separator();
+        // Tagline Text
+        ImGui.SetCursorPosY(ImGui.GetCursorPosY() - 20);
+        ImGui.SetCursorPosX(ImGui.GetCursorPosX() + 10);
+        ImGui.TextColored(new Vector4(0.4f, 0.9f, 0.4f, 1.0f), _changelogFile?.Tagline);
+        ImGui.SameLine();
+        ImGui.TextColored(new Vector4(0.75f, 0.75f, 0.85f, 1.0f), $"  -  {_changelogFile?.Subline}");
+        ImBrio.VerticalPadding(5);
 
         // Buttons
         var segmentSize = ImGui.GetWindowSize().X / 4.15f;
         var buttonSize = new Vector2(segmentSize, ImGui.GetTextLineHeight() * 1.7f);
 
-        ImGui.SetCursorPosY(ImGui.GetCursorPosY() + 10);
+        ImGui.SetCursorPosY(ImGui.GetCursorPosY() + 5);
 
         using(ImRaii.PushColor(ImGuiCol.Button, new Vector4(0, 224, 148, 200) / 255))
             if(ImGui.Button("Support on KoFi", buttonSize))
@@ -149,11 +167,6 @@ public class UpdateWindow : Window
             if(ImGui.Button("More Links", buttonSize))
                 Process.Start(new ProcessStartInfo { FileName = "https://etheirystools.carrd.co", UseShellExecute = true });
 
-        // Tagline Test
-        ImGui.SetCursorPosY(ImGui.GetCursorPosY() + 10);
-        ImGui.TextColored(new Vector4(0.4f, 0.9f, 0.4f, 1.0f), _changelogFile.Tagline);
-        ImGui.SameLine();
-        ImGui.TextColored(new Vector4(0.75f, 0.75f, 0.85f, 1.0f), $"  -  {_changelogFile.Subline}");
         ImBrio.VerticalPadding(10);
 
         // Selector
@@ -172,7 +185,7 @@ public class UpdateWindow : Window
                         ImGui.SetScrollHereY(0);
                     }
 
-                    foreach(var entry in _changelogFile.Changelog)
+                    foreach(var entry in _changelogFile?.Changelog ?? [])
                         DrawChangelogTemplate(entry);
 
                     ImGui.Spacing();
@@ -195,8 +208,8 @@ public class UpdateWindow : Window
             DrawSupporters();
         }
 
-        ImGui.SetCursorPosX((ImGui.GetWindowSize().Y - _closeButtonWidth) / 2);
-        if(ImBrio.Button("Close", FontAwesomeIcon.SquareXmark, new Vector2(_closeButtonWidth, 0), centerTest: true, tooltip: "To open this window again click the `Information` button on the Brio Scene Manager!"))
+        ImGui.SetCursorPosX((ImGui.GetWindowSize().Y - CloseButtonWidth) / 2);
+        if(ImBrio.HoldButton("updateWindowClose", "Close", FontAwesomeIcon.SquareXmark, 0.7f, new Vector2(CloseButtonWidth, 0), centerTest: true, tooltip: "[HOLD TO CLOSE]\nTo open this window again click the `Information` button on the Brio Scene Manager!"))
         {
             IsOpen = false;
         }
@@ -210,7 +223,7 @@ public class UpdateWindow : Window
         // Dev Message
         if(entry.Message.IsNullOrEmpty() is false)
         {
-            if(CollapsingHeader($" {entry.Name} –- {entry.Date} ", $" {entry.Tagline} ", currentColor, isCurrent))
+            if(CollapsingHeader($" {entry.Name} — {entry.Date} ", $" {entry.Tagline} ", currentColor, isCurrent))
             {
                 ImBrio.VerticalPadding(10);
 
@@ -221,7 +234,7 @@ public class UpdateWindow : Window
             return;
         }
 
-        if(CollapsingHeader($" {entry.Name} –- {entry.Date} ", $"  –-  {entry.Tagline} ", currentColor, isCurrent))
+        if(CollapsingHeader($" {entry.Name} — {entry.Date} ", $"  —  {entry.Tagline} ", currentColor, isCurrent))
         {
             ImBrio.VerticalPadding(10);
 
@@ -281,7 +294,7 @@ public class UpdateWindow : Window
 
     //
     // some code found here is modified and from CharacterSelect+
-    // https://github.com/IcarusXIV/Character-Select- (link is includes the -)
+    // https://github.com/IcarusXIV/Character-Select- (link includes the -)
     //
 
     private static void DrawBackground(Vector2 headerStart, Vector2 headerEnd)
@@ -311,19 +324,12 @@ public class UpdateWindow : Window
 
     private static void DrawFeature(FontAwesomeIcon icon, string title, Vector4 accentColor)
     {
-        var drawList = ImGui.GetWindowDrawList();
-        var startPos = ImGui.GetCursorScreenPos();
-
-        // Feature section background
-        var backgroundMin = startPos + new Vector2(-10, -5);
-        var backgroundMax = startPos + new Vector2(ImGui.GetContentRegionAvail().X + 10, 25);
-        drawList.AddRectFilled(backgroundMin, backgroundMax, ImGui.GetColorU32(new Vector4(0.12f, 0.12f, 0.15f, 0.6f)), 4f);
-        drawList.AddRectFilled(backgroundMin, backgroundMin + new Vector2(3, backgroundMax.Y - backgroundMin.Y), ImGui.GetColorU32(accentColor), 2f);
-
         ImGui.Spacing();
+
         ImBrio.Icon(icon);
         ImGui.SameLine();
         ImGui.TextColored(accentColor, title);
+
         ImGui.Spacing();
     }
 }

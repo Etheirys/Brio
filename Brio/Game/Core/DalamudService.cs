@@ -1,4 +1,7 @@
-﻿using Dalamud.Game.ClientState.Conditions;
+﻿using Brio.Game.GPose;
+using Brio.Services;
+using Brio.Services.MediatorMessages;
+using Dalamud.Game.ClientState.Conditions;
 using Dalamud.Game.ClientState.Objects.SubKinds;
 using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Plugin.Services;
@@ -10,9 +13,13 @@ using System.Threading.Tasks;
 
 namespace Brio.Game.Core;
 
-public class DalamudService : IDisposable
+public class DalamudService : MediatorSubscriberBase
 {
+    public static DalamudService? Instance;
+
     public bool IsWine { get; init; }
+
+    public uint CurrentTerritory { get { if(field is 0) return _clientState.TerritoryType; return field; } set; } = 0;
 
     private readonly ICondition _condition;
     private readonly IFramework _framework;
@@ -20,21 +27,27 @@ public class DalamudService : IDisposable
     private readonly IGameConfig _gameConfig;
     private readonly IDataManager _dataManager;
     private readonly IObjectTable _objectTable;
+    private readonly GPoseService _gPoseService;
 
     private uint? _classJobId = 0;
 
-    public DalamudService(ICondition condition, IObjectTable gameObjects, IClientState clientState, IGameConfig gameConfig, IDataManager dataManager, IFramework framework)
+    public DalamudService(ICondition condition, IObjectTable gameObjects, IClientState clientState, GPoseService gPoseService, IGameConfig gameConfig, IDataManager dataManager, IFramework framework, Mediator mediator)
+        : base(mediator)
     {
         _condition = condition;
-        _clientState = clientState;
+        _gPoseService = gPoseService;
         _framework = framework;
         _gameConfig = gameConfig;
         _dataManager = dataManager;
         _objectTable = gameObjects;
+        _clientState = clientState;
 
         IsWine = Util.IsWine();
 
-        _framework.Update += FrameworkOnUpdate;
+        _framework.Update += FrameworkUpdate;
+        _clientState.TerritoryChanged += TerritoryChanged;
+
+        Instance = this;
     }
 
     public bool IsInCutscene { get; private set; } = false;
@@ -44,8 +57,10 @@ public class DalamudService : IDisposable
     public bool IsLodEnabled { get; private set; }
     public uint ClassJobId => _classJobId!.Value;
 
-    private void FrameworkOnUpdate(IFramework framework)
+    private void FrameworkUpdate(IFramework framework)
     {
+        Mediator.Publish(new PriorityFrameworkUpdateMessage(framework));
+
         if(_condition[ConditionFlag.WatchingCutscene] && !IsInCutscene)
         {
             IsInCutscene = true;
@@ -54,6 +69,8 @@ public class DalamudService : IDisposable
         {
             IsInCutscene = false;
         }
+
+        Mediator.Publish(new FrameworkUpdateMessage(framework));
 
         var localPlayer = _objectTable.LocalPlayer;
         if(localPlayer != null)
@@ -66,6 +83,15 @@ public class DalamudService : IDisposable
         {
             IsLodEnabled = lodEnabled;
         }
+
+        Mediator.Publish(new DelayedFrameworkUpdateMessage(framework));
+    }
+
+    private void TerritoryChanged(uint obj)
+    {
+        Mediator.Publish(new TerritoryChangedMessage(obj));
+
+        CurrentTerritory = obj;
     }
 
     public async Task<uint> GetHomeWorldIdAsync()
@@ -138,10 +164,11 @@ public class DalamudService : IDisposable
         return func.Invoke();
     }
 
-    public void Dispose()
+    public override void Dispose()
     {
-        _framework.Update -= FrameworkOnUpdate;
+        base.Dispose();
 
-        GC.SuppressFinalize(this);
+        _clientState.TerritoryChanged -= TerritoryChanged;
+        _framework.Update -= FrameworkUpdate;
     }
 }

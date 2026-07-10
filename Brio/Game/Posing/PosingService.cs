@@ -1,22 +1,33 @@
-﻿using Brio.Core;
+﻿using Brio.Config;
+using Brio.Core;
 using Dalamud.Bindings.ImGuizmo;
 
 namespace Brio.Game.Posing;
 
 public class PosingService
 {
-    public PosingOperation Operation { get; set; } = PosingOperation.Rotate;
+    public PosingOperation Operation
+    {
+        get => _configurationService.Configuration.Posing.LastGizmoOperation;
+        set
+        {
+            if(_configurationService.Configuration.Posing.LastGizmoOperation == value)
+                return;
+
+            _configurationService.Configuration.Posing.LastGizmoOperation = value;
+            _configurationService.ApplyChange();
+        }
+    }
 
     public PosingCoordinateMode CoordinateMode { get; set; } = PosingCoordinateMode.Local;
 
     public bool GizmoStaysWhenAllBonesAreDisabled { get; set; } = false;
 
-    public BoneCategories BoneCategories { get; } = new();
-
-    public BoneFilter OverlayFilter { get; }
+    public BoneCategories BoneCategories { get { field ??= new BoneCategories(); return field; } }
 
     public PoseImporterOptions DefaultImporterOptions { get; }
     public PoseImporterOptions DefaultIPCImporterOptions { get; }
+    public PoseImporterOptions DefaultCMPImporterOptions { get; }
 
     public PoseImporterOptions SceneImporterOptions { get; }
 
@@ -25,17 +36,27 @@ public class PosingService
     public PoseImporterOptions ExpressionOptions { get; }
     public PoseImporterOptions ExpressionOptions2 { get; }
 
-    public PosingService()
+    private readonly ConfigurationService _configurationService;
+
+    public PosingService(ConfigurationService configurationService)
     {
-        OverlayFilter = new BoneFilter(this);
-        OverlayFilter.DisableCategory("ex");
-        OverlayFilter.DisableCategory("weapon");
-        OverlayFilter.DisableCategory("clothing");
-        OverlayFilter.DisableCategory("legacy");
+        _configurationService = configurationService;
 
         DefaultImporterOptions = new PoseImporterOptions(new BoneFilter(this), TransformComponents.Rotation, false);
         DefaultImporterOptions.BoneFilter.DisableCategory("weapon");
         DefaultImporterOptions.BoneFilter.DisableCategory("ex");
+
+        // I don't like this, I want to  come back and change this later TODO (ken)
+        DefaultCMPImporterOptions = new PoseImporterOptions(new BoneFilter(this), TransformComponents.Rotation, false);
+        DefaultCMPImporterOptions.BoneFilter.DisableCategory("weapon");
+        DefaultCMPImporterOptions.BoneFilter.DisableCategory("ears");
+        DefaultCMPImporterOptions.BoneFilter.DisableCategory("hair");
+        DefaultCMPImporterOptions.BoneFilter.DisableCategory("face");
+        DefaultCMPImporterOptions.BoneFilter.DisableCategory("eyes");
+        DefaultCMPImporterOptions.BoneFilter.DisableCategory("lips");
+        DefaultCMPImporterOptions.BoneFilter.DisableCategory("jaw");
+        DefaultCMPImporterOptions.BoneFilter.DisableCategory("head");
+        DefaultCMPImporterOptions.BoneFilter.DisableCategory("ex");
 
         DefaultIPCImporterOptions = new PoseImporterOptions(new BoneFilter(this), TransformComponents.All, false);
 
@@ -100,7 +121,7 @@ public static class PosingExtensions
         PosingOperation.Translate => ImGuizmoOperation.Translate,
         PosingOperation.Rotate => ImGuizmoOperation.Rotate,
         PosingOperation.Scale => ImGuizmoOperation.Scale,
-        PosingOperation.Universal => ImGuizmoOperation.Translate | ImGuizmoOperation.Rotate | ImGuizmoOperation.Scale,
-        _ => ImGuizmoOperation.Rotate
+        PosingOperation.Universal => ImGuizmoOperation.Translate | ImGuizmoOperation.Rotate,
+        _ => ImGuizmoOperation.Translate | ImGuizmoOperation.Rotate | ImGuizmoOperation.Scale
     };
 }

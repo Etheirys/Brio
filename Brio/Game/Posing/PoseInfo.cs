@@ -50,7 +50,7 @@ public class PoseInfo
         {
             if(predicate == null || predicate(pose.Key))
             {
-                Brio.Log.Debug($"Clearing stacks for pose {pose.Key}");
+
                 pose.Value.ClearStacks();
             }
         }

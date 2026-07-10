@@ -19,7 +19,7 @@ public static class JsonSerializer
             AllowTrailingCommas = true,
             // Since these files aren't used in a web browser we don't need the html safety escaping.
             // This option reduces the size of base64 encoded content by around 7%
-            Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping  
+            Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
         };
 
         _serializeOptions.Converters.Add(new JsonStringEnumConverter());

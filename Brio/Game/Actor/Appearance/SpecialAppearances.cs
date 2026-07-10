@@ -48,5 +48,5 @@ public static class SpecialAppearances
         Variant = 12
     };
 
-    public static ENpcBase DefaultHumanEventNpc = GameDataProvider.Instance.ENpcBases[1029275];
+    public static ENpcBase DefaultHumanEventNpc = GameDataProvider.Instance.GetExcelSheet<ENpcBase>().GetRow(1029275);
 }

@@ -1,6 +1,7 @@
-﻿using Brio.Config;
+using Brio.Config;
 using Brio.Game.Actor;
 using Brio.Game.Core;
+using Brio.Game.GPose;
 using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Plugin;
 using Dalamud.Plugin.Services;
@@ -42,19 +43,22 @@ public class GlamourerService : BrioIPC
     private readonly ICommandManager _commandManager;
     private readonly IObjectTable _gameObjects;
     private readonly DalamudService _dalamudService;
+    private readonly GPoseService _gPoseService;
 
     //
     //
 
+    public event Action<nint, StateFinalizationType>? OnGlamourerStateFinalized;
+
+    private readonly EventSubscriber<nint, StateFinalizationType> _glamourerStateFinalizedSubscriber;
     private readonly EventSubscriber _glamourerInitializedSubscriber;
-
     private readonly ApiVersion _glamourerApiVersion;
 
     private readonly GetState _glamourerGetState;
     private readonly ApplyState _glamourerApplyState;
     private readonly RevertState _glamourerRevertCharacter;
     private readonly RevertStateName _glamourerRevertByName;
-    private readonly GetStateBase64? _glamourerGetAllCustomization;
+    private readonly GetStateBase64 _glamourerGetAllCustomization;
 
     private readonly UnlockState _glamourerUnlock;
     private readonly UnlockStateName _glamourerUnlockByName;
@@ -66,7 +70,7 @@ public class GlamourerService : BrioIPC
 
     private readonly uint LockCode = 0x6D617265;
 
-    public GlamourerService(IDalamudPluginInterface pluginInterface, IObjectTable gameObjects, ICommandManager commandManager, DalamudService dalamudService, ConfigurationService configurationService, IFramework framework, ActorRedrawService redrawService)
+    public GlamourerService(IDalamudPluginInterface pluginInterface, GPoseService gPoseService, IObjectTable gameObjects, ICommandManager commandManager, DalamudService dalamudService, ConfigurationService configurationService, IFramework framework, ActorRedrawService redrawService)
     {
         _pluginInterface = pluginInterface;
         _configurationService = configurationService;
@@ -75,8 +79,10 @@ public class GlamourerService : BrioIPC
         _commandManager = commandManager;
         _dalamudService = dalamudService;
         _gameObjects = gameObjects;
+        _gPoseService = gPoseService;
 
         _glamourerInitializedSubscriber = Initialized.Subscriber(_pluginInterface, OnConfigurationChanged);
+        _glamourerStateFinalizedSubscriber = StateFinalized.Subscriber(_pluginInterface, HandleGlamourerStateFinalized);
 
         _glamourerApiVersion = new ApiVersion(_pluginInterface);
 
@@ -102,6 +108,12 @@ public class GlamourerService : BrioIPC
         _commandManager.ProcessCommand("/glamourer");
     }
 
+    private void HandleGlamourerStateFinalized(nint actorAddress, StateFinalizationType type)
+    {
+        Brio.Log.Debug($"Glamourer state finalized event received. Type: {type}");
+        OnGlamourerStateFinalized?.Invoke(actorAddress, type);
+    }
+
     public bool CheckForLock(IGameObject? character)
     {
         if(IsAvailable == false || character is null)
@@ -112,6 +124,40 @@ public class GlamourerService : BrioIPC
         Brio.Log.Verbose("Glamourer CheckForLock... " + key);
 
         return key == GlamourerApiEc.InvalidKey;
+    }
+
+    public string GetState(IGameObject? character)
+    {
+        if(IsAvailable == false || character is null)
+            return string.Empty;
+
+        var (key, customization) = _glamourerGetAllCustomization.Invoke(character!.ObjectIndex);
+
+        if(key is not GlamourerApiEc.Success || customization is null)
+        {
+            Brio.Log.Info($"Glamourer GetState was not Successful: {key}");
+            return string.Empty;
+        }
+
+        return customization;
+    }
+
+    public bool CopyTo(IGameObject? character, IGameObject? targetCharacter)
+    {
+        if(IsAvailable == false || character is null || targetCharacter is null)
+            return false;
+
+        var (key, customization) = _glamourerGetState.Invoke(character!.ObjectIndex);
+
+        if(key is not GlamourerApiEc.Success || customization is null)
+        {
+            Brio.Log.Info($"Glamourer CopyTo was not Successful: {key}");
+            return false;
+        }
+
+        _glamourerApplyState.Invoke(customization, targetCharacter!.ObjectIndex);
+
+        return true;
     }
 
     public bool UnlockAndRevertCharacterByName(string name)
@@ -187,15 +233,28 @@ public class GlamourerService : BrioIPC
         return _glamourerGetDesignList.Invoke();
     }
 
-    public async Task RevertByNameAsync(string name, Guid applicationId)
+    public async Task RevertByNameAsync(string name)
     {
-        if((!IsAvailable) || _dalamudService.IsZoning) return;
+        if(IsAvailable == false || _dalamudService.IsZoning) return;
 
         await _framework.RunOnFrameworkThread(() =>
         {
-            RevertByName(name, applicationId);
+            RevertByName(name);
 
         }).ConfigureAwait(false);
+    }
+
+    public void SetState(IGameObject? character, string? customization)
+    {
+        if(IsAvailable == false || string.IsNullOrEmpty(customization)) return;
+        try
+        {
+            _glamourerApplyState.Invoke(customization, character!.ObjectIndex);
+        }
+        catch(Exception ex)
+        {
+            Brio.Log.Debug(ex, "Failed to apply Glamourer data");
+        }
     }
 
     public void ApplyAllAsync(IGameObject? character, string? customization, Guid applicationId)
@@ -213,16 +272,15 @@ public class GlamourerService : BrioIPC
         }
     }
 
-    public void RevertByName(string name, Guid applicationId)
+    public void RevertByName(string name)
     {
-        if((IsAvailable) || _dalamudService.IsZoning) return;
+        if(IsAvailable == false || _dalamudService.IsZoning) return;
 
         try
         {
-            Brio.Log.Debug("[{appid}] Calling On IPC: GlamourerRevertByName", applicationId);
             _glamourerRevertByName.Invoke(name, LockCode);
-            Brio.Log.Debug("[{appid}] Calling On IPC: GlamourerUnlockName", applicationId);
             _glamourerUnlockByName.Invoke(name, LockCode);
+            
         }
         catch(Exception ex)
         {
@@ -270,6 +328,7 @@ public class GlamourerService : BrioIPC
         _configurationService.OnConfigurationChanged -= OnConfigurationChanged;
 
         _glamourerInitializedSubscriber.Dispose();
+        _glamourerStateFinalizedSubscriber.Dispose();
 
         GC.SuppressFinalize(this);
     }

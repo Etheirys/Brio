@@ -34,7 +34,7 @@ public static class AppearanceEditorCommon
     private const string _collectionLabelDesign = "Design";
     private const string _collectionLabelProfile = "Profile";
 
-    private static float _lableWidth => ImGui.CalcTextSize(_collectionLabel).X - (44 * ImGuiHelpers.GlobalScale) + 125;
+    private static float _lableWidth => ImGui.CalcTextSize(_collectionLabel).X - (44 * ImGuiHelpers.GlobalScale) + 110;
 
     //
 
@@ -110,7 +110,7 @@ public static class AppearanceEditorCommon
     {
         if(!capability.HasGlamourerIntegration)
             return;
-        ImBrio.VerticalPadding(1);
+        ImBrio.VerticalPadding(2);
 
         if(ImBrio.FontIconButton(FontAwesomeIcon.TheaterMasks))
         {
@@ -151,7 +151,7 @@ public static class AppearanceEditorCommon
                         bool isSelected = collection.Value.Equals(currentDesign);
                         if(ImGui.Selectable(collection.Value, isSelected))
                         {
-                            capability.CurrentDesign = collection.Value;
+                            capability.CurrentDesign = (collection.Value, collection.Key);
                             capability.SetDesign(collection.Key);
                         }
                     }
@@ -184,7 +184,7 @@ public static class AppearanceEditorCommon
         if(!capability.HasCustomizePlusIntegration)
             return;
 
-        ImBrio.VerticalPadding(1);
+        ImBrio.VerticalPadding(2);
 
         if(ImGui.Button("C+", new Vector2(25 * ImGuiHelpers.GlobalScale)))
         {
@@ -286,7 +286,7 @@ public static class AppearanceEditorCommon
 
         if(_globalNpcSelector.SelectionChanged && _globalNpcSelector.Selected != null)
         {
-            _ = capability.SetAppearance(_globalNpcSelector.Selected.Appearance, options);
+            _ = capability.SetAppearance(_globalNpcSelector.Selected.Appearance, options, true);
             return true;
         }
 

@@ -80,6 +80,7 @@ public class WebService : IDisposable
 
     public void Dispose()
     {
+        _configurationService.OnConfigurationChanged -= OnConfigurationChanged;
         DestroyWebServer();
     }
 }

@@ -15,7 +15,6 @@ using FFXIVClientStructs.Havok.Common.Base.Types;
 using FFXIVClientStructs.Havok.Common.Serialize.Util;
 using K4os.Compression.LZ4.Legacy;
 using Serilog;
-using Serilog.Core;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -25,7 +24,6 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using static FFXIVClientStructs.FFXIV.Common.Component.BGCollision.MeshPCB;
 
 namespace Brio.MCDF.Game.Services;
 
@@ -248,7 +246,7 @@ public class MCDFService : IDisposable
         using var lz4Stream = new LZ4Stream(File.OpenRead(charaFileHeader.FilePath), LZ4StreamMode.Decompress, LZ4StreamFlags.HighCompression);
         using var reader = new BinaryReader(lz4Stream);
         MareCharaFileHeader.AdvanceReaderToData(reader);
-     
+
         logger.Debug("Finished Advancing MCDF header, starting to read file data");
 
         long totalRead = 0;

@@ -1,7 +1,6 @@
 ﻿using Brio.Game.Actor;
 using Brio.Game.Actor.Extensions;
 using Brio.Game.Core;
-using Brio.Game.Posing;
 using Brio.IPC.API;
 using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Plugin.Services;
@@ -20,7 +19,7 @@ using BrioTransform = Brio.Core.Transform;
 
 namespace Brio.Web;
 
-public class ActorWebController(IFramework framework, PosingAPI posingAPI, SkeletonService skeletonService, ActorSpawnService actorSpawnService, ActorRedrawService redrawService) : WebApiController
+public class ActorWebController(IFramework framework, PosingAPI posingAPI, ActorSpawnService actorSpawnService, ActorRedrawService redrawService) : WebApiController
 {
     private readonly IFramework _framework = framework;
     private readonly ActorSpawnService _actorSpawnService = actorSpawnService;
@@ -144,8 +143,6 @@ public class ActorWebController(IFramework framework, PosingAPI posingAPI, Skele
             return;
         }
 
-        bool success = false;
-
         var boneTransforms = new Dictionary<string, BrioTransform>();
 
         Brio.Log.Debug($"Received bone transform update for object ID {objectId} with {data.Count} bones.");
@@ -161,7 +158,7 @@ public class ActorWebController(IFramework framework, PosingAPI posingAPI, Skele
             Brio.Log.Debug($"Bone: {kvp.Key}, Pos: {boneTransforms[kvp.Key].Position}, Rot: {boneTransforms[kvp.Key].Rotation}, Scale: {boneTransforms[kvp.Key].Scale}");
         }
 
-        //success = skeletonService.SetBoneTransforms(objectId, boneTransforms);
+        // success = skeletonService.SetBoneTransforms(objectId, boneTransforms); TODO FIX
 
         Response.StatusCode = 200;
     }

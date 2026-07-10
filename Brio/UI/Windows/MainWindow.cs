@@ -6,9 +6,10 @@ using Brio.Game.GPose;
 using Brio.MCDF.Game.Services;
 using Brio.Services;
 using Brio.UI.Controls.Core;
+using Brio.UI.Controls.Editors;
 using Brio.UI.Controls.Stateless;
 using Brio.UI.Entitites;
-using Brio.UI.Theming;
+using Brio.UI.Windows.Specialized;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface;
 using Dalamud.Interface.Utility;
@@ -31,8 +32,9 @@ public class MainWindow : Window, IDisposable
     private readonly ProjectWindow _projectWindow;
     private readonly GPoseService _gPoseService;
     private readonly AutoSaveService _autoSaveService;
-    private readonly HistoryService _groupedUndoService;
     private readonly MCDFService _mCDFService;
+    private readonly EntitySectionWindow _entitySectionWindow;
+    private readonly ProjectSystem _projectSystem;
 
     private float MaxHeight => (1050 * ImGuiHelpers.GlobalScale);
 
@@ -42,14 +44,16 @@ public class MainWindow : Window, IDisposable
         UpdateWindow infoWindow,
         LibraryWindow libraryWindow,
         EntityManager entityManager,
-        HistoryService groupedUndoService,
         SceneService sceneService,
         GPoseService gPoseService,
         ProjectWindow projectWindow,
         AutoSaveService autoSaveService,
-        MCDFService mCDFService
+        MCDFService mCDFService,
+        EntitySectionWindow entitySectionWindow,
+        ProjectSystem projectSystem
         )
         : base($" {Brio.Name} [{configService.Version}]###brio_main_window", ImGuiWindowFlags.AlwaysAutoResize)
+    //: base($" {Brio.Name} [0.8.0.0]###brio_main_window", ImGuiWindowFlags.AlwaysAutoResize)
     {
         Namespace = "brio_main_namespace";
 
@@ -59,12 +63,16 @@ public class MainWindow : Window, IDisposable
         _infoWindow = infoWindow;
         _entityManager = entityManager;
         _gPoseService = gPoseService;
-        _groupedUndoService = groupedUndoService;
-        _entitySelector = new(_entityManager, _gPoseService, _groupedUndoService);
+        _entitySelector = new(_entityManager, _gPoseService);
         _sceneService = sceneService;
         _projectWindow = projectWindow;
         _autoSaveService = autoSaveService;
         _mCDFService = mCDFService;
+        _entitySectionWindow = entitySectionWindow;
+        _projectSystem = projectSystem;
+
+        RespectCloseHotkey = false;
+        AllowBackgroundBlur = false;
 
         SizeConstraints = new WindowSizeConstraints
         {
@@ -75,6 +83,8 @@ public class MainWindow : Window, IDisposable
 
     public override void Draw()
     {
+        ImBrio.BlurWindow(ImGuiWindowFlags.None);
+
         bool hasScrollbar = ImGui.GetScrollMaxY() > 0;
         if(hasScrollbar)
         {
@@ -113,7 +123,28 @@ public class MainWindow : Window, IDisposable
         {
             DrawEntitySelector(rootEntity);
 
-            EntityHelpers.DrawEntitySection(_entityManager.SelectedEntity);
+            var selected = _entityManager.SelectedEntity;
+            var isUndocked = _entitySectionWindow.IsOpen;
+
+            var pos = ImGui.GetCursorPos();
+
+            if(ImBrio.FontIconButtonRight("undock_entity_section", isUndocked ? FontAwesomeIcon.Compress : FontAwesomeIcon.WindowRestore, 1,
+                tooltip: isUndocked ? "Redock Entity Widgets" : "Undock Entity Widgets into it's own Window"))
+                _entitySectionWindow.IsOpen = !_entitySectionWindow.IsOpen;
+
+            ImGui.SetCursorPos(pos);
+
+            using(ImRaii.Disabled(_gPoseService.IsGPosing == false || selected?.IsLoading == true))
+                if(ImBrio.FontIconButton("lifetimewidget_spawnnew", FontAwesomeIcon.Plus, "Spawn New..."))
+                {
+                    SpawnMenu.OpenUnifiedSpawnMenu();
+                }
+
+            ImBrio.VerticalSeparator(24, 1);
+
+            var sectionEntity = _entityManager.SelectedEntities.Count > 1 ? _entityManager.EntityManagerContainer : selected;
+
+            EntityHelpers.DrawEntitySection(sectionEntity, isUndocked);
         }
         catch(Exception ex)
         {
@@ -121,24 +152,18 @@ public class MainWindow : Window, IDisposable
         }
     }
 
-
     private float? _entitySelectorHeight;
     private bool _isDraggingEntitySelector = false;
     public void DrawEntitySelector(Entity rootEntity)
     {
         var containerHeight = _entitySelectorHeight ?? (ImGui.GetTextLineHeight() * 18f);
 
+        using(ImRaii.PushStyle(ImGuiStyleVar.ChildRounding, 8f))
         using(var container = ImRaii.Child("###entity_hierarchy_container", new Vector2(-1, containerHeight), true))
         {
             if(container.Success)
             {
-                _entitySelector.Draw(rootEntity);
-
-                if(_entityManager.SelectedEntityIds.Count > 1)
-                {
-                    using var color = ImRaii.PushColor(ImGuiCol.Text, ThemeManager.CurrentTheme.Accent.AccentColor);
-                    ImGui.Text($"{_entityManager.SelectedEntityIds.Count} selected");
-                }
+                _entitySelector.Draw(rootEntity, _entityManager.DebugEntity, _entityManager.TimelineEntity);
             }
         }
 
@@ -183,8 +208,8 @@ public class MainWindow : Window, IDisposable
 
     private void DrawHeaderButtons()
     {
-        float buttonWidths = 25 * ImGuiHelpers.GlobalScale;
-        float line1FinalWidth = ImBrio.GetRemainingWidth() - ((buttonWidths * 2) + (ImGui.GetStyle().ItemSpacing.X * 2) + ImGui.GetStyle().WindowBorderSize);
+        float buttonWidths = 25;
+        float line1FinalWidth = ImBrio.GetRemainingWidth() - (((buttonWidths * 2) * ImGuiHelpers.GlobalScale) + (ImGui.GetStyle().ItemSpacing.X * 2) + ImGui.GetStyle().WindowBorderSize);
 
         float line1Width = (line1FinalWidth / 2) - 3;
 
@@ -198,11 +223,11 @@ public class MainWindow : Window, IDisposable
                 ImGui.SetCursorPos(startPos);
             }
 
-            if(ImBrio.Button("Project", FontAwesomeIcon.FolderOpen, new Vector2(line1Width, 0), centerTest: true))
+            if(ImBrio.Button("Project", FontAwesomeIcon.FileAlt, new Vector2(line1Width, 0), centerTest: true))
                 ImGui.OpenPopup("DrawProjectPopup");
 
             ImGui.SameLine();
-            if(ImBrio.Button("Library", FontAwesomeIcon.Book, new Vector2(line1Width, 0), centerTest: true))
+            if(ImBrio.Button("Library", FontAwesomeIcon.BookBookmark, new Vector2(line1Width, 0), centerTest: true))
                 _libraryWindow.Toggle();
         }
 
@@ -222,8 +247,15 @@ public class MainWindow : Window, IDisposable
 
         //
 
+        //if(ImBrio.Button("Open Vivacity Timeline BETA", FontAwesomeIcon.Timeline, new Vector2(-1, 0), centerTest: true))
+        //{
+
+        //}
+
+        //
+
         using(ImRaii.Disabled(_mCDFService.IsApplyingMCDF))
-            FileUIHelpers.DrawProjectPopup(_sceneService, _entityManager, _projectWindow, _autoSaveService);
+            FileUIHelpers.DrawProjectPopup(_sceneService, _entityManager, _projectWindow, _autoSaveService, _projectSystem);
     }
 
     public void Dispose()

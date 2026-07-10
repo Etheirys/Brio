@@ -8,13 +8,14 @@ using System.Numerics;
 
 namespace Brio.Capabilities.Posing;
 
-public class ModelPosingCapability : ActorCharacterCapability
+public class ModelPosingCapability : ActorCharacterCapability, ITransformable
 {
     public bool HasOverride => _transformOverride.HasValue;
 
     public float TransformOffset = 0.01f;
-    public bool Freeze = false;
+    public bool IsTransformFrozen { get; set; } = false;
 
+    public bool TransformOverride => _transformOverride.HasValue;
     public unsafe Transform Transform
     {
         get
@@ -41,6 +42,7 @@ public class ModelPosingCapability : ActorCharacterCapability
 
             return Transform;
         }
+        set => _originalTransform = value;
     }
 
     public Transform? OverrideTransform => _transformOverride;
@@ -75,7 +77,7 @@ public class ModelPosingCapability : ActorCharacterCapability
         ResetTransform();
     }
 
-    public void ImportModelPose(PoseFile poseFile, PoseImporterOptions options, bool isLoadingAsScene, bool applyModelTransform)
+    public void ImportModelPose(PoseData poseFile, PoseImporterOptions options, bool isLoadingAsScene, bool applyModelTransform)
     {
         if(applyModelTransform)
         {
@@ -110,7 +112,7 @@ public class ModelPosingCapability : ActorCharacterCapability
         }
     }
 
-    public void ExportModelPose(PoseFile poseFile)
+    public void ExportModelPose(PoseData poseFile)
     {
         if(_originalTransform.HasValue)
         {
@@ -123,5 +125,11 @@ public class ModelPosingCapability : ActorCharacterCapability
         poseFile.Position = Transform.Position;
         poseFile.Rotation = Transform.Rotation;
         poseFile.Scale = Transform.Scale;
+    }
+
+    public void Snapshot() { }
+    public void SetTransform(Transform transform)
+    {
+        Transform = transform;
     }
 }

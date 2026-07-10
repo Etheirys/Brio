@@ -33,15 +33,12 @@ using Brio.Entities;
 using Brio.Entities.Actor;
 using Brio.Files.Converters;
 using Brio.Game.Actor.Appearance;
-using Brio.Game.Posing;
 using Brio.Library.Sources;
 using Brio.Resources;
-using Brio.UI.Controls.Editors;
 using Brio.UI.Controls.Stateless;
 using Dalamud.Bindings.ImGui;
-using Dalamud.Interface;
 using Dalamud.Interface.Textures.TextureWraps;
-using Dalamud.Interface.Utility.Raii;
+using OneOf;
 using System;
 using System.Globalization;
 using System.Numerics;
@@ -51,42 +48,52 @@ namespace Brio.Files;
 
 public class CMToolPoseFileInfo : AppliableActorFileInfoBase<CMToolPoseFile>
 {
-    private PosingService _posingService;
+    private PosingCapability? _pendingCapability;
+    private OneOf<PoseFile, CMToolPoseFile, PoseData>? _pendingPose;
+    private bool _openPendingPosePopup;
 
     public override string Name => "CMTool Pose File";
     public override IDalamudTextureWrap Icon => ResourceProvider.Instance.GetResourceImage("Images.FileIcon_Pose.png");
     public override string Extension => ".cmp";
 
-    public CMToolPoseFileInfo(EntityManager entityManager, PosingService posingService, ConfigurationService configurationService)
-         : base(entityManager, configurationService)
+    public CMToolPoseFileInfo(EntityManager entityManager, ConfigurationService configurationService) : base(entityManager, configurationService)
     {
-        _posingService = posingService;
     }
 
     public override void DrawActions(FileEntry fileEntry, bool isModal)
     {
-        if(ImBrio.Button("##cmpose_import_options_action", FontAwesomeIcon.Cog, new Vector2(25, 0), tooltip: "Import Options"))
+        base.DrawActions(fileEntry, isModal);
+
+        if(_openPendingPosePopup)
         {
-            ImGui.OpenPopup("import_options_popup_lib");
+            ImGui.OpenPopup("DrawImportPoseMenuPopup");
+            _openPendingPosePopup = false;
         }
 
-        using(var popup = ImRaii.Popup("import_options_popup_lib"))
+        FileUIHelpers.DrawImportPoseMenuPopup("libraryPose", _pendingCapability, importPose: _pendingPose);
+    }
+
+    protected override void OnApplyToActor(FileEntry fileEntry, ActorEntity actor)
+    {
+        if(Load(fileEntry.FilePath) is CMToolPoseFile file)
         {
-            if(popup.Success)
+            if(actor.TryGetCapability<PosingCapability>(out PosingCapability? capability) && capability != null)
             {
-                PosingEditorCommon.DrawImportOptionEditor(_posingService.DefaultImporterOptions, _posingService);
+                if(_configService.Configuration.Library.UseFilenameAsActorName)
+                {
+                    actor.FriendlyName = fileEntry.Name;
+                }
+
+                _pendingCapability = capability;
+                _pendingPose = file;
+                _openPendingPosePopup = true;
             }
         }
-
-        ImGui.SameLine();
-
-        base.DrawActions(fileEntry, isModal);
     }
 
     protected override void Apply(CMToolPoseFile file, ActorEntity actor, bool asExpression)
     {
-        PosingCapability? capability;
-        if(actor.TryGetCapability<PosingCapability>(out capability) && capability != null)
+        if(actor.TryGetCapability<PosingCapability>(out PosingCapability? capability) && capability != null)
         {
             capability.ImportPose(file, asExpression: asExpression);
         }

@@ -1,6 +1,7 @@
-﻿using Brio.Game.World;
+﻿using Brio.Game.World.Interop;
+using Brio.Game.World.Lights;
+using Brio.Game.WorldObjects;
 using Dalamud.Game.ClientState.Objects.Types;
-
 using NativeCharacter = FFXIVClientStructs.FFXIV.Client.Game.Character.Character;
 using NativeGameObject = FFXIVClientStructs.FFXIV.Client.Game.Object.GameObject;
 
@@ -15,6 +16,9 @@ public record struct EntityId(string Unique)
     {
     }
     public EntityId(IGameLight id) : this($"light_{id.Address}")
+    {
+    }
+    public EntityId(IWorldObject obj) : this($"bg_{obj.Address}")
     {
     }
 
@@ -41,7 +45,7 @@ public record struct EntityId(string Unique)
     {
         return new EntityId($"actor_{(nint)go}");
     }
-    public unsafe static implicit operator EntityId(GameLight* light)
+    public unsafe static implicit operator EntityId(BrioLight* light)
     {
         return new EntityId($"light_{(nint)light}");
     }

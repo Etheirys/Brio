@@ -7,7 +7,7 @@ public class AutoSaveConfiguration
     public bool AutoSaveIndividualPoses { get; set; } = true;
 
     public int AutoSaveInterval { get; set; } = 60;
-    public int MaxAutoSaves { get; set; } = 11;
+    public int MaxAutoSaves { get; set; } = 60;
 
     public bool CleanAutoSaveOnLeavingGpose { get; set; } = false;
 

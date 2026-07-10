@@ -4,16 +4,15 @@ using Brio.Core;
 using Brio.Entities;
 using Brio.Entities.Actor;
 using Brio.Files.Converters;
-using Brio.Game.Posing;
+using Brio.Game.Actor.Appearance;
 using Brio.Library.Sources;
 using Brio.Resources;
-using Brio.UI.Controls.Editors;
 using Brio.UI.Controls.Stateless;
 using Dalamud.Bindings.ImGui;
-using Dalamud.Interface;
 using Dalamud.Interface.Textures.TextureWraps;
-using Dalamud.Interface.Utility.Raii;
+using FFXIVClientStructs.FFXIV.Client.System.Framework;
 using MessagePack;
+using OneOf;
 using System;
 using System.Collections.Generic;
 using System.Numerics;
@@ -22,54 +21,64 @@ namespace Brio.Files;
 
 public class PoseFileInfo : AppliableActorFileInfoBase<PoseFile>
 {
-    private PosingService _posingService;
+    private PosingCapability? _pendingCapability;
+    private OneOf<PoseFile, CMToolPoseFile, PoseData>? _pendingPose;
+    private bool _openPendingPosePopup;
 
     public override string Name => "Pose File";
     public override IDalamudTextureWrap Icon => ResourceProvider.Instance.GetResourceImage("Images.FileIcon_Pose.png");
     public override string Extension => ".pose";
 
-    public PoseFileInfo(EntityManager entityManager, PosingService posingService, ConfigurationService configurationService)
-    : base(entityManager, configurationService)
+    public PoseFileInfo(EntityManager entityManager, ConfigurationService configurationService) : base(entityManager, configurationService)
     {
-        _posingService = posingService;
     }
 
     public override void DrawActions(FileEntry fileEntry, bool isModal)
     {
-        if(ImBrio.Button("##pose_import_options_action", FontAwesomeIcon.Cog, new Vector2(25, 0), tooltip: "Import Options"))
+        base.DrawActions(fileEntry, isModal);
+
+        if(_openPendingPosePopup)
         {
-            ImGui.OpenPopup("import_options_popup_lib");
+            ImGui.OpenPopup("DrawImportPoseMenuPopup");
+            _openPendingPosePopup = false;
         }
 
-        using(var popup = ImRaii.Popup("import_options_popup_lib"))
+        FileUIHelpers.DrawImportPoseMenuPopup("libraryPose", _pendingCapability, importPose: _pendingPose);
+    }
+
+    protected override void OnApplyToActor(FileEntry fileEntry, ActorEntity actor)
+    {
+        if(Load(fileEntry.FilePath) is PoseFile file)
         {
-            if(popup.Success)
+            if(actor.TryGetCapability<PosingCapability>(out PosingCapability? capability) && capability != null)
             {
-                PosingEditorCommon.DrawImportOptionEditor(_posingService.DefaultImporterOptions, _posingService);
+                if(_configService.Configuration.Library.UseFilenameAsActorName)
+                {
+                    actor.FriendlyName = fileEntry.Name;
+                }
+
+                _pendingCapability = capability;
+                _pendingPose = file;
+                _openPendingPosePopup = true;
             }
         }
-
-        ImGui.SameLine();
-
-        base.DrawActions(fileEntry, isModal);
     }
 
     protected override void Apply(PoseFile file, ActorEntity actor, bool asExpression)
     {
-        PosingCapability? capability;
-        if(actor.TryGetCapability<PosingCapability>(out capability) && capability != null)
+        if(actor.TryGetCapability<PosingCapability>(out PosingCapability? capability) && capability != null)
         {
             capability.ImportPose(file, asExpression: asExpression);
         }
     }
 }
 
+public record PoseMetaData(int ModelId, string? RaceSexId, int? FaceID);
+
 [Serializable]
 [MessagePackObject(keyAsPropertyName: true)]
-public class PoseFile : JsonDocumentBase
+public class PoseData : JsonDocumentBase
 {
-    public string TypeName { get; set; } = "Brio Pose";
-
     public Bone ModelDifference { get; set; } = Transform.Identity;
     public Bone ModelAbsoluteValues { get; set; } = Transform.Identity;
 
@@ -79,9 +88,9 @@ public class PoseFile : JsonDocumentBase
     public Dictionary<string, Bone> Prop { get; set; } = [];
     public Dictionary<string, Bone> Ornament { get; set; } = [];
 
-    public Vector3 Position { get; set; }  // legacy & for better support for other pose tools
-    public Quaternion Rotation { get; set; } // legacy & for better support for other pose tools
-    public Vector3 Scale { get; set; } // legacy & for better support for other pose tools
+    public Vector3 Position { get; set; }       // legacy & for better support for other pose tools
+    public Quaternion Rotation { get; set; }    // legacy & for better support for other pose tools
+    public Vector3 Scale { get; set; }          // legacy & for better support for other pose tools
 
     [MessagePackObject(keyAsPropertyName: true)]
     public class Bone
@@ -119,5 +128,30 @@ public class PoseFile : JsonDocumentBase
             newBones[AnamnesisBoneNameConverter.AnamnesisToGame(bone.Key)] = bone.Value;
         }
         Bones = newBones;
+    }
+}
+
+[Serializable]
+[MessagePackObject(keyAsPropertyName: true)]
+public class PoseFile : PoseData
+{
+    public string FileExtension => ".pose";
+
+    public int FileVersion { get; set; } = 3;
+    public string TypeName { get; set; } = "Brio Pose";
+
+    public int ModelId { get; set; } = 0;
+    public string? RaceSexId { get; set; } = null;
+    public int? FaceID { get; set; } = null;
+
+    // "2026.06.18.0000.0000" or above
+    public unsafe string GameVersion { get; set; } = Framework.Instance()->GameVersionString;
+
+    public (Tribes tribe, Genders gender, bool isNpc) GetRaceSexId()
+    {
+        if(RaceSexId == null)
+            return (0, 0, false);
+
+        return DataPathResolver.FromDataPath(short.Parse(RaceSexId));
     }
 }

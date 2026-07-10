@@ -79,7 +79,7 @@ public class ComponentSet<T> : IEnumerable<T>, IDisposable
     public void ReplaceItem(int address, T item)
     {
         if(address < 0 || address >= NextAvailableIndex)
-            Brio.Log.Fatal($"(ComponentSet::ReplaceItem) [{address}] Address is out of range.");
+            Brio.Log.Debug($"(ComponentSet::ReplaceItem) [{address}] Address is out of range.");
 
         Components[address] = item;
     }
@@ -87,7 +87,7 @@ public class ComponentSet<T> : IEnumerable<T>, IDisposable
     public void Remove(int address)
     {
         if(address < 0 || address >= NextAvailableIndex)
-            Brio.Log.Fatal($"(ComponentSet::Remove) [{address}] Address is out of range.");
+            Brio.Log.Debug($"(ComponentSet::Remove) [{address}] Address is out of range.");
 
         Components[address] = default!;
         AvailableIndices.Enqueue(address);

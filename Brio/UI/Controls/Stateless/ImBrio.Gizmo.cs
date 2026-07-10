@@ -1,11 +1,12 @@
-﻿using Brio.Game.Camera;
+﻿using Brio.Config;
+using Brio.Game.Camera;
 using Brio.Input;
+using Brio.UI.Controls.Core;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface.Utility.Raii;
 using FFXIVClientStructs.FFXIV.Client.Game.Control;
 using System;
 using System.Numerics;
-using Brio.Config;
 
 namespace Brio.UI.Controls.Stateless;
 
@@ -90,6 +91,7 @@ public static partial class ImBrioGizmo
         var transformMatrix = Matrix4x4.CreateFromQuaternion(rotation);
         transformMatrix.Translation = new Vector3(0, -5, 0);
 
+        using(ImRaii.PushColor(ImGuiCol.ChildBg, UIConstants.Transparent))
         using(var child = ImRaii.Child("##imbriozmo", size))
         {
             if(child.Success)

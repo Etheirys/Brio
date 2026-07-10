@@ -4,6 +4,5 @@ public enum ActorType
 {
     BrioActor,
     Companion,
-    Prop,
-    Effect
+    WorldActor
 }

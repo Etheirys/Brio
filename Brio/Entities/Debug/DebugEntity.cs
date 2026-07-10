@@ -15,6 +15,8 @@ public class DebugEntity(IServiceProvider provider) : Entity(FixedId, provider)
 
     public override EntityFlags Flags => EntityFlags.AllowOutsideGpose;
 
+    public override bool IsAttached => true;
+
     public override void OnAttached()
     {
         AddCapability(ActivatorUtilities.CreateInstance<DebugCapability>(_serviceProvider, this));

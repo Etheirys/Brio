@@ -1,11 +1,7 @@
 ﻿using Brio.Capabilities.Actor;
-using Brio.Entities.Actor;
-using Brio.UI.Controls.Stateless;
 using Brio.UI.Widgets.Core;
 using Dalamud.Bindings.ImGui;
-using Dalamud.Interface;
-using Dalamud.Interface.Utility;
-using Dalamud.Interface.Utility.Raii;
+using System.Linq;
 using System.Numerics;
 
 namespace Brio.UI.Widgets.Actor;
@@ -17,7 +13,7 @@ public class ActorContainerWidget(ActorContainerCapability capability) : Widget<
     {
         get
         {
-            WidgetFlags flags = WidgetFlags.DefaultOpen | WidgetFlags.DrawBody | WidgetFlags.DrawQuickIcons;
+            WidgetFlags flags = WidgetFlags.DrawQuickIcons;
 
             if(Capability.CanControlCharacters)
                 flags |= WidgetFlags.DrawPopup | WidgetFlags.CanHide;
@@ -26,118 +22,98 @@ public class ActorContainerWidget(ActorContainerCapability capability) : Widget<
         }
     }
 
-    private ActorEntity? _selectedActor;
-
-    public override void DrawQuickIcons()
-    {
-        using(ImRaii.Disabled(!Capability.CanControlCharacters))
-        {
-            bool hasSelection = _selectedActor != null;
-
-            if(ImBrio.FontIconButton("containerwidget_spawnbasic", FontAwesomeIcon.Plus, "Spawn"))
-            {
-                Capability.CreateCharacter(false, true, forceSpawnActorWithoutCompanion: true);
-            }
-
-            ImGui.SameLine();
-
-            if(ImBrio.FontIconButton("containerwidget_spawnattachments", FontAwesomeIcon.PlusSquare, "Spawn with Companion slot"))
-            {
-                Capability.CreateCharacter(true, true);
-            }
-
-            ImGui.SameLine();
-
-            if(ImBrio.FontIconButton("lifetimewidget_spawn_prop", FontAwesomeIcon.Cubes, "Spawn Prop"))
-            {
-                Capability.SpawnNewProp(true);
-            }
-
-            ImGui.SameLine();
-
-            if(ImBrio.FontIconButton("containerwidget_clone", FontAwesomeIcon.Clone, "Clone", hasSelection))
-            {
-                Capability.CloneActor(_selectedActor!, false);
-            }
-
-            ImGui.SameLine();
-
-            if(ImBrio.FontIconButton("containerwidget_destroy", FontAwesomeIcon.Trash, "Destroy", hasSelection))
-            {
-                Capability.DestroyCharacter(_selectedActor!);
-            }
-
-            ImGui.SameLine();
-
-            if(ImBrio.FontIconButton("containerwidget_target", FontAwesomeIcon.Bullseye, "Target", hasSelection))
-            {
-                Capability.Target(_selectedActor!);
-            }
-
-            ImGui.SameLine();
-
-            if(ImBrio.FontIconButton("containerwidget_selectinhierarchy", FontAwesomeIcon.FolderTree, "Select in Hierarchy", hasSelection))
-            {
-                Capability.SelectInHierarchy(_selectedActor!);
-            }
-
-            ImGui.SameLine();
-
-            if(ImBrio.FontIconButton("containerwidget_destroyall", FontAwesomeIcon.Bomb, "Destroy All"))
-            {
-                Capability.DestroyAll();
-            }
-        }
-    }
-
-    public override void DrawBody()
-    {
-        if(ImGui.BeginListBox($"###actorcontainerwidget_{Capability.Entity.Id}_list", new Vector2(-1, 150 * ImGuiHelpers.GlobalScale)))
-        {
-            foreach(var child in Capability.Entity.Children)
-            {
-                if(child is ActorEntity actorEntity)
-                {
-                    bool isSelected = actorEntity.Equals(_selectedActor);
-                    if(ImGui.Selectable($"{child.FriendlyName}###actorcontainerwidget_{Capability.Entity.Id}_item_{actorEntity.Id}", isSelected, ImGuiSelectableFlags.AllowDoubleClick))
-                    {
-                        _selectedActor = actorEntity;
-                        Capability.SelectActorInHierarchy(actorEntity);
-                    }
-                }
-            }
-
-            ImGui.EndListBox();
-        }
-    }
-
     public override void DrawPopup()
     {
         if(ImGui.BeginMenu("New...###containerwidgetpopup_new"))
         {
-            if(ImGui.MenuItem("Spawn###containerwidgetpopup_spawnbasic"))
+            if(ImGui.MenuItem("Actor###containerwidgetpopup_spawnbasic"))
             {
                 Capability.CreateCharacter(false, true, forceSpawnActorWithoutCompanion: true);
             }
-            if(ImGui.MenuItem("Spawn with Companion###containerwidgetpopup_spawncompanion"))
+            if(ImGui.MenuItem("Actor with Companion###containerwidgetpopup_spawncompanion"))
             {
                 Capability.CreateCharacter(true, true);
             }
-            if(ImGui.MenuItem("Spawn Prop###containerwidgetpopup_spawnprop"))
+
+            ImGui.Separator();
+
+            if(ImGui.MenuItem("Prop###containerwidgetpopup_spawnprop"))
             {
-                Capability.CreateProp(true);
+                Capability.WorldObjectService.SpawnProp(new FFXIVClientStructs.FFXIV.Client.Graphics.Scene.WeaponCreateInfo
+                {
+                    WeaponModelId =
+                    {
+                        Id = 9001,
+                        Type = 249,
+                        Variant = 1,
+                        Stain0 = 1,
+                        Stain1 = 1,
+                    },
+                    AnimationVariant = 0,
+                });
+            }
+
+            if(ImGui.MenuItem("Furniture Item###containerwidgetpopup_spawnfur"))
+            {
+                Capability.WorldObjectService.SpawnFurniture("bgcommon/hou/outdoor/general/0332/asset/gar_b0_m0332.sgb");
+            }
+
+            if(ImGui.MenuItem("World Object###containerwidgetpopup_spawnworld"))
+            {
+                Capability.WorldObjectService.SpawnBgObject("bg/ffxiv/fst_f1/twn/common/bgparts/f1t0_a0_taru1.mdl");
+            }
+
+            if(ImGui.MenuItem("VFX###containerwidgetpopup_spawnVFX"))
+            {
+                Capability.WorldObjectService.SpawnStaticVfx("bgcommon/world/common/vfx_for_bg/eff/val_obj001_o.avfx");
             }
 
             ImGui.EndMenu();
         }
 
-        if(ImGui.BeginMenu("Destroy All Actors###containerwidgetpopup_destroy"))
+        if(ImGui.BeginMenu("Add from World...###containerwidgetpopup_add"))
         {
-            if(ImGui.MenuItem("Confirm Destruction##containerwidgetpopup_destroyall"))
+            if(ImGui.BeginMenu("Actor...###containerwidgetpopup_addActor"))
             {
-                Capability.DestroyAll();
+                var playerPosition = Capability.ObjectMonitorService.ObjectTable.LocalPlayer?.Position ?? Vector3.Zero; // I hate this
+                var overworldActors = Capability.ObjectMonitorService.GetOverworldActors().OrderBy(actor => Vector3.DistanceSquared(playerPosition, actor.Position));
+
+                if(!overworldActors.Any())
+                {
+                    ImGui.TextDisabled("No world actors found");
+                }
+
+                foreach(var actor in overworldActors)
+                {
+                    if(actor == null || !actor.IsValid())
+                        return;
+
+                    var distanceText = $" [{Vector3.Distance(playerPosition, actor.Position):0.0}]";
+
+                    if(ImGui.MenuItem(string.IsNullOrWhiteSpace(actor?.Name.ToString()) ? $"Unknown {distanceText}##actor_containerwidgetpopup_{actor!.GameObjectId}" : $"{actor.Name} {distanceText}##actor_containerwidgetpopup_{actor.GameObjectId}"))
+                    {
+                        Capability.AddFromWorld(actor);
+                        ImGui.CloseCurrentPopup();
+                    }
+                }
+                ImGui.EndMenu();
             }
             ImGui.EndMenu();
         }
+
+        if(ImGui.BeginMenu("Destroy All...###containerwidgetpopup_destroy"))
+        {
+            if(ImGui.BeginMenu("Actors###containerwidgetpopup_destroyActors"))
+            {
+                if(ImGui.MenuItem("Confirm Destruction##containerwidgetpopup_destroyallActors"))
+                {
+                    Capability.DestroyAll();
+                }
+                ImGui.EndMenu();
+            }
+            ImGui.EndMenu();
+        }
+
+        ImGui.Separator();
     }
 }

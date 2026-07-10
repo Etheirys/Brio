@@ -5,6 +5,7 @@ using Brio.Library.Sources;
 using Brio.Library.Tags;
 using Brio.UI.Controls.Core;
 using Brio.UI.Controls.Stateless;
+using Brio.UI.Theming;
 using Brio.UI.Windows;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface;
@@ -36,7 +37,7 @@ public abstract class ItemEntryBase : EntryBase
     public virtual bool EditAble { get; }
     public virtual void AddTag(string tag) { }
     public virtual void RemoveTag(string tag) { }
-    public virtual void EditDetailsPopup(bool openPopup) { }
+    public virtual void OpenEditDetails() { }
     private Tag? _contextSource = null;
     private string _tagName = String.Empty;
     private TagAction _tagAction = TagAction.New;
@@ -198,25 +199,24 @@ public abstract class ItemEntryBase : EntryBase
         var config = ConfigurationService.Instance.Configuration;
         bool isFavorite = config.Library.Favorites.Contains(this.Identifier);
 
-        ImGui.PushStyleColor(ImGuiCol.Text, isFavorite ? UIConstants.GizmoRed : UIConstants.ToggleButtonInactive);
-
         //
 
-        if(ImBrio.FontIconButton(FontAwesomeIcon.Heart))
+        using(ImRaii.PushColor(ImGuiCol.Text, isFavorite ? UIConstants.GizmoRed : ThemeManager.CurrentTheme.Text.Text))
         {
-            if(!isFavorite)
+            if(ImBrio.FontIconButton(FontAwesomeIcon.Heart))
             {
-                config.Library.Favorites.Add(this.Identifier);
-            }
-            else
-            {
-                config.Library.Favorites.Remove(this.Identifier);
-            }
+                if(!isFavorite)
+                {
+                    config.Library.Favorites.Add(this.Identifier);
+                }
+                else
+                {
+                    config.Library.Favorites.Remove(this.Identifier);
+                }
 
-            ConfigurationService.Instance.Save();
+                ConfigurationService.Instance.Save();
+            }
         }
-
-        ImGui.PopStyleColor();
 
         if(ImGui.IsItemHovered())
             ImGui.SetTooltip(isFavorite ? "Remove from favorites" : "Add to favorites");
@@ -226,15 +226,11 @@ public abstract class ItemEntryBase : EntryBase
         if(EditAble is false)
             return;
 
-        bool openPopup = false;
-        using(var disabled = ImRaii.Disabled(true))
-            if(ImBrio.FontIconButton(FontAwesomeIcon.FilePen))
-                openPopup = true;
+        if(ImBrio.FontIconButton(FontAwesomeIcon.FilePen))
+            OpenEditDetails();
 
         if(ImGui.IsItemHovered())
-            ImGui.SetTooltip("Edit details (coming soon)");
-
-        EditDetailsPopup(openPopup);
+            ImGui.SetTooltip("Edit Properties");
 
         ImGui.SameLine();
     }

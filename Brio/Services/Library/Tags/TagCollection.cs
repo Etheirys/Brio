@@ -3,7 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Text;
-using YamlDotNet.Core.Tokens;
 
 namespace Brio.Library.Tags;
 
@@ -12,7 +11,7 @@ public class TagCollection : ICollection<Tag>, INotifyCollectionChanged
 {
     public static readonly TagCollection Empty = [];
 
-    private HashSet<Tag> tags { get; set; } = [];
+    private HashSet<Tag> _tags { get; set; } = [];
 
     private bool supressChangedEvents = false;
 
@@ -27,13 +26,13 @@ public class TagCollection : ICollection<Tag>, INotifyCollectionChanged
 
     public event NotifyCollectionChangedEventHandler? CollectionChanged;
 
-    public int Count => this.tags.Count;
+    public int Count => this._tags.Count;
 
     public bool IsReadOnly => false;
 
-    public Tag Add(string name)
+    public Tag Add(string name, bool isToolGenerated = false)
     {
-        Tag tag = Tag.Get(name);
+        Tag tag = Tag.Get(name, isToolGenerated);
         this.Add(tag);
         return tag;
     }
@@ -43,7 +42,7 @@ public class TagCollection : ICollection<Tag>, INotifyCollectionChanged
         if(tag == null)
             return;
 
-        this.tags.Add(tag);
+        this._tags.Add(tag);
 
         if(!this.supressChangedEvents)
         {
@@ -69,7 +68,7 @@ public class TagCollection : ICollection<Tag>, INotifyCollectionChanged
 
     public void Remove(Tag tag)
     {
-        this.tags.Remove(tag);
+        this._tags.Remove(tag);
 
         if(!this.supressChangedEvents)
         {
@@ -113,7 +112,7 @@ public class TagCollection : ICollection<Tag>, INotifyCollectionChanged
 
     bool ICollection<Tag>.Remove(Tag tag)
     {
-        bool removed = this.tags.Remove(tag);
+        bool removed = this._tags.Remove(tag);
 
         if(removed && !this.supressChangedEvents)
         {
@@ -125,7 +124,7 @@ public class TagCollection : ICollection<Tag>, INotifyCollectionChanged
 
     public void Clear()
     {
-        this.tags.Clear();
+        this._tags.Clear();
 
         if(!this.supressChangedEvents)
         {
@@ -133,13 +132,13 @@ public class TagCollection : ICollection<Tag>, INotifyCollectionChanged
         }
     }
 
-    public bool Contains(Tag tag) => this.tags.Contains(tag);
+    public bool Contains(Tag tag) => this._tags.Contains(tag);
 
     public bool Contains(TagCollection other)
     {
         foreach(Tag tag in other)
         {
-            if(!this.tags.Contains(tag))
+            if(!this._tags.Contains(tag))
             {
                 return false;
             }
@@ -148,8 +147,8 @@ public class TagCollection : ICollection<Tag>, INotifyCollectionChanged
         return true;
     }
 
-    public IEnumerator<Tag> GetEnumerator() => this.tags.GetEnumerator();
-    IEnumerator IEnumerable.GetEnumerator() => this.tags.GetEnumerator();
+    public IEnumerator<Tag> GetEnumerator() => this._tags.GetEnumerator();
+    IEnumerator IEnumerable.GetEnumerator() => this._tags.GetEnumerator();
 
     public override string ToString()
     {
@@ -165,6 +164,6 @@ public class TagCollection : ICollection<Tag>, INotifyCollectionChanged
 
     public void CopyTo(Tag[] array, int arrayIndex)
     {
-        this.tags.CopyTo(array, arrayIndex);
+        this._tags.CopyTo(array, arrayIndex);
     }
 }

@@ -23,13 +23,13 @@ public class CompanionSelector(string id) : Selector<CompanionRowUnion>(id)
 
     protected override void PopulateList()
     {
-        foreach(var companion in GameDataProvider.Instance.Companions)
+        foreach(var companion in GameDataProvider.Instance.FilteredCompanions)
             AddItem(companion);
 
-        foreach(var mount in GameDataProvider.Instance.Mounts)
+        foreach(var mount in GameDataProvider.Instance.FilteredMounts)
             AddItem(mount);
 
-        foreach(var ornament in GameDataProvider.Instance.Ornaments)
+        foreach(var ornament in GameDataProvider.Instance.FilteredOrnaments)
             AddItem(ornament);
 
         AddItem(new None());
@@ -64,9 +64,9 @@ public class CompanionSelector(string id) : Selector<CompanionRowUnion>(id)
             return true;
 
         bool shouldFilter = item.Match(
-            companion => !_showCompanions || companion.Model.RowId == 0,
-            mount => !_showMounts || mount.ModelChara.RowId == 0,
-            ornament => !_showOrnaments || ornament.Model == 0,
+            companion => !_showCompanions,
+            mount => !_showMounts,
+            ornament => !_showOrnaments,
             none => false
         );
 
@@ -80,11 +80,7 @@ public class CompanionSelector(string id) : Selector<CompanionRowUnion>(id)
             none => "none"
         );
 
-        if(searchText.Contains(search, System.StringComparison.InvariantCultureIgnoreCase))
-            return true;
-
-
-        return false;
+        return searchText.Contains(search, System.StringComparison.InvariantCultureIgnoreCase);
     }
 
     protected override int Compare(CompanionRowUnion itemA, CompanionRowUnion itemB)

@@ -91,6 +91,7 @@ public unsafe class IKService : IDisposable
     {
         NativeHelpers.FreeAlignedMemory(_solverAddr);
         NativeHelpers.FreeAlignedMemory(_ccdConstraintCtrAddr);
+        NativeHelpers.FreeAlignedMemory(_twoJointSetupAddr);
     }
 
     [StructLayout(LayoutKind.Explicit, Size = 0x18)]

@@ -16,9 +16,9 @@ public partial class CompanionRowUnion : OneOfBase<Companion, Mount, Ornament, N
 
         return container.Kind switch
         {
-            CompanionKind.Companion => GameDataProvider.Instance.Companions[container.Id],
-            CompanionKind.Mount => GameDataProvider.Instance.Mounts[container.Id],
-            CompanionKind.Ornament => GameDataProvider.Instance.Ornaments[container.Id],
+            CompanionKind.Companion => GameDataProvider.Instance.GetExcelSheet<Companion>().GetRow(container.Id),
+            CompanionKind.Mount => GameDataProvider.Instance.GetExcelSheet<Mount>().GetRow(container.Id),
+            CompanionKind.Ornament => GameDataProvider.Instance.GetExcelSheet<Ornament>().GetRow(container.Id),
             CompanionKind.None => new None(),
             _ => new None()
         };

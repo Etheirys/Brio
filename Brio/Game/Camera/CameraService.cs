@@ -1,6 +1,5 @@
 ﻿using Brio.Capabilities.Camera;
 using Brio.Entities;
-using Brio.Entities.Camera;
 using Brio.Game.Cutscene;
 using Brio.Game.GPose;
 using Brio.Input;
@@ -134,17 +133,15 @@ public unsafe class CameraService : IDisposable
     {
         if(_gPoseService.IsGPosing)
         {
-            if(_entityManager.TryGetEntity<CameraContainerEntity>("cameras", out var cameraEntity))
+            var cameraEntity = _entityManager.EntityManagerContainer;
+            if(cameraEntity.TryGetCapability<CameraContainerCapability>(out var cameraCapability))
             {
-                if(cameraEntity.TryGetCapability<CameraContainerCapability>(out var cameraCapability))
-                {
-                    if(cameraCapability.CurrentCamera is not null && cameraCapability.IsAllowed && cameraCapability.CurrentCamera.IsFreeCamera == false)
-                        if(cameraCapability.CurrentCamera.DisableCollision && cameraCapability.CurrentCamera.IsActiveCamera)
-                        {
-                            camera->Collide = new Vector2(camera->Camera.MaxDistance);
-                            return 0;
-                        }
-                }
+                if(cameraCapability.CurrentCamera is not null && cameraCapability.IsAllowed && cameraCapability.CurrentCamera.IsFreeCamera == false)
+                    if(cameraCapability.CurrentCamera.DisableCollision && cameraCapability.CurrentCamera.IsActiveCamera)
+                    {
+                        camera->Collide = new Vector2(camera->Camera.MaxDistance);
+                        return 0;
+                    }
             }
         }
 

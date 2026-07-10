@@ -17,7 +17,7 @@ public class CameraLifetimeCapability : CameraCapability
     {
         _virtualCameraManager = virtualCameraManager;
 
-        Widget = new CameraLifetimeWidget(this, actorSpawnService, lightingService);
+        Widget = new CameraLifetimeWidget(this);
     }
 
     public bool CanDestroy => CameraEntity.CameraID != 0;

@@ -33,7 +33,7 @@ public class TextureSelector : Selector<TextureId>
 
     protected override SelectorFlags Flags { get; } = SelectorFlags.AllowSearch | SelectorFlags.AdaptiveSizing;
 
-    public TextureSelector(string id, TextureType textureType, uint maxId = 80) : base(id)
+    public TextureSelector(string id, TextureType textureType, uint maxId = 120) : base(id)
     {
         _textureType = textureType;
         _maxId = maxId;
