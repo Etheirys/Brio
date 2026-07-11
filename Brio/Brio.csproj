@@ -21,7 +21,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="LuminaSupplemental.Excel" Version="4.3.7" />
+		<PackageReference Include="LuminaSupplemental.Excel" Version="5.0.0" />
 		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.9" />
 		<PackageReference Include="MessagePack" Version="3.1.7" />
 		<PackageReference Include="SharpYaml" Version="3.11.0" />
