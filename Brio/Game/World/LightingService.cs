@@ -46,7 +46,7 @@ public unsafe class LightingService : MediatorSubscriberBase
     private delegate BrioLight* LightDelegate(BrioLight* light);
     private readonly Hook<LightDelegate> _lightCtorHook = null!;
 
-     public delegate* unmanaged<BrioLight*, bool, nint> Destructor;
+    public delegate* unmanaged<BrioLight*, bool, nint> Destructor;
 
     private delegate nint LightDtorDelegate(BrioLight* thisPtr, bool free);
     private Hook<LightDtorDelegate> _lightDtorHook = null!;
