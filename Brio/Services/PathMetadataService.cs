@@ -92,6 +92,11 @@ public class PathMetadataService
     }
     private void Load(PathTarget target, ref byte[] data)
     {
+        // A new installation has no user path store yet. Treat the missing
+        // store as empty instead of reporting a corrupt-file error.
+        if(data.Length == 0)
+            return;
+
         try
         {
             var loaded = PathDatabase.Deserialize<PathStore>(data, PathStore.Magic);

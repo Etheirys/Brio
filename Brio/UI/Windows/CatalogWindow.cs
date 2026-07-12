@@ -64,10 +64,13 @@ public class CatalogWindow : Window, IDisposable
     private List<string> _modelSubtypeOptions = [];
     private List<string> _modelAssetOptions = [];
     private CatalogDisplayMode _modelDisplayMode = CatalogDisplayMode.Compact;
-    private bool _modelLivePreviewEnabled;
+    private readonly CatalogModelPreviewWindow _modelPreviewWindow;
     private IWorldObject? _modelLivePreview;
     private string _modelLivePreviewPath = string.Empty;
+    private int _modelLivePreviewIndex = -1;
     private int _modelLivePreviewRequest;
+
+    public Window ModelPreviewWindow => _modelPreviewWindow;
 
     private List<GamePathInfo> _allVfx = [];
     private List<GamePathInfo> _filteredVfx = [];
@@ -93,6 +96,10 @@ public class CatalogWindow : Window, IDisposable
     private string _metaTerritoryInput = string.Empty;
     private string _metaLastExport = string.Empty;
     private IWorldObject? _metaPreview;
+    private bool _metaPreviewMode;
+    private int _metaPreviewRequest;
+    private int _metaJumpIndex = 1;
+    private bool _metaScrollToSelected;
 
     public CatalogWindow(GPoseService gPoseService, WorldObjectService worldObjectService, ConfigurationService configurationService, QuickAccessService quickAccess, PathMetadataService pathMetadata, IClientState clientState) : base($"{Brio.Name} - CATALOG###brio_furniture_catalog_window")
     {
@@ -104,6 +111,7 @@ public class CatalogWindow : Window, IDisposable
         _quickAccess = quickAccess;
         _pathMetadata = pathMetadata;
         _clientState = clientState;
+        _modelPreviewWindow = new CatalogModelPreviewWindow(this);
 
         this.AllowBackgroundBlur = false;
 
@@ -248,7 +256,7 @@ public class CatalogWindow : Window, IDisposable
         DrawMetadataToolbar();
 
         if(_metaKind == ObjectPathKind.Model)
-            DrawModelFilters();
+            DrawModelFilters(false);
         else
             DrawVfxFilters();
 
@@ -321,6 +329,20 @@ public class CatalogWindow : Window, IDisposable
             return;
         }
 
+        if(_metaScrollToSelected)
+        {
+            var selectedRow = rows.FindIndex(row => row.Header is null
+                && row.Index >= 0
+                && row.Index < items.Count
+                && items[row.Index].Path == _metaSelectedPath);
+            if(selectedRow >= 0)
+            {
+                var rowHeight = ImGui.GetTextLineHeightWithSpacing();
+                ImGui.SetScrollY(Math.Max(0, selectedRow * rowHeight - ImGui.GetWindowHeight() * 0.5f));
+            }
+            _metaScrollToSelected = false;
+        }
+
         var clipper = new ImGuiListClipperPtr(ImGuiNative.ImGuiListClipper());
         clipper.Begin(rows.Count);
         while(clipper.Step())
@@ -345,7 +367,7 @@ public class CatalogWindow : Window, IDisposable
 
                 string label = metadata is not null ? $"* {name}" : model.DisplayName;
                 if(ImGui.Selectable($"{label}###{key}", isSelected))
-                    LoadMetaEditing(model.Path, model);
+                    SelectMetadataItem(row.Index);
 
                 if(ImGui.IsItemHovered())
                     ImBrio.AttachToolTip($"{name}{ImBrio.TooltipSeparator}{model.Path}");
@@ -363,18 +385,32 @@ public class CatalogWindow : Window, IDisposable
             return;
         }
 
-        if(ImBrio.FontIconButton("meta_preview_spawn", FontAwesomeIcon.PlusCircle, "Spawn preview"))
+        var items = _metaKind == ObjectPathKind.Model ? _filteredModels : _filteredVfx;
+        var selectedIndex = items.FindIndex(item => item.Path == _metaSelectedPath);
+        var buttonHeight = ImGui.GetFrameHeight();
+
+        if(ImBrio.IconButtonWithText(FontAwesomeIcon.PlusCircle, "Spawn preview",
+            new Vector2(120 * ImGuiHelpers.GlobalScale, buttonHeight)))
             SpawnMetaPreview();
+
+        ImGui.SameLine();
+
+        using(ImRaii.Disabled(selectedIndex <= 0))
+            if(ImGui.Button("Previous", new Vector2(82 * ImGuiHelpers.GlobalScale, buttonHeight)))
+                SelectMetadataItem(selectedIndex - 1);
+
+        ImGui.SameLine();
+
+        using(ImRaii.Disabled(selectedIndex < 0 || selectedIndex >= items.Count - 1))
+            if(ImGui.Button("Next", new Vector2(82 * ImGuiHelpers.GlobalScale, buttonHeight)))
+                SelectMetadataItem(selectedIndex + 1);
 
         ImGui.SameLine();
 
         using(ImRaii.Disabled(_metaPreview is not { IsValid: true }))
         {
             if(ImBrio.FontIconButton("meta_preview_destroy", FontAwesomeIcon.Ban, "Destroy preview"))
-            {
-                _worldObjectService.Destroy(_metaPreview!);
-                _metaPreview = null;
-            }
+                StopMetaPreview();
         }
 
         ImGui.SameLine();
@@ -383,7 +419,24 @@ public class CatalogWindow : Window, IDisposable
         {
             _worldObjectService.DestroyAll();
             _metaPreview = null;
+            _metaPreviewMode = false;
+            _metaPreviewRequest++;
         }
+
+        ImGui.TextUnformatted("Index");
+        ImGui.SameLine();
+        ImGui.SetNextItemWidth(92 * ImGuiHelpers.GlobalScale);
+        ImGui.InputInt("###meta_jump_index", ref _metaJumpIndex, 0, 0);
+        var jumpConfirmed = ImBrio.IsItemConfirmed();
+        ImGui.SameLine();
+        using(ImRaii.Disabled(items.Count == 0))
+        {
+            var goTo = ImGui.Button("Go to");
+            if(items.Count > 0 && (goTo || jumpConfirmed))
+                SelectMetadataItem(Math.Clamp(_metaJumpIndex, 1, items.Count) - 1);
+        }
+
+        ImGui.TextDisabled($"Item {selectedIndex + 1} of {items.Count}");
 
         ImGui.Separator();
 
@@ -409,7 +462,8 @@ public class CatalogWindow : Window, IDisposable
 
         var pathExpansion = _metaSelectedInfo?.Expansion;
         ImGui.SameLine();
-        if(ImBrio.FontIconButton("###meta_expansion_from_path", FontAwesomeIcon.FileImport, $"Set from path ({pathExpansion})", !string.IsNullOrWhiteSpace(pathExpansion)))
+        if(ImBrio.FontIconButton("###meta_expansion_from_path", FontAwesomeIcon.FileImport,
+            $"Set from path ({pathExpansion})", !string.IsNullOrWhiteSpace(pathExpansion)))
             _metaEditing.Expansion = pathExpansion!.Trim();
 
         if(_metaKind == ObjectPathKind.VFX)
@@ -560,9 +614,50 @@ public class CatalogWindow : Window, IDisposable
         if(string.IsNullOrEmpty(_metaSelectedPath))
             return;
 
-        _metaPreview = _metaKind == ObjectPathKind.Model
-            ? await _worldObjectService.SpawnBgObjectAsync(_metaSelectedPath)
-            : await _worldObjectService.SpawnStaticVfxAsync(_metaSelectedPath);
+        _metaPreviewMode = true;
+        var request = ++_metaPreviewRequest;
+        var path = _metaSelectedPath;
+        var kind = _metaKind;
+
+        if(_metaPreview is { IsValid: true })
+            _worldObjectService.Destroy(_metaPreview);
+        _metaPreview = null;
+
+        IWorldObject? preview;
+        if(kind == ObjectPathKind.Model)
+            preview = await _worldObjectService.SpawnBgObjectAsync(path);
+        else
+            preview = await _worldObjectService.SpawnStaticVfxAsync(path);
+
+        if(request != _metaPreviewRequest || !_metaPreviewMode || path != _metaSelectedPath || kind != _metaKind)
+        {
+            if(preview is not null)
+                _worldObjectService.Destroy(preview);
+            return;
+        }
+
+        _metaPreview = preview;
+    }
+
+    private void StopMetaPreview()
+    {
+        _metaPreviewMode = false;
+        _metaPreviewRequest++;
+        if(_metaPreview is { IsValid: true })
+            _worldObjectService.Destroy(_metaPreview);
+        _metaPreview = null;
+    }
+
+    private void SelectMetadataItem(int index)
+    {
+        var items = _metaKind == ObjectPathKind.Model ? _filteredModels : _filteredVfx;
+        if(index < 0 || index >= items.Count)
+            return;
+
+        var item = items[index];
+        _metaJumpIndex = index + 1;
+        _metaScrollToSelected = true;
+        LoadMetaEditing(item.Path, item);
     }
 
     private void SetMetaTarget(PathTarget target)
@@ -574,9 +669,12 @@ public class CatalogWindow : Window, IDisposable
 
     private void LoadMetaEditing(string path, GamePathInfo? info = null)
     {
-        if(_metaPreview is { IsValid: true } && path != _metaSelectedPath)
+        var pathChanged = path != _metaSelectedPath;
+        if(pathChanged)
         {
-            _worldObjectService.Destroy(_metaPreview);
+            _metaPreviewRequest++;
+            if(_metaPreview is { IsValid: true })
+                _worldObjectService.Destroy(_metaPreview);
             _metaPreview = null;
         }
 
@@ -586,6 +684,9 @@ public class CatalogWindow : Window, IDisposable
             ? data.Clone()
             : new PathData { Path = path };
         _metaEditing.Path = path;
+
+        if(pathChanged && _metaPreviewMode)
+            SpawnMetaPreview();
     }
 
     private void ExportMetadata()
@@ -638,10 +739,10 @@ public class CatalogWindow : Window, IDisposable
             });
     }
 
-    private bool DrawSearchAndViewMode(ref string searchText, ref CatalogDisplayMode mode, string id)
+    private bool DrawSearchAndViewMode(ref string searchText, ref CatalogDisplayMode mode, string id, float extraReservedWidth = 0)
     {
         bool applay = false;
-        ImGui.SetNextItemWidth((ImBrio.GetRemainingWidth() - 125) * ImGuiHelpers.GlobalScale);
+        ImGui.SetNextItemWidth((ImBrio.GetRemainingWidth() - 125 - extraReservedWidth) * ImGuiHelpers.GlobalScale);
         if(ImGui.InputTextWithHint("###vfx_search", "Search...", ref searchText, 256))
             applay = true;
 
@@ -671,25 +772,18 @@ public class CatalogWindow : Window, IDisposable
         ImGui.SameLine();
         ImGui.TextUnformatted($"{_filteredFurnishings.Count:N0} of {_allFurnishings.Count:N0} items");
     }
-    private void DrawModelFilters()
+    private void DrawModelFilters(bool showPreviewButton = true)
     {
-        if(DrawSearchAndViewMode(ref _modelSearch, ref _modelDisplayMode, "model_view"))
+        const float previewButtonWidth = 145;
+        if(DrawSearchAndViewMode(ref _modelSearch, ref _modelDisplayMode, "model_view", showPreviewButton ? previewButtonWidth : 0))
             ApplyModelFilter();
 
-        ImGui.SameLine();
-        if(ImBrio.ToggelFontIconButton("model_live_preview", FontAwesomeIcon.Eye, new Vector2(24, 5), _modelLivePreviewEnabled,
-            tooltip: "Live Preview (single-click previews, double-click spawns)"))
+        if(showPreviewButton)
         {
-            _modelLivePreviewEnabled = !_modelLivePreviewEnabled;
-            if(!_modelLivePreviewEnabled)
-                ClearModelLivePreview();
-        }
-
-        ImGui.SameLine();
-        using(ImRaii.Disabled(_modelLivePreview is not { IsValid: true }))
-        {
-            if(ImBrio.FontIconButton("model_live_preview_clear", FontAwesomeIcon.Ban, "Clear Live Preview"))
-                ClearModelLivePreview();
+            ImGui.SameLine();
+            if(ImBrio.IconButtonWithText(FontAwesomeIcon.Eye, "Open Model Preview",
+                new Vector2(previewButtonWidth * ImGuiHelpers.GlobalScale, ImGui.GetFrameHeight())))
+                OpenModelPreview();
         }
 
         float third = (ImGui.GetContentRegionAvail().X - ImGui.GetStyle().ItemSpacing.X * 2) / 3f;
@@ -960,22 +1054,109 @@ public class CatalogWindow : Window, IDisposable
 
     private void HandleCatalogSelection(ObjectPathKind kind, string path, string name, uint iconId, bool doubleClicked)
     {
-        if(_modelLivePreviewEnabled && kind == ObjectPathKind.Model)
+        if(_modelPreviewWindow.IsOpen && kind == ObjectPathKind.Model)
         {
-            if(doubleClicked)
-            {
-                ClearModelLivePreview();
-                Spawn(kind, path, name, iconId);
-            }
-            else
-            {
-                PreviewModel(path);
-            }
-
+            SelectModelPreview(path);
             return;
         }
 
         Spawn(kind, path, name, iconId);
+    }
+
+    private void OpenModelPreview()
+    {
+        _modelPreviewWindow.IsOpen = true;
+        if(_filteredModels.Count == 0)
+            return;
+
+        var currentIndex = _filteredModels.FindIndex(model => model.Path == _modelLivePreviewPath);
+        SelectModelPreview(currentIndex >= 0 ? currentIndex : 0);
+    }
+
+    public void OpenModelPreviewBrowser()
+    {
+        IsOpen = true;
+        categorySelection = 4;
+        _metaKind = ObjectPathKind.Model;
+    }
+
+    private void SelectModelPreview(string path)
+    {
+        var index = _filteredModels.FindIndex(model => model.Path == path);
+        if(index >= 0)
+            SelectModelPreview(index);
+    }
+
+    private void SelectModelPreview(int index)
+    {
+        if(index < 0 || index >= _filteredModels.Count)
+            return;
+
+        _modelLivePreviewIndex = index;
+        PreviewModel(_filteredModels[index].Path);
+    }
+
+    private void NavigateModelPreview(int direction)
+    {
+        if(_filteredModels.Count == 0)
+            return;
+
+        SelectModelPreview(Math.Clamp(_modelLivePreviewIndex + direction, 0, _filteredModels.Count - 1));
+    }
+
+    private void ApplyModelPreview()
+    {
+        if(_modelLivePreview is not { IsValid: true }
+            || _modelLivePreviewIndex < 0
+            || _modelLivePreviewIndex >= _filteredModels.Count)
+            return;
+
+        var model = _filteredModels[_modelLivePreviewIndex];
+        var metadata = _pathMetadata.PathDatabase.GetPathDataByPath(model.Path);
+        var name = metadata is not null ? $"{metadata.Name} ({model.DisplayName})" : model.DisplayName;
+        _quickAccess.PushRecent(MakeEntry(ObjectPathKind.Model, model.Path, name, 0));
+
+        _modelLivePreviewRequest++;
+        _modelLivePreview = null;
+        _modelLivePreviewPath = string.Empty;
+        _modelLivePreviewIndex = -1;
+        _modelPreviewWindow.IsOpen = false;
+    }
+
+    private void DrawModelPreviewWindow()
+    {
+        ImBrio.BlurWindow();
+
+        if(_filteredModels.Count == 0 || _modelLivePreviewIndex < 0 || _modelLivePreviewIndex >= _filteredModels.Count)
+        {
+            ImGui.TextWrapped("No models match the current filter.");
+            return;
+        }
+
+        var model = _filteredModels[_modelLivePreviewIndex];
+        var metadata = _pathMetadata.PathDatabase.GetPathDataByPath(model.Path);
+        var name = metadata is not null ? $"{metadata.Name} ({model.DisplayName})" : model.DisplayName;
+
+        ImGui.TextWrapped(name);
+        ImGui.TextDisabled($"Model {_modelLivePreviewIndex + 1} of {_filteredModels.Count}");
+        ImGui.Separator();
+        ImGui.TextWrapped(model.Path);
+        ImBrio.VerticalPadding(4);
+
+        var spacing = ImGui.GetStyle().ItemSpacing.X;
+        var halfWidth = (ImGui.GetContentRegionAvail().X - spacing) / 2f;
+        using(ImRaii.Disabled(_modelLivePreviewIndex <= 0))
+            if(ImGui.Button("Previous", new Vector2(halfWidth, 0)))
+                NavigateModelPreview(-1);
+
+        ImGui.SameLine();
+        using(ImRaii.Disabled(_modelLivePreviewIndex >= _filteredModels.Count - 1))
+            if(ImGui.Button("Next", new Vector2(halfWidth, 0)))
+                NavigateModelPreview(1);
+
+        using(ImRaii.Disabled(_modelLivePreview is not { IsValid: true }))
+            if(ImGui.Button("Apply This Model", new Vector2(-1, 0)))
+                ApplyModelPreview();
     }
 
     private async void PreviewModel(string path)
@@ -989,7 +1170,7 @@ public class CatalogWindow : Window, IDisposable
         try
         {
             var preview = await _worldObjectService.SpawnBgObjectAsync(path);
-            if(request != _modelLivePreviewRequest || !_modelLivePreviewEnabled)
+            if(request != _modelLivePreviewRequest || !_modelPreviewWindow.IsOpen)
             {
                 if(preview is not null)
                     _worldObjectService.Destroy(preview);
@@ -1088,6 +1269,20 @@ public class CatalogWindow : Window, IDisposable
 
         _filteredModels = [.. items];
         _modelRows = BuildRows(_filteredModels, m => m.AssetType);
+
+        if(_modelPreviewWindow.IsOpen)
+        {
+            var currentIndex = _filteredModels.FindIndex(model => model.Path == _modelLivePreviewPath);
+            if(currentIndex >= 0)
+                _modelLivePreviewIndex = currentIndex;
+            else if(_filteredModels.Count > 0)
+                SelectModelPreview(0);
+            else
+            {
+                ClearModelLivePreview();
+                _modelLivePreviewIndex = -1;
+            }
+        }
     }
     private void ApplyVfxFilter()
     {
@@ -1213,21 +1408,52 @@ public class CatalogWindow : Window, IDisposable
     {
         if(!newState)
         {
+            _modelPreviewWindow.IsOpen = false;
             ClearModelLivePreview();
+            _modelLivePreviewIndex = -1;
             IsOpen = false;
         }
     }
 
     public override void OnClose()
     {
+        _modelPreviewWindow.IsOpen = false;
         ClearModelLivePreview();
+        _modelLivePreviewIndex = -1;
         base.OnClose();
     }
 
     public void Dispose()
     {
+        _modelPreviewWindow.IsOpen = false;
         ClearModelLivePreview();
         _gPoseService.OnGPoseStateChange -= OnGPoseStateChange;
+    }
+
+    private sealed class CatalogModelPreviewWindow : Window
+    {
+        private readonly CatalogWindow _owner;
+
+        public CatalogModelPreviewWindow(CatalogWindow owner)
+            : base("Model Preview###brio_catalog_model_preview", ImGuiWindowFlags.NoCollapse)
+        {
+            _owner = owner;
+            SizeConstraints = new WindowSizeConstraints
+            {
+                MinimumSize = new Vector2(320, 170),
+                MaximumSize = new Vector2(520, 320),
+            };
+        }
+
+        public override void Draw()
+            => _owner.DrawModelPreviewWindow();
+
+        public override void OnClose()
+        {
+            _owner.ClearModelLivePreview();
+            _owner._modelLivePreviewIndex = -1;
+            base.OnClose();
+        }
     }
 }
 

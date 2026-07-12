@@ -170,6 +170,7 @@ public class UIManager : IDisposable
         _windowSystem.AddWindow(_entitySectionWindow);
         _windowSystem.AddWindow(_timelineWindow);
         _windowSystem.AddWindow(_catalogWindow);
+        _windowSystem.AddWindow(_catalogWindow.ModelPreviewWindow);
 
         _gPoseService.OnGPoseStateChange += OnGPoseStateChange;
         _configurationService.OnConfigurationChanged += ApplySettings;
@@ -209,6 +210,11 @@ public class UIManager : IDisposable
     public void ToggleCatalogWindow()
     {
         _catalogWindow.IsOpen = !_catalogWindow.IsOpen;
+    }
+
+    public void OpenModelPreviewBrowser()
+    {
+        _catalogWindow.OpenModelPreviewBrowser();
     }
 
     public void ToggleProjectWindow()

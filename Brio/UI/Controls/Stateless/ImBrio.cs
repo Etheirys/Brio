@@ -68,19 +68,24 @@ public static partial class ImBrio
     [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
     public static bool IconButtonWithText(FontAwesomeIcon icon, string text, Vector2 size)
     {
-        var cursorPos = ImGui.GetCursorPos();
         bool clicked = ImGui.Button($"##{text}", size);
-
-        ImGui.SetCursorPos(cursorPos + new Vector2(5 * ImGuiHelpers.GlobalScale, ImGui.GetStyle().FramePadding.Y));
+        var buttonMin = ImGui.GetItemRectMin();
+        var buttonSize = ImGui.GetItemRectSize();
+        var drawList = ImGui.GetWindowDrawList();
+        var color = ImGui.GetColorU32(ImGuiCol.Text);
+        var padding = 5 * ImGuiHelpers.GlobalScale;
+        Vector2 iconSize;
 
         using(ImRaii.PushFont(UiBuilder.IconFont))
         {
-            ImGui.Text(icon.ToIconString());
+            var iconText = icon.ToIconString();
+            iconSize = ImGui.CalcTextSize(iconText);
+            drawList.AddText(buttonMin + new Vector2(padding, (buttonSize.Y - iconSize.Y) * 0.5f), color, iconText);
         }
 
-        ImGui.SameLine();
-        ImGui.SetCursorPosY(cursorPos.Y + ImGui.GetStyle().FramePadding.Y);
-        ImGui.Text(text);
+        var textSize = ImGui.CalcTextSize(text);
+        var textPosition = buttonMin + new Vector2(padding + iconSize.X + ImGui.GetStyle().ItemInnerSpacing.X, (buttonSize.Y - textSize.Y) * 0.5f);
+        drawList.AddText(textPosition, color, text);
 
         return clicked;
     }

@@ -136,6 +136,12 @@ public class SpawnMenu
                     ImGui.CloseCurrentPopup();
                 }
 
+                if(ImBrio.IconButtonWithText(FontAwesomeIcon.Eye, "World Model Preview", buttonSize))
+                {
+                    UIManager.Instance.OpenModelPreviewBrowser();
+                    ImGui.CloseCurrentPopup();
+                }
+
                 if(ImBrio.IconButtonWithText(FontAwesomeIcon.Cubes, "Prop", buttonSize))
                 {
                     _worldObjectService.SpawnProp(new FFXIVClientStructs.FFXIV.Client.Graphics.Scene.WeaponCreateInfo
