@@ -85,6 +85,8 @@ public class PosingTransformWindow : Window
     {
         float buttonWidth = (ImGui.GetContentRegionAvail().X - (ImGui.GetStyle().ItemSpacing.X * 3f)) / 4f;
 
+        // same shit that is in posing window, really don't like this but it makes the little shits work
+
         // IK
         PosingEditorCommon.DrawIKSelect(posing, new Vector2(buttonWidth, 0));
         ImGui.SameLine();
@@ -92,8 +94,9 @@ public class PosingTransformWindow : Window
         // Clear Selection
         ImGui.SameLine();
         using(ImRaii.Disabled(posing.Selected.Value is None))
+        using(ImRaii.PushFont(UiBuilder.IconFont))
         {
-            if(ImBrio.FontIconButton(FontAwesomeIcon.MinusSquare, new Vector2(buttonWidth, 0)))
+            if(ImGui.Button($"{FontAwesomeIcon.MinusSquare.ToIconString()}###bone_clear_selected", new Vector2(buttonWidth, 0)))
                 posing.ClearSelection();
         }
         ImBrio.AttachToolTip("Clear Selection");
@@ -107,8 +110,9 @@ public class PosingTransformWindow : Window
         );
 
         using(ImRaii.Disabled(parentBone == null))
+        using(ImRaii.PushFont(UiBuilder.IconFont))
         {
-            if(ImBrio.FontIconButton(FontAwesomeIcon.LevelUpAlt, new Vector2(buttonWidth, 0)))
+            if(ImGui.Button($"{FontAwesomeIcon.LevelUpAlt.ToIconString()}###bone_select_parent", new Vector2(buttonWidth, 0)))
                 posing.SetBoneSelection(new BonePoseInfoId(parentBone!.Name, parentBone!.PartialId, PoseInfoSlot.Character), false);
         }
         ImBrio.AttachToolTip("Select Parent");
