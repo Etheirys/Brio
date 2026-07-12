@@ -38,6 +38,6 @@ public unsafe struct VFXObject
     [FieldOffset(0x268)] public byte Blue;
     [FieldOffset(0x26C)] public float Alpha;
 
-    [FieldOffset(672)]
-    public unsafe Game.VFX.Intertop.VfxResourceInstance* VfxResourceInstance;
+    [FieldOffset(0x2A0)]
+    public unsafe VfxResourceInstance* VfxResourceInstance;
 }
