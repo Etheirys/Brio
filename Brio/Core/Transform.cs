@@ -153,6 +153,11 @@ public struct Transform
         Rotation = Quaternion.Slerp(Rotation, to.Rotation, delta),
         Scale = Vector3.Lerp(Scale, to.Scale, delta)
     };
+
+    public override string ToString()
+    {
+        return $"Position: {Position}, Rotation: {Rotation}, Scale: {Scale}";
+    }
 }
 
 [Flags]

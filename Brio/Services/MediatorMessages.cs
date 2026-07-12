@@ -1,4 +1,5 @@
 ﻿
+using Brio.Entities.Core;
 using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Plugin.Services;
 
@@ -18,3 +19,5 @@ public record GposeEndMessage : MessageBase;
 
 public record ActorSpawnedMessage(IGameObject GameObject) : MessageBase;
 public record ActorDespawnedMessage(IGameObject GameObject) : MessageBase;
+
+public record EntityStateCommittedMessage(EntityId Id) : SameThreadMessage;

@@ -1,11 +1,12 @@
 using Brio.Config;
 using Brio.Core;
 using Brio.Entities.Core;
+using Brio.Services.MediatorMessages;
 using System.Collections.Generic;
 
 namespace Brio.Services;
 
-public class HistoryService(ConfigurationService configurationService)
+public class HistoryService(ConfigurationService configurationService, Mediator mediator)
 {
     public bool CanUndo(EntityId id) => GetStacks(id).Undo.Count is not 0 and not 1;
     public bool CanRedo(EntityId id) => GetStacks(id).Redo.Count > 0;
@@ -18,6 +19,7 @@ public class HistoryService(ConfigurationService configurationService)
         {
             stacks.Undo.Clear();
             stacks.Redo.Clear();
+            mediator.Publish(new EntityStateCommittedMessage(id));
             return;
         }
 
@@ -28,6 +30,8 @@ public class HistoryService(ConfigurationService configurationService)
 
         stacks.Undo.Push(new Entry(owner, state));
         stacks.Undo = stacks.Undo.Trim(undoStackSize + 1);
+
+        mediator.Publish(new EntityStateCommittedMessage(id));
     }
 
     public void Undo(EntityId id)
