@@ -292,7 +292,7 @@ public sealed partial class PathIndex
         return new PathIndex(infos, byHash, byFileName);
     }
 
-    private static GamePathInfo ParsePath(string path)
+    public static GamePathInfo ParsePath(string path)
     {
         var splitPath = path.Split('/');
         string expansion = "Base Game";

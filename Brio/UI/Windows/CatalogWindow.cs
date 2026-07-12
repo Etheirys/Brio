@@ -233,9 +233,7 @@ public class CatalogWindow : Window, IDisposable
             {
                 var objectPath = new ObjectPath(_spawnPath);
                 if(objectPath.IsValid)
-                    Spawn(objectPath.GetPathKind(), _spawnPath.Trim(), _spawnPath.Trim(), 0);
-                else
-                    Brio.NotifyError("Invalid path. Please enter a valid game path.");
+                    Spawn(objectPath.GetPathKind(), _spawnPath.Trim(), _spawnPath.Trim(), 0, objectPath);
             }
     }
 
@@ -936,8 +934,18 @@ public class CatalogWindow : Window, IDisposable
 
     //
 
-    private void Spawn(ObjectPathKind kind, string path, string name, uint iconId)
+    private void Spawn(ObjectPathKind kind, string path, string name, uint iconId, ObjectPath? objectPath = null)
     {
+        if(objectPath == null) 
+            objectPath = new ObjectPath(path);
+
+        if(objectPath.Value.IsValid == false)
+        {
+            // This text doesn't quite make sense for all of the cases this would catch TODO
+            Brio.NotifyError("Invalid path. Please enter a valid game path.");
+            return;
+        }
+
         switch(kind)
         {
             case ObjectPathKind.SharedGroup: _worldObjectService.SpawnFurniture(path); break;
@@ -949,6 +957,8 @@ public class CatalogWindow : Window, IDisposable
     }
     private void SpawnEntry(QuickAccessEntry entry)
     {
+        // We shouldn't asume this is a valid path, but we can for now
+
         var parts = entry.Data.Split('|', 2);
         if(parts.Length != 2 || !int.TryParse(parts[0], out var k)) return;
         Spawn((ObjectPathKind)k, parts[1], entry.DisplayName, entry.IconId);
