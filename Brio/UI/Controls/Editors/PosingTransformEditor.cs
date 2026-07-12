@@ -126,18 +126,11 @@ public class PosingTransformEditor
                 }
             }
 
-            if(selectedIsBone.HasValue)
+            var modTransform = ((ITransformable)posingCapability.Entity).Transform;
+            if(Clipboard.DrawCopyPastePopup(ref modTransform, 1))
             {
-
-            }
-            else
-            {
-                var modTransform = posingCapability.ModelPosing.Transform;
-                if(Clipboard.DrawCopyPastePopup(ref modTransform, 1))
-                {
-                    posingCapability.ModelPosing.Transform = modTransform;
-                    posingCapability.Snapshot(false, false);
-                }
+                ((ITransformable)posingCapability.Entity).SetTransform(modTransform);
+                posingCapability.Snapshot(false, false);
             }
         }
     }
