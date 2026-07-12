@@ -17,7 +17,7 @@ public unsafe struct BrioLight
     public struct GameLightVirtualTable
     {
         [FieldOffset(0)]
-        public delegate* unmanaged<BrioLight*, bool, void> Destructor;
+        public delegate* unmanaged<BrioLight*, bool, nint> Destructor;
 
         [FieldOffset(8)]
         public delegate* unmanaged<BrioLight*, void> Cleanup;
