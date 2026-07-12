@@ -152,7 +152,15 @@ public class GameInputService : IDisposable
                         mouseFrame->ScrollValue = 0;
                     }
 
-                    ConsumeAllInput(keyboardFrame);
+                    keyboardFrame->KeyState[81] = 0; // VirtualKey.Q
+                    keyboardFrame->KeyState[69] = 0; // VirtualKey.E
+
+                    keyboardFrame->KeyState[_freeW] = 0;
+                    keyboardFrame->KeyState[_freeA] = 0;
+                    keyboardFrame->KeyState[_freeS] = 0;
+                    keyboardFrame->KeyState[_freeD] = 0;
+
+                    //ConsumeAllInput(keyboardFrame);
                 }
             }
 
