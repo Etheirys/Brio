@@ -1,4 +1,5 @@
-﻿using Dalamud.Bindings.ImGui;
+﻿using Brio.UI.Controls.Stateless;
+using Dalamud.Bindings.ImGui;
 using Dalamud.Interface.Utility;
 using Dalamud.Interface.Utility.Raii;
 using System;
@@ -73,6 +74,9 @@ public abstract class Selector<T> where T : class
 
     public unsafe void Draw()
     {
+
+        ImBrio.BlurPopup();
+
         var items = _filteredAndSortedItems;
 
         SoftSelectionChanged = false;

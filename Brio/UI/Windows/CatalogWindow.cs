@@ -219,7 +219,7 @@ public class CatalogWindow : Window, IDisposable
     {
         float buttonWidth = 110 * ImGuiHelpers.GlobalScale;
 
-        ImGui.TextUnformatted("Enter a game path (.sgb, .avfx, etc.)");
+        ImGui.TextUnformatted("Enter a game path (.mdl, .avfx, etc.)");
 
         ImBrio.HorizontalPadding(2);
 
@@ -229,7 +229,7 @@ public class CatalogWindow : Window, IDisposable
         ImGui.SameLine();
 
         using(ImRaii.Disabled(string.IsNullOrWhiteSpace(_spawnPath)))
-            if(ImGui.Button("Spawn BgObject", new Vector2(buttonWidth, 0)))
+            if(ImGui.Button("Spawn Object", new Vector2(buttonWidth, 0)))
             {
                 var objectPath = new ObjectPath(_spawnPath);
                 if(objectPath.IsValid)

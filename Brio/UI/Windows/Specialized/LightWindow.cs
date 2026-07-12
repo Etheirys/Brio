@@ -121,7 +121,7 @@ public class LightWindow : Window, IDisposable
 
             ImGui.SameLine();
 
-            if(ImBrio.FontIconButton("lifetimewidget_move", FontAwesomeIcon.ArrowUp, "Move to Camera"))
+            if(ImBrio.FontIconButton("lifetimewidget_move", FontAwesomeIcon.CaretSquareDown, "Move to Camera"))
             {
                 light!.MoveToCamera();
             }
