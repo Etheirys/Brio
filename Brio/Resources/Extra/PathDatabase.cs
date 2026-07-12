@@ -173,7 +173,7 @@ public sealed partial class PathIndex
         { "cry",  "Crystal"   },
         { "wat",  "Water"     }, { "sea",  "Sea"       },
         { "stc",  "Structure" },
-        { "gls",  "Glass"     }, { "grs",  "Glass"     },
+        { "gls",  "Glass"     }, { "grs",  "Grass"     },
         { "box",  "Box"       },
         { "flw",  "Flower"    },
         { "bos",  "Boss"      },
