@@ -309,7 +309,7 @@ public class LibraryWindow : Window, IDisposable
 
         ImGui.OpenPopup($"Import {_modalFilter.Name}##brio_library_popup");
 
-        ImGui.SetNextWindowSizeConstraints(MinimumSize, ImGui.GetIO().DisplaySize);
+        ImGui.SetNextWindowSizeConstraints(MinimumSize * ImGuiHelpers.GlobalScale, ImGui.GetIO().DisplaySize);
 
         using(var popup = ImRaii.PopupModal($"Import {_modalFilter.Name}##brio_library_popup"))
         {

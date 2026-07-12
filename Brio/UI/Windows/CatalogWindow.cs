@@ -635,8 +635,13 @@ public class CatalogWindow : Window, IDisposable
     private bool DrawSearchAndViewMode(ref string searchText, ref CatalogDisplayMode mode, string id)
     {
         bool applay = false;
-        ImGui.SetNextItemWidth((ImBrio.GetRemainingWidth() - 125) * ImGuiHelpers.GlobalScale);
-        if(ImGui.InputTextWithHint("###vfx_search", "Search...", ref searchText, 256))
+
+        float buttonWidth = 49 * ImGuiHelpers.GlobalScale;
+        float spacing = ImGui.GetStyle().ItemSpacing.X;
+        float reservedWidth = (buttonWidth * 2) + (spacing * 2);
+
+        ImGui.SetNextItemWidth(ImBrio.GetRemainingWidth() - reservedWidth);
+        if(ImGui.InputTextWithHint($"###{id}_search", "Search...", ref searchText, 256))
             applay = true;
 
         ImGui.SameLine();

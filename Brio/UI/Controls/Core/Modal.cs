@@ -1,5 +1,6 @@
 using Brio.UI.Controls.Stateless;
 using Dalamud.Bindings.ImGui;
+using Dalamud.Interface.Utility;
 using Dalamud.Interface.Utility.Raii;
 using System.Numerics;
 
@@ -10,8 +11,11 @@ public abstract class Modal
     private readonly string _id;
     private bool _isOpen = false;
 
-    protected Vector2 MinimumSize;
-    protected Vector2 MaximumSize;
+    private readonly Vector2 _minimumSize;
+    private readonly Vector2 _maximumSize;
+
+    protected Vector2 MinimumSize => _minimumSize * ImGuiHelpers.GlobalScale;
+    protected Vector2 MaximumSize => _maximumSize * ImGuiHelpers.GlobalScale;
     protected ImGuiWindowFlags Flags;
     protected bool KeepCentered = true;
 
@@ -20,8 +24,8 @@ public abstract class Modal
     protected Modal(string id, Vector2 minimumSize, ImGuiWindowFlags flags = ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoResize)
     {
         _id = id;
-        MinimumSize = minimumSize;
-        MaximumSize = minimumSize;
+        _minimumSize = minimumSize;
+        _maximumSize = minimumSize;
         Flags = flags;
     }
 

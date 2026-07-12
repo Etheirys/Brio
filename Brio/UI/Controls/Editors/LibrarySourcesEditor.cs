@@ -2,6 +2,7 @@
 using Brio.UI.Controls.Stateless;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface;
+using Dalamud.Interface.Utility;
 using Dalamud.Interface.Utility.Raii;
 using System;
 using System.IO;
@@ -151,7 +152,7 @@ public static class LibrarySourcesEditor
 
         if(isEditing && selectedItem is not null)
         {
-            ImGui.SetNextWindowSize(new(450, 200));
+            ImGui.SetNextWindowSize(new Vector2(450, 200) * ImGuiHelpers.GlobalScale);
 
             if(isItemEditorOpen && isFolderDialogOpen)
             {
@@ -162,8 +163,9 @@ public static class LibrarySourcesEditor
                 ImGui.OpenPopup("###settings_edit_source");
             }
 
-            ImGui.SetNextWindowSizeConstraints(MinimumSize, MinimumSize);
-            ImGui.SetNextWindowPos(new Vector2((ImGui.GetIO().DisplaySize.X / 2) - (MinimumSize.X / 2), (ImGui.GetIO().DisplaySize.Y / 2) - (MinimumSize.Y / 2)));
+            var scaledSize = MinimumSize * ImGuiHelpers.GlobalScale;
+            ImGui.SetNextWindowSizeConstraints(scaledSize, scaledSize);
+            ImGui.SetNextWindowPos(new Vector2((ImGui.GetIO().DisplaySize.X / 2) - (scaledSize.X / 2), (ImGui.GetIO().DisplaySize.Y / 2) - (scaledSize.Y / 2)));
 
             using(var popup = ImRaii.PopupModal("###settings_edit_source", ref isItemEditorOpen, ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoTitleBar))
             {

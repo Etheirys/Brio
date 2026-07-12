@@ -6,6 +6,7 @@ using Brio.Config;
 using Brio.Entities;
 using Brio.Entities.Actor;
 using Brio.Entities.Core;
+using Brio.Game.GPose;
 using Brio.Game.Input;
 using Brio.Game.Posing;
 using Brio.Game.WorldObjects.Objects;
@@ -38,11 +39,13 @@ public class PosingOverlayToolbarWindow : Window
     private readonly PosingOverlayWindow _overlayWindow;
     private readonly PosingService _posingService;
     private readonly EntityManager _entityManager;
+    private readonly GPoseService _gPoseService;
     private readonly LightWindow _lightWindow;
     private readonly IFramework _framework;
 
     private bool _pushedStyle = false;
-    public PosingOverlayToolbarWindow(PosingOverlayWindow overlayWindow, IFramework framework, LightWindow lightWindow, GameInputService gameInputService, EntityManager entityManager, PosingTransformWindow overlayTransformWindow, PosingService posingService, ConfigurationService configurationService) : base($"{Brio.Name} OVERLAY###brio_posing_overlay_toolbar_window", ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoCollapse)
+    public PosingOverlayToolbarWindow(PosingOverlayWindow overlayWindow, IFramework framework, GPoseService gPoseService, LightWindow lightWindow, GameInputService gameInputService, EntityManager entityManager, PosingTransformWindow overlayTransformWindow, PosingService posingService, ConfigurationService configurationService) : base($"{Brio.Name} OVERLAY###brio_PosingOverlayToolbar", 
+        ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoSavedSettings)
     {
         Namespace = "brio_posing_overlay_toolbar_namespace";
 
@@ -54,15 +57,13 @@ public class PosingOverlayToolbarWindow : Window
         _posingService = posingService;
         _lightWindow = lightWindow;
         _framework = framework;
+        _gPoseService = gPoseService;
 
         ShowCloseButton = false;
         this.AllowBackgroundBlur = false;
+        this.RespectCloseHotkey = false;
 
-        SizeConstraints = new WindowSizeConstraints
-        {
-            MinimumSize = new Vector2(((button4XSize * 4) + 30) , 400),
-            MaximumSize = new Vector2(((button4XSize * 4) + 30) , 400)
-        };
+        this.SizeCondition = ImGuiCond.Appearing;
     }
 
     public override void PreOpenCheck()
@@ -87,12 +88,6 @@ public class PosingOverlayToolbarWindow : Window
 
     public override void PreDraw()
     {
-        //SizeConstraints = new WindowSizeConstraints
-        //{
-        //    MinimumSize = new Vector2(((button4XSize * 4) + 30) * ImGuiHelpers.GlobalScale, 400 * ImGuiHelpers.GlobalScale),
-        //    MaximumSize = new Vector2(((button4XSize * 4) + 30) * ImGuiHelpers.GlobalScale, 400 * ImGuiHelpers.GlobalScale)
-        //}; 
-
         ImGui.PushStyleVar(ImGuiStyleVar.WindowBorderSize, 0);
         ImGui.PushStyleVar(ImGuiStyleVar.WindowTitleAlign, new Vector2(0.5f, 0.5f));
         ImGui.PushStyleColor(ImGuiCol.NavWindowingHighlight, UIConstants.Transparent);

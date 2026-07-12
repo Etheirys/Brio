@@ -80,9 +80,9 @@ public class PosingGraphicalWindow : Window, IDisposable
 
     public unsafe override void PreDraw()
     {
-        ImGui.SetNextWindowSize(new Vector2(1200, 600), ImGuiCond.FirstUseEver);
+        ImGui.SetNextWindowSize(new Vector2(1200, 600) * ImGuiHelpers.GlobalScale, ImGuiCond.FirstUseEver);
 
-        ImGui.SetNextWindowSizeConstraints(new Vector2(700, 450), new Vector2(4800, 2400), (x) =>
+        ImGui.SetNextWindowSizeConstraints(new Vector2(700, 450) * ImGuiHelpers.GlobalScale, new Vector2(4800, 2400) * ImGuiHelpers.GlobalScale, (x) =>
         {
             x->DesiredSize.X = MathF.Max(x->DesiredSize.X, x->DesiredSize.Y);
             x->DesiredSize.Y = x->DesiredSize.X * 0.5f;
@@ -180,7 +180,9 @@ public class PosingGraphicalWindow : Window, IDisposable
 
     private void DrawTopBar(PosingCapability posing)
     {
-        float buttonWidth = 28 * ImGuiHelpers.GlobalScale;
+        const float buttonWidth = 28;
+        const float wideButtonWidth = buttonWidth + 10;
+        const float separatorWidth = 3;
 
         ImBrio.HorizontalPadding(5);
         ImGui.AlignTextToFramePadding();
@@ -208,7 +210,10 @@ public class PosingGraphicalWindow : Window, IDisposable
 
         ImGui.SameLine();
 
-        ImBrio.RightAlign(((buttonWidth * 8) + (ImGui.GetStyle().ItemSpacing.X * 9)) * ImGuiHelpers.GlobalScale);
+        float iconButtonsWidth = ((5 * buttonWidth) + (2 * wideButtonWidth)) * ImGuiHelpers.GlobalScale;
+        float separatorsWidth = 3 * separatorWidth * ImGuiHelpers.GlobalScale;
+        float spacingWidth = ImGui.GetStyle().ItemSpacing.X * 9;
+        ImBrio.RightAlign(iconButtonsWidth + separatorsWidth + spacingWidth);
 
         if(ImBrio.FontIconButton((posing.OverlayOpen ? FontAwesomeIcon.EyeSlash : FontAwesomeIcon.Eye), new(buttonWidth, 0)))
             posing.OverlayOpen = !posing.OverlayOpen;
@@ -247,7 +252,7 @@ public class PosingGraphicalWindow : Window, IDisposable
 
         using(ImRaii.Disabled(!posing.CanUndo))
         {
-            if(ImBrio.FontIconButton(FontAwesomeIcon.Reply, new(buttonWidth + 10, 0)) || (InputManagerService.ActionKeysPressedLastFrame(InputAction.Posing_Undo) && posing.CanUndo))
+            if(ImBrio.FontIconButton(FontAwesomeIcon.Reply, new(wideButtonWidth, 0)) || (InputManagerService.ActionKeysPressedLastFrame(InputAction.Posing_Undo) && posing.CanUndo))
                 posing.Undo();
         }
 
@@ -258,7 +263,7 @@ public class PosingGraphicalWindow : Window, IDisposable
 
         using(ImRaii.Disabled(!posing.CanRedo))
         {
-            if(ImBrio.FontIconButton(FontAwesomeIcon.Share, new(buttonWidth + 10, 0)) || (InputManagerService.ActionKeysPressedLastFrame(InputAction.Posing_Redo) && posing.CanRedo))
+            if(ImBrio.FontIconButton(FontAwesomeIcon.Share, new(wideButtonWidth, 0)) || (InputManagerService.ActionKeysPressedLastFrame(InputAction.Posing_Redo) && posing.CanRedo))
                 posing.Redo();
         }
 
@@ -349,14 +354,16 @@ public class PosingGraphicalWindow : Window, IDisposable
     private void DrawTransformHeader(PosingCapability posing)
     {
         float width = ((ImGui.GetContentRegionAvail().X - (ImGui.GetStyle().ItemSpacing.X * 3f)) / 4f);
-        ImBrio.RightAlign((width * 4) + (ImGui.GetStyle().ItemSpacing.X * 3));
 
         PosingEditorCommon.DrawIKSelect(posing, new Vector2(width, 0));
 
+        // Don't really like this but it makes the little shits work
+
         ImGui.SameLine();
         using(ImRaii.Disabled(posing.Selected.Value is None))
+        using(ImRaii.PushFont(UiBuilder.IconFont))
         {
-            if(ImBrio.FontIconButton(FontAwesomeIcon.MinusSquare, new Vector2(width, 0)))
+            if(ImGui.Button($"{FontAwesomeIcon.MinusSquare.ToIconString()}###bone_clear_selected", new Vector2(width, 0)))
                 posing.ClearSelection();
         }
         ImBrio.AttachToolTip("Clear Selection");
@@ -370,8 +377,9 @@ public class PosingGraphicalWindow : Window, IDisposable
         );
 
         using(ImRaii.Disabled(parentBone == null))
+        using(ImRaii.PushFont(UiBuilder.IconFont))
         {
-            if(ImBrio.FontIconButton(FontAwesomeIcon.LevelUpAlt, new Vector2(width, 0)))
+            if(ImGui.Button($"{FontAwesomeIcon.LevelUpAlt.ToIconString()}###bone_select_parent", new Vector2(width, 0)))
                 posing.SetBoneSelection(new BonePoseInfoId(parentBone!.Name, parentBone!.PartialId, PoseInfoSlot.Character), false);
         }
         ImBrio.AttachToolTip("Select Parent");
@@ -598,7 +606,7 @@ public class PosingGraphicalWindow : Window, IDisposable
         {
             ImGui.SameLine();
 
-            using(var child = ImRaii.Child("###face_pane", new Vector2(contentArea.X - 35, -1), false, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse))
+            using(var child = ImRaii.Child("###face_pane", new Vector2(contentArea.X - (35 * ImGuiHelpers.GlobalScale), -1), false, ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse))
             {
                 if(child.Success)
                 {
@@ -788,8 +796,8 @@ public class PosingGraphicalWindow : Window, IDisposable
             _ => { }
         );
 
-        float circleSize = 6;
-        float hitSize = circleSize + 12;
+        float circleSize = 6 * ImGuiHelpers.GlobalScale;
+        float hitSize = circleSize + (12 * ImGuiHelpers.GlobalScale);
 
         using(ImRaii.Disabled(!enabled))
         {
@@ -830,7 +838,7 @@ public class PosingGraphicalWindow : Window, IDisposable
                 Vector2 parentPos = ImGui.GetCursorScreenPos() + (parentPosition.Value - entry.Position) + new Vector2(ImGui.GetFrameHeight() / 2);
                 Vector2 offset = Vector2.Normalize(parentPos - pos) * (circleSize - 0.5f);
 
-                ImGui.GetWindowDrawList().AddLine(pos + offset, parentPos - offset, lineCol, 1);
+                ImGui.GetWindowDrawList().AddLine(pos + offset, parentPos - offset, lineCol, ImGuiHelpers.GlobalScale);
             }
 
             ImGui.GetWindowDrawList().AddCircle(pos, circleSize + 1f, 0xC0000000);
