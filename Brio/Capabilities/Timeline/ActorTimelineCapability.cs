@@ -2,6 +2,7 @@ using Brio.Capabilities.Actor;
 using Brio.Capabilities.Posing;
 using Brio.Core;
 using Brio.Entities.Actor;
+using Brio.Entities.Core;
 using Brio.Files;
 using Brio.Game.Posing;
 using Brio.Services.Timeline;
