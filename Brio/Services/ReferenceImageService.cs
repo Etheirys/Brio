@@ -1,5 +1,6 @@
 using Brio.Capabilities.ReferenceImage;
 using Brio.Entities;
+using Brio.Services.MediatorMessages;
 using Brio.UI.Controls.Stateless;
 using Brio.UI.Theming;
 using Dalamud.Bindings.ImGui;
@@ -13,10 +14,29 @@ using System.Numerics;
 
 namespace Brio.Services;
 
-public class ReferenceImageService(EntityManager entityManager)
+public class ReferenceImageService : MediatorSubscriberBase
 {
-    private readonly EntityManager _entityManager = entityManager;
+    private readonly EntityManager _entityManager;
     private readonly List<ReferenceImageEntity> _imageEntities = [];
+
+    public ReferenceImageService(EntityManager entityManager) : base(entityManager.Mediator)
+    {
+        _entityManager = entityManager;
+
+        Mediator.Subscribe<GposeStateChangedMessage>(this, OnGposeStateChanged);
+    }
+
+    private void OnGposeStateChanged(GposeStateChangedMessage message)
+    {
+        if(!message.NewState)
+        {
+            foreach(var entity in _imageEntities)
+            {
+                _entityManager.DetachEntity(entity, true);
+            }
+            _imageEntities.Clear();
+        }
+    }
 
     public ReferenceImageEntity Spawn(string filePath)
     {
