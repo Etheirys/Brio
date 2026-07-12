@@ -27,6 +27,8 @@ public class ActorTimelineCapability : ActorCharacterCapability, ITimelineHost
     public string Name => Actor.FriendlyName;
     public string CaptureHint => "Select bones in the posing overlay, then capture.";
 
+    public EntityId OwnerId => Actor.Id;
+
     public IReadOnlyList<TimelineCaptureChannel> CaptureChannels { get; }
 
     private SkeletonPosingCapability Skeleton => Actor.GetCapability<SkeletonPosingCapability>();

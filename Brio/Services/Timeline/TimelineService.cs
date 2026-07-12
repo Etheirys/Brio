@@ -15,6 +15,8 @@ public interface ITimelineHost
     string Name { get; }
     string CaptureHint { get; }
 
+    EntityId OwnerId { get; }
+
     List<TimelineTrack> Tracks { get; }
     IReadOnlyList<TimelineCaptureChannel> CaptureChannels { get; }
 
