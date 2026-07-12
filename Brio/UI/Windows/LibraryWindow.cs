@@ -13,6 +13,7 @@ using Brio.UI.Controls.Stateless;
 using Brio.UI.Theming;
 using Dalamud.Bindings.ImGui;
 using Dalamud.Interface;
+using Dalamud.Interface.Utility;
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Interface.Windowing;
 using Dalamud.Plugin.Services;
@@ -276,6 +277,7 @@ public class LibraryWindow : Window, IDisposable
 
     private void OnLibraryScanFinished()
     {
+        ResolvePath();
         TryRefresh(true);
     }
 
@@ -1152,11 +1154,48 @@ public class LibraryWindow : Window, IDisposable
         sw.Start();
 
         await _libraryManager.ScanAsync();
+        ResolvePath();
         TryRefresh(true);
 
         sw.Stop();
         _lastRefreshTimeMs = sw.ElapsedMilliseconds;
         _isRescanning = false;
+    }
+
+    private void ResolvePath()
+    {
+        if(_path.Count <= 1)
+            return;
+
+        List<GroupEntryBase> resolved = [_libraryManager.Root];
+        GroupEntryBase current = _libraryManager.Root;
+
+        for(int i = 1; i < _path.Count; i++)
+        {
+            string identifier = _path[i].Identifier;
+            GroupEntryBase? match = null;
+
+            if(current.AllEntries != null)
+            {
+                foreach(EntryBase entry in current.AllEntries)
+                {
+                    if(entry is GroupEntryBase group && group.Identifier == identifier)
+                    {
+                        match = group;
+                        break;
+                    }
+                }
+            }
+
+            if(match == null)
+                break;
+
+            resolved.Add(match);
+            current = match;
+        }
+
+        _path.Clear();
+        _path.AddRange(resolved);
     }
 
     public void TryRefresh(bool filter)
