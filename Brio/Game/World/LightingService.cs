@@ -46,9 +46,9 @@ public unsafe class LightingService : MediatorSubscriberBase
     private delegate BrioLight* LightDelegate(BrioLight* light);
     private readonly Hook<LightDelegate> _lightCtorHook = null!;
 
-    public delegate* unmanaged<BrioLight*, bool, void> Destructor;
+    public delegate* unmanaged<BrioLight*, bool, nint> Destructor;
 
-    private delegate void LightDtorDelegate(BrioLight* thisPtr, bool free);
+    private delegate nint LightDtorDelegate(BrioLight* thisPtr, bool free);
     private Hook<LightDtorDelegate> _lightDtorHook = null!;
 
     //
@@ -123,6 +123,7 @@ public unsafe class LightingService : MediatorSubscriberBase
                 var gposeLight = gposeController->GetLight(i);
                 if(gposeLight != null && (nint)gposeLight == (nint)light)
                 {
+                    _worldGameLights.Remove((nint)light);
                     Light blight = new(gposeLight, gposeLight->Transform.Position, gposeLight->Transform.Rotation, gposeLight->Transform.Scale)
                     {
                         IsGPoseLight = true,
@@ -140,7 +141,7 @@ public unsafe class LightingService : MediatorSubscriberBase
         return value;
     }
 
-    private void LightDtor(BrioLight* light, bool free)
+    private nint LightDtor(BrioLight* light, bool free)
     {
         if(_worldGameLights.Contains((nint)light))
         {
@@ -150,7 +151,6 @@ public unsafe class LightingService : MediatorSubscriberBase
 
         if(_gPoseService.IsGPosing)
         {
-            var gposeController = (BrioEventGPoseController*)&EventFramework.Instance()->EventSceneModule.EventGPoseController;
             for(uint i = 0; i < 3; i++)
             {
                 var gposeLight = gposeLights[i];
@@ -162,7 +162,7 @@ public unsafe class LightingService : MediatorSubscriberBase
             }
         }
 
-        _lightDtorHook.Original(light, free);
+        return _lightDtorHook.Original(light, free);
     }
 
     public Entity? AddWorldLight(BrioLight* light)
@@ -473,6 +473,7 @@ public unsafe class LightingService : MediatorSubscriberBase
 
     public void Destroy(IGameLight light)
     {
+        Brio.Log.Warning($"Destroying light at index {light.Index} with address {light.Address}.");
         _framework.RunOnFrameworkThread(() =>
         {
             if(light.IsWorldLight)
