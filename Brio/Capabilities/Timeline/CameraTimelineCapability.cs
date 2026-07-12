@@ -1,6 +1,7 @@
 using Brio.Capabilities.Core;
 using Brio.Core;
 using Brio.Entities.Camera;
+using Brio.Entities.Core;
 using Brio.Game.Posing;
 using Brio.Services.Timeline;
 using Microsoft.Extensions.DependencyInjection;
@@ -16,6 +17,8 @@ public class CameraTimelineCapability : Capability, ITimelineHost
 
     public string Name => CameraEntity.FriendlyName;
     public string CaptureHint => "Pose the camera, then capture.";
+
+    public EntityId OwnerId => Entity.Id;
 
     public IReadOnlyList<TimelineCaptureChannel> CaptureChannels { get; }
 
@@ -92,6 +95,8 @@ public class CameraTimelineCapability : Capability, ITimelineHost
 
         CaptureKeyframe(frame, groups);
     }
+
+    public void AutoCapture(int frame) => CaptureAuto(frame);
 
     public void Apply(float frame)
     {

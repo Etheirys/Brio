@@ -17,6 +17,7 @@ public unsafe class LightTimelineCapability : LightCapability, ITimelineHost
 
     public string Name => Light.FriendlyName;
     public string CaptureHint => "Pose the light, then capture.";
+    public EntityId OwnerId => Entity.Id;
     public IReadOnlyList<TimelineCaptureChannel> CaptureChannels { get; }
 
     private readonly TimelineService _timelineService;
@@ -75,6 +76,8 @@ public unsafe class LightTimelineCapability : LightCapability, ITimelineHost
 
         CaptureKeyframe(frame, groups);
     }
+    public void AutoCapture(int frame) => CaptureAuto(frame);
+
     public void Apply(float frame)
     {
         if(_track.IsMuted)

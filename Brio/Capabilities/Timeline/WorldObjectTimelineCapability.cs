@@ -18,6 +18,8 @@ public class WorldObjectTimelineCapability : WorldObjectCapability, ITimelineHos
     public string Name => BgObjectEntity.FriendlyName;
     public string CaptureHint => "Pose the object, then capture.";
 
+    public EntityId OwnerId => Entity.Id;
+
     private readonly TimelineService _timelineService;
     private readonly TimelineTrack _track;
 
@@ -86,6 +88,8 @@ public class WorldObjectTimelineCapability : WorldObjectCapability, ITimelineHos
 
         CaptureKeyframe(frame, groups);
     }
+    public void AutoCapture(int frame) => CaptureAuto(frame);
+
     public unsafe void Apply(float frame)
     {
         if(_track.IsMuted)
