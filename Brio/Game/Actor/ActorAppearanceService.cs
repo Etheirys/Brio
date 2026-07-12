@@ -1,4 +1,5 @@
 ﻿using Brio.Config;
+using Brio.Core;
 using Brio.Entities;
 using Brio.Game.Actor.Appearance;
 using Brio.Game.Actor.Extensions;
@@ -120,19 +121,6 @@ public class ActorAppearanceService : IDisposable
                 glamourerReset |= true;
                 didchange |= true;
             }
-        }
-
-        if(didchange)
-        {
-            if(needsRedraw)
-                _ = await _redrawService.Redraw(character);
-
-            return RedrawResult.NoChange;
-        }
-
-        unsafe
-        {
-            var native = character.Native();
 
             if(options.HasFlag(AppearanceImportOptions.Equipment) || options.HasFlag(AppearanceImportOptions.Customize))
             {
@@ -176,13 +164,16 @@ public class ActorAppearanceService : IDisposable
                             byte[] data = new byte[108];
                             fixed(byte* ptr = data)
                             {
-                                if(options.HasFlag(AppearanceImportOptions.Customize))
+                                if(appearance.ModelCharaId == 0)
                                 {
-                                    Buffer.MemoryCopy(appearance.Customize.Data, ptr, 32, 32);
-                                }
-                                else
-                                {
-                                    Buffer.MemoryCopy(existingAppearance.Customize.Data, ptr, 28, 28);
+                                    if(options.HasFlag(AppearanceImportOptions.Customize))
+                                    {
+                                        Buffer.MemoryCopy(appearance.Customize.Data, ptr, 32, 32);
+                                    }
+                                    else
+                                    {
+                                        Buffer.MemoryCopy(existingAppearance.Customize.Data, ptr, 28, 28);
+                                    }
                                 }
 
                                 if(options.HasFlag(AppearanceImportOptions.Equipment))
@@ -202,13 +193,16 @@ public class ActorAppearanceService : IDisposable
                         {
                             needsRedraw |= true;
                         }
+                        needsRedraw |= true;
                     }
 
-                    // || appearance.ModelCharaId == 0
-                    if(options.HasFlag(AppearanceImportOptions.Customize) && native->ModelContainer.ModelCharaId == 0)
+                    if(options.HasFlag(AppearanceImportOptions.Customize))
                     {
-                        // We can just set the data again incase we didn't earlier
-                        *(ActorCustomize*)&native->DrawData.CustomizeData = appearance.Customize;
+                        fixed(byte* dest = native->DrawData.CustomizeData.Data)
+                        {
+                            // I should move all of the memcpy's to this TODO
+                            MemoryUtility.MemCpyUnchecked(dest, appearance.Customize.Data, 26);
+                        }
                     }
 
                     if(options.HasFlag(AppearanceImportOptions.Equipment))
