@@ -1,7 +1,11 @@
 ﻿using Brio.Capabilities.Posing;
 using Brio.Game.Posing;
+using Brio.UI.Controls.Stateless;
 using Dalamud.Bindings.ImGui;
+using Dalamud.Interface;
 using Dalamud.Interface.Utility.Raii;
+using System;
+using System.Numerics;
 
 namespace Brio.UI.Controls.Editors;
 
@@ -13,6 +17,28 @@ public class BoneIKEditor
 
         var ik = poseInfo.DefaultIK;
 
+        // Set IK Button
+
+
+        using(ImRaii.Disabled(posing?.SkeletonPosing.PoseInfo.HasIKStacks is false))
+        using(ImRaii.PushFont(UiBuilder.IconFont))
+            if(ImGui.Button($"{FontAwesomeIcon.BreadSlice.ToIconString()}###clear_ik", new Vector2(-1, 26)))
+                posing?.SkeletonPosing.ResetIK();
+        ImBrio.AttachToolTip($"Bake IK Changes{(!posing?.SkeletonPosing.PoseInfo.HasIKStacks ?? false ? ".\n\nAfter enabling IK & have made a change with IK use this to...\nBake('Lock in') all IK changes into the pose using this button." : "")}");
+
+        var center = ImGui.GetItemRectMin() + (ImGui.GetItemRectSize() / 2);
+        var radius = MathF.Ceiling(ImGui.GetTextLineHeight() * 0.9f);
+        var thickness = MathF.Ceiling(ImGui.GetTextLineHeight() * 0.1f);
+
+        if(posing?.SkeletonPosing.PoseInfo.HasIKStacks is false)
+        {
+            thickness += 0.2f;
+            var offset = (radius - thickness) / MathF.Sqrt(2.0f);
+            var lineStart = center + new Vector2(-offset, -offset);
+            var lineEnd = center + new Vector2(offset, offset);
+            ImGui.GetWindowDrawList().AddLine(lineStart, lineEnd, 0x400000FF, thickness);
+        }
+
         if(ImGui.Checkbox("Enabled", ref ik.Enabled))
         {
             didChange |= true;
@@ -20,12 +46,10 @@ public class BoneIKEditor
 
         using(ImRaii.Disabled(!ik.Enabled))
         {
-
             if(ImGui.Checkbox("Enforce Constraints", ref ik.EnforceConstraints))
             {
                 didChange |= true;
             }
-
 
             string solverType = ik.SolverOptions.Match(_ => "CCD", _ => "Two Joint");
             using(var combo = ImRaii.Combo("Solver", solverType))
