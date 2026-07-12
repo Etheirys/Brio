@@ -83,6 +83,9 @@ public class PosingOverlayToolbarWindow : Window
     {
         _gameInputService.AllowEscape = true;
 
+        if(_gPoseService.IsGPosing == false)
+            return false;
+
         return base.DrawConditions();
     }
 
