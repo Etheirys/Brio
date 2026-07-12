@@ -78,6 +78,8 @@ public unsafe class StaticVfxObject : WorldObject
         VFX = VfxObject.Create(Path, string.Empty);
         if(!IsValid) return;
 
+        _vFXService.AddHandledVFX(Path);
+
         VFX->SomeFlags &= 0xF7;
         VFX->Update(0f);
 
@@ -199,6 +201,10 @@ public unsafe class StaticVfxObject : WorldObject
     {
         VFX->CleanupRender();
         VFX->Dtor(1);
+
+        // techically this is wrong as if you have more then one of the same VFX it still be loaded in engine.
+        // But it's ok, we don't need to worry about this, just have the user rspawn the VFX if anything goes wrong
+        _vFXService.RemoveHandledVFX(Path);
     }
 
     public override void Dispose()

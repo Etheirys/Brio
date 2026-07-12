@@ -8,9 +8,11 @@ using Dalamud.Plugin.Services;
 using FFXIVClientStructs.FFXIV.Client.Graphics.Scene;
 using FFXIVClientStructs.FFXIV.Client.System.Resource.Handle;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
-
+using System.Threading;
 using NativeGameObject = FFXIVClientStructs.FFXIV.Client.Game.Object.GameObject;
 
 namespace Brio.Game.Core;
@@ -33,7 +35,10 @@ public unsafe class VFXService : MediatorSubscriberBase
     private delegate* unmanaged<VfxObject*, bool> _vfxIsActiveStatic;
 
     public delegate nint VfxResourceLoadDelegate(void* job, nint unk1, byte* filePath, byte* avfxData, uint dataSize, ResourceHandle* resourceHandle, uint unk2);
-    public Hook<VfxResourceLoadDelegate>? _vfxResourceLoadDetour;
+    public Hook<VfxResourceLoadDelegate> _vfxResourceLoadDetour;
+
+    private readonly Lock _handledVfxLock = new();
+    private readonly HashSet<ulong> HandledVFX = []; 
 
     public VFXService(ISigScanner scanner, GPoseService gPoseService, IGameInteropProvider hooking, IFramework framework, Mediator mediator) : base(mediator)
     {
@@ -81,22 +86,28 @@ public unsafe class VFXService : MediatorSubscriberBase
     {
         if(_gPoseService.IsGPosing == false) // TODO we should really disabled this Detour once we are out of Gpose, not just this 
         {
-            return (IntPtr)(byte*)(void*)_vfxResourceLoadDetour?.Original(aJob, unk1, filePath, avfxData, dataSize, resourceHandle, unk2)!;
+            return _vfxResourceLoadDetour.Original(aJob, unk1, filePath, avfxData, dataSize, resourceHandle, unk2)!;
         }
 
         var temp = MemoryMarshal.CreateReadOnlySpanFromNullTerminated(filePath);
         var path = Encoding.UTF8.GetString(temp);
 
-        try
+        if(IsHandledVFX(path))
         {
-            UnbindAllTimelineItems(avfxData, (int)dataSize);
+            Brio.Log.Verbose($"HandledVFX contains :: {path}");
+            try
+            {
+                UnbindAllTimelineItems(avfxData, (int)dataSize);
+            }
+            catch(Exception ex)
+            {
+                Brio.Log.Error(ex, $"avfx unbind failed for {path}");
+            }
         }
-        catch(Exception ex)
-        {
-            Brio.Log.Error(ex, $"avfx unbind failed for {path}");
-        }
+        else
+            Brio.Log.Verbose($"HandledVFX does NOT contain :: {path}");
 
-        return (IntPtr)(byte*)(void*)_vfxResourceLoadDetour?.Original(aJob, unk1, filePath, avfxData, dataSize, resourceHandle, unk2)!;
+        return _vfxResourceLoadDetour.Original(aJob, unk1, filePath, avfxData, dataSize, resourceHandle, unk2)!;
     }
 
     //
@@ -173,6 +184,34 @@ public unsafe class VFXService : MediatorSubscriberBase
         return patched;
     }
 
+    //
+
+    public void AddHandledVFX(string path)
+    {
+        var hash = ObjectPath.HashPath(path);
+        lock(_handledVfxLock)
+        {
+            HandledVFX.Add(hash);
+        }
+    }
+
+    public void RemoveHandledVFX(string path)
+    {
+        var hash = ObjectPath.HashPath(path);
+        lock(_handledVfxLock)
+        {
+            HandledVFX.Remove(hash); // Remove is a no-op if absent; the Contains check is redundant
+        }
+    }
+
+    public bool IsHandledVFX(string path)
+    {
+        var hash = ObjectPath.HashPath(path);
+        lock(_handledVfxLock)
+        {
+            return HandledVFX.Contains(hash);
+        }
+    }
     //
 
     public VfxData* CreateActorVFX(string vfxName, IGameObject actor, IGameObject? target = null)
