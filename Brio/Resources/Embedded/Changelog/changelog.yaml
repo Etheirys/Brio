@@ -7,11 +7,41 @@ changelog:
     date: "July 7th 2026"
     isCurrent: true
     versions:
-      - number: "Thank you!"
+      - number: "Attention!"
         icon: ""
         items:
+          - "Something I forgot to post in the notes 0.8.0 notes."
+          - "The rotational transform values X, Y. are now flipped to properly match the game and fix a NaN bug"
+          - "I know there's muscle memory there, this was done to fix those bugs, if you want it as a setting let me know"
           - "As a reminder! If you experience any issues please report them on Discord or on GitHub"
 
+      - number: "0.8.0.10"
+        icon: ""
+        items:
+          - "Added the 'Bake/Lock in' button to the IK popout (and has a better tooltip)"
+          - "For real honest it's really fixed this time, \nFixed characters from being set to nude when Glamourer was installed (0.8.0.5)"
+          - "NPC names in the NPCs selector should now be more accurate (Thanks Hasel!)"
+          - "Fixed an issue where NPCs were mismatched in the selector (Thanks Hasel!)"
+          - "Fixed an issue with selecting a new NPC after you've already selected one would not properly apply"
+          - "Fixed an issue where Reference Images would not get destroyed when leaving GPose"
+          - "Fixed an issue where the Features section was missing in Advanced Appearance"
+          - "Fixed an issue where the GPose screen effects were broken"
+          - "Fixed an issue where some VFX like ones on armor would appear at world origin (0,0,0)"
+          - "Fixed an issue where the overlay would appear on the title screen"
+          - "Fixed multiple instances of UI clipping, like the catalog, posing window or rename/save project"
+          - "Fixed an issue where selectors would not scale properly"
+          - "Fixed an issue where the library would not find files properly"
+          - "Fixed an issue with a copy/paste transform function, that upon paste sets transform to (0,0,0)"
+          - "Fixed an issue where the default light loading function would not load Gpose lights into Brio"
+          - "Fixed an issue where Gpose lights would conflict with other tools (by Cazzar)"
+          - "Fixed UI surfaces that did not have blur behind them now properly do"
+          - "Fixed another crash related to lights"
+          - "World objects tagged as `grs` are not marked as `Grass` and not `Glass`"
+          - "Fixed some text typos and made some text more descriptive"
+          - "Light selection with the Light Window now works properly"
+          - "There is still a desync when `If light window is open don't show light in Scene Manager'` is enabled"
+          - "Changed some of the tooltips to be more descriptive"
+    
       - number: "0.8.0.3"
         icon: ""
         items:
@@ -188,8 +218,6 @@ changelog:
              \n\tIf you move the default camera into a folder and then delete the folder \n\tand all of the children it will delete the default camera.
              \n\tIf this happens just restart Brio in the Plugin installer"
           - "You can only target other actors instead of other entities from the camera targeting system"
-          - "If you have undocked the entity widgets, the delete button does not function.
-             \n\tAs a work around hold `Ctrl` and click it instead"
 
   - name: Message From the Developer 
     tagline:
