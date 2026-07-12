@@ -144,23 +144,8 @@ public unsafe struct BrioCharaMakeType(ExcelPage page, uint offset, uint row) : 
 
         }
 
-        menus.Sort((a, b) => GetMenuSortPriority(a.CustomizeIndex).CompareTo(GetMenuSortPriority(b.CustomizeIndex)));
-
         return new MenuCollection([.. menus]);
     }
-
-    private static int GetMenuSortPriority(CustomizeIndex index) => index switch
-    {
-        CustomizeIndex.Height => 0,
-        CustomizeIndex.HairStyle => 0,
-        CustomizeIndex.FaceType => 1,
-        CustomizeIndex.FaceFeatures => 2,
-        CustomizeIndex.Facepaint => 3,
-        CustomizeIndex.RaceFeatureType => 4,
-        CustomizeIndex.RaceFeatureSize => 5,
-        CustomizeIndex.SkinColor => 6,
-        _ => 7,
-    };
 
     public class MenuCollection(Menu[] menus)
     {
