@@ -1,3 +1,4 @@
+using Brio.Resources;
 using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Plugin;
 using Lumina.Excel.Sheets;
@@ -13,22 +14,6 @@ namespace Brio.IPC;
 public sealed class PenumbraModActionService
 {
     private static readonly TimeSpan RefreshInterval = TimeSpan.FromSeconds(2);
-    private static readonly IReadOnlyDictionary<string, PoseVariantDefinition> PoseVariants =
-        new Dictionary<string, PoseVariantDefinition>(StringComparer.OrdinalIgnoreCase)
-        {
-            ["s_pose01_loop.pap"] = new(50, 643, 1),
-            ["s_pose02_loop.pap"] = new(50, 3132, 2),
-            ["s_pose03_loop.pap"] = new(50, 3134, 3),
-            ["s_pose04_loop.pap"] = new(50, 8002, 4),
-            ["s_pose05_loop.pap"] = new(50, 8004, 5),
-            ["j_pose01_loop.pap"] = new(52, 654, 1),
-            ["j_pose02_loop.pap"] = new(52, 3136, 2),
-            ["j_pose03_loop.pap"] = new(52, 3138, 3),
-            ["j_pose04_loop.pap"] = new(52, 3771, 4),
-            ["l_pose01_loop.pap"] = new(13, 3140, 1),
-            ["l_pose02_loop.pap"] = new(13, 3142, 2),
-            ["l_pose03_loop.pap"] = new(13, 585, 3),
-        };
 
     private readonly PenumbraService _penumbraService;
     private readonly GetEnabledState _getEnabledState;
@@ -37,6 +22,7 @@ public sealed class PenumbraModActionService
     private readonly CheckCurrentChangedItemFunc _checkCurrentChangedItem;
     private readonly GetGameObjectResourcePaths _getGameObjectResourcePaths;
     private readonly GetModPath _getModPath;
+    private readonly ResolveGameObjectPath _resolveGameObjectPath;
 
     private IReadOnlyList<PenumbraModAction> _cachedActions = [];
     private string _cacheSignature = string.Empty;
@@ -56,6 +42,7 @@ public sealed class PenumbraModActionService
         _checkCurrentChangedItem = new CheckCurrentChangedItemFunc(pluginInterface);
         _getGameObjectResourcePaths = new GetGameObjectResourcePaths(pluginInterface);
         _getModPath = new GetModPath(pluginInterface);
+        _resolveGameObjectPath = new ResolveGameObjectPath(pluginInterface);
     }
 
     public IReadOnlyList<PenumbraModAction> GetActiveActions(IGameObject actor)
@@ -96,11 +83,10 @@ public sealed class PenumbraModActionService
 
             var changedItems = _getChangedItemsForCollection.Invoke(collection.Id);
             var modLookup = _checkCurrentChangedItem.Invoke();
-            var variantResources = GetVariantResources(actor.ObjectIndex);
-            var actions = BuildActions(changedItems, modLookup, variantResources);
+            var actions = BuildActions(changedItems, modLookup, actor.ObjectIndex);
             var status = actions.Count == 0
-                ? $"No active mod actions were found in {collection.Name}."
-                : $"{actions.Count} active mod actions from {collection.Name}.";
+                ? string.Format("No active mod actions were found in {0}.", collection.Name)
+                : string.Format("{0} active mod actions from {1}.", actions.Count, collection.Name);
 
             SetCache(actions, status);
         }
@@ -114,28 +100,42 @@ public sealed class PenumbraModActionService
     private IReadOnlyList<PenumbraModAction> BuildActions(
         IReadOnlyDictionary<string, object?> changedItems,
         Func<string, (string ModDirectory, string ModName)[]> modLookup,
-        IReadOnlyList<VariantResourceHit> variantResources)
+        ushort objectIndex)
     {
-        var actions = new List<PenumbraModAction>();
+        var modsByChangedItem = new Dictionary<string, IReadOnlyList<ResolvedModReference>>(StringComparer.OrdinalIgnoreCase);
+        foreach(var changedItemName in changedItems.Keys)
+        {
+            var resolved = ResolveMods(modLookup(changedItemName));
+            if(resolved.Count > 0)
+                modsByChangedItem[changedItemName] = resolved;
+        }
+
+        var allMods = modsByChangedItem.Values
+            .SelectMany(mods => mods)
+            .GroupBy(mod => mod.ModDirectory, StringComparer.OrdinalIgnoreCase)
+            .Select(group => group.First())
+            .ToList();
+
+        var variantResources = GetVariantResources(objectIndex);
+        var (variantActions, detectedModEmotes) = BuildVariantActions(allMods, variantResources, changedItems.Values.OfType<Emote>());
+        var actions = new List<PenumbraModAction>(variantActions);
+
         foreach(var (changedItemName, payload) in changedItems.OrderBy(item => item.Key, StringComparer.OrdinalIgnoreCase))
         {
             if(payload is not Emote emote || emote.RowId is 0 or > ushort.MaxValue)
                 continue;
 
-            var mods = ResolveMods(modLookup(changedItemName));
-            if(mods.Count == 0)
+            if(!modsByChangedItem.TryGetValue(changedItemName, out var resolvedMods))
                 continue;
+
+            var mods = resolvedMods.ToList();
 
             var emoteName = emote.Name.ToString().Trim();
             if(string.IsNullOrWhiteSpace(emoteName))
                 emoteName = $"Emote {emote.RowId}";
 
-            if(PoseVariants.Values.Any(variant => variant.BaseEmoteId == emote.RowId))
-            {
-                var (variantActions, detectedMods) = BuildVariantActions(emote, emoteName, mods, variantResources);
-                actions.AddRange(variantActions);
-                mods = mods.Where(mod => !detectedMods.Contains(mod.ModDirectory)).ToList();
-            }
+            if(CommonPoseCatalog.All.Any(variant => variant.BaseEmoteId == emote.RowId))
+                mods = mods.Where(mod => !detectedModEmotes.Contains(VariantDetectionKey(mod.ModDirectory, emote.RowId))).ToList();
 
             if(mods.Count > 0)
                 actions.Add(new PenumbraModAction(emote, emoteName, BuildModLabel(mods.Select(mod => mod.DisplayName).ToArray()), null));
@@ -181,14 +181,46 @@ public sealed class PenumbraModActionService
                 return [];
 
             var hits = new List<VariantResourceHit>();
+            var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            var variantsByFileName = new Dictionary<string, CommonPoseDefinition>(StringComparer.OrdinalIgnoreCase);
+            foreach(var definition in CommonPoseCatalog.All)
+            {
+                if(GameDataProvider.Instance.ActionTimelines.TryGetRow(definition.TimelineId, out var timeline))
+                    variantsByFileName[$"{timeline.Key}.pap"] = definition;
+            }
+
             foreach(var actualPath in pathMap.Keys)
             {
                 if(string.IsNullOrWhiteSpace(actualPath))
                     continue;
 
                 var fileName = Path.GetFileName(actualPath);
-                if(!string.IsNullOrWhiteSpace(fileName) && PoseVariants.TryGetValue(fileName, out var definition))
+                if(!string.IsNullOrWhiteSpace(fileName) && variantsByFileName.TryGetValue(fileName, out var definition)
+                    && seen.Add($"{actualPath}|{definition.TimelineId}"))
                     hits.Add(new VariantResourceHit(actualPath, definition));
+            }
+
+            var residentDirectories = pathMap.Values
+                .SelectMany(paths => paths)
+                .Select(NormalizeGamePath)
+                .Where(path => path.Contains("/bt_common/resident/", StringComparison.OrdinalIgnoreCase))
+                .Select(path => path[..path.LastIndexOf('/')])
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToList();
+
+            foreach(var residentDirectory in residentDirectories)
+            {
+                foreach(var (fileName, definition) in variantsByFileName)
+                {
+                    var gamePath = $"{residentDirectory}/{fileName}";
+                    var resolvedPath = _resolveGameObjectPath.Invoke(gamePath, objectIndex);
+                    if(string.IsNullOrWhiteSpace(resolvedPath)
+                        || string.Equals(NormalizeGamePath(resolvedPath), gamePath, StringComparison.OrdinalIgnoreCase)
+                        || !seen.Add($"{resolvedPath}|{definition.TimelineId}"))
+                        continue;
+
+                    hits.Add(new VariantResourceHit(resolvedPath, definition));
+                }
             }
 
             return hits;
@@ -200,15 +232,17 @@ public sealed class PenumbraModActionService
         }
     }
 
-    private static (IReadOnlyList<PenumbraModAction> Actions, IReadOnlySet<string> DetectedMods) BuildVariantActions(
-        Emote emote,
-        string emoteName,
+    private static (IReadOnlyList<PenumbraModAction> Actions, IReadOnlySet<string> DetectedModEmotes) BuildVariantActions(
         IReadOnlyList<ResolvedModReference> mods,
-        IReadOnlyList<VariantResourceHit> variantResources)
+        IReadOnlyList<VariantResourceHit> variantResources,
+        IEnumerable<Emote> emotes)
     {
         var actions = new List<PenumbraModAction>();
-        var detectedMods = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        var detectedModEmotes = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        var emotesById = emotes
+            .GroupBy(emote => emote.RowId)
+            .ToDictionary(group => group.Key, group => group.First());
 
         foreach(var mod in mods)
         {
@@ -216,23 +250,36 @@ public sealed class PenumbraModActionService
                 continue;
 
             foreach(var hit in variantResources
-                .Where(hit => hit.Definition.BaseEmoteId == emote.RowId && IsPathInDirectory(hit.ActualPath, mod.PathPrefix))
-                .OrderBy(hit => hit.Definition.SortOrder))
+                .Where(hit => IsPathInDirectory(hit.ActualPath, mod.PathPrefix))
+                .OrderBy(hit => hit.Definition.Kind)
+                .ThenBy(hit => hit.Definition.VariantIndex))
             {
                 if(!seen.Add($"{mod.ModDirectory}|{hit.Definition.TimelineId}"))
                     continue;
 
+                Emote? emote = null;
+                if(hit.Definition.BaseEmoteId != 0 && emotesById.TryGetValue(hit.Definition.BaseEmoteId, out var baseEmote))
+                    emote = baseEmote;
+
                 actions.Add(new PenumbraModAction(
                     emote,
-                    $"{emoteName} {hit.Definition.SortOrder}",
+                    hit.Definition.DisplayName,
                     mod.DisplayName,
                     hit.Definition.TimelineId));
-                detectedMods.Add(mod.ModDirectory);
+
+                if(hit.Definition.BaseEmoteId != 0)
+                    detectedModEmotes.Add(VariantDetectionKey(mod.ModDirectory, hit.Definition.BaseEmoteId));
             }
         }
 
-        return (actions, detectedMods);
+        return (actions, detectedModEmotes);
     }
+
+    private static string NormalizeGamePath(string path)
+        => path.Replace('\\', '/');
+
+    private static string VariantDetectionKey(string modDirectory, uint baseEmoteId)
+        => $"{modDirectory}|{baseEmoteId}";
 
     private static string BuildModLabel(IReadOnlyList<string> names)
         => names.Count switch
@@ -258,7 +305,7 @@ public sealed class PenumbraModActionService
 
     private void SetCache(IReadOnlyList<PenumbraModAction> actions, string status)
     {
-        var signature = string.Join('\n', actions.Select(action => $"{action.Emote.RowId}|{action.ModName}|{action.TimelineId}"));
+        var signature = string.Join('\n', actions.Select(action => $"{action.Emote?.RowId ?? 0}|{action.ModName}|{action.TimelineId}"));
         if(!string.Equals(_cacheSignature, signature, StringComparison.Ordinal))
         {
             _cachedActions = actions;
@@ -270,8 +317,7 @@ public sealed class PenumbraModActionService
     }
 
     private sealed record ResolvedModReference(string ModDirectory, string DisplayName, string? PathPrefix);
-    private sealed record VariantResourceHit(string ActualPath, PoseVariantDefinition Definition);
-    private readonly record struct PoseVariantDefinition(uint BaseEmoteId, uint TimelineId, int SortOrder);
+    private sealed record VariantResourceHit(string ActualPath, CommonPoseDefinition Definition);
 }
 
-public sealed record PenumbraModAction(Emote Emote, string EmoteName, string ModName, uint? TimelineId);
+public sealed record PenumbraModAction(Emote? Emote, string EmoteName, string ModName, uint? TimelineId);
