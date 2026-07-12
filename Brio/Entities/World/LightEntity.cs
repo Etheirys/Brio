@@ -3,6 +3,7 @@ using Brio.Capabilities.World;
 using Brio.Config;
 using Brio.Core;
 using Brio.Entities.Core;
+using Brio.Game.World;
 using Brio.Game.World.Lights;
 using Brio.UI;
 using Brio.UI.Controls.Stateless;
@@ -44,7 +45,11 @@ public class LightEntity(IGameLight gameLight, IServiceProvider provider) : Tran
 
     public override bool IsVisible => true;
 
-    public override EntityFlags Flags => EntityFlags.AllowDoubleClick | EntityFlags.HasContextButton | EntityFlags.DefaultOpen | EntityFlags.AllowMultiSelect;
+    public override EntityFlags Flags =>
+        EntityFlags.AllowDoubleClick | EntityFlags.HasContextButton | EntityFlags.DefaultOpen | EntityFlags.AllowMultiSelect
+        | (ConfigurationService.Instance.Configuration.Posing.IfLightWindowisOpenDontUseSceneManager && UIManager.IsLightWindowOpen
+            ? EntityFlags.DisableSelection
+            : EntityFlags.None);
 
     public override FontAwesomeIcon Icon => FontAwesomeIcon.Lightbulb;
 
@@ -67,6 +72,17 @@ public class LightEntity(IGameLight gameLight, IServiceProvider provider) : Tran
     public override void OnDoubleClick()
     {
         ModalManager.Instance.OpenRenameModal(this);
+    }
+
+    public override void OnSelected()
+    {
+        if(ConfigurationService.Instance.Configuration.Posing.IfLightWindowisOpenDontUseSceneManager && UIManager.IsLightWindowOpen)
+        {
+            _serviceProvider.GetRequiredService<LightingService>().SelectedLightEntity = this;
+            return;
+        }
+
+        base.OnSelected();
     }
 
     public unsafe override void SetVisibility(bool visible)

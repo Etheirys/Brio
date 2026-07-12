@@ -52,9 +52,6 @@ public class LightTransformCapability : LightCapability, ITransformable, IHistor
     private readonly HistoryService _historyService;
     private readonly LightWindow _lightWindow;
 
-    public bool ShouldHideBodyInHierarchy =>
-        _lightWindow.IsOpen && _configurationService.Configuration.Posing.IfLightWindowisOpenDontUseSceneManager;
-
     public bool LightWindowOpen
     {
         get => _lightWindow.IsOpen;
