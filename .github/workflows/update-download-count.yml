@@ -1,0 +1,22 @@
+name: Update Download Count
+
+permissions:
+  contents: write
+
+on:
+  schedule:
+    - cron: '0 6 * * *'
+  workflow_dispatch:
+
+jobs:
+  update:
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v6
+
+    - name: Refresh DownloadCount
+      uses: ./.github/actions/update-repo
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}

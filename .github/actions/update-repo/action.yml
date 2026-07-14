@@ -1,0 +1,97 @@
+name: 'Update repo.json'
+
+inputs:
+  token:
+    required: true
+  version:
+    description: 'The version to write. When empty, only DownloadCount is refreshed.'
+    required: false
+    default: ''
+  testing:
+    required: false
+    default: 'false'
+  branch:
+    required: false
+    default: 'main'
+  project:
+    required: false
+    default: 'Brio'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Checkout repo branch
+      uses: actions/checkout@v6
+      with:
+        ref: ${{ inputs.branch }}
+        token: ${{ inputs.token }}
+
+    - name: Patch repo.json
+      shell: pwsh
+      env:
+        GITHUB_TOKEN: ${{ inputs.token }}
+      run: |
+        $path    = './repo.json'
+        $version = '${{ inputs.version }}'
+        $project = '${{ inputs.project }}'
+        $testing = [System.Convert]::ToBoolean('${{ inputs.testing }}')
+
+        $json = Get-Content -Raw $path | ConvertFrom-Json
+
+        function Set-Link([string]$link, [string]$ver) {
+          $pattern = "[^/]+/$([regex]::Escape($project))\.zip"
+          return ($link -replace $pattern, "v$ver/$project.zip")
+        }
+
+        if ($version) {
+          if ($testing) {
+            $json[0].TestingAssemblyVersion = $version
+            $json[0].DownloadLinkTesting    = Set-Link $json[0].DownloadLinkTesting $version
+          }
+          else {
+            $json[0].AssemblyVersion     = $version
+            $json[0].DownloadLinkInstall = Set-Link $json[0].DownloadLinkInstall $version
+            $json[0].DownloadLinkUpdate  = Set-Link $json[0].DownloadLinkUpdate  $version
+
+            $rollUp = $true
+            try { $rollUp = ([version]$version -gt [version]$json[0].TestingAssemblyVersion) } catch { $rollUp = $true }
+            if ($rollUp) {
+              $json[0].TestingAssemblyVersion = $version
+              $json[0].DownloadLinkTesting    = Set-Link $json[0].DownloadLinkTesting $version
+            }
+          }
+        }
+
+        $headers = @{
+          Authorization = "Bearer $env:GITHUB_TOKEN"
+          'User-Agent'  = 'brio-ci'
+          Accept        = 'application/vnd.github+json'
+        }
+        $total = 0
+        $page  = 1
+        do {
+          $uri = "https://api.github.com/repos/$env:GITHUB_REPOSITORY/releases?per_page=100&page=$page"
+          $releases = Invoke-RestMethod -Headers $headers -Uri $uri
+          foreach ($r in $releases) { foreach ($a in $r.assets) { $total += [int]$a.download_count } }
+          $page++
+        } while ($releases.Count -eq 100)
+
+        Write-Host "Computed DownloadCount = $total"
+        $json[0].DownloadCount = $total
+
+        $content = $json | ConvertTo-Json -AsArray -Depth 10
+        Set-Content -Path $path -Value $content
+
+    - name: Commit repo.json
+      shell: pwsh
+      env:
+        GITHUB_TOKEN: ${{ inputs.token }}
+      run: |
+        $version = '${{ inputs.version }}'
+        $message = if ($version) { "[CI] Update repo.json for v$version" } else { "[CI] Refresh DownloadCount" }
+        git config --global user.name  "Actions User"
+        git config --global user.email "actions@github.com"
+        git add repo.json
+        git commit -m $message
+        if ($LASTEXITCODE -ne 0) { Write-Host "Nothing to commit"; exit 0 }
+        git push origin ${{ inputs.branch }}

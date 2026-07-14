@@ -1,11 +1,11 @@
-name: Build Brio - Dalamud Staging
+name: Build Brio
 
 permissions:
   contents: read
 
 on:
   push:
-    branches: 
+    branches:
     - main
     tags-ignore: '*'
   pull_request:
@@ -35,7 +35,7 @@ jobs:
 
     - name: Restore Dependencies
       run: dotnet restore Brio.slnx
-      
+
     - name: Build Brio
       run: dotnet build --no-restore Brio.slnx /p:Configuration=Release /p:DebugType=None /p:DebugSymbols=false /p:Version=0.0.0.1
 
