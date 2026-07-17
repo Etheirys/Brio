@@ -21,11 +21,14 @@ using Brio.Services.Models;
 using Dalamud.Hooking;
 using Dalamud.Plugin.Services;
 using FFXIVClientStructs.FFXIV.Client.Game.Event;
+using FFXIVClientStructs.FFXIV.Client.System.String;
 using InteropGenerator.Runtime;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
+using System.Runtime.CompilerServices;
+using System.Text;
 
 namespace Brio.Game.World;
 
@@ -68,6 +71,9 @@ public unsafe class LightingService : MediatorSubscriberBase
 
     private readonly HashSet<nint> _worldGameLights = [];
     public IReadOnlyCollection<nint> WorldLights => _worldGameLights;
+  
+    private readonly delegate* unmanaged<BrioLight*, byte*, byte*, byte> _setCubemapPath;
+    private readonly delegate* unmanaged<uint*, byte*, uint*> _classifyPath;
 
     public LightingService(IServiceProvider serviceProvider, EntityManager entityManager, GPoseService gPoseService, VirtualCameraManager virtualCameraManager, IFramework framework, ISigScanner sigScanner, IGameInteropProvider hooks, Mediator mediator) : base(mediator)
     {
@@ -78,11 +84,17 @@ public unsafe class LightingService : MediatorSubscriberBase
         _framework = framework;
         _hooks = hooks;
 
-        var createGameLightAddress = sigScanner.ScanText("48 89 5C 24 ?? 57 48 83 EC 20 49 8B D8 8B F9");                               // Light.Create
+        var createGameLightAddress = sigScanner.ScanText("48 ?? ?? ?? ?? 57 48 83 EC 20 49 8B D8 8B F9 ??");                               // Light.Create
         _createGameLight = (delegate* unmanaged<LightType, CStringPointer, BrioLight*, BrioLight*>)createGameLightAddress;
 
         var toggleLightHookAddress = sigScanner.ScanText("48 83 EC 28 4C 8B C1 83 FA 03 ?? ?? 8B C2");
         _toggleGPoseLight = (delegate* unmanaged<BrioEventGPoseController*, uint, char>)toggleLightHookAddress;
+   
+        var tecPathAddr = sigScanner.ScanText("40 53 48 83 ?? ?? 48 ?? ?? ?? 44 24 58 ?? ?? ?? ?? 33 ?? 48");
+        _setCubemapPath = (delegate* unmanaged<BrioLight*, byte*, byte*, byte>)tecPathAddr;
+     
+        var cPathAddr = sigScanner.ScanText("40 53 48 83 ?? ?? 44 0F BE 02 ?? ?? ?? ??");
+        _classifyPath = (delegate* unmanaged<uint*, byte*, uint*>)cPathAddr;
 
         var _lightCtorAddress = sigScanner.ScanText("E8 ?? ?? ?? ?? 48 89 84 ?? ?? ?? ?? ?? 48 85 C0 0F ?? ?? ?? ?? ?? 48 8B C8");      // Light.ctor
         _lightCtorHook = hooks.HookFromAddress<LightDelegate>(_lightCtorAddress, LightCtor);
@@ -96,6 +108,34 @@ public unsafe class LightingService : MediatorSubscriberBase
 
     public char ToggleGPoseLight(BrioEventGPoseController* ptr, uint index)
         => _toggleGPoseLight(ptr, index);
+
+    [SkipLocalsInit]
+    public unsafe bool SetLightCubemap(BrioLight* light, string path)
+    {
+        if(light->ProjectedCubemapTexture != null)
+        {
+            return false;
+        }
+
+        int byteCount = Encoding.UTF8.GetByteCount(path);
+        Span<byte> span = ((byteCount > 511) ? ((Span<byte>)new byte[byteCount + 1]) : stackalloc byte[512]);
+        Span<byte> bytes = span;
+        Encoding.UTF8.GetBytes(path.AsSpan(), bytes);
+        bytes[byteCount] = 0;
+        fixed(byte* pathPtr = span)
+        {
+            uint category = 0xFFFFFFFF;
+
+            _classifyPath(&category, pathPtr); // we can do this our selfs but I don't wanna right now
+
+            byte result = _setCubemapPath(light, (byte*)&category, pathPtr);
+
+            light->UpdateRender();
+            light->Update();
+
+            return result != 0;
+        }
+    }
 
     private BrioLight* LightCtor(BrioLight* light)
     {
@@ -537,7 +577,10 @@ public unsafe class LightingService : MediatorSubscriberBase
             {
                 if(light.GameLight->VisibilityFlags == 0)
                     continue;
-
+                unsafe
+                {
+                    light.GameLight->UpdateRender();
+                }               
                 light.Update();
             }
         }
