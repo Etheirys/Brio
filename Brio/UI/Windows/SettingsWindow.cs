@@ -918,6 +918,13 @@ public class SettingsWindow : Window
             _configurationService.Configuration.Posing.UndoStackSize = undoStackSize;
             _configurationService.ApplyChange();
         }
+
+        bool swapRotationXandY = _configurationService.Configuration.Posing.SwapRotationXandY;
+        if(ImGui.Checkbox("Swap Rotation X and Y in Transform Editors", ref swapRotationXandY))
+        {
+            _configurationService.Configuration.Posing.SwapRotationXandY = swapRotationXandY;
+            _configurationService.ApplyChange();
+        }
     }
 
     private void DrawOffsetSection()

@@ -21,6 +21,11 @@ public static class NumericsExtensions
         return new Vector3(pitch, yaw, roll) * MathHelpers.RadiansToDegrees;
     }
 
+    public static Vector3 SwapXY(this Vector3 v)
+    {
+        return new Vector3(v.Y, v.X, v.Z);
+    }
+
     public static bool IsPointInPolygon(this ref Vector2 point, Vector2[] polygon)
     {
         int i, j = polygon.Length - 1;

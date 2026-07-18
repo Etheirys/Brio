@@ -149,7 +149,10 @@ public class PosingTransformEditor
         var realTransform = _trackingTransform ?? before;
         var beforeMods = realTransform;
 
+        var swapRotationXandY = posingCapability.ConfigurationService.Configuration.Posing.SwapRotationXandY;
+
         var realEuler = _trackingEuler ?? realTransform.Rotation.ToEuler();
+        var displayEuler = swapRotationXandY ? realEuler.SwapXY() : realEuler;
 
         using(ImRaii.Disabled(bone != null && bone.Freeze))
         {
@@ -163,7 +166,7 @@ public class PosingTransformEditor
 
             (var pdidChange, var panyActive) = ImBrio.DragFloat3($"###_transformPosition_0", ref realTransform.Position, offset, FontAwesomeIcon.ArrowsUpDownLeftRight, "Position", enableExpanded: compactMode);
             ImBrio.VerticalPadding(2);
-            (var rdidChange, var ranyActive) = ImBrio.DragFloat3($"###_transformRotation_0", ref realEuler, offset * 100, FontAwesomeIcon.ArrowsSpin, "Rotation", enableExpanded: compactMode);
+            (var rdidChange, var ranyActive) = ImBrio.DragFloat3($"###_transformRotation_0", ref displayEuler, offset * 100, FontAwesomeIcon.ArrowsSpin, "Rotation", enableExpanded: compactMode);
             ImBrio.VerticalPadding(2);
             (var sdidChange, var sanyActive) = ImBrio.DragFloat3($"###_transformScale_0", ref realTransform.Scale, offset, FontAwesomeIcon.ExpandAlt, "Scale", enableExpanded: compactMode);
             ImBrio.VerticalPadding(2);
@@ -171,6 +174,7 @@ public class PosingTransformEditor
             didChange |= pdidChange |= rdidChange |= sdidChange;
             anyActive |= panyActive |= ranyActive |= sanyActive;
 
+            realEuler = swapRotationXandY ? displayEuler.SwapXY() : displayEuler;
             realTransform.Rotation = realEuler.ToQuaternion();
             var toApply = before + realTransform.CalculateDiff(beforeMods);
 
@@ -250,7 +254,11 @@ public class PosingTransformEditor
         var offset = primaryCapability.ModelPosing.TransformOffset;
         var primaryTransform = _trackingTransform ?? primaryCapability.ModelPosing.Transform;
         var beforeMods = primaryTransform;
+
+        var swapRotationXandY = primaryCapability.ConfigurationService.Configuration.Posing.SwapRotationXandY;
+
         var realEuler = _trackingEuler ?? primaryTransform.Rotation.ToEuler();
+        var displayEuler = swapRotationXandY ? realEuler.SwapXY() : realEuler;
 
         bool anyFrozen = selected.Any(t => t.target.IsTransformFrozen);
 
@@ -261,7 +269,7 @@ public class PosingTransformEditor
 
             (var pdidChange, var panyActive) = ImBrio.DragFloat3($"###_transformPosition_1", ref primaryTransform.Position, offset, FontAwesomeIcon.ArrowsUpDownLeftRight, "Position (Group)", enableExpanded: compactMode);
             ImBrio.VerticalPadding(2);
-            (var rdidChange, var ranyActive) = ImBrio.DragFloat3($"###_transformRotation_1", ref realEuler, offset * 100, FontAwesomeIcon.ArrowsSpin, "Rotation (Pivot)", enableExpanded: compactMode);
+            (var rdidChange, var ranyActive) = ImBrio.DragFloat3($"###_transformRotation_1", ref displayEuler, offset * 100, FontAwesomeIcon.ArrowsSpin, "Rotation (Pivot)", enableExpanded: compactMode);
             ImBrio.VerticalPadding(2);
             (var sdidChange, var sanyActive) = ImBrio.DragFloat3($"###_transformScale_1", ref primaryTransform.Scale, offset, FontAwesomeIcon.ExpandAlt, "Scale (Group)", enableExpanded: compactMode);
             ImBrio.VerticalPadding(2);
@@ -269,6 +277,7 @@ public class PosingTransformEditor
             didChange |= pdidChange || rdidChange || sdidChange;
             anyActive |= panyActive || ranyActive || sanyActive;
 
+            realEuler = swapRotationXandY ? displayEuler.SwapXY() : displayEuler;
             primaryTransform.Rotation = realEuler.ToQuaternion();
 
             if(didChange)

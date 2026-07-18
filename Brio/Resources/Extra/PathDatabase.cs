@@ -186,7 +186,7 @@ public sealed partial class PathIndex
         { "ter",  "Terrain"   }, { "plt",  "Foliage"  }, { "bsh",  "Foliage"        },
         { "gren", "Foliage"   },
         { "itm",  "Item"      },
-        { "chr",  "Chair"     }, { "chair", "Chair"   },
+        { "chr",  "Chair"     }, { "chair", "Chair"   }, { "cha",  "Chair"     },
         { "dsk",  "Desk"      }, { "desk", "Desk"     },
         { "rug",  "Rug"       },
         { "slf",  "Shelf"     }, { "shelf", "Shelf"   }, { "she",  "Shelf"          },
