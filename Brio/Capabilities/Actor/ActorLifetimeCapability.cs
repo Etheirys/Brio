@@ -1,4 +1,5 @@
 ﻿using Brio.Capabilities.Posing;
+using Brio.Core;
 using Brio.Entities;
 using Brio.Entities.Actor;
 using Brio.Entities.Core;
@@ -31,30 +32,18 @@ public class ActorLifetimeCapability : ActorCapability
         Widget = new ActorLifetimeWidget(this);
     }
 
-    public void MoveToCamera()
+    public unsafe void MoveToCamera()
     {
-        if(_cameraManager.CurrentCamera is null)
-            return;
-
-        var cam = _cameraManager.CurrentCamera;
-        System.Numerics.Vector3 camPos;
-        if(cam.IsFreeCamera)
+        if(_cameraManager.CurrentCamera is not null && Entity.TryGetCapability<ModelPosingCapability>(out var modelPosing))
         {
-            camPos = cam.Position;
-        }
-        else
-        {
-            unsafe
+            if(_cameraManager.CurrentCamera!.IsFreeCamera)
             {
-                camPos = cam.BrioCamera->Position;
+                modelPosing.Transform = new Transform { Position = _cameraManager.CurrentCamera.Position, Rotation = modelPosing.Transform.Rotation, Scale = modelPosing.Transform.Scale };
             }
-        }
-
-        if(Actor.TryGetCapability<ModelPosingCapability>(out var modelPosing))
-        {
-            var t = modelPosing.Transform;
-            t.Position = camPos;
-            modelPosing.Transform = t;
+            else
+            {
+                modelPosing.Transform = new Transform { Position = _cameraManager.CurrentCamera.BrioCamera->Position, Rotation = modelPosing.Transform.Rotation, Scale = modelPosing.Transform.Scale };
+            }
         }
     }
 
