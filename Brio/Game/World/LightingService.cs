@@ -21,7 +21,6 @@ using Brio.Services.Models;
 using Dalamud.Hooking;
 using Dalamud.Plugin.Services;
 using FFXIVClientStructs.FFXIV.Client.Game.Event;
-using FFXIVClientStructs.FFXIV.Client.System.String;
 using InteropGenerator.Runtime;
 using System;
 using System.Collections.Generic;
@@ -71,7 +70,7 @@ public unsafe class LightingService : MediatorSubscriberBase
 
     private readonly HashSet<nint> _worldGameLights = [];
     public IReadOnlyCollection<nint> WorldLights => _worldGameLights;
-  
+
     private readonly delegate* unmanaged<BrioLight*, byte*, byte*, byte> _setCubemapPath;
     private readonly delegate* unmanaged<uint*, byte*, uint*> _classifyPath;
 
@@ -89,10 +88,10 @@ public unsafe class LightingService : MediatorSubscriberBase
 
         var toggleLightHookAddress = sigScanner.ScanText("48 83 EC 28 4C 8B C1 83 FA 03 ?? ?? 8B C2");
         _toggleGPoseLight = (delegate* unmanaged<BrioEventGPoseController*, uint, char>)toggleLightHookAddress;
-   
+
         var tecPathAddr = sigScanner.ScanText("40 53 48 83 ?? ?? 48 ?? ?? ?? 44 24 58 ?? ?? ?? ?? 33 ?? 48");
         _setCubemapPath = (delegate* unmanaged<BrioLight*, byte*, byte*, byte>)tecPathAddr;
-     
+
         var cPathAddr = sigScanner.ScanText("40 53 48 83 ?? ?? 44 0F BE 02 ?? ?? ?? ??");
         _classifyPath = (delegate* unmanaged<uint*, byte*, uint*>)cPathAddr;
 
@@ -580,7 +579,7 @@ public unsafe class LightingService : MediatorSubscriberBase
                 unsafe
                 {
                     light.GameLight->UpdateRender();
-                }               
+                }
                 light.Update();
             }
         }

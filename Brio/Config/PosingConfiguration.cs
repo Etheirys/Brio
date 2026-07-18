@@ -41,6 +41,7 @@ public class PosingConfiguration
 
     // Graphical Posing
     public bool GraphicalSidesSwapped { get; set; } = false;
+    public bool SwapRotationXandY { get; set; } = false;
     public bool ShowGenitaliaInAdvancedPoseWindow { get; set; } = false;
 
     // Hooks
@@ -50,7 +51,7 @@ public class PosingConfiguration
     // Targeting
     public bool GPoseTargetChangesWithBrio { get; set; } = false;
     public bool BrioTargetChangesWithGPose { get; set; } = true;
-    public bool AutoSelectTransformOnEntitySelect { get; set; } = false;
+    public bool AutoSelectTransformOnEntitySelect { get; set; } = false; // must be presvered for compatibility
 
     public bool AutoSelectLightWhenClickingOnALight { get; set; } = true;
     public bool IfLightWindowisOpenDontUseSceneManager { get; set; } = false;

@@ -130,19 +130,6 @@ public class LightTransformCapability : LightCapability, ITransformable, IHistor
         Widget = new LightTransformWidget(this);
     }
 
-    public override void OnEntitySelected()
-    {
-        if(_configurationService.Configuration.Posing.AutoSelectTransformOnEntitySelect)
-        {
-            IsGismoVisible = true;
-        }
-    }
-
-    public override void OnEntityDeselected()
-    {
-        IsGismoVisible = false;
-    }
-
     public void Redo()
         => Entity.EntityManager.RedoSelected();
 
