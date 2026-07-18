@@ -1147,13 +1147,6 @@ public class SettingsWindow : Window
                 _configurationService.Configuration.InputManager.FlipKeyBindsPastNinety = flipKeybindsPastNinety;
                 _configurationService.ApplyChange();
             }
-
-            bool disableScrollOnInputs = _configurationService.Configuration.InputManager.DisableScrollWheelOnInputs;
-            if(ImGui.Checkbox("Disable scroll wheel for input boxes and gizmos", ref disableScrollOnInputs))
-            {
-                _configurationService.Configuration.InputManager.DisableScrollWheelOnInputs = disableScrollOnInputs;
-                _configurationService.ApplyChange();
-            }
         }
     }
 

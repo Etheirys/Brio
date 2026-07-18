@@ -13,9 +13,6 @@ public static class ImGuizmoExtensions
         if(ImGui.IsAnyMouseDown())
             return false;
 
-        if(ConfigurationService.Instance.Configuration.InputManager.DisableScrollWheelOnInputs)
-            return false;
-
         float mouseWheel = ImGui.GetIO().MouseWheel / 100;
 
         if(mouseWheel != 0)

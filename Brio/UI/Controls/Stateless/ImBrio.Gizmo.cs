@@ -183,35 +183,32 @@ public static partial class ImBrioGizmo
                     }
                     else
                     {
-                        if(!ConfigurationService.Instance.Configuration.InputManager.DisableScrollWheelOnInputs)
+                        float mouseWheel = ImGui.GetIO().MouseWheel / 100;
+
+                        if(mouseWheel != 0)
                         {
-                            float mouseWheel = ImGui.GetIO().MouseWheel / 100;
+                            if(InputManagerService.ActionKeysPressed(InputAction.Interface_IncrementSmallModifier))
+                                mouseWheel /= 10;
 
-                            if(mouseWheel != 0)
+                            if(InputManagerService.ActionKeysPressed(InputAction.Interface_IncrementLargeModifier))
+                                mouseWheel *= 10;
+
+                            Quaternion rot = Quaternion.Identity;
+                            if(closestMouseAxis == Axis.X)
                             {
-                                if(InputManagerService.ActionKeysPressed(InputAction.Interface_IncrementSmallModifier))
-                                    mouseWheel /= 10;
-
-                                if(InputManagerService.ActionKeysPressed(InputAction.Interface_IncrementLargeModifier))
-                                    mouseWheel *= 10;
-
-                                Quaternion rot = Quaternion.Identity;
-                                if(closestMouseAxis == Axis.X)
-                                {
-                                    rot = Quaternion.CreateFromAxisAngle(Vector3.UnitX, mouseWheel);
-                                }
-                                if(closestMouseAxis == Axis.Y)
-                                {
-                                    rot = Quaternion.CreateFromAxisAngle(Vector3.UnitY, -mouseWheel);
-                                }
-                                if(closestMouseAxis == Axis.Z)
-                                {
-                                    rot = Quaternion.CreateFromAxisAngle(Vector3.UnitZ, mouseWheel);
-                                }
-
-                                rotation *= rot;
-                                changed = true;
+                                rot = Quaternion.CreateFromAxisAngle(Vector3.UnitX, mouseWheel);
                             }
+                            if(closestMouseAxis == Axis.Y)
+                            {
+                                rot = Quaternion.CreateFromAxisAngle(Vector3.UnitY, -mouseWheel);
+                            }
+                            if(closestMouseAxis == Axis.Z)
+                            {
+                                rot = Quaternion.CreateFromAxisAngle(Vector3.UnitZ, mouseWheel);
+                            }
+
+                            rotation *= rot;
+                            changed = true;
                         }
                     }
 

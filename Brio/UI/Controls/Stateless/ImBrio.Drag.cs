@@ -1,4 +1,4 @@
-﻿using Brio.Config;
+﻿    using Brio.Config;
 using Brio.Core;
 using Brio.Input;
 using Brio.UI.Controls.Core;
@@ -122,14 +122,11 @@ public static partial class ImBrio
         if(ImGui.IsItemHovered())
         {
             AttachToolTip($" X {toolTip ?? ""}");
-            if(!ConfigurationService.Instance.Configuration.InputManager.DisableScrollWheelOnInputs)
+            float mouseWheel = ImGui.GetIO().MouseWheel / 10;
+            if(mouseWheel != 0)
             {
-                float mouseWheel = ImGui.GetIO().MouseWheel / 10;
-                if(mouseWheel != 0)
-                {
-                    value.X += mouseWheel * step;
-                    changed = true;
-                }
+                value.X += mouseWheel * step;
+                changed = true;
             }
         }
         active |= ImGui.IsItemActive();
@@ -143,14 +140,11 @@ public static partial class ImBrio
         if(ImGui.IsItemHovered())
         {
             AttachToolTip($" Y {toolTip ?? ""}");
-            if(!ConfigurationService.Instance.Configuration.InputManager.DisableScrollWheelOnInputs)
+            float mouseWheel = ImGui.GetIO().MouseWheel / 10;
+            if(mouseWheel != 0)
             {
-                float mouseWheel = ImGui.GetIO().MouseWheel / 10;
-                if(mouseWheel != 0)
-                {
-                    value.Y += mouseWheel * step;
-                    changed = true;
-                }
+                value.Y += mouseWheel * step;
+                changed = true;
             }
         }
         active |= ImGui.IsItemActive();
@@ -163,15 +157,13 @@ public static partial class ImBrio
 
         if(ImGui.IsItemHovered())
         {
-            AttachToolTip($" Z {toolTip ?? ""}");
-            if(!ConfigurationService.Instance.Configuration.InputManager.DisableScrollWheelOnInputs)
+            ImGui.SetTooltip($" Z {toolTip ?? ""}");
+            float mouseWheel = ImGui.GetIO().MouseWheel / 10;
+            if(mouseWheel != 0)
             {
-                float mouseWheel = ImGui.GetIO().MouseWheel / 10;
-                if(mouseWheel != 0)
-                {
-                    value.Z += mouseWheel * step;
-                    changed = true;
-                }
+                value.Z += mouseWheel * step;
+                changed = true;
+
             }
         }
         active |= ImGui.IsItemActive();
@@ -220,14 +212,11 @@ public static partial class ImBrio
         if(ImGui.IsItemHovered())
         {
             ImGui.SetTooltip($"{tooltip}");
-            if(!ConfigurationService.Instance.Configuration.InputManager.DisableScrollWheelOnInputs)
+            float mouseWheel = ImGui.GetIO().MouseWheel / 10;
+            if(mouseWheel != 0)
             {
-                float mouseWheel = ImGui.GetIO().MouseWheel / 10;
-                if(mouseWheel != 0)
-                {
-                    value += mouseWheel * step;
-                    changed = true;
-                }
+                value += mouseWheel * step;
+                changed = true;
             }
         }
 
@@ -284,15 +273,12 @@ public static partial class ImBrio
 
         if(ImGui.IsItemHovered())
         {
-            AttachToolTip($" X {tooltip}");
-            if(!ConfigurationService.Instance.Configuration.InputManager.DisableScrollWheelOnInputs)
+            AttachToolTip($" X {tooltip ?? ""}");
+            float mouseWheel = ImGui.GetIO().MouseWheel / 10;
+            if(mouseWheel != 0)
             {
-                float mouseWheel = ImGui.GetIO().MouseWheel / 10;
-                if(mouseWheel != 0)
-                {
-                    vectorBuffer.X += mouseWheel * step;
-                    changed = true;
-                }
+                value.X += mouseWheel * step;
+                changed = true;
             }
         }
         active |= ImGui.IsItemActive();
@@ -305,15 +291,12 @@ public static partial class ImBrio
 
         if(ImGui.IsItemHovered())
         {
-            AttachToolTip($" Y {tooltip}");
-            if(!ConfigurationService.Instance.Configuration.InputManager.DisableScrollWheelOnInputs)
+            AttachToolTip($" Y {tooltip ?? ""}");
+            float mouseWheel = ImGui.GetIO().MouseWheel / 10;
+            if(mouseWheel != 0)
             {
-                float mouseWheel = ImGui.GetIO().MouseWheel / 10;
-                if(mouseWheel != 0)
-                {
-                    vectorBuffer.Y += mouseWheel * step;
-                    changed = true;
-                }
+                value.Y += mouseWheel * step;
+                changed = true;
             }
         }
         active |= ImGui.IsItemActive();
