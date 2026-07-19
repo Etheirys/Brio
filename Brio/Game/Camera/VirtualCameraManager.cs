@@ -42,7 +42,7 @@ public class VirtualCameraManager : IDisposable
         _moveSpeed = configurationService.Configuration.Interface.DefaultFreeCameraMovementSpeed;
     }
 
-    public bool CamerasLocked
+    public bool IsCurrentCameraLocked
     {
         get
         {
@@ -307,7 +307,7 @@ public class VirtualCameraManager : IDisposable
 
     public unsafe void Update(MouseFrame* mouseFrame)
     {
-        if(mouseFrame is null || CurrentCamera is null || CamerasLocked)
+        if(mouseFrame is null || CurrentCamera is null || IsCurrentCameraLocked)
         {
             return;
         }
@@ -326,6 +326,7 @@ public class VirtualCameraManager : IDisposable
         //
         // Handle keyboard input
         //
+
         if(CurrentCamera.IsPortraitMode)
         {
 

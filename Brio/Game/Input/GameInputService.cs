@@ -96,7 +96,15 @@ public class GameInputService : IDisposable
 
             if(_configurationService.Configuration.InputManager.EnableConsumeAllInput)
             {
-                ConsumeAllInput(keyboardFrame);
+                for(int i = 0; i < KeyboardFrame.KeyStateLength; i++)
+                {
+                    if(i == 27) // VirtualKey.ESCAPE
+                        continue;
+                    if(i == 13) // VirtualKey.RETURN
+                        continue;
+
+                    keyboardFrame->KeyState[i] = 0;
+                }
             }
 
             if(_configurationService.Configuration.InputManager.Enable)
@@ -139,28 +147,20 @@ public class GameInputService : IDisposable
                     }
                 }
 
-                // If cameras are locked, consume mouse movement and movement keys so
-                // no camera movement can occur.
-                if(_virtualCameraService.CamerasLocked)
+                // If a camera is locked, consume mouse and keyboard changes
+                if(_virtualCameraService.IsCurrentCameraLocked)
                 {
-                    if(mouseFrame is not null)
-                    {
-                        // Prevent mouse movement from affecting the camera, but keep
-                        // button presses so game UI interactions still work.
-                        mouseFrame->DeltaX = 0;
-                        mouseFrame->DeltaY = 0;
-                        mouseFrame->ScrollValue = 0;
-                    }
+                    mouseFrame->DeltaX = 0;
+                    mouseFrame->DeltaY = 0;
+                    mouseFrame->ScrollValue = 0;
 
-                    keyboardFrame->KeyState[81] = 0; // VirtualKey.Q
-                    keyboardFrame->KeyState[69] = 0; // VirtualKey.E
+                    keyboardFrame->KeyState[81] = 0;        // VirtualKey.Q
+                    keyboardFrame->KeyState[69] = 0;        // VirtualKey.E
 
                     keyboardFrame->KeyState[_freeW] = 0;
                     keyboardFrame->KeyState[_freeA] = 0;
                     keyboardFrame->KeyState[_freeS] = 0;
                     keyboardFrame->KeyState[_freeD] = 0;
-
-                    //ConsumeAllInput(keyboardFrame);
                 }
             }
 
@@ -168,19 +168,6 @@ public class GameInputService : IDisposable
             {
                 keyboardFrame->KeyState[27] = 0; // ESCAPE
             }
-        }
-    }
-
-    public unsafe void ConsumeAllInput(KeyboardFrame* keyboardFrame)
-    {
-        for(int i = 0; i < KeyboardFrame.KeyStateLength; i++)
-        {
-            if(i == 27) // VirtualKey.ESCAPE
-                continue;
-            if(i == 13) // VirtualKey.RETURN
-                continue;
-
-            keyboardFrame->KeyState[i] = 0;
         }
     }
 
