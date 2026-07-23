@@ -226,6 +226,7 @@ public class Brio(IDalamudPluginInterface pluginInterface) : IAsyncDalamudPlugin
         serviceCollection.AddSingleton<IPCManager>();
         serviceCollection.AddSingleton<DynamisService>();
         serviceCollection.AddSingleton<PenumbraService>();
+        serviceCollection.AddSingleton<PenumbraModActionService>();
         serviceCollection.AddSingleton<GlamourerService>();
         serviceCollection.AddSingleton<CustomizePlusService>();
         serviceCollection.AddSingleton<KtisisService>();

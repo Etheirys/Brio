@@ -1,12 +1,15 @@
+using Brio.IPC;
 using Brio.Resources;
 using Brio.Resources.Sheets;
 using Brio.UI.Controls.Core;
 using Brio.UI.Controls.Stateless;
 using Brio.UI.Theming;
 using Dalamud.Bindings.ImGui;
+using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Interface;
 using Lumina.Excel.Sheets;
 using System;
+using System.Collections.Generic;
 using System.Numerics;
 using static Brio.Game.Actor.ActionTimelineService;
 using ActionSheet = Lumina.Excel.Sheets.Action;
@@ -38,7 +41,23 @@ public class ActionTimelineSelector(string id) : Selector<ActionTimelineSelector
     private bool _isPinned = false;
     private bool _isWindowOpen = false;
 
+    private IGameObject? _modActionActor;
+    private IReadOnlyList<PenumbraModAction> _modActions = [];
+    private int _modActionVersion = -1;
+
     public bool IsPinned => _isPinned;
+
+    public IGameObject? ModActionActor
+    {
+        get => _modActionActor;
+        set
+        {
+            var changed = _modActionActor?.ObjectIndex != value?.ObjectIndex;
+            _modActionActor = value;
+            if(changed)
+                _modActionVersion = -1;
+        }
+    }
 
     //TODO(KEN) at some point make all of them use `field`
 
@@ -73,6 +92,8 @@ public class ActionTimelineSelector(string id) : Selector<ActionTimelineSelector
 
     public void DrawAsWindow()
     {
+        RefreshModActions();
+
         if(!_isPinned)
             return;
 
@@ -116,6 +137,8 @@ public class ActionTimelineSelector(string id) : Selector<ActionTimelineSelector
 
     public new void Draw()
     {
+        RefreshModActions();
+
         if(_isPinned)
         {
             ImGui.TextDisabled("(Selector is pinned as separate window)");
@@ -125,6 +148,20 @@ public class ActionTimelineSelector(string id) : Selector<ActionTimelineSelector
         DrawPinButton();
 
         base.Draw();
+    }
+
+    private void RefreshModActions()
+    {
+        if(_modActionActor is null || !Brio.TryGetService<PenumbraModActionService>(out var service))
+            return;
+
+        var actions = service.GetActiveActions(_modActionActor);
+        if(_modActionVersion == service.Version)
+            return;
+
+        _modActions = actions;
+        _modActionVersion = service.Version;
+        ReloadList();
     }
 
     protected override void PopulateList()
@@ -247,6 +284,70 @@ public class ActionTimelineSelector(string id) : Selector<ActionTimelineSelector
                     false,
                     0));
         }
+
+        foreach(var pose in CommonPoseCatalog.All)
+        {
+            if(pose.TimelineId > ushort.MaxValue
+                || !GameDataProvider.Instance.ActionTimelines.TryGetRow(pose.TimelineId, out BrioActionTimeline timeline))
+                continue;
+
+            AddItem(new ActionTimelineSelectorEntry(
+                pose.DisplayName,
+                (ushort)pose.TimelineId,
+                pose.TimelineId,
+                timeline.Key.ToString(),
+                ActionTimelineSelectorEntry.OriginalType.Pose,
+                ActionTimelineSelectorEntry.AnimationPurpose.Standard,
+                (ActionTimelineSlots)timeline.Slot,
+                0,
+                false,
+                0));
+        }
+
+        foreach(var modAction in _modActions)
+        {
+            if(modAction.TimelineId is uint timelineId)
+            {
+                AddModTimeline(modAction, timelineId, ActionTimelineSelectorEntry.AnimationPurpose.Standard);
+            }
+            else
+            {
+                AddModTimeline(modAction, 0, ActionTimelineSelectorEntry.AnimationPurpose.Standard);
+                AddModTimeline(modAction, 1, ActionTimelineSelectorEntry.AnimationPurpose.Intro);
+                AddModTimeline(modAction, 2, ActionTimelineSelectorEntry.AnimationPurpose.Ground);
+                AddModTimeline(modAction, 3, ActionTimelineSelectorEntry.AnimationPurpose.Chair);
+                AddModTimeline(modAction, 4, ActionTimelineSelectorEntry.AnimationPurpose.Blend);
+            }
+        }
+    }
+
+    private void AddModTimeline(PenumbraModAction modAction, int timelineIndex, ActionTimelineSelectorEntry.AnimationPurpose purpose)
+    {
+        if(modAction.Emote is not Emote emote)
+            return;
+
+        var timelineId = emote.ActionTimeline[timelineIndex].RowId;
+        AddModTimeline(modAction, timelineId, purpose);
+    }
+
+    private void AddModTimeline(PenumbraModAction modAction, uint timelineId, ActionTimelineSelectorEntry.AnimationPurpose purpose)
+    {
+        var emote = modAction.Emote;
+        if(timelineId == 0 || timelineId > ushort.MaxValue
+            || !GameDataProvider.Instance.ActionTimelines.TryGetRow(timelineId, out BrioActionTimeline timeline))
+            return;
+
+        AddItem(new ActionTimelineSelectorEntry(
+            $"{modAction.ModName} - {modAction.EmoteName}",
+            (ushort)timelineId,
+            emote?.RowId ?? timelineId,
+            timeline.Key.ToString(),
+            ActionTimelineSelectorEntry.OriginalType.Mod,
+            purpose,
+            (ActionTimelineSlots)timeline.Slot,
+            emote?.Icon ?? 0,
+            emote?.DrawsWeapon ?? false,
+            emote is Emote value ? (byte)value.EmoteCategory.RowId : (byte)0));
     }
 
     protected override void DrawItem(ActionTimelineSelectorEntry item, bool isSoftSelected)
@@ -268,7 +369,8 @@ public class ActionTimelineSelector(string id) : Selector<ActionTimelineSelector
 
         bool[] items = [_showEmotes, _showActions, _showRaw];
 
-        var changed = ImBrio.ToggleSelecterStrip("actiontimeline_filters_selector", Vector2.Zero, ref items, ["Emotes", "Actions", "Timelines"]);
+        var changed = ImBrio.ToggleSelecterStrip("actiontimeline_filters_selector", Vector2.Zero, ref items,
+            ["Emotes", "Actions", "Timelines"]);
 
         if(changed)
         {
@@ -278,6 +380,10 @@ public class ActionTimelineSelector(string id) : Selector<ActionTimelineSelector
 
             UpdateList();
         }
+
+        if(_emoteCategoryValue == 4 && _modActions.Count == 0
+            && Brio.TryGetService<PenumbraModActionService>(out var modActionService))
+            ImGui.TextDisabled(modActionService.StatusMessage);
 
         ImBrio.VerticalPadding(4);
 
@@ -296,7 +402,8 @@ public class ActionTimelineSelector(string id) : Selector<ActionTimelineSelector
 
             int drawsWeaponSelection = !_filterByDrawsWeapon ? 0 : (_drawsWeaponValue ? 2 : 1);
 
-            if(ImBrio.ButtonSelectorStrip("draws_weapon_filter", Vector2.Zero, ref drawsWeaponSelection, ["All", "Sheathed", "Drawn"]))
+            if(ImBrio.ButtonSelectorStrip("draws_weapon_filter", Vector2.Zero, ref drawsWeaponSelection,
+                ["All", "Sheathed", "Drawn"]))
             {
                 switch(drawsWeaponSelection)
                 {
@@ -325,10 +432,11 @@ public class ActionTimelineSelector(string id) : Selector<ActionTimelineSelector
 
         int emoteCategorySelection = _emoteCategoryValue;
 
-        if(ImBrio.ButtonSelectorStrip("emote_category_filter", Vector2.Zero, ref emoteCategorySelection, ["All", "General", "Special", "Expression"]))
+        if(ImBrio.ButtonSelectorStrip("emote_category_filter", Vector2.Zero, ref emoteCategorySelection,
+            ["All", "General", "Special", "Expression", "Mod", "Poses"]))
         {
             _emoteCategoryValue = emoteCategorySelection;
-            _filterByEmoteCategory = _emoteCategoryValue != 0;
+            _filterByEmoteCategory = _emoteCategoryValue is >= 1 and <= 3;
             UpdateList();
         }
 
@@ -337,19 +445,9 @@ public class ActionTimelineSelector(string id) : Selector<ActionTimelineSelector
 
     protected override int Compare(ActionTimelineSelectorEntry itemA, ActionTimelineSelectorEntry itemB)
     {
-        // Emotes first
-        if(itemA.TimelineType == ActionTimelineSelectorEntry.OriginalType.Emote && itemB.TimelineType != ActionTimelineSelectorEntry.OriginalType.Emote)
-            return -1;
-
-        if(itemA.TimelineType != ActionTimelineSelectorEntry.OriginalType.Emote && itemB.TimelineType == ActionTimelineSelectorEntry.OriginalType.Emote)
-            return 1;
-
-        // Then Actions
-        if(itemA.TimelineType == ActionTimelineSelectorEntry.OriginalType.Action && itemB.TimelineType != ActionTimelineSelectorEntry.OriginalType.Action)
-            return -1;
-
-        if(itemA.TimelineType != ActionTimelineSelectorEntry.OriginalType.Action && itemB.TimelineType == ActionTimelineSelectorEntry.OriginalType.Action)
-            return 1;
+        var typeCompare = TypePriority(itemA.TimelineType).CompareTo(TypePriority(itemB.TimelineType));
+        if(typeCompare != 0)
+            return typeCompare;
 
         // Blank to last
         if(string.IsNullOrEmpty(itemA.Name) && !string.IsNullOrEmpty(itemB.Name))
@@ -373,6 +471,16 @@ public class ActionTimelineSelector(string id) : Selector<ActionTimelineSelector
         return 0;
     }
 
+    private static int TypePriority(ActionTimelineSelectorEntry.OriginalType type)
+        => type switch
+        {
+            ActionTimelineSelectorEntry.OriginalType.Emote => 0,
+            ActionTimelineSelectorEntry.OriginalType.Pose => 1,
+            ActionTimelineSelectorEntry.OriginalType.Mod => 2,
+            ActionTimelineSelectorEntry.OriginalType.Action => 3,
+            _ => 4,
+        };
+
     protected override bool Filter(ActionTimelineSelectorEntry item, string search)
     {
         var searchText = $"{item.Name} {item.TimelineId} {item.TimelineType} {item.Slot} {item.Purpose} {item.Key} {item.SecondaryId}";
@@ -380,10 +488,14 @@ public class ActionTimelineSelector(string id) : Selector<ActionTimelineSelector
         if(!searchText.Contains(search, StringComparison.InvariantCultureIgnoreCase))
             return false;
 
-        if(ExpressionsOnly)
-            return item.TimelineType == ActionTimelineSelectorEntry.OriginalType.Emote && item.EmoteCategory == 3 && item.Purpose == ActionTimelineSelectorEntry.AnimationPurpose.Blend;
+        var isEmote = item.TimelineType is ActionTimelineSelectorEntry.OriginalType.Emote
+            or ActionTimelineSelectorEntry.OriginalType.Mod
+            or ActionTimelineSelectorEntry.OriginalType.Pose;
 
-        if(item.TimelineType == ActionTimelineSelectorEntry.OriginalType.Emote && !_showEmotes)
+        if(ExpressionsOnly)
+            return isEmote && item.EmoteCategory == 3 && item.Purpose == ActionTimelineSelectorEntry.AnimationPurpose.Blend;
+
+        if(isEmote && !_showEmotes)
             return false;
 
         if(item.TimelineType == ActionTimelineSelectorEntry.OriginalType.Action && !_showActions)
@@ -398,7 +510,7 @@ public class ActionTimelineSelector(string id) : Selector<ActionTimelineSelector
         // When in blend mode, filter out non-blend animations unless option is enabled
         if(_showBlendable && !_showNonBlendInBlendMode)
         {
-            if(item.TimelineType == ActionTimelineSelectorEntry.OriginalType.Emote)
+            if(isEmote)
             {
                 if(item.Purpose != ActionTimelineSelectorEntry.AnimationPurpose.Blend)
                     return false;
@@ -407,7 +519,7 @@ public class ActionTimelineSelector(string id) : Selector<ActionTimelineSelector
 
         if(_filterByDrawsWeapon)
         {
-            if(item.TimelineType == ActionTimelineSelectorEntry.OriginalType.Emote)
+            if(isEmote)
             {
                 if(item.DrawsWeapon != _drawsWeaponValue)
                     return false;
@@ -416,12 +528,21 @@ public class ActionTimelineSelector(string id) : Selector<ActionTimelineSelector
 
         if(_filterByEmoteCategory)
         {
+            if(item.TimelineType is ActionTimelineSelectorEntry.OriginalType.Mod or ActionTimelineSelectorEntry.OriginalType.Pose)
+                return false;
+
             if(item.TimelineType == ActionTimelineSelectorEntry.OriginalType.Emote)
             {
                 if(item.EmoteCategory != _emoteCategoryValue)
                     return false;
             }
         }
+
+        if(_emoteCategoryValue == 4 && item.TimelineType != ActionTimelineSelectorEntry.OriginalType.Mod)
+            return false;
+
+        if(_emoteCategoryValue == 5 && item.TimelineType != ActionTimelineSelectorEntry.OriginalType.Pose)
+            return false;
 
         return true;
     }
@@ -456,5 +577,7 @@ public record class ActionTimelineSelectorEntry(
         Raw,
         Emote,
         Action,
+        Mod,
+        Pose,
     }
 }
