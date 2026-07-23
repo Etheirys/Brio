@@ -17,12 +17,12 @@ public class ResourceProvider : IDisposable
 
     private readonly ITextureProvider _textureProvider;
 
-    public ResourceProvider(ITextureProvider textureProvider)
+    public ResourceProvider(ITextureProvider textureProvider, IClientState clientState)
     {
         Instance = this;
         _textureProvider = textureProvider;
 
-        Localize.Load(this);
+        Localize.Load(this, clientState.ClientLanguage.ToString());
     }
 
     public T GetResourceDocument<T>(string name)

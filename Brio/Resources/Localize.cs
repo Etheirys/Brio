@@ -5,7 +5,11 @@ namespace Brio.Resources;
 
 public static class Localize
 {
+    private const string DefaultLanguage = "en";
+
     private static readonly Dictionary<string, string> _stringDb = [];
+
+    public static string CurrentLanguage { get; private set; } = DefaultLanguage;
 
     public static string Get(string key, string? defaultValue = null)
     {
@@ -21,10 +25,38 @@ public static class Localize
         return null;
     }
 
-    public static void Load(ResourceProvider provider)
+    public static void Load(ResourceProvider provider, string? clientLanguage = null)
     {
         _stringDb.Clear();
-        var raw = provider.GetRawResourceString("Language.en.json");
+
+        LoadLanguage(provider, DefaultLanguage);
+
+        CurrentLanguage = ResolveLanguage(clientLanguage);
+        if(CurrentLanguage != DefaultLanguage)
+            LoadLanguage(provider, CurrentLanguage, required: false);
+    }
+
+    private static string ResolveLanguage(string? clientLanguage)
+    {
+        return clientLanguage switch
+        {
+            "ChineseSimplified" => "zh-CN",
+            _ => DefaultLanguage,
+        };
+    }
+
+    private static void LoadLanguage(ResourceProvider provider, string language, bool required = true)
+    {
+        string raw;
+        try
+        {
+            raw = provider.GetRawResourceString($"Language.{language}.json");
+        }
+        catch when(!required)
+        {
+            return;
+        }
+
         using JsonDocument doc = JsonDocument.Parse(raw);
         FlattenRecursive(doc.RootElement, "");
     }
@@ -48,7 +80,7 @@ public static class Localize
                 }
                 break;
             default:
-                _stringDb.Add(currentKey.TrimEnd('.'), element.ToString());
+                _stringDb[currentKey.TrimEnd('.')] = element.ToString();
                 break;
         }
     }
