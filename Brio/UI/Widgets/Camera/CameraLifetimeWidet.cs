@@ -30,6 +30,10 @@ public class CameraLifetimeWidget(CameraLifetimeCapability capability) : Widget<
                 Capability.VirtualCameraManager.SelectCamera(Capability.VirtualCamera);
             }
 
+            if(ImBrio.FontIconButton("CameraLifetime_editor", FontAwesomeIcon.Edit, "Open Camera Editor")) {
+                Capability.OpenCameraWindow();
+            }
+
             ImBrio.VerticalSeparator(24, 1);
 
             using(ImRaii.Disabled(Capability.CameraEntity.CameraID == 0))
@@ -87,6 +91,10 @@ public class CameraLifetimeWidget(CameraLifetimeCapability capability) : Widget<
         if(ImGui.MenuItem($"{lockLabel}###CameraLifetime_lock"))
         {
             Capability.Entity.IsLocked = !Capability.Entity.IsLocked;
+        }
+
+        if(ImGui.MenuItem("Open Camera Editor###CameraLifetime_editor_open")) {
+            Capability.OpenCameraWindow();
         }
 
         if(Capability.CanDestroy)

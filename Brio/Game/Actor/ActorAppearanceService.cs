@@ -185,7 +185,7 @@ public class ActorAppearanceService : IDisposable
                                     Buffer.MemoryCopy(existingAppearance.Equipment.Data, ptr + 32, 80, 80);
                                 }
 
-                                var didUpdate = human->Human.UpdateDrawData((DrawData*)ptr, false);
+                                var didUpdate = human->Human.UpdateDrawData((Human.DrawData*)ptr, false);
                                 needsRedraw |= !didUpdate;
                             }
                         }
