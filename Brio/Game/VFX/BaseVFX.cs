@@ -44,7 +44,8 @@ public unsafe struct VfxResourceObjectVtable
 [StructLayout(LayoutKind.Explicit)]
 public unsafe struct VfxResourceInstanceVtable
 {
-
+    [FieldOffset(0)]
+    public delegate* unmanaged<VfxResourceInstance*, nint, nint> Dtor;
 }
 
 [StructLayout(LayoutKind.Explicit)]
