@@ -1,10 +1,8 @@
 using Brio.Resources;
 using Brio.Resources.Extra;
 using Dalamud.Plugin;
-using Swan;
 using System;
 using System.IO;
-using System.IO.Compression;
 
 namespace Brio.Services;
 
@@ -53,7 +51,8 @@ public class PathMetadataService
             pluginBytes = ms.ToArray();
         }
 
-        Load(PathTarget.User, ref userBytes);
+        if(userBytes.Length > 0)
+            Load(PathTarget.User, ref userBytes);
         Load(PathTarget.Plugin, ref pluginBytes);
     }
 
