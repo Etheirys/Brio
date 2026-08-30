@@ -23,13 +23,13 @@ public static class CharacterExtensions
     public unsafe static bool HasCompanionSlot(this ICharacter go)
     {
         var native = go.Native();
-        return native->CompanionObject != null;
+        return native->ChildObject != null;
     }
 
     public unsafe static bool HasSpawnedCompanion(this ICharacter go)
     {
         var native = go.Native();
-        return native->CompanionObject != null &&
+        return native->ChildObject != null &&
             (
             native->OrnamentData.OrnamentObject != null ||
             native->Mount.MountObject != null ||
@@ -46,7 +46,7 @@ public static class CharacterExtensions
     public unsafe static CompanionContainer GetCompanionInfo(this ICharacter go)
     {
         var native = go.Native();
-        if(native->CompanionObject != null)
+        if(native->ChildObject != null)
         {
             if(native->OrnamentData.OrnamentObject != null)
             {
@@ -144,7 +144,7 @@ public static class CharacterExtensions
         var weaponDrawData = go.GetWeaponDrawObjectData(slot);
         if(weaponDrawData != null)
         {
-            return (BrioCharacterBase*)weaponDrawData->DrawObject;
+            return (BrioCharacterBase*)weaponDrawData->DrawData.DrawObject;
         }
 
         return null;

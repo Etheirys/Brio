@@ -158,7 +158,7 @@ public class ActorSpawnService : MediatorSubscriberBase
             if(disableSpawnCompanion == false && hasCompanion)
             {
                 // We need to wait for the companion to be ready before we can draw it.
-                var companion = _objectTable.CreateObjectReference((nint)(targetNative->CompanionObject));
+                var companion = _objectTable.CreateObjectReference((nint)targetNative->ChildObject);
                 if(companion != null)
                     _actorRedrawService.DrawWhenReady(companion);
             }
@@ -269,7 +269,7 @@ public class ActorSpawnService : MediatorSubscriberBase
         publicSetCompanion(character, container.Kind, (short)container.Id);
 
         // We need to wait for the companion to be ready before we can draw it.
-        var companionNative = &character.Native()->CompanionObject->Character.GameObject;
+        var companionNative = &((FFXIVClientStructs.FFXIV.Client.Game.Character.Companion*)character.Native()->ChildObject)->Character.GameObject;
         _framework.RunUntilSatisfied(
             () => character.CalculateCompanionInfo(out var info) && info.Kind == container.Kind && info.Id == container.Id && companionNative->IsReadyToDraw(),
             (_) => companionNative->EnableDraw(),
