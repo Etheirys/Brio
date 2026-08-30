@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
+using System.Threading;
 
 namespace Brio.Resources;
 
@@ -14,6 +15,8 @@ public class ResourceProvider : IDisposable
 
     private readonly Dictionary<string, object> _cachedDocuments = [];
     private readonly Dictionary<string, IDalamudTextureWrap> _cachedImages = [];
+
+    private readonly Lock _cachedImagesLock = new();
 
     private readonly ITextureProvider _textureProvider;
 
@@ -40,17 +43,23 @@ public class ResourceProvider : IDisposable
 
     public IDalamudTextureWrap GetResourceImage(string name)
     {
-        if(_cachedImages.TryGetValue(name, out var cached))
-            return cached;
+        lock(_cachedImagesLock)
+        {
+            if(_cachedImages.TryGetValue(name, out var cached))
+                return cached;
 
-        using var stream = GetRawResourceStream(name);
-        using var reader = new BinaryReader(stream);
-        var imgBin = reader.ReadBytes((int)stream.Length);
-        var imgTask = _textureProvider.CreateFromImageAsync(imgBin);
-        imgTask.Wait(); // TODO: Don't block
-        var img = imgTask.Result;
-        _cachedImages[name] = img;
-        return img;
+            using var stream = GetRawResourceStream(name);
+            using var reader = new BinaryReader(stream);
+            var imgBin = reader.ReadBytes((int)stream.Length);
+
+            var imgTask = _textureProvider.CreateFromImageAsync(imgBin);
+            imgTask.Wait(); // TODO: Don't block
+
+            var img = imgTask.Result;
+            _cachedImages[name] = img;
+
+            return img;
+        }
     }
 
     public Stream GetRawResourceStream(string name)
@@ -100,10 +109,14 @@ public class ResourceProvider : IDisposable
 
     public void Dispose()
     {
-        foreach(var img in _cachedImages.Values)
-            img?.Dispose();
+        lock(_cachedImagesLock)
+        {
+            foreach(var img in _cachedImages.Values)
+                img?.Dispose();
 
-        _cachedImages?.Clear();
+            _cachedImages.Clear();
+        }
+
         _cachedDocuments?.Clear();
 
         GC.SuppressFinalize(this);
