@@ -10,7 +10,7 @@ public class DebugEnvironmentWidget(DebugEnvironmentCapability capability) : Wid
 {
     public override string HeaderName => "Debug";
 
-    public override WidgetFlags Flags => WidgetFlags.DrawBody;
+    public override WidgetFlags Flags => Capability.IsDebug ? WidgetFlags.DrawBody : WidgetFlags.None;
 
     override unsafe public void DrawBody()
     {
