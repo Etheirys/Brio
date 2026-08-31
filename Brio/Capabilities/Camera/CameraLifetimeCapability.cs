@@ -25,7 +25,8 @@ public class CameraLifetimeCapability : CameraCapability
 
     public bool CanDestroy => CameraEntity.CameraID != 0;
 
-    public void OpenCameraWindow() {
+    public void OpenCameraWindow()
+    {
         _cameraWindow.IsOpen = true;
     }
 }

@@ -30,10 +30,6 @@ public class CameraLifetimeWidget(CameraLifetimeCapability capability) : Widget<
                 Capability.VirtualCameraManager.SelectCamera(Capability.VirtualCamera);
             }
 
-            if(ImBrio.FontIconButton("CameraLifetime_editor", FontAwesomeIcon.Edit, "Open Camera Editor")) {
-                Capability.OpenCameraWindow();
-            }
-
             ImBrio.VerticalSeparator(24, 1);
 
             using(ImRaii.Disabled(Capability.CameraEntity.CameraID == 0))
