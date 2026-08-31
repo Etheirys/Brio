@@ -89,6 +89,10 @@ public class CameraLifetimeWidget(CameraLifetimeCapability capability) : Widget<
             Capability.Entity.IsLocked = !Capability.Entity.IsLocked;
         }
 
+        if(ImGui.MenuItem("Open Camera Editor###CameraLifetime_editor_open")) {
+            Capability.OpenCameraWindow();
+        }
+
         if(Capability.CanDestroy)
         {
             ImGui.Separator();
