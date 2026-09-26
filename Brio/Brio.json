@@ -3,7 +3,7 @@
   "Name": "Brio",
   "InternalName": "Brio",
   "AssemblyVersion": "0.0.0.1",
-  "Description": "Brio is suite of tools that gives you advanced control to edit and pose actors during GPose.\n- Advanced actor posing \n\t- While animating\n\t- While animating\n\t- Overlay and graphical posing modes\n- Creation of up to 239 G-Pose actors\n- Creation of custom lights\n- Supports integration with Penumbra & Glamourer\n- Offline import and export of MCDF files onto G-Pose actors\n- Play XAT .xcp camera files\n- Play/Blend animations of GPose actors\n- Control Time/Weather in both the Overworld and GPose\n- Change the active festivals and apply up to 4 at once\n- Add/Remove Status Effects of GPose actors",
+  "Description": "Brio is a suite of tools that gives you advanced control to edit and pose actors during GPose.\n- Advanced actor posing \n\t- While animating\n\t- Overlay and graphical posing modes\n- Creation of up to 239 G-Pose actors\n- Creation of custom lights\n- Spawn and edit any visual object, Furniture or VFX in the game\n- Supports integration with Penumbra & Glamourer\n- Offline import and export of MCDF files onto G-Pose actors\n- Make and paly animations with Vivacity. The animation Timeline\n- Play XAT .xcp camera files\n- Play/Blend animations of GPose actors\n- Control Time/Weather in both the Overworld and GPose\n- Change the active festivals and apply up to 8 at once\n- Add/Remove Status Effects of GPose actors",
   "ApplicableVersion": "any",
   "RepoUrl": "https://github.com/Etheirys/Brio",
   "Tags": [
