@@ -133,6 +133,13 @@ public static class PosingEditorCommon
                                      enabledCount == 0 ? (sbyte)-1 :
                                      (sbyte)0;
 
+                if(ImBrio.FontIconButton($"collapse_{category.Id}", category.IsUICollapsed ? FontAwesomeIcon.ChevronRight : FontAwesomeIcon.ChevronDown, category.IsUICollapsed ? "Expand" : "Collapse", size: new Vector2(25)))
+                {
+                    category.IsUICollapsed = !category.IsUICollapsed;
+                }
+
+                ImGui.SameLine();
+
                 if(tristateCheckbox.Draw(category.Name, ref tristateValue))
                 {
                     if(tristateValue == 1)
@@ -152,6 +159,13 @@ public static class PosingEditorCommon
             }
             else
             {
+                var parentCategory = filter.AllCategories.FirstOrDefault(c =>
+                    c.Type is BoneCategories.BoneCategoryTypes.Category &&
+                    c.Bones.Contains(category.Id));
+
+                if(parentCategory?.IsUICollapsed == true)
+                    continue;
+
                 var isEnabled = filter.IsCategoryEnabled(category);
 
                 if(ImGui.Checkbox(category.Name, ref isEnabled))
