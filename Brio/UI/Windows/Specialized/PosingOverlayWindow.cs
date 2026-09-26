@@ -95,6 +95,9 @@ public unsafe class PosingOverlayWindow : MediatorWindow
 
     public override void Draw()
     {
+        if(_gPoseService.IsGPosing is false)
+            return;
+
         var overlayConfig = _configurationService.Configuration.Posing;
         var uiState = new OverlayUIState(overlayConfig, _trackingTransform.HasValue, _entityManager.SelectedEntitiesCount > 1);
 
