@@ -101,9 +101,12 @@ public static partial class ImBrio
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
-    public static bool FontIconButton(string id, FontAwesomeIcon icon, string? tooltip = null, bool enabled = true, bool bordered = true, uint? textColor = null)
+    public static bool FontIconButton(string id, FontAwesomeIcon icon, string? tooltip = null, bool enabled = true, bool bordered = true, uint? textColor = null, Vector2? size = null)
     {
         bool wasClicked = false;
+
+        if(size.HasValue == false)
+            size = new Vector2(25);
 
         if(!enabled)
             ImGui.BeginDisabled();
@@ -116,7 +119,7 @@ public static partial class ImBrio
 
         using(ImRaii.PushFont(UiBuilder.IconFont))
         {
-            if(ImGui.Button($"{icon.ToIconString()}###{id}", new Vector2(25 * ImGuiHelpers.GlobalScale)))
+            if(ImGui.Button($"{icon.ToIconString()}###{id}", size.Value * ImGuiHelpers.GlobalScale))
                 wasClicked = true;
         }
 
