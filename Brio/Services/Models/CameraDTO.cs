@@ -3,6 +3,7 @@ using Brio.Files;
 using Brio.Game.Camera;
 using MessagePack;
 using System;
+using System.Numerics;
 
 namespace Brio.Services.Models;
 
@@ -17,4 +18,6 @@ public class CameraDTO // TODO (Ken) names don't work with cameras. I don't have
     [Key(2)] public XATCameraFile? XATCamera { get; set; }
 
     [Key(3)] public string? ParentFolderId { get; set; }
+
+    [Key(4)] public Vector3 RelativePosition { get; set; }
 }

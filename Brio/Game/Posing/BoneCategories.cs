@@ -21,7 +21,10 @@ public class BoneCategories
         }
     }
 
-    public record class BoneCategory(string Id, string Name, BoneCategoryTypes Type, List<string> Bones);
+    public record class BoneCategory(string Id, string Name, BoneCategoryTypes Type, List<string> Bones)
+    {
+        public bool IsUICollapsed { get; set; }
+    }
 
     private class BoneCategoryFile
     {
