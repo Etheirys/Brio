@@ -157,8 +157,12 @@ public class MCDFService : IDisposable
                     return;
                 }
 
-                var playerChar = await _dalamudService.GetPlayerCharacterAsync().ConfigureAwait(false);
-                bool isSelf = playerChar is not null && string.Equals(playerChar.Name.TextValue, name, StringComparison.Ordinal);
+                bool isSelf = false;
+                await _framework.RunOnTick(async () =>
+                 {
+                     var playerChar = await _dalamudService.GetPlayerCharacterAsync().ConfigureAwait(false);
+                     isSelf = playerChar is not null && string.Equals(playerChar.Name.TextValue, name, StringComparison.Ordinal);
+                 });
 
                 if(isSelf)
                 {
