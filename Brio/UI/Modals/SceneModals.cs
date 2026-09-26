@@ -86,12 +86,12 @@ public class SaveProjectModal : Modal
 
         float buttonW = (MinimumSize.X / 2) - 12;
 
-        using(ImRaii.Disabled(string.IsNullOrEmpty(_name)))
+        using(ImRaii.Disabled(string.IsNullOrWhiteSpace(_name)))
         {
             if(ImBrio.Button("Save", FontAwesomeIcon.Save, new(buttonW, 0), centerTest: true, tooltip: "Save as a new Project"))
             {
-                _projectSystem.NewProject(_name, string.IsNullOrEmpty(_description) ? null : _description);
-                Close();
+                if(_projectSystem.NewProject(_name, string.IsNullOrEmpty(_description) ? null : _description))
+                    Close();
             }
         }
 
