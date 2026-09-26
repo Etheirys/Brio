@@ -68,6 +68,9 @@ public class ProjectWindow : Window, IDisposable
     SceneImportOptions importOptions = SceneImportOptions.Default;
     public void DrawLoad()
     {
+        if(selectedItem is not null && !_projectSystem.BrioProjects.Projects.Contains(selectedItem))
+            selectedItem = null;
+
         var windowSize = ImGui.GetWindowSize();
         using(var child = ImRaii.Child("###left_pane", new Vector2(windowSize.X - InfoPaneWidth, -1), false, ImGuiWindowFlags.NoBackground | ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse))
         {
@@ -80,6 +83,17 @@ public class ProjectWindow : Window, IDisposable
             {
                 if(entriesChild.Success == false)
                     return;
+
+                if(_projectSystem.BrioProjects.Projects.Count == 0)
+                {
+                    ImGui.TextDisabled("No saved projects yet.");
+                    ImGui.TextWrapped("A project stores your current Brio scene.");
+
+                    if(ImBrio.Button("Save current scene as a new project", FontAwesomeIcon.FileCirclePlus, new(ImBrio.GetRemainingWidth(), 0), centerTest: true))
+                        ModalManager.Instance.OpenSaveProjectModal();
+
+                    return;
+                }
 
                 int x = 0;
                 foreach(var item in _projectSystem.BrioProjects.Projects)
@@ -138,8 +152,8 @@ public class ProjectWindow : Window, IDisposable
             {
                 if(ImBrio.HoldButton("proj_delete", "Delete", FontAwesomeIcon.Trash, 1.1f, new(120, 0), centerTest: true, tooltip: "[HOLD]\nDelete Project"))
                 {
-                    _projectSystem.DeleteProject(selectedItem!);
-                    selectedItem = null;
+                    if(_projectSystem.DeleteProject(selectedItem!))
+                        selectedItem = null;
                 }
             }
         }
