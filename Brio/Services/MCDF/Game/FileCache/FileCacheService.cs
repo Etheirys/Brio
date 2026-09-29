@@ -53,7 +53,7 @@ public class FileCacheService : IDisposable
     }
     public void ClearTemp()
     {
-        if(Directory.Exists(TempPath) is false)
+        if(Directory.Exists(TempPath))
         {
             Directory.Delete(TempPath, true);
         }
