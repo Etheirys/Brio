@@ -152,8 +152,8 @@ public class ProjectWindow : Window, IDisposable
             {
                 if(ImBrio.HoldButton("proj_delete", "Delete", FontAwesomeIcon.Trash, 1.1f, new(120, 0), centerTest: true, tooltip: "[HOLD]\nDelete Project"))
                 {
-                    if(_projectSystem.DeleteProject(selectedItem!))
-                        selectedItem = null;
+                    _projectSystem.DeleteProject(selectedItem!)
+                    selectedItem = null;
                 }
             }
         }

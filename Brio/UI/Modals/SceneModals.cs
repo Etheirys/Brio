@@ -90,8 +90,8 @@ public class SaveProjectModal : Modal
         {
             if(ImBrio.Button("Save", FontAwesomeIcon.Save, new(buttonW, 0), centerTest: true, tooltip: "Save as a new Project"))
             {
-                if(_projectSystem.NewProject(_name, string.IsNullOrEmpty(_description) ? null : _description))
-                    Close();
+                _projectSystem.NewProject(_name, string.IsNullOrEmpty(_description) ? null : _description)
+                Close();
             }
         }
 

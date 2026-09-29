@@ -133,9 +133,9 @@ public static class PosingEditorCommon
                                      enabledCount == 0 ? (sbyte)-1 :
                                      (sbyte)0;
 
-                if(ImBrio.FontIconButton($"collapse_{category.Id}", category.IsUICollapsed ? FontAwesomeIcon.ChevronRight : FontAwesomeIcon.ChevronDown, category.IsUICollapsed ? "Expand" : "Collapse", size: new Vector2(25)))
+                //if(ImBrio.FontIconButton($"collapse_{category.Id}", category.IsUICollapsed ? FontAwesomeIcon.ChevronRight : FontAwesomeIcon.ChevronDown, category.IsUICollapsed ? "Expand" : "Collapse", size: new Vector2(25)))
                 {
-                    category.IsUICollapsed = !category.IsUICollapsed;
+                    //category.IsUICollapsed = !category.IsUICollapsed;
                 }
 
                 ImGui.SameLine();
@@ -163,8 +163,8 @@ public static class PosingEditorCommon
                     c.Type is BoneCategories.BoneCategoryTypes.Category &&
                     c.Bones.Contains(category.Id));
 
-                if(parentCategory?.IsUICollapsed == true)
-                    continue;
+                //if(parentCategory?.IsUICollapsed == true)
+                    //continue;
 
                 var isEnabled = filter.IsCategoryEnabled(category);
 
