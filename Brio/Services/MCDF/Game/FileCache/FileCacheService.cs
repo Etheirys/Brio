@@ -1,4 +1,4 @@
-﻿using Brio.Config;
+using Brio.Config;
 using Brio.Core;
 using Brio.IPC;
 using System;
@@ -55,7 +55,7 @@ public class FileCacheService : IDisposable
     {
         try
         {
-            if(Directory.Exists(TempPath) is false)
+            if(Directory.Exists(TempPath))
             {
                 Directory.Delete(TempPath, true);
             }
