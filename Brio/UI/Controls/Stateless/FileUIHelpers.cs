@@ -98,7 +98,6 @@ public class FileUIHelpers
                 if(ImBrio.IconButtonWithText(FontAwesomeIcon.Save, "Save Scene", buttonSize))
                 {
                     projectSystem.SaveProject(projectSystem.CurrentProject!);
-                    Brio.NotifyInfo("Scene saved.");
                     ImGui.CloseCurrentPopup();
                 }
             if(projectSystem.CurrentProject is null)
@@ -119,17 +118,17 @@ public class FileUIHelpers
                 projectWindow.IsOpen = true;
             }
             if(ImGui.IsItemHovered())
-                ImGui.SetTooltip("Load on to this Scene");
+                ImGui.SetTooltip("Load a saved project into this scene");
 
             ImGui.Spacing();
             ImGui.Separator();
 
-            if(ImBrio.IconButtonWithText(FontAwesomeIcon.Clock, "Load Auto-Saves", buttonSize))
+            if(ImBrio.IconButtonWithText(FontAwesomeIcon.Clock, "Load Auto-Save", buttonSize))
             {
                 UIManager.Instance.ToggleAutoSaveWindow();
             }
             if(ImGui.IsItemHovered())
-                ImGui.SetTooltip("Load an Auto-Saves on this scene");
+                ImGui.SetTooltip("Load an auto-save into this scene");
 
             ImBrio.SeparatorText("Export");
 
