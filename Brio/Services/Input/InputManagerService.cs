@@ -15,7 +15,7 @@ public class InputManagerService : MediatorSubscriberBase
     private readonly ConfigurationService _configurationService;
     private readonly GPoseService _gPoseService;
     private readonly Dictionary<VirtualKey, bool> _lastFrameKeyStates = [];
-    private readonly HashSet<VirtualKey> _keyUpTriggered = [];
+    private readonly HashSet<VirtualKey> _keysUpLastFrame = [];
 
     public static InputManagerService Instance { get; private set; } = null!;
 
@@ -35,11 +35,15 @@ public class InputManagerService : MediatorSubscriberBase
         if(_gPoseService.IsGPosing is false || _configurationService.Configuration.InputManager.Enable is false)
             return;
 
+        _keysUpLastFrame.Clear();
         foreach(var key in _keyState.GetValidVirtualKeys())
         {
-            _lastFrameKeyStates[key] = _keyState[key];
-            if(_keyState[key])
-                _keyUpTriggered.Remove(key);
+            var isDown = _keyState[key];
+         
+            if(_lastFrameKeyStates.TryGetValue(key, out var wasDown) && wasDown && !isDown)
+                _keysUpLastFrame.Add(key);
+
+            _lastFrameKeyStates[key] = isDown;
         }
     }
 
@@ -48,24 +52,22 @@ public class InputManagerService : MediatorSubscriberBase
         return _keyState[key];
     }
 
-    public bool IsKeyUp(VirtualKey key)
+    public bool WasKeyReleased(VirtualKey key)
     {
-        if(_configurationService.Configuration.InputManager.Enable is false)
-            return false;
-
-        bool released = (!_keyState[key] && _lastFrameKeyStates.TryGetValue(key, out var wasDown) && wasDown);
-        if(released && !_keyUpTriggered.Contains(key))
+        if(_keysUpLastFrame.Contains(key))
         {
-            _keyUpTriggered.Add(key);
+            _keysUpLastFrame.Remove(key); // we do this so that we can 'eat' it for KeyBindings like "frezze actor" as it can toggle more then once a frame making it look as if it did nothing
             return true;
         }
+
         return false;
     }
 
-    public bool IsKeyUpOrDown(VirtualKey key) => IsKeyUp(key) || IsKeyDown(key);
-
     public static bool ActionKeysPressedLastFrame(InputAction action)
     {
+        if(Instance._configurationService.Configuration.InputManager.Enable is false)
+            return false;
+
         if(Instance._configurationService.Configuration.InputManager.KeyBindings.TryGetValue(action, out KeyConfig value))
         {
             if(value.Key == VirtualKey.NO_KEY)
@@ -73,28 +75,31 @@ public class InputManagerService : MediatorSubscriberBase
 
             if(value.RequireCtrl || action is InputAction.Brio_Ctrl)
             {
-                if(Instance.IsKeyUpOrDown(VirtualKey.CONTROL) && Instance.IsKeyUp(value.Key))
+                if(Instance.IsKeyDown(VirtualKey.CONTROL) && Instance.WasKeyReleased(value.Key))
                 {
+                    Brio.Log.Debug($"ActionKeysPressedLastFrame: {action} with key {value.Key} and Ctrl pressed");
                     return true;
                 }
             }
             else if(value.RequireShift || action is InputAction.Brio_Shift)
             {
-                if(Instance.IsKeyUpOrDown(VirtualKey.SHIFT) && Instance.IsKeyUp(value.Key))
+                if(Instance.IsKeyDown(VirtualKey.SHIFT) && Instance.WasKeyReleased(value.Key))
                 {
+                    Brio.Log.Debug($"ActionKeysPressedLastFrame: {action} with key {value.Key} and Shift pressed");
                     return true;
                 }
             }
             else if(value.RequireAlt || action is InputAction.Brio_Alt)
             {
-                if(Instance.IsKeyUpOrDown(VirtualKey.MENU) && Instance.IsKeyUp(value.Key))
+                if(Instance.IsKeyDown(VirtualKey.MENU) && Instance.WasKeyReleased(value.Key))
                 {
+                    Brio.Log.Debug($"ActionKeysPressedLastFrame: {action} with key {value.Key} and Alt pressed");
                     return true;
                 }
             }
             else
             {
-                if(Instance.IsKeyUp(value.Key))
+                if(Instance.WasKeyReleased(value.Key))
                 {
                     return true;
                 }

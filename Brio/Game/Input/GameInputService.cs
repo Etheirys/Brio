@@ -123,30 +123,6 @@ public class GameInputService : IDisposable
                     }
                 }
 
-                if(_virtualCameraService.CurrentCamera?.IsFreeCamera is true)
-                {
-                    _virtualCameraService.Update(mouseFrame);
-
-                    keyboardFrame->KeyState[_freeW] = 0;
-                    keyboardFrame->KeyState[_freeA] = 0;
-                    keyboardFrame->KeyState[_freeS] = 0;
-                    keyboardFrame->KeyState[_freeD] = 0;
-
-                    keyboardFrame->KeyState[32] = 0; // SPACE
-
-                    if(_virtualCameraService.CurrentCamera.FreeCamValues.IsMovementEnabled &&
-                        _configurationService.Configuration.InputManager.EnableKeyHandlingOnKeyMod)
-                    {
-                        keyboardFrame->KeyState[81] = 0; // VirtualKey.Q
-                        keyboardFrame->KeyState[69] = 0; // VirtualKey.E
-
-                        keyboardFrame->KeyState[32] = 0; // SPACE
-                        keyboardFrame->KeyState[16] = 0; // SHIFT
-                        keyboardFrame->KeyState[17] = 0; // Ctrl
-                        keyboardFrame->KeyState[18] = 0; // Alt
-                    }
-                }
-
                 // If a camera is locked, consume mouse and keyboard changes
                 if(_virtualCameraService.IsCurrentCameraLocked)
                 {
@@ -161,6 +137,30 @@ public class GameInputService : IDisposable
                     keyboardFrame->KeyState[_freeA] = 0;
                     keyboardFrame->KeyState[_freeS] = 0;
                     keyboardFrame->KeyState[_freeD] = 0;
+                }
+            }
+
+            if(_virtualCameraService.CurrentCamera?.IsFreeCamera is true)
+            {
+                _virtualCameraService.Update(mouseFrame);
+
+                keyboardFrame->KeyState[_freeW] = 0;
+                keyboardFrame->KeyState[_freeA] = 0;
+                keyboardFrame->KeyState[_freeS] = 0;
+                keyboardFrame->KeyState[_freeD] = 0;
+
+                keyboardFrame->KeyState[32] = 0; // SPACE
+
+                if(_virtualCameraService.CurrentCamera.FreeCamValues.IsMovementEnabled &&
+                    _configurationService.Configuration.InputManager.EnableKeyHandlingOnKeyMod)
+                {
+                    keyboardFrame->KeyState[81] = 0; // VirtualKey.Q
+                    keyboardFrame->KeyState[69] = 0; // VirtualKey.E
+
+                    keyboardFrame->KeyState[32] = 0; // SPACE
+                    keyboardFrame->KeyState[16] = 0; // SHIFT
+                    keyboardFrame->KeyState[17] = 0; // Ctrl
+                    keyboardFrame->KeyState[18] = 0; // Alt
                 }
             }
 
