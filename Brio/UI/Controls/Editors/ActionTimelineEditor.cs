@@ -78,6 +78,7 @@ public class ActionTimelineEditor(CutsceneManager cutsceneManager, GPoseService 
     public void Draw(bool drawAdvanced, ActionTimelineCapability capability)
     {
         _capability = capability;
+        _globalTimelineSelector.ModActionActor = capability.GameObject;
 
         _globalTimelineSelector.DrawAsWindow();
 
