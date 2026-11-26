@@ -147,6 +147,23 @@ public class InputManagerService : MediatorSubscriberBase
         return false;
     }
 
+    // Returns how many modifiers the action's bind requires if the bind is held, or -1 if it is not
+    // Lets opposing actions resolve overlapping binds, as a plain Space bind also matches while Ctrl + Space is held
+    public static int GetPressedModifierCount(InputAction action)
+    {
+        if(ActionKeysPressed(action) is false)
+            return -1;
+
+        var bind = Instance._configurationService.Configuration.InputManager.KeyBindings[action];
+
+        if((bind.RequireCtrl && !Instance.IsKeyDown(VirtualKey.CONTROL))
+            || (bind.RequireShift && !Instance.IsKeyDown(VirtualKey.SHIFT))
+            || (bind.RequireAlt && !Instance.IsKeyDown(VirtualKey.MENU)))
+            return -1;
+
+        return (bind.RequireCtrl ? 1 : 0) + (bind.RequireShift ? 1 : 0) + (bind.RequireAlt ? 1 : 0);
+    }
+
     public static IEnumerable<VirtualKey> GetValidKeys()
     {
         return Instance._keyState.GetValidVirtualKeys();

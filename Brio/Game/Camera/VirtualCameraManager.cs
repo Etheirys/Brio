@@ -370,7 +370,12 @@ public class VirtualCameraManager : IDisposable
 
         // Handle vertical movement (up and down)
         // Invert logic around the 90 degree pivot points (like lateral movement)
-        if(InputManagerService.ActionKeysPressed(InputAction.FreeCamera_Up) || InputManagerService.ActionKeysPressed(InputAction.FreeCamera_UpAlt))
+        // If both directions match, the bind with more modifiers wins
+        // (So Space and Ctrl + Space can be opposites, ties go to up)
+        var upModifiers = Math.Max(InputManagerService.GetPressedModifierCount(InputAction.FreeCamera_Up), InputManagerService.GetPressedModifierCount(InputAction.FreeCamera_UpAlt));
+        var downModifiers = Math.Max(InputManagerService.GetPressedModifierCount(InputAction.FreeCamera_Down), InputManagerService.GetPressedModifierCount(InputAction.FreeCamera_DownAlt));
+
+        if(upModifiers >= 0 && upModifiers >= downModifiers)
             if(CurrentCamera.IsFreeCamera)
                 if(ConfigurationService.Instance.Configuration.InputManager.FlipKeyBindsPastNinety && (CurrentCamera.PivotRotation < BrioUtilities.DegreesToRadians(-90) || CurrentCamera.PivotRotation > BrioUtilities.DegreesToRadians(90)))
                     upDown -= 1;
@@ -378,7 +383,7 @@ public class VirtualCameraManager : IDisposable
                     upDown += 1;
             else
                 upDown -= 1;
-        else if(InputManagerService.ActionKeysPressed(InputAction.FreeCamera_Down) || InputManagerService.ActionKeysPressed(InputAction.FreeCamera_DownAlt))
+        else if(downModifiers >= 0)
             if(CurrentCamera.IsFreeCamera)
                 if(ConfigurationService.Instance.Configuration.InputManager.FlipKeyBindsPastNinety && (CurrentCamera.PivotRotation < BrioUtilities.DegreesToRadians(-90) || CurrentCamera.PivotRotation > BrioUtilities.DegreesToRadians(90)))
                     upDown += 1;
